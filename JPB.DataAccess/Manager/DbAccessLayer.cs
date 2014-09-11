@@ -22,10 +22,11 @@ namespace JPB.DataAccess.Manager
         /// Must set the Database Property immeditly
         /// Just for Intigration
         /// </summary>
-        [Obsolete("Will be removed in future", false)]
+        [Obsolete("Will maybe removed in future", false)]
         public DbAccessLayer()
         {
-
+            var layer = new DbAccessLayer(DbTypes.MsSql, "");
+            List<Foo> foos = layer.Select<Foo>();
         }
 
         public DbAccessLayer(DbTypes dbType, string connection)

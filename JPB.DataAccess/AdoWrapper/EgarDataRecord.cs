@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.AdoWrapper
 {
-    public class EgarDataRecord : IDataRecord
+    public class EgarDataRecord : IDataRecord, IDisposable
     {
         public Dictionary<string, object> Objects { get; set; }
 
@@ -159,6 +159,12 @@ namespace JPB.DataAccess.AdoWrapper
                     return null;
                 return value;
             }
+        }
+
+        public void Dispose()
+        {
+            this.Objects.Clear();
+            this.Objects = null;
         }
     }
 }

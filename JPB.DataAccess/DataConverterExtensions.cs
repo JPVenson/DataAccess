@@ -377,6 +377,11 @@ namespace JPB.DataAccess
                 }
             }
 
+            if (reader is IDisposable)
+            {
+                (reader as IDisposable).Dispose();
+            }
+
             return source;
         }
 
