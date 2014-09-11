@@ -124,7 +124,7 @@ namespace JPB.DataAccess.ModelsAnotations
     /// Marks a property to be ignored by the complete searching logic
     /// TO BE SUPPORTED
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public class IgnoreReflectionAttribute : DataAccessAttribute
     {
 

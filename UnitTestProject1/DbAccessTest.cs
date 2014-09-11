@@ -26,8 +26,8 @@ namespace UnitTestProject1
 
         public string testName = "TestDD";
 
-        [TestMethod]
-        public void CheckInserts()
+        [TestMethod]        
+        public void ACheckInserts()
         {
             var user = new User();
             user.Name = testName;
@@ -49,7 +49,7 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
-        public void CheckSelects()
+        public void BCheckSelects()
         {
             var @select = AccessLayer.Select<User>();
             Assert.AreEqual(@select.Count, 3);
@@ -74,7 +74,7 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
-        public void CheckUpdate()
+        public void CCheckUpdate()
         {
             var @select = AccessLayer.Select<User>();
 
@@ -97,5 +97,13 @@ namespace UnitTestProject1
                 AccessLayer.RefreshKeepObject(user);
             }
         }
+
+        [TestMethod()]
+        public void DCheckAttributeSelect()
+        {
+            var @select = AccessLayer.Select<PocoUsers>();
+            Assert.AreEqual(@select.Count, 3);
+        }
+
     }
 }
