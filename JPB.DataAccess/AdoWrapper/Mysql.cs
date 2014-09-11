@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace JPB.DataAccess.AdoWrapper
 {
-    public class Mysql : IDatabaseStrategy
+    internal class Mysql : IDatabaseStrategy
     {
         private const string TEMPLATE_MSSQL_UNTRUSTED =
           "server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5";

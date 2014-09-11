@@ -4,7 +4,8 @@
     {
         Unknown,
         MsSql,
-        MySql
+        MySql,
+        OleDb
     }
 
 }

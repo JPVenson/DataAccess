@@ -55,6 +55,7 @@
     <Compile Include="AdoWrapper\IDatabase.cs" />
     <Compile Include="AdoWrapper\IDatabaseStrategy.cs" />
     <Compile Include="AdoWrapper\Mysql.cs" />
+    <Compile Include="AdoWrapper\OleDb.cs" />
     <Compile Include="DataConverterExtensions.cs" />
     <Compile Include="Helper\IQueryParameter.cs" />
     <Compile Include="Helper\QueryParameter.cs" />

@@ -45,6 +45,9 @@ namespace JPB.DataAccess.Manager
                 case DbTypes.MsSql:
                     Database.Attach(new DsMSSQL(connection));
                     break;
+                case DbTypes.OleDb:
+                    Database.Attach(new OleDb(connection));
+                    break;
                 case DbTypes.MySql:
                     Database.Attach(new Mysql(connection));
                     break;
@@ -70,7 +73,7 @@ namespace JPB.DataAccess.Manager
             set
             {
                 if(_database == null)
-                _database = value;
+                    _database = value;
                 else
                 {
                     throw new NotSupportedException("Runtime change of Database is not allowed. Create a new DbAccessLayer object");
