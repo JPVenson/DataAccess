@@ -25,8 +25,7 @@ namespace JPB.DataAccess.Manager
         [Obsolete("Will maybe removed in future", false)]
         public DbAccessLayer()
         {
-            var layer = new DbAccessLayer(DbTypes.MsSql, "");
-            List<Foo> foos = layer.Select<Foo>();
+
         }
 
         public DbAccessLayer(DbTypes dbType, string connection)
