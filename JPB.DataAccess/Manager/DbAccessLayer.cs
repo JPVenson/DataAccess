@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
 {
@@ -85,6 +87,40 @@ namespace JPB.DataAccess.Manager
             return true;
         }
 
+        private static IDbCommand CheckInstanceForAttriute<T,TE>(T entry, IDatabase db, Func<T, IDatabase, IDbCommand> fallback)
+            where TE : DataAccessAttribute
+        {
+            var type = entry.GetType();
+
+            //try to get a Factory mehtod
+            var methods =
+                type.GetMethods()
+                    .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE));
+            if (methods != null)
+            {
+                //must be public static
+                if (!methods.IsStatic)
+                {
+                    var invoke = methods.Invoke(entry, null);
+                    if (invoke != null)
+                    {
+                        if (invoke is string && !string.IsNullOrEmpty(invoke as string))
+                        {
+                            return CreateCommand(db, invoke as string);
+                        }
+                        if (invoke is IQueryFactoryResult)
+                        {
+                            var result = invoke as IQueryFactoryResult;
+                            return CreateCommandWithParameterValues(result.Query, db, result.Parameters);
+                        }
+                    }
+                }
+            }
+            return fallback(entry, db);
+            //screw that. Generate a select self!
+            return createUpdate(entry, db);
+        }
+
         public int ExecuteGenericCommand(string query, IEnumerable<IQueryParameter> values)
         {
             IDbCommand command = CreateCommand(Database, query);
@@ -105,15 +141,15 @@ namespace JPB.DataAccess.Manager
             return Database.Run(s => s.ExecuteNonQuery(command));
         }
 
-        public static int ExecuteGenericCommand(IDbCommand command, IDatabase batchRemotingDb)
+        public static int ExecuteGenericCommand(IDbCommand command, IDatabase db)
         {
-            return batchRemotingDb.Run(s => s.ExecuteNonQuery(command));
+            return db.Run(s => s.ExecuteNonQuery(command));
         }
 
-        public static List<T> ExecuteGenericCreateModelsCommand<T>(IDbCommand command, IDatabase batchRemotingDb)
+        public static List<T> ExecuteGenericCreateModelsCommand<T>(IDbCommand command, IDatabase db)
             where T : class, new()
         {
-            return batchRemotingDb.Run(
+            return db.Run(
                 s =>
                     s.GetEntitiesList(command, DataConverterExtensions.SetPropertysViaRefection<T>)
                         .ToList());
@@ -124,13 +160,13 @@ namespace JPB.DataAccess.Manager
             return value ?? DBNull.Value;
         }
 
-        protected static IDbCommand CreateCommand(IDatabase batchRemotingDb, string query)
+        protected static IDbCommand CreateCommand(IDatabase db, string query)
         {
-            return batchRemotingDb.CreateCommand(query);
+            return db.CreateCommand(query);
         }
 
         public static IDbCommand CreateCommandWithParameterValues<T>(string query, string[] propertyInfos, T entry,
-            IDatabase batchRemotingDb)
+            IDatabase db)
         {
             Type type = typeof(T);
             object[] propertyvalues =
@@ -142,22 +178,22 @@ namespace JPB.DataAccess.Manager
                         object dataValue = GetDataValue(property.GetValue(entry, null));
                         return dataValue;
                     }).ToArray();
-            return CreateCommandWithParameterValues(query, batchRemotingDb, propertyvalues);
+            return CreateCommandWithParameterValues(query, db, propertyvalues);
         }
 
-        public static IDbCommand CreateCommandWithParameterValues(string query, IDatabase batchRemotingDb,
+        public static IDbCommand CreateCommandWithParameterValues(string query, IDatabase db,
             object[] values)
         {
             var listofQueryParamter = new List<IQueryParameter>();
             for (int i = 0; i < values.Count(); i++)
                 listofQueryParamter.Add(new QueryParameter { Name = i.ToString(), Value = values[i] });
-            return CreateCommandWithParameterValues(query, batchRemotingDb, listofQueryParamter);
+            return CreateCommandWithParameterValues(query, db, listofQueryParamter);
         }
 
-        public static IDbCommand CreateCommandWithParameterValues(string query, IDatabase batchRemotingDb,
+        public static IDbCommand CreateCommandWithParameterValues(string query, IDatabase db,
             IEnumerable<IQueryParameter> values)
         {
-            IDbCommand cmd = CreateCommand(batchRemotingDb, query);
+            IDbCommand cmd = CreateCommand(db, query);
             foreach (IQueryParameter queryParameter in values)
             {
                 IDbDataParameter dbDataParameter = cmd.CreateParameter();

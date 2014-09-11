@@ -351,12 +351,17 @@ namespace JPB.DataAccess
 
             var listofpropertys = new Dictionary<string, object>();
 
+            PropertyInfo maybeFallbackProperty = null;
+            bool searchedForFallback = false;
+            var propertys = type.GetProperties();
+            var instanceOfFallbackList = new Dictionary<string, object>();
+
             for (var i = 0; i < reader.FieldCount; i++)
                 listofpropertys.Add(ReMapSchemaToEntiysProp(type, reader.GetName(i)), reader.GetValue(i));
 
             foreach (var item in listofpropertys)
             {
-                PropertyInfo property = type.GetProperty(item.Key);
+                var property = propertys.FirstOrDefault(s => s.Name == item.Key);
                 if (property != null)
                 {
                     if (item.Value is DBNull)
@@ -373,6 +378,35 @@ namespace JPB.DataAccess
                         }
                         else
                             property.SetValue(source, item.Value, null);
+                    }
+                }
+                else if (instanceOfFallbackList != null)
+                {
+                    //no property found Look for LoadNotImplimentedDynamicAttribute property to include it
+
+                    if (instanceOfFallbackList.Any())
+                    {
+                        instanceOfFallbackList.Add(item.Key, item.Value);
+                    }
+                    else
+                    {
+                        maybeFallbackProperty =
+                            propertys.FirstOrDefault(
+                                s => s.GetCustomAttributes().Any(e => e is LoadNotImplimentedDynamicAttribute));
+                        if (maybeFallbackProperty != null)
+                        {
+                            instanceOfFallbackList = maybeFallbackProperty.GetValue(source);
+                            if (instanceOfFallbackList == null)
+                            {
+                                instanceOfFallbackList = new Dictionary<string, object>();
+                                maybeFallbackProperty.SetValue(source, instanceOfFallbackList);
+                            }
+                            instanceOfFallbackList.Add(item.Key, item.Value);
+                        }
+                        else
+                        {
+                            instanceOfFallbackList = null;
+                        }
                     }
                 }
             }

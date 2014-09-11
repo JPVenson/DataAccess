@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
 {
@@ -28,12 +30,12 @@ namespace JPB.DataAccess.Manager
             });
         }
 
-        public static IDbCommand CreateInsert<T>(T entry, IDatabase batchRemotingDb)
+        public static IDbCommand _CreateInsert<T>(T entry, IDatabase db)
         {
-            Type type = typeof (T);
+            Type type = typeof(T);
             string[] ignore =
                 type.GetProperties()
-                    .Where(s => s.CheckForPK() || s.GetCustomAttributes(false).Any(e => e is InsertIgnore))
+                    .Where(s => s.CheckForPK() || s.GetCustomAttributes(false).Any(e => e is InsertIgnore || e is IgnoreReflectionAttribute))
                     .Select(s => s.Name)
                     .Concat(CreateIgnoreList(type))
                     .ToArray();
@@ -48,7 +50,12 @@ namespace JPB.DataAccess.Manager
 
             string[] orignialProps = type.GetPropertysViaRefection(ignore).ToArray();
 
-            return CreateCommandWithParameterValues(query, orignialProps, entry, batchRemotingDb);
+            return CreateCommandWithParameterValues(query, orignialProps, entry, db);
+        }
+
+        public static IDbCommand CreateInsert<T>(T entry, IDatabase db)
+        {
+            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, _CreateInsert);
         }
 
         public static void Insert<T>(T entry, IDatabase db)
@@ -56,7 +63,7 @@ namespace JPB.DataAccess.Manager
             db.Run(s => { s.ExecuteNonQuery(CreateInsert(entry, s)); });
         }
 
-        public static T InsertWithSelect<T>(T entry, IDatabase db) 
+        public static T InsertWithSelect<T>(T entry, IDatabase db)
         {
             return db.Run(s =>
             {

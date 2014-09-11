@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Manager
 {
@@ -8,40 +9,28 @@ namespace JPB.DataAccess.Manager
     {
         public void Delete<T>(T entry)
         {
-            Delete<T, long>(entry, Database);
+            Delete<T>(entry, Database);
         }
 
-        public void Delete<T, E>(T entry)
+        internal static IDbCommand CreateDelete<T>(T entry, IDatabase db)
         {
-            Delete<T, E>(entry, Database);
-        }
-
-        public static void Delete<T>(T entry, IDatabase batchRemotingDb)
-        {
-            Type type = typeof (T);
+            Type type = typeof(T);
             string proppk = type.GetPK();
-            string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @pk";
+            string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @1";
+            return CreateCommandWithParameterValues(query, db, new object[] { entry.GetPK<T, long>() });
+        }
 
-            batchRemotingDb.Run(s =>
+        internal static void _Delete<T>(T entry, IDatabase db)
+        {
+            db.Run(s =>
             {
-                IDbCommand cmd = CreateCommand(s, query);
-                cmd.Parameters.AddWithValue("@pk", entry.GetPK<T, long>(), s);
-                s.ExecuteNonQuery(cmd);
+                s.ExecuteNonQuery(CreateDelete(entry, s));
             });
         }
 
-        public static void Delete<T, E>(T entry, IDatabase batchRemotingDb)
+        public static void Delete<T>(T entry, IDatabase db)
         {
-            Type type = typeof (T);
-            string proppk = type.GetPK();
-            string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @pk";
-
-            batchRemotingDb.Run(s =>
-            {
-                IDbCommand cmd = CreateCommand(s, query);
-                cmd.Parameters.AddWithValue("@pk", entry.GetPK<T, E>(), s);
-                s.ExecuteNonQuery(cmd);
-            });
+            CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db, CreateDelete);
         }
     }
 }

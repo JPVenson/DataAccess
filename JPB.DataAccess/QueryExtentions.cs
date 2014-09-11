@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using JPB.DataAccess.QueryProvider;
 
-namespace JPB.DataAccess.Manager
+namespace JPB.DataAccess
 {
     public static class QueryExtentions
     {

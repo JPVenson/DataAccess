@@ -11,6 +11,12 @@ namespace JPB.DataAccess.ModelsAnotations
     }
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+    public class DeleteFactoryMethodAttribute : DataAccessAttribute
+    {
+         
+    }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     public class InsertIgnore : DataAccessAttribute
     {
     }
@@ -59,7 +65,7 @@ namespace JPB.DataAccess.ModelsAnotations
     /// The Method must be static
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
-    public sealed class ObjectFactoryMethodAttribute : Attribute
+    public sealed class ObjectFactoryMethodAttribute : DataAccessAttribute
     {
 
     }
@@ -69,7 +75,7 @@ namespace JPB.DataAccess.ModelsAnotations
     /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class SelectFactoryMethodAttribute : Attribute
+    public sealed class SelectFactoryMethodAttribute : DataAccessAttribute
     {
 
     }
@@ -79,7 +85,7 @@ namespace JPB.DataAccess.ModelsAnotations
     /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class UpdateFactoryMethodAttribute : Attribute
+    public sealed class InsertFactoryMethodAttribute : DataAccessAttribute
     {
 
     }
@@ -89,7 +95,7 @@ namespace JPB.DataAccess.ModelsAnotations
     /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class ObjectFactoryMehtodAttribute : Attribute
+    public sealed class UpdateFactoryMethodAttribute : DataAccessAttribute
     {
 
     }
@@ -99,7 +105,39 @@ namespace JPB.DataAccess.ModelsAnotations
     /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class SelectFactoryMehtodAttribute : Attribute
+    public sealed class ObjectFactoryMehtodAttribute : DataAccessAttribute
+    {
+
+    }
+
+    /// <summary>
+    /// Marks a mehtod as an Factory method
+    /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    public sealed class SelectFactoryMehtodAttribute : DataAccessAttribute
+    {
+
+    }
+
+    /// <summary>
+    /// Marks a property to be ignored by the complete searching logic
+    /// TO BE SUPPORTED
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    public class IgnoreReflectionAttribute : DataAccessAttribute
+    {
+
+    }
+
+    /// <summary>
+    /// Marks the property that will be used to hold all non existing Columns
+    /// Must be of Type <code>IDictionary string Object</code>
+    /// Only for Automatik Loading
+    /// TO BE SUPPORTED
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    public sealed class LoadNotImplimentedDynamicAttribute : IgnoreReflectionAttribute
     {
 
     }
@@ -108,7 +146,7 @@ namespace JPB.DataAccess.ModelsAnotations
     /// Provieds a Query ( parametes not used ) for selection
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    public sealed class SelectFactoryAttribute : Attribute, IQueryFactoryResult
+    public sealed class SelectFactoryAttribute : DataAccessAttribute, IQueryFactoryResult
     {
         public SelectFactoryAttribute(string query)
         {

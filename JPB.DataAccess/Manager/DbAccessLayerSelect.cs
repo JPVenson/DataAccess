@@ -34,14 +34,14 @@ namespace JPB.DataAccess.Manager
             return (T)Select(typeof(T), pk);
         }
 
-        protected static object Select(Type type, long pk, IDatabase batchRemotingDb)
+        protected static object Select(Type type, long pk, IDatabase db)
         {
-            return Select(type, batchRemotingDb).FirstOrDefault();
+            return Select(type, db).FirstOrDefault();
         }
 
-        protected static T Select<T>(long pk, IDatabase batchRemotingDb)
+        protected static T Select<T>(long pk, IDatabase db)
         {
-            return Select<T>(batchRemotingDb, CreateSelect<T>(batchRemotingDb, pk)).FirstOrDefault();
+            return Select<T>(db, CreateSelect<T>(db, pk)).FirstOrDefault();
         }
 
         public List<object> Select(Type type)
@@ -55,54 +55,54 @@ namespace JPB.DataAccess.Manager
             return objects.Cast<T>().ToList();
         }
 
-        protected static List<object> Select(Type type, IDatabase batchRemotingDb)
+        protected static List<object> Select(Type type, IDatabase db)
         {
-            return Select(type, batchRemotingDb, CreateSelectQueryFactory(type, batchRemotingDb));
+            return Select(type, db, CreateSelectQueryFactory(type, db));
         }
 
-        protected static List<T> Select<T>(IDatabase batchRemotingDb)
+        protected static List<T> Select<T>(IDatabase db)
         {
-            return Select(typeof(T), batchRemotingDb).Cast<T>().ToList();
+            return Select(typeof(T), db).Cast<T>().ToList();
         }
 
-        protected static List<object> Select(Type type, IDatabase batchRemotingDb, IDbCommand command)
+        protected static List<object> Select(Type type, IDatabase db, IDbCommand command)
         {
-            return SelectNative(type, batchRemotingDb, command);
+            return SelectNative(type, db, command);
         }
 
-        protected static List<T> Select<T>(IDatabase batchRemotingDb, IDbCommand command)
+        protected static List<T> Select<T>(IDatabase db, IDbCommand command)
         {
-            return Select(typeof(T), batchRemotingDb, command).Cast<T>().ToList();
+            return Select(typeof(T), db, command).Cast<T>().ToList();
         }
 
         #endregion
 
         #region CreateCommands
 
-        public static IDbCommand CreateSelect(Type type, IDatabase batchRemotingDb, string query)
+        public static IDbCommand CreateSelect(Type type, IDatabase db, string query)
         {
-            return CreateCommand(batchRemotingDb, CreateSelectQueryFactory(type, batchRemotingDb).CommandText + " " + query);
+            return CreateCommand(db, CreateSelectQueryFactory(type, db).CommandText + " " + query);
         }
 
-        public static IDbCommand CreateSelect<T>(IDatabase batchRemotingDb, string query)
+        public static IDbCommand CreateSelect<T>(IDatabase db, string query)
         {
-            return CreateSelect(typeof(T), batchRemotingDb, query);
+            return CreateSelect(typeof(T), db, query);
         }
 
-        public static IDbCommand CreateSelect(Type type, IDatabase batchRemotingDb, string query,
+        public static IDbCommand CreateSelect(Type type, IDatabase db, string query,
             IEnumerable<IQueryParameter> paramenter)
         {
-            IDbCommand plainCommand = CreateCommand(batchRemotingDb,
-                CreateSelectQueryFactory(type, batchRemotingDb).CommandText + " " + query);
+            IDbCommand plainCommand = CreateCommand(db,
+                CreateSelectQueryFactory(type, db).CommandText + " " + query);
             foreach (IQueryParameter para in paramenter)
-                plainCommand.Parameters.AddWithValue(para.Name, para.Value, batchRemotingDb);
+                plainCommand.Parameters.AddWithValue(para.Name, para.Value, db);
             return plainCommand;
         }
 
-        public static IDbCommand CreateSelect<T>(IDatabase batchRemotingDb, string query,
+        public static IDbCommand CreateSelect<T>(IDatabase db, string query,
             IEnumerable<IQueryParameter> paramenter)
         {
-            return CreateSelect(typeof(T), batchRemotingDb, query, paramenter);
+            return CreateSelect(typeof(T), db, query, paramenter);
         }
 
         public static string[] CreateIgnoreList(Type type)
@@ -110,42 +110,24 @@ namespace JPB.DataAccess.Manager
             return
                 type.GetProperties()
                     .Where(
-                        s => s.GetGetMethod(false).IsVirtual)
+                        s => s.GetGetMethod(false).IsVirtual || s.GetCustomAttributes().Any(e => e is IgnoreReflectionAttribute))
                     .Select(s => s.Name)
                     .ToArray();
         }
 
-        private static IDbCommand CreateSelectQueryFactory(Type type, IDatabase batchRemotingDb)
+        private static IDbCommand CreateSelectQueryFactory(Type type, IDatabase db)
         {
-            //if (type.GetInterface("IQuerySelectFactory") != null)
-            //{
-            //    var instance = Activator.CreateInstance(type) as IQuerySelectFactory;
-            //    if (instance != null)
-            //    {
-            //        var queryFactoryResult = instance.CreateSelect();
-            //        if (queryFactoryResult.Parameters.Any())
-            //        {
-            //            return CreateCommandWithParameterValues(queryFactoryResult.Query, batchRemotingDb,
-            //                queryFactoryResult.Parameters);
-            //        }
-            //        {
-            //            return CreateCommand(batchRemotingDb, queryFactoryResult.Query);
-            //        }
-            //    }
-            //}
-
             //try to get the attribute for static selection
             var staticFactory = type.GetCustomAttributes().FirstOrDefault(s => s is SelectFactoryAttribute) as SelectFactoryAttribute;
 
             if (staticFactory != null)
             {
-                return CreateCommand(batchRemotingDb, staticFactory.Query);
+                return CreateCommand(db, staticFactory.Query);
             }
 
             //try to get a Factory mehtod
             var methods =
-                type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic |
-                              BindingFlags.Static)
+                type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
                     .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is SelectFactoryMehtodAttribute));
             if (methods != null)
             {
@@ -155,32 +137,32 @@ namespace JPB.DataAccess.Manager
                     var invoke = methods.Invoke(null, null);
                     if (invoke is string)
                     {
-                        return CreateCommand(batchRemotingDb, invoke as string);
+                        return CreateCommand(db, invoke as string);
                     }
                     if (invoke is IQueryFactoryResult)
                     {
                         var result = invoke as IQueryFactoryResult;
-                        return CreateCommandWithParameterValues(result.Query, batchRemotingDb, result.Parameters);
+                        return CreateCommandWithParameterValues(result.Query, db, result.Parameters);
                     }
                 }
             }
 
             //screw that. Generate a select self!
-            return CreateCommand(batchRemotingDb, CreateSelect(type));
+            return CreateCommand(db, CreateSelect(type));
         }
 
-        public static IDbCommand CreateSelect(Type type, IDatabase batchRemotingDb, long pk)
+        public static IDbCommand CreateSelect(Type type, IDatabase db, long pk)
         {
             string proppk = type.GetPK();
             string query = CreateSelect(type) + " WHERE " + proppk + " = @pk";
-            IDbCommand cmd = CreateCommand(batchRemotingDb, query);
-            cmd.Parameters.AddWithValue("@pk", pk, batchRemotingDb);
+            IDbCommand cmd = CreateCommand(db, query);
+            cmd.Parameters.AddWithValue("@pk", pk, db);
             return cmd;
         }
 
-        public static IDbCommand CreateSelect<T>(IDatabase batchRemotingDb, long pk)
+        public static IDbCommand CreateSelect<T>(IDatabase db, long pk)
         {
-            return CreateSelect(typeof(T), batchRemotingDb, pk);
+            return CreateSelect(typeof(T), db, pk);
         }
 
         public static string CreateSelect<T>()
@@ -193,9 +175,9 @@ namespace JPB.DataAccess.Manager
             return "SELECT " + CreatePropertyCSV(type, CreateIgnoreList(type)) + " FROM " + type.GetTableName();
         }
 
-        public static IDbCommand CreateSelect<T>(IDatabase batchRemotingDb)
+        public static IDbCommand CreateSelect<T>(IDatabase db)
         {
-            return CreateSelectQueryFactory(typeof(T), batchRemotingDb);
+            return CreateSelectQueryFactory(typeof(T), db);
         }
 
         #endregion

@@ -108,24 +108,9 @@ namespace JPB.DataAccess.Manager
             return false;
         }
 
-        private static IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase batchRemotingDb)
+        private static IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db)
         {
-            //if (type.GetInterface("IQuerySelectFactory") != null)
-            //{
-            //    var instance = Activator.CreateInstance(type) as IQuerySelectFactory;
-            //    if (instance != null)
-            //    {
-            //        var queryFactoryResult = instance.CreateSelect();
-            //        if (queryFactoryResult.Parameters.Any())
-            //        {
-            //            return CreateCommandWithParameterValues(queryFactoryResult.Query, batchRemotingDb,
-            //                queryFactoryResult.Parameters);
-            //        }
-            //        {
-            //            return CreateCommand(batchRemotingDb, queryFactoryResult.Query);
-            //        }
-            //    }
-            //}
+            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, createUpdate);
 
             var type = entry.GetType();
 
@@ -143,22 +128,22 @@ namespace JPB.DataAccess.Manager
                     {
                         if (invoke is string && !string.IsNullOrEmpty(invoke as string))
                         {
-                            return CreateCommand(batchRemotingDb, invoke as string);
+                            return CreateCommand(db, invoke as string);
                         }
                         if (invoke is IQueryFactoryResult)
                         {
                             var result = invoke as IQueryFactoryResult;
-                            return CreateCommandWithParameterValues(result.Query, batchRemotingDb, result.Parameters);
+                            return CreateCommandWithParameterValues(result.Query, db, result.Parameters);
                         }
                     }
                 }
             }
 
             //screw that. Generate a select self!
-            return createUpdate(entry, batchRemotingDb);
+            return createUpdate(entry, db);
         }
 
-        internal static IDbCommand createUpdate<T>(T entry, IDatabase batchRemotingDb)
+        internal static IDbCommand createUpdate<T>(T entry, IDatabase db)
         {
             Type type = typeof(T);
             string pk = type.GetPK();
@@ -183,12 +168,12 @@ namespace JPB.DataAccess.Manager
 
             string query = "UPDATE " + type.GetTableName() + prop + " WHERE " + pk + " = " + entry.GetPK();
 
-            return CreateCommandWithParameterValues(query, propertyInfos, entry, batchRemotingDb);
+            return CreateCommandWithParameterValues(query, propertyInfos, entry, db);
         }
 
-        public static IDbCommand CreateUpdate<T>(T entry, IDatabase batchRemotingDb)
+        public static IDbCommand CreateUpdate<T>(T entry, IDatabase db)
         {
-            return CreateUpdateQueryFactory(entry, batchRemotingDb);
+            return CreateUpdateQueryFactory(entry, db);
         }
     }
 }

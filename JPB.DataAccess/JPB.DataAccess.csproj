@@ -64,7 +64,7 @@
     <Compile Include="Manager\DbAccessLayerSelect.cs" />
     <Compile Include="Manager\DBAccessLayerUpdate.cs" />
     <Compile Include="Manager\DbTypes.cs" />
-    <Compile Include="Manager\QueryExtentions.cs" />
+    <Compile Include="QueryExtentions.cs" />
     <Compile Include="ModelsAnotations\Annotations.cs" />
     <Compile Include="ModelsAnotations\ModelAnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

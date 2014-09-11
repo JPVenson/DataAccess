@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.AdoWrapper
 {
-    public class EgarDataRecord : IDataRecord, IDisposable
+    public sealed class EgarDataRecord : IDataRecord, IDisposable
     {
         public Dictionary<string, object> Objects { get; set; }
 
