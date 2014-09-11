@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JPB.DataAccess</RootNamespace>
+    <AssemblyName>JPB.DataAccess</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ExternalRelease|AnyCPU'">
+    <OutputPath>..\..\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MySql.Data, Version=6.8.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdoWrapper\Database.cs" />
+    <Compile Include="AdoWrapper\DsMSSQL.cs" />
+    <Compile Include="AdoWrapper\EgarDataRecord.cs" />
+    <Compile Include="AdoWrapper\IDatabase.cs" />
+    <Compile Include="AdoWrapper\IDatabaseStrategy.cs" />
+    <Compile Include="AdoWrapper\Mysql.cs" />
+    <Compile Include="DataConverterExtensions.cs" />
+    <Compile Include="Helper\IQueryParameter.cs" />
+    <Compile Include="Helper\QueryParameter.cs" />
+    <Compile Include="Manager\DbAccessLayer.cs" />
+    <Compile Include="Manager\DbAccessLayerDelete.cs" />
+    <Compile Include="Manager\DbAccessLayerInsert.cs" />
+    <Compile Include="Manager\DbAccessLayerSelect.cs" />
+    <Compile Include="Manager\DBAccessLayerUpdate.cs" />
+    <Compile Include="Manager\DbTypes.cs" />
+    <Compile Include="Manager\QueryExtentions.cs" />
+    <Compile Include="ModelsAnotations\Annotations.cs" />
+    <Compile Include="ModelsAnotations\ModelAnotations.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryFactory\Contracts\IQuerySelectFactory.cs" />
+    <Compile Include="QueryFactory\IQueryFactoryResult.cs" />
+    <Compile Include="QueryFactory\QueryFactoryResult.cs" />
+    <Compile Include="QueryProvider\Query.cs" />
+    <Compile Include="QueryProvider\QueryProvider.cs" />
+    <Compile Include="QueryProvider\TestQueryProvider.cs" />
+    <Compile Include="QueryProvider\TypeSystem.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
