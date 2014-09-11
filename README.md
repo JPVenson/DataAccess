@@ -121,3 +121,17 @@ Linq
 The lib contains a small Linq Provider ( WIP )
 this feature is very basic and will not be complete implemented.
 
+
+
+
+
+DbAccessLayer
+
+This is the Main class that is used to calculate everything.
+
+USAGE:
+
+		var layer = new DbAccessLayer(DbTypes.MsSql, "ConnectionString");
+		List<Foo> foos = layer.Select<Foo>();
+		
+This will Create a DB connection, Enumerate all propertys or call a factory, to create a Select Statement, then execute this statement and load the propertys back into the object via reflection or Factory.
