@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Collections.Generic;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
@@ -9,11 +7,6 @@ namespace testing
     [ForModel("Users")]
     public class User
     {
-        public User()
-        {
-            
-        }
-
         [ForModel("UserName")]
         public string Name { get; set; }
 
@@ -32,7 +25,13 @@ namespace testing
             return new QueryFactoryResult("SELECT * FROM Users");
         }
 
-        [UpdateFactoryMethod()]
+        [SelectFactoryMehtod]
+        public static IQueryFactoryResult CreateQuery(string testParam)
+        {
+            return new QueryFactoryResult("SELECT * FROM Users");
+        }
+
+        [UpdateFactoryMethod]
         public string UpdateQuery()
         {
             return string.Empty;

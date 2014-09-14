@@ -1,6 +1,5 @@
 ﻿using System;
 using JPB.DataAccess.ModelsAnotations;
-using testing.Annotations;
 
 namespace testing
 {

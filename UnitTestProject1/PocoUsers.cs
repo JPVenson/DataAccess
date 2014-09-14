@@ -5,7 +5,7 @@ namespace testing
 {
     [ForModel("Users")]
     [SelectFactory("SELECT * FROM Users")]
-    class PocoUsers
+    internal class PocoUsers
     {
         [LoadNotImplimentedDynamic]
         public IDictionary<string, object> UnresolvedObjects { set; get; }
