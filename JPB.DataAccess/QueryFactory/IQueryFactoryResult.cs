@@ -5,7 +5,7 @@ namespace JPB.DataAccess.QueryFactory
 {
     public interface IQueryFactoryResult
     {
-        string Query { get; } 
-        IEnumerable<IQueryParameter> Parameters { get; } 
+        string Query { get; }
+        IEnumerable<IQueryParameter> Parameters { get; }
     }
 }

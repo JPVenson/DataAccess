@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Data;
+using System.Data.Odbc;
 using System.Data.OleDb;
-using JPB.DataAccess.AdoWrapper;
 
-namespace JPB.DataAccess.OleDB
+namespace JPB.DataAccess.AdoWrapper
 {
-    public class OleDb : IDatabaseStrategy
+    public class Obdc : IDatabaseStrategy
     {
         private const string TEMPLATE_MSSQL_UNTRUSTED =
             "server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
@@ -14,12 +14,12 @@ namespace JPB.DataAccess.OleDB
             "server={0};database={1};Connect Timeout=100;Min Pool Size=5;trusted_connection=true";
 
 
-        public OleDb(string strServer, string strDatabase)
+        public Obdc(string strServer, string strDatabase)
         {
             ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
         }
 
-        public OleDb(string strServer, string strDatabase, string strLogin, string strPassword)
+        public Obdc(string strServer, string strDatabase, string strLogin, string strPassword)
         {
             if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
                 ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
@@ -30,14 +30,14 @@ namespace JPB.DataAccess.OleDB
             }
         }
 
-        public OleDb(string strConnStr)
+        public Obdc(string strConnStr)
         {
             ConnectionString = strConnStr;
         }
 
         public object Clone()
         {
-            return new OleDb(ConnectionString);
+            return new Obdc(ConnectionString);
         }
 
         public string ConnectionString { get; set; }
@@ -47,25 +47,25 @@ namespace JPB.DataAccess.OleDB
         {
             get
             {
-                var cn = (OleDbConnection) CreateConnection();
+                var cn = (OdbcConnection) CreateConnection();
                 return cn.DataSource;
             }
         }
 
         public IDbConnection CreateConnection()
         {
-            return new OleDbConnection(ConnectionString);
+            return new OdbcConnection(ConnectionString);
         }
 
         public IDbCommand CreateCommand(string strSql, IDbConnection conn)
         {
-            return new OleDbCommand(strSql, (OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
+            return new OdbcCommand(strSql, (OdbcConnection) (conn is OdbcConnection ? conn : CreateConnection()));
         }
 
         public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDbDataParameter[] fields)
         {
-            var oleDbCommand = new OleDbCommand(strSql,
-                (OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
+            var oleDbCommand = new OdbcCommand(strSql,
+                (OdbcConnection) (conn is OdbcConnection ? conn : CreateConnection()));
 
             foreach (IDbDataParameter dbDataParameter in fields)
             {
@@ -76,12 +76,12 @@ namespace JPB.DataAccess.OleDB
 
         public IDataParameter CreateParameter(string strName, object value)
         {
-            return new OleDbParameter(strName, value);
+            return new OdbcParameter(strName, value);
         }
 
         public IDbDataAdapter CreateDataAdapter(IDbCommand cmd)
         {
-            return new OleDbDataAdapter(cmd as OleDbCommand);
+            return new OdbcDataAdapter(cmd as OdbcCommand);
         }
 
         public DataTable CreateDataTable(string name, IDbCommand cmd)

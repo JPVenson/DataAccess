@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
 {
@@ -12,7 +11,6 @@ namespace JPB.DataAccess.Manager
     {
         private void UpdateDbAccessLayer()
         {
-
         }
 
         public static void Update<T>(T entry, IDatabase db)
@@ -20,23 +18,31 @@ namespace JPB.DataAccess.Manager
             db.Run(s => { s.ExecuteNonQuery(CreateUpdate(entry, s)); });
         }
 
-        public void Update<T>(T entry)
+        public bool Update<T>(T entry, bool checkRowVersion = false)
         {
+            if (checkRowVersion)
+            {
+                if (!CheckRowVersion(entry))
+                    return false;
+                Update(entry, Database);
+                return false;
+            }
             Update(entry, Database);
+            return true;
         }
 
         /// <summary>
-        /// Will create a new Object when
-        /// T contains a Valid RowVersion property
-        /// AND 
-        /// RowVersion property is not equals the DB version
-        /// OR
-        /// T does not contain any RowVersion
+        ///     Will create a new Object when
+        ///     T contains a Valid RowVersion property
+        ///     AND
+        ///     RowVersion property is not equals the DB version
+        ///     OR
+        ///     T does not contain any RowVersion
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entry"></param>
         /// <returns></returns>
-        public T Refresh<T>(T entry) 
+        public T Refresh<T>(T entry)
         {
             if (!CheckRowVersion(entry))
             {
@@ -46,12 +52,12 @@ namespace JPB.DataAccess.Manager
         }
 
         /// <summary>
-        /// Will update all propertys of entry when
-        /// T contains a Valid RowVersion property
-        /// AND
-        /// RowVersion property is not equals the DB version
-        /// OR
-        /// T does not contain any RowVersion
+        ///     Will update all propertys of entry when
+        ///     T contains a Valid RowVersion property
+        ///     AND
+        ///     RowVersion property is not equals the DB version
+        ///     OR
+        ///     T does not contain any RowVersion
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entry"></param>
@@ -61,14 +67,15 @@ namespace JPB.DataAccess.Manager
             if (!CheckRowVersion(entry))
             {
                 var @select = Select<T>(entry.GetPK<T, long>(), Database);
-                var updated = false;
-                var propertys = typeof(T).GetProperties();
-                foreach (var propertyInfo in propertys)
+                bool updated = false;
+                PropertyInfo[] propertys = typeof (T).GetProperties();
+                foreach (PropertyInfo propertyInfo in propertys)
                 {
-                    var oldValue = propertyInfo.GetValue(entry);
-                    var newValue = propertyInfo.GetValue(@select);
+                    object oldValue = propertyInfo.GetValue(entry);
+                    object newValue = propertyInfo.GetValue(@select);
 
-                    if (newValue == null && oldValue == null || (oldValue != null && (newValue == null || newValue.Equals(oldValue)))) 
+                    if (newValue == null && oldValue == null ||
+                        (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
                         continue;
 
                     propertyInfo.SetValue(@select, newValue);
@@ -81,26 +88,27 @@ namespace JPB.DataAccess.Manager
         }
 
         /// <summary>
-        /// Checks the Row version of the local entry and the server on
+        ///     Checks the Row version of the local entry and the server on
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entry"></param>
         /// <returns>True when the version is Equals, otherwise false</returns>
         private bool CheckRowVersion<T>(T entry)
         {
-            var type = typeof(T);
-            var rowVersion =
-               entry.GetType()
-                   .GetProperties()
-                   .FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is RowVersionAttribute));
+            Type type = typeof (T);
+            PropertyInfo rowVersion =
+                entry.GetType()
+                    .GetProperties()
+                    .FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is RowVersionAttribute));
             if (rowVersion != null)
             {
                 var rowversionValue = rowVersion.GetValue(entry) as byte[];
                 if (rowversionValue != null || entry.GetPK() == 0)
                 {
-                    var rowVersionprop = type.MapEntiysPropToSchema(rowVersion.Name);
-                    var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " + type.GetPK() + " = " + entry.GetPK();
-                    var scalarValue = RunPrimetivSelect<byte[]>(staticRowVersion).FirstOrDefault();
+                    string rowVersionprop = type.MapEntiysPropToSchema(rowVersion.Name);
+                    string staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " +
+                                              type.GetPK() + " = " + entry.GetPK();
+                    byte[] scalarValue = RunPrimetivSelect<byte[]>(staticRowVersion).FirstOrDefault();
                     return scalarValue != null && scalarValue == rowversionValue;
                 }
                 return false;
@@ -108,44 +116,14 @@ namespace JPB.DataAccess.Manager
             return false;
         }
 
-        private static IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db)
+        private static IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db, params object[] parameter)
         {
-            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, createUpdate);
-
-            var type = entry.GetType();
-
-            //try to get a Factory mehtod
-            var methods =
-                type.GetMethods()
-                    .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is UpdateFactoryMethodAttribute));
-            if (methods != null)
-            {
-                //must be public static
-                if (!methods.IsStatic)
-                {
-                    var invoke = methods.Invoke(entry, null);
-                    if (invoke != null)
-                    {
-                        if (invoke is string && !string.IsNullOrEmpty(invoke as string))
-                        {
-                            return CreateCommand(db, invoke as string);
-                        }
-                        if (invoke is IQueryFactoryResult)
-                        {
-                            var result = invoke as IQueryFactoryResult;
-                            return CreateCommandWithParameterValues(result.Query, db, result.Parameters);
-                        }
-                    }
-                }
-            }
-
-            //screw that. Generate a select self!
-            return createUpdate(entry, db);
+            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, createUpdate, parameter);
         }
 
         internal static IDbCommand createUpdate<T>(T entry, IDatabase db)
         {
-            Type type = typeof(T);
+            Type type = typeof (T);
             string pk = type.GetPK();
 
             string[] ignore =

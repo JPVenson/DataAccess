@@ -2,24 +2,22 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JPB.DataAccess.AdoWrapper
 {
     public sealed class EgarDataRecord : IDataRecord, IDisposable
     {
-        public Dictionary<string, object> Objects { get; set; }
-
         public EgarDataRecord(IDataRecord sourceRecord)
         {
             Objects = new Dictionary<string, object>();
             for (int i = 0; i < sourceRecord.FieldCount; i++)
             {
-                var obj = sourceRecord[i];
+                object obj = sourceRecord[i];
                 Objects.Add(sourceRecord.GetName(i), obj);
             }
         }
+
+        public Dictionary<string, object> Objects { get; set; }
 
         public string GetName(int i)
         {
@@ -47,24 +45,24 @@ namespace JPB.DataAccess.AdoWrapper
             {
                 if (values.Length > i)
                     break;
-                values.SetValue(Objects.ElementAt(i),i);
+                values.SetValue(Objects.ElementAt(i), i);
             }
             return values.Length;
         }
 
         public int GetOrdinal(string name)
         {
-            return (int)Objects.FirstOrDefault(s => s.Key == name).Value;
+            return (int) Objects.FirstOrDefault(s => s.Key == name).Value;
         }
 
         public bool GetBoolean(int i)
         {
-            return (bool)GetValue(i);
+            return (bool) GetValue(i);
         }
 
         public byte GetByte(int i)
         {
-            return (byte)GetValue(i);
+            return (byte) GetValue(i);
         }
 
         public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
@@ -74,7 +72,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public char GetChar(int i)
         {
-            return (char)GetValue(i);
+            return (char) GetValue(i);
         }
 
         public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
@@ -84,47 +82,47 @@ namespace JPB.DataAccess.AdoWrapper
 
         public Guid GetGuid(int i)
         {
-            return (Guid)GetValue(i);
+            return (Guid) GetValue(i);
         }
 
         public short GetInt16(int i)
         {
-            return (short)GetValue(i);
+            return (short) GetValue(i);
         }
 
         public int GetInt32(int i)
         {
-            return (int)GetValue(i);
+            return (int) GetValue(i);
         }
 
         public long GetInt64(int i)
         {
-            return (long)GetValue(i);
+            return (long) GetValue(i);
         }
 
         public float GetFloat(int i)
         {
-            return (float)GetValue(i);
+            return (float) GetValue(i);
         }
 
         public double GetDouble(int i)
         {
-            return (double)GetValue(i);
+            return (double) GetValue(i);
         }
 
         public string GetString(int i)
         {
-            return (string)GetValue(i);
+            return (string) GetValue(i);
         }
 
         public decimal GetDecimal(int i)
         {
-            return (decimal)GetValue(i);
+            return (decimal) GetValue(i);
         }
 
         public DateTime GetDateTime(int i)
         {
-            return (DateTime)GetValue(i);
+            return (DateTime) GetValue(i);
         }
 
         public IDataReader GetData(int i)
@@ -137,13 +135,16 @@ namespace JPB.DataAccess.AdoWrapper
             return GetValue(i) is DBNull;
         }
 
-        public int FieldCount { get { return this.Objects.Count; }}
+        public int FieldCount
+        {
+            get { return Objects.Count; }
+        }
 
         object IDataRecord.this[int i]
         {
             get
             {
-                var value = GetValue(i);
+                object value = GetValue(i);
                 if (value is DBNull)
                     return null;
                 return value;
@@ -154,7 +155,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             get
             {
-                var value = Objects.First(s => s.Key == name).Value;
+                object value = Objects.First(s => s.Key == name).Value;
                 if (value is DBNull)
                     return null;
                 return value;
@@ -163,8 +164,8 @@ namespace JPB.DataAccess.AdoWrapper
 
         public void Dispose()
         {
-            this.Objects.Clear();
-            this.Objects = null;
+            Objects.Clear();
+            Objects = null;
         }
     }
 }

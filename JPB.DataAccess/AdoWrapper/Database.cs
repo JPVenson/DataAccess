@@ -117,56 +117,6 @@ namespace JPB.DataAccess.AdoWrapper
             return _strategy.CreateParameter(strName, value);
         }
 
-        //public IDbDataParameter CreateParameter_Bit(string strName, bool nullable = false)
-        //{
-        //    return _strategy.CreateParameter_Bit(strName, nullable);
-        //}
-
-        //public IDbDataParameter CreateParameter_Int(string strName, bool nullable = false)
-        //{
-        //    return _strategy.CreateParameter_Int(strName, nullable);
-        //}
-
-        //public IDbDataParameter CreateParameter_SmallInt(string strName)
-        //{
-        //    return _strategy.CreateParameter_SmallInt(strName);
-        //}
-
-        //public IDbDataParameter CreateParameter_BigInt(string strName)
-        //{
-        //    return _strategy.CreateParameter_BigInt(strName);
-        //}
-
-        //public IDbDataParameter CreateParameter_VarChar(string strName, int iSize, bool nullable = false)
-        //{
-        //    return _strategy.CreateParameter_VarChar(strName, iSize, nullable);
-        //}
-
-        //public IDbDataParameter CreateParameter_NVarChar(string strName, int iSize, bool nullable = false)
-        //{
-        //    return _strategy.CreateParameter_NVarChar(strName, iSize, nullable);
-        //}
-
-        //public IDbDataParameter CreateParameter_NVarChar_MAX(string strName)
-        //{
-        //    return _strategy.CreateParameter_NVarChar_MAX(strName);
-        //}
-
-        //public IDbDataParameter CreateParameter_DateTime(string strName, bool nullable = false)
-        //{
-        //    return _strategy.CreateParameter_DateTime(strName, nullable);
-        //}
-
-        //public IDbDataParameter CreateParameter_Time(string strName, bool nullable = false)
-        //{
-        //    return _strategy.CreateParameter_Time(strName, nullable);
-        //}
-
-        //public IDbDataParameter CreateParameter_SmallDateTime(string strName)
-        //{
-        //    return _strategy.CreateParameter_SmallDateTime(strName);
-        //}
-
         public int ExecuteNonQuery(IDbCommand cmd)
         {
             if (null == GetConnection())
@@ -347,11 +297,6 @@ namespace JPB.DataAccess.AdoWrapper
                         TypeToString(
                             column.DataType)))
                     .ToArray()));
-
-            //using(TextWriter w = new StreamWriter(@"E:\__OUT\xxxx.txt", false))
-            //{
-            //    w.WriteLine(sql);
-            //}
 
             ExecuteNonQuery(sql);
         }
@@ -820,37 +765,6 @@ namespace JPB.DataAccess.AdoWrapper
             db.Attach(strategy);
             return db;
         }
-
-        [Obsolete]
-        public static Database CreateMySQL(string strServer, string strDatabase)
-        {
-            return Create(new DsMSSQL(strServer, strDatabase));
-        }
-
-        [Obsolete]
-        public static Database CreateMSSQL(string strServer, string strDatabase)
-        {
-            return Create(new DsMSSQL(strServer, strDatabase));
-        }
-
-        [Obsolete]
-        public static Database CreateMSSQL(string strServer, string strDatabase, string strLogin, string strPassword)
-        {
-            return Create(new DsMSSQL(strServer, strDatabase, strLogin, strPassword));
-        }
-
-        [Obsolete]
-        public static Database CreateMSSQL(string strConnStr)
-        {
-            return Create(new DsMSSQL(strConnStr));
-        }
-
-        //public static Database CreateExcel(string strFilename, bool bAssumeHeader, bool bUseImex, bool bNewExcel)
-        //{
-        //    return Create(bNewExcel
-        //                      ? new DsExcel_XLSX(strFilename, bAssumeHeader, bUseImex)
-        //                      : (AbstractDsExcel)new DsExcel_XLS(strFilename, bAssumeHeader, bUseImex));
-        //}
 
         private int DoExecuteNonQuery(string strSql)
         {

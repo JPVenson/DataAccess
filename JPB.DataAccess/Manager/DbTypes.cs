@@ -1,11 +1,16 @@
 ﻿namespace JPB.DataAccess.Manager
 {
+    /// <summary>
+    ///     Defines a Common set of DBTypes
+    /// </summary>
     public enum DbTypes
     {
-        Unknown,
+        //default 
+        Unknown = 0,
         MsSql,
         MySql,
-        OleDb
+        OleDb,
+        Obdc,
+        SqLite
     }
-
 }

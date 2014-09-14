@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
 {
@@ -32,10 +30,13 @@ namespace JPB.DataAccess.Manager
 
         public static IDbCommand _CreateInsert<T>(T entry, IDatabase db)
         {
-            Type type = typeof(T);
+            Type type = typeof (T);
             string[] ignore =
                 type.GetProperties()
-                    .Where(s => s.CheckForPK() || s.GetCustomAttributes(false).Any(e => e is InsertIgnore || e is IgnoreReflectionAttribute))
+                    .Where(
+                        s =>
+                            s.CheckForPK() ||
+                            s.GetCustomAttributes(false).Any(e => e is InsertIgnore || e is IgnoreReflectionAttribute))
                     .Select(s => s.Name)
                     .Concat(CreateIgnoreList(type))
                     .ToArray();
@@ -53,9 +54,9 @@ namespace JPB.DataAccess.Manager
             return CreateCommandWithParameterValues(query, orignialProps, entry, db);
         }
 
-        public static IDbCommand CreateInsert<T>(T entry, IDatabase db)
+        public static IDbCommand CreateInsert<T>(T entry, IDatabase db, params object[] parameter)
         {
-            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, _CreateInsert);
+            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, _CreateInsert, parameter);
         }
 
         public static void Insert<T>(T entry, IDatabase db)

@@ -5,10 +5,15 @@ namespace JPB.DataAccess.QueryFactory
 {
     public class QueryFactoryResult : IQueryFactoryResult
     {
-        public QueryFactoryResult(string query, params IQueryParameter[] parameters)
+        public QueryFactoryResult(string query)
+        {
+            Query = query;
+        }
+
+        public QueryFactoryResult(string query, params IQueryParameter[] parameters) 
+            : this(query)
         {
             Parameters = parameters;
-            Query = query;
         }
 
         public string Query { get; private set; }

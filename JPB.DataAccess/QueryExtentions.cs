@@ -14,7 +14,7 @@ namespace JPB.DataAccess
         public static string DeleteExpression = "DELETE";
         public static string InsertExpression = "INSERT";
 
-        static IQueryable<T> SqlQuery<T>(this IQueryable<T> query, Expression predicate, MethodInfo info)
+        private static IQueryable<T> SqlQuery<T>(this IQueryable<T> query, Expression predicate, MethodInfo info)
         {
             var queryable = query as Query<T>;
 
@@ -24,9 +24,9 @@ namespace JPB.DataAccess
                 queryable.Expression,
                 predicate
             };
- 
-            
-            var methodCallExpression = Expression.Call(null, info, expressions);
+
+
+            MethodCallExpression methodCallExpression = Expression.Call(null, info, expressions);
 
             return
                 query.Provider.CreateQuery<T>(methodCallExpression);
@@ -35,32 +35,32 @@ namespace JPB.DataAccess
 
         public static IQueryable<T> WhereSql<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-            return SqlQuery(query, predicate, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)));
+            return SqlQuery(query, predicate, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)));
         }
 
         public static IQueryable<T> AndSql<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-            return SqlQuery(query, predicate, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)));
+            return SqlQuery(query, predicate, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)));
         }
 
         public static IQueryable<T> OrSql<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-            return SqlQuery(query, predicate, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)));
+            return SqlQuery(query, predicate, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)));
         }
 
         public static IQueryable<T> LessThenSql<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-            return SqlQuery(query, predicate, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)));
+            return SqlQuery(query, predicate, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)));
         }
 
         public static IQueryable<T> IsSql<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-            return SqlQuery(query, predicate, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)));
+            return SqlQuery(query, predicate, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)));
         }
 
         public static IQueryable<T> EqualsSql<T>(this IQueryable<T> query, Expression<Func<T, bool>> predicate)
         {
-            return SqlQuery(query, predicate, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)));
+            return SqlQuery(query, predicate, ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)));
         }
     }
 }
