@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Pager.Contracts;
 using MySql.Data.MySqlClient;
 
 namespace JPB.DataAccess.MySql
@@ -50,10 +51,10 @@ namespace JPB.DataAccess.MySql
             return new MySqlCommand(strSql, conn as MySqlConnection);
         }
 
-        public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDbDataParameter[] fields)
+        public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
         {
             var mySqlCommand = new MySqlCommand(strSql, conn as MySqlConnection);
-            foreach (IDbDataParameter dbDataParameter in fields)
+            foreach (var dbDataParameter in fields)
             {
                 mySqlCommand.Parameters.Add(dbDataParameter);
             }
@@ -165,6 +166,16 @@ namespace JPB.DataAccess.MySql
             using (var cmd = new MySqlCommand(sql, (MySqlConnection) conn))
             using (IDataReader dr = cmd.ExecuteReader())
                 return (dr.Read());
+        }
+
+        public IDataPager<T> CreatePager<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IUnGenericDataPager CreateUnmagedPager()
+        {
+            throw new NotImplementedException();
         }
 
         public object Clone()
