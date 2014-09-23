@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.SqlLite
 {
@@ -30,6 +31,11 @@ namespace JPB.DataAccess.SqlLite
         public IDbCommand CreateCommand(string strSql, IDbConnection conn)
         {
             return new SQLiteCommand(strSql, (SQLiteConnection) conn);
+        }
+
+        public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
+        {
+            throw new NotImplementedException();
         }
 
         public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDbDataParameter[] fields)
@@ -145,6 +151,16 @@ namespace JPB.DataAccess.SqlLite
             using (IDbCommand cmd = CreateCommand(sql, conn))
             using (IDataReader dr = cmd.ExecuteReader())
                 return (dr.Read());
+        }
+
+        public IDataPager<T> CreatePager<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IUnGenericDataPager CreateUnmagedPager()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -79,7 +79,7 @@ namespace UnitTestProject1
                         DataPager.LoadPage(accessLayer);
                         ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
                         ConsolePropertyGrid.ExtraInfos.Append("last page reached ...");
-                        ConsolePropertyGrid.ExtraInfos.Append(", Page: " + DataPager.CurrentPage);
+                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                         ConsolePropertyGrid.RenderGrid();
                         continue;
                     }
@@ -92,9 +92,9 @@ namespace UnitTestProject1
                         DataPager.CurrentPage--;
                         DataPager.LoadPage(accessLayer);
                         ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
-                        ConsolePropertyGrid.ExtraInfos.Append(", Page: " + DataPager.CurrentPage);
                         ConsolePropertyGrid.ExtraInfos.Append("last page reached ...");
                     }
+                    ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
 
                     ConsolePropertyGrid.RenderGrid();
                     continue;
@@ -104,13 +104,14 @@ namespace UnitTestProject1
                     if (DataPager.CurrentPage == 0)
                     {
                         ConsolePropertyGrid.ExtraInfos.AppendLine("First page reached ...");
+                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                     }
                     else
                     {
                         DataPager.CurrentPage--;
                         DataPager.LoadPage(accessLayer);
                         ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
-                        ConsolePropertyGrid.ExtraInfos.Append(", Page: " + DataPager.CurrentPage);
+                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                     }
 
                     ConsolePropertyGrid.RenderGrid();
@@ -199,7 +200,7 @@ namespace UnitTestProject1
                         DataPager.CurrentPage = pageNumer;
                         DataPager.LoadPage(accessLayer);
                         ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
-                        ConsolePropertyGrid.ExtraInfos.Append(", Page: " + DataPager.CurrentPage);
+                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                     }
                 }
                 ConsolePropertyGrid.RenderGrid();
