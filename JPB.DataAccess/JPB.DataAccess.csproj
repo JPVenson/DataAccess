@@ -52,10 +52,11 @@
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
     <Compile Include="AdoWrapper\IDatabase.cs" />
     <Compile Include="AdoWrapper\IDatabaseStrategy.cs" />
-    <Compile Include="AdoWrapper\MsSql.cs" />
-    <Compile Include="AdoWrapper\Odbc.cs" />
-    <Compile Include="AdoWrapper\OleDb.cs" />
+    <Compile Include="AdoWrapper\MsSQL\MsSql.cs" />
+    <Compile Include="AdoWrapper\Odbc\Odbc.cs" />
+    <Compile Include="AdoWrapper\OleDB\OleDb.cs" />
     <Compile Include="DataConverterExtensions.cs" />
+    <Compile Include="DataHelperExtensions.cs" />
     <Compile Include="Helper\IQueryParameter.cs" />
     <Compile Include="Helper\QueryParameter.cs" />
     <Compile Include="Manager\DbAccessLayer.cs" />
@@ -64,6 +65,9 @@
     <Compile Include="Manager\DbAccessLayerSelect.cs" />
     <Compile Include="Manager\DBAccessLayerUpdate.cs" />
     <Compile Include="Manager\DbTypes.cs" />
+    <Compile Include="Pager\Contracts\IDataPager.cs" />
+    <Compile Include="AdoWrapper\MsSQL\MsSqlDataPager.cs" />
+    <Compile Include="Pager\Contracts\IUnGenericDataPager.cs" />
     <Compile Include="QueryExtentions.cs" />
     <Compile Include="ModelsAnotations\Annotations.cs" />
     <Compile Include="ModelsAnotations\ModelAnotations.cs" />
@@ -75,6 +79,9 @@
     <Compile Include="QueryProvider\QueryProvider.cs" />
     <Compile Include="QueryProvider\TestQueryProvider.cs" />
     <Compile Include="QueryProvider\TypeSystem.cs" />
+    <Compile Include="ReflecionStore.cs" />
+    <Compile Include="ReposetoryCollection.cs" />
+    <Compile Include="StaticHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

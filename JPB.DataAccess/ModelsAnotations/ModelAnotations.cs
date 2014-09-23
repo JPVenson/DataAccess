@@ -103,11 +103,6 @@ namespace JPB.DataAccess.ModelsAnotations
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     public class ForeignKeyAttribute : InsertIgnore
     {
-        public ForeignKeyAttribute(string keyname)
-        {
-            KeyName = keyname;
-        }
-
         public string KeyName { get; set; }
     }
 

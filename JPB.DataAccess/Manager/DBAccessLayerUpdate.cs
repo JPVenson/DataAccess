@@ -15,7 +15,15 @@ namespace JPB.DataAccess.Manager
 
         public static void Update<T>(T entry, IDatabase db)
         {
-            db.Run(s => { s.ExecuteNonQuery(CreateUpdate(entry, s)); });
+            db.RunInTransaction(s =>
+            {
+                s.ExecuteNonQuery(CreateUpdate(entry, s));
+
+                foreach (var navigationProp in entry.GetType().GetNavigationProps())
+                {
+                    
+                }
+            });
         }
 
         public bool Update<T>(T entry, bool checkRowVersion = false)
@@ -44,11 +52,14 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public T Refresh<T>(T entry)
         {
-            if (!CheckRowVersion(entry))
+            return Database.RunInTransaction(s =>
             {
-                return Select<T>(entry.GetPK<T, long>(), Database);
-            }
-            return entry;
+                if (!CheckRowVersion(entry))
+                {
+                    return Select<T>(entry.GetPK<T, long>(), s).LoadNavigationProps(s);
+                }
+                return entry;
+            });
         }
 
         /// <summary>
@@ -68,7 +79,7 @@ namespace JPB.DataAccess.Manager
             {
                 var @select = Select<T>(entry.GetPK<T, long>(), Database);
                 bool updated = false;
-                PropertyInfo[] propertys = typeof (T).GetProperties();
+                PropertyInfo[] propertys = typeof(T).GetProperties();
                 foreach (PropertyInfo propertyInfo in propertys)
                 {
                     object oldValue = propertyInfo.GetValue(entry);
@@ -81,6 +92,8 @@ namespace JPB.DataAccess.Manager
                     propertyInfo.SetValue(@select, newValue);
                     updated = true;
                 }
+
+                @select.LoadNavigationProps(Database);
 
                 return updated;
             }
@@ -95,7 +108,7 @@ namespace JPB.DataAccess.Manager
         /// <returns>True when the version is Equals, otherwise false</returns>
         private bool CheckRowVersion<T>(T entry)
         {
-            Type type = typeof (T);
+            Type type = typeof(T);
             PropertyInfo rowVersion =
                 entry.GetType()
                     .GetProperties()
@@ -123,12 +136,12 @@ namespace JPB.DataAccess.Manager
 
         internal static IDbCommand createUpdate<T>(T entry, IDatabase db)
         {
-            Type type = typeof (T);
+            Type type = typeof(T);
             string pk = type.GetPK();
 
             string[] ignore =
                 type.GetProperties()
-                    .Where(s => s.CheckForPK() || s.GetCustomAttributes(false).Any(e => e is InsertIgnore))
+                    .Where(s => s.CheckForPK() || s.GetCustomAttributes().Any(e => e is InsertIgnore))
                     .Select(s => s.Name)
                     .Concat(CreateIgnoreList(type))
                     .ToArray();

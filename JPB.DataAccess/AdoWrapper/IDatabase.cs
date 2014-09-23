@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
 {
@@ -12,6 +13,9 @@ namespace JPB.DataAccess.AdoWrapper
         string DatabaseFile { get; }
         string DatabaseName { get; }
         string ServerName { get; }
+
+        IDataPager<T> CreatePager<T>();
+        IUnGenericDataPager CreateUntypedPager(); 
 
         /// <summary>
         ///     Required
@@ -85,7 +89,7 @@ namespace JPB.DataAccess.AdoWrapper
         /// <param name="strSql"></param>
         /// <param name="fields"></param>
         /// <returns></returns>
-        IDbCommand CreateCommand(string strSql, params IDbDataParameter[] fields);
+        IDbCommand CreateCommand(string strSql, params IDataParameter[] fields);
 
         /// <summary>
         ///     Required

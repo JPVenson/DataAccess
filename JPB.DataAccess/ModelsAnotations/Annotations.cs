@@ -131,7 +131,7 @@ namespace testing.Annotations
     ///    protected virtual void NotifyChanged(string propertyName) { ... }
     /// 
     ///    private string _name;
-    ///    public string Name {
+    ///    public string ClassName {
     ///      get { return _name; }
     ///      set { _name = value; NotifyChanged("LastName"); /* Warning */ }
     ///    }

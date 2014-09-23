@@ -11,8 +11,6 @@ namespace JPB.DataAccess.QueryProvider
 {
     public class TestQueryProvider : QueryProvider
     {
-        public DbAccessLayer DbAccessLayer { get; set; }
-
         public TestQueryProvider(DbAccessLayer dbAccessLayer)
         {
             DbAccessLayer = dbAccessLayer;
@@ -20,16 +18,15 @@ namespace JPB.DataAccess.QueryProvider
 
         #region Overrides of QueryProvider
 
+        private readonly List<Tuple<MethodInfo, Expression>> _expressionTree = new List<Tuple<MethodInfo, Expression>>();
+
+        private readonly List<IQueryParameter> _parameters = new List<IQueryParameter>();
+        private Type type;
+
         public override string GetQueryText(Expression expression)
         {
             return null;
         }
-
-        private Type type;
-
-        private List<Tuple<MethodInfo, Expression>> _expressionTree = new List<Tuple<MethodInfo, Expression>>();
-
-        private List<IQueryParameter> _parameters = new List<IQueryParameter>();
 
         private void SplitArguments(MethodCallExpression parent)
         {
@@ -39,7 +36,7 @@ namespace JPB.DataAccess.QueryProvider
                 return;
             }
 
-            var expression = parent.Arguments.Last();
+            Expression expression = parent.Arguments.Last();
             _expressionTree.Add(new Tuple<MethodInfo, Expression>(parent.Method, expression));
             SplitArguments(parent.Arguments.FirstOrDefault() as MethodCallExpression);
         }
@@ -81,22 +78,22 @@ namespace JPB.DataAccess.QueryProvider
 
         private string ReplaceExpressionWithTableName(BinaryExpression argument)
         {
-            var exp = argument as BinaryExpression;
+            BinaryExpression exp = argument;
             var getLeftHandExp = exp.Left as MemberExpression;
-            var expression = getLeftHandExp.Expression;
-            var expressionAsString = exp.ToString();
-            var leftHandExp = expression.ToString();
+            Expression expression = getLeftHandExp.Expression;
+            string expressionAsString = exp.ToString();
+            string leftHandExp = expression.ToString();
             //replace alias with Table name
-            var indexOfDot = expressionAsString.IndexOf(".");
-            var indexOfExpression = expressionAsString.IndexOf(leftHandExp, 0, indexOfDot);
+            int indexOfDot = expressionAsString.IndexOf(".");
+            int indexOfExpression = expressionAsString.IndexOf(leftHandExp, 0, indexOfDot);
             expressionAsString = expressionAsString.Remove(indexOfExpression, indexOfDot);
             expressionAsString = expressionAsString.Insert(indexOfExpression, type.GetTableName() + ".");
             //replace column name with mapped name
             indexOfDot = expressionAsString.IndexOf(".") + 1;
-            var indexOfOperator = expressionAsString.IndexOf(' ', indexOfDot);
+            int indexOfOperator = expressionAsString.IndexOf(' ', indexOfDot);
 
 
-            var maybeNotRealColumnName = expressionAsString.Substring(indexOfDot, indexOfOperator - indexOfDot);
+            string maybeNotRealColumnName = expressionAsString.Substring(indexOfDot, indexOfOperator - indexOfDot);
             expressionAsString = expressionAsString.Remove(indexOfDot, indexOfOperator - indexOfDot);
             expressionAsString = expressionAsString.Insert(indexOfDot,
                 type.MapEntiysPropToSchema(maybeNotRealColumnName));
@@ -125,23 +122,23 @@ namespace JPB.DataAccess.QueryProvider
                 return GetValue(exp as MemberExpression);
             }
 
-            throw new NotSupportedException("This expression is not suported") { Data = { { "Expression", exp.GetType() } } };
+            throw new NotSupportedException("This expression is not suported") {Data = {{"Expression", exp.GetType()}}};
         }
 
         private object GetValue(MemberExpression member)
         {
-            var objectMember = Expression.Convert(member, typeof(object));
+            UnaryExpression objectMember = Expression.Convert(member, typeof (object));
 
-            var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+            Expression<Func<object>> getterLambda = Expression.Lambda<Func<object>>(objectMember);
 
-            var getter = getterLambda.Compile();
+            Func<object> getter = getterLambda.Compile();
 
             return getter();
         }
 
         private string processParameter(MethodInfo item1, Expression argument)
         {
-            var query = "";
+            string query = "";
             //Sql operator Syntax cleanup
 
             //Sql Query Syntax cleanup
@@ -174,17 +171,17 @@ namespace JPB.DataAccess.QueryProvider
             {
                 return processParameter(item1, (argument as UnaryExpression).Operand);
             }
-            else if (argument is LambdaExpression)
+            if (argument is LambdaExpression)
             {
                 return processParameter(item1, (argument as LambdaExpression).Body);
             }
 
-            else if (argument is MethodCallExpression)
+            if (argument is MethodCallExpression)
             {
                 //TODO test for CRUD
 
                 var methodCall = argument as MethodCallExpression;
-                var upper = methodCall.Method.Name.ToUpper();
+                string upper = methodCall.Method.Name.ToUpper();
                 if (upper.Contains("SELECT"))
                 {
                     return DbAccessLayer.CreateSelect(type) + " ";
@@ -203,5 +200,7 @@ namespace JPB.DataAccess.QueryProvider
         }
 
         #endregion
+
+        public DbAccessLayer DbAccessLayer { get; set; }
     }
 }

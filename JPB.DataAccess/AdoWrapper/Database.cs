@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
 {
@@ -14,6 +15,16 @@ namespace JPB.DataAccess.AdoWrapper
         private IDbTransaction _trans;
 
         #region IDatabase Members
+
+        public IDataPager<T> CreatePager<T>()
+        {
+            return _strategy.CreatePager<T>();
+        }
+
+        public IUnGenericDataPager CreateUntypedPager()
+        {
+            return _strategy.CreateUnmagedPager();
+        }
 
         public void Attach(IDatabaseStrategy strategy)
         {
@@ -104,7 +115,7 @@ namespace JPB.DataAccess.AdoWrapper
             }
         }
 
-        public IDbCommand CreateCommand(string strSql, params IDbDataParameter[] fields)
+        public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
         {
             IDbCommand cmd = _strategy.CreateCommand(GetConnection(), strSql, fields);
             if (_trans != null)

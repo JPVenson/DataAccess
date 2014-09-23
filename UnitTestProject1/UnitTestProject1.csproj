@@ -38,6 +38,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
   </ItemGroup>
@@ -54,11 +55,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ConsolePropertyGrid.cs" />
     <Compile Include="DbAccessTest.cs" />
     <Compile Include="FooTest.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="PocoUsers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTest1.cs" />
+    <Compile Include="PagerTest.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>

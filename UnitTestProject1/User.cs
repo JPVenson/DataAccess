@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
@@ -9,32 +11,18 @@ namespace testing
     {
         [ForModel("UserName")]
         public string Name { get; set; }
-
-        public long? ID_Image { get; set; }
-
-        [LoadNotImplimentedDynamic]
-        public IDictionary<string, object> UnresolvedObjects { set; get; }
-
+        
         [PrimaryKey]
         [ForModel("User_ID")]
         public long UserId { get; set; }
+    }
 
-        [SelectFactoryMehtod]
-        public static IQueryFactoryResult CreateQuery()
+    public class UserImpl : User
+    {
+        public UserImpl(IDataRecord rec)
         {
-            return new QueryFactoryResult("SELECT * FROM Users");
-        }
-
-        [SelectFactoryMehtod]
-        public static IQueryFactoryResult CreateQuery(string testParam)
-        {
-            return new QueryFactoryResult("SELECT * FROM Users");
-        }
-
-        [UpdateFactoryMethod]
-        public string UpdateQuery()
-        {
-            return string.Empty;
+            Name = (string)rec["UserName"];
+            UserId = (long)rec["User_ID"];
         }
     }
 }

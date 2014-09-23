@@ -1,5 +1,7 @@
 ﻿#region Jean-Pierre Bachmann
+
 // Erstellt von Jean-Pierre Bachmann am 11:28
+
 #endregion
 
 using System;
@@ -18,15 +20,15 @@ namespace JPB.DataAccess.QueryProvider
 
         private static Type FindIEnumerable(Type seqType)
         {
-            if (seqType == null || seqType == typeof(string))
+            if (seqType == null || seqType == typeof (string))
                 return null;
             if (seqType.IsArray)
-                return typeof(IEnumerable<>).MakeGenericType(seqType.GetElementType());
+                return typeof (IEnumerable<>).MakeGenericType(seqType.GetElementType());
             if (seqType.IsGenericType)
             {
                 foreach (Type arg in seqType.GetGenericArguments())
                 {
-                    Type ienum = typeof(IEnumerable<>).MakeGenericType(arg);
+                    Type ienum = typeof (IEnumerable<>).MakeGenericType(arg);
                     if (ienum.IsAssignableFrom(seqType))
                     {
                         return ienum;
@@ -42,7 +44,7 @@ namespace JPB.DataAccess.QueryProvider
                     if (ienum != null) return ienum;
                 }
             }
-            if (seqType.BaseType != null && seqType.BaseType != typeof(object))
+            if (seqType.BaseType != null && seqType.BaseType != typeof (object))
             {
                 return FindIEnumerable(seqType.BaseType);
             }

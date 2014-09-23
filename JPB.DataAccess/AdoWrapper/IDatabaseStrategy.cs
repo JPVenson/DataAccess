@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
 {
@@ -11,7 +12,7 @@ namespace JPB.DataAccess.AdoWrapper
         IDbConnection CreateConnection();
 
         IDbCommand CreateCommand(string strSql, IDbConnection conn);
-        IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDbDataParameter[] fields);
+        IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields);
         IDataParameter CreateParameter(string strName, object value);
 
         IDbDataAdapter CreateDataAdapter(IDbCommand cmd);
@@ -37,5 +38,9 @@ namespace JPB.DataAccess.AdoWrapper
 
         bool SupportsView(IDbConnection conn, String strName);
         bool SupportsStoredProcedure(IDbConnection conn, String strName);
+
+        IDataPager<T> CreatePager<T>();
+
+        IUnGenericDataPager CreateUnmagedPager();
     }
 }

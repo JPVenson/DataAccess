@@ -13,22 +13,22 @@ namespace UnitTestProject1
         public string testName = "TestDD";
         public static DbAccessLayer AccessLayer { get; set; }
 
-        private static void Main()
-        {
-            var dbAccessTest = new DbAccessTest();
-            try
-            {
-                dbAccessTest.TestMethod1();
-                CleanUp();
+        //private static void Main()
+        //{
+        //    var dbAccessTest = new DbAccessTest();
+        //    try
+        //    {
+        //        dbAccessTest.TestMethod1();
+        //        CleanUp();
 
-                dbAccessTest.ACheckInserts();
-                dbAccessTest.BCheckSelects();
-            }
-            finally
-            {
-                CleanUp();
-            }
-        }
+        //        dbAccessTest.ACheckInserts();
+        //        dbAccessTest.BCheckSelects();
+        //    }
+        //    finally
+        //    {
+        //        CleanUp();
+        //    }
+        //}
 
         [ClassCleanup]
         public static void CleanUp()
@@ -56,12 +56,12 @@ namespace UnitTestProject1
             img.Text = "BLA";
             img = AccessLayer.InsertWithSelect(img);
 
-            user.ID_Image = img.Id;
+            //user.ID_Image = img.Id;
 
-            User updatedUser = AccessLayer.InsertWithSelect(user);
+            //User updatedUser = AccessLayer.InsertWithSelect(user);
 
-            updatedUser.ID_Image = img.Id;
-            AccessLayer.Update(updatedUser);
+            //updatedUser.ID_Image = img.Id;
+            //AccessLayer.Update(updatedUser);
         }
 
         [TestMethod]

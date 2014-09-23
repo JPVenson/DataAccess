@@ -8,7 +8,7 @@ namespace JPB.DataAccess.QueryProvider
 {
     public class Query<T> : IOrderedQueryable<T>
     {
-        QueryProvider provider;
+        private readonly QueryProvider provider;
 
         public Query(QueryProvider provider)
         {
@@ -17,7 +17,7 @@ namespace JPB.DataAccess.QueryProvider
                 throw new ArgumentNullException("provider");
             }
             this.provider = provider;
-            this.Expression = Expression.Constant(this);
+            Expression = Expression.Constant(this);
         }
 
         public Query(QueryProvider provider, Expression expression)
@@ -28,34 +28,36 @@ namespace JPB.DataAccess.QueryProvider
             }
             if (expression != null)
             {
-                if (!typeof(IQueryable<T>).IsAssignableFrom(expression.Type) && !(expression is ParameterExpression))
+                if (!typeof (IQueryable<T>).IsAssignableFrom(expression.Type) && !(expression is ParameterExpression))
                 {
                     throw new ArgumentOutOfRangeException("expression");
                 }
             }
             this.provider = provider;
-            this.Expression = expression;
+            Expression = expression;
         }
 
         #region Implementation of IEnumerable
 
         /// <summary>
-        /// Gibt einen Enumerator zurück, der die Auflistung durchläuft.
+        ///     Gibt einen Enumerator zurück, der die Auflistung durchläuft.
         /// </summary>
         /// <returns>
-        /// Ein <see cref="T:System.Collections.Generic.IEnumerator`1"/>, der zum Durchlaufen der Auflistung verwendet werden kann.
+        ///     Ein <see cref="T:System.Collections.Generic.IEnumerator`1" />, der zum Durchlaufen der Auflistung verwendet werden
+        ///     kann.
         /// </returns>
         public IEnumerator<T> GetEnumerator()
         {
-            var execute = ((IEnumerable)this.provider.Execute(this.Expression)).Cast<T>();
+            IEnumerable<T> execute = ((IEnumerable) provider.Execute(Expression)).Cast<T>();
             return execute.GetEnumerator();
         }
 
         /// <summary>
-        /// Gibt einen Enumerator zurück, der eine Auflistung durchläuft.
+        ///     Gibt einen Enumerator zurück, der eine Auflistung durchläuft.
         /// </summary>
         /// <returns>
-        /// Ein <see cref="T:System.Collections.IEnumerator"/>-Objekt, das zum Durchlaufen der Auflistung verwendet werden kann.
+        ///     Ein <see cref="T:System.Collections.IEnumerator" />-Objekt, das zum Durchlaufen der Auflistung verwendet werden
+        ///     kann.
         /// </returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -67,28 +69,35 @@ namespace JPB.DataAccess.QueryProvider
         #region Implementation of IQueryable
 
         /// <summary>
-        /// Ruft die Ausdrucksbaumstruktur ab, die mit der Instanz von <see cref="T:System.Linq.IQueryable"/> verknüpft ist.
+        ///     Ruft die Ausdrucksbaumstruktur ab, die mit der Instanz von <see cref="T:System.Linq.IQueryable" /> verknüpft ist.
         /// </summary>
         /// <returns>
-        /// Der <see cref="T:System.Linq.Expressions.Expression"/>, der mit dieser Instanz von <see cref="T:System.Linq.IQueryable"/> verknüpft ist.
+        ///     Der <see cref="T:System.Linq.Expressions.Expression" />, der mit dieser Instanz von
+        ///     <see cref="T:System.Linq.IQueryable" /> verknüpft ist.
         /// </returns>
         public Expression Expression { get; private set; }
 
         /// <summary>
-        /// Ruft den Typ der Elemente ab, die zurückgegeben werden, wenn die Ausdrucksbaumstruktur ausgeführt wird, die mit dieser Instanz von <see cref="T:System.Linq.IQueryable"/> verknüpft ist.
+        ///     Ruft den Typ der Elemente ab, die zurückgegeben werden, wenn die Ausdrucksbaumstruktur ausgeführt wird, die mit
+        ///     dieser Instanz von <see cref="T:System.Linq.IQueryable" /> verknüpft ist.
         /// </summary>
         /// <returns>
-        /// Ein <see cref="T:System.Type"/>, der den Typ der Elemente darstellt, die zurückgegeben werden, wenn die Ausdrucksbaumstruktur ausgeführt wird, die mit diesem Objekt verknüpft ist.
+        ///     Ein <see cref="T:System.Type" />, der den Typ der Elemente darstellt, die zurückgegeben werden, wenn die
+        ///     Ausdrucksbaumstruktur ausgeführt wird, die mit diesem Objekt verknüpft ist.
         /// </returns>
-        public Type ElementType { get { return typeof(T); } }
+        public Type ElementType
+        {
+            get { return typeof (T); }
+        }
 
         /// <summary>
-        /// Ruft den Abfrageanbieter ab, der dieser Datenquelle zugeordnet ist.
+        ///     Ruft den Abfrageanbieter ab, der dieser Datenquelle zugeordnet ist.
         /// </summary>
         /// <returns>
-        /// Der <see cref="T:System.Linq.IQueryProvider"/>, der dieser Datenquelle zugeordnet ist.
+        ///     Der <see cref="T:System.Linq.IQueryProvider" />, der dieser Datenquelle zugeordnet ist.
         /// </returns>
-        public IQueryProvider Provider {
+        public IQueryProvider Provider
+        {
             get { return provider; }
         }
 
