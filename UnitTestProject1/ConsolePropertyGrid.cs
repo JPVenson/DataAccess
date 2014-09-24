@@ -7,11 +7,30 @@ namespace UnitTestProject1
 {
     public class ConsolePropertyGrid
     {
+        public ConsolePropertyGrid()
+        {
+            ExpandConsole = true;
+            ClearConsole = true;
+        }
         public StringBuilder ExtraInfos = new StringBuilder();
 
         public Type Target { get; set; }
 
         public List<object> SourceList { get; set; }
+
+        public bool ExpandConsole { get; set; }
+
+        public bool ClearConsole { get; set; }
+
+        public static void RenderList<T>(List<T> sourceList)
+        {
+            var gridInstance = new ConsolePropertyGrid();
+            gridInstance.Target = typeof (T);
+            gridInstance.SourceList = sourceList.Cast<object>().ToList();
+            gridInstance.ExpandConsole = true;
+            gridInstance.ClearConsole = true;
+            gridInstance.RenderGrid();
+        }
 
         public void RenderGrid()
         {
@@ -25,10 +44,13 @@ namespace UnitTestProject1
 
             var propNames = new Dictionary<string, int>();
 
+
             foreach (var propertyInfo in props)
             {
-                var maxContentLength = propertyInfo.Name.Length;
+                var headerLength = propertyInfo.Name.Length + propertyInfo.PropertyType.ToString().Length;
+                var maxContentLength = headerLength;
 
+                var propertyIsLargerThenValues = true;
                 foreach (var item in SourceList)
                 {
                     var value = propertyInfo.GetValue(item);
@@ -37,14 +59,15 @@ namespace UnitTestProject1
                     var s = value.ToString();
                     if (maxContentLength < s.Length)
                     {
+                        propertyIsLargerThenValues = false;
                         maxContentLength = s.Length;
                     }
                 }
 
                 //check for Modulo
 
-                int left = maxContentLength / 2;
-                int right = maxContentLength / 2;
+                int left = (maxContentLength - headerLength) / 2;
+                int right = left;
 
                 if (maxContentLength % 2 != 0)
                 {
@@ -53,13 +76,15 @@ namespace UnitTestProject1
 
                 var name = "";
 
+                if (!propertyIsLargerThenValues)
                 for (int i = 0; i < left; i++)
                 {
                     name += " ";
                 }
 
-                name += propertyInfo.Name;
+                name += string.Format(@"{0} {{ {1} }}", propertyInfo.Name, propertyInfo.PropertyType);
 
+                if (!propertyIsLargerThenValues)
                 for (int r = 0; r < right; r++)
                 {
                     name += " ";
@@ -102,7 +127,7 @@ namespace UnitTestProject1
             stream.AppendLine();
 
             if (Console.WindowWidth < size)
-                Console.WindowWidth = size + 10;
+                Console.WindowWidth = size + 30;
 
             for (int i = 0; i < SourceList.Count; i++)
             {
@@ -116,7 +141,7 @@ namespace UnitTestProject1
                     var value = propertyInfo.GetValue(item);
 
                     if (value == null)
-                        value = DBNull.Value;
+                        value = "{Null}";
 
                     var items = value.ToString();
 
@@ -144,14 +169,6 @@ namespace UnitTestProject1
                         name += " ";
                     }
 
-                    //if (items.Length < propLength.Value)
-                    //{
-                    //    for (int j = 0; j < propLength.Value / items.Length; j++)
-                    //    {
-                    //        items += " ";
-                    //    }
-                    //}
-
                     stream.Append(name + " | ");
                 }
                 stream.AppendLine();
@@ -172,8 +189,9 @@ namespace UnitTestProject1
             stream.AppendLine();
 
             stream.Append(ExtraInfos.ToString());
+            if (ClearConsole)
+                Console.Clear();
 
-            Console.Clear();
             ExtraInfos.Clear();
             Console.WriteLine(stream.ToString());
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Manager;
@@ -13,22 +14,22 @@ namespace UnitTestProject1
         public string testName = "TestDD";
         public static DbAccessLayer AccessLayer { get; set; }
 
-        //private static void Main()
-        //{
-        //    var dbAccessTest = new DbAccessTest();
-        //    try
-        //    {
-        //        dbAccessTest.TestMethod1();
-        //        CleanUp();
+        private static void Main()
+        {
+            var dbAccessTest = new DbAccessTest();
+            try
+            {
+                dbAccessTest.MySQlTest();
+                CleanUp();
 
-        //        dbAccessTest.ACheckInserts();
-        //        dbAccessTest.BCheckSelects();
-        //    }
-        //    finally
-        //    {
-        //        CleanUp();
-        //    }
-        //}
+                dbAccessTest.ACheckInserts();
+                dbAccessTest.BCheckSelects();
+            }
+            finally
+            {
+                CleanUp();
+            }
+        }
 
         [ClassCleanup]
         public static void CleanUp()
@@ -37,8 +38,46 @@ namespace UnitTestProject1
         }
 
         [TestInitialize]
-        public void TestMethod1()
+        public void MySQlTest()
         {
+            var accessLayer = new DbAccessLayer(new MsSql("Server=192.168.1.9;Uid=admin"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("IF EXISTS (select * from sys.databases where name='TestDB')" +
+                                                                                 " DROP DATABASE TestDB"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE DATABASE TestDB"));
+
+            accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
+                                                                                 " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                                 " UserName NVARCHAR(MAX)," +
+                                                                                 ");"));
+
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
+                                                                     " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                     " Content NVARCHAR(MAX)," +
+                                                                     ");"));
+
+            AccessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
+        }
+
+        [TestInitialize]
+        public void MsSQlTest()
+        {
+            var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Integrated Security=True;"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("IF EXISTS (select * from sys.databases where name='TestDB')" +
+                                                                                 " DROP DATABASE TestDB"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE DATABASE TestDB"));
+
+            accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
+                                                                                 " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                                 " UserName NVARCHAR(MAX)," +
+                                                                                 ");"));
+
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
+                                                                     " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                     " Content NVARCHAR(MAX)," +
+                                                                     ");"));
+
             AccessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
         }
 
@@ -56,27 +95,37 @@ namespace UnitTestProject1
             img.Text = "BLA";
             img = AccessLayer.InsertWithSelect(img);
 
-            //user.ID_Image = img.Id;
+            ConsolePropertyGrid.RenderList(new List<Image>() { img });
 
-            //User updatedUser = AccessLayer.InsertWithSelect(user);
+            Console.ReadKey();
+            
+            User updatedUser = AccessLayer.InsertWithSelect(user);
 
-            //updatedUser.ID_Image = img.Id;
-            //AccessLayer.Update(updatedUser);
+            AccessLayer.Update(updatedUser);
         }
 
         [TestMethod]
         public void BCheckSelects()
         {
             List<User> @select = AccessLayer.Select<User>("test");
+
+            ConsolePropertyGrid.RenderList(@select);
+            Console.ReadKey();
+
             Assert.AreEqual(@select.Count, 3);
 
             var lastID = (long) AccessLayer.Database.Run(s => s.GetSkalar("SELECT TOP 1 User_ID FROM Users"));
             long count = (int) AccessLayer.Database.Run(s => s.GetSkalar("SELECT COUNT(*) FROM Users"));
 
             var user = AccessLayer.Select<User>(lastID);
+
             Assert.AreEqual(user.Name, testName);
 
             List<User> users = AccessLayer.SelectNative<User>("SELECT * FROM Users");
+            ConsolePropertyGrid.RenderList(users);
+            Console.ReadKey();
+
+
             Assert.AreEqual(users.Count, 3);
 
             User list =
@@ -85,6 +134,10 @@ namespace UnitTestProject1
             Assert.AreEqual(list.UserId, lastID);
 
             List<User> selectWhere = AccessLayer.SelectWhere<User>("AS s WHERE s.User_ID != 0");
+
+            ConsolePropertyGrid.RenderList(selectWhere);
+            Console.ReadKey();
+
             Assert.AreEqual(count, selectWhere.Count);
 
             User @where =

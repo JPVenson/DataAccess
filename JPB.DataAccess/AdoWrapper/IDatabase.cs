@@ -72,16 +72,9 @@ namespace JPB.DataAccess.AdoWrapper
 
         object GetSkalar(IDbCommand cmd);
         object GetSkalar(string strSql, params object[] obj);
-        DateTime GetDateTimeSkalar(string strSql);
 
         DataTable GetDataTable(string name, string strSql);
         DataSet GetDataSet(string strSql);
-
-        void Import(IDatabase dbFrom, string strSqlFrom, string strSqlTo);
-        void Import(DataTable dt, string strSql);
-
-        string GetTimeStamp();
-        string GetTimeStamp(DateTime dtValue);
 
         /// <summary>
         ///     Required
@@ -100,31 +93,7 @@ namespace JPB.DataAccess.AdoWrapper
         /// <param name="value"></param>
         /// <returns></returns>
         IDataParameter CreateParameter(string strName, object value);
-
-        string[] GetTables();
-        string[] GetTables(String strFilter);
-        string[] GetTableColumns(string strTableName, params object[] exclude);
-        int DropTable(string strTableName);
-
-        void CompactDatabase();
-        void ShrinkDatabase();
-        void PrepareQuery(string strSql);
-
-        void CreateTable(DataTable table, string strTableName, HashSet<string> hsColumns2Export);
-
-        void InsertTable(DataTable table, string strTableName, HashSet<string> hsColumns2Export,
-            string strFilterExpression);
-
-        bool SupportsView(String strName);
-        IEnumerable<string> GetViews(String strName);
-        bool SupportsStoredProcedure(String strName);
-        IEnumerable<string> GetStoredProcedure(String strName);
-
-        void ProcessEntitiesList(string strQuery, Action<IDataRecord> action, bool bHandleConnection);
-
-        Exception TryOnEntitiesList(string strQuery, Action<IDataRecord> action, string strMessageOnEmpty,
-            bool bHandleConnection);
-
+        
         /// <summary>
         ///     Required
         ///     Execute a Query and map the result that is created with the func
@@ -145,18 +114,7 @@ namespace JPB.DataAccess.AdoWrapper
         /// <param name="func"></param>
         /// <returns></returns>
         IEnumerable<T> GetEntitiesList<T>(IDbCommand cmd, Func<IDataRecord, T> func);
-
-        IEnumerable<T> GetEntitiesListWithIndex<T>(string strQuery, Func<long, IDataRecord, T> func,
-            bool bHandleConnection);
-
-        IDictionary<K, V> GetEntitiesDictionary<K, V>(string strQuery, Func<IDataRecord, KeyValuePair<K, V>> func,
-            bool bHandleConnection, string strExceptionMessage = null);
-
-        IDictionary<K, V> GetEntitiesDictionary<K, V>(IDbCommand cmd, Func<IDataRecord, KeyValuePair<K, V>> func);
-
-        IDictionary<long, V> GetPagedEntitiesDictionary<V>(string strQuery, Func<IDataRecord, V> func, long iPageSize,
-            bool bHandleConnection, string strExceptionMessage = null);
-
+        
         /// <summary>
         ///     Required
         ///     Opens a Connection or reuse an existing one and then execute the action

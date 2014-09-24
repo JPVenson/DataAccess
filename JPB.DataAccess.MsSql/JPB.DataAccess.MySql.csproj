@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MySqlDataConverterPager.cs" />
+    <Compile Include="MySqlDataPager.cs" />
+    <Compile Include="MySqlUntypedDataPager.cs" />
     <Compile Include="Mysql.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -18,7 +18,7 @@ namespace UnitTestProject1
     {
         //private static void Main()
         //{
-        //    new UnitTest1().TestMethod1();
+        //    new UnitTest1().MsSQlTest();
         //}
 
         public UnitTest1()

@@ -28,7 +28,7 @@ namespace JPB.DataAccess
 
     public static class DataConverterExtensions
     {
-        internal static string GetTableName<T>()
+        public static string GetTableName<T>()
         {
             var forModel = typeof(T).GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;
             if (forModel != null)
@@ -36,7 +36,7 @@ namespace JPB.DataAccess
             return typeof(T).Name;
         }
 
-        internal static string GetTableName(this Type type)
+        public static string GetTableName(this Type type)
         {
             var forModel = type.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;
             if (forModel != null)
@@ -44,34 +44,34 @@ namespace JPB.DataAccess
             return type.Name;
         }
 
-        internal static object GetParamaterValue(this object source, string name)
+        public static object GetParamaterValue(this object source, string name)
         {
             return GetParamater(source, name).GetValue(source, null);
         }
 
-        internal static PropertyInfo GetParamater(this object source, string name)
+        public static PropertyInfo GetParamater(this object source, string name)
         {
             return ReflectionHelpers.GetProperties(source.GetType()).FirstOrDefault(s => s.Name == name);
         }
 
-        internal static bool CheckForPK(this PropertyInfo info)
+        public static bool CheckForPK(this PropertyInfo info)
         {
             return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute) || (info.Name.EndsWith("_ID"));
         }
 
-        internal static bool CheckForFK(this PropertyInfo info, string name)
+        public static bool CheckForFK(this PropertyInfo info, string name)
         {
             if (info.Name != name)
                 return false;
             return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute);
         }
 
-        internal static bool CheckForFK(this PropertyInfo info)
+        public static bool CheckForFK(this PropertyInfo info)
         {
             return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute);
         }
 
-        internal static string GetPKPropertyName(this Type type)
+        public static string GetPKPropertyName(this Type type)
         {
             PropertyInfo name = ReflectionHelpers.GetProperties(type).FirstOrDefault(CheckForPK);
             return name == null ? null : name.Name;
@@ -82,18 +82,18 @@ namespace JPB.DataAccess
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        internal static string GetPK(this Type type)
+        public static string GetPK(this Type type)
         {
             PropertyInfo name = ReflectionHelpers.GetProperties(type).FirstOrDefault(CheckForPK);
             return MapEntiysPropToSchema(type, name == null ? null : name.Name);
         }
 
-        internal static PropertyInfo[] GetFKs(this Type type)
+        public static PropertyInfo[] GetFKs(this Type type)
         {
             return ReflectionHelpers.GetProperties(type).Where(CheckForFK).ToArray();
         }
 
-        internal static string GetFK(this Type type, string name)
+        public static string GetFK(this Type type, string name)
         {
             name = type.ReMapSchemaToEntiysProp(name);
             PropertyInfo prop = ReflectionHelpers.GetProperties(type).FirstOrDefault(info => CheckForFK(info, name));
@@ -106,31 +106,31 @@ namespace JPB.DataAccess
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static long GetPK<T>(this T source)
+        public static long GetPK<T>(this T source)
         {
             return GetPK<T, long>(source);
         }
 
-        internal static E GetPK<T, E>(this T source)
+        public static E GetPK<T, E>(this T source)
         {
             string pk = source.GetType().GetPKPropertyName();
             return (E)source.GetType().GetProperty(pk).GetValue(source, null);
         }
 
-        internal static E GetFK<E>(this object source, string name)
+        public static E GetFK<E>(this object source, string name)
         {
             Type type = source.GetType();
             string pk = type.GetFK(name);
             return (E)type.GetProperty(pk).GetValue(source, null);
         }
 
-        internal static E GetFK<T, E>(this T source, string name)
+        public static E GetFK<T, E>(this T source, string name)
         {
             string pk = typeof(T).GetFK(name);
             return (E)typeof(T).GetProperty(pk).GetValue(source, null);
         }
 
-        internal static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
+        public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
         {
             foreach (PropertyInfo s1 in ReflectionHelpers.GetProperties(type))
             {
@@ -145,12 +145,12 @@ namespace JPB.DataAccess
             }
         }
 
-        internal static IEnumerable<string> MapEntiyToSchema<T>(string[] ignore)
+        public static IEnumerable<string> MapEntiyToSchema<T>(string[] ignore)
         {
             return MapEntiyToSchema(typeof(T), ignore);
         }
 
-        internal static string MapEntiysPropToSchema(this Type type, string prop)
+        public static string MapEntiysPropToSchema(this Type type, string prop)
         {
             PropertyInfo[] propertys = ReflectionHelpers.GetProperties(type);
             return (from propertyInfo in propertys
@@ -160,17 +160,17 @@ namespace JPB.DataAccess
                     select formodle != null ? formodle.AlternatingName : propertyInfo.Name).FirstOrDefault();
         }
 
-        internal static string MapEntiysPropToSchema<T>(string prop)
+        public static string MapEntiysPropToSchema<T>(string prop)
         {
             return MapEntiysPropToSchema(typeof(T), prop);
         }
 
-        internal static string ReMapSchemaToEntiysProp<T>(string prop)
+        public static string ReMapSchemaToEntiysProp<T>(string prop)
         {
             return ReMapSchemaToEntiysProp(typeof(T), prop);
         }
 
-        internal static string ReMapSchemaToEntiysProp(this Type type, string prop)
+        public static string ReMapSchemaToEntiysProp(this Type type, string prop)
         {
             foreach (PropertyInfo propertyInfo in from propertyInfo in ReflectionHelpers.GetProperties(type)
                                                   let customAttributes =
@@ -184,7 +184,7 @@ namespace JPB.DataAccess
             return prop;
         }
 
-        internal static bool CheckForListInterface(this PropertyInfo info)
+        public static bool CheckForListInterface(this PropertyInfo info)
         {
             if (info.PropertyType == typeof(string))
                 return false;
@@ -195,29 +195,29 @@ namespace JPB.DataAccess
             return false;
         }
 
-        internal static bool CheckForListInterface(this object info)
+        public static bool CheckForListInterface(this object info)
         {
             return !(info is string) &&
                    info.GetType().GetInterface(typeof(IEnumerable).Name) != null &&
                    info.GetType().GetInterface(typeof(IEnumerable<>).Name) != null;
         }
 
-        internal static PropertyInfo[] GetNavigationProps(this Type type)
+        public static PropertyInfo[] GetNavigationProps(this Type type)
         {
             return ReflectionHelpers.GetProperties(type).Where(s => s.GetGetMethod(false).IsVirtual).ToArray();
         }
 
-        internal static PropertyInfo[] GetNavigationProps<T>()
+        public static PropertyInfo[] GetNavigationProps<T>()
         {
             return GetNavigationProps(typeof(T));
         }
 
-        internal static T LoadNavigationProps<T>(this T source, IDatabase accessLayer)
+        public static T LoadNavigationProps<T>(this T source, IDatabase accessLayer)
         {
             return (T)LoadNavigationProps(source as object, accessLayer);
         }
 
-        internal static object LoadNavigationProps(this object source, IDatabase accessLayer)
+        public static object LoadNavigationProps(this object source, IDatabase accessLayer)
         {
             Type type = source.GetType();
             PropertyInfo[] props = ReflectionHelpers.GetProperties(type).ToArray();
@@ -292,7 +292,7 @@ namespace JPB.DataAccess
             return source;
         }
 
-        internal static T SetPropertysViaRefection<T>(IDataRecord reader)
+        public static T SetPropertysViaRefection<T>(IDataRecord reader)
             where T : class
         {
             return (T)SetPropertysViaRefection(typeof(T), reader);
@@ -367,7 +367,7 @@ namespace JPB.DataAccess
         }
 
 
-        internal static dynamic SetPropertysViaRefection(Type type, IDataRecord reader)
+        public static dynamic SetPropertysViaRefection(Type type, IDataRecord reader)
         {
             ConstructorInfo[] constructorInfos = type.GetConstructors();
             dynamic source = null;
@@ -491,7 +491,7 @@ namespace JPB.DataAccess
             return source;
         }
 
-        internal static IEnumerable<string> GetPropertysViaRefection(this Type type, params string[] ignore)
+        public static IEnumerable<string> GetPropertysViaRefection(this Type type, params string[] ignore)
         {
             return ReflectionHelpers.GetProperties(type).Select(s => s.Name).Except(ignore);
         }

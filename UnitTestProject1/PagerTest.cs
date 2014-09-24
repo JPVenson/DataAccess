@@ -14,11 +14,11 @@ namespace UnitTestProject1
     [TestClass]
     public class PagerTest
     {
-        public static void Main()
-        {
-            var test = new PagerTest();
-            test.TestMethod1();
-        }
+        //public static void Main()
+        //{
+        //    var test = new PagerTest();
+        //    test.MsSQlTest();
+        //}
 
         [ForModel("PagerTest")]
         public class TestPagerTest

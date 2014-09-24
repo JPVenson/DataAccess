@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Pager.Contracts;
 using MySql.Data.MySqlClient;
 
 namespace JPB.DataAccess.MySql
 {
-    internal class MySql : IDatabaseStrategy
+    public class MySql : IDatabaseStrategy
     {
         private const string TEMPLATE_MSSQL_UNTRUSTED =
             "server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5";
@@ -84,103 +85,24 @@ namespace JPB.DataAccess.MySql
             return table;
         }
 
-        public string[] GetTables(IDbConnection conn, string strFilter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string[] GetTableColumns(IDbConnection conn, string strTableName, params object[] exclude)
-        {
-            string sql = string.Format("SHOW COLUMNS FROM {0}", strTableName);
-            using (var cmd = new MySqlCommand(sql, (MySqlConnection) conn))
-            using (IDataReader dr = cmd.ExecuteReader())
-            {
-                var list = new List<string>();
-                while (dr.Read())
-                    list.Add((string) dr[0]);
-                return list.ToArray();
-            }
-        }
-
-        public int DropTable(IDbConnection conn, string strTableName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CompactDatabase(string strSource, string strDest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ShrinkDatabase(string strConnectionString)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Import(DataTable dt, IDbCommand cmd)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetTimeStamp()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetTimeStamp(DateTime dtValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void PrepareQuery(IDbConnection conn, string strSql)
-        {
-            throw new NotImplementedException();
-        }
-
         public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
         {
-            return CreateCommand("SELECT LAST_INSERT_ID()", conn);
-        }
-
-        public string GetViewsSql(String strName)
-        {
-            return string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
-        }
-
-        public string GetStoredProcedureSql(String strName)
-        {
-            return string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
-        }
-
-        public bool SupportsView(IDbConnection conn, String strName)
-        {
-            string sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
-            using (var cmd = new MySqlCommand(sql, (MySqlConnection) conn))
-            using (IDataReader dr = cmd.ExecuteReader())
-                return (dr.Read());
-        }
-
-        public bool SupportsStoredProcedure(IDbConnection conn, String strName)
-        {
-            string sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
-            using (var cmd = new MySqlCommand(sql, (MySqlConnection) conn))
-            using (IDataReader dr = cmd.ExecuteReader())
-                return (dr.Read());
+            return CreateCommand("SELECT * FROM LAST_INSERT_ID();", conn);
         }
 
         public IDataPager<T> CreatePager<T>()
         {
-            throw new NotImplementedException();
+            return new MySqlDataPager<T>();
         }
 
         public IUnGenericDataPager CreateUnmagedPager()
         {
-            throw new NotImplementedException();
+            return new MySqlUntypedDataPager();
         }
 
         public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
         {
-            throw new NotImplementedException();
+            return new MySqlDataConverterPager<T, TE>();
         }
 
         public object Clone()
