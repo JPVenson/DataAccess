@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using JPB.DataAccess.AdoWrapper;
-using JPB.DataAccess.AdoWrapper.MsSQL;
 using JPB.DataAccess.Pager.Contracts;
 
-namespace JPB.DataAccess.MsSql
+namespace JPB.DataAccess.AdoWrapper.MsSql
 {
     public class MsSql : IDatabaseStrategy
     {
@@ -244,7 +242,7 @@ namespace JPB.DataAccess.MsSql
         public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
         {
             //return this.CreateCommand("SELECT SCOPE_IDENTITY() as Value", conn);
-            return CreateCommand("SELECT @@IDENTITY as Value", conn);
+            return CreateCommand("SELECT SCOPE_IDENTITY() as Value", conn);
         }
 
         public string GetViewsSql(String strName)
@@ -281,6 +279,11 @@ namespace JPB.DataAccess.MsSql
         public IUnGenericDataPager CreateUnmagedPager()
         {
             return new MsSqlUntypedDataPager();
+        }
+
+        public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
+        {
+            return new MsSqlDataConverterPager<T, TE>();
         }
 
         public object Clone()

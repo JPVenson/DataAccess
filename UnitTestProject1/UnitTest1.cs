@@ -6,8 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.MsSql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using testing;
 

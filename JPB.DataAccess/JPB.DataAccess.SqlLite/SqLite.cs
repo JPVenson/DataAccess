@@ -162,5 +162,10 @@ namespace JPB.DataAccess.SqlLite
         {
             throw new NotImplementedException();
         }
+
+        public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

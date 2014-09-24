@@ -1,10 +1,9 @@
 using System;
 using System.Data;
 using System.Data.OleDb;
-using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Pager.Contracts;
 
-namespace JPB.DataAccess.OleDB
+namespace JPB.DataAccess.AdoWrapper.OleDB
 {
     public class OleDb : IDatabaseStrategy
     {
@@ -190,6 +189,11 @@ namespace JPB.DataAccess.OleDB
         }
 
         public IUnGenericDataPager CreateUnmagedPager()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
         {
             throw new NotImplementedException();
         }

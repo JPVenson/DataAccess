@@ -4,7 +4,7 @@ using System.Data.Odbc;
 using System.Data.OleDb;
 using JPB.DataAccess.Pager.Contracts;
 
-namespace JPB.DataAccess.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper.Odbc
 {
     public class Obdc : IDatabaseStrategy
     {
@@ -190,6 +190,11 @@ namespace JPB.DataAccess.AdoWrapper
         }
 
         public IUnGenericDataPager CreateUnmagedPager()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
         {
             throw new NotImplementedException();
         }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.MsSql;
 using JPB.DataAccess.Pager.Contracts;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using testing;
@@ -58,7 +58,40 @@ namespace UnitTestProject1
             types.Add(new TypeWrapper(ConsolePropertyGrid.Target));
             types.Add(new TypeWrapper(typeof(User)) );
 
-            var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
+            var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Integrated Security=True;"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("IF EXISTS (select * from sys.databases where name='TestDB')" +
+                                                                                 " DROP DATABASE TestDB"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE DATABASE TestDB"));
+
+            accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE PagerTest (" +
+                                                                                 " ID_test BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                                 " PropA NVARCHAR(MAX)," +
+                                                                                 " PropB NVARCHAR(MAX)" +
+                                                                                 ");"));
+
+            Console.WriteLine("Insert 100 Rows");
+            for (int i = 0; i < 100; i++)
+            {
+                Console.WriteLine("Row " + i);
+                accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
+            }
+
+            Console.WriteLine("Insert 100 Rows");
+            for (int i = 0; i < 100; i++)
+            {
+                Console.WriteLine("Row " + i + 100);
+                accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
+            }
+            Console.WriteLine("Insert 100 Rows");
+
+            for (int i = 0; i < 100; i++)
+            {
+                Console.WriteLine("Row " + i + 200);
+                accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
+            }
+            Console.Clear();
+            Console.WriteLine("Inserting done");
             DataPager = accessLayer.Database.CreateUntypedPager();
             DataPager.TargetType = typeof(TestPagerTest);
             DataPager.CurrentPage = 1;
@@ -209,7 +242,5 @@ namespace UnitTestProject1
 
 
         public ConsolePropertyGrid ConsolePropertyGrid { get; set; }
-
-
     }
 }

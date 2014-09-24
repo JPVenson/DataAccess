@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,6 +16,7 @@ namespace JPB.DataAccess.Manager
 {
     public partial class DbAccessLayer
     {
+
         #region BasicCommands
 
         /// <summary>
@@ -35,12 +37,13 @@ namespace JPB.DataAccess.Manager
 
         protected static object Select(Type type, long pk, IDatabase db)
         {
-            return Select(type, db).FirstOrDefault();
+            return Select(type, db, CreateSelect(type, db, pk)).FirstOrDefault();
         }
 
         protected static T Select<T>(long pk, IDatabase db)
         {
-            return Select<T>(db, CreateSelect<T>(db, pk)).FirstOrDefault();
+            //return Select<T>(db, CreateSelect<T>(db, pk)).FirstOrDefault();
+            return (T)Select(typeof(T), pk, db);
         }
 
         public List<object> Select(Type type, params object[] parameter)
@@ -202,7 +205,7 @@ namespace JPB.DataAccess.Manager
         public static IDbCommand CreateSelect(Type type, IDatabase db, long pk)
         {
             string proppk = type.GetPK();
-            string query = CreateSelect(type) + " WHERE " + proppk + " = @pk";
+            string query = CreateSelectQueryFactory(type, db).CommandText + " WHERE " + proppk + " = @pk";
             IDbCommand cmd = CreateCommand(db, query);
             cmd.Parameters.AddWithValue("@pk", pk, db);
             return cmd;
@@ -211,11 +214,6 @@ namespace JPB.DataAccess.Manager
         public static IDbCommand CreateSelect<T>(IDatabase db, long pk)
         {
             return CreateSelect(typeof(T), db, pk);
-        }
-
-        public static string CreateSelect<T>()
-        {
-            return CreateSelect(typeof(T));
         }
 
         public static string CreateSelect(Type type)

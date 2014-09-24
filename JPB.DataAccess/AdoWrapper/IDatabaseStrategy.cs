@@ -42,5 +42,6 @@ namespace JPB.DataAccess.AdoWrapper
         IDataPager<T> CreatePager<T>();
 
         IUnGenericDataPager CreateUnmagedPager();
+        IWrapperDataPager<T,TE> CreateConverterPager<T, TE>();
     }
 }

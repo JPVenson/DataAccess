@@ -8,31 +8,25 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {
-    public class MsSqlDataPager<T> : IDataPager<T>
+    public class MsSqlUntypedDataPager : IUnGenericDataPager
     {
-        static MsSqlDataPager()
+        public MsSqlUntypedDataPager()
         {
-            _type = typeof(T);
-        }
-
-        public MsSqlDataPager()
-        {
-            TargetType = _type;
             CurrentPage = 0;
             PageSize = 10;
 
-            CurrentPageItems = new ObservableCollection<T>();
+            CurrentPageItems = new ObservableCollection<dynamic>();
             FirstID = -1;
             LastID = -1;
             SyncHelper = action => action();
         }
-        
+
         public bool Cache
         {
             get { return _cache; }
             set
             {
-                if(value)
+                if (value)
                     throw new Exception("To be supported ... sory");
                 _cache = value;
             }
@@ -54,18 +48,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
         public long MaxPage { get; private set; }
 
         private string SqlVersion;
-
-        private static Type _type;
-
+        
         public int PageSize { get; set; }
 
-        public ICollection<T> CurrentPageItems { get; private set; }
-
-        ICollection<dynamic> IUnGenericDataPager.CurrentPageItems
-        {
-            get { return new ObservableCollection<dynamic>();}
-        }
-
+        public ICollection<dynamic> CurrentPageItems { get; private set; }
         public Type TargetType { get; set; }
 
         public void LoadPage(DbAccessLayer dbAccess)
@@ -77,20 +63,20 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
             SyncHelper(CurrentPageItems.Clear);
 
-            var pk = _type.GetPK();
+            var pk = TargetType.GetPK();
 
             if (FirstID == -1 || LastID == -1)
             {
-                var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long), "SELECT TOP 1 " + pk + " FROM " + _type.GetTableName() + " ORDER BY " + pk).FirstOrDefault();
+                var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long), "SELECT TOP 1 " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk).FirstOrDefault();
                 if (firstOrDefault != null)
                     FirstID = (long)firstOrDefault;
 
-                var lastId = dbAccess.RunPrimetivSelect(typeof(long), "SELECT TOP 1 " + pk + " FROM " + _type.GetTableName() + " ORDER BY " + pk + " DESC").FirstOrDefault();
+                var lastId = dbAccess.RunPrimetivSelect(typeof(long), "SELECT TOP 1 " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk + " DESC").FirstOrDefault();
                 if (lastId != null)
                     LastID = (long)lastId;
             }
 
-            var maxItems = dbAccess.RunPrimetivSelect(typeof(long), "SELECT COUNT( * ) FROM " + TargetType.GetTableName()).FirstOrDefault();
+            var maxItems = dbAccess.RunPrimetivSelect(typeof(long), "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName()).FirstOrDefault();
             if (maxItems != null)
             {
                 long parsedCount;
@@ -101,10 +87,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             //Check select strategy
             //IF version is or higher then 11.0.2100.60 we can use OFFSET and FETCH
             //esle we need to do it the old way
-            List<T> selectWhere = null;
+            List<dynamic> selectWhere = null;
             if (CheckVersionForFetch())
             {
-                selectWhere = dbAccess.SelectWhere<T>(" ORDER BY " + pk + " ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
+                selectWhere = dbAccess.SelectWhere(TargetType," ORDER BY " + pk + " ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
                 {
                     PagedRows = CurrentPage * PageSize,
                     PageSize
@@ -119,13 +105,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 queryBuilde.Append(pk);
                 queryBuilde.Append(") AS NUMBER, *");
                 queryBuilde.Append(" FROM ");
-                queryBuilde.Append(_type.GetTableName());
+                queryBuilde.Append(TargetType.GetTableName());
                 queryBuilde.Append(") AS TBL ");
                 queryBuilde.Append("WHERE NUMBER BETWEEN ((@PagedRows - 1) * @PageSize + 1) AND (@PagedRows * @PageSize)");
                 queryBuilde.Append("ORDER BY ");
                 queryBuilde.Append(pk);
 
-                selectWhere = dbAccess.SelectNative<T>(queryBuilde.ToString(), new
+                selectWhere = dbAccess.SelectNative(TargetType, queryBuilde.ToString(), new
                 {
                     PagedRows = CurrentPage + 1,
                     PageSize
@@ -134,7 +120,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
             foreach (var item in selectWhere)
             {
-                T item1 = item;
+                dynamic item1 = item;
                 SyncHelper(() => CurrentPageItems.Add(item1));
             }
         }
@@ -205,6 +191,5 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                     _syncHelper = value;
             }
         }
-
     }
 }

@@ -16,6 +16,11 @@ namespace JPB.DataAccess.AdoWrapper
 
         #region IDatabase Members
 
+        public IWrapperDataPager<T, TE> CreatePager<T, TE>()
+        {
+            return _strategy.CreateConverterPager<T, TE>();
+        }
+
         public IDataPager<T> CreatePager<T>()
         {
             return _strategy.CreatePager<T>();
@@ -77,8 +82,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             if (null == GetConnection())
                 _conn2 = _strategy.CreateConnection();
-            _handlecounter++;
-
+            
             if (GetConnection().State != ConnectionState.Open)
                 GetConnection().Open();
 
@@ -87,11 +91,13 @@ namespace JPB.DataAccess.AdoWrapper
                 if (bUseTransaction)
                     _trans = GetConnection().BeginTransaction();
             }
+
+            _handlecounter++;
         }
 
         public void TransactionCommit()
         {
-            if (_trans != null)
+            if (_trans != null && _handlecounter == 0)
             {
                 _trans.Commit();
                 _trans = null;
@@ -101,7 +107,11 @@ namespace JPB.DataAccess.AdoWrapper
         public void TransactionRollback()
         {
             if (_trans != null)
-                _trans.Rollback();
+            {
+                //Force all open connections to close
+                _handlecounter = 0;
+                CloseConnection();
+            }
         }
 
         public void CloseConnection()
@@ -110,6 +120,7 @@ namespace JPB.DataAccess.AdoWrapper
                 _handlecounter--;
             if (GetConnection() != null && _handlecounter == 0)
             {
+                TransactionCommit();
                 _trans = null;
                 GetConnection().Close();
             }
@@ -143,12 +154,19 @@ namespace JPB.DataAccess.AdoWrapper
             return DoExecuteNonQuery(string.Format(strSql, obj));
         }
 
-        public object GetlastInsertedID()
+
+        public IDbCommand GetlastInsertedIdCommand()
         {
             if (null == GetConnection())
                 throw new Exception("DB2.ExecuteNonQuery: void connection");
 
-            using (IDbCommand cmd = _strategy.GetlastInsertedID_Cmd(GetConnection()))
+            return _strategy.GetlastInsertedID_Cmd(GetConnection());
+        }
+
+
+        public object GetlastInsertedID()
+        {
+            using (IDbCommand cmd = GetlastInsertedIdCommand())
                 return GetSkalar(cmd);
         }
 
@@ -351,7 +369,7 @@ namespace JPB.DataAccess.AdoWrapper
                 {
                     if (hsColumns2Export.Contains(column.ColumnName))
                     {
-                        var param = (IDbDataParameter) cmd.Parameters[htPars[column.Caption]];
+                        var param = (IDbDataParameter)cmd.Parameters[htPars[column.Caption]];
                         param.Value = rows[i][column];
                     }
                 }
@@ -370,7 +388,7 @@ namespace JPB.DataAccess.AdoWrapper
             using (IDataReader dr = GetDataReader(_strategy.GetViewsSql(strName)))
             {
                 while (dr.Read())
-                    lst.Add((string) dr[0]);
+                    lst.Add((string)dr[0]);
                 dr.Close();
             }
             return lst;
@@ -387,7 +405,7 @@ namespace JPB.DataAccess.AdoWrapper
             using (IDataReader dr = GetDataReader(_strategy.GetStoredProcedureSql(strName)))
             {
                 while (dr.Read())
-                    lst.Add((string) dr[0]);
+                    lst.Add((string)dr[0]);
                 dr.Close();
             }
             return lst;
@@ -402,7 +420,7 @@ namespace JPB.DataAccess.AdoWrapper
         public IDatabase Clone()
         {
             var db = new Database();
-            db.Attach((IDatabaseStrategy) _strategy.Clone());
+            db.Attach((IDatabaseStrategy)_strategy.Clone());
             return db;
         }
 
@@ -823,13 +841,13 @@ namespace JPB.DataAccess.AdoWrapper
 
         private static string TypeToString(Type type)
         {
-            if (type == typeof (string))
+            if (type == typeof(string))
                 return "TEXT";
-            if (type == typeof (long) || type == typeof (int))
+            if (type == typeof(long) || type == typeof(int))
                 return "NUMBER";
-            if (type == typeof (double) || type == typeof (float))
+            if (type == typeof(double) || type == typeof(float))
                 return "NUMBER";
-            if (type == typeof (DateTime))
+            if (type == typeof(DateTime))
                 return "DATETIME";
             return "TEXT";
         }

@@ -19,9 +19,9 @@ namespace JPB.DataAccess.Manager
     {
         private readonly Dictionary<DbTypes, string> _preDefinedProvider = new Dictionary<DbTypes, string>
         {
-            {DbTypes.MsSql, "JPB.DataAccess.MsSql.MsSql"},
-            {DbTypes.OleDb, "JPB.DataAccess.OleDB.OleDb"},
-            {DbTypes.Obdc, "JPB.DataAccess.Obdc.Obdc"},
+            {DbTypes.MsSql, "JPB.DataAccess.AdoWrapper.MsSql.MsSql"},
+            {DbTypes.OleDb, "JPB.DataAccess.AdoWrapper.OleDB.OleDb"},
+            {DbTypes.Obdc, "JPB.DataAccess.AdoWrapper.Obdc.Obdc"},
             {DbTypes.MySql, "JPB.DataAccess.MySql.MySql"},
             {DbTypes.SqLite, "JPB.DataAccess.SqlLite.SqLite"},
         };
@@ -222,12 +222,10 @@ namespace JPB.DataAccess.Manager
             return true;
         }
 
-        private static IDbCommand CheckInstanceForAttriute<T, TE>(T entry, IDatabase db,
-            Func<T, IDatabase, IDbCommand> fallback, params object[] param)
-            where TE : DataAccessAttribute
+        private static IDbCommand CheckInstanceForAttriute<TE>(Type type, object entry, IDatabase db,
+    Func<object, IDatabase, IDbCommand> fallback, params object[] param)
+    where TE : DataAccessAttribute
         {
-            Type type = entry.GetType();
-
             //try to get a Factory mehtod
             //var methods =
             //    type.GetMethods()
@@ -290,6 +288,13 @@ namespace JPB.DataAccess.Manager
             return fallback(entry, db);
         }
 
+        private static IDbCommand CheckInstanceForAttriute<T, TE>(T entry, IDatabase db,
+            Func<T, IDatabase, IDbCommand> fallback, params object[] param)
+            where TE : DataAccessAttribute
+        {
+            return CheckInstanceForAttriute<TE>(typeof(T), entry, db, (o, database) => fallback((T)o, database), param);
+        }
+
         public int ExecuteGenericCommand(string query, IEnumerable<IQueryParameter> values)
         {
             IDbCommand command = CreateCommand(Database, query);
@@ -334,19 +339,23 @@ namespace JPB.DataAccess.Manager
             return db.CreateCommand(query);
         }
 
-        public static IDbCommand CreateCommandWithParameterValues<T>(string query, string[] propertyInfos, T entry, IDatabase db)
+        public static IDbCommand CreateCommandWithParameterValues(Type type, string query, string[] propertyInfos, object entry, IDatabase db)
         {
-            Type type = typeof(T);
             object[] propertyvalues =
                 propertyInfos.Select(
                     propertyInfo =>
                     {
                         PropertyInfo property =
-                            type.GetProperty(DataConverterExtensions.ReMapSchemaToEntiysProp<T>(propertyInfo));
+                            type.GetProperty(DataConverterExtensions.ReMapSchemaToEntiysProp(type, propertyInfo));
                         object dataValue = GetDataValue(property.GetValue(entry, null));
                         return dataValue;
                     }).ToArray();
             return CreateCommandWithParameterValues(query, db, propertyvalues);
+        }
+
+        public static IDbCommand CreateCommandWithParameterValues<T>(string query, string[] propertyInfos, T entry, IDatabase db)
+        {
+            return CreateCommandWithParameterValues(typeof(T), query, propertyInfos, entry, db);
         }
 
         public static IDbCommand CreateCommandWithParameterValues(string query, IDatabase db, object[] values)

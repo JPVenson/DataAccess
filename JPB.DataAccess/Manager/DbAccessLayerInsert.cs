@@ -83,10 +83,9 @@ namespace JPB.DataAccess.Manager
 
             return commands.ToArray();
         }
-        
-        public static IDbCommand _CreateInsert<T>(T entry, IDatabase db)
+
+        public static IDbCommand _CreateInsert(Type type, object entry, IDatabase db)
         {
-            Type type = typeof(T);
             string[] ignore =
                 type.GetProperties()
                     .Where(
@@ -96,8 +95,8 @@ namespace JPB.DataAccess.Manager
                     .Select(s => s.Name)
                     .Concat(CreateIgnoreList(type))
                     .ToArray();
-            string[] propertyInfos = CreatePropertyNames<T>(ignore).ToArray();
-            string csvprops = CreatePropertyCSV<T>(ignore);
+            string[] propertyInfos = CreatePropertyNames(type, ignore).ToArray();
+            string csvprops = CreatePropertyCSV(type, ignore);
 
             string values = "";
             for (int index = 0; index < propertyInfos.Length; index++)
@@ -107,12 +106,22 @@ namespace JPB.DataAccess.Manager
 
             string[] orignialProps = type.GetPropertysViaRefection(ignore).ToArray();
 
-            return CreateCommandWithParameterValues(query, orignialProps, entry, db);
+            return CreateCommandWithParameterValues(type, query, orignialProps, entry, db);
+        }
+
+        public static IDbCommand _CreateInsert<T>(T entry, IDatabase db)
+        {
+            return _CreateInsert(typeof(T), entry, db);
+        }
+
+        public static IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
+        {
+            return CheckInstanceForAttriute<InsertFactoryMethodAttribute>(type, entry, db, (o, database) => _CreateInsert(type, o, database), parameter);
         }
 
         public static IDbCommand CreateInsert<T>(T entry, IDatabase db, params object[] parameter)
         {
-            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, _CreateInsert, parameter);
+            return CreateInsert(typeof(T), entry, db, parameter);
         }
 
         public static void Insert<T>(T entry, IDatabase db)
@@ -120,15 +129,56 @@ namespace JPB.DataAccess.Manager
             db.Run(s => { s.ExecuteNonQuery(CreateInsert(entry, s)); });
         }
 
-        public static T InsertWithSelect<T>(T entry, IDatabase db)
+        public static object InsertWithSelect(Type type, object entry, IDatabase db)
         {
             return db.Run(s =>
             {
-                IDbCommand dbCommand = CreateInsert(entry, s);
-                dbCommand.ExecuteNonQuery();
-                object getlastInsertedId = s.GetlastInsertedID();
-                return Select<T>(Convert.ToInt64(getlastInsertedId), s);
+                var dbCommand = CreateInsert(type, entry, s);
+                var mergeCommands = MergeCommands(s, dbCommand, s.GetlastInsertedIdCommand());
+                var skalar = s.GetSkalar(mergeCommands);
+                object getlastInsertedId = skalar;
+                return Select(type, Convert.ToInt64(getlastInsertedId), s);
             });
+        }
+
+        /// <summary>
+        /// Not Connection save
+        /// Must be executed inside a Valid Connection
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="last"></param>
+        /// <returns></returns>
+        public static IDbCommand MergeCommands(IDatabase db, IDbCommand first, IDbCommand last)
+        {
+            var mergedCommandText = first.CommandText + ";" + last.CommandText;
+            var paramter = new List<IQueryParameter>();
+
+            foreach (IDataParameter parameter in first.Parameters.Cast<IDataParameter>())
+            {
+                if (paramter.Any(s => s.Name == parameter.ParameterName))
+                {
+                    throw new ArgumentOutOfRangeException("first", "");
+                }
+                
+                paramter.Add(new QueryParameter(){Name = parameter.ParameterName,Value = parameter.Value});
+            }
+
+            foreach (var parameter in last.Parameters.Cast<IDataParameter>())
+            {
+                if (paramter.Any(s => s.Name == parameter.ParameterName))
+                {
+                    throw new ArgumentOutOfRangeException("first", "");
+                }
+
+                paramter.Add(new QueryParameter(){Name = parameter.ParameterName,Value = parameter.Value});
+            }
+
+            return CreateCommandWithParameterValues(mergedCommandText, db, paramter);
+        }
+
+        public static T InsertWithSelect<T>(T entry, IDatabase db)
+        {
+            return (T)InsertWithSelect(typeof(T), entry, db);
         }
     }
 }

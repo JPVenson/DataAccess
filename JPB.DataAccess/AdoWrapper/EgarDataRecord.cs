@@ -155,10 +155,14 @@ namespace JPB.DataAccess.AdoWrapper
         {
             get
             {
-                object value = Objects.First(s => s.Key == name).Value;
-                if (value is DBNull)
-                    return null;
-                return value;
+                var firstOrDefault = Objects.Select(s => (KeyValuePair<string, object>?)s).FirstOrDefault(s =>
+                               s.HasValue && s.Value.Key == name);
+                if (firstOrDefault != null)
+                {
+                    object value = firstOrDefault.Value.Value;
+                    return value;
+                }
+                return null;
             }
         }
 

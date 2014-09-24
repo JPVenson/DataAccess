@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Dynamic;
 using JPB.DataAccess.Manager;
-using testing.Annotations;
 
 namespace JPB.DataAccess.Pager.Contracts
 {
     public interface IDataPager<T> : IUnGenericDataPager
     {
-        new ObservableCollection<T> CurrentPageItems { get; }
+        new ICollection<T> CurrentPageItems { get; }
     }
 
     public interface IDataPager

@@ -8,31 +8,30 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {
-    public class MsSqlDataPager<T> : IDataPager<T>
+    public class MsSqlDataConverterPager<T, TE> : IWrapperDataPager<T, TE>
     {
-        static MsSqlDataPager()
+        static MsSqlDataConverterPager()
         {
             _type = typeof(T);
         }
 
-        public MsSqlDataPager()
+        public MsSqlDataConverterPager()
         {
             TargetType = _type;
             CurrentPage = 0;
             PageSize = 10;
 
-            CurrentPageItems = new ObservableCollection<T>();
             FirstID = -1;
             LastID = -1;
             SyncHelper = action => action();
         }
-        
+
         public bool Cache
         {
             get { return _cache; }
             set
             {
-                if(value)
+                if (value)
                     throw new Exception("To be supported ... sory");
                 _cache = value;
             }
@@ -59,12 +58,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
         public int PageSize { get; set; }
 
-        public ICollection<T> CurrentPageItems { get; private set; }
+        public Func<T, TE> Converter { get; set; }
 
         ICollection<dynamic> IUnGenericDataPager.CurrentPageItems
         {
-            get { return new ObservableCollection<dynamic>();}
+            get { return new ObservableCollection<dynamic>(); }
         }
+
+        public ICollection<TE> CurrentPageItems { get; set; }
 
         public Type TargetType { get; set; }
 
@@ -74,6 +75,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             {
                 SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
             }
+
+            if (CurrentPageItems == null)
+                CurrentPageItems = new ObservableCollection<TE>();
 
             SyncHelper(CurrentPageItems.Clear);
 
@@ -135,7 +139,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             foreach (var item in selectWhere)
             {
                 T item1 = item;
-                SyncHelper(() => CurrentPageItems.Add(item1));
+                SyncHelper(() => CurrentPageItems.Add(this.Converter(item1)));
             }
         }
 
@@ -205,6 +209,5 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                     _syncHelper = value;
             }
         }
-
     }
 }

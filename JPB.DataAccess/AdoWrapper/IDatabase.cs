@@ -15,7 +15,8 @@ namespace JPB.DataAccess.AdoWrapper
         string ServerName { get; }
 
         IDataPager<T> CreatePager<T>();
-        IUnGenericDataPager CreateUntypedPager(); 
+        IWrapperDataPager<T, TE> CreatePager<T, TE>();
+        IUnGenericDataPager CreateUntypedPager();
 
         /// <summary>
         ///     Required
@@ -153,9 +154,6 @@ namespace JPB.DataAccess.AdoWrapper
 
         IDictionary<K, V> GetEntitiesDictionary<K, V>(IDbCommand cmd, Func<IDataRecord, KeyValuePair<K, V>> func);
 
-        V GetNextPagingStep<V>(string strQuery, Func<IDataRecord, V> func, long iPageSize, V @default,
-            bool bHandleConnection, string strExceptionMessage = null);
-
         IDictionary<long, V> GetPagedEntitiesDictionary<V>(string strQuery, Func<IDataRecord, V> func, long iPageSize,
             bool bHandleConnection, string strExceptionMessage = null);
 
@@ -188,5 +186,6 @@ namespace JPB.DataAccess.AdoWrapper
         T RunInTransaction<T>(Func<IDatabase, T> func);
 
         IDatabase Clone();
+        IDbCommand GetlastInsertedIdCommand();
     }
 }

@@ -178,6 +178,11 @@ namespace JPB.DataAccess.MySql
             throw new NotImplementedException();
         }
 
+        public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
+        {
+            throw new NotImplementedException();
+        }
+
         public object Clone()
         {
             return new MySql(ConnectionString);

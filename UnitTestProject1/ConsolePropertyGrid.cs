@@ -68,7 +68,7 @@ namespace UnitTestProject1
                 name += " | ";
 
                 propNames.Add(name, maxContentLength);
-                size += propertyInfo.Name.Length;
+                size += name.Length;
             }
             var enumerable = propNames.Select(s => s.Key.Length).Aggregate((e, f) => e + f) - 2;
 
@@ -102,7 +102,7 @@ namespace UnitTestProject1
             stream.AppendLine();
 
             if (Console.WindowWidth < size)
-                Console.WindowWidth = size + 30;
+                Console.WindowWidth = size + 10;
 
             for (int i = 0; i < SourceList.Count; i++)
             {

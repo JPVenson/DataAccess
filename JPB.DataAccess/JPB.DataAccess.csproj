@@ -52,7 +52,8 @@
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
     <Compile Include="AdoWrapper\IDatabase.cs" />
     <Compile Include="AdoWrapper\IDatabaseStrategy.cs" />
-    <Compile Include="AdoWrapper\MsSQL\MsSql.cs" />
+    <Compile Include="AdoWrapper\MsSql\MsSql.cs" />
+    <Compile Include="AdoWrapper\MsSql\MsSqlUntypedDataPager.cs" />
     <Compile Include="AdoWrapper\Odbc\Odbc.cs" />
     <Compile Include="AdoWrapper\OleDB\OleDb.cs" />
     <Compile Include="DataConverterExtensions.cs" />
@@ -66,8 +67,10 @@
     <Compile Include="Manager\DBAccessLayerUpdate.cs" />
     <Compile Include="Manager\DbTypes.cs" />
     <Compile Include="Pager\Contracts\IDataPager.cs" />
-    <Compile Include="AdoWrapper\MsSQL\MsSqlDataPager.cs" />
+    <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />
     <Compile Include="Pager\Contracts\IUnGenericDataPager.cs" />
+    <Compile Include="Pager\Contracts\IWrapperDataPager.cs" />
+    <Compile Include="AdoWrapper\MsSql\MsSqlDataConverterPager.cs" />
     <Compile Include="QueryExtentions.cs" />
     <Compile Include="ModelsAnotations\Annotations.cs" />
     <Compile Include="ModelsAnotations\ModelAnotations.cs" />

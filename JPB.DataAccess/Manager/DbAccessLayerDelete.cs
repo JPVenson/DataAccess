@@ -16,7 +16,7 @@ namespace JPB.DataAccess.Manager
         {
             Type type = typeof (T);
             string proppk = type.GetPK();
-            string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @1";
+            string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @0";
             return CreateCommandWithParameterValues(query, db, new object[] {entry.GetPK<T, long>()});
         }
 
@@ -27,7 +27,11 @@ namespace JPB.DataAccess.Manager
 
         public static void Delete<T>(T entry, IDatabase db, params object[] parameter)
         {
-            CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db, CreateDelete, parameter);
+            var checkInstanceForAttriute = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db, CreateDelete, parameter);
+            db.Run(s =>
+            {
+                s.ExecuteNonQuery(checkInstanceForAttriute);
+            });
         }
     }
 }

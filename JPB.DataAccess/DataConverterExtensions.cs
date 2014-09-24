@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
@@ -22,10 +23,10 @@ using JPB.DataAccess.ModelsAnotations;
 namespace JPB.DataAccess
 {
 #if !DEBUG
-        [DebuggerStepThrough]
+    [DebuggerStepThrough]
 #endif
 
-    internal static class DataConverterExtensions
+    public static class DataConverterExtensions
     {
         internal static string GetTableName<T>()
         {
@@ -133,7 +134,7 @@ namespace JPB.DataAccess
         {
             foreach (PropertyInfo s1 in ReflectionHelpers.GetProperties(type))
             {
-                if (!s1.GetGetMethod().IsVirtual)
+                if (!s1.GetGetMethod().IsVirtual && !s1.GetCustomAttributes().Any(s => s is IgnoreReflectionAttribute))
                 {
                     if (!ignore.Contains(s1.Name))
                     {
@@ -155,7 +156,7 @@ namespace JPB.DataAccess
             return (from propertyInfo in propertys
                     where propertyInfo.Name == prop
                     let formodle =
-                        propertyInfo.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel
+                            propertyInfo.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel
                     select formodle != null ? formodle.AlternatingName : propertyInfo.Name).FirstOrDefault();
         }
 
@@ -173,7 +174,7 @@ namespace JPB.DataAccess
         {
             foreach (PropertyInfo propertyInfo in from propertyInfo in ReflectionHelpers.GetProperties(type)
                                                   let customAttributes =
-                                                      propertyInfo.GetCustomAttributes()
+                                                                                        propertyInfo.GetCustomAttributes()
                                                           .FirstOrDefault(s => s is ForModel) as ForModel
                                                   where
                                                       customAttributes != null &&
@@ -302,6 +303,70 @@ namespace JPB.DataAccess
             return new EgarDataRecord(rec);
         }
 
+        public static void SetPropertysViaReflection(dynamic instance, IDataRecord reader)
+        {
+            var listofpropertys = new Dictionary<string, object>();
+
+            var type = instance.GetType();
+            PropertyInfo[] propertys = type.GetProperties();
+            var instanceOfFallbackList = new Dictionary<string, object>();
+
+            for (int i = 0; i < reader.FieldCount; i++)
+                listofpropertys.Add(ReMapSchemaToEntiysProp(type, reader.GetName(i)), reader.GetValue(i));
+
+            foreach (var item in listofpropertys)
+            {
+                PropertyInfo property = propertys.FirstOrDefault(s => s.Name == item.Key);
+                if (property != null)
+                {
+                    if (item.Value is DBNull)
+                        property.SetValue(instance, null, null);
+                    else
+                    {
+                        if (property.PropertyType.IsGenericTypeDefinition &&
+                            property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                        {
+                            object convertedValue = Convert.ChangeType(item.Value,
+                                Nullable.GetUnderlyingType(
+                                    property.PropertyType));
+                            property.SetValue(instance, convertedValue, null);
+                        }
+                        else
+                            property.SetValue(instance, item.Value, null);
+                    }
+                }
+                else if (instanceOfFallbackList != null)
+                {
+                    //no property found Look for LoadNotImplimentedDynamicAttribute property to include it
+
+                    if (instanceOfFallbackList.Any())
+                    {
+                        instanceOfFallbackList.Add(item.Key, item.Value);
+                    }
+                    else
+                    {
+                        PropertyInfo maybeFallbackProperty = propertys.FirstOrDefault(
+                            s => s.GetCustomAttributes().Any(e => e is LoadNotImplimentedDynamicAttribute));
+                        if (maybeFallbackProperty != null)
+                        {
+                            instanceOfFallbackList = maybeFallbackProperty.GetValue(instance);
+                            if (instanceOfFallbackList == null)
+                            {
+                                instanceOfFallbackList = new Dictionary<string, object>();
+                                maybeFallbackProperty.SetValue(instance, instanceOfFallbackList);
+                            }
+                            instanceOfFallbackList.Add(item.Key, item.Value);
+                        }
+                        else
+                        {
+                            instanceOfFallbackList = null;
+                        }
+                    }
+                }
+            }
+        }
+
+
         internal static dynamic SetPropertysViaRefection(Type type, IDataRecord reader)
         {
             ConstructorInfo[] constructorInfos = type.GetConstructors();
@@ -360,7 +425,7 @@ namespace JPB.DataAccess
 
             PropertyInfo maybeFallbackProperty = null;
             bool searchedForFallback = false;
-            PropertyInfo[] propertys = ReflectionHelpers.GetProperties(type);
+            PropertyInfo[] propertys = type.GetProperties();
             var instanceOfFallbackList = new Dictionary<string, object>();
 
             for (int i = 0; i < reader.FieldCount; i++)
