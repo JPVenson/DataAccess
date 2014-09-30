@@ -114,18 +114,6 @@ namespace JPB.DataAccess.Manager
             return CreateSelect(typeof(T), db, query, paramenter);
         }
 
-        public static string[] CreateIgnoreList(Type type)
-        {
-            return
-                type.GetProperties()
-                    .Where(
-                        s =>
-                            s.GetGetMethod(false).IsVirtual ||
-                            s.GetCustomAttributes().Any(e => e is IgnoreReflectionAttribute))
-                    .Select(s => s.Name)
-                    .ToArray();
-        }
-
         private static IDbCommand CreateSelectQueryFactory(Type type, IDatabase db, params object[] parameter)
         {
             //try to get the attribute for static selection
@@ -230,33 +218,9 @@ namespace JPB.DataAccess.Manager
 
         #region Runs
 
-        //public static object RunDynamicSelect(Type type, IDatabase database, IDbCommand query)
-        //{
-        //    return
-        //        database.Run(
-        //            s => {}
-        //                s.GetEntitiesList(query, e => DataConverterExtensions.SetPropertysViaRefection(type,e)).ToList());
-        //}
-
-        private static IEnumerable<IDataRecord> EnumerateDataRecords(IDatabase database, IDbCommand query)
-        {
-            return database.Run(
-                s =>
-                {
-                    var records = new List<IDataRecord>();
-
-                    using (IDataReader dr = query.ExecuteReader())
-                    {
-                        while (dr.Read())
-                            records.Add(dr.CreateEgarRecord());
-                        dr.Close();
-                    }
-                    return records;
-                });
-        }
-
         public static IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query)
         {
+            RaiseUnknownSelect(query);
             return
                 EnumerateDataRecords(database, query)
                     .Select(dataRecord => DataConverterExtensions.SetPropertysViaRefection(type, dataRecord))
@@ -346,17 +310,11 @@ namespace JPB.DataAccess.Manager
 
         #region PrimetivSelects
 
-        //public IEnumerable<object> RunPrimetivSelect(Type type, string query)
-        //{
-        //    return
-        //        Database.Run(
-        //            s =>
-        //                s.GetEntitiesList(CreateCommand(s, query), e => e[0]).ToList());
-
-        //}
         public IEnumerable<object> RunPrimetivSelect(Type type, string query)
         {
-            return EnumerateDataRecords(Database, CreateCommand(Database, query)).Select(s => s[0]).ToList();
+            var dbCommand = CreateCommand(Database, query);
+            RaiseKnownSelect(dbCommand);
+            return EnumerateDataRecords(Database, dbCommand).Select(s => s[0]).ToList();
         }
 
         public List<T> RunPrimetivSelect<T>(string query) where T : class

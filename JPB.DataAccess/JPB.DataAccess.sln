@@ -14,6 +14,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.SqlLite", "JPB.DataAccess.SqlLite\JPB.DataAccess.SqlLite.csproj", "{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}"
 EndProject
 Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		ExternalRelease|Any CPU = ExternalRelease|Any CPU

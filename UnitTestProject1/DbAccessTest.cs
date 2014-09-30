@@ -19,7 +19,7 @@ namespace UnitTestProject1
             var dbAccessTest = new DbAccessTest();
             try
             {
-                dbAccessTest.MySQlTest();
+                dbAccessTest.MsSQlTest();
                 CleanUp();
 
                 dbAccessTest.ACheckInserts();

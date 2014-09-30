@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
@@ -13,6 +14,8 @@ namespace JPB.DataAccess.AdoWrapper
         string DatabaseFile { get; }
         string DatabaseName { get; }
         string ServerName { get; }
+
+        QueryDebugger LastExecutedQuery { get; }
 
         IDataPager<T> CreatePager<T>();
         IWrapperDataPager<T, TE> CreatePager<T, TE>();

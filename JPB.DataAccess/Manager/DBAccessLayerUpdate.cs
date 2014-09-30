@@ -17,12 +17,9 @@ namespace JPB.DataAccess.Manager
         {
             db.RunInTransaction(s =>
             {
-                s.ExecuteNonQuery(CreateUpdate(entry, s));
-
-                foreach (var navigationProp in entry.GetType().GetNavigationProps())
-                {
-                    
-                }
+                var dbCommand = CreateUpdate(entry, s);
+                RaiseUnknwonUpdate(dbCommand);
+                s.ExecuteNonQuery(dbCommand);
             });
         }
 
@@ -56,7 +53,9 @@ namespace JPB.DataAccess.Manager
             {
                 if (!CheckRowVersion(entry))
                 {
-                    return Select<T>(entry.GetPK<T, long>(), s).LoadNavigationProps(s);
+                    var query = CreateSelect(typeof(T), s, entry.GetPK<T, long>());
+                    RaiseKnownUpdate(query);
+                    return Select<T>(query).FirstOrDefault();
                 }
                 return entry;
             });
@@ -77,7 +76,10 @@ namespace JPB.DataAccess.Manager
         {
             if (!CheckRowVersion(entry))
             {
-                var @select = Select<T>(entry.GetPK<T, long>(), Database);
+                var query = CreateSelect(typeof(T), Database, entry.GetPK<T, long>());
+                RaiseKnownUpdate(query);
+                var @select = Select<T>(query).FirstOrDefault();
+
                 bool updated = false;
                 PropertyInfo[] propertys = typeof(T).GetProperties();
                 foreach (PropertyInfo propertyInfo in propertys)

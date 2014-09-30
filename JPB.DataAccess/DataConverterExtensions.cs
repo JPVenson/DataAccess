@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
@@ -28,6 +29,11 @@ namespace JPB.DataAccess
 
     public static class DataConverterExtensions
     {
+        public static DebuggerHelper.QueryDebugger CreateQueryDebugger(this IDbCommand command)
+        {
+            return new QueryDebugger(command);
+        }
+
         public static string GetTableName<T>()
         {
             var forModel = typeof(T).GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;

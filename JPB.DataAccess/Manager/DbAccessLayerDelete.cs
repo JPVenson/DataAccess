@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.DbEventArgs;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Manager
@@ -9,28 +10,29 @@ namespace JPB.DataAccess.Manager
     {
         public void Delete<T>(T entry)
         {
-            Delete(entry, Database);
+            var deleteCommand = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, this.Database, CreateDelete);
+            RaiseKnownDelete(deleteCommand);
+            this.Database.Run(s =>
+            {
+                s.ExecuteNonQuery(deleteCommand);
+            });
         }
 
         internal static IDbCommand CreateDelete<T>(T entry, IDatabase db)
         {
-            Type type = typeof (T);
+            Type type = typeof(T);
             string proppk = type.GetPK();
             string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @0";
-            return CreateCommandWithParameterValues(query, db, new object[] {entry.GetPK<T, long>()});
-        }
-
-        internal static void _Delete<T>(T entry, IDatabase db)
-        {
-            db.Run(s => { s.ExecuteNonQuery(CreateDelete(entry, s)); });
+            return CreateCommandWithParameterValues(query, db, new object[] { entry.GetPK<T, long>() });
         }
 
         public static void Delete<T>(T entry, IDatabase db, params object[] parameter)
         {
-            var checkInstanceForAttriute = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db, CreateDelete, parameter);
+            var deleteCommand = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db, CreateDelete, parameter);
+            RaiseUnknownDelete(deleteCommand);
             db.Run(s =>
             {
-                s.ExecuteNonQuery(checkInstanceForAttriute);
+                s.ExecuteNonQuery(deleteCommand);
             });
         }
     }

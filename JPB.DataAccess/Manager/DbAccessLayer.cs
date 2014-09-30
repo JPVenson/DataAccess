@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,40 +8,15 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.DbEventArgs;
+using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
 {
-    public class PreDefinedProviderCollection : IReadOnlyCollection<KeyValuePair<DbTypes, string>>
-    {
-        private readonly Dictionary<DbTypes, string> _preDefinedProvider = new Dictionary<DbTypes, string>
-        {
-            {DbTypes.MsSql, "JPB.DataAccess.AdoWrapper.MsSql.MsSql"},
-            {DbTypes.OleDb, "JPB.DataAccess.AdoWrapper.OleDB.OleDb"},
-            {DbTypes.Obdc, "JPB.DataAccess.AdoWrapper.Obdc.Obdc"},
-            {DbTypes.MySql, "JPB.DataAccess.MySql.MySql"},
-            {DbTypes.SqLite, "JPB.DataAccess.SqlLite.SqLite"},
-        };
-
-        public IEnumerator<KeyValuePair<DbTypes, string>> GetEnumerator()
-        {
-            return _preDefinedProvider.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public int Count
-        {
-            get { return _preDefinedProvider.Count; }
-        }
-    }
-
-    [DebuggerDisplay("DB={Database}")]
+    [DebuggerDisplay("DB={DbType}, QueryDebug={Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
         [DebuggerStepThrough]
 #endif
@@ -51,6 +25,7 @@ namespace JPB.DataAccess.Manager
         private IDatabase _database;
 
         public PreDefinedProviderCollection ProviderCollection { get; set; }
+
 
         /// <summary>
         ///     Must set the Database Property immeditly
@@ -194,7 +169,6 @@ namespace JPB.DataAccess.Manager
 
             return instanceOfType;
         }
-
 
         public DbTypes DbType { get; private set; }
 
@@ -437,6 +411,35 @@ namespace JPB.DataAccess.Manager
         protected static IEnumerable<string> CreatePropertyNames<T>(bool ignorePK = false)
         {
             return ignorePK ? CreatePropertyNames<T>(typeof(T).GetPK()) : CreatePropertyNames<T>(new string[0]);
+        }
+
+        public static string[] CreateIgnoreList(Type type)
+        {
+            return
+                type.GetProperties()
+                    .Where(
+                        s =>
+                            s.GetGetMethod(false).IsVirtual ||
+                            s.GetCustomAttributes().Any(e => e is IgnoreReflectionAttribute))
+                    .Select(s => s.Name)
+                    .ToArray();
+        }
+        
+        private static IEnumerable<IDataRecord> EnumerateDataRecords(IDatabase database, IDbCommand query)
+        {
+            return database.Run(
+                s =>
+                {
+                    var records = new List<IDataRecord>();
+
+                    using (IDataReader dr = query.ExecuteReader())
+                    {
+                        while (dr.Read())
+                            records.Add(dr.CreateEgarRecord());
+                        dr.Close();
+                    }
+                    return records;
+                });
         }
     }
 }

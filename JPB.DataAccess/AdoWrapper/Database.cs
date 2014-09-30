@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
@@ -20,6 +21,8 @@ namespace JPB.DataAccess.AdoWrapper
         {
             return _strategy.CreateConverterPager<T, TE>();
         }
+
+        public QueryDebugger LastExecutedQuery { get; private set; }
 
         public IDataPager<T> CreatePager<T>()
         {
@@ -146,6 +149,7 @@ namespace JPB.DataAccess.AdoWrapper
 
             if (_trans != null)
                 cmd.Transaction = _trans;
+            LastExecutedQuery = new QueryDebugger(cmd);
             return cmd.ExecuteNonQuery();
         }
 
@@ -153,7 +157,6 @@ namespace JPB.DataAccess.AdoWrapper
         {
             return DoExecuteNonQuery(string.Format(strSql, obj));
         }
-
 
         public IDbCommand GetlastInsertedIdCommand()
         {
@@ -566,10 +569,6 @@ namespace JPB.DataAccess.AdoWrapper
             }
         }
 
-        public void RunInTransaction(Action<IDatabase> action, IsolationLevel readUncommitted)
-        {
-        }
-
         #endregion Query Helper
 
         ~Database()
@@ -608,6 +607,7 @@ namespace JPB.DataAccess.AdoWrapper
             {
                 if (_trans != null)
                     cmd.Transaction = _trans;
+                LastExecutedQuery = new QueryDebugger(cmd);
 
                 return cmd.ExecuteNonQuery();
             }
@@ -621,6 +621,7 @@ namespace JPB.DataAccess.AdoWrapper
             {
                 if (_trans != null)
                     cmd.Transaction = _trans;
+                LastExecutedQuery = new QueryDebugger(cmd);
                 return cmd.ExecuteReader();
             }
         }
@@ -633,6 +634,7 @@ namespace JPB.DataAccess.AdoWrapper
             {
                 if (_trans != null)
                     cmd.Transaction = _trans;
+                LastExecutedQuery = new QueryDebugger(cmd);
                 return cmd.ExecuteScalar();
             }
         }

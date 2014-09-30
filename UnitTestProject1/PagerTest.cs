@@ -31,7 +31,6 @@ namespace UnitTestProject1
         }
 
         public IUnGenericDataPager DataPager { get; set; }
-
       
         public class TypeWrapper
         {
