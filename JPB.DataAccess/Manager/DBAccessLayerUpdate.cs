@@ -29,8 +29,6 @@ namespace JPB.DataAccess.Manager
             {
                 if (!CheckRowVersion(entry))
                     return false;
-                Update(entry, Database);
-                return false;
             }
             Update(entry, Database);
             return true;
@@ -55,7 +53,7 @@ namespace JPB.DataAccess.Manager
                 {
                     var query = CreateSelect(typeof(T), s, entry.GetPK<T, long>());
                     RaiseKnownUpdate(query);
-                    return Select<T>(query).FirstOrDefault();
+                    return RunSelect<T>(query).FirstOrDefault();
                 }
                 return entry;
             });
@@ -124,7 +122,7 @@ namespace JPB.DataAccess.Manager
                     string staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " +
                                               type.GetPK() + " = " + entry.GetPK();
                     byte[] scalarValue = RunPrimetivSelect<byte[]>(staticRowVersion).FirstOrDefault();
-                    return scalarValue != null && scalarValue == rowversionValue;
+                    return scalarValue != null && scalarValue.SequenceEqual(rowversionValue);
                 }
                 return false;
             }
