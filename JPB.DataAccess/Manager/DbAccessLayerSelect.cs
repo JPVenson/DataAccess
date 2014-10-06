@@ -117,12 +117,14 @@ namespace JPB.DataAccess.Manager
         private static IDbCommand CreateSelectQueryFactory(Type type, IDatabase db, params object[] parameter)
         {
             //try to get the attribute for static selection
-            var staticFactory =
-                type.GetCustomAttributes().FirstOrDefault(s => s is SelectFactoryAttribute) as SelectFactoryAttribute;
-
-            if (staticFactory != null)
+            if (parameter != null && !parameter.Any())
             {
-                return CreateCommand(db, staticFactory.Query);
+                var staticFactory = type.GetCustomAttributes().FirstOrDefault(s => s is SelectFactoryAttribute) as SelectFactoryAttribute;
+
+                if (staticFactory != null)
+                {
+                    return CreateCommand(db, staticFactory.Query);
+                }
             }
 
             //try to get a Factory mehtod

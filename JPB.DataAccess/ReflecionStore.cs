@@ -15,7 +15,7 @@ namespace JPB.DataAccess
 
         public ClassInfoCache GetOrCreatePropertyInfoCache(Type type)
         {
-            var element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
+            var element = SClassInfoCaches.ToArray().FirstOrDefault(s => s.ClassName == type.FullName);
 
             if (element == null)
             {
@@ -28,7 +28,7 @@ namespace JPB.DataAccess
         public PropertyInfoCache GetOrCreatePropertyInfoCache(PropertyInfo type)
         {
             var name = type.Name;
-            var element = SClassInfoCaches.FirstOrDefault(s => s.PropertyInfoCaches.Any(e => e.PropertyName == name));
+            var element = SClassInfoCaches.ToArray().FirstOrDefault(s => s.PropertyInfoCaches.Any(e => e.PropertyName == name));
 
             if (element == null)
             {
@@ -36,12 +36,12 @@ namespace JPB.DataAccess
                 SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
             }
 
-            return element.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == type.Name);
+            return element.PropertyInfoCaches.ToArray().FirstOrDefault(s => s.PropertyName == type.Name);
         }
 
         public ClassInfoCache GetOrCreateClassInfoCache(Type type)
         {
-            var element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
+            var element = SClassInfoCaches.ToArray().FirstOrDefault(s => s.ClassName == type.FullName);
 
             if (element == null)
             {
@@ -109,19 +109,19 @@ namespace JPB.DataAccess
 
         public static Attribute[] GetCustomAttributes(this Type type)
         {
-            return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute).ToArray();
+            return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
         }
 
         public static Attribute[] GetCustomAttributes(this PropertyInfo type)
         {
-            var deb = ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute).ToArray();
+            var deb = ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
             
             return deb;
         }
 
         public static PropertyInfo[] GetProperties(this Type @class)
         {
-            return ReflecionStore.GetOrCreatePropertyInfoCache(@class).PropertyInfoCaches.Select(s => s.PropertyInfo).ToArray();
+            return ReflecionStore.GetOrCreatePropertyInfoCache(@class).PropertyInfoCaches.ToArray().Select(s => s.PropertyInfo).ToArray();
         }
     }
 }
