@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.QueryFactory;
 
@@ -148,5 +149,53 @@ namespace JPB.DataAccess.ModelsAnotations
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class LoadNotImplimentedDynamicAttribute : IgnoreReflectionAttribute
     {
+    }
+
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    public sealed class ValueConverterAttribute : Attribute
+    {
+        private readonly Type _converter;
+
+        // This is a positional argument
+        public ValueConverterAttribute(Type converter)
+        {
+            this._converter = converter;
+
+            if (!converter.IsAssignableFrom(typeof(IValueConverter)))
+            {
+                throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
+            }
+        }
+
+        // This is a positional argument
+        public ValueConverterAttribute(Type converter, object parameter)
+            : this(converter)
+        {
+            this.Parameter = parameter;
+        }
+
+        public object Parameter { get; private set; }
+
+        internal IValueConverter CreateConverter()
+        {
+            return (IValueConverter) Activator.CreateInstance(_converter);
+        }
+    }
+
+    /// <summary>
+    /// Converts values from DB to C# and back
+    /// </summary>
+    public interface IValueConverter
+    {
+        /// <summary>
+        /// Converts a value from a DB to a C# object 
+        /// </summary>
+        /// <param name="value">Object from the DB</param>
+        /// <param name="targetType">Type of Property to convert to</param>
+        /// <param name="parameter">given Params</param>
+        /// <param name="culture">Current Culture</param>
+        /// <returns>C# object that is of type of property</returns>
+        object Convert(object value, Type targetType, object parameter, CultureInfo culture);
+        object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture);
     }
 }

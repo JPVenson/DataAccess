@@ -82,8 +82,8 @@ namespace JPB.DataAccess.Manager
                 PropertyInfo[] propertys = typeof(T).GetProperties();
                 foreach (PropertyInfo propertyInfo in propertys)
                 {
-                    object oldValue = propertyInfo.GetValue(entry);
-                    object newValue = propertyInfo.GetValue(@select);
+                    object oldValue = propertyInfo.GetConvertedValue(entry);
+                    object newValue = propertyInfo.GetConvertedValue(@select);
 
                     if (newValue == null && oldValue == null ||
                         (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
@@ -115,7 +115,7 @@ namespace JPB.DataAccess.Manager
                     .FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is RowVersionAttribute));
             if (rowVersion != null)
             {
-                var rowversionValue = rowVersion.GetValue(entry) as byte[];
+                var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
                 if (rowversionValue != null || entry.GetPK() == 0)
                 {
                     string rowVersionprop = type.MapEntiysPropToSchema(rowVersion.Name);

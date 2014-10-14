@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
@@ -29,7 +30,7 @@ namespace JPB.DataAccess
 
     public static class DataConverterExtensions
     {
-        public static DebuggerHelper.QueryDebugger CreateQueryDebugger(this IDbCommand command)
+        public static QueryDebugger CreateQueryDebugger(this IDbCommand command)
         {
             return new QueryDebugger(command);
         }
@@ -52,7 +53,12 @@ namespace JPB.DataAccess
 
         public static object GetParamaterValue(this object source, string name)
         {
-            return GetParamater(source, name).GetValue(source, null);
+            if (source == null)
+                throw new ArgumentNullException("source");
+            var propertyInfo = GetParamater(source, name);
+            if (propertyInfo == null)
+                throw new ArgumentNullException("name");
+            return propertyInfo.GetConvertedValue(source);
         }
 
         public static PropertyInfo GetParamater(this object source, string name)
@@ -106,6 +112,18 @@ namespace JPB.DataAccess
             return prop == null ? null : prop.Name;
         }
 
+        internal static object GetConvertedValue(this PropertyInfo source, object instance)
+        {
+            var converter = source.GetCustomAttributes().FirstOrDefault(s => s is ValueConverterAttribute) as ValueConverterAttribute;
+
+            if (converter != null)
+            {
+                var valueConverter = converter.CreateConverter();
+                return valueConverter.ConvertBack(source.GetValue(instance), null, converter.Parameter, CultureInfo.CurrentCulture);
+            }
+            return source.GetValue(instance);
+        }
+
         /// <summary>
         ///     Gets the PK value of the Object
         /// </summary>
@@ -120,35 +138,25 @@ namespace JPB.DataAccess
         public static E GetPK<T, E>(this T source)
         {
             string pk = source.GetType().GetPKPropertyName();
-            return (E)source.GetType().GetProperty(pk).GetValue(source, null);
+            return (E)source.GetType().GetProperty(pk).GetConvertedValue(source);
         }
 
         public static E GetFK<E>(this object source, string name)
         {
             Type type = source.GetType();
             string pk = type.GetFK(name);
-            return (E)type.GetProperty(pk).GetValue(source, null);
+            return (E)type.GetProperty(pk).GetConvertedValue(source);
         }
 
         public static E GetFK<T, E>(this T source, string name)
         {
             string pk = typeof(T).GetFK(name);
-            return (E)typeof(T).GetProperty(pk).GetValue(source, null);
+            return (E)typeof(T).GetProperty(pk).GetConvertedValue(source);
         }
 
         public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
         {
-            foreach (PropertyInfo s1 in ReflectionHelpers.GetProperties(type))
-            {
-                if (!s1.GetGetMethod().IsVirtual && !s1.GetCustomAttributes().Any(s => s is IgnoreReflectionAttribute))
-                {
-                    if (!ignore.Contains(s1.Name))
-                    {
-                        ForModel formodle = s1.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;
-                        yield return formodle != null ? formodle.AlternatingName : s1.Name;
-                    }
-                }
-            }
+            return from s1 in ReflectionHelpers.GetProperties(type) where !s1.GetGetMethod().IsVirtual && !s1.GetCustomAttributes().Any(s => s is IgnoreReflectionAttribute) where !ignore.Contains(s1.Name) let formodle = s1.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel select formodle != null ? formodle.AlternatingName : s1.Name;
         }
 
         public static IEnumerable<string> MapEntiyToSchema<T>(string[] ignore)
@@ -309,6 +317,7 @@ namespace JPB.DataAccess
             return new EgarDataRecord(rec);
         }
 
+        [Obsolete("Will be removed in future", false)]
         public static void SetPropertysViaReflection(dynamic instance, IDataRecord reader)
         {
             var listofpropertys = new Dictionary<string, object>();
@@ -371,7 +380,6 @@ namespace JPB.DataAccess
                 }
             }
         }
-
 
         public static dynamic SetPropertysViaRefection(Type type, IDataRecord reader)
         {
@@ -439,23 +447,34 @@ namespace JPB.DataAccess
 
             foreach (var item in listofpropertys)
             {
-                PropertyInfo property = propertys.FirstOrDefault(s => s.Name == item.Key);
+                var property = propertys.FirstOrDefault(s => s.Name == item.Key);
                 if (property != null)
                 {
-                    if (item.Value is DBNull)
+                    var value = item.Value;
+
+                    var any = property.GetCustomAttributes().FirstOrDefault(s => s is ValueConverterAttribute) as ValueConverterAttribute;
+
+                    if (any != null)
+                    {
+                        var valueConverter = any.CreateConverter();
+
+                        value = valueConverter.Convert(value, property.PropertyType, any.Parameter,
+                            CultureInfo.CurrentCulture);
+                    }
+
+                    if (value is DBNull || value == null)
+                    {
                         property.SetValue(source, null, null);
+                    }
                     else
                     {
-                        if (property.PropertyType.IsGenericTypeDefinition &&
-                            property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                        if (property.PropertyType.IsGenericTypeDefinition && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                         {
-                            object convertedValue = Convert.ChangeType(item.Value,
-                                Nullable.GetUnderlyingType(
-                                    property.PropertyType));
+                            object convertedValue = Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType));
                             property.SetValue(source, convertedValue, null);
                         }
                         else
-                            property.SetValue(source, item.Value, null);
+                            property.SetValue(source, value, null);
                     }
                 }
                 else if (instanceOfFallbackList != null)

@@ -13,11 +13,12 @@ namespace JPB.DataAccess.AdoWrapper
             for (int i = 0; i < sourceRecord.FieldCount; i++)
             {
                 object obj = sourceRecord[i];
-                Objects.Add(sourceRecord.GetName(i), obj);
+                var name = sourceRecord.GetName(i);
+                Objects.Add(name, obj);
             }
         }
 
-        public Dictionary<string, object> Objects { get; set; }
+        internal Dictionary<string, object> Objects { get; set; }
 
         public string GetName(int i)
         {
@@ -26,7 +27,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public string GetDataTypeName(int i)
         {
-            throw new NotImplementedException();
+            return Objects.ElementAt(i).Value.GetType().FullName;
         }
 
         public Type GetFieldType(int i)

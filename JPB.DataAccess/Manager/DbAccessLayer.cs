@@ -321,7 +321,7 @@ namespace JPB.DataAccess.Manager
                     {
                         PropertyInfo property =
                             type.GetProperty(DataConverterExtensions.ReMapSchemaToEntiysProp(type, propertyInfo));
-                        object dataValue = GetDataValue(property.GetValue(entry, null));
+                        object dataValue = GetDataValue(property.GetConvertedValue(entry));
                         return dataValue;
                     }).ToArray();
             return CreateCommandWithParameterValues(query, db, propertyvalues);
