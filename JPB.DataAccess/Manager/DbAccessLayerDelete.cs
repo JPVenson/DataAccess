@@ -8,9 +8,14 @@ namespace JPB.DataAccess.Manager
 {
     partial class DbAccessLayer
     {
+        /// <summary>
+        /// Creates and Executes a Standart SQL delete statement based on the Entry
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <typeparam name="T"></typeparam>
         public void Delete<T>(T entry)
         {
-            var deleteCommand = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, this.Database, CreateDelete);
+            var deleteCommand = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(typeof(T),entry, this.Database, CreateDelete);
             RaiseKnownDelete(deleteCommand);
             this.Database.Run(s =>
             {
@@ -26,9 +31,17 @@ namespace JPB.DataAccess.Manager
             return CreateCommandWithParameterValues(query, db, new object[] { entry.GetPK<T, long>() });
         }
 
+        /// <summary>
+        /// Creates and Executes a Standart SQL delete statement based on the Entry 
+        /// uses factory Mehtod if availbile 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entry"></param>
+        /// <param name="db"></param>
+        /// <param name="parameter"></param>
         public static void Delete<T>(T entry, IDatabase db, params object[] parameter)
         {
-            var deleteCommand = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db, CreateDelete, parameter);
+            var deleteCommand = CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(typeof(T), entry, db, CreateDelete, parameter);
             RaiseUnknownDelete(deleteCommand);
             db.Run(s =>
             {

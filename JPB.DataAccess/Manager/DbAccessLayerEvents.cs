@@ -9,11 +9,23 @@ using JPB.DataAccess.DebuggerHelper;
 
 namespace JPB.DataAccess.Manager
 {
+    /// <summary>
+    /// A database operation is done
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public delegate void DatabaseActionHandler(object sender, DatabaseActionEvent e);
 
     partial class DbAccessLayer
     {
+        /// <summary>
+        /// Should raise Instance bound Events
+        /// </summary>
         public bool RaiseEvents { get; set; }
+
+        /// <summary>
+        /// Should raise non Instance bound Events
+        /// </summary>
         public static bool RaiseStaticEvents { get; set; }
 
         public static event DatabaseActionHandler OnUnknownDelete;

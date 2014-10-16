@@ -131,7 +131,7 @@ namespace JPB.DataAccess.Manager
 
         private static IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db, params object[] parameter)
         {
-            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, createUpdate, parameter);
+            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(typeof(T), entry, db, createUpdate, parameter);
         }
 
         internal static IDbCommand createUpdate<T>(T entry, IDatabase db)

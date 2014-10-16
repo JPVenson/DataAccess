@@ -30,22 +30,51 @@ namespace JPB.DataAccess.Manager
             return Select(type, pk, Database);
         }
 
+        /// <summary>
+        /// Selectes a Entry by its PrimaryKey
+        /// Needs to define a PrimaryKey attribute inside <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="pk"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public T Select<T>(long pk)
         {
             return (T)Select(typeof(T), pk);
         }
 
+        /// <summary> 
+        /// Selectes a Entry by its PrimaryKey
+        /// Needs to define a PrimaryKey attribute inside <paramref name="type"/>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="pk"></param>
+        /// <param name="db"></param>
+        /// <returns></returns>
         protected static object Select(Type type, long pk, IDatabase db)
         {
             return Select(type, db, CreateSelect(type, db, pk)).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Selectes a Entry by its PrimaryKey
+        /// Needs to define a PrimaryKey attribute inside <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="pk"></param>
+        /// <param name="db"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         protected static T Select<T>(long pk, IDatabase db)
         {
             //return Select<T>(db, CreateSelect<T>(db, pk)).FirstOrDefault();
             return (T)Select(typeof(T), pk, db);
         }
 
+        /// <summary>
+        /// Creates and Executes a Plain select over a <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
         public List<object> Select(Type type, params object[] parameter)
         {
             return Select(type, Database, parameter);
@@ -64,21 +93,47 @@ namespace JPB.DataAccess.Manager
             return objects.Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Creates and Executes a SelectStatement for a given <param name="type"></param> by using the <param name="parameter"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="db"></param>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
         protected static List<object> Select(Type type, IDatabase db, params object[] parameter)
         {
             return Select(type, db, CreateSelectQueryFactory(type, db, parameter));
         }
 
+        /// <summary>
+        /// Creates a selectStatement for a given <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="db"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         protected static List<T> Select<T>(IDatabase db)
         {
             return Select(typeof(T), db).Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Creates and Executes a Select Statement for a given <param name="type"></param> by using <param name="command"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="db"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
         protected static List<object> Select(Type type, IDatabase db, IDbCommand command)
         {
             return SelectNative(type, db, command);
         }
 
+        /// <summary>
+        /// Creates and Executes a Select Statement for <typeparam name="T"></typeparam> by using <param name="command"></param>
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
         protected static List<T> Select<T>(IDatabase db, IDbCommand command)
         {
             return Select(typeof(T), db, command).Cast<T>().ToList();
@@ -88,16 +143,39 @@ namespace JPB.DataAccess.Manager
 
         #region CreateCommands
 
+        /// <summary>
+        /// Creates a Select with appended query
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="db"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public static IDbCommand CreateSelect(Type type, IDatabase db, string query)
         {
             return CreateCommand(db, CreateSelectQueryFactory(type, db).CommandText + " " + query);
         }
 
+
+        /// <summary>
+        /// Creates a Select with appended query
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="db"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public static IDbCommand CreateSelect<T>(IDatabase db, string query)
         {
             return CreateSelect(typeof(T), db, query);
         }
 
+        /// <summary>
+        /// Creates a Select with appended query and inclueded Query Paramater
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="db"></param>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
         public static IDbCommand CreateSelect(Type type, IDatabase db, string query,
             IEnumerable<IQueryParameter> paramenter)
         {
@@ -108,6 +186,14 @@ namespace JPB.DataAccess.Manager
             return plainCommand;
         }
 
+        /// <summary>
+        ///  Creates a Select with appended query and inclueded Query Paramater
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static IDbCommand CreateSelect<T>(IDatabase db, string query,
             IEnumerable<IQueryParameter> paramenter)
         {
@@ -192,6 +278,13 @@ namespace JPB.DataAccess.Manager
             return CreateCommand(db, CreateSelect(type));
         }
 
+        /// <summary>
+        ///  Creates a Select for one Item with appended query and inclueded Query Paramater
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="db"></param>
+        /// <param name="pk"></param>
+        /// <returns></returns>
         public static IDbCommand CreateSelect(Type type, IDatabase db, long pk)
         {
             string proppk = type.GetPK();
@@ -201,16 +294,34 @@ namespace JPB.DataAccess.Manager
             return cmd;
         }
 
+        /// <summary>
+        ///  Creates a Select for one Item with appended query and inclueded Query Paramater
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="pk"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static IDbCommand CreateSelect<T>(IDatabase db, long pk)
         {
             return CreateSelect(typeof(T), db, pk);
         }
 
+        /// <summary>
+        /// Creates a Plain Select statement by using <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static string CreateSelect(Type type)
         {
             return "SELECT " + CreatePropertyCSV(type, CreateIgnoreList(type)) + " FROM " + type.GetTableName();
         }
 
+        /// <summary>
+        /// Creates a Select by using a Factory mehtod or auto generated querys
+        /// </summary>
+        /// <param name="db"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static IDbCommand CreateSelect<T>(IDatabase db)
         {
             return CreateSelectQueryFactory(typeof(T), db);
@@ -220,6 +331,13 @@ namespace JPB.DataAccess.Manager
 
         #region Runs
 
+        /// <summary>
+        /// Executes a Selectstatement and Parse the Output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="database"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public static IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query)
         {
             RaiseUnknownSelect(query);
@@ -229,16 +347,38 @@ namespace JPB.DataAccess.Manager
                     .ToList();
         }
 
+        /// <summary>
+        /// Executes a Selectstatement and Parse the Output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="database"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public static List<object> RunSelect(Type type, IDatabase database, IDbCommand query)
         {
             return RunDynamicSelect(type, database, query) as List<object>;
         }
 
+        /// <summary>
+        /// Executes a Selectstatement and Parse the Output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="query"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static List<T> RunSelect<T>(IDatabase database, IDbCommand query)
         {
             return RunSelect(typeof(T), database, query).Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Executes <param name="query"></param> and Parse the Output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="database"></param>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
         public static List<object> RunSelect(Type type, IDatabase database, string query,
             IEnumerable<IQueryParameter> paramenter)
         {
@@ -255,6 +395,14 @@ namespace JPB.DataAccess.Manager
                     );
         }
 
+        /// <summary>
+        /// Executes <param name="query"></param> and Parse the Output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static List<T> RunSelect<T>(IDatabase database, string query, IEnumerable<IQueryParameter> paramenter)
         {
             return RunSelect(typeof(T), database, query, paramenter).Cast<T>().ToList();
@@ -274,34 +422,78 @@ namespace JPB.DataAccess.Manager
 
         #region SelectWhereCommands
 
+        /// <summary>
+        /// Executes a Select Statement and adds <param name="where"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="where"></param>
+        /// <returns></returns>
         public List<object> SelectWhere(Type type, String @where)
         {
             IDbCommand query = CreateSelect(type, Database, @where);
             return RunSelect(type, query);
         }
 
+        /// <summary>
+        /// Executes a Select Statement and adds <param name="where"></param>
+        /// </summary>
+        /// <param name="where"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> SelectWhere<T>(String @where)
         {
             return SelectWhere(typeof(T), @where).Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Executes a Select Statement and adds <param name="where"></param>
+        /// uses <param name="paramenter"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="where"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
         public List<object> SelectWhere(Type type, String @where, IEnumerable<IQueryParameter> paramenter)
         {
             IDbCommand query = CreateSelect(type, Database, @where, paramenter);
             return RunSelect(type, query);
         }
 
+        /// <summary>
+        /// Executes a Select Statement and adds <param name="where"></param>
+        /// uses <param name="paramenter"></param>
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="paramenter"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> SelectWhere<T>(String @where, IEnumerable<IQueryParameter> paramenter)
         {
             return SelectWhere(typeof(T), where, paramenter).Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Executes a Select Statement and adds <param name="where"></param>
+        /// uses <param name="paramenter"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="where"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
         public List<object> SelectWhere(Type type, String @where, dynamic paramenter)
         {
             IEnumerable<IQueryParameter> enumarateFromDynamics = EnumarateFromDynamics(paramenter);
             return SelectWhere(type, where, enumarateFromDynamics);
         }
 
+        /// <summary>
+        /// Executes a Select Statement and adds <param name="where"></param>
+        /// uses <param name="paramenter"></param>
+        /// </summary>
+        /// <param name="where"></param>
+        /// <param name="paramenter"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> SelectWhere<T>(String @where, dynamic paramenter)
         {
             List<object> selectWhere = SelectWhere(typeof(T), @where, paramenter);
@@ -312,28 +504,109 @@ namespace JPB.DataAccess.Manager
 
         #region PrimetivSelects
 
+        /// <summary>
+        /// Runs <param name="command"></param> and parses the first line of output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        public IEnumerable<object> RunPrimetivSelect(Type type, IDbCommand command)
+        {
+            RaiseKnownSelect(command);
+            return EnumerateDataRecords(Database, command).Select(s => s[0]).ToList();
+        }
+
+        /// <summary>
+        /// Runs <param name="query"></param> and parses the first line of output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="query"></param>
+        /// <param name="paramerter"></param>
+        /// <returns></returns>
+        public IEnumerable<object> RunPrimetivSelect(Type type, string query, IEnumerable<IQueryParameter> paramerter)
+        {
+            return RunPrimetivSelect(type, CreateCommandWithParameterValues(query, Database, paramerter));
+        }
+
+        /// <summary>
+        /// Runs <param name="query"></param> and parses the first line of output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public IEnumerable<object> RunPrimetivSelect(Type type, string query)
         {
-            var dbCommand = CreateCommand(Database, query);
-            RaiseKnownSelect(dbCommand);
-            return EnumerateDataRecords(Database, dbCommand).Select(s => s[0]).ToList();
+            return RunPrimetivSelect(type, query, new List<IQueryParameter>());
         }
 
+        /// <summary>
+        /// Runs <param name="query"></param> and parses the first line of output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="parameters"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> RunPrimetivSelect<T>(string query, dynamic parameters) where T : class
+        {
+            IEnumerable<IQueryParameter> enumarateFromDynamics = EnumarateFromDynamics(parameters);
+            var runPrimetivSelect = RunPrimetivSelect(typeof(T), query, enumarateFromDynamics);
+            return runPrimetivSelect.Cast<T>().ToList();
+        }
+
+        /// <summary>
+        /// Runs <param name="query"></param> and parses the first line of output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="parameters"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> RunPrimetivSelect<T>(string query, IEnumerable<IQueryParameter> parameters) where T : class
+        {
+            return RunPrimetivSelect(typeof(T), query, parameters).Cast<T>().ToList();
+        }
+
+        /// <summary>
+        /// Runs <param name="query"></param> and parses the first line of output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> RunPrimetivSelect<T>(string query) where T : class
         {
-            return RunPrimetivSelect(typeof(T), query).Cast<T>().ToList();
+            return RunPrimetivSelect<T>(query, new List<IQueryParameter>());
         }
 
-        public List<object> SelectNative(Type type, string query)
-        {
-            return Select(type, Database, CreateCommand(Database, query));
-        }
-
+        /// <summary>
+        /// Runs <param name="query"></param> and parses output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> SelectNative<T>(string query) where T : class
         {
             return SelectNative(typeof(T), query).Cast<T>().ToList();
         }
 
+        /// <summary>
+        /// Runs <param name="query"></param> and parses output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        public List<object> SelectNative(Type type, string query)
+        {
+            return Select(type, Database, CreateCommand(Database, query));
+        }
+
+
+        /// <summary>
+        /// Runs <param name="command"></param> and parses output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="database"></param>
+        /// <param name="command"></param>
+        /// <param name="multiRow"></param>
+        /// <returns></returns>
         public static List<object> SelectNative(Type type, IDatabase database, IDbCommand command, bool multiRow)
         {
             if (!multiRow)
@@ -356,6 +629,13 @@ namespace JPB.DataAccess.Manager
             return objects;
         }
 
+        /// <summary>
+        /// Runs <param name="command"></param> and parses output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="database"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
         public static List<object> SelectNative(Type type, IDatabase database, IDbCommand command)
         {
             List<object> objects = RunSelect(type, database, command);
@@ -366,28 +646,62 @@ namespace JPB.DataAccess.Manager
             return objects;
         }
 
+        /// <summary>
+        /// Runs <param name="command"></param> and parses output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="command"></param>
+        /// <returns></returns>
         public List<object> SelectNative(Type type, IDbCommand command)
         {
             return SelectNative(type, Database, command);
         }
 
+        /// <summary>
+        /// Runs <param name="query"></param> and parses output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
         public List<object> SelectNative(Type type, string query, IEnumerable<IQueryParameter> paramenter)
         {
             IDbCommand dbCommand = CreateCommandWithParameterValues(query, Database, paramenter);
             return SelectNative(type, dbCommand);
         }
 
+        /// <summary>
+        /// Runs <param name="query"></param> and parses output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> SelectNative<T>(string query, IEnumerable<IQueryParameter> paramenter)
         {
             return RunSelect<T>(Database, query, paramenter);
         }
 
+        /// <summary>
+        /// Runs <param name="query"></param> and parses output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
         public List<object> SelectNative(Type type, string query, dynamic paramenter)
         {
             IEnumerable<IQueryParameter> enumarateFromDynamics = EnumarateFromDynamics(paramenter);
             return SelectNative(type, query, enumarateFromDynamics);
         }
 
+        /// <summary>
+        /// Runs <param name="query"></param> and parses output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public List<T> SelectNative<T>(string query, dynamic paramenter)
         {
             var objects = ((List<object>)SelectNative(typeof(T), query, paramenter));
@@ -405,7 +719,7 @@ namespace JPB.DataAccess.Manager
             _testQueryProvider = new TestQueryProvider(this);
         }
 
-        [Obsolete]
+        [Obsolete("Not implimented", true)]
         public IQueryable<T> SelectQuery<T>()
         {
             MethodInfo makeGenericMethod = ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T));

@@ -189,11 +189,6 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
             throw new NotImplementedException();
         }
 
-        public IUnGenericDataPager CreateUnmagedPager()
-        {
-            throw new NotImplementedException();
-        }
-
         public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
         {
             throw new NotImplementedException();

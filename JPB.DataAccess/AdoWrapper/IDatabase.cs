@@ -6,20 +6,51 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
 {
+    /// <summary>
+    /// Database wrapper interface
+    /// </summary>
     public interface IDatabase : IDisposable
     {
+        /// <summary>
+        /// NotImp
+        /// </summary>
         bool IsAttached { get; }
 
+        /// <summary>
+        /// Get the Current Connection string
+        /// </summary>
         string ConnectionString { get; }
+        /// <summary>
+        /// If local instance get the file
+        /// </summary>
         string DatabaseFile { get; }
+        /// <summary>
+        /// Get the Database name that we are connected to
+        /// </summary>
         string DatabaseName { get; }
+        /// <summary>
+        /// Get the Server we are Connected to
+        /// </summary>
         string ServerName { get; }
 
+        /// <summary>
+        /// Get the last Executed Query wrapped by a Debugger
+        /// </summary>
         QueryDebugger LastExecutedQuery { get; }
 
+        /// <summary>
+        /// Get Database specific Datapager
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         IDataPager<T> CreatePager<T>();
+        /// <summary>
+        /// Get database specific converter Datapager
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TE"></typeparam>
+        /// <returns></returns>
         IWrapperDataPager<T, TE> CreatePager<T, TE>();
-        IUnGenericDataPager CreateUntypedPager();
 
         /// <summary>
         ///     Required

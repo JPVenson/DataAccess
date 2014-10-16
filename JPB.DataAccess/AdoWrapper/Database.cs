@@ -8,6 +8,9 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class Database : IDatabase
     {
         private IDbConnection _conn2;
@@ -27,11 +30,6 @@ namespace JPB.DataAccess.AdoWrapper
         public IDataPager<T> CreatePager<T>()
         {
             return _strategy.CreatePager<T>();
-        }
-
-        public IUnGenericDataPager CreateUntypedPager()
-        {
-            return _strategy.CreateUnmagedPager();
         }
 
         public void Attach(IDatabaseStrategy strategy)

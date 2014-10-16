@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\JPB.DataAccess.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\JPB.DataAccess.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ExternalRelease|AnyCPU'">
     <OutputPath>..\..\Release\</OutputPath>
@@ -72,7 +74,6 @@
     <Compile Include="Manager\PreDefinedProviderCollection.cs" />
     <Compile Include="Pager\Contracts\IDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />
-    <Compile Include="Pager\Contracts\IUnGenericDataPager.cs" />
     <Compile Include="Pager\Contracts\IWrapperDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataConverterPager.cs" />
     <Compile Include="QueryExtentions.cs" />

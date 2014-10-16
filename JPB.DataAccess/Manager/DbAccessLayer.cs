@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,19 +17,22 @@ using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
 {
+    /// <summary>
+    /// Contanins some Helper mehtods for CRUD operation
+    /// </summary>
     [DebuggerDisplay("DB={DbType}, QueryDebug={Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
         [DebuggerStepThrough]
 #endif
+
     public partial class DbAccessLayer
     {
         private IDatabase _database;
 
         public PreDefinedProviderCollection ProviderCollection { get; set; }
-
-
+        
         /// <summary>
-        ///     Must set the Database Property immeditly
+        ///     Must set the Database Property
         ///     Just for Intigration
         /// </summary>
         [Obsolete("Will maybe removed in future", false)]
@@ -56,6 +60,12 @@ namespace JPB.DataAccess.Manager
             Database.Attach(GenerateStrategy(ProviderCollection.FirstOrDefault(s => s.Key == dbType).Value, connection));
         }
 
+        /// <summary>
+        /// Create a DbAccessLAyer with exernal Strategy
+        /// </summary>
+        /// <param name="fullTypeNameToIDatabaseStrategy">Full type name of Strategy class</param>
+        /// <param name="connection"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection)
             : this()
         {
@@ -73,6 +83,11 @@ namespace JPB.DataAccess.Manager
             Database.Attach(type);
         }
 
+        /// <summary>
+        /// Create a DbAccessLayer with a new Database
+        /// </summary>
+        /// <param name="database"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public DbAccessLayer(IDatabaseStrategy database)
             : this()
         {
@@ -88,6 +103,11 @@ namespace JPB.DataAccess.Manager
             Database.Attach(database);
         }
 
+        /// <summary>
+        /// Creates a DbAccessLayer with a new Database
+        /// DbType will be Guessed
+        /// </summary>
+        /// <param name="database"></param>
         public DbAccessLayer(IDatabase database)
             : this()
         {
@@ -170,8 +190,16 @@ namespace JPB.DataAccess.Manager
             return instanceOfType;
         }
 
+        /// <summary>
+        /// Selected DbType
+        /// </summary>
         public DbTypes DbType { get; private set; }
 
+        /// <summary>
+        /// Current Database
+        /// Can be used to write multi statements
+        /// Is used for ALL NonStatic statments creators
+        /// </summary>
         public IDatabase Database
         {
             get { return _database; }
@@ -187,6 +215,10 @@ namespace JPB.DataAccess.Manager
             }
         }
 
+        /// <summary>
+        /// Check for Availability 
+        /// </summary>
+        /// <returns></returns>
         public bool CheckDatabase()
         {
             if (Database == null)
@@ -196,7 +228,7 @@ namespace JPB.DataAccess.Manager
             return true;
         }
 
-        private static IDbCommand CheckInstanceForAttriute<TE>(Type type, object entry, IDatabase db,
+        private static IDbCommand CheckInstanceForAttriute<TE>(Type type,object entry, IDatabase db,
     Func<object, IDatabase, IDbCommand> fallback, params object[] param)
     where TE : DataAccessAttribute
         {
@@ -204,7 +236,7 @@ namespace JPB.DataAccess.Manager
             //var methods =
             //    type.GetMethods()
             //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(DbType)*/));
-
+            
             MethodInfo[] methods =
                 type.GetMethods().Where(s => s.GetCustomAttributes(false).Any(e => e is TE)).ToArray();
 
@@ -262,13 +294,19 @@ namespace JPB.DataAccess.Manager
             return fallback(entry, db);
         }
 
-        private static IDbCommand CheckInstanceForAttriute<T, TE>(T entry, IDatabase db,
+        private static IDbCommand CheckInstanceForAttriute<T, TE>(Type type, T entry, IDatabase db,
             Func<T, IDatabase, IDbCommand> fallback, params object[] param)
             where TE : DataAccessAttribute
         {
-            return CheckInstanceForAttriute<TE>(typeof(T), entry, db, (o, database) => fallback((T)o, database), param);
+            return CheckInstanceForAttriute<TE>(type, entry, db, (o, database) => fallback((T)o, database), param);
         }
 
+        /// <summary>
+        /// Wraps a Query and its Paramters and then executes it
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
         public int ExecuteGenericCommand(string query, IEnumerable<IQueryParameter> values)
         {
             IDbCommand command = CreateCommand(Database, query);
@@ -279,21 +317,46 @@ namespace JPB.DataAccess.Manager
             return Database.Run(s => s.ExecuteNonQuery(command));
         }
 
+        /// <summary>
+        /// Wraps a Query and its Paramters from Dynamic and then executes it
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
         public int ExecuteGenericCommand(string query, dynamic paramenter)
         {
             return ExecuteGenericCommand(query, (IEnumerable<IQueryParameter>)EnumarateFromDynamics(paramenter));
         }
 
+        /// <summary>
+        /// Execute a Query and without Paramters
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
         public int ExecuteGenericCommand(IDbCommand command)
         {
             return Database.Run(s => s.ExecuteNonQuery(command));
         }
 
+
+        /// <summary>
+        /// Execute a Query on a given Database
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="db"></param>
+        /// <returns></returns>
         public static int ExecuteGenericCommand(IDbCommand command, IDatabase db)
         {
             return db.Run(s => s.ExecuteNonQuery(command));
         }
 
+        /// <summary>
+        /// Runs a Command on a given Database and Converts the Output into <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="db"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static List<T> ExecuteGenericCreateModelsCommand<T>(IDbCommand command, IDatabase db)
             where T : class, new()
         {
@@ -303,16 +366,37 @@ namespace JPB.DataAccess.Manager
                         .ToList());
         }
 
+        /// <summary>
+        /// Gets the Value or DB null
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static object GetDataValue(object value)
         {
             return value ?? DBNull.Value;
         }
 
-        protected static IDbCommand CreateCommand(IDatabase db, string query)
+        /// <summary>
+        /// Wraps a Parameterless string into a Command for the given DB
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        public static IDbCommand CreateCommand(IDatabase db, string query)
         {
             return db.CreateCommand(query);
         }
 
+        /// <summary>
+        /// Wraps a <param name="query"></param> on a given <param name="type"></param> by including <param name="entry"></param>'s 
+        /// propertys that are defined in <param name="propertyInfos"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="query"></param>
+        /// <param name="propertyInfos"></param>
+        /// <param name="entry"></param>
+        /// <param name="db"></param>
+        /// <returns></returns>
         public static IDbCommand CreateCommandWithParameterValues(Type type, string query, string[] propertyInfos, object entry, IDatabase db)
         {
             object[] propertyvalues =
@@ -327,19 +411,45 @@ namespace JPB.DataAccess.Manager
             return CreateCommandWithParameterValues(query, db, propertyvalues);
         }
 
+        /// <summary>
+        /// Wraps a <param name="query"></param> on a given typeof(T) by including <param name="entry"></param>'s 
+        /// propertys that are defined in <param name="propertyInfos"></param>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="propertyInfos"></param>
+        /// <param name="entry"></param>
+        /// <param name="db"></param>
+        /// <returns></returns>
         public static IDbCommand CreateCommandWithParameterValues<T>(string query, string[] propertyInfos, T entry, IDatabase db)
         {
             return CreateCommandWithParameterValues(typeof(T), query, propertyInfos, entry, db);
         }
 
+        /// <summary>
+        /// Wraps <param name="query"></param> into a Command and adds the values
+        /// values are added by Index
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="db"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
         public static IDbCommand CreateCommandWithParameterValues(string query, IDatabase db, object[] values)
         {
             var listofQueryParamter = new List<IQueryParameter>();
             for (int i = 0; i < values.Count(); i++)
-                listofQueryParamter.Add(new QueryParameter { Name = i.ToString(), Value = values[i] });
+                listofQueryParamter.Add(new QueryParameter { Name = i.ToString(CultureInfo.InvariantCulture), Value = values[i] });
             return CreateCommandWithParameterValues(query, db, listofQueryParamter);
         }
 
+        /// <summary>
+        /// Wraps <param name="query"></param> into a Command and adds the values
+        /// values are added by Name of IQueryParamter
+        /// If item of <param name="values"></param> contains a name that does not contains @ it will be added
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="db"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
         public static IDbCommand CreateCommandWithParameterValues(string query, IDatabase db, IEnumerable<IQueryParameter> values)
         {
             IDbCommand cmd = CreateCommand(db, query);
@@ -372,47 +482,99 @@ namespace JPB.DataAccess.Manager
             return list;
         }
 
-        public static string CreatePropertyCSV(Type type, bool ignorePK = false)
+        /// <summary>
+        /// Returns all Propertys that can be loaded due reflection
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="ignorePk"></param>
+        /// <returns></returns>
+        public static string CreatePropertyCSV(Type type, bool ignorePk = false)
         {
-            return CreatePropertyNames(type, ignorePK).Aggregate((e, f) => e + ", " + f);
+            return CreatePropertyNames(type, ignorePk).Aggregate((e, f) => e + ", " + f);
         }
 
-        public static string CreatePropertyCSV<T>(bool ignorePK = false)
+        /// <summary>
+        /// Returns all Propertys that can be loaded due reflection
+        /// </summary>
+        /// <param name="ignorePk"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static string CreatePropertyCSV<T>(bool ignorePk = false)
         {
-            return CreatePropertyCSV(typeof(T), ignorePK);
+            return CreatePropertyCSV(typeof(T), ignorePk);
         }
 
+        /// <summary>
+        /// Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="ignore"></param>
+        /// <returns></returns>
         protected static string CreatePropertyCSV(Type type, params string[] ignore)
         {
             IEnumerable<string> propertyNames = CreatePropertyNames(type, ignore);
             return propertyNames.Aggregate((e, f) => e + ", " + f);
         }
 
+        /// <summary>
+        /// Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
+        /// </summary>
+        /// <param name="ignore"></param>
+        /// <returns></returns>
         protected static string CreatePropertyCSV<T>(params string[] ignore)
         {
             return CreatePropertyCSV(typeof(T), ignore);
         }
 
+        /// <summary>
+        /// Maps all propertys of <param name="type"></param> into the Db columns
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="ignore"></param>
+        /// <returns></returns>
         protected static IEnumerable<string> CreatePropertyNames(Type type, params string[] ignore)
         {
             return DataConverterExtensions.MapEntiyToSchema(type, ignore).ToList();
         }
 
+        /// <summary>
+        /// Maps all propertys of typeof(T) into the Db columns
+        /// </summary>
+        /// <param name="ignore"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         protected static IEnumerable<string> CreatePropertyNames<T>(params string[] ignore)
         {
             return CreatePropertyNames(typeof(T), ignore);
         }
 
+        /// <summary>
+        /// Maps propertys to database of given type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="ignorePK"></param>
+        /// <returns></returns>
         protected static IEnumerable<string> CreatePropertyNames(Type type, bool ignorePK = false)
         {
             return ignorePK ? CreatePropertyNames(type, type.GetPK()) : CreatePropertyNames(type, new string[0]);
         }
 
+        /// <summary>
+        /// Maps propertys to database of given type
+        /// </summary>
+        /// <param name="ignorePK"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         protected static IEnumerable<string> CreatePropertyNames<T>(bool ignorePK = false)
         {
             return ignorePK ? CreatePropertyNames<T>(typeof(T).GetPK()) : CreatePropertyNames<T>(new string[0]);
         }
 
+        /// <summary>
+        /// Gets all propertys that should be ignored due rules
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static string[] CreateIgnoreList(Type type)
         {
             return

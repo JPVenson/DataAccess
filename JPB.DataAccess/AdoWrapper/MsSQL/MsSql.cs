@@ -276,11 +276,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             return new MsSqlDataPager<T>();
         }
 
-        public IUnGenericDataPager CreateUnmagedPager()
-        {
-            return new MsSqlUntypedDataPager();
-        }
-
         public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
         {
             return new MsSqlDataConverterPager<T, TE>();
