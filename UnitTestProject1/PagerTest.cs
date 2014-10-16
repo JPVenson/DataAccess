@@ -30,8 +30,8 @@ namespace UnitTestProject1
             public string PropB { get; set; }
         }
 
-        public IUnGenericDataPager DataPager { get; set; }
-      
+        public IDataPager DataPager { get; set; }
+
         public class TypeWrapper
         {
             public TypeWrapper(Type type)
@@ -55,7 +55,7 @@ namespace UnitTestProject1
             ConsolePropertyGrid = new ConsolePropertyGrid();
             ConsolePropertyGrid.Target = typeof(TestPagerTest);
             types.Add(new TypeWrapper(ConsolePropertyGrid.Target));
-            types.Add(new TypeWrapper(typeof(User)) );
+            types.Add(new TypeWrapper(typeof(User)));
 
             var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Integrated Security=True;"));
             accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("IF EXISTS (select * from sys.databases where name='TestDB')" +
@@ -91,11 +91,13 @@ namespace UnitTestProject1
             }
             Console.Clear();
             Console.WriteLine("Inserting done");
-            DataPager = accessLayer.Database.CreateUntypedPager();
-            DataPager.TargetType = typeof(TestPagerTest);
+            DataPager = accessLayer.Database.CreatePager<TestPagerTest>();
             DataPager.CurrentPage = 1;
-            DataPager.LoadPage(accessLayer);
-            ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
+            DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
+            foreach (var source in DataPager.CurrentPageItems)
+            {
+                ConsolePropertyGrid.SourceList.Add(source);
+            }
             var input = "";
             ConsolePropertyGrid.RenderGrid();
 
@@ -108,8 +110,11 @@ namespace UnitTestProject1
                 {
                     if (DataPager.CurrentPageItems.Count < DataPager.PageSize)
                     {
-                        DataPager.LoadPage(accessLayer);
-                        ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
+                        DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
+                        foreach (var source in DataPager.CurrentPageItems)
+                        {
+                            ConsolePropertyGrid.SourceList.Add(source);
+                        }
                         ConsolePropertyGrid.ExtraInfos.Append("last page reached ...");
                         ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                         ConsolePropertyGrid.RenderGrid();
@@ -117,13 +122,19 @@ namespace UnitTestProject1
                     }
 
                     DataPager.CurrentPage++;
-                    DataPager.LoadPage(accessLayer);
-                    ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
+                    DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
+                    foreach (var source in DataPager.CurrentPageItems)
+                    {
+                        ConsolePropertyGrid.SourceList.Add(source);
+                    }
                     if (DataPager.CurrentPageItems.Count == 0)
                     {
                         DataPager.CurrentPage--;
-                        DataPager.LoadPage(accessLayer);
-                        ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
+                        DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
+                        foreach (var source in DataPager.CurrentPageItems)
+                        {
+                            ConsolePropertyGrid.SourceList.Add(source);
+                        }
                         ConsolePropertyGrid.ExtraInfos.Append("last page reached ...");
                     }
                     ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
@@ -142,7 +153,11 @@ namespace UnitTestProject1
                     {
                         DataPager.CurrentPage--;
                         DataPager.LoadPage(accessLayer);
-                        ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
+                        ConsolePropertyGrid.SourceList.Clear();
+                        foreach (var source in DataPager.CurrentPageItems)
+                        {
+                            ConsolePropertyGrid.SourceList.Add(source);
+                        }
                         ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                     }
 
@@ -177,7 +192,11 @@ namespace UnitTestProject1
                     {
                         DataPager.PageSize = pageSize;
                         DataPager.LoadPage(accessLayer);
-                        ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
+                        ConsolePropertyGrid.SourceList.Clear();
+                        foreach (var source in DataPager.CurrentPageItems)
+                        {
+                            ConsolePropertyGrid.SourceList.Add(source);
+                        }
                         ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                     }
                 }
@@ -194,7 +213,6 @@ namespace UnitTestProject1
                         try
                         {
                             ConsolePropertyGrid.Target = Type.GetType(this.types[pageSize].Type);
-                            DataPager.TargetType = ConsolePropertyGrid.Target;
                             ConsolePropertyGrid.SourceList.Clear();
                             DataPager.CurrentPage = 0;
                             DataPager.LoadPage(accessLayer);
@@ -216,7 +234,11 @@ namespace UnitTestProject1
                         }
 
                         ConsolePropertyGrid.RenderGrid();
-                        ConsolePropertyGrid.SourceList = objects.ToList();
+                        ConsolePropertyGrid.SourceList.Clear();
+                        foreach (var o in objects)
+                        {
+                            ConsolePropertyGrid.SourceList.Add(o);
+                        }
                         ConsolePropertyGrid.Target = oldTarget;
                         continue;
                     }
@@ -230,8 +252,12 @@ namespace UnitTestProject1
                     if (tryParse)
                     {
                         DataPager.CurrentPage = pageNumer;
-                        DataPager.LoadPage(accessLayer);
-                        ConsolePropertyGrid.SourceList = DataPager.CurrentPageItems.ToList();
+                        DataPager.LoadPage(accessLayer); 
+                        ConsolePropertyGrid.SourceList.Clear();
+                        foreach (var source in DataPager.CurrentPageItems)
+                        {
+                            ConsolePropertyGrid.SourceList.Add(source);
+                        }
                         ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                     }
                 }

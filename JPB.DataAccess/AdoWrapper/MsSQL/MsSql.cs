@@ -8,6 +8,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 {
     public class MsSql : IDatabaseStrategy
     {
+        private readonly string _strDatabase;
+
         private const string TEMPLATE_MSSQL_UNTRUSTED =
             "server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
 
@@ -18,6 +20,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
         public MsSql(string strServer, string strDatabase)
         {
+            _strDatabase = strDatabase;
             _connStr = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
         }
 
@@ -76,7 +79,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
         public IDbConnection CreateConnection()
         {
-            return new SqlConnection(_connStr);
+            var sqlConnection = new SqlConnection(_connStr);
+            return sqlConnection;
         }
 
         public IDbCommand CreateCommand(string strSql, IDbConnection conn)
@@ -88,7 +92,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
         public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
         {
-            var cmd = (SqlCommand) CreateCommand(strSql, conn);
+            var cmd = (SqlCommand)CreateCommand(strSql, conn);
 
             foreach (var dataParameter in fields)
             {
@@ -102,56 +106,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
         {
             return new SqlParameter(strName, value);
         }
-
-        //public IDbDataParameter CreateParameter_Bit(string strName, bool nullable = false)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.Bit) { IsNullable = nullable };
-        //}
-
-        //public IDbDataParameter CreateParameter_VarChar(string strName, int iSize, bool nullable = false)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.VarChar, iSize) { IsNullable = nullable };
-        //}
-
-        //public IDbDataParameter CreateParameter_NVarChar(string strName, int iSize, bool nullable = false)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.NVarChar, iSize) { IsNullable = nullable };
-        //}
-
-        //public IDbDataParameter CreateParameter_NVarChar_MAX(string strName)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.NVarChar);
-        //}
-
-        //public IDbDataParameter CreateParameter_Int(string strName, bool nullable = false)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.Int) { IsNullable = nullable };
-        //}
-
-        //public IDbDataParameter CreateParameter_SmallInt(string strName)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.SmallInt);
-        //}
-
-        //public IDbDataParameter CreateParameter_BigInt(string strName)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.BigInt);
-        //}
-
-        //public IDbDataParameter CreateParameter_DateTime(string strName, bool nullable = false)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.DateTime) { IsNullable = nullable };
-        //}
-
-        //public IDbDataParameter CreateParameter_Time(string strName, bool nullable = false)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.Time) { IsNullable = nullable };
-        //}
-
-        //public IDbDataParameter CreateParameter_SmallDateTime(string strName)
-        //{
-        //    return new SqlParameter(strName, SqlDbType.SmallDateTime);
-        //}
 
         public IDbDataAdapter CreateDataAdapter(IDbCommand cmd)
         {

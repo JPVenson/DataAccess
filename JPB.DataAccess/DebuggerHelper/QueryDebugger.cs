@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -49,30 +50,120 @@ namespace JPB.DataAccess.DebuggerHelper
                 stackFrames = new List<StackFrame>();
             }
             var enumerable = stackFrames.Select(s => s.ToString()).ToArray();
-            if(enumerable.Any())
+            if (enumerable.Any())
                 StackTracer = enumerable.Aggregate((e, f) => e + Environment.NewLine + f);
             var debugquery = new StringBuilder(command.CommandText);
-            var sqlReady = new StringBuilder(command.CommandText);
+            var sqlReady = CommandAsMsSql(command);
+            DebuggerQuery = debugquery.ToString();
+            SqlQuery = sqlReady;
+        }
 
-            foreach (var parameter in command.Parameters.Cast<IDataParameter>())
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sp"></param>
+        /// <returns></returns>
+        public static String ParameterValue(IDataParameter sp)
+        {
+            String retval = "";
+
+            switch (sp.DbType)
             {
-                string param;
+                case DbType.VarNumeric:
+                case DbType.Decimal:
+                case DbType.Currency:
+                case DbType.AnsiStringFixedLength:
+                case DbType.Time:
+                case DbType.AnsiString:
+                case DbType.Xml:
+                case DbType.Date:
+                case DbType.DateTime:
+                case DbType.DateTime2:
+                case DbType.DateTimeOffset:
+                    retval = "'" + sp.Value.ToString().Replace("'", "''") + "'";
+                    break;
 
-                if (parameter.Value is string)
-                {
-                    param = "'" + parameter.Value + "'";
-                }
-                else
-                {
-                    param = parameter.Value.ToString();
-                }
+                case DbType.Boolean:
+                    retval = (sp.Value is bool && (bool)sp.Value) ? "1" : "0";
+                    break;
 
-                debugquery.Replace(parameter.ParameterName, StartValuePart + param + EndValuePart);
-                sqlReady.Replace(parameter.ParameterName, param);
+                default:
+                    retval = sp.Value.ToString().Replace("'", "''");
+                    break;
             }
 
-            DebuggerQuery = debugquery.ToString();
-            SqlQuery = sqlReady.ToString();
+            return retval;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sc"></param>
+        /// <returns></returns>
+        public static String CommandAsMsSql(IDbCommand sc)
+        {
+            var sql = new StringBuilder();
+            Boolean FirstParam = true;
+            if (!string.IsNullOrEmpty(sc.Connection.Database))
+                sql.AppendLine("USE " + sc.Connection.Database + ";");
+
+            switch (sc.CommandType)
+            {
+                case CommandType.StoredProcedure:
+                    sql.AppendLine("DECLARE @return_value int;");
+
+                    foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+                    {
+                        if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
+                        {
+                            sql.Append("DECLARE " + sp.ParameterName + "\t" + sp.SqlDbType + "\t= ");
+
+                            sql.AppendLine(((sp.Direction == ParameterDirection.Output) ? "NULL" : ParameterValue(sp)) + ";");
+
+                        }
+                    }
+
+                    sql.AppendLine("EXEC [" + sc.CommandText + "]");
+
+                    foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+                    {
+                        if (sp.Direction != ParameterDirection.ReturnValue)
+                        {
+                            sql.Append((FirstParam) ? "\t" : "\t, ");
+
+                            if (FirstParam) FirstParam = false;
+
+                            if (sp.Direction == ParameterDirection.Input)
+                                sql.AppendLine(sp.ParameterName + " = " + ParameterValue(sp));
+                            else
+
+                                sql.AppendLine(sp.ParameterName + " = " + sp.ParameterName + " OUTPUT");
+                        }
+                    }
+                    sql.AppendLine(";");
+
+                    sql.AppendLine("SELECT 'Return Value' = CONVERT(NVARCHAR, @return_value);");
+
+                    foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+                    {
+                        if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
+                        {
+                            sql.AppendLine("SELECT '" + sp.ParameterName + "' = CONVERT(NVARCHAR, " + sp.ParameterName + ");");
+                        }
+                    }
+                    break;
+                case CommandType.Text:
+                    foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+                    {
+                        sql.AppendLine("DECLARE " + sp.ParameterName + " " + sp.SqlDbType + " = " + ParameterValue(sp) + ";");
+                    }
+
+                    sql.AppendLine(sc.CommandText);
+                    break;
+            }
+
+            return sql.ToString();
         }
     }
 }

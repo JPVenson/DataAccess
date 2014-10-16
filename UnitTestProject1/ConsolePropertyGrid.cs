@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using testing;
 
 namespace UnitTestProject1
 {
@@ -16,34 +19,33 @@ namespace UnitTestProject1
 
         public Type Target { get; set; }
 
-        public List<object> SourceList { get; set; }
+        public ObservableCollection<object> SourceList { get; set; }
 
         public bool ExpandConsole { get; set; }
 
         public bool ClearConsole { get; set; }
 
-        public static void RenderList<T>(List<T> sourceList)
-        {
-            var gridInstance = new ConsolePropertyGrid();
-            gridInstance.Target = typeof (T);
-            gridInstance.SourceList = sourceList.Cast<object>().ToList();
-            gridInstance.ExpandConsole = true;
-            gridInstance.ClearConsole = true;
-            gridInstance.RenderGrid();
-        }
-
         public void RenderGrid()
         {
             var stream = new StringBuilder();
+            SourceList.CollectionChanged += SourceListOnCollectionChanged;
 
             stream.Append("o ");
 
             var size = 0;
 
+            var FirstItem = SourceList.FirstOrDefault();
+
+            if (FirstItem == null)
+            {
+                return;
+            }
+
+            Target = FirstItem.GetType();
+
             var props = Target.GetProperties();
 
             var propNames = new Dictionary<string, int>();
-
 
             foreach (var propertyInfo in props)
             {
@@ -77,18 +79,18 @@ namespace UnitTestProject1
                 var name = "";
 
                 if (!propertyIsLargerThenValues)
-                for (int i = 0; i < left; i++)
-                {
-                    name += " ";
-                }
+                    for (int i = 0; i < left; i++)
+                    {
+                        name += " ";
+                    }
 
                 name += string.Format(@"{0} {{ {1} }}", propertyInfo.Name, propertyInfo.PropertyType);
 
                 if (!propertyIsLargerThenValues)
-                for (int r = 0; r < right; r++)
-                {
-                    name += " ";
-                }
+                    for (int r = 0; r < right; r++)
+                    {
+                        name += " ";
+                    }
 
                 name += " | ";
 
@@ -194,6 +196,18 @@ namespace UnitTestProject1
 
             ExtraInfos.Clear();
             Console.WriteLine(stream.ToString());
+        }
+
+        private void SourceListOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
+        {
+            RenderGrid();
+        }
+
+        public static void RenderList<T>(IEnumerable<T> @select)
+        {
+            var grid = new ConsolePropertyGrid();
+            grid.SourceList = new ObservableCollection<object>(@select.Cast<object>());
+            grid.RenderGrid();
         }
     }
 }

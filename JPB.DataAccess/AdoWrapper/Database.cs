@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using JPB.DataAccess.DebuggerHelper;
@@ -8,9 +9,11 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
 {
+
     /// <summary>
     /// 
     /// </summary>
+    [DebuggerDisplay("OpenRuns {_handlecounter}, IsConnectionOpen {_conn2 != null}, IsTransactionOpen {_trans != null}")]
     public sealed class Database : IDatabase
     {
         private IDbConnection _conn2;
@@ -81,23 +84,27 @@ namespace JPB.DataAccess.AdoWrapper
 
         public void Connect(bool bUseTransaction)
         {
+            //check for an Active connection
             if (null == GetConnection())
+                //No Connection open one
                 _conn2 = _strategy.CreateConnection();
             
+            //Connection exists check for open
             if (GetConnection().State != ConnectionState.Open)
                 GetConnection().Open();
 
-            if (_handlecounter == 0)
-            {
-                if (bUseTransaction)
+            //This is the First call of connect so we Could
+            //define it as Transaction
+            if (_handlecounter == 0 && bUseTransaction) 
                     _trans = GetConnection().BeginTransaction();
-            }
 
+            //We created a Connection and proceed now with the DB access
             _handlecounter++;
         }
 
         public void TransactionCommit()
         {
+            //All previous DB actions are Successfull so Commit the changes
             if (_trans != null && _handlecounter == 0)
             {
                 _trans.Commit();
@@ -107,6 +114,8 @@ namespace JPB.DataAccess.AdoWrapper
 
         public void TransactionRollback()
         {
+            //Error inside the call
+            //Rollback the transaction and close the Connection
             if (_trans != null)
             {
                 //Force all open connections to close
@@ -119,10 +128,15 @@ namespace JPB.DataAccess.AdoWrapper
 
         public void CloseConnection()
         {
+            Debug.Assert(_handlecounter >= 0);
+
+            //This is not the last call of Close so decreese the counter
             if (_handlecounter > 0)
                 _handlecounter--;
+
             if (GetConnection() != null && _handlecounter == 0)
             {
+                if (_trans != null)
                 TransactionCommit();
                 _trans = null;
                 GetConnection().Close();
@@ -191,6 +205,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             return DoGetSkalar(String.Format(strSql, obj));
         }
+
         public DataTable GetDataTable(string name, string strSql)
         {
             lock (this)
@@ -452,56 +467,6 @@ namespace JPB.DataAccess.AdoWrapper
             }
         }
 
-        public IDictionary<long, V> GetPagedEntitiesDictionary<V>(string strQuery, Func<IDataRecord, V> func,
-            long iPageSize, bool bHandleConnection,
-            string strExceptionMessage = null)
-        {
-            var htRes = new Dictionary<long, V>();
-
-            if (bHandleConnection)
-                Connect(false);
-
-            IDataReader dr = null;
-            try
-            {
-                long index = -1;
-                long rotate = -1;
-                dr = GetDataReader(strQuery);
-                while (dr.Read())
-                {
-                    index += 1;
-                    rotate += 1;
-                    if (rotate == (iPageSize - 1))
-                        rotate = -1;
-
-                    try
-                    {
-                        if (0 == rotate)
-                            htRes.Add(index, func(dr));
-                    }
-                    catch (Exception)
-                    {
-                        if (strExceptionMessage != null)
-                            throw new ApplicationException(strExceptionMessage + ", " + index);
-                        else throw;
-                    }
-                }
-
-                return htRes;
-            }
-            finally
-            {
-                if (dr != null)
-                {
-                    dr.Close();
-                    dr.Dispose();
-                }
-
-                if (bHandleConnection)
-                    CloseConnection();
-            }
-        }
-
         public void Run(Action<IDatabase> action)
         {
             try
@@ -649,19 +614,6 @@ namespace JPB.DataAccess.AdoWrapper
         {
             Connect(false);
             CloseConnection();
-        }
-
-        private static string TypeToString(Type type)
-        {
-            if (type == typeof(string))
-                return "TEXT";
-            if (type == typeof(long) || type == typeof(int))
-                return "NUMBER";
-            if (type == typeof(double) || type == typeof(float))
-                return "NUMBER";
-            if (type == typeof(DateTime))
-                return "DATETIME";
-            return "TEXT";
         }
 
         public static object DBCAST(IDataRecord dr, string strFieldName, object objFallThru)

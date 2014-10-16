@@ -287,12 +287,12 @@ namespace JPB.DataAccess
                     //MethodInfo castMethod =
                     //    typeof(StaticHelper).GetMethod("CastToEnumerable").MakeGenericMethod(targetType);
 
-                    var reproCollection =
-                        typeof(ReposetoryCollection<>).MakeGenericType(targetType).GetConstructor(new Type[] { typeof(IEnumerable) })
-                            .Invoke(new[] { orDefault });
+                    var constructorInfo = typeof(ReposetoryCollection<>).MakeGenericType(targetType).GetConstructor(new[] { typeof(IEnumerable) });
 
+                    Debug.Assert(constructorInfo != null, "constructorInfo != null");
+                    var reproCollection = constructorInfo.Invoke(new object[] { orDefault });
                     propertyInfo.SetValue(source, reproCollection, null);
-                    foreach (object item in orDefault)
+                    foreach (var item in orDefault)
                         item.LoadNavigationProps(accessLayer);
                 }
                 if (!CheckForListInterface(propertyInfo))

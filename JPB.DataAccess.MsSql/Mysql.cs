@@ -95,11 +95,6 @@ namespace JPB.DataAccess.MySql
             return new MySqlDataPager<T>();
         }
 
-        public IUnGenericDataPager CreateUnmagedPager()
-        {
-            return new MySqlUntypedDataPager();
-        }
-
         public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
         {
             return new MySqlDataConverterPager<T, TE>();
