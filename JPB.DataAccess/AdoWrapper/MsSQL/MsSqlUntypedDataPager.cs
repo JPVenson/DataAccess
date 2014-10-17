@@ -129,9 +129,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 if (CheckVersionForFetch())
                 {
                     command = DbAccessLayer.CreateSelect(TargetType, s,
-                        "ORDER BY @Pk ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new IQueryParameter[]
+                        "ORDER BY " + pk + " ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new IQueryParameter[]
                     {
-                        new QueryParameter("Pk", pk),
                         new QueryParameter("PagedRows", CurrentPage*PageSize),
                         new QueryParameter("PageSize", PageSize),
                     });
@@ -140,7 +139,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 {
                     //Write as CTE to filter on it
                     var queryBuilde = new StringBuilder();
-                    queryBuilde.Append("WITH CTE AS (SELECT * ");
+                    queryBuilde.Append("WITH CTE AS (SELECT ");
+                    queryBuilde.Append(DbAccessLayer.CreatePropertyCSV(TargetType));
                     queryBuilde.Append(" FROM (");
                     queryBuilde.Append("SELECT ROW_NUMBER() OVER (ORDER BY @Pk)");
                     queryBuilde.Append(" AS NUMBER, *");

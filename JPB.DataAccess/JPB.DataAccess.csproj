@@ -88,6 +88,7 @@
     <Compile Include="QueryProvider\TestQueryProvider.cs" />
     <Compile Include="QueryProvider\TypeSystem.cs" />
     <Compile Include="ReflecionStore.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="ReposetoryCollection.cs" />
     <Compile Include="StaticHelper.cs" />
   </ItemGroup>

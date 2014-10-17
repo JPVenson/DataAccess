@@ -16,7 +16,6 @@ namespace JPB.DataAccess.Manager
 {
     public partial class DbAccessLayer
     {
-
         #region BasicCommands
 
         /// <summary>

@@ -36,9 +36,10 @@ namespace JPB.DataAccess.Manager
         ///     Just for Intigration
         /// </summary>
         [Obsolete("Will maybe removed in future", false)]
-        public DbAccessLayer()
+        internal DbAccessLayer()
         {
             ProviderCollection = new PreDefinedProviderCollection();
+            LoadCompleteResultBeforeMapping = true;
         }
 
         /// <summary>
@@ -586,6 +587,13 @@ namespace JPB.DataAccess.Manager
                     .Select(s => s.Name)
                     .ToArray();
         }
+
+
+        /// <summary>
+        /// if set the created reader of an read operation will be completely stored then the open connection will be closed
+        /// Default is true
+        /// </summary>
+        public bool LoadCompleteResultBeforeMapping { get; set; }
         
         private static IEnumerable<IDataRecord> EnumerateDataRecords(IDatabase database, IDbCommand query)
         {

@@ -24,10 +24,12 @@ using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess
 {
+    /// <summary>
+    /// Helper Extentions for Maintaining Value
+    /// </summary>
 #if !DEBUG
     [DebuggerStepThrough]
 #endif
-
     public static class DataConverterExtensions
     {
         public static QueryDebugger CreateQueryDebugger(this IDbCommand command)
@@ -317,74 +319,74 @@ namespace JPB.DataAccess
             return new EgarDataRecord(rec);
         }
 
-        [Obsolete("Will be removed in future", false)]
-        public static void SetPropertysViaReflection(dynamic instance, IDataRecord reader)
-        {
-            var listofpropertys = new Dictionary<string, object>();
+        //[Obsolete("Will be removed in future", false)]
+        //public static void SetPropertysViaReflection(dynamic instance, IDataRecord reader)
+        //{
+        //    var listofpropertys = new Dictionary<string, object>();
 
-            var type = instance.GetType();
-            PropertyInfo[] propertys = type.GetProperties();
-            var instanceOfFallbackList = new Dictionary<string, object>();
+        //    var type = instance.GetType();
+        //    PropertyInfo[] propertys = type.GetProperties();
+        //    var instanceOfFallbackList = new Dictionary<string, object>();
 
-            for (int i = 0; i < reader.FieldCount; i++)
-                listofpropertys.Add(ReMapSchemaToEntiysProp(type, reader.GetName(i)), reader.GetValue(i));
+        //    for (int i = 0; i < reader.FieldCount; i++)
+        //        listofpropertys.Add(ReMapSchemaToEntiysProp(type, reader.GetName(i)), reader.GetValue(i));
 
-            foreach (var item in listofpropertys)
-            {
-                PropertyInfo property = propertys.FirstOrDefault(s => s.Name == item.Key);
-                if (property != null)
-                {
-                    if (item.Value is DBNull)
-                        property.SetValue(instance, null, null);
-                    else
-                    {
-                        if (property.PropertyType.IsGenericTypeDefinition &&
-                            property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                        {
-                            object convertedValue = Convert.ChangeType(item.Value,
-                                Nullable.GetUnderlyingType(
-                                    property.PropertyType));
-                            property.SetValue(instance, convertedValue, null);
-                        }
-                        else
-                            property.SetValue(instance, item.Value, null);
-                    }
-                }
-                else if (instanceOfFallbackList != null)
-                {
-                    //no property found Look for LoadNotImplimentedDynamicAttribute property to include it
+        //    foreach (var item in listofpropertys)
+        //    {
+        //        PropertyInfo property = propertys.FirstOrDefault(s => s.Name == item.Key);
+        //        if (property != null)
+        //        {
+        //            if (item.Value is DBNull)
+        //                property.SetValue(instance, null, null);
+        //            else
+        //            {
+        //                if (property.PropertyType.IsGenericTypeDefinition &&
+        //                    property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+        //                {
+        //                    object convertedValue = Convert.ChangeType(item.Value,
+        //                        Nullable.GetUnderlyingType(
+        //                            property.PropertyType));
+        //                    property.SetValue(instance, convertedValue, null);
+        //                }
+        //                else
+        //                    property.SetValue(instance, item.Value, null);
+        //            }
+        //        }
+        //        else if (instanceOfFallbackList != null)
+        //        {
+        //            //no property found Look for LoadNotImplimentedDynamicAttribute property to include it
 
-                    if (instanceOfFallbackList.Any())
-                    {
-                        instanceOfFallbackList.Add(item.Key, item.Value);
-                    }
-                    else
-                    {
-                        PropertyInfo maybeFallbackProperty = propertys.FirstOrDefault(
-                            s => s.GetCustomAttributes().Any(e => e is LoadNotImplimentedDynamicAttribute));
-                        if (maybeFallbackProperty != null)
-                        {
-                            instanceOfFallbackList = maybeFallbackProperty.GetValue(instance);
-                            if (instanceOfFallbackList == null)
-                            {
-                                instanceOfFallbackList = new Dictionary<string, object>();
-                                maybeFallbackProperty.SetValue(instance, instanceOfFallbackList);
-                            }
-                            instanceOfFallbackList.Add(item.Key, item.Value);
-                        }
-                        else
-                        {
-                            instanceOfFallbackList = null;
-                        }
-                    }
-                }
-            }
-        }
+        //            if (instanceOfFallbackList.Any())
+        //            {
+        //                instanceOfFallbackList.Add(item.Key, item.Value);
+        //            }
+        //            else
+        //            {
+        //                PropertyInfo maybeFallbackProperty = propertys.FirstOrDefault(
+        //                    s => s.GetCustomAttributes().Any(e => e is LoadNotImplimentedDynamicAttribute));
+        //                if (maybeFallbackProperty != null)
+        //                {
+        //                    instanceOfFallbackList = maybeFallbackProperty.GetValue(instance);
+        //                    if (instanceOfFallbackList == null)
+        //                    {
+        //                        instanceOfFallbackList = new Dictionary<string, object>();
+        //                        maybeFallbackProperty.SetValue(instance, instanceOfFallbackList);
+        //                    }
+        //                    instanceOfFallbackList.Add(item.Key, item.Value);
+        //                }
+        //                else
+        //                {
+        //                    instanceOfFallbackList = null;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
-        public static dynamic SetPropertysViaRefection(Type type, IDataRecord reader)
+        public static object CreateInstance(this Type type, IDataRecord reader, out bool fullLoaded)
         {
             ConstructorInfo[] constructorInfos = type.GetConstructors();
-            dynamic source = null;
+            object source = null;
 
             ConstructorInfo constructor =
                 constructorInfos
@@ -402,6 +404,7 @@ namespace JPB.DataAccess
                 ParameterInfo[] parameterInfos = constructor.GetParameters();
                 if (parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof(IDataRecord))
                 {
+                    fullLoaded = true;
                     return Activator.CreateInstance(type, reader);
                 }
             }
@@ -424,6 +427,7 @@ namespace JPB.DataAccess
                             if (returnParameter.Length == 1 &&
                                 returnParameter.First().ParameterType == typeof(IDataRecord))
                             {
+                                fullLoaded = true;
                                 return factory.Invoke(null, new object[] { reader });
                             }
                         }
@@ -433,12 +437,25 @@ namespace JPB.DataAccess
 
             //well letzs do it by our self and create an instance and then load the propertys
 
-            source = Activator.CreateInstance(type);
+            fullLoaded = false;
+            return Activator.CreateInstance(type);
+        }
+
+        /// <summary>
+        /// Creates a new Instance based on possible Ctor's and the given <param name="reader"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static object SetPropertysViaRefection(Type type, IDataRecord reader)
+        {
+            bool created;
+            var source = type.CreateInstance(reader, out created);
+            if (created)
+                return source;
 
             var listofpropertys = new Dictionary<string, object>();
 
-            PropertyInfo maybeFallbackProperty = null;
-            bool searchedForFallback = false;
             PropertyInfo[] propertys = type.GetProperties();
             var instanceOfFallbackList = new Dictionary<string, object>();
 
@@ -469,10 +486,7 @@ namespace JPB.DataAccess
                     else
                     {
                         if (property.PropertyType.IsGenericTypeDefinition && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                        {
-                            object convertedValue = Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType));
-                            property.SetValue(source, convertedValue, null);
-                        }
+                            property.SetValue(source, Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType)), null);
                         else
                             property.SetValue(source, value, null);
                     }
@@ -487,12 +501,10 @@ namespace JPB.DataAccess
                     }
                     else
                     {
-                        maybeFallbackProperty =
-                            propertys.FirstOrDefault(
-                                s => s.GetCustomAttributes().Any(e => e is LoadNotImplimentedDynamicAttribute));
+                        PropertyInfo maybeFallbackProperty = propertys.FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is LoadNotImplimentedDynamicAttribute));
                         if (maybeFallbackProperty != null)
                         {
-                            instanceOfFallbackList = maybeFallbackProperty.GetValue(source);
+                            instanceOfFallbackList = (Dictionary<string, object>) maybeFallbackProperty.GetValue(source);
                             if (instanceOfFallbackList == null)
                             {
                                 instanceOfFallbackList = new Dictionary<string, object>();

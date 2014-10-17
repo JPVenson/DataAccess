@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess
@@ -104,52 +103,5 @@ namespace JPB.DataAccess
             public AttributeInfoCache[] AttributeInfoCaches { get; set; }
         }
 
-    }
-#if !DEBUG
-    [DebuggerStepThrough]
-#endif
-    public static class ReflectionHelpers
-    {
-        static ReflectionHelpers()
-        {
-            ReflecionStore = new ReflecionStore();
-        }
-
-        public static Boolean IsAnonymousType(this Type type)
-        {
-            Boolean hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
-            Boolean nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
-            Boolean isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
-
-            return isAnonymousType;
-        }
-
-        public static ReflecionStore ReflecionStore { get; set; }
-
-        public static Attribute[] GetCustomAttributes(this Type type)
-        {
-            if (IsAnonymousType(type))
-                return new Attribute[0]; //anonymos types does not have any Attributes
-
-            return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
-        }
-
-        public static Attribute[] GetCustomAttributes(this PropertyInfo type)
-        {
-            if (IsAnonymousType(type.DeclaringType))
-                return new Attribute[0]; //anonymos types does not have any Attributes
-
-            var deb = ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
-
-            return deb;
-        }
-
-        public static PropertyInfo[] GetProperties(this Type @class)
-        {
-            if (IsAnonymousType(@class))
-                return @class.GetProperties();
-
-            return ReflecionStore.GetOrCreatePropertyInfoCache(@class).PropertyInfoCaches.ToArray().Select(s => s.PropertyInfo).ToArray();
-        }
     }
 }

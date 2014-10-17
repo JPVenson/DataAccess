@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.DebuggerHelper
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [DebuggerDisplay("Query : {DebuggerQuery}", Name = "Query")]
     public class QueryDebugger
     {
@@ -103,8 +106,12 @@ namespace JPB.DataAccess.DebuggerHelper
         /// <returns></returns>
         public static String CommandAsMsSql(IDbCommand sc)
         {
+            if (!(sc is SqlCommand))
+                return sc.CommandText;
+
             var sql = new StringBuilder();
-            Boolean FirstParam = true;
+            Boolean firstParam = true;
+
             if (!string.IsNullOrEmpty(sc.Connection.Database))
                 sql.AppendLine("USE " + sc.Connection.Database + ";");
 
@@ -130,9 +137,9 @@ namespace JPB.DataAccess.DebuggerHelper
                     {
                         if (sp.Direction != ParameterDirection.ReturnValue)
                         {
-                            sql.Append((FirstParam) ? "\t" : "\t, ");
+                            sql.Append((firstParam) ? "\t" : "\t, ");
 
-                            if (FirstParam) FirstParam = false;
+                            if (firstParam) firstParam = false;
 
                             if (sp.Direction == ParameterDirection.Input)
                                 sql.AppendLine(sp.ParameterName + " = " + ParameterValue(sp));
@@ -156,7 +163,7 @@ namespace JPB.DataAccess.DebuggerHelper
                 case CommandType.Text:
                     foreach (var sp in sc.Parameters.Cast<SqlParameter>())
                     {
-                        sql.AppendLine("DECLARE " + sp.ParameterName + " " + sp.SqlDbType + " = " + ParameterValue(sp) + ";");
+                        sql.AppendLine("DECLARE " + " @" + sp.ParameterName + " " + sp.SqlDbType + " = " + ParameterValue(sp) + ";");
                     }
 
                     sql.AppendLine(sc.CommandText);
