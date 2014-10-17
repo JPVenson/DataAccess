@@ -90,6 +90,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             List<dynamic> selectWhere = null;
             dbAccess.Database.RunInTransaction(s =>
             {
+                var finalCOmmands = new List<IDbCommand>();
+                IDbCommand finalAppendCommand = null;
+                if (AppendedComands.Any())
+                {
+                    finalAppendCommand = AppendedComands.Aggregate(DbAccessLayer.CreateCommand(s, "WHERE"), (current, comand) => DbAccessLayer.ConcatCommands(s, current, comand));
+                }
+
                 if (string.IsNullOrEmpty(SqlVersion))
                 {
                     SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
@@ -99,11 +106,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
                 var pk = TargetType.GetPK();
 
-                var mergedItemsCommand = DbAccessLayer.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
-                foreach (IDbCommand comand in AppendedComands)
-                    mergedItemsCommand = DbAccessLayer.MergeCommands(s, mergedItemsCommand, comand);
+                var selectMaxCommand = DbAccessLayer.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
 
-                var maxItems = dbAccess.RunPrimetivSelect(typeof(long), mergedItemsCommand).FirstOrDefault();
+                if (finalAppendCommand != null)
+                    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
+
+                var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
                 if (maxItems != null)
                 {
                     long parsedCount;
@@ -130,30 +138,32 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 }
                 else
                 {
+                    //Write as CTE to filter on it
                     var queryBuilde = new StringBuilder();
-                    queryBuilde.Append("SELECT * ");
+                    queryBuilde.Append("WITH CTE AS (SELECT * ");
                     queryBuilde.Append(" FROM (");
                     queryBuilde.Append("SELECT ROW_NUMBER() OVER (ORDER BY @Pk)");
                     queryBuilde.Append(" AS NUMBER, *");
                     queryBuilde.Append(" FROM ");
                     queryBuilde.Append(TargetType.GetTableName());
                     queryBuilde.Append(") AS TBL ");
-                    queryBuilde.Append("WHERE NUMBER BETWEEN ((@PagedRows - 1) * @PageSize + 1) AND (@PagedRows * @PageSize)");
-                    queryBuilde.Append("ORDER BY ");
-                    queryBuilde.Append(pk);
+                    queryBuilde.Append("WHERE NUMBER BETWEEN ((@PagedRows) * @PageSize + 1) AND ((@PagedRows + 1) * @PageSize)");
+                    queryBuilde.Append(") ");
+
+                    queryBuilde.Append("SELECT * FROM CTE ");
 
                     var parameters = new List<IQueryParameter>(new[]
-                {
-                    new QueryParameter("Pk", pk),
-                    new QueryParameter("PagedRows", CurrentPage),
-                    new QueryParameter("PageSize", PageSize),
-                });
+                    {
+                        new QueryParameter("Pk", pk),
+                        new QueryParameter("PagedRows", CurrentPage),
+                        new QueryParameter("PageSize", PageSize),
+                    });
 
                     command = DbAccessLayer.CreateCommandWithParameterValues(queryBuilde.ToString(), s, parameters);
                 }
 
-                foreach (IDbCommand comand in AppendedComands)
-                    command = DbAccessLayer.MergeCommands(s, command, comand);
+                if (finalAppendCommand != null)
+                    command = DbAccessLayer.ConcatCommands(s, command, finalAppendCommand);
 
                 selectWhere = DbAccessLayer.SelectNative(TargetType, s, command);
             });
@@ -163,6 +173,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 dynamic item1 = item;
                 SyncHelper(() => CurrentPageItems.Add(item1));
             }
+
+            if (CurrentPage > MaxPage)
+                CurrentPage = MaxPage;
 
             RaiseNewPageLoaded();
         }
