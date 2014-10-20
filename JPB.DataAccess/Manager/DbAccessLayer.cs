@@ -363,7 +363,7 @@ namespace JPB.DataAccess.Manager
         {
             return db.Run(
                 s =>
-                    s.GetEntitiesList(command, DataConverterExtensions.SetPropertysViaRefection<T>)
+                    s.GetEntitiesList(command, DataConverterExtensions.SetPropertysViaReflection<T>)
                         .ToList());
         }
 

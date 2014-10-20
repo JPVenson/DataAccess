@@ -342,7 +342,7 @@ namespace JPB.DataAccess.Manager
             RaiseUnknownSelect(query);
             return
                 EnumerateDataRecords(database, query)
-                    .Select(dataRecord => DataConverterExtensions.SetPropertysViaRefection(type, dataRecord))
+                    .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(type, dataRecord))
                     .ToList();
         }
 

@@ -58,6 +58,7 @@
     <Compile Include="AdoWrapper\MsSql\MsSqlUntypedDataPager.cs" />
     <Compile Include="AdoWrapper\Odbc\Odbc.cs" />
     <Compile Include="AdoWrapper\OleDB\OleDb.cs" />
+    <Compile Include="AdoWrapper\XmlDataRecord.cs" />
     <Compile Include="DataConverterExtensions.cs" />
     <Compile Include="DataHelperExtensions.cs" />
     <Compile Include="DbEventArgs\DatabaseActionEvent.cs" />

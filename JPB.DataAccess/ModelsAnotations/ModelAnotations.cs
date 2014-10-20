@@ -151,6 +151,11 @@ namespace JPB.DataAccess.ModelsAnotations
     {
     }
 
+    /// <summary>
+    /// Adds a Converter that is used to convert from an DB object to an C# object
+    /// The Converter must inhert from
+    /// ModelAnotations.IValueConverter
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
     public sealed class ValueConverterAttribute : Attribute
     {
@@ -161,7 +166,7 @@ namespace JPB.DataAccess.ModelsAnotations
         {
             this._converter = converter;
 
-            if (!converter.IsAssignableFrom(typeof(IValueConverter)))
+            if (!typeof(IValueConverter).IsAssignableFrom(converter))
             {
                 throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
             }
@@ -180,6 +185,28 @@ namespace JPB.DataAccess.ModelsAnotations
         {
             return (IValueConverter) Activator.CreateInstance(_converter);
         }
+    }
+
+    /// <summary>
+    /// Marks a Property as XML Serilized
+    /// If marked the output field from the query will be Serlized to the given object
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+    public sealed class FromXmlAttribute : Attribute
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fieldName"></param>
+        public FromXmlAttribute(string fieldName)
+        {
+            FieldName = fieldName;
+        }
+
+        /// <summary>
+        /// The name of the Field inside the result stream
+        /// </summary>
+        public string FieldName { get; set; }
     }
 
     /// <summary>
