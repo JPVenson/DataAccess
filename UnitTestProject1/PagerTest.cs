@@ -14,11 +14,11 @@ namespace UnitTestProject1
     [TestClass]
     public class PagerTest
     {
-        public static void Main()
-        {
-            var test = new PagerTest();
-            test.TestMethod1();
-        }
+        //public static void Main()
+        //{
+        //    var test = new PagerTest();
+        //    test.TestMethod1();
+        //}
 
         [ForModel("PagerTest")]
         public class TestPagerTest
@@ -93,7 +93,8 @@ namespace UnitTestProject1
             Console.WriteLine("Inserting done");
             DataPager = accessLayer.Database.CreatePager<TestPagerTest>();
             DataPager.CurrentPage = 1;
-            DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
+            DataPager.LoadPage(accessLayer); 
+            ConsolePropertyGrid.SourceList.Clear();
             foreach (var source in DataPager.CurrentPageItems)
             {
                 ConsolePropertyGrid.SourceList.Add(source);

@@ -159,7 +159,36 @@ namespace JPB.DataAccess
 
         public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
         {
-            return from s1 in ReflectionHelpers.GetProperties(type) where !s1.GetGetMethod().IsVirtual && !s1.GetCustomAttributes().Any(s => s is IgnoreReflectionAttribute) where !ignore.Contains(s1.Name) let formodle = s1.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel select formodle != null ? formodle.AlternatingName : s1.Name;
+            foreach (var s1 in ReflectionHelpers.GetProperties(type))
+            {
+                if (s1.GetGetMethod().IsVirtual && s1.GetCustomAttributes().Any(s =>
+                {
+                    var isAttr = s is FromXmlAttribute;
+
+                    if (!isAttr)
+                        return false;
+
+                    var att = s as FromXmlAttribute;
+                    if (att.LoadStrategy == LoadStrategy.IncludeInSelect)
+                        return true;
+                    return false;
+                }))
+                {
+                    if (!ignore.Contains(s1.Name))
+                    {
+                        yield return (s1.GetCustomAttributes().First(s => s is FromXmlAttribute) as FromXmlAttribute).FieldName;
+                    }
+                }
+                else if (!s1.GetGetMethod().IsVirtual && !s1.GetCustomAttributes().Any(s => s is IgnoreReflectionAttribute))
+                {
+                    if (!ignore.Contains(s1.Name))
+                    {
+                        var formodle = s1.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;
+                        var s2 = formodle != null ? formodle.AlternatingName : s1.Name;
+                        yield return s2;
+                    }
+                }
+            }
         }
 
         public static IEnumerable<string> MapEntiyToSchema<T>(string[] ignore)
@@ -364,25 +393,22 @@ namespace JPB.DataAccess
 
                         if (CheckForListInterface(property))
                         {
+                            //target Property is of type list
+                            //so expect a xml valid list Take the first element and expect the propertys inside this first element
                             var record = new XmlDataRecord(xmlStream);
                             var xmlDataRecords = record.CreateListOfItems();
 
-                            var enumerableOfItems = new List<object>();
-
                             var genericArguments = property.PropertyType.GetGenericArguments().FirstOrDefault();
+                            var enumerableOfItems = xmlDataRecords.Select(xmlDataRecord => SetPropertysViaReflection(genericArguments, xmlDataRecord)).ToList();
 
-                            foreach (var xmlDataRecord in xmlDataRecords)
-                            {
-                                var propertysViaReflection = SetPropertysViaReflection(genericArguments, xmlDataRecord);
-                                enumerableOfItems.Add(propertysViaReflection);
-                            }
+                            var caster = typeof(ReposetoryCollection<>).MakeGenericType(genericArguments).GetConstructor(new[] { typeof(IEnumerable) });
 
-                            property.SetValue(instance, enumerableOfItems);
+                            var castedList = caster.Invoke(new object[] { enumerableOfItems });
+                            property.SetValue(instance, castedList);
                         }
                         else
                         {
-                            var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType,
-                                new XmlDataRecord(xmlStream));
+                            var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType, new XmlDataRecord(xmlStream));
 
                             property.SetValue(instance, xmlSerilizedProperty);
                         }
@@ -393,10 +419,15 @@ namespace JPB.DataAccess
                     }
                     else
                     {
-                        if (property.PropertyType.IsGenericTypeDefinition && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            property.SetValue(instance, Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType)), null);
+                        if (property.PropertyType.IsGenericTypeDefinition &&
+                            property.PropertyType.GetGenericTypeDefinition() == typeof (Nullable<>))
+                            property.SetValue(instance,
+                                Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType)), null);
                         else
-                            property.SetValue(instance, value, null);
+                        {
+                            var changeType = Convert.ChangeType(value, property.PropertyType);
+                            property.SetValue(instance, changeType, null);
+                        }
                     }
                 }
                 else if (instanceOfFallbackList != null)

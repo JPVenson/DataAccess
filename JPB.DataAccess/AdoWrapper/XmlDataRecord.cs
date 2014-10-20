@@ -13,18 +13,16 @@ namespace JPB.DataAccess.AdoWrapper
 {
     internal class XmlDataRecord : IDataRecord
     {
-        private readonly string _xmlStream;
-        readonly XDocument _xmlReader;
+        private XElement baseElement;
 
         public XmlDataRecord(string xmlStream)
         {
-            _xmlStream = xmlStream;
-            _xmlReader = XDocument.Parse(_xmlStream);
+            baseElement = XDocument.Parse(xmlStream).Elements().ElementAt(0);
         }
 
         public string GetName(int i)
         {
-            return _xmlReader.Elements().ElementAt(i).Name.LocalName;
+            return baseElement.Elements().ElementAt(i).Name.LocalName;
         }
 
         public string GetDataTypeName(int i)
@@ -39,7 +37,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public object GetValue(int i)
         {
-            return _xmlReader.Elements().ElementAt(i).Value;
+            return baseElement.Elements().ElementAt(i).Value;
         }
 
         public int GetValues(object[] values)
@@ -134,7 +132,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public int FieldCount
         {
-            get { return this._xmlReader.Elements().Count(); }
+            get { return baseElement.Elements().Count(); }
         }
 
         object IDataRecord.this[int i]
@@ -149,8 +147,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public IEnumerable<XmlDataRecord> CreateListOfItems()
         {
-            var xNodes = _xmlReader.Root.Nodes();
-
+            var xNodes = baseElement.Elements();
             return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString()));
         }
     }

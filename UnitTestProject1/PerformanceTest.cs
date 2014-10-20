@@ -14,14 +14,14 @@ using testing;
 namespace UnitTestProject1
 {
     [TestClass]
-    public class UnitTest1
+    public class PerformanceTest
     {
         //public static void Main()
         //{
-        //    new UnitTest1().TestMethod1();
+        //    new PerformanceTest().TestMethod1();
         //}
 
-        public UnitTest1()
+        public PerformanceTest()
         {
             writer = new StreamWriter("output.xml", false);
             watch = new Stopwatch();

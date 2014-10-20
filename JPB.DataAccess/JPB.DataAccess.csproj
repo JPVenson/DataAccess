@@ -73,6 +73,9 @@
     <Compile Include="Manager\DBAccessLayerUpdate.cs" />
     <Compile Include="Manager\DbTypes.cs" />
     <Compile Include="Manager\PreDefinedProviderCollection.cs" />
+    <Compile Include="Contacts\IValueConverter.cs" />
+    <Compile Include="ModelsAnotations\ILoadFromXmlStrategy.cs" />
+    <Compile Include="ModelsAnotations\LoadStrategy.cs" />
     <Compile Include="Pager\Contracts\IDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />
     <Compile Include="Pager\Contracts\IWrapperDataPager.cs" />

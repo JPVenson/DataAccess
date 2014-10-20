@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.ComponentModel;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.QueryFactory;
 
@@ -183,7 +183,7 @@ namespace JPB.DataAccess.ModelsAnotations
 
         internal IValueConverter CreateConverter()
         {
-            return (IValueConverter) Activator.CreateInstance(_converter);
+            return (IValueConverter)Activator.CreateInstance(_converter);
         }
     }
 
@@ -192,13 +192,16 @@ namespace JPB.DataAccess.ModelsAnotations
     /// If marked the output field from the query will be Serlized to the given object
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class FromXmlAttribute : Attribute
+    public sealed class FromXmlAttribute : ForModel
     {
+        private Type _loadFromXmlStrategy;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="fieldName"></param>
         public FromXmlAttribute(string fieldName)
+            :base(fieldName)
         {
             FieldName = fieldName;
         }
@@ -207,22 +210,25 @@ namespace JPB.DataAccess.ModelsAnotations
         /// The name of the Field inside the result stream
         /// </summary>
         public string FieldName { get; set; }
-    }
 
-    /// <summary>
-    /// Converts values from DB to C# and back
-    /// </summary>
-    public interface IValueConverter
-    {
         /// <summary>
-        /// Converts a value from a DB to a C# object 
+        /// Specifiys the Strategy that is used to load the Property
         /// </summary>
-        /// <param name="value">Object from the DB</param>
-        /// <param name="targetType">Type of Property to convert to</param>
-        /// <param name="parameter">given Params</param>
-        /// <param name="culture">Current Culture</param>
-        /// <returns>C# object that is of type of property</returns>
-        object Convert(object value, Type targetType, object parameter, CultureInfo culture);
-        object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture);
+        [DefaultValue("IncludeInSelect")]
+        public LoadStrategy LoadStrategy { get; set; }
+
+        /// <summary>
+        /// if set the type will be used to define a user logic for the Serialization process
+        /// </summary>
+        public Type LoadFromXmlStrategy
+        {
+            get { return _loadFromXmlStrategy; }
+            set
+            {
+                if (!typeof(ILoadFromXmlStrategy).IsAssignableFrom(value))
+                    throw new ArgumentException("Not able to assgin value from IloadFromXMLStrategy");
+                _loadFromXmlStrategy = value;
+            }
+        }
     }
 }
