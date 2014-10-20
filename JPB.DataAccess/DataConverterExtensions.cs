@@ -425,7 +425,15 @@ namespace JPB.DataAccess
                                 Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType)), null);
                         else
                         {
-                            var changeType = Convert.ChangeType(value, property.PropertyType);
+                            object changeType;
+                            if (typeof (Enum).IsAssignableFrom(property.PropertyType))
+                            {
+                                changeType = Enum.ToObject(property.PropertyType, value);
+                            }
+                            else
+                            {
+                                changeType = Convert.ChangeType(value, property.PropertyType);
+                            }
                             property.SetValue(instance, changeType, null);
                         }
                     }
