@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
@@ -7,6 +8,8 @@ namespace JPB.DataAccess.EntryCreator.MsSql
 {
     public class ColumnInfo
     {
+        private SqlDbType _targetType2;
+
         [SelectFactoryMehtod()]
         public static IQueryFactoryResult SelectColumns(string tableName)
         {
@@ -27,8 +30,17 @@ namespace JPB.DataAccess.EntryCreator.MsSql
         [ValueConverter(typeof(NoYesConverter))]
         public bool Nullable { get; set; }
 
-        [ForModel("DATA_TYPE")]
-        [ValueConverter(typeof(DbTypeToCsType))]
         public Type TargetType { get; set; }
+
+        [ForModel("DATA_TYPE")]
+        public SqlDbType TargetType2
+        {
+            get { return _targetType2; }
+            set
+            {
+                TargetType = DbTypeToCsType.GetClrType(value);
+                _targetType2 = value;
+            }
+        }
     }
 }

@@ -9,11 +9,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DebuggerHelper;
@@ -395,7 +397,7 @@ namespace JPB.DataAccess
                         {
                             //target Property is of type list
                             //so expect a xml valid list Take the first element and expect the propertys inside this first element
-                            var record = new XmlDataRecord(xmlStream);
+                            var record = new XmlDataRecord(xmlStream, property.PropertyType.GetGenericArguments().FirstOrDefault());
                             var xmlDataRecords = record.CreateListOfItems();
 
                             var genericArguments = property.PropertyType.GetGenericArguments().FirstOrDefault();
@@ -408,7 +410,7 @@ namespace JPB.DataAccess
                         }
                         else
                         {
-                            var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType, new XmlDataRecord(xmlStream));
+                            var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType, new XmlDataRecord(xmlStream, property.PropertyType));
 
                             property.SetValue(instance, xmlSerilizedProperty);
                         }
@@ -419,30 +421,8 @@ namespace JPB.DataAccess
                     }
                     else
                     {
-                        if (property.PropertyType.IsGenericTypeDefinition &&
-                            property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                            property.SetValue(instance,
-                                Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType)), null);
-                        else
-                        {
-                            object changeType;
-                            if (typeof(Enum).IsAssignableFrom(property.PropertyType))
-                            {
-                                changeType = Enum.ToObject(property.PropertyType, value);
-                            }
-                            else
-                            {
-                                if (value is IConvertible)
-                                {
-                                    changeType = Convert.ChangeType(value, property.PropertyType);
-                                }
-                                else
-                                {
-                                    changeType = value;
-                                }
-                            }
-                            property.SetValue(instance, changeType, null);
-                        }
+                        var changedType = ChangeType(value, property.PropertyType);
+                        property.SetValue(instance, changedType, null);               
                     }
                 }
                 else if (instanceOfFallbackList != null)
@@ -480,6 +460,57 @@ namespace JPB.DataAccess
             }
 
             return instance;
+        }
+
+        internal static object ChangeType(object value, Type conversion)
+        {
+            var t = conversion;
+
+            if (t.IsGenericType && t.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+            {
+                if (value == null)
+                {
+                    return null;
+                }
+
+                t = Nullable.GetUnderlyingType(t);
+            }
+
+            if (typeof(Enum).IsAssignableFrom(t))
+            {
+                if (typeof(long).IsAssignableFrom(value.GetType()))
+                {
+                    value = Enum.ToObject(t, value);
+                }
+                else if (value is string)
+                {
+                    value = Enum.Parse(t, value as string, true);
+                }
+            }
+            else if (typeof(bool).IsAssignableFrom(t))
+            {
+                if (value is int)
+                {
+                    value = value.Equals(1);
+                }
+                else if (value is string)
+                {
+                    value = value.Equals("1");
+                }
+                else if (value is bool)
+                {
+                    value = (bool)value;
+                }
+            }
+            else if (typeof(byte[]).IsAssignableFrom(t))
+            {
+                if (value is string)
+                {
+                    value = Encoding.Default.GetBytes(value as string);
+                }
+            }
+
+            return Convert.ChangeType(value, t);
         }
 
         /// <summary>

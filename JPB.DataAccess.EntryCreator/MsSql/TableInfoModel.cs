@@ -5,6 +5,24 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.EntryCreator.MsSql
 {
+
+    public class StoredPrcInfoModel
+    {
+        public StoredProcedureInformation Parameter { get; set; }
+        public bool Exclude { get; set; }
+        public string NewTableName { get; set; }
+
+        public StoredPrcInfoModel(StoredProcedureInformation parameter)
+        {
+            Parameter = parameter;
+        }
+
+        public string GetClassName()
+        {
+            return string.IsNullOrEmpty(NewTableName) ? Parameter.TableName : NewTableName;
+        }
+    }
+
     public class TableInfoModel
     {
         public TableInformations Info { get; set; }

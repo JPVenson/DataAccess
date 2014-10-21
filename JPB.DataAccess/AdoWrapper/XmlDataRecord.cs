@@ -8,15 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.AdoWrapper
 {
     internal class XmlDataRecord : IDataRecord
     {
+        private readonly Type _target;
         private XElement baseElement;
 
-        public XmlDataRecord(string xmlStream)
+        public XmlDataRecord(string xmlStream, Type target)
         {
+            _target = target;
             baseElement = XDocument.Parse(xmlStream).Elements().ElementAt(0);
         }
 
@@ -37,7 +40,22 @@ namespace JPB.DataAccess.AdoWrapper
 
         public object GetValue(int i)
         {
-            return baseElement.Elements().ElementAt(i).Value;
+            var name = GetName(i);
+
+            var mapEntiysPropToSchema = this._target.ReMapSchemaToEntiysProp(name);
+
+            var firstOrDefault = _target.GetProperties().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
+            if (firstOrDefault == null)
+                return null;
+
+            var propertyType = firstOrDefault.PropertyType;
+            var xElement = baseElement.Elements().ElementAt(i);
+
+            if (xElement.HasElements)
+                return xElement.ToString();
+
+            var type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
+            return type;
         }
 
         public int GetValues(object[] values)
@@ -148,7 +166,7 @@ namespace JPB.DataAccess.AdoWrapper
         public IEnumerable<XmlDataRecord> CreateListOfItems()
         {
             var xNodes = baseElement.Elements();
-            return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString()));
+            return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), this._target));
         }
     }
 }

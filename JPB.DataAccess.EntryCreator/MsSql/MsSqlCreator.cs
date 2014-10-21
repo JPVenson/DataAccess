@@ -6,10 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.EntryCreator.MsSql
 {
@@ -46,224 +48,12 @@ namespace JPB.DataAccess.EntryCreator.MsSql
 
             _tableNames = Manager.Select<TableInformations>().Select(s => new TableInfoModel(s, databaseName)).ToList();
             _views = Manager.Select<ViewInformation>().Select(s => new TableInfoModel(s, databaseName)).ToList();
+            _storedProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
 
-            Console.WriteLine("Found {0} Tables and {1} Views ... select a Table to see Options or start an Action", _tableNames.Count, _views.Count);
+            Console.WriteLine("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", _tableNames.Count, _views.Count, _storedProcs.Count);
             RenderMenu();
         }
 
-        private void RenderCompiler()
-        {
-            Console.Clear();
-            Console.WriteLine("Start compiling with selected options");
-
-            var provider = CodeDomProvider.CreateProvider("CSharp");
-
-            foreach (var tableInfoModel in _tableNames)
-            {
-                if (tableInfoModel.Exclude)
-                    continue;
-
-                var targetCsName = tableInfoModel.GetClassName();
-
-                var generatedClass = new CodeTypeDeclaration(targetCsName);
-
-                generatedClass.IsClass = true;
-
-                var generatedCodeAttribute = new GeneratedCodeAttribute("MsSqlEntryCreator", "1.0.0.0");
-                var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
-                    new CodeAttributeArgument(
-                    new CodePrimitiveExpression(generatedCodeAttribute.Tool)),
-                        new CodeAttributeArgument(
-                            new CodePrimitiveExpression(generatedCodeAttribute.Version)));
-
-                generatedClass.CustomAttributes.Add(codeAttrDecl);
-                if (!string.IsNullOrEmpty(tableInfoModel.NewTableName))
-                {
-                    var forModel = new ForModel(tableInfoModel.Info.TableName);
-                    var codeAttributeDeclaration = new CodeAttributeDeclaration(forModel.GetType().Name,
-                        new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName)));
-                    generatedClass.CustomAttributes.Add(codeAttributeDeclaration);
-                    generatedClass.Name = tableInfoModel.NewTableName;
-
-                }
-                else
-                {
-                    generatedClass.Name = tableInfoModel.Info.TableName;
-                }
-
-                if (tableInfoModel.CreateSelectFactory)
-                {
-                    var ctor = new CodeConstructor();
-                    ctor.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ObjectFactoryMethodAttribute).Name));
-                    ctor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(IDataRecord).Name, "record"));
-                    ctor.Attributes = MemberAttributes.Public;
-
-                    foreach (var columInfoModel in tableInfoModel.ColumnInfos)
-                    {
-                        var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
-                            new CodePrimitiveExpression(columInfoModel.ColumnInfo.ColumnName));
-                        var castExp = new CodeCastExpression(columInfoModel.ColumnInfo.TargetType, codeIndexerExpression);
-                        var setExpr = new CodeAssignStatement(new CodeVariableReferenceExpression(columInfoModel.GetPropertyName()), castExp);
-
-                        ctor.Statements.Add(setExpr);
-                    }
-
-                    generatedClass.Members.Add(ctor);
-                }
-
-                var fields = new List<CodeMemberField>();
-                var propertys = new List<CodeMemberProperty>();
-
-
-                foreach (var columInfoModel in tableInfoModel.ColumnInfos)
-                {
-                    var property = new CodeMemberProperty();
-
-                    property.Attributes = MemberAttributes.Public;
-                    property.HasGet = true;
-                    property.HasSet = true;
-
-                    var targetType = columInfoModel.ColumnInfo.TargetType;
-                    if (columInfoModel.ColumnInfo.Nullable)
-                    {
-                        var type = typeof(Nullable<>);
-                        if (columInfoModel.ColumnInfo.TargetType.IsClass)
-                        {
-                            try
-                            {
-                                targetType = type.MakeGenericType(columInfoModel.ColumnInfo.TargetType);
-                            }
-                            catch (Exception)
-                            {
-
-                            }
-                        }
-                    }
-                    property.Type = new CodeTypeReference(targetType);
-                    var codeAttributeDeclarationCollection = new CodeAttributeDeclarationCollection();
-                    if (!string.IsNullOrEmpty(columInfoModel.NewColumnName))
-                    {
-                        var forModel = new ForModel(columInfoModel.ColumnInfo.ColumnName);
-                        codeAttributeDeclarationCollection.Add(new CodeAttributeDeclaration(forModel.GetType().Name,
-                            new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName))));
-                        property.Name = columInfoModel.NewColumnName;
-                    }
-                    else
-                    {
-                        property.Name = columInfoModel.ColumnInfo.ColumnName;
-                    }
-
-                    var memberName = char.ToLower(property.Name[0]) + property.Name.Substring(1);
-                    memberName = memberName.Insert(0, "_");
-
-                    var field = new CodeMemberField()
-                    {
-                        Name = memberName,
-                        Type = new CodeTypeReference(targetType),
-                        Attributes = MemberAttributes.Private
-                    };
-
-                    property.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName)));
-                    property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName), new CodePropertySetValueReferenceExpression()));
-
-                    if (columInfoModel.PrimaryKey)
-                    {
-                        codeAttributeDeclarationCollection.Add(
-                            new CodeAttributeDeclaration(typeof(PrimaryKeyAttribute).Name));
-                    }
-                    property.CustomAttributes = codeAttributeDeclarationCollection;
-                    fields.Add(field);
-                    propertys.Add(property);
-                }
-
-                if (tableInfoModel.CreateFallbackProperty)
-                {
-                    var property = new CodeMemberProperty();
-
-                    property.HasGet = true;
-                    property.HasSet = true;
-                    property.Type = new CodeTypeReference(typeof(Dictionary<string, object>));
-                    var codeAttributeDeclarationCollection = new CodeAttributeDeclarationCollection();
-                    property.Name = "FallbackDictorary";
-                    var memberName = "_fallbackDictorary";
-
-                    var field = new CodeMemberField()
-                    {
-                        Name = memberName,
-                        Type = new CodeTypeReference(typeof(Dictionary<string, object>)),
-                        Attributes = MemberAttributes.Private
-                    };
-
-                    property.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName)));
-                    property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName), new CodePropertySetValueReferenceExpression()));
-                    var fallbackAtt = new LoadNotImplimentedDynamicAttribute();
-                    codeAttributeDeclarationCollection.Add(new CodeAttributeDeclaration(fallbackAtt.GetType().Name));
-                    property.CustomAttributes = codeAttributeDeclarationCollection;
-                    propertys.Add(property);
-                    fields.Add(field);
-                }
-
-                foreach (var codeMemberField in fields)
-                {
-                    generatedClass.Members.Add(codeMemberField);
-                }
-
-                foreach (var codeMemberProperty in propertys)
-                {
-                    generatedClass.Members.Add(codeMemberProperty);
-                }
-
-                var writer = new StringWriter();
-
-                //if (tableInfoModel.CreateSelectFactory)
-                //{
-                //    provider.GenerateCodeFromType(generatedClass, writer, new CodeGeneratorOptions());
-                //    var compileAssemblyFromDom = provider.CompileAssemblyFromDom(new CompilerParameters(), new CodeSnippetCompileUnit(writer.ToString()));
-
-                //    var firstOrDefault = Assembly.LoadFile(compileAssemblyFromDom.PathToAssembly).DefinedTypes.FirstOrDefault();
-                //    var selectAttribute = new SelectFactoryAttribute(DbAccessLayer.CreateSelect(firstOrDefault));
-
-                //    generatedClass.CustomAttributes.Add(new CodeAttributeDeclaration(selectAttribute.GetType().Name,
-                //        new CodeAttributeArgument(new CodePrimitiveExpression(selectAttribute.Query))));
-                //}
-
-                var targetFileName = Path.Combine(TargetDir, targetCsName + ".cs");
-                if (File.Exists(targetFileName))
-                    File.Delete(targetFileName);
-                var fileStream = File.Create(targetFileName);
-
-                using (fileStream)
-                {
-                    writer = new StringWriter();
-                    var cp = new CompilerParameters();
-                    cp.ReferencedAssemblies.Add("System.dll");
-                    cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
-
-                    var compileUnit = new CodeCompileUnit();
-                    var importNameSpace = new CodeNamespace("JPB.DataAccess.EntryCreator.AutoGeneratedEntrys");
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Linq"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Data"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ModelsAnotations"));
-                    importNameSpace.Types.Add(generatedClass);
-                    compileUnit.Namespaces.Add(importNameSpace);
-
-                    provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
-                    {
-                        BlankLinesBetweenMembers = true,
-                        VerbatimOrder = true,
-                        ElseOnClosing = true
-                    });
-                    var csResult = Encoding.Unicode.GetBytes(writer.ToString());
-                    fileStream.Write(csResult, 0, csResult.Length);
-                }
-            }
-
-            Console.WriteLine("Created all files");
-
-            Console.ReadKey();
-        }
 
         private readonly string[] usings = new[]
         {
@@ -275,21 +65,33 @@ namespace JPB.DataAccess.EntryCreator.MsSql
         private void RenderMenu()
         {
             Console.WriteLine("Tables:");
-            for (int i = 0; i < _tableNames.Count; i++)
+            int i = 0;
+            for (; i < _tableNames.Count; i++)
             {
                 Console.WriteLine("{0} \t {1}", i, _tableNames[i].Info.TableName);
             }
 
             Console.WriteLine("Views:");
-            for (int i = _tableNames.Count; i < _views.Count + _tableNames.Count; i++)
+            int j = i;
+            for (; j < _views.Count + i; j++)
             {
-                Console.WriteLine("{0} \t {1}", i, _views[i - _tableNames.Count].Info.TableName);
+                Console.WriteLine("{0} \t {1}", j, _views[j - i].Info.TableName);
+            }
+
+            Console.WriteLine("Procedures:");
+            int k = j;
+            for (; k < _storedProcs.Count + j; k++)
+            {
+                Console.WriteLine("{0} \t {1}", k, _storedProcs[k - j].Parameter.TableName);
             }
 
             Console.WriteLine("Actions: ");
 
-            Console.WriteLine(@"\compile        \tStarts the Compiling of all Tables");
-            Console.WriteLine(@"\autoGenNames   \tDefines all names after a common naming convention");
+            Console.WriteLine(@"\compile       Starts the Compiling of all Tables");
+            Console.WriteLine(@"\autoGenNames  Defines all names after a common naming convention");
+            Console.WriteLine(@"\add           Adds elements to existing cs classes");
+            Console.WriteLine(@"    Options: ");
+            Console.WriteLine(@"            \ctor [\r]   Adds a loader Constructor to all classes and if \r is set existing ctors that impliments IDataReader will be overwritten");
             RenderMenuAction();
         }
 
@@ -322,7 +124,8 @@ namespace JPB.DataAccess.EntryCreator.MsSql
             }
             else
             {
-                switch (input)
+                var split = input.Split(' ');
+                switch (split[0])
                 {
                     case @"\autogennames":
                         AutoAlignNames();
@@ -330,11 +133,120 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                     case @"\compile":
                         RenderCompiler();
                         break;
+                    case @"\add":
+                        if (split.Length >= 2)
+                        {
+                            switch (split[1])
+                            {
+                                case @"\ctor":
+                                    var replaceExisting = false;
+                                    if (split.Length >= 3)
+                                    {
+                                        replaceExisting = split[3] == "\r";
+                                    }
+                                    RenderCtorCompiler(replaceExisting);
+                                    break;
+                            }
+                        }
+                        break;
                 }
             }
 
             Console.WriteLine("Done ... end of program");
             Console.ReadKey();
+        }
+
+        private void RenderCtorCompiler(bool replaceExisting)
+        {
+            var files = Directory.GetFiles(TargetDir, "*.cs");
+
+            var provider = CodeDomProvider.CreateProvider("CSharp");
+            foreach (var file in files)
+            {
+                var codeCompileUnit = provider.Parse(new StreamReader(file));
+
+                foreach (var ns in codeCompileUnit.Namespaces.Cast<CodeNamespace>())
+                {
+                    foreach (var type in ns.Types.Cast<CodeTypeDeclaration>())
+                    {
+                        bool createCtor = false;
+                        var ctor = type.Members.Cast<CodeTypeMember>().Where(s => s is CodeConstructor).Cast<CodeConstructor>().Where(s => s != null).ToArray();
+
+                        if (ctor.Any())
+                        {
+                            var fullNameOfObjectFactory = typeof(ObjectFactoryMethodAttribute).FullName;
+                            var ctorWithIdataRecord =
+                                ctor.FirstOrDefault(
+                                    s =>
+                                        s.CustomAttributes.Cast<CodeAttributeDeclaration>()
+                                            .Any(e => e.Name == fullNameOfObjectFactory)
+                                        && s.Parameters.Count == 1
+                                        && s.Parameters.Cast<CodeParameterDeclarationExpression>().Any(e => Type.GetType(e.Type.BaseType) == typeof(IDataRecord)));
+
+                            if (ctorWithIdataRecord != null)
+                            {
+                                if (replaceExisting)
+                                {
+                                    type.Members.Remove(ctorWithIdataRecord);
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                createCtor = true;
+                            }
+                        }
+                        else
+                        {
+                            createCtor = true;
+                        }
+
+                        if (createCtor)
+                        {
+                            //var propertys =
+                            //    type.Members.Cast<CodeMemberProperty>()
+                            //        .Where(s => s != null)
+                            //        .ToArray()
+                            //        .Select(s => new Tuple<string, Type>(s.Name, Type.GetType(s.Type.BaseType)));
+
+                            //var columnNames = 
+
+
+
+                        }
+                    }
+                }
+            }
+        }
+        //        foreach (var columInfoModel in tableInfoModel.ColumnInfos)
+        //{
+        //    var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
+        //        new CodePrimitiveExpression(columInfoModel.ColumnInfo.ColumnName));
+        //    var castExp = new CodeCastExpression(columInfoModel.ColumnInfo.TargetType, codeIndexerExpression);
+        //    var setExpr = new CodeAssignStatement(new CodeVariableReferenceExpression(columInfoModel.GetPropertyName()), castExp);
+
+        //    ctor.Statements.Add(setExpr);
+        //}
+        private CodeConstructor GenerateTypeConstructor(IDictionary<string, Tuple<string, Type>> propertyToDbColumn)
+        {
+            var ctor = new CodeConstructor();
+            ctor.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ObjectFactoryMethodAttribute).Name));
+            ctor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(IDataRecord).Name, "record"));
+            ctor.Attributes = MemberAttributes.Public;
+
+            foreach (var columInfoModel in propertyToDbColumn)
+            {
+                var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"), new CodePrimitiveExpression(columInfoModel.Key));
+                var castExp = new CodeCastExpression(columInfoModel.Value.Item2, codeIndexerExpression);
+                var setExpr = new CodeAssignStatement(new CodeVariableReferenceExpression(columInfoModel.Value.Item1), castExp);
+
+                ctor.Statements.Add(setExpr);
+            }
+
+            return ctor;
         }
 
         private void AutoAlignNames()
@@ -584,11 +496,371 @@ namespace JPB.DataAccess.EntryCreator.MsSql
             RenderTableMenu(selectedTable);
         }
 
+
+        private void RenderCompiler()
+        {
+            Console.Clear();
+            Console.WriteLine("Start compiling with selected options");
+
+            var provider = CodeDomProvider.CreateProvider("CSharp");
+
+            foreach (var tableInfoModel in _tableNames.Concat(_views))
+            {
+                if (tableInfoModel.Exclude)
+                    continue;
+
+                var targetCsName = tableInfoModel.GetClassName();
+
+                var generatedClass = new CodeTypeDeclaration(targetCsName);
+
+                generatedClass.IsClass = true;
+
+                var generatedCodeAttribute = new GeneratedCodeAttribute("MsSqlEntryCreator", "1.0.0.0");
+                var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
+                    new CodeAttributeArgument(
+                    new CodePrimitiveExpression(generatedCodeAttribute.Tool)),
+                        new CodeAttributeArgument(
+                            new CodePrimitiveExpression(generatedCodeAttribute.Version)));
+
+                generatedClass.CustomAttributes.Add(codeAttrDecl);
+                if (!string.IsNullOrEmpty(tableInfoModel.NewTableName))
+                {
+                    var forModel = new ForModel(tableInfoModel.Info.TableName);
+                    var codeAttributeDeclaration = new CodeAttributeDeclaration(forModel.GetType().Name,
+                        new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName)));
+                    generatedClass.CustomAttributes.Add(codeAttributeDeclaration);
+                    generatedClass.Name = tableInfoModel.NewTableName;
+
+                }
+                else
+                {
+                    generatedClass.Name = tableInfoModel.Info.TableName;
+                }
+
+                if (tableInfoModel.CreateSelectFactory)
+                {
+                    var generateTypeConstructor = GenerateTypeConstructor(tableInfoModel.ColumnInfos.ToDictionary(s => s.ColumnInfo.ColumnName,
+                        s => new Tuple<string, Type>(s.GetPropertyName(), s.ColumnInfo.TargetType)));
+                    generatedClass.Members.Add(generateTypeConstructor);
+                }
+
+                var fields = new List<CodeMemberField>();
+                var propertys = new List<CodeMemberProperty>();
+
+                foreach (var columInfoModel in tableInfoModel.ColumnInfos)
+                {
+                    var property = new CodeMemberProperty();
+
+                    property.Attributes = (MemberAttributes)24578; //Public Final
+                    property.HasGet = true;
+                    property.HasSet = true;
+
+                    var targetType = columInfoModel.ColumnInfo.TargetType;
+                    if (columInfoModel.ColumnInfo.Nullable)
+                    {
+                        var type = typeof(Nullable<>);
+                        if (columInfoModel.ColumnInfo.TargetType.IsClass)
+                        {
+                            try
+                            {
+                                targetType = type.MakeGenericType(columInfoModel.ColumnInfo.TargetType);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+                        }
+                    }
+                    property.Type = new CodeTypeReference(targetType);
+                    var codeAttributeDeclarationCollection = new CodeAttributeDeclarationCollection();
+                    if (!string.IsNullOrEmpty(columInfoModel.NewColumnName))
+                    {
+                        var forModel = new ForModel(columInfoModel.ColumnInfo.ColumnName);
+                        codeAttributeDeclarationCollection.Add(new CodeAttributeDeclaration(forModel.GetType().Name,
+                            new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName))));
+                        property.Name = columInfoModel.NewColumnName;
+                    }
+                    else
+                    {
+                        property.Name = columInfoModel.ColumnInfo.ColumnName;
+                    }
+
+                    var memberName = char.ToLower(property.Name[0]) + property.Name.Substring(1);
+                    memberName = memberName.Insert(0, "_");
+
+                    var field = new CodeMemberField()
+                    {
+                        Name = memberName,
+                        Type = new CodeTypeReference(targetType),
+                        Attributes = MemberAttributes.Private
+                    };
+
+                    property.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName)));
+                    property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName), new CodePropertySetValueReferenceExpression()));
+
+                    if (columInfoModel.PrimaryKey)
+                    {
+                        codeAttributeDeclarationCollection.Add(
+                            new CodeAttributeDeclaration(typeof(PrimaryKeyAttribute).Name));
+                    }
+                    if (columInfoModel.ColumnInfo.TargetType2 == SqlDbType.Timestamp)
+                    {
+                        codeAttributeDeclarationCollection.Add(
+                           new CodeAttributeDeclaration(typeof(RowVersionAttribute).Name));
+                    }
+                    property.CustomAttributes = codeAttributeDeclarationCollection;
+                    fields.Add(field);
+                    propertys.Add(property);
+                }
+
+                if (tableInfoModel.CreateFallbackProperty)
+                {
+                    var property = new CodeMemberProperty();
+
+                    property.HasGet = true;
+                    property.HasSet = true;
+                    property.Type = new CodeTypeReference(typeof(Dictionary<string, object>));
+                    var codeAttributeDeclarationCollection = new CodeAttributeDeclarationCollection();
+                    property.Name = "FallbackDictorary";
+                    var memberName = "_fallbackDictorary";
+
+                    var field = new CodeMemberField()
+                    {
+                        Name = memberName,
+                        Type = new CodeTypeReference(typeof(Dictionary<string, object>)),
+                        Attributes = MemberAttributes.Private
+                    };
+
+                    property.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName)));
+                    property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName), new CodePropertySetValueReferenceExpression()));
+                    var fallbackAtt = new LoadNotImplimentedDynamicAttribute();
+                    codeAttributeDeclarationCollection.Add(new CodeAttributeDeclaration(fallbackAtt.GetType().Name));
+                    property.CustomAttributes = codeAttributeDeclarationCollection;
+                    propertys.Add(property);
+                    fields.Add(field);
+                }
+
+                foreach (var codeMemberField in fields)
+                {
+                    generatedClass.Members.Add(codeMemberField);
+                }
+
+                foreach (var codeMemberProperty in propertys)
+                {
+                    generatedClass.Members.Add(codeMemberProperty);
+                }
+
+                var writer = new StringWriter();
+
+                //if (tableInfoModel.CreateSelectFactory)
+                //{
+                //    provider.GenerateCodeFromType(generatedClass, writer, new CodeGeneratorOptions());
+                //    var compileAssemblyFromDom = provider.CompileAssemblyFromDom(new CompilerParameters(), new CodeSnippetCompileUnit(writer.ToString()));
+
+                //    var firstOrDefault = Assembly.LoadFile(compileAssemblyFromDom.PathToAssembly).DefinedTypes.FirstOrDefault();
+                //    var selectAttribute = new SelectFactoryAttribute(DbAccessLayer.CreateSelect(firstOrDefault));
+
+                //    generatedClass.CustomAttributes.Add(new CodeAttributeDeclaration(selectAttribute.GetType().Name,
+                //        new CodeAttributeArgument(new CodePrimitiveExpression(selectAttribute.Query))));
+                //}
+
+                var targetFileName = Path.Combine(TargetDir, targetCsName + ".cs");
+                if (File.Exists(targetFileName))
+                    File.Delete(targetFileName);
+                var fileStream = File.Create(targetFileName);
+
+                using (fileStream)
+                {
+                    writer = new StringWriter();
+                    var cp = new CompilerParameters();
+                    cp.ReferencedAssemblies.Add("System.dll");
+                    cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
+
+                    var compileUnit = new CodeCompileUnit();
+                    var importNameSpace = new CodeNamespace("JPB.DataAccess.EntryCreator.AutoGeneratedEntrys");
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Linq"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Data"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ModelsAnotations"));
+                    importNameSpace.Types.Add(generatedClass);
+                    compileUnit.Namespaces.Add(importNameSpace);
+
+                    provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
+                    {
+                        BlankLinesBetweenMembers = true,
+                        VerbatimOrder = true,
+                        ElseOnClosing = true
+                    });
+                    var csResult = Encoding.Unicode.GetBytes(writer.ToString());
+                    fileStream.Write(csResult, 0, csResult.Length);
+                }
+            }
+
+
+            foreach (var proc in _storedProcs)
+            {
+                if (proc.Exclude)
+                    continue;
+
+                var targetCsName = proc.GetClassName();
+
+                var generatedClass = new CodeTypeDeclaration(targetCsName);
+
+                generatedClass.IsClass = true;
+
+                var generatedCodeAttribute = new GeneratedCodeAttribute("MsSqlEntryCreator", "1.0.0.0");
+                var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
+                    new CodeAttributeArgument(
+                    new CodePrimitiveExpression(generatedCodeAttribute.Tool)),
+                        new CodeAttributeArgument(
+                            new CodePrimitiveExpression(generatedCodeAttribute.Version)));
+
+                generatedClass.CustomAttributes.Add(codeAttrDecl);
+                if (!string.IsNullOrEmpty(proc.NewTableName))
+                {
+                    var forModel = new ForModel(proc.Parameter.TableName);
+                    var codeAttributeDeclaration = new CodeAttributeDeclaration(forModel.GetType().Name,
+                        new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName)));
+                    generatedClass.CustomAttributes.Add(codeAttributeDeclaration);
+                    generatedClass.Name = proc.NewTableName;
+
+                }
+                else
+                {
+                    generatedClass.Name = proc.Parameter.TableName;
+                }
+
+                var fields = new List<CodeMemberField>();
+                var propertys = new List<CodeMemberProperty>();
+
+                foreach (var spParamter in proc.Parameter.ParamaterSpParams)
+                {
+                    var property = new CodeMemberProperty();
+
+                    property.Attributes = (MemberAttributes)24578; //Public Final
+                    property.HasGet = true;
+                    property.HasSet = true;
+
+                    var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
+
+                    property.Type = new CodeTypeReference(targetType);
+                    var codeAttributeDeclarationCollection = new CodeAttributeDeclarationCollection();
+                    property.Name = spParamter.Parameter;
+
+                    var memberName = char.ToLower(property.Name[0]) + property.Name.Substring(1);
+                    memberName = memberName.Insert(0, "_");
+
+                    var field = new CodeMemberField()
+                    {
+                        Name = memberName,
+                        Type = new CodeTypeReference(targetType),
+                        Attributes = MemberAttributes.Private
+                    };
+
+                    property.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName)));
+                    property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName), new CodePropertySetValueReferenceExpression()));
+
+                    property.CustomAttributes = codeAttributeDeclarationCollection;
+                    fields.Add(field);
+                    propertys.Add(property);
+                }
+
+                foreach (var codeMemberField in fields)
+                {
+                    generatedClass.Members.Add(codeMemberField);
+                }
+
+                foreach (var codeMemberProperty in propertys)
+                {
+                    generatedClass.Members.Add(codeMemberProperty);
+                }
+
+                var writer = new StringWriter();
+
+                //Create Caller
+
+                var createFactoryMethod = new CodeMemberMethod();
+                createFactoryMethod.Name = "Invoke" + proc.GetClassName();
+                createFactoryMethod.ReturnType = new CodeTypeReference(typeof(QueryFactoryResult));
+                createFactoryMethod.CustomAttributes.Add(
+                    new CodeAttributeDeclaration(typeof(SelectFactoryMehtodAttribute).FullName));
+
+                //Create the Params
+                string query = "EXEC " + proc.Parameter.TableName;
+
+                var nameOfListOfParamater = "paramaters";
+                var listOfParams = new CodeObjectCreateExpression(typeof(List<IQueryParameter>));
+                var listOfParamscreator = new CodeVariableDeclarationStatement(typeof(List<IQueryParameter>), nameOfListOfParamater, listOfParams);
+                createFactoryMethod.Statements.Add(listOfParamscreator);
+
+                for (int i = 0; i < proc.Parameter.ParamaterSpParams.Count(); i++)
+                {
+                    var variable = proc.Parameter.ParamaterSpParams.ElementAt(i);
+                    var paramName = "param" + i;
+                    query += " @" + paramName + " ";
+                    var createParams = new CodeObjectCreateExpression(typeof(QueryParameter),
+                        new CodePrimitiveExpression(paramName),
+                        new CodeVariableReferenceExpression(variable.Parameter));
+                    var addToList = new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater),
+                        "Add", createParams);
+
+                    createFactoryMethod.Statements.Add(addToList);
+                }
+
+                //Finaly create the instance
+                var createFactory = new CodeObjectCreateExpression(typeof(QueryFactoryResult),
+                    new CodePrimitiveExpression(query),
+                    new CodeVariableReferenceExpression(nameOfListOfParamater));
+                var queryFactoryVariable = new CodeMethodReturnStatement(createFactory);
+
+                createFactoryMethod.Statements.Add(queryFactoryVariable);
+                generatedClass.Members.Add(createFactoryMethod);
+
+                var targetFileName = Path.Combine(TargetDir, targetCsName + ".cs");
+                if (File.Exists(targetFileName))
+                    File.Delete(targetFileName);
+                var fileStream = File.Create(targetFileName);
+
+                using (fileStream)
+                {
+                    writer = new StringWriter();
+                    var cp = new CompilerParameters();
+                    cp.ReferencedAssemblies.Add("System.dll");
+                    cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
+
+                    var compileUnit = new CodeCompileUnit();
+                    var importNameSpace = new CodeNamespace("JPB.DataAccess.EntryCreator.AutoGeneratedEntrys");
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Linq"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Data"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ModelsAnotations"));
+                    importNameSpace.Types.Add(generatedClass);
+                    compileUnit.Namespaces.Add(importNameSpace);
+
+                    provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
+                    {
+                        BlankLinesBetweenMembers = true,
+                        VerbatimOrder = true,
+                        ElseOnClosing = true
+                    });
+                    var csResult = Encoding.Unicode.GetBytes(writer.ToString());
+                    fileStream.Write(csResult, 0, csResult.Length);
+                }
+            }
+
+            Console.WriteLine("Created all files");
+
+            Console.ReadKey();
+        }
+
         public string SqlVersion { get; set; }
 
         private bool Is2000;
         private bool Is2014;
         private List<TableInfoModel> _views;
+        private List<StoredPrcInfoModel> _storedProcs;
 
         private void CheckVersion()
         {
