@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.SqlLite", "JPB.DataAccess.SqlLite\JPB.DataAccess.SqlLite.csproj", "{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.EntryCreator", "..\JPB.DataAccess.EntryCreator\JPB.DataAccess.EntryCreator.csproj", "{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -46,6 +48,12 @@ Global
 		{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
 		{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
 		{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
+		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

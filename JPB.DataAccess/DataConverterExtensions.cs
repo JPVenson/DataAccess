@@ -420,19 +420,26 @@ namespace JPB.DataAccess
                     else
                     {
                         if (property.PropertyType.IsGenericTypeDefinition &&
-                            property.PropertyType.GetGenericTypeDefinition() == typeof (Nullable<>))
+                            property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                             property.SetValue(instance,
                                 Convert.ChangeType(value, Nullable.GetUnderlyingType(property.PropertyType)), null);
                         else
                         {
                             object changeType;
-                            if (typeof (Enum).IsAssignableFrom(property.PropertyType))
+                            if (typeof(Enum).IsAssignableFrom(property.PropertyType))
                             {
                                 changeType = Enum.ToObject(property.PropertyType, value);
                             }
                             else
                             {
-                                changeType = Convert.ChangeType(value, property.PropertyType);
+                                if (value is IConvertible)
+                                {
+                                    changeType = Convert.ChangeType(value, property.PropertyType);
+                                }
+                                else
+                                {
+                                    changeType = value;
+                                }
                             }
                             property.SetValue(instance, changeType, null);
                         }
