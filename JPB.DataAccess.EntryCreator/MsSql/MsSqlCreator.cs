@@ -26,7 +26,16 @@ namespace JPB.DataAccess.EntryCreator.MsSql
         {
             TargetDir = outputPath;
             Manager = new DbAccessLayer(DbTypes.MsSql, connection);
-            var checkDatabase = Manager.CheckDatabase();
+            bool checkDatabase;
+            try
+            {
+                checkDatabase = Manager.CheckDatabase();
+            }
+            catch (Exception)
+            {
+                checkDatabase = false;
+            }
+
             if (!checkDatabase)
             {
                 Console.WriteLine("Database not accessible. Maybe wrong Connection or no Selected Database?");
@@ -206,16 +215,46 @@ namespace JPB.DataAccess.EntryCreator.MsSql
 
                         if (createCtor)
                         {
-                            //var propertys =
-                            //    type.Members.Cast<CodeMemberProperty>()
-                            //        .Where(s => s != null)
-                            //        .ToArray()
-                            //        .Select(s => new Tuple<string, Type>(s.Name, Type.GetType(s.Type.BaseType)));
+                            var propertys =
+                                type.Members.Cast<CodeMemberProperty>()
+                                    .Where(s => s != null)
+                                    .ToArray()
+                                    .Select(s => new Tuple<string, Type>(s.Name, Type.GetType(s.Type.BaseType)));
 
-                            //var columnNames = 
+                            var generateTypeConstructor = GenerateTypeConstructor(propertys.ToDictionary(f =>
+                            {
+                                var property =
+                                    type.Members.Cast<CodeMemberProperty>().FirstOrDefault(e => e.Name == f.Item1);
 
+                                var codeAttributeDeclaration = property.CustomAttributes.Cast<CodeAttributeDeclaration>()
+                                    .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModel).FullName);
+                                if (codeAttributeDeclaration != null)
+                                {
+                                    var firstOrDefault =
+                                        codeAttributeDeclaration.Arguments.Cast<CodeAttributeDeclaration>()
+                                            .FirstOrDefault();
+                                    if (firstOrDefault != null)
+                                    {
+                                        var codeAttributeArgument = firstOrDefault
+                                            .Arguments.Cast<CodeAttributeArgument>()
+                                            .FirstOrDefault();
+                                        if (codeAttributeArgument != null)
+                                        {
+                                            var codePrimitiveExpression = codeAttributeArgument
+                                                .Value as CodePrimitiveExpression;
+                                            if (codePrimitiveExpression != null)
+                                                return
+                                                    codePrimitiveExpression.Value.ToString();
+                                        }
+                                    }
+                                }
+                                return f.Item1;
+                            }, f =>
+                            {
+                                return f;
+                            }));
 
-
+                            type.Members.Insert(0, generateTypeConstructor);
                         }
                     }
                 }
@@ -495,14 +534,35 @@ namespace JPB.DataAccess.EntryCreator.MsSql
             Console.Clear();
             RenderTableMenu(selectedTable);
         }
-
-
+        
         private void RenderCompiler()
         {
             Console.Clear();
             Console.WriteLine("Start compiling with selected options");
 
+            var copyrightBuilder = new StringBuilder();
+
+            copyrightBuilder.AppendLine("o--------------------------------o");
+            copyrightBuilder.AppendLine("| Made by Jean - Pierre Bachmann |");
+            copyrightBuilder.AppendLine("| Visit my Github page for more  |");
+            copyrightBuilder.AppendLine("|              infos             |");
+            copyrightBuilder.AppendLine("|  https://github.com/JPVenson   |");
+            copyrightBuilder.AppendLine("|              Email:            |");
+            copyrightBuilder.AppendLine("|  jean-pierre_bachmann@live.de  |");
+            copyrightBuilder.AppendLine("o--------------------------------o");
+
+            Console.WriteLine(copyrightBuilder.ToString());
+
             var provider = CodeDomProvider.CreateProvider("CSharp");
+
+            var comments = copyrightBuilder.ToString().Split('\n').Select(s => new CodeCommentStatement(s)).Concat(new []
+            {
+                new CodeCommentStatement("Created by " + Environment.UserDomainName + @"\" + Environment.UserName),
+                new CodeCommentStatement("Created at " + DateTime.Now.ToString("yyyy MMMM dd"))
+            }).ToArray();
+
+            var classes = new List<CodeTypeDeclaration>();
+
 
             foreach (var tableInfoModel in _tableNames.Concat(_views))
             {
@@ -512,7 +572,10 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                 var targetCsName = tableInfoModel.GetClassName();
 
                 var generatedClass = new CodeTypeDeclaration(targetCsName);
+                classes.Add(generatedClass);
 
+                generatedClass.Comments.AddRange(comments);
+                
                 generatedClass.IsClass = true;
 
                 var generatedCodeAttribute = new GeneratedCodeAttribute("MsSqlEntryCreator", "1.0.0.0");
@@ -649,9 +712,7 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                 {
                     generatedClass.Members.Add(codeMemberProperty);
                 }
-
-                var writer = new StringWriter();
-
+              
                 //if (tableInfoModel.CreateSelectFactory)
                 //{
                 //    provider.GenerateCodeFromType(generatedClass, writer, new CodeGeneratorOptions());
@@ -664,48 +725,16 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                 //        new CodeAttributeArgument(new CodePrimitiveExpression(selectAttribute.Query))));
                 //}
 
-                var targetFileName = Path.Combine(TargetDir, targetCsName + ".cs");
-                if (File.Exists(targetFileName))
-                    File.Delete(targetFileName);
-                var fileStream = File.Create(targetFileName);
 
-                using (fileStream)
-                {
-                    writer = new StringWriter();
-                    var cp = new CompilerParameters();
-                    cp.ReferencedAssemblies.Add("System.dll");
-                    cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
-
-                    var compileUnit = new CodeCompileUnit();
-                    var importNameSpace = new CodeNamespace("JPB.DataAccess.EntryCreator.AutoGeneratedEntrys");
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Linq"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.Data"));
-                    importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ModelsAnotations"));
-                    importNameSpace.Types.Add(generatedClass);
-                    compileUnit.Namespaces.Add(importNameSpace);
-
-                    provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
-                    {
-                        BlankLinesBetweenMembers = true,
-                        VerbatimOrder = true,
-                        ElseOnClosing = true
-                    });
-                    var csResult = Encoding.Unicode.GetBytes(writer.ToString());
-                    fileStream.Write(csResult, 0, csResult.Length);
-                }
             }
 
+            var dynmaicResultClass = "DynamicStoredProcedureResultSet";
 
-            foreach (var proc in _storedProcs)
+            //create a generic Result entry
+            if (_storedProcs.Any())
             {
-                if (proc.Exclude)
-                    continue;
-
-                var targetCsName = proc.GetClassName();
-
-                var generatedClass = new CodeTypeDeclaration(targetCsName);
+                var generatedClass = new CodeTypeDeclaration(dynmaicResultClass);
+                classes.Add(generatedClass);
 
                 generatedClass.IsClass = true;
 
@@ -717,6 +746,62 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                             new CodePrimitiveExpression(generatedCodeAttribute.Version)));
 
                 generatedClass.CustomAttributes.Add(codeAttrDecl);
+
+                generatedClass.Comments.AddRange(comments);
+
+                var property = new CodeMemberProperty();
+
+                property.HasGet = true;
+                property.HasSet = true;
+                property.Type = new CodeTypeReference(typeof(Dictionary<string, object>));
+                var codeAttributeDeclarationCollection = new CodeAttributeDeclarationCollection();
+                property.Name = "FallbackDictorary";
+                var memberName = "_fallbackDictorary";
+
+                var field = new CodeMemberField()
+                {
+                    Name = memberName,
+                    Type = new CodeTypeReference(typeof(Dictionary<string, object>)),
+                    Attributes = MemberAttributes.Private
+                };
+
+                property.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName)));
+                property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName), new CodePropertySetValueReferenceExpression()));
+                var fallbackAtt = new LoadNotImplimentedDynamicAttribute();
+                codeAttributeDeclarationCollection.Add(new CodeAttributeDeclaration(fallbackAtt.GetType().Name));
+                property.CustomAttributes = codeAttributeDeclarationCollection;
+
+                generatedClass.Members.Add(property);
+                generatedClass.Members.Add(field);
+            }
+
+            foreach (var proc in _storedProcs)
+            {
+                if (proc.Exclude)
+                    continue;
+
+                var targetCsName = proc.GetClassName();
+
+                var generatedClass = new CodeTypeDeclaration(targetCsName);
+                classes.Add(generatedClass);
+
+                generatedClass.Comments.AddRange(comments);
+                generatedClass.TypeParameters.Add(dynmaicResultClass);
+
+                generatedClass.IsClass = true;
+
+                //add Generated Code Attribute
+                var generatedCodeAttribute = new GeneratedCodeAttribute("MsSqlEntryCreator", "1.0.0.0");
+                var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
+                    new CodeAttributeArgument(
+                    new CodePrimitiveExpression(generatedCodeAttribute.Tool)),
+                        new CodeAttributeArgument(
+                            new CodePrimitiveExpression(generatedCodeAttribute.Version)));
+                generatedClass.CustomAttributes.Add(codeAttrDecl);
+
+                var spAttribute = new CodeAttributeDeclaration(typeof(StoredProcedureAttribute).Name);
+                generatedClass.CustomAttributes.Add(spAttribute);
+
                 if (!string.IsNullOrEmpty(proc.NewTableName))
                 {
                     var forModel = new ForModel(proc.Parameter.TableName);
@@ -779,7 +864,6 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                 var writer = new StringWriter();
 
                 //Create Caller
-
                 var createFactoryMethod = new CodeMemberMethod();
                 createFactoryMethod.Name = "Invoke" + proc.GetClassName();
                 createFactoryMethod.ReturnType = new CodeTypeReference(typeof(QueryFactoryResult));
@@ -811,32 +895,36 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                 //Finaly create the instance
                 var createFactory = new CodeObjectCreateExpression(typeof(QueryFactoryResult),
                     new CodePrimitiveExpression(query),
-                    new CodeVariableReferenceExpression(nameOfListOfParamater));
+                    new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater), "ToArray"));
                 var queryFactoryVariable = new CodeMethodReturnStatement(createFactory);
 
                 createFactoryMethod.Statements.Add(queryFactoryVariable);
                 generatedClass.Members.Add(createFactoryMethod);
+            }
 
-                var targetFileName = Path.Combine(TargetDir, targetCsName + ".cs");
+
+            foreach (var codeTypeDeclaration in classes)
+            {
+                var targetFileName = Path.Combine(TargetDir, codeTypeDeclaration.Name + ".cs");
                 if (File.Exists(targetFileName))
                     File.Delete(targetFileName);
                 var fileStream = File.Create(targetFileName);
 
                 using (fileStream)
                 {
-                    writer = new StringWriter();
+                    var writer = new StringWriter();
                     var cp = new CompilerParameters();
                     cp.ReferencedAssemblies.Add("System.dll");
                     cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
-
                     var compileUnit = new CodeCompileUnit();
                     var importNameSpace = new CodeNamespace("JPB.DataAccess.EntryCreator.AutoGeneratedEntrys");
                     importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
                     importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
+                    importNameSpace.Imports.Add(new CodeNamespaceImport("System.CodeDom.Compiler"));
                     importNameSpace.Imports.Add(new CodeNamespaceImport("System.Linq"));
                     importNameSpace.Imports.Add(new CodeNamespaceImport("System.Data"));
                     importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ModelsAnotations"));
-                    importNameSpace.Types.Add(generatedClass);
+                    importNameSpace.Types.Add(codeTypeDeclaration);
                     compileUnit.Namespaces.Add(importNameSpace);
 
                     provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
@@ -845,6 +933,8 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                         VerbatimOrder = true,
                         ElseOnClosing = true
                     });
+
+                    Console.WriteLine("Generated class" + codeTypeDeclaration.Name);
                     var csResult = Encoding.Unicode.GetBytes(writer.ToString());
                     fileStream.Write(csResult, 0, csResult.Length);
                 }

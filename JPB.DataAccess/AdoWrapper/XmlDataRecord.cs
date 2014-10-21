@@ -20,6 +20,12 @@ namespace JPB.DataAccess.AdoWrapper
         public XmlDataRecord(string xmlStream, Type target)
         {
             _target = target;
+            if (string.IsNullOrEmpty(xmlStream))
+            {
+                baseElement = new XElement("faild");
+                return;
+            }
+
             baseElement = XDocument.Parse(xmlStream).Elements().ElementAt(0);
         }
 
