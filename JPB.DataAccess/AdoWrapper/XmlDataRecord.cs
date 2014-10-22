@@ -14,10 +14,26 @@ namespace JPB.DataAccess.AdoWrapper
 {
     internal class XmlDataRecord : IDataRecord
     {
-        private readonly Type _target;
-        private XElement baseElement;
+        internal static XmlDataRecord TryParse(string xmlStream, Type target)
+        {
+            if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
+                return null;
 
-        public XmlDataRecord(string xmlStream, Type target)
+            try
+            {
+                var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
+                return new XmlDataRecord(xDocument, target);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private readonly Type _target;
+        private readonly XElement baseElement;
+
+        private XmlDataRecord(string xmlStream, Type target)
         {
             _target = target;
             if (string.IsNullOrEmpty(xmlStream))
@@ -27,6 +43,12 @@ namespace JPB.DataAccess.AdoWrapper
             }
 
             baseElement = XDocument.Parse(xmlStream).Elements().ElementAt(0);
+        }
+
+        internal XmlDataRecord(XDocument baseElement, Type target)
+        {
+            _target = target;
+            this.baseElement = baseElement.Elements().ElementAt(0);
         }
 
         public string GetName(int i)

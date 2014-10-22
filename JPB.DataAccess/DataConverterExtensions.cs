@@ -358,6 +358,9 @@ namespace JPB.DataAccess
         /// <param name="reader"></param>
         public static object SetPropertysViaReflection(object instance, IDataRecord reader)
         {
+            if (reader == null)
+                return instance;
+
             var listofpropertys = new Dictionary<string, object>();
             var type = instance.GetType();
 
@@ -391,13 +394,18 @@ namespace JPB.DataAccess
                     {
                         var xmlStream = value.ToString();
 
+                        if (string.IsNullOrEmpty(xmlStream))
+                        {
+                            continue;
+                        }
+
                         //Check for List
 
                         if (CheckForListInterface(property))
                         {
                             //target Property is of type list
                             //so expect a xml valid list Take the first element and expect the propertys inside this first element
-                            var record = new XmlDataRecord(xmlStream, property.PropertyType.GetGenericArguments().FirstOrDefault());
+                            var record = XmlDataRecord.TryParse(xmlStream, property.PropertyType.GetGenericArguments().FirstOrDefault());
                             var xmlDataRecords = record.CreateListOfItems();
 
                             var genericArguments = property.PropertyType.GetGenericArguments().FirstOrDefault();
@@ -410,7 +418,7 @@ namespace JPB.DataAccess
                         }
                         else
                         {
-                            var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType, new XmlDataRecord(xmlStream, property.PropertyType));
+                            var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType, XmlDataRecord.TryParse(xmlStream, property.PropertyType));
 
                             property.SetValue(instance, xmlSerilizedProperty);
                         }
