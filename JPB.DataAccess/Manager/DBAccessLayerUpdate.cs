@@ -131,7 +131,7 @@ namespace JPB.DataAccess.Manager
 
         private static IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db, params object[] parameter)
         {
-            return CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(typeof(T), entry, db, createUpdate, parameter);
+            return typeof(T).CheckInstanceForAttriute<T, InsertFactoryMethodAttribute>(entry, db, createUpdate, parameter);
         }
 
         internal static IDbCommand createUpdate<T>(T entry, IDatabase db)
@@ -143,10 +143,10 @@ namespace JPB.DataAccess.Manager
                 type.GetProperties()
                     .Where(s => s.CheckForPK() || s.GetCustomAttributes().Any(e => e is InsertIgnore))
                     .Select(s => s.Name)
-                    .Concat(CreateIgnoreList(type))
+                    .Concat(type.CreateIgnoreList())
                     .ToArray();
 
-            string[] propertyInfos = CreatePropertyNames<T>(ignore).ToArray();
+            string[] propertyInfos = DbAccessLayerHelper.CreatePropertyNames<T>(ignore).ToArray();
 
             string prop = " SET ";
             for (int index = 0; index < propertyInfos.Length; index++)
@@ -159,7 +159,7 @@ namespace JPB.DataAccess.Manager
 
             string query = "UPDATE " + type.GetTableName() + prop + " WHERE " + pk + " = " + entry.GetPK();
 
-            return CreateCommandWithParameterValues(query, propertyInfos, entry, db);
+            return db.CreateCommandWithParameterValues(query, propertyInfos, entry);
         }
 
         public static IDbCommand CreateUpdate<T>(T entry, IDatabase db)

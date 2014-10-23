@@ -130,10 +130,10 @@ namespace JPB.DataAccess.Manager
                             s.CheckForPK() ||
                             s.GetCustomAttributes().Any(e => e is InsertIgnore || e is IgnoreReflectionAttribute))
                     .Select(s => s.Name)
-                    .Concat(CreateIgnoreList(type))
+                    .Concat(type.CreateIgnoreList())
                     .ToArray();
-            string[] propertyInfos = CreatePropertyNames(type, ignore).ToArray();
-            string csvprops = CreatePropertyCSV(type, ignore);
+            string[] propertyInfos = type.CreatePropertyNames(ignore).ToArray();
+            string csvprops = type.CreatePropertyCSV(ignore);
 
             string values = "";
             for (int index = 0; index < propertyInfos.Length; index++)
@@ -143,7 +143,7 @@ namespace JPB.DataAccess.Manager
 
             string[] orignialProps = type.GetPropertysViaRefection(ignore).ToArray();
 
-            return CreateCommandWithParameterValues(type, query, orignialProps, entry, db);
+            return db.CreateCommandWithParameterValues(type, query, orignialProps, entry);
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
         {
-            return CheckInstanceForAttriute<InsertFactoryMethodAttribute>(type, entry, db, (e, f) => _CreateInsert(type, e, f), parameter);
+            return type.CheckInstanceForAttriute<InsertFactoryMethodAttribute>(entry, db, (e, f) => _CreateInsert(type, e, f), parameter);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace JPB.DataAccess.Manager
                 paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
             }
 
-            return CreateCommandWithParameterValues(mergedCommandText, db, paramter);
+            return db.CreateCommandWithParameterValues(mergedCommandText, paramter);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace JPB.DataAccess.Manager
                 paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
             }
 
-            return CreateCommandWithParameterValues(mergedCommandText, db, paramter);
+            return db.CreateCommandWithParameterValues(mergedCommandText, paramter);
         }
 
         /// <summary>

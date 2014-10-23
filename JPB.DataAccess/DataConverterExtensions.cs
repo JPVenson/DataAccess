@@ -39,6 +39,16 @@ namespace JPB.DataAccess
         {
             return new QueryDebugger(command);
         }
+        
+        /// <summary>
+        /// Gets the Value or DB null
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static object GetDataValue(object value)
+        {
+            return value ?? DBNull.Value;
+        }
 
         public static string GetTableName<T>()
         {
@@ -287,7 +297,7 @@ namespace JPB.DataAccess
                     var targetName = firstOrDefault.KeyName;
                     targetType = propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 
-                    if (string.IsNullOrEmpty(targetName))
+                    if (String.IsNullOrEmpty(targetName))
                     {
                         targetName = targetType.GetPK();
                     }
@@ -394,7 +404,7 @@ namespace JPB.DataAccess
                     {
                         var xmlStream = value.ToString();
 
-                        if (string.IsNullOrEmpty(xmlStream))
+                        if (String.IsNullOrEmpty(xmlStream))
                         {
                             continue;
                         }

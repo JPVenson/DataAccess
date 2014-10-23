@@ -94,7 +94,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 IDbCommand finalAppendCommand = null;
                 if (AppendedComands.Any())
                 {
-                    finalAppendCommand = AppendedComands.Aggregate(DbAccessLayer.CreateCommand(s, "WHERE"), (current, comand) => DbAccessLayer.ConcatCommands(s, current, comand));
+                    finalAppendCommand = AppendedComands.Aggregate(DbAccessLayerHelper.CreateCommand(s, "WHERE"), (current, comand) => DbAccessLayer.ConcatCommands(s, current, comand));
                 }
 
                 if (string.IsNullOrEmpty(SqlVersion))
@@ -106,7 +106,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
                 var pk = TargetType.GetPK();
 
-                var selectMaxCommand = DbAccessLayer.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
+                var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
 
                 if (finalAppendCommand != null)
                     selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
@@ -160,7 +160,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                         new QueryParameter("PageSize", PageSize),
                     });
 
-                    command = DbAccessLayer.CreateCommandWithParameterValues(queryBuilde.ToString(), s, parameters);
+                    command = s.CreateCommandWithParameterValues(queryBuilde.ToString(), parameters);
                 }
 
                 if (finalAppendCommand != null)

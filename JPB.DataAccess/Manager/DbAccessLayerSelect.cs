@@ -151,7 +151,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IDbCommand CreateSelect(Type type, IDatabase db, string query)
         {
-            return CreateCommand(db, CreateSelectQueryFactory(type, db).CommandText + " " + query);
+            return DbAccessLayerHelper.CreateCommand(db, CreateSelectQueryFactory(type, db).CommandText + " " + query);
         }
 
 
@@ -178,7 +178,7 @@ namespace JPB.DataAccess.Manager
         public static IDbCommand CreateSelect(Type type, IDatabase db, string query,
             IEnumerable<IQueryParameter> paramenter)
         {
-            IDbCommand plainCommand = CreateCommand(db,
+            IDbCommand plainCommand = DbAccessLayerHelper.CreateCommand(db,
                 CreateSelectQueryFactory(type, db).CommandText + " " + query);
             foreach (IQueryParameter para in paramenter)
                 plainCommand.Parameters.AddWithValue(para.Name, para.Value, db);
@@ -208,7 +208,7 @@ namespace JPB.DataAccess.Manager
 
                 if (staticFactory != null)
                 {
-                    return CreateCommand(db, staticFactory.Query);
+                    return DbAccessLayerHelper.CreateCommand(db, staticFactory.Query);
                 }
             }
 
@@ -250,7 +250,7 @@ namespace JPB.DataAccess.Manager
 
                 if (searchMethodWithFittingParams.Length != 1)
                 {
-                    return CreateCommand(db, CreateSelect(type));
+                    return DbAccessLayerHelper.CreateCommand(db, CreateSelect(type));
                 }
 
                 MethodInfo method = searchMethodWithFittingParams.First();
@@ -264,17 +264,17 @@ namespace JPB.DataAccess.Manager
                     {
                         if (invoke is string && !string.IsNullOrEmpty(invoke as string))
                         {
-                            return CreateCommand(db, invoke as string);
+                            return DbAccessLayerHelper.CreateCommand(db, invoke as string);
                         }
                         if (invoke is IQueryFactoryResult)
                         {
                             var result = invoke as IQueryFactoryResult;
-                            return CreateCommandWithParameterValues(result.Query, db, result.Parameters);
+                            return db.CreateCommandWithParameterValues(result.Query, result.Parameters);
                         }
                     }
                 }
             }
-            return CreateCommand(db, CreateSelect(type));
+            return DbAccessLayerHelper.CreateCommand(db, CreateSelect(type));
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace JPB.DataAccess.Manager
         {
             string proppk = type.GetPK();
             string query = CreateSelectQueryFactory(type, db).CommandText + " WHERE " + proppk + " = @pk";
-            IDbCommand cmd = CreateCommand(db, query);
+            IDbCommand cmd = DbAccessLayerHelper.CreateCommand(db, query);
             cmd.Parameters.AddWithValue("@pk", pk, db);
             return cmd;
         }
@@ -312,7 +312,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static string CreateSelect(Type type)
         {
-            return "SELECT " + CreatePropertyCSV(type, CreateIgnoreList(type)) + " FROM " + type.GetTableName();
+            return "SELECT " + type.CreatePropertyCSV(type.CreateIgnoreList()) + " FROM " + type.GetTableName();
         }
 
         /// <summary>
@@ -341,7 +341,7 @@ namespace JPB.DataAccess.Manager
         {
             RaiseUnknownSelect(query);
             return
-                EnumerateDataRecords(database, query)
+                DbAccessLayerHelper.EnumerateDataRecords(database, query)
                     .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(type, dataRecord))
                     .ToList();
         }
@@ -385,7 +385,7 @@ namespace JPB.DataAccess.Manager
                 database.Run(
                     s =>
                     {
-                        IDbCommand command = CreateCommand(s, query);
+                        IDbCommand command = DbAccessLayerHelper.CreateCommand(s, query);
 
                         foreach (IQueryParameter item in paramenter)
                             command.Parameters.AddWithValue(item.Name, item.Value, s);
@@ -481,7 +481,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public List<object> SelectWhere(Type type, String @where, dynamic paramenter)
         {
-            IEnumerable<IQueryParameter> enumarateFromDynamics = EnumarateFromDynamics(paramenter);
+            IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
             return SelectWhere(type, where, enumarateFromDynamics);
         }
 
@@ -512,7 +512,7 @@ namespace JPB.DataAccess.Manager
         public IEnumerable<object> RunPrimetivSelect(Type type, IDbCommand command)
         {
             RaiseKnownSelect(command);
-            return EnumerateDataRecords(Database, command).Select(s => s[0]).ToList();
+            return DbAccessLayerHelper.EnumerateDataRecords(Database, command).Select(s => s[0]).ToList();
         }
 
         /// <summary>
@@ -524,7 +524,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public IEnumerable<object> RunPrimetivSelect(Type type, string query, IEnumerable<IQueryParameter> paramerter)
         {
-            return RunPrimetivSelect(type, CreateCommandWithParameterValues(query, Database, paramerter));
+            return RunPrimetivSelect(type, Database.CreateCommandWithParameterValues(query, paramerter));
         }
 
         /// <summary>
@@ -547,7 +547,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public List<T> RunPrimetivSelect<T>(string query, dynamic parameters) where T : class
         {
-            IEnumerable<IQueryParameter> enumarateFromDynamics = EnumarateFromDynamics(parameters);
+            IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(parameters);
             var runPrimetivSelect = RunPrimetivSelect(typeof(T), query, enumarateFromDynamics);
             return runPrimetivSelect.Cast<T>().ToList();
         }
@@ -594,7 +594,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public List<object> SelectNative(Type type, string query)
         {
-            return Select(type, Database, CreateCommand(Database, query));
+            return Select(type, Database, DbAccessLayerHelper.CreateCommand(Database, query));
         }
 
 
@@ -665,7 +665,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public List<object> SelectNative(Type type, string query, IEnumerable<IQueryParameter> paramenter)
         {
-            IDbCommand dbCommand = CreateCommandWithParameterValues(query, Database, paramenter);
+            IDbCommand dbCommand = Database.CreateCommandWithParameterValues(query, paramenter);
             return SelectNative(type, dbCommand);
         }
 
@@ -690,7 +690,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public List<object> SelectNative(Type type, string query, dynamic paramenter)
         {
-            IEnumerable<IQueryParameter> enumarateFromDynamics = EnumarateFromDynamics(paramenter);
+            IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
             return SelectNative(type, query, enumarateFromDynamics);
         }
 

@@ -61,6 +61,7 @@
     <Compile Include="AdoWrapper\XmlDataRecord.cs" />
     <Compile Include="DataConverterExtensions.cs" />
     <Compile Include="DataHelperExtensions.cs" />
+    <Compile Include="DbAccessLayerHelper.cs" />
     <Compile Include="DbEventArgs\DatabaseActionEvent.cs" />
     <Compile Include="DebuggerHelper\QueryDebugger.cs" />
     <Compile Include="Helper\IQueryParameter.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Manager\DbAccessLayer.cs" />
     <Compile Include="Manager\DbAccessLayerDelete.cs" />
     <Compile Include="Manager\DbAccessLayerEvents.cs" />
+    <Compile Include="Manager\DbAccessLayerExecuteProcedure.cs" />
     <Compile Include="Manager\DbAccessLayerInsert.cs" />
     <Compile Include="Manager\DbAccessLayerSelect.cs" />
     <Compile Include="Manager\DBAccessLayerUpdate.cs" />

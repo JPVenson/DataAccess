@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compiler\ClassCompiler.cs" />
     <Compile Include="MsSql\ColumnInfo.cs" />
     <Compile Include="MsSql\DbTypeToCsType.cs" />
     <Compile Include="IEntryCreator.cs" />
