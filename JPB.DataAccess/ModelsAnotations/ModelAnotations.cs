@@ -94,6 +94,22 @@ namespace JPB.DataAccess.ModelsAnotations
         public IEnumerable<IQueryParameter> Parameters { get; private set; }
     }
 
+    /// <summary>
+    ///     Provieds a Query ( parametes not used ) for selection
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class StoredProcedureFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
+    {
+        public StoredProcedureFactoryAttribute(string query)
+        {
+            Query = query;
+        }
+
+        public string Query { get; private set; }
+
+        public IEnumerable<IQueryParameter> Parameters { get; private set; }
+    }
+
     #endregion
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]

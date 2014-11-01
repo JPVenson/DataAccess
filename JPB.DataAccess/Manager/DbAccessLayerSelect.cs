@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
@@ -312,7 +313,13 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static string CreateSelect(Type type)
         {
-            return "SELECT " + type.CreatePropertyCSV(type.CreateIgnoreList()) + " FROM " + type.GetTableName();
+            var sb = new StringBuilder();
+            sb.Append("SELECT ");
+            sb.Append(type.CreatePropertyCSV(type.CreateIgnoreList()));
+            sb.Append(" FROM ");
+            sb.Append(type.GetTableName());
+            return sb.ToString();
+            //return "SELECT " + type.CreatePropertyCSV(type.CreateIgnoreList()) + " FROM " + type.GetTableName();
         }
 
         /// <summary>

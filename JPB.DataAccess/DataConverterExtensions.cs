@@ -39,6 +39,18 @@ namespace JPB.DataAccess
         {
             return new QueryDebugger(command);
         }
+
+        /// <summary>
+        /// Checks <param name="t"></param> for Generics
+        /// This would indicate that the call of the proc could return some data
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static bool CheckForResultProcedure(Type t)
+        {
+            var attStatus = t.GetGenericArguments();
+            return attStatus.Any();
+        }
         
         /// <summary>
         /// Gets the Value or DB null
