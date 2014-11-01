@@ -9,10 +9,10 @@ namespace UnitTestProject1
     [TestClass]
     public class UnitTestLoadXml
     {
-        public static void Main()
-        {
-            new UnitTestLoadXml().TestMethod1();
-        }
+        //public static void Main()
+        //{
+        //    new UnitTestLoadXml().TestMethod1();
+        //}
 
         [TestMethod]
         public void TestMethod1()

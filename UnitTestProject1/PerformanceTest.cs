@@ -15,19 +15,20 @@ namespace UnitTestProject1
     [TestClass]
     public class PerformanceTest
     {
-        //public static void Main()
-        //{
-        //    new PerformanceTest().TestMethod1();
-        //}
+        public static void Main()
+        {
+            new PerformanceTest().TestMethod1();
+        }
 
         public PerformanceTest()
         {
-            writer = new StreamWriter("output.xml", false);
+            writer = new StreamWriter(output, false);
             watch = new Stopwatch();
         }
 
         private StreamWriter writer;
         Stopwatch watch;
+        private const string output = "output.xml";
 
         private void TraceAction(Action action, string message)
         {
@@ -51,9 +52,19 @@ namespace UnitTestProject1
             var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
             accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
 
+            //accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
+            //                                                                     " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+            //                                                                     " UserName NVARCHAR(MAX)," +
+            //                                                                     ");"));
+
+            //accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
+            //                                                         " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+            //                                                         " Content NVARCHAR(MAX)," +
+            //                                                         ");"));
+
             var itemsList = new List<User>();
 
-            var count = 5000;
+            var count = 500;
 
             for (int i = 0; i < count; i++)
             {
@@ -87,31 +98,35 @@ namespace UnitTestProject1
             accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
             accessLayer.InsertRange(itemsList);
 
-            writer.WriteLine("Test Managed Select Range");
+            writer.WriteLine("Test POCO serialization over {0} items", count);
             TraceAction(() =>
             {
                 var items = accessLayer.Select<User>();
                 Assert.AreEqual(items.Count, count);
             }, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
 
-            writer.WriteLine("Test Managed/Unmanged Select Range");
+            writer.WriteLine();
+            writer.WriteLine("Test POCO serialization over {0} items with static Select Statement", count);
             TraceAction(() =>
             {
                 var items = accessLayer.SelectNative(typeof(UserImpl), "SELECT * FROM Users");
                 Assert.AreEqual(items.Count, count);
             }, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
 
-            writer.WriteLine("Test Unmanaged Select Range");
+            writer.WriteLine();
+            writer.WriteLine("POCO serialization over {0} items with static Select Statement and Static Factory", count);
             TraceAction(() =>
             {
                 var entitiesList = accessLayer.Database.GetEntitiesList("SELECT * FROM Users", e => new UserImpl(e), true).ToArray();
                 Assert.AreEqual(entitiesList.Length, count);
-
             }, "Test |  Selection + " + count + " + Entrys done in !{0}! ms");
 
             //accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
 
+
             writer.Close();
+            Console.WriteLine(File.ReadAllText(output));
+            Console.ReadLine();
         }
     }
 }
