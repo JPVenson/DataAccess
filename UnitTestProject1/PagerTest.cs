@@ -7,7 +7,6 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Pager.Contracts;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using testing;
 
 namespace UnitTestProject1
 {

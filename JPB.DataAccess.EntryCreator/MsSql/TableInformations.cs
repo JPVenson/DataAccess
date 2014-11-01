@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.EntryCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.MsSql
 {
     [SelectFactory("SELECT name FROM sysobjects WHERE xtype='U'")]
     public class TableInformations

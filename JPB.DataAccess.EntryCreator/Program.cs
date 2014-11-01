@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Sql;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using JPB.DataAccess.EntryCreator.MsSql;
+using JPB.DataAccess.EntityCreator.MsSql;
 
-namespace JPB.DataAccess.EntryCreator
+namespace JPB.DataAccess.EntityCreator
 {
     public class Program
     {

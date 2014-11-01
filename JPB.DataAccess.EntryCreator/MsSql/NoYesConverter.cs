@@ -1,8 +1,8 @@
 using System;
 using System.Globalization;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.EntryCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.MsSql
 {
     class NoYesConverter : IValueConverter
     {

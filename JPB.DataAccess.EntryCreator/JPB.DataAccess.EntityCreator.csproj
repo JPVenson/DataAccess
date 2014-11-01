@@ -7,8 +7,8 @@
     <ProjectGuid>{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JPB.DataAccess.EntryCreator</RootNamespace>
-    <AssemblyName>JPB.DataAccess.EntryCreator</AssemblyName>
+    <RootNamespace>JPB.DataAccess.EntityCreator</RootNamespace>
+    <AssemblyName>JPB.DataAccess.EntityCreator</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -4,7 +4,6 @@ using System.Linq;
 using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Manager;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using testing;
 
 namespace UnitTestProject1
 {

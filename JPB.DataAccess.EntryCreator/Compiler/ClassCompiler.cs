@@ -1,19 +1,17 @@
 ﻿using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.EntryCreator.MsSql;
+using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.EntryCreator.Compiler
+namespace JPB.DataAccess.EntityCreator.Compiler
 {
     public class ClassCompiler
     {
@@ -72,6 +70,26 @@ namespace JPB.DataAccess.EntryCreator.Compiler
             return classCompiler;
         }
 
+        public const string GitURL = "https://github.com/JPVenson/DataAccess";
+        public const string AttrbuteHeader = "MsSqlEntryCreator";
+
+        public static StringBuilder CreateHeader()
+        {
+            var copyrightBuilder = new StringBuilder();
+
+            copyrightBuilder.AppendLine("o--------------------------------o");
+            copyrightBuilder.AppendLine("| Made by Jean - Pierre Bachmann |");
+            copyrightBuilder.AppendLine("| Visit my Github page for more  |");
+            copyrightBuilder.AppendLine("|              infos             |");
+            copyrightBuilder.AppendLine("|  https://github.com/JPVenson/  |");
+            copyrightBuilder.AppendLine("|            DataAccess          |");
+            copyrightBuilder.AppendLine("|              Email:            |");
+            copyrightBuilder.AppendLine("|  jean-pierre_bachmann@live.de  |");
+            copyrightBuilder.AppendLine("o--------------------------------o");
+
+            return copyrightBuilder;
+        }
+
         public void CompileClass()
         {
             if (CompileToPrc && !preCompiled)
@@ -86,16 +104,7 @@ namespace JPB.DataAccess.EntryCreator.Compiler
             }
 
             //Add Creation Infos
-            var copyrightBuilder = new StringBuilder();
-
-            copyrightBuilder.AppendLine("o--------------------------------o");
-            copyrightBuilder.AppendLine("| Made by Jean - Pierre Bachmann |");
-            copyrightBuilder.AppendLine("| Visit my Github page for more  |");
-            copyrightBuilder.AppendLine("|              infos             |");
-            copyrightBuilder.AppendLine("|  https://github.com/JPVenson   |");
-            copyrightBuilder.AppendLine("|              Email:            |");
-            copyrightBuilder.AppendLine("|  jean-pierre_bachmann@live.de  |");
-            copyrightBuilder.AppendLine("o--------------------------------o");
+            var copyrightBuilder = CreateHeader();
 
             var comments = copyrightBuilder.ToString().Split('\n').Select(s => new CodeCommentStatement(s)).Concat(new[]
             {
@@ -108,13 +117,12 @@ namespace JPB.DataAccess.EntryCreator.Compiler
 
             //Add Copyright
             _base.Comments.AddRange(comments);
-
-
+            
             //Write static members
             _base.IsClass = true;
 
             //Add Code Generated Attribute
-            var generatedCodeAttribute = new GeneratedCodeAttribute("MsSqlEntryCreator", "1.0.0.0");
+            var generatedCodeAttribute = new GeneratedCodeAttribute(AttrbuteHeader, "1.0.0.1");
             var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
                 new CodeAttributeArgument(
                 new CodePrimitiveExpression(generatedCodeAttribute.Tool)),

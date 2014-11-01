@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryFactory;
 
-namespace testing
+namespace UnitTestProject1
 {
     [ForModel("Users")]
     public class User

@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.EntryCreator
+﻿namespace JPB.DataAccess.EntityCreator
 {
     public interface IEntryCreator
     {

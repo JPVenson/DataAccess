@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.Helper;
-using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.EntryCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.MsSql
 {
 
     public class StoredPrcInfoModel

@@ -1,7 +1,7 @@
 ﻿using System;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace testing
+namespace UnitTestProject1
 {
     [Serializable]
     [ForModel("Images")]

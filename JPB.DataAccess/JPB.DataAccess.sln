@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.SqlLite", "JPB.DataAccess.SqlLite\JPB.DataAccess.SqlLite.csproj", "{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.EntryCreator", "..\JPB.DataAccess.EntryCreator\JPB.DataAccess.EntryCreator.csproj", "{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.EntityCreator", "..\JPB.DataAccess.EntryCreator\JPB.DataAccess.EntityCreator.csproj", "{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution

@@ -1,20 +1,16 @@
 ﻿using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using JPB.DataAccess.EntryCreator.Compiler;
-using JPB.DataAccess.Helper;
+using JPB.DataAccess.EntityCreator.Compiler;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
-using System.CodeDom;
-using System.CodeDom.Compiler;
-using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.EntryCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.MsSql
 {
     public class MsSqlCreator : IEntryCreator
     {
@@ -565,10 +561,6 @@ namespace JPB.DataAccess.EntryCreator.MsSql
                     var spcName = spParamter.Parameter;
                     generatedClass.AddProperty(spcName, targetType);
                 }
-
-            
-
-             
             }
 
             foreach (var codeTypeDeclaration in classes)

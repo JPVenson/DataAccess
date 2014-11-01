@@ -1,9 +1,9 @@
 using System;
 using System.Data;
 using System.Globalization;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.EntryCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.MsSql
 {
     public class DbTypeToCsType : IValueConverter
     {

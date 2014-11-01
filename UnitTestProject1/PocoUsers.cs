@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace testing
+namespace UnitTestProject1
 {
     [ForModel("Users")]
     [SelectFactory("SELECT * FROM Users")]
