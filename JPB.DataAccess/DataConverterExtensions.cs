@@ -583,12 +583,9 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static object CreateInstance(this Type type, IDataRecord reader, out bool fullLoaded)
         {
-            ConstructorInfo[] constructorInfos = type.GetConstructors();
-            object source = null;
+            var constructorInfos = type.GetConstructors();
 
-            ConstructorInfo constructor =
-                constructorInfos
-                    .FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is ObjectFactoryMethodAttribute)) ??
+            var constructor = constructorInfos.FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is ObjectFactoryMethodAttribute)) ??
                 constructorInfos.FirstOrDefault(s =>
                 {
                     ParameterInfo[] parameterInfos = s.GetParameters();
@@ -603,7 +600,9 @@ namespace JPB.DataAccess
                 if (parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof(IDataRecord))
                 {
                     fullLoaded = true;
-                    return Activator.CreateInstance(type, reader);
+                    //todo add delegate to cache
+                    return constructor.Invoke(new object[] { reader });
+                    //return Activator.CreateInstance(type, reader);
                 }
             }
             else
@@ -617,8 +616,8 @@ namespace JPB.DataAccess
                 {
                     if (factory.IsStatic)
                     {
-                        ParameterInfo[] returnParameter = factory.GetParameters();
-                        ParameterInfo returnType = factory.ReturnParameter;
+                        var returnParameter = factory.GetParameters();
+                        var returnType = factory.ReturnParameter;
 
                         if (returnType != null && returnType.ParameterType == type)
                         {
@@ -634,9 +633,10 @@ namespace JPB.DataAccess
             }
 
             //well letzs do it by our self and create an instance and then load the propertys
-
             fullLoaded = false;
-            return Activator.CreateInstance(type);
+            //todo add delegate to cache
+            return constructorInfos.First().Invoke(new object[0]);
+            //return Activator.CreateInstance(type);
         }
 
         /// <summary>
@@ -655,6 +655,12 @@ namespace JPB.DataAccess
             return SetPropertysViaReflection(source, reader);
         }
 
+        /// <summary>
+        /// Returns all Cached Propertys from a <paramref name="type"/>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="ignore"></param>
+        /// <returns></returns>
         public static IEnumerable<string> GetPropertysViaRefection(this Type type, params string[] ignore)
         {
             return ReflectionHelpers.GetProperties(type).Select(s => s.Name).Except(ignore);

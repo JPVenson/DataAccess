@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Manager
         }
 
         /// <summary>
-        /// Insert a <param name="entry"></param> and then selectes this entry and creates a new model
+        /// Insert a <param name="entry"></param> ,then selectes this entry based on the last inserted ID and creates a new model
         /// </summary>
         /// <param name="entry"></param>
         /// <typeparam name="T"></typeparam>
@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Manager
         }
 
         /// <summary>
-        /// Defines the size of the Partiotion of the singel InsertStatements
+        /// get the size of the Partition of the singel InsertStatements
         /// </summary>
         public static int RangerInsertPation { get { return 25; } }
 
@@ -191,57 +191,44 @@ namespace JPB.DataAccess.Manager
         /// <summary>
         /// Not Connection save
         /// Must be executed inside a Valid Connection
+        /// Takes <paramref name="base"/> as base of Connection propertys
+        /// Merges the Command text of Both commands sepperated by a space
+        /// Creats a new command based on <param name="db"></param> and Adds the Merged Commandtext and all parameter to it
         /// </summary>
-        /// <param name="first"></param>
+        /// <param name="base"></param>
         /// <param name="last"></param>
+        /// <param name="autoRename">allows an Automatik renaming of multible Commands</param>
         /// <returns></returns>
-        public static IDbCommand ConcatCommands(IDatabase db, IDbCommand first, IDbCommand last)
+        public static IDbCommand ConcatCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
         {
-            var mergedCommandText = first.CommandText + " " + last.CommandText;
-            var paramter = new List<IQueryParameter>();
-
-            foreach (IDataParameter parameter in first.Parameters.Cast<IDataParameter>())
-            {
-                if (paramter.Any(s => s.Name == parameter.ParameterName))
-                {
-                    throw new ArgumentOutOfRangeException("first", "");
-                }
-
-                paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
-            }
-
-            foreach (var parameter in last.Parameters.Cast<IDataParameter>())
-            {
-                if (paramter.Any(s => s.Name == parameter.ParameterName))
-                {
-                    throw new ArgumentOutOfRangeException("first", "");
-                }
-
-                paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
-            }
-
-            return db.CreateCommandWithParameterValues(mergedCommandText, paramter);
+            var mergedCommandText = @base.CommandText + " " + last.CommandText;
+            return MergeTextToParameters(db, mergedCommandText, @base, last, autoRename);
         }
 
         /// <summary>
         /// Not Connection save
         /// Must be executed inside a Valid Connection
         /// </summary>
-        /// <param name="first"></param>
+        /// <param name="base"></param>
         /// <param name="last"></param>
+        /// <param name="autoRename">allows an Automatik renaming of multible Commands</param>
         /// <returns></returns>
-        public static IDbCommand MergeCommands(IDatabase db, IDbCommand first, IDbCommand last)
+        public static IDbCommand MergeCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
         {
-            var mergedCommandText = first.CommandText + ";" + last.CommandText;
+            var mergedCommandText = @base.CommandText + ";" + last.CommandText;
+            return MergeTextToParameters(db, mergedCommandText, @base, last, autoRename);
+        }
+
+        private static IDbCommand MergeTextToParameters(IDatabase db,
+            string mergedCommandText,
+            IDbCommand @base,
+            IDbCommand last,
+            bool autoRename = false)
+        {
             var paramter = new List<IQueryParameter>();
 
-            foreach (IDataParameter parameter in first.Parameters.Cast<IDataParameter>())
+            foreach (IDataParameter parameter in @base.Parameters.Cast<IDataParameter>())
             {
-                if (paramter.Any(s => s.Name == parameter.ParameterName))
-                {
-                    throw new ArgumentOutOfRangeException("first", "");
-                }
-
                 paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
             }
 
@@ -249,7 +236,22 @@ namespace JPB.DataAccess.Manager
             {
                 if (paramter.Any(s => s.Name == parameter.ParameterName))
                 {
-                    throw new ArgumentOutOfRangeException("first", "");
+                    //Parameter is found twice in both commands so rename it
+                    if (!autoRename)
+                    {
+                        throw new ArgumentOutOfRangeException("base", "");
+                    }
+                    else
+                    {
+                        int counter = 1;
+                        var parameterName = parameter.ParameterName;
+                        while (paramter.Any(s => s.Name == parameterName))
+                        {
+                            parameterName = string.Format("{0}_{1}", parameterName, counter);
+                        }
+
+                        parameter.ParameterName = parameterName;
+                    }
                 }
 
                 paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
@@ -267,7 +269,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static T InsertWithSelect<T>(T entry, IDatabase db)
         {
-            return (T)InsertWithSelect(typeof(T) ,entry, db);
+            return (T)InsertWithSelect(typeof(T), entry, db);
         }
     }
 }

@@ -176,8 +176,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="query"></param>
         /// <param name="paramenter"></param>
         /// <returns></returns>
-        public static IDbCommand CreateSelect(Type type, IDatabase db, string query,
-            IEnumerable<IQueryParameter> paramenter)
+        public static IDbCommand CreateSelect(Type type, IDatabase db, string query, IEnumerable<IQueryParameter> paramenter)
         {
             IDbCommand plainCommand = DbAccessLayerHelper.CreateCommand(db,
                 CreateSelectQueryFactory(type, db).CommandText + " " + query);

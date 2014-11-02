@@ -3,6 +3,9 @@ using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.QueryFactory
 {
+    /// <summary>
+    /// Wraps a query and its Paramters into one single Object
+    /// </summary>
     public class QueryFactoryResult : IQueryFactoryResult
     {
         public QueryFactoryResult(string query)

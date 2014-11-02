@@ -295,7 +295,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
         {
             //Key = Column Name
             //Value = 
-                //Value 1 = PropertyName
+                //Value 1 = MethodName
                 //Value 2 = Type
 
 

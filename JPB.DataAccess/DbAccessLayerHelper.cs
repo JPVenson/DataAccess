@@ -184,7 +184,7 @@ namespace JPB.DataAccess
                 {
                     var records = new List<IDataRecord>();
 
-                    using (IDataReader dr = query.ExecuteReader())
+                    using (var dr = query.ExecuteReader())
                     {
                         while (dr.Read())
                             records.Add(dr.CreateEgarRecord());

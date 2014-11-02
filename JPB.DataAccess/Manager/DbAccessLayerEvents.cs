@@ -44,7 +44,7 @@ namespace JPB.DataAccess.Manager
 
             var handler = OnUnknownDelete;
             if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
         protected virtual void RaiseKnownDelete(IDbCommand query)
@@ -55,7 +55,7 @@ namespace JPB.DataAccess.Manager
             //Async invoke
             var handler = OnDelete;
             if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
         protected static void RaiseUnknownSelect(IDbCommand query)
@@ -64,7 +64,7 @@ namespace JPB.DataAccess.Manager
                 return;
             var handler = OnUnknownSelect;
             if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
         protected virtual void RaiseKnownSelect(IDbCommand query)
@@ -75,7 +75,7 @@ namespace JPB.DataAccess.Manager
             //Async invoke
             var handler = OnKnownSelect;
             if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
         protected static void RaiseUnknwonUpdate(IDbCommand query)
@@ -85,7 +85,7 @@ namespace JPB.DataAccess.Manager
 
             var handler = OnUnknownUpdate;
             if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
         protected virtual void RaiseKnownUpdate(IDbCommand query)
@@ -96,7 +96,7 @@ namespace JPB.DataAccess.Manager
             //Async invoke
             var handler = OnKnownUpdate;
             if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
         protected static void RaiseUnknwonInsert(IDbCommand query)
@@ -106,7 +106,7 @@ namespace JPB.DataAccess.Manager
 
             var handler = OnUnknownInsert;
             if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
         protected virtual void RaiseKnownInsert(IDbCommand query)
@@ -117,7 +117,7 @@ namespace JPB.DataAccess.Manager
             //Async invoke
             var handler = OnKnownUInsert;
             if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(new QueryDebugger(query)), s => { }, null);
+                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
     }
 }

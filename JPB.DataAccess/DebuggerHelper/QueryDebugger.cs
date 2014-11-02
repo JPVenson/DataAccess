@@ -37,11 +37,8 @@ namespace JPB.DataAccess.DebuggerHelper
                 {
                     return _stackTracer;
                 }
-                else
-                {
-                    _wokerTask.Wait();
-                    return _stackTracer;
-                }
+                _wokerTask.Wait();
+                return _stackTracer;
             }
             private set
             {
@@ -53,16 +50,16 @@ namespace JPB.DataAccess.DebuggerHelper
         public const string EndValuePart = @"}} ";
 
         private Task _wokerTask;
-        private bool _loaded = false;
+        private bool _loaded;
         private string _stackTracer;
 
         private void Init()
         {
+            var frames = new StackTrace().GetFrames();
             _wokerTask = new Task(() =>
             {
                 try
                 {
-                    var frames = new StackTrace().GetFrames();
                     IEnumerable<StackFrame> stackFrames;
                     if (frames != null)
                     {
@@ -99,8 +96,10 @@ namespace JPB.DataAccess.DebuggerHelper
         /// Creates a Debugger that contains some debugging datas
         /// </summary>
         /// <param name="command"></param>
-        public QueryDebugger(IDbCommand command)
+        internal QueryDebugger(IDbCommand command)
         {
+            //Init async because this could be time consuming
+            _loaded = false;
             Init();
             var debugquery = new StringBuilder(command.CommandText);
             var sqlReady = CommandAsMsSql(command);

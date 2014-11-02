@@ -20,25 +20,38 @@ namespace UnitTestProject1
 
         public PerformanceTest()
         {
-            writer = new StreamWriter(output, false);
+            Console.WriteLine("Hello World");
+            FileStream fs = new FileStream(output, FileMode.Create);
+            // First, save the standard output.
+            //writer = new StreamWriter(fs);
+            //Console.SetOut(writer);
+            //Console.WriteLine("Hello file");
+
+
+            //writer = new StreamWriter(output, false);
+            //Console.WriteLine("Start");
+            //_textWriter = Console.Out;
+            //Console.SetOut(writer);
+            //Console.WriteLine("Start");
+            //writer.Flush();
             watch = new Stopwatch();
         }
 
         private StreamWriter writer;
         Stopwatch watch;
+        //private TextWriter _textWriter;
         private const string output = "output.xml";
 
         private void TraceAction(Action action, string message)
         {
             watch.Reset();
-
             watch.Start();
 
             action();
 
             watch.Stop();
 
-            writer.WriteLine(message, watch.ElapsedMilliseconds);
+            Console.WriteLine(message, watch.ElapsedMilliseconds);
 
             watch.Reset();
         }
@@ -47,7 +60,7 @@ namespace UnitTestProject1
         {
             //Clear old entrys
             var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
-            //accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
+            accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
 
             ////accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
             ////                                                                     " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
@@ -59,82 +72,71 @@ namespace UnitTestProject1
             ////                                                         " Content NVARCHAR(MAX)," +
             ////                                                         ");"));
 
-            //var itemsList = new List<User>();
+            var itemsList = new List<User>();
 
-            var count = 500;
+            var count = 5000;
 
-            //for (int i = 0; i < count; i++)
-            //{
-            //    itemsList.Add(new User() { Name = "testUser_" + i});
-            //}
+            for (int i = 0; i < count; i++)
+            {
+                itemsList.Add(new User() { Name = "testUser_" + i });
+            }
 
-            ////first try normal Inserting
-
-            //writer.WriteLine("Test Managed Insert Range");
-            //TraceAction(() =>
-            //{
-            //    accessLayer.InsertRange(itemsList);
-            //}, "Test | adding + " + count + " + Entrys done in !{0}! ms");
-
-            //writer.WriteLine("Test UnManaged Insert Range");
-            //TraceAction(() =>
-            //{
-            //    foreach (var user in itemsList)
-            //    {
-            //        accessLayer.Database.Run(s =>
-            //        {
-            //            var dbCommand = s.CreateCommand("INSERT INTO Users (UserName) VALUES (@1)") as SqlCommand;
-            //            dbCommand.Parameters.AddWithValue("@1", user.Name);
-
-            //            s.ExecuteNonQuery(dbCommand);
-            //        });
-            //    }
-            //}, "Test | adding + " + count + " + Entrys done in !{0}! ms");
-
-            //writer.WriteLine("Test POCO serialization over {0} items", count);
-            //TraceAction(() =>
-            //{
-            //    var items = accessLayer.Select<User>();
-            //}, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
-
-            //accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
-            //accessLayer.InsertRange(itemsList);
-
+            //Create the cache
             accessLayer.Select<User>();
 
+            //first try normal Inserting
+            Console.WriteLine("Test Managed Insert Range");
+            TraceAction(() =>
+            {
+                accessLayer.InsertRange(itemsList);
+            }, "Test | adding + " + count + " + Entrys done in !{0}! ms");
 
-            writer.WriteLine("Test POCO serialization over {0} items", count);
+            Console.WriteLine("Test UnManaged Insert Range");
+            TraceAction(() =>
+            {
+                accessLayer.Database.RunInTransaction(s =>
+                {
+                    foreach (var user in itemsList)
+                    {
+                        var dbCommand = s.CreateCommand("INSERT INTO Users (UserName) VALUES (@1)") as SqlCommand;
+                        dbCommand.Parameters.AddWithValue("@1", user.Name);
+                        s.ExecuteNonQuery(dbCommand);
+                    }
+                });
+            }, "Test | adding + " + count + " + Entrys done in !{0}! ms");
+
+            accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
+            accessLayer.InsertRange(itemsList);
+
+            Console.WriteLine("Test POCO serialization over {0} items", count);
             TraceAction(() =>
             {
                 var items = accessLayer.Select<User>();
             }, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
 
-            //writer.WriteLine();
-            //writer.WriteLine("Test POCO serialization over {0} items with static Select Statement", count);
-            //TraceAction(() =>
-            //{
-            //    var items = accessLayer.SelectNative(typeof(User), "SELECT * FROM Users");
-            //}, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
+            Console.WriteLine();
+            Console.WriteLine("Test POCO serialization over {0} items with static Select Statement", count);
+            TraceAction(() =>
+            {
+                var items = accessLayer.SelectNative(typeof(User), "SELECT * FROM Users");
+            }, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
 
-            //writer.WriteLine();
-            //writer.WriteLine("Test POCO serialization over {0} items with static Select Statement and Static Factory", count);
-            //TraceAction(() =>
-            //{
-            //    var items = accessLayer.SelectNative(typeof(UserImpl), "SELECT * FROM Users");
-            //}, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
+            Console.WriteLine();
+            Console.WriteLine("Test POCO serialization over {0} items with static Select Statement and Static Factory", count);
+            TraceAction(() =>
+            {
+                var items = accessLayer.SelectNative(typeof(UserImpl), "SELECT * FROM Users");
+            }, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
 
-            //writer.WriteLine();
-            //writer.WriteLine("POCO serialization over {0} items with static Select Statement and Static Factory", count);
-            //TraceAction(() =>
-            //{
-            //    var entitiesList = accessLayer.Database.GetEntitiesList("SELECT * FROM Users", e => new UserImpl(e), true).ToArray();
-            //}, "Test |  Selection + " + count + " + Entrys done in !{0}! ms");
+            Console.WriteLine();
+            Console.WriteLine("POCO serialization over {0} items with static Select Statement and Static Factory", count);
+            TraceAction(() =>
+            {
+                var entitiesList = accessLayer.Database.GetEntitiesList("SELECT * FROM Users", e => new UserImpl(e), true).ToArray();
+            }, "Test |  Selection + " + count + " + Entrys done in !{0}! ms");
 
             //accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
-
-
-            writer.Close();
-            Console.WriteLine(File.ReadAllText(output));
+            //writer.Close();
             Console.ReadLine();
         }
     }

@@ -6,7 +6,8 @@ using System.Linq.Expressions;
 
 namespace JPB.DataAccess.QueryProvider
 {
-    public class Query<T> : IOrderedQueryable<T>
+    [Obsolete]
+    internal class Query<T> : IOrderedQueryable<T>
     {
         private readonly QueryProvider provider;
 

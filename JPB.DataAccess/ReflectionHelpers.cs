@@ -9,7 +9,7 @@ namespace JPB.DataAccess
 #if !DEBUG
     [DebuggerStepThrough]
 #endif
-    internal static class ReflectionHelpers
+    public static class ReflectionHelpers
     {
         static ReflectionHelpers()
         {
@@ -25,7 +25,7 @@ namespace JPB.DataAccess
             return nameContainsAnonymousType;
         }
 
-        public static ReflecionStore ReflecionStore { get; set; }
+        internal static ReflecionStore ReflecionStore { get; set; }
 
         public static Attribute[] GetCustomAttributes(this Type type)
         {
