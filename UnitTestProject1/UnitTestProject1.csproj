@@ -72,6 +72,10 @@
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj">
+      <Project>{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}</Project>
+      <Name>JPB.DataAccess.MySql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
       <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
       <Name>JPB.DataAccess</Name>

@@ -74,7 +74,7 @@ namespace UnitTestProject1
 
             var itemsList = new List<User>();
 
-            var count = 5000;
+            var count = 500;
 
             for (int i = 0; i < count; i++)
             {

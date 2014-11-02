@@ -19,6 +19,11 @@ namespace JPB.DataAccess
             SClassInfoCaches = new ConcurrentBag<ClassInfoCache>();
         }
 
+        /// <summary>
+        /// Gets an Cache object if exists or creats one
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public ClassInfoCache GetOrCreatePropertyInfoCache(Type type)
         {
             var element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
@@ -30,7 +35,11 @@ namespace JPB.DataAccess
 
             return element;
         }
-
+        /// <summary>
+        /// Gets an Cache object if exists or creats one
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public PropertyInfoCache GetOrCreatePropertyInfoCache(PropertyInfo type)
         {
             var declareingType = type.ReflectedType;
@@ -45,7 +54,11 @@ namespace JPB.DataAccess
 
             return element.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == type.Name);
         }
-
+        /// <summary>
+        /// Gets an Cache object if exists or creats one
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public ClassInfoCache GetOrCreateClassInfoCache(Type type)
         {
             var element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
@@ -57,7 +70,11 @@ namespace JPB.DataAccess
 
             return element;
         }
-        
+        /// <summary>
+        /// Gets an Cache object if exists or creats one
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public MethodInfoCache GetOrCreateMethodInfoCache(MethodInfo type)
         {
             var declareingType = type.ReflectedType;
@@ -73,7 +90,7 @@ namespace JPB.DataAccess
             return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);
         }
 
-        public static ConcurrentBag<ClassInfoCache> SClassInfoCaches { get; set; }
+        public static ConcurrentBag<ClassInfoCache> SClassInfoCaches { get; private set; }
 
         public class MethodInfoCache
         {

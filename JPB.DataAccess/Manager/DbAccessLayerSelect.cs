@@ -487,6 +487,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public List<object> SelectWhere(Type type, String @where, dynamic paramenter)
         {
+            //Concret declaration is nessesary because we are working with dynmaics, so the compiler has ne space to guess the type wrong
             IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
             return SelectWhere(type, where, enumarateFromDynamics);
         }
@@ -617,14 +618,15 @@ namespace JPB.DataAccess.Manager
             if (!multiRow)
                 return SelectNative(type, database, command);
 
-            var guessingRelations = new List<string>();
+            //var guessingRelations = new Dictionary<PropertyInfo, IDbCommand>();
 
-            var propertyInfos = type.GetFKs();
+            //var propertyInfos = type.GetFKs();
+            //var primaryKeyName = type.GetPK();
 
-            foreach (var propertyInfo in propertyInfos)
-            {
-                CreateSelect(propertyInfo.PropertyType, database, "");
-            }
+            //foreach (var propertyInfo in propertyInfos)
+            //{
+            //    guessingRelations.Add(propertyInfo, database.CreateCommand(string.Format("JOIN {0} ON {0} = {1}", propertyInfo.DeclaringType.GetTableName(), primaryKeyName)));
+            //}
 
             var objects = RunSelect(type, database, command);
 

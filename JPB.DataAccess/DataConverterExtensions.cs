@@ -148,7 +148,7 @@ namespace JPB.DataAccess
         }
 
         /// <summary>
-        ///     Get and Convert the found PK into Database name
+        ///     Get and Convert the found PK name into Database name
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>

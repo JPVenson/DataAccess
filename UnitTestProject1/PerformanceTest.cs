@@ -15,10 +15,10 @@ namespace UnitTestProject1
     [TestClass]
     public class PerformanceTest
     {
-        public static void Main()
-        {
-            new PerformanceTest().TestMethod1();
-        }
+        //public static void Main()
+        //{
+        //    new PerformanceTest().TestMethod1();
+        //}
 
         public PerformanceTest()
         {

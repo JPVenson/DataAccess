@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
 using System.Data.Sql;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.MsSQLServerExplorer;
+using Microsoft.Data.ConnectionUI;
 
 namespace JPB.DataAccess.EntityCreator
 {
@@ -27,8 +30,11 @@ namespace JPB.DataAccess.EntityCreator
             //string connectionString = "Data Source=S-SQL-DPE2;Initial Catalog=BatchRemoting;Integrated Security=False;User Id=BatchRemotingJobServer;Password=BatchServer;MultipleActiveResultSets=True";
             string connectionString = @"Data Source=(localdb)\Projects;Initial Catalog=TestDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False";
 
+
+            Console.ReadKey();
+
 #if DEBUG
-        
+
 #else
             Console.WriteLine("Enter output dir");
 

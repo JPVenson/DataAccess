@@ -22,6 +22,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.SqlLite", "..\JPB.DataAccess.SqlLite\JPB.DataAccess.SqlLite.csproj", "{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MsSQLServerExplorer", "..\JPB.DataAccess.MsSQLServerExplorer\JPB.DataAccess.MsSQLServerExplorer.csproj", "{8193A51E-9921-46DB-9567-808A9ACD0E69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApplication1", "WpfApplication1\WpfApplication1.csproj", "{5BD7A2D1-D699-4EB5-B042-C3926BF3CC41}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -69,6 +73,18 @@ Global
 		{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
 		{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8193A51E-9921-46DB-9567-808A9ACD0E69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8193A51E-9921-46DB-9567-808A9ACD0E69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8193A51E-9921-46DB-9567-808A9ACD0E69}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{8193A51E-9921-46DB-9567-808A9ACD0E69}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
+		{8193A51E-9921-46DB-9567-808A9ACD0E69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8193A51E-9921-46DB-9567-808A9ACD0E69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BD7A2D1-D699-4EB5-B042-C3926BF3CC41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BD7A2D1-D699-4EB5-B042-C3926BF3CC41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BD7A2D1-D699-4EB5-B042-C3926BF3CC41}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{5BD7A2D1-D699-4EB5-B042-C3926BF3CC41}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
+		{5BD7A2D1-D699-4EB5-B042-C3926BF3CC41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BD7A2D1-D699-4EB5-B042-C3926BF3CC41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
