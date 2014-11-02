@@ -57,13 +57,43 @@ namespace JPB.DataAccess
 
             return element;
         }
+        
+        public MethodInfoCache GetOrCreateMethodInfoCache(MethodInfo type)
+        {
+            var declareingType = type.ReflectedType;
+            var name = type.Name;
+            var element = SClassInfoCaches.FirstOrDefault(s => s.Type == declareingType && s.MethodInfoCaches.Any(e => e.MethodName == name));
+
+            if (element == null)
+            {
+                var declaringType = type.ReflectedType;
+                SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+            }
+
+            return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);
+        }
 
         public static ConcurrentBag<ClassInfoCache> SClassInfoCaches { get; set; }
 
+        public class MethodInfoCache
+        {
+            public MethodInfoCache(MethodInfo mehtodInfo)
+            {
+                MethodInfo = mehtodInfo;
+                MethodName = mehtodInfo.Name;
+                this.AttributeInfoCaches =
+                    mehtodInfo.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToArray();
+            }
+
+            public MethodInfo MethodInfo { get; private set; }
+            public string MethodName { get; private set; }
+            public AttributeInfoCache[] AttributeInfoCaches { get; private set; }
+        }
+
         public class AttributeInfoCache
         {
-            public Attribute Attribute { get; set; }
-            public object AttributeName { get; set; }
+            public Attribute Attribute { get; private set; }
+            public object AttributeName { get; private set; }
 
             public AttributeInfoCache(Attribute attribute)
             {
@@ -82,9 +112,9 @@ namespace JPB.DataAccess
                     propertyInfo.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToArray();
             }
 
-            public PropertyInfo PropertyInfo { get; set; }
-            public string PropertyName { get; set; }
-            public AttributeInfoCache[] AttributeInfoCaches { get; set; }
+            public PropertyInfo PropertyInfo { get; private set; }
+            public string PropertyName { get; private set; }
+            public AttributeInfoCache[] AttributeInfoCaches { get; private set; }
         }
 
         public class ClassInfoCache
@@ -95,12 +125,14 @@ namespace JPB.DataAccess
                 Type = type;
                 this.AttributeInfoCaches = type.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToArray();
                 this.PropertyInfoCaches = type.GetProperties().Select(s => new PropertyInfoCache(s)).ToArray();
+                this.MethodInfoCaches = type.GetMethods().Select(s => new MethodInfoCache(s)).ToArray();
             }
 
-            public string ClassName { get; set; }
-            public Type Type { get; set; }
-            public PropertyInfoCache[] PropertyInfoCaches { get; set; }
-            public AttributeInfoCache[] AttributeInfoCaches { get; set; }
+            public string ClassName { get; private set; }
+            public Type Type { get; private set; }
+            public PropertyInfoCache[] PropertyInfoCaches { get; private set; }
+            public AttributeInfoCache[] AttributeInfoCaches { get; private set; }
+            public MethodInfoCache[] MethodInfoCaches { get; private set; }
         }
 
     }

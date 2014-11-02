@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace JPB.DataAccess.ModelsAnotations
+namespace JPB.DataAccess.Contacts
 {
     /// <summary>
     /// Converts values from DB to C# and back

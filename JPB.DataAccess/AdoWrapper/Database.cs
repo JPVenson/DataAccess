@@ -146,7 +146,7 @@ namespace JPB.DataAccess.AdoWrapper
         public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
         {
             IDbCommand cmd = _strategy.CreateCommand(GetConnection(), strSql, fields);
-            LastExecutedQuery = new QueryDebugger(cmd);
+            LastExecutedQuery = cmd.CreateQueryDebugger();
             if (_trans != null)
                 cmd.Transaction = _trans;
             return cmd;
@@ -164,7 +164,7 @@ namespace JPB.DataAccess.AdoWrapper
 
             if (_trans != null)
                 cmd.Transaction = _trans;
-            LastExecutedQuery = new QueryDebugger(cmd);
+            LastExecutedQuery = cmd.CreateQueryDebugger();
             return cmd.ExecuteNonQuery();
         }
 
@@ -197,7 +197,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             if (_trans != null)
                 cmd.Transaction = _trans;
-            LastExecutedQuery = new QueryDebugger(cmd);
+            LastExecutedQuery = cmd.CreateQueryDebugger();
             return cmd.ExecuteScalar();
         }
 
@@ -214,7 +214,7 @@ namespace JPB.DataAccess.AdoWrapper
                 {
                     if (_trans != null)
                         cmd.Transaction = _trans;
-                    LastExecutedQuery = new QueryDebugger(cmd);
+                    LastExecutedQuery = cmd.CreateQueryDebugger();
 
                     return _strategy.CreateDataTable(name, cmd);
                 }
@@ -228,7 +228,7 @@ namespace JPB.DataAccess.AdoWrapper
                 using (IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection()))
                 {
                     IDataAdapter da = _strategy.CreateDataAdapter(cmd); //todo//
-                    LastExecutedQuery = new QueryDebugger(cmd);
+                    LastExecutedQuery = cmd.CreateQueryDebugger();
 
                     var ds = new DataSet();
                     da.Fill(ds);
@@ -328,7 +328,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public IEnumerable<T> GetEntitiesList<T>(IDbCommand cmd, Func<IDataRecord, T> func)
         {
-            LastExecutedQuery = new QueryDebugger(cmd);
+            LastExecutedQuery = cmd.CreateQueryDebugger();
             using (IDataReader dr = cmd.ExecuteReader())
             {
                 while (dr.Read())
@@ -404,7 +404,7 @@ namespace JPB.DataAccess.AdoWrapper
         public IDictionary<K, V> GetEntitiesDictionary<K, V>(IDbCommand cmd, Func<IDataRecord, KeyValuePair<K, V>> func)
         {
             var htRes = new Dictionary<K, V>();
-            LastExecutedQuery = new QueryDebugger(cmd);
+            LastExecutedQuery = cmd.CreateQueryDebugger();
 
             using (IDataReader dr = cmd.ExecuteReader())
             {
@@ -578,7 +578,7 @@ namespace JPB.DataAccess.AdoWrapper
             {
                 if (_trans != null)
                     cmd.Transaction = _trans;
-                LastExecutedQuery = new QueryDebugger(cmd);
+                LastExecutedQuery = cmd.CreateQueryDebugger();
 
                 return cmd.ExecuteNonQuery();
             }
@@ -592,7 +592,7 @@ namespace JPB.DataAccess.AdoWrapper
             {
                 if (_trans != null)
                     cmd.Transaction = _trans;
-                LastExecutedQuery = new QueryDebugger(cmd);
+                LastExecutedQuery = cmd.CreateQueryDebugger();
                 return cmd.ExecuteReader();
             }
         }
@@ -605,7 +605,7 @@ namespace JPB.DataAccess.AdoWrapper
             {
                 if (_trans != null)
                     cmd.Transaction = _trans;
-                LastExecutedQuery = new QueryDebugger(cmd);
+                LastExecutedQuery = cmd.CreateQueryDebugger();
                 return cmd.ExecuteScalar();
             }
         }

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.MySql;
 using JPB.DataAccess.Pager.Contracts;
 
-namespace JPB.DataAccess.AdoWrapper.MsSql
+namespace JPB.DataAccess.MySql
 {
     public class MySqlDataPager<T> : MySqlUntypedDataPager, IDataPager<T>
     {

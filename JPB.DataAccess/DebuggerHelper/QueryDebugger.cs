@@ -25,36 +25,83 @@ namespace JPB.DataAccess.DebuggerHelper
 
         public string DebuggerQuery { get; private set; }
         public string SqlQuery { get; private set; }
-        public string StackTracer { get; private set; }
+
+        /// <summary>
+        /// Blocking if Stack Trace is not created
+        /// </summary>
+        public string StackTracer
+        {
+            get
+            {
+                if (_loaded)
+                {
+                    return _stackTracer;
+                }
+                else
+                {
+                    _wokerTask.Wait();
+                    return _stackTracer;
+                }
+            }
+            private set
+            {
+                _stackTracer = value;
+            }
+        }
 
         public const string StartValuePart = @" {{";
         public const string EndValuePart = @"}} ";
 
+        private Task _wokerTask;
+        private bool _loaded = false;
+        private string _stackTracer;
+
+        private void Init()
+        {
+            _wokerTask = new Task(() =>
+            {
+                try
+                {
+                    var frames = new StackTrace().GetFrames();
+                    IEnumerable<StackFrame> stackFrames;
+                    if (frames != null)
+                    {
+                        stackFrames = frames.Where(s =>
+                        {
+                            var methodBase = s.GetMethod();
+                            if (Assembly.DefinedTypes.Contains(methodBase.DeclaringType))
+                                return false;
+
+                            if (methodBase.DeclaringType != null && methodBase.DeclaringType.Assembly.GlobalAssemblyCache)
+                                return false;
+
+                            return true;
+                        });
+                    }
+                    else
+                    {
+                        stackFrames = new List<StackFrame>();
+                    }
+                    var enumerable = stackFrames.Select(s => s.ToString()).ToArray();
+                    if (enumerable.Any())
+                        StackTracer = enumerable.Aggregate((e, f) => e + Environment.NewLine + f);
+                }
+                finally
+                {
+                    _loaded = true;
+                }
+            });
+
+            _wokerTask.Start();
+        }
+
+        /// <summary>
+        /// Creates a Debugger that contains some debugging datas
+        /// </summary>
+        /// <param name="command"></param>
         public QueryDebugger(IDbCommand command)
         {
-            var frames = new StackTrace().GetFrames();
-            IEnumerable<StackFrame> stackFrames;
-            if (frames != null)
-            {
-                stackFrames = frames.Where(s =>
-                {
-                    var methodBase = s.GetMethod();
-                    if (Assembly.DefinedTypes.Contains(methodBase.DeclaringType))
-                        return false;
-
-                    if (methodBase.DeclaringType != null && methodBase.DeclaringType.Assembly.GlobalAssemblyCache)
-                        return false;
-
-                    return true;
-                });
-            }
-            else
-            {
-                stackFrames = new List<StackFrame>();
-            }
-            var enumerable = stackFrames.Select(s => s.ToString()).ToArray();
-            if (enumerable.Any())
-                StackTracer = enumerable.Aggregate((e, f) => e + Environment.NewLine + f);
+            Init();
             var debugquery = new StringBuilder(command.CommandText);
             var sqlReady = CommandAsMsSql(command);
             DebuggerQuery = debugquery.ToString();

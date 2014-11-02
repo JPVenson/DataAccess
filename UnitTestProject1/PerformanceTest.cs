@@ -109,6 +109,14 @@ namespace UnitTestProject1
             writer.WriteLine("Test POCO serialization over {0} items with static Select Statement", count);
             TraceAction(() =>
             {
+                var items = accessLayer.SelectNative(typeof(User), "SELECT * FROM Users");
+                Assert.AreEqual(items.Count, count);
+            }, "Test | Selection + " + count + " + Entrys done in !{0}! ms");
+
+            writer.WriteLine();
+            writer.WriteLine("Test POCO serialization over {0} items with static Select Statement and Static Factory", count);
+            TraceAction(() =>
+            {
                 var items = accessLayer.SelectNative(typeof(UserImpl), "SELECT * FROM Users");
                 Assert.AreEqual(items.Count, count);
             }, "Test | Selection + " + count + " + Entrys done in !{0}! ms");

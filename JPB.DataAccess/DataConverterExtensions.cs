@@ -62,14 +62,23 @@ namespace JPB.DataAccess
             return value ?? DBNull.Value;
         }
 
+        /// <summary>
+        /// Gets the table name from an Entity
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The class name or if contains the ForModel name</returns>
         public static string GetTableName<T>()
         {
-            var forModel = typeof(T).GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;
-            if (forModel != null)
-                return forModel.AlternatingName;
-            return typeof(T).Name;
+            return typeof (T).GetTableName();
         }
 
+        /// <summary>
+        /// Gets the table name from an Entity
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The class name or if contains the ForModel name</returns>
         public static string GetTableName(this Type type)
         {
             var forModel = type.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;
@@ -78,6 +87,13 @@ namespace JPB.DataAccess
             return type.Name;
         }
 
+        /// <summary>
+        /// Gets the Value from a Paramter with Conversion if Nessesary
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static object GetParamaterValue(this object source, string name)
         {
             if (source == null)
@@ -88,16 +104,31 @@ namespace JPB.DataAccess
             return propertyInfo.GetConvertedValue(source);
         }
 
+        /// <summary>
+        /// retuns the Cashed Property info from Refection Cash
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static PropertyInfo GetParamater(this object source, string name)
         {
             return ReflectionHelpers.GetProperties(source.GetType()).FirstOrDefault(s => s.Name == name);
         }
 
+        /// <summary>
+        /// Checks a <param name="info"></param> to be a Primary Key
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         public static bool CheckForPK(this PropertyInfo info)
         {
             return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute) || (info.Name.EndsWith("_ID"));
         }
-
+        /// <summary>
+        /// Checks a <param name="info"></param> to be a Primary Key
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         public static bool CheckForFK(this PropertyInfo info, string name)
         {
             if (info.Name != name)

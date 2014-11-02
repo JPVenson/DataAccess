@@ -18,11 +18,11 @@ namespace JPB.DataAccess
 
         public static Boolean IsAnonymousType(this Type type)
         {
-            Boolean hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
+            //Boolean hasCompilerGeneratedAttribute = type.GetCustomAttributes().Any(s => s is CompilerGeneratedAttribute);
             Boolean nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
-            Boolean isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
+            //Boolean isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
 
-            return isAnonymousType;
+            return nameContainsAnonymousType;
         }
 
         public static ReflecionStore ReflecionStore { get; set; }
@@ -41,6 +41,16 @@ namespace JPB.DataAccess
                 return new Attribute[0]; //anonymos types does not have any Attributes
 
             var deb = ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
+
+            return deb;
+        }
+
+        public static Attribute[] GetCustomAttributes(this MethodInfo type)
+        {
+            if (IsAnonymousType(type.DeclaringType))
+                return new Attribute[0]; //anonymos types does not have any Attributes
+
+            var deb = ReflecionStore.GetOrCreateMethodInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
 
             return deb;
         }
