@@ -37,8 +37,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JPB.WPFBase">
-      <HintPath>..\..\..\..\WPFCommon\trunk\JPB.WPFBase\bin\Debug\JPB.WPFBase.dll</HintPath>
+    <Reference Include="JPB.WPFBase, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\svnProj\IEADPC.BatchRemote\trunk\src\libraries\3th Party\JPB.WPFBase.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -55,9 +56,10 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ViewModel\ConnectToServerViewModel.cs" />
-    <Compile Include="ViewModel\GetSql.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="ViewModel\DatabaseViewModel.cs" />
+    <Compile Include="ViewModel\ServerViewModel.cs" />
+    <Compile Include="ViewModel\TableViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
