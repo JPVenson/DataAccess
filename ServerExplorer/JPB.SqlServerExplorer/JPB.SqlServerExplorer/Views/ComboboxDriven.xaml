@@ -1,0 +1,72 @@
+﻿<UserControl x:Class="JPB.SqlServerExplorer.Views.ComboboxDriven"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModel="clr-namespace:JPB.SqlServerExplorer.ComboboxViewModel"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance viewModel:MainWindowViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <DockPanel LastChildFill="False">
+        <DockPanel DockPanel.Dock="Top">
+            <Label DockPanel.Dock="Left" Content="Server (" />
+            <Label DockPanel.Dock="Left" Content="{Binding ActiveServers.Count}" />
+            <Label DockPanel.Dock="Left" Content=") :" />
+            <Label
+                DockPanel.Dock="Right"
+                Content="Loading Servers ..." 
+                Visibility="{Binding IsServerEnumerationInProgress, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <ComboBox 
+            IsEnabled="{Binding CanChangeServer}"
+             DockPanel.Dock="Left"
+            Text="{Binding ServerName, UpdateSourceTrigger=PropertyChanged}"
+            IsTextSearchEnabled="True"
+            IsEditable="True"
+            DisplayMemberPath="ServerName"
+            ItemsSource="{Binding ActiveServers}"/>
+        </DockPanel>
+       
+        <DockPanel DockPanel.Dock="Top">
+            <Label DockPanel.Dock="Left" Content="Databases (" />
+            <Label DockPanel.Dock="Left" Content="{Binding ActiveDatabases.Count}" />
+            <Label DockPanel.Dock="Left" Content=") :" />
+            <Label
+                DockPanel.Dock="Right"
+                Content="Loading Databases ..." 
+                Visibility="{Binding IsDatabaseEnumerationInProgress, Converter={StaticResource BooleanToVisibilityConverter}}">
+            </Label>
+            <ComboBox 
+            IsEnabled="{Binding CanChangeDatabase}"
+            DockPanel.Dock="Top"
+            Text="{Binding DatabaseName, UpdateSourceTrigger=PropertyChanged}"
+            IsDropDownOpen="{Binding IsDatabaseOpen}"
+            DisplayMemberPath="Database"
+            IsTextSearchEnabled="True"
+            IsEditable="True"
+            ItemsSource="{Binding ActiveDatabases}"/>
+
+        </DockPanel>
+
+
+        <DockPanel DockPanel.Dock="Top">
+            <Label DockPanel.Dock="Left" Content="Tables (" />
+            <Label DockPanel.Dock="Left" Content="{Binding ActiveTables.Count}" />
+            <Label DockPanel.Dock="Left" Content=") :" />
+            <Label
+                DockPanel.Dock="Right"
+                Content="Loading Tables ..." 
+                Visibility="{Binding IsTableEnumerationInProgress, Converter={StaticResource BooleanToVisibilityConverter}}">
+            </Label>
+            <ComboBox 
+            IsEnabled="{Binding CanChangeTable}"
+            DockPanel.Dock="Top"
+            Text="{Binding TableName, UpdateSourceTrigger=PropertyChanged}"
+            IsDropDownOpen="{Binding IsTableOpen}"
+            DisplayMemberPath="TableName"
+            IsTextSearchEnabled="True"
+            IsEditable="True"
+            ItemsSource="{Binding ActiveTables}"/>
+
+        </DockPanel>
+    </DockPanel>
+</UserControl>
