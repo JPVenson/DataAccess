@@ -123,6 +123,7 @@ namespace JPB.DataAccess.DebuggerHelper
                 case DbType.Currency:
                 case DbType.AnsiStringFixedLength:
                 case DbType.Time:
+                case DbType.String:
                 case DbType.AnsiString:
                 case DbType.Xml:
                 case DbType.Date:
@@ -209,7 +210,7 @@ namespace JPB.DataAccess.DebuggerHelper
                 case CommandType.Text:
                     foreach (var sp in sc.Parameters.Cast<SqlParameter>())
                     {
-                        sql.AppendLine("DECLARE " + " @" + sp.ParameterName + " " + sp.SqlDbType + " = " + ParameterValue(sp) + ";");
+                        sql.AppendLine("DECLARE " + " " + sp.ParameterName + " " + sp.SqlDbType + " = " + ParameterValue(sp) + ";");
                     }
 
                     sql.AppendLine(sc.CommandText);
