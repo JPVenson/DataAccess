@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using JPB.DataAccess.EntityCreator.MsSql;
-using JPB.DataAccess.MsSQLServerExplorer;
 using Microsoft.Data.ConnectionUI;
 
 namespace JPB.DataAccess.EntityCreator

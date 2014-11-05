@@ -57,7 +57,7 @@ namespace JPB.DataAccess.Manager
 
                 foreach (var item in insertRangeCommand)
                 {
-                    RaiseKnownInsert(item);
+                    RaiseKnownInsert(item, c);
                     c.ExecuteNonQuery(item);
                 }
             });
@@ -181,7 +181,7 @@ namespace JPB.DataAccess.Manager
             {
                 var dbCommand = CreateInsert(type, entry, s);
                 var mergeCommands = MergeCommands(s, dbCommand, s.GetlastInsertedIdCommand());
-                RaiseUnknwonInsert(mergeCommands);
+                RaiseUnknwonInsert(mergeCommands, s);
                 var skalar = s.GetSkalar(mergeCommands);
                 object getlastInsertedId = skalar;
                 return Select(type, Convert.ToInt64(getlastInsertedId), s);

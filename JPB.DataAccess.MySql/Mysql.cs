@@ -100,6 +100,11 @@ namespace JPB.DataAccess.MySql
             return new MySqlDataConverterPager<T, TE>();
         }
 
+        public string FormartCommandToQuery(IDbCommand command)
+        {
+            return command.ToString();
+        }
+
         public object Clone()
         {
             return new MySql(ConnectionString);

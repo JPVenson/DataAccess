@@ -35,9 +35,15 @@ namespace JPB.DataAccess
 #endif
     public static class DataConverterExtensions
     {
-        public static QueryDebugger CreateQueryDebugger(this IDbCommand command)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static QueryDebugger CreateQueryDebugger(this IDbCommand command, IDatabase source = null)
         {
-            return new QueryDebugger(command);
+            return new QueryDebugger(command, source);
         }
 
         /// <summary>

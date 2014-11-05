@@ -193,5 +193,10 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
         {
             throw new NotImplementedException();
         }
+
+        public string FormartCommandToQuery(IDbCommand command)
+        {
+            return command.ToString();
+        }
     }
 }

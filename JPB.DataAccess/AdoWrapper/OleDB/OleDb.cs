@@ -13,6 +13,10 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
         private const string TEMPLATE_MSSQL_TRUSTED =
             "server={0};database={1};Connect Timeout=100;Min Pool Size=5;trusted_connection=true";
 
+        public string FormartCommandToQuery(IDbCommand command)
+        {
+            return command.ToString();
+        }
 
         public OleDb(string strServer, string strDatabase)
         {

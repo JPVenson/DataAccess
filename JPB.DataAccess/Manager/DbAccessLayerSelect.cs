@@ -345,7 +345,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query)
         {
-            RaiseUnknownSelect(query);
+            RaiseUnknownSelect(query, database);
             return
                 DbAccessLayerHelper.EnumerateDataRecords(database, query)
                     .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(type, dataRecord))
@@ -518,7 +518,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public IEnumerable<object> RunPrimetivSelect(Type type, IDbCommand command)
         {
-            RaiseKnownSelect(command);
+            RaiseKnownSelect(command, Database);
             return DbAccessLayerHelper.EnumerateDataRecords(Database, command).Select(s => s[0]).ToList();
         }
 
@@ -628,12 +628,12 @@ namespace JPB.DataAccess.Manager
             //    guessingRelations.Add(propertyInfo, database.CreateCommand(string.Format("JOIN {0} ON {0} = {1}", propertyInfo.DeclaringType.GetTableName(), primaryKeyName)));
             //}
 
-            var objects = RunSelect(type, database, command);
+            /*
+             * Due the fact that you are not able to anylse the Query in a way to ensure its will not effect the query self we
+             * are loading the result an then loading based on that the items             
+             */
 
-            foreach (object model in objects)
-                model.LoadNavigationProps(database);
-
-            return objects;
+            return RunSelect(type, database, command).AsParallel().Select(s => s.LoadNavigationProps(database)).ToList();
         }
 
         /// <summary>

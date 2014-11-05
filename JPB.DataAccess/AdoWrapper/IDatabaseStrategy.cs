@@ -24,5 +24,12 @@ namespace JPB.DataAccess.AdoWrapper
         IDataPager<T> CreatePager<T>();
 
         IWrapperDataPager<T,TE> CreateConverterPager<T, TE>();
+
+        /// <summary>
+        /// Formarts a Command into a Query after the Strategy rules
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        string FormartCommandToQuery(IDbCommand command);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Windows.Input;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Pager.Contracts;
 
@@ -20,14 +21,17 @@ namespace JPB.DataAccess.AdoWrapper
         /// Get the Current Connection string
         /// </summary>
         string ConnectionString { get; }
+
         /// <summary>
         /// If local instance get the file
         /// </summary>
         string DatabaseFile { get; }
+
         /// <summary>
         /// Get the Database name that we are connected to
         /// </summary>
         string DatabaseName { get; }
+
         /// <summary>
         /// Get the Server we are Connected to
         /// </summary>
@@ -44,6 +48,7 @@ namespace JPB.DataAccess.AdoWrapper
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         IDataPager<T> CreatePager<T>();
+
         /// <summary>
         /// Get database specific converter Datapager
         /// </summary>
@@ -179,5 +184,12 @@ namespace JPB.DataAccess.AdoWrapper
 
         IDatabase Clone();
         IDbCommand GetlastInsertedIdCommand();
+
+        /// <summary>
+        /// Formarts a Command to a executable Query
+        /// </summary>
+        /// <param name="comm"></param>
+        /// <returns></returns>
+        string FormartCommandToQuery(IDbCommand comm);
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper;
 
 namespace JPB.DataAccess.DebuggerHelper
 {
@@ -16,14 +17,36 @@ namespace JPB.DataAccess.DebuggerHelper
     [DebuggerDisplay("Query : {DebuggerQuery}", Name = "Query")]
     public class QueryDebugger
     {
+        /// <summary>
+        /// Creates a Debugger that contains some debugging datas
+        /// </summary>
+        /// <param name="command"></param>
+        internal QueryDebugger(IDbCommand command, IDatabase source)
+        {
+            //Init async because this could be time consuming
+            _loaded = false;
+            Init();
+            var debugquery = new StringBuilder(command.CommandText);
+            var formartCommandToQuery = source.FormartCommandToQuery(command);
+            DebuggerQuery = debugquery.ToString();
+            SqlQuery = formartCommandToQuery;
+        }
+
         static QueryDebugger()
         {
+            //Store assembly to exclude API calls
             Assembly = Assembly.GetAssembly(typeof(QueryDebugger));
         }
 
         static readonly Assembly Assembly;
 
+        /// <summary>
+        /// Stores the exact executed query
+        /// </summary>
         public string DebuggerQuery { get; private set; }
+        /// <summary>
+        /// Provieds a Instant to use SQL query that Contains all Variables and querys
+        /// </summary>
         public string SqlQuery { get; private set; }
 
         /// <summary>
@@ -92,20 +115,6 @@ namespace JPB.DataAccess.DebuggerHelper
             _wokerTask.Start();
         }
 
-        /// <summary>
-        /// Creates a Debugger that contains some debugging datas
-        /// </summary>
-        /// <param name="command"></param>
-        internal QueryDebugger(IDbCommand command)
-        {
-            //Init async because this could be time consuming
-            _loaded = false;
-            Init();
-            var debugquery = new StringBuilder(command.CommandText);
-            var sqlReady = CommandAsMsSql(command);
-            DebuggerQuery = debugquery.ToString();
-            SqlQuery = sqlReady;
-        }
 
         /// <summary>
         /// 
@@ -146,78 +155,5 @@ namespace JPB.DataAccess.DebuggerHelper
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sc"></param>
-        /// <returns></returns>
-        public static String CommandAsMsSql(IDbCommand sc)
-        {
-            if (!(sc is SqlCommand))
-                return sc.CommandText;
-
-            var sql = new StringBuilder();
-            Boolean firstParam = true;
-
-            if (!string.IsNullOrEmpty(sc.Connection.Database))
-                sql.AppendLine("USE " + sc.Connection.Database + ";");
-
-            switch (sc.CommandType)
-            {
-                case CommandType.StoredProcedure:
-                    sql.AppendLine("DECLARE @return_value int;");
-
-                    foreach (var sp in sc.Parameters.Cast<SqlParameter>())
-                    {
-                        if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
-                        {
-                            sql.Append("DECLARE " + sp.ParameterName + "\t" + sp.SqlDbType + "\t= ");
-
-                            sql.AppendLine(((sp.Direction == ParameterDirection.Output) ? "NULL" : ParameterValue(sp)) + ";");
-
-                        }
-                    }
-
-                    sql.AppendLine("EXEC [" + sc.CommandText + "]");
-
-                    foreach (var sp in sc.Parameters.Cast<IDataParameter>())
-                    {
-                        if (sp.Direction != ParameterDirection.ReturnValue)
-                        {
-                            sql.Append((firstParam) ? "\t" : "\t, ");
-
-                            if (firstParam) firstParam = false;
-
-                            if (sp.Direction == ParameterDirection.Input)
-                                sql.AppendLine(sp.ParameterName + " = " + ParameterValue(sp));
-                            else
-
-                                sql.AppendLine(sp.ParameterName + " = " + sp.ParameterName + " OUTPUT");
-                        }
-                    }
-                    sql.AppendLine(";");
-
-                    sql.AppendLine("SELECT 'Return Value' = CONVERT(NVARCHAR, @return_value);");
-
-                    foreach (var sp in sc.Parameters.Cast<IDataParameter>())
-                    {
-                        if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
-                        {
-                            sql.AppendLine("SELECT '" + sp.ParameterName + "' = CONVERT(NVARCHAR, " + sp.ParameterName + ");");
-                        }
-                    }
-                    break;
-                case CommandType.Text:
-                    foreach (var sp in sc.Parameters.Cast<SqlParameter>())
-                    {
-                        sql.AppendLine("DECLARE " + " " + sp.ParameterName + " " + sp.SqlDbType + " = " + ParameterValue(sp) + ";");
-                    }
-
-                    sql.AppendLine(sc.CommandText);
-                    break;
-            }
-
-            return sql.ToString();
-        }
     }
 }

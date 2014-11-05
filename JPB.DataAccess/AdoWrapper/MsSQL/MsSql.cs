@@ -2,14 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {
+    /// <summary>
+    /// Wrapps MsSQL spezifc data
+    /// </summary>
     public class MsSql : IDatabaseStrategy
     {
         private readonly string _strDatabase;
-
         private const string TEMPLATE_MSSQL_UNTRUSTED =
             "server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
 
@@ -233,6 +238,85 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
         public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
         {
             return new MsSqlDataConverterPager<T, TE>();
+        }
+
+        public string FormartCommandToQuery(IDbCommand command)
+        {
+            return CommandAsMsSql(command);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sc"></param>
+        /// <returns></returns>
+        public static String CommandAsMsSql(IDbCommand sc)
+        {
+            if (!(sc is SqlCommand))
+                return sc.CommandText;
+
+            var sql = new StringBuilder();
+            Boolean firstParam = true;
+
+            if (!string.IsNullOrEmpty(sc.Connection.Database))
+                sql.AppendLine("USE " + sc.Connection.Database + ";");
+
+            switch (sc.CommandType)
+            {
+                case CommandType.StoredProcedure:
+                    sql.AppendLine("DECLARE @return_value int;");
+
+                    foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+                    {
+                        if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
+                        {
+                            sql.Append("DECLARE " + sp.ParameterName + "\t" + sp.SqlDbType + "\t= ");
+
+                            sql.AppendLine(((sp.Direction == ParameterDirection.Output) ? "NULL" : QueryDebugger.ParameterValue(sp)) + ";");
+
+                        }
+                    }
+
+                    sql.AppendLine("EXEC [" + sc.CommandText + "]");
+
+                    foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+                    {
+                        if (sp.Direction != ParameterDirection.ReturnValue)
+                        {
+                            sql.Append((firstParam) ? "\t" : "\t, ");
+
+                            if (firstParam) firstParam = false;
+
+                            if (sp.Direction == ParameterDirection.Input)
+                                sql.AppendLine(sp.ParameterName + " = " + QueryDebugger.ParameterValue(sp));
+                            else
+
+                                sql.AppendLine(sp.ParameterName + " = " + sp.ParameterName + " OUTPUT");
+                        }
+                    }
+                    sql.AppendLine(";");
+
+                    sql.AppendLine("SELECT 'Return Value' = CONVERT(NVARCHAR, @return_value);");
+
+                    foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+                    {
+                        if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
+                        {
+                            sql.AppendLine("SELECT '" + sp.ParameterName + "' = CONVERT(NVARCHAR, " + sp.ParameterName + ");");
+                        }
+                    }
+                    break;
+                case CommandType.Text:
+                    foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+                    {
+                        sql.AppendLine("DECLARE " + " @" + sp.ParameterName + " " + sp.SqlDbType + " = " + QueryDebugger.ParameterValue(sp) + ";");
+                    }
+
+                    sql.AppendLine(sc.CommandText);
+                    break;
+            }
+
+            return sql.ToString();
         }
 
         public object Clone()

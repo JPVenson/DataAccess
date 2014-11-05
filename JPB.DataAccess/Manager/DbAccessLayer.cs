@@ -29,13 +29,11 @@ namespace JPB.DataAccess.Manager
     {
         private IDatabase _database;
 
-        public PreDefinedProviderCollection ProviderCollection { get; set; }
-        
         /// <summary>
-        ///     Must set the Database Property
-        ///     Just for Intigration
+        /// Defines a set of Providers that are inclueded in this DLL or are weak refernced.
         /// </summary>
-        [Obsolete("Will maybe removed in future", false)]
+        public PreDefinedProviderCollection ProviderCollection { get; private set; }
+        
         internal DbAccessLayer()
         {
             ProviderCollection = new PreDefinedProviderCollection();
@@ -45,7 +43,7 @@ namespace JPB.DataAccess.Manager
         /// <summary>
         ///     Create a DbAccessLayer that uses a Predefined type and Connection string
         /// </summary>
-        /// <param name="dbType"></param>
+        /// <param name="dbType">Can be anything execpt for <code>DbTypes.Unknown</code></param>
         /// <param name="connection"></param>
         public DbAccessLayer(DbTypes dbType, string connection)
             : this()
@@ -98,7 +96,6 @@ namespace JPB.DataAccess.Manager
             UpdateDbAccessLayer();
 
             ResolveDbType(database.GetType().FullName);
-            DbType = DbTypes.Unknown;
 
             Database = new Database();
             Database.Attach(database);
@@ -177,8 +174,6 @@ namespace JPB.DataAccess.Manager
             return true;
         }
 
-
-
         /// <summary>
         /// Wraps a Query and its Paramters and then executes it
         /// </summary>
@@ -215,9 +210,7 @@ namespace JPB.DataAccess.Manager
         {
             return Database.Run(s => s.ExecuteNonQuery(command));
         }
-
-
-
+        
 
         /// <summary>
         /// if set the created reader of an read operation will be completely stored then the open connection will be closed
