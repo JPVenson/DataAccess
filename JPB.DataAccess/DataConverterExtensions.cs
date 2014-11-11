@@ -142,11 +142,22 @@ namespace JPB.DataAccess
             return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute);
         }
 
+        /// <summary>
+        /// Checks a Property to BE handled as a Forgine Key from an Other class
+        /// (Checks for PrimaryKey)
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         public static bool CheckForFK(this PropertyInfo info)
         {
             return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute);
         }
 
+        /// <summary>
+        /// Returns the Primarykey name (Converted) if exists
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static string GetPKPropertyName(this Type type)
         {
             PropertyInfo name = ReflectionHelpers.GetProperties(type).FirstOrDefault(CheckForPK);
@@ -164,11 +175,22 @@ namespace JPB.DataAccess
             return MapEntiysPropToSchema(type, name == null ? null : name.Name);
         }
 
+        /// <summary>
+        /// Returns All forgin keys of the given type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static PropertyInfo[] GetFKs(this Type type)
         {
             return ReflectionHelpers.GetProperties(type).Where(CheckForFK).ToArray();
         }
 
+        /// <summary>
+        /// Get the forgin key based that contains the <param name="name"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static string GetFK(this Type type, string name)
         {
             name = type.ReMapSchemaToEntiysProp(name);
@@ -199,12 +221,26 @@ namespace JPB.DataAccess
             return GetPK<T, long>(source);
         }
 
+        /// <summary>
+        /// Gets the Primary key of <typeparam name="T"></typeparam> and convert it the <typeparam name="E"></typeparam>
+        /// </summary>
+        /// <param name="source"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="E"></typeparam>
+        /// <returns></returns>
         public static E GetPK<T, E>(this T source)
         {
             string pk = source.GetType().GetPKPropertyName();
             return (E)source.GetType().GetProperty(pk).GetConvertedValue(source);
         }
 
+        /// <summary>
+        /// retruns the Value of <param name="name"></param> in the type of <param name="source"></param>
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <typeparam name="E"></typeparam>
+        /// <returns></returns>
         public static E GetFK<E>(this object source, string name)
         {
             Type type = source.GetType();
@@ -212,12 +248,26 @@ namespace JPB.DataAccess
             return (E)type.GetProperty(pk).GetConvertedValue(source);
         }
 
-        public static E GetFK<T, E>(this T source, string name)
+        /// <summary>
+        /// retruns the Value of <param name="name"></param> in the type of <typeparam name="T"></typeparam>
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="name"></param>
+        /// <typeparam name="TE"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static TE GetFK<T, TE>(this T source, string name)
         {
             string pk = typeof(T).GetFK(name);
-            return (E)typeof(T).GetProperty(pk).GetConvertedValue(source);
+            return (TE)typeof(T).GetProperty(pk).GetConvertedValue(source);
         }
 
+        /// <summary>
+        /// Returns an Orderd list of all Converted names that <param name="type"></param> contains, exept for all Propertynames that are defined in <param name="ignore"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="ignore"></param>
+        /// <returns></returns>
         public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
         {
             foreach (var s1 in ReflectionHelpers.GetProperties(type))
@@ -252,11 +302,23 @@ namespace JPB.DataAccess
             }
         }
 
+        /// <summary>
+        /// Returns an Orderd list of all Converted names that <typeparam name="T"></typeparam> contains, exept for all Propertynames that are defined in <param name="ignore"></param>
+        /// </summary>
+        /// <param name="ignore"></param>
+        /// <returns></returns>
         public static IEnumerable<string> MapEntiyToSchema<T>(string[] ignore)
         {
             return MapEntiyToSchema(typeof(T), ignore);
         }
 
+        /// <summary>
+        /// Maps one propertyname of <param name="type"></param> into the corresponding DbName that is defined by the object
+        /// If you want to convert multible names call MapEntiyToSchema
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="prop"></param>
+        /// <returns></returns>
         public static string MapEntiysPropToSchema(this Type type, string prop)
         {
             PropertyInfo[] propertys = ReflectionHelpers.GetProperties(type);
@@ -267,16 +329,34 @@ namespace JPB.DataAccess
                     select formodle != null ? formodle.AlternatingName : propertyInfo.Name).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Maps one propertyname of <param name="type"></param> into the corresponding DbName that is defined by the object
+        /// If you want to convert multible names call MapEntiyToSchema
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <returns></returns>
         public static string MapEntiysPropToSchema<T>(string prop)
         {
             return MapEntiysPropToSchema(typeof(T), prop);
         }
 
+        /// <summary>
+        /// Maps a DbName into the corresponding C# property or class
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static string ReMapSchemaToEntiysProp<T>(string prop)
         {
             return ReMapSchemaToEntiysProp(typeof(T), prop);
         }
 
+        /// <summary>
+        /// Maps a DbName into the corresponding C# property or class
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="prop"></param>
+        /// <returns></returns>
         public static string ReMapSchemaToEntiysProp(this Type type, string prop)
         {
             foreach (PropertyInfo propertyInfo in from propertyInfo in ReflectionHelpers.GetProperties(type)
@@ -291,6 +371,11 @@ namespace JPB.DataAccess
             return prop;
         }
 
+        /// <summary>
+        /// Checks the <param name="info"></param> declaring type to be an List
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         public static bool CheckForListInterface(this PropertyInfo info)
         {
             if (info.PropertyType == typeof(string))
@@ -302,6 +387,11 @@ namespace JPB.DataAccess
             return false;
         }
 
+        /// <summary>
+        /// Checks the object instance to be an List
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         public static bool CheckForListInterface(this object info)
         {
             return !(info is string) &&
@@ -309,21 +399,44 @@ namespace JPB.DataAccess
                    info.GetType().GetInterface(typeof(IEnumerable<>).Name) != null;
         }
 
+        /// <summary>
+        /// returns all propertys that are marked as Forgin keys
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static PropertyInfo[] GetNavigationProps(this Type type)
         {
             return ReflectionHelpers.GetProperties(type).Where(s => s.GetGetMethod(false).IsVirtual).ToArray();
         }
 
+        /// <summary>
+        /// returns all propertys that are marked as Forgin keys
+        /// </summary>
+        /// <returns></returns>
         public static PropertyInfo[] GetNavigationProps<T>()
         {
             return GetNavigationProps(typeof(T));
         }
 
+        /// <summary>
+        /// ToBeSupplied
+        /// 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="accessLayer"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static T LoadNavigationProps<T>(this T source, IDatabase accessLayer)
         {
             return (T)LoadNavigationProps(source as object, accessLayer);
         }
 
+        /// <summary>
+        /// ToBeSupplied
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="accessLayer"></param>
+        /// <returns></returns>
         public static object LoadNavigationProps(this object source, IDatabase accessLayer)
         {
             Type type = source.GetType();
@@ -399,12 +512,24 @@ namespace JPB.DataAccess
             return source;
         }
 
+        /// <summary>
+        /// Sets the infomations from the <param name="reader"></param> into the given object
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static T SetPropertysViaReflection<T>(IDataRecord reader)
             where T : class
         {
             return (T)SetPropertysViaReflection(typeof(T), reader);
         }
 
+        /// <summary>
+        /// Factory
+        /// Will enumerate the <param name="rec"></param> and wrapps all infos into a Egar record
+        /// </summary>
+        /// <param name="rec"></param>
+        /// <returns></returns>
         public static EgarDataRecord CreateEgarRecord(this IDataRecord rec)
         {
             return new EgarDataRecord(rec);
