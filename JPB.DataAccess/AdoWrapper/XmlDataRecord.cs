@@ -33,7 +33,7 @@ namespace JPB.DataAccess.AdoWrapper
         private readonly Type _target;
         private readonly XElement baseElement;
 
-        private XmlDataRecord(string xmlStream, Type target)
+        internal XmlDataRecord(string xmlStream, Type target)
         {
             _target = target;
             if (string.IsNullOrEmpty(xmlStream))

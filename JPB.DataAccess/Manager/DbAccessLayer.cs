@@ -152,7 +152,9 @@ namespace JPB.DataAccess.Manager
             set
             {
                 if (_database == null)
+                {
                     _database = value;
+                }
                 else
                 {
                     throw new NotSupportedException(
@@ -217,5 +219,34 @@ namespace JPB.DataAccess.Manager
         /// Default is true
         /// </summary>
         public bool LoadCompleteResultBeforeMapping { get; set; }
+
+        /// <summary>
+        /// Creates a Strong typed query that awaits a Result
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <returns></returns>
+        public QueryBuilder.QueryBuilder Query()
+        {
+            return new QueryBuilder.QueryBuilder(this.Database);
+        }
+
+        /// <summary>
+        /// Creates a Strong typed query that awaits a Result
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <returns></returns>
+        public QueryBuilder.QueryBuilder Query(Type targetType)
+        {
+            return new QueryBuilder.QueryBuilder(this.Database, targetType);
+        }
+
+        /// <summary>
+        /// Creates a Strong typed query that awaits a Result
+        /// </summary>
+        /// <returns></returns>
+        public QueryBuilder.QueryBuilder Query<T>()
+        {
+            return new QueryBuilder.QueryBuilder<T>(this.Database);
+        }
     }
 }

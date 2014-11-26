@@ -10,6 +10,7 @@ using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
+using Microsoft.CSharp;
 
 namespace JPB.DataAccess.EntityCreator.Compiler
 {
@@ -17,7 +18,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
     {
         static ClassCompiler()
         {
-            Provider = CodeDomProvider.CreateProvider("CSharp");
+            Provider = new CSharpCodeProvider();
         }
         
         public string TargetDir { get; private set; }
@@ -109,7 +110,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
             var comments = copyrightBuilder.ToString().Split('\n').Select(s => new CodeCommentStatement(s)).Concat(new[]
             {
                 new CodeCommentStatement("Created by " + Environment.UserDomainName + @"\" + Environment.UserName),
-                new CodeCommentStatement("Created at " + DateTime.Now.ToString("yyyy MMMM dd"))
+                new CodeCommentStatement("Created on " + DateTime.Now.ToString("yyyy MMMM dd"))
             }).ToArray();
 
             //Create DOM class
@@ -324,7 +325,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
         internal CodeConstructor GenerateTypeConstructorBasedOnElements()
         {
-            var codeMemberProperties = _base.Members.Cast<CodeMemberProperty>().Where(s => s != null).ToArray();
+            var codeMemberProperties = _base.Members.Cast<CodeTypeMember>().Where(s => s is CodeMemberProperty).Cast<CodeMemberProperty>().ToArray();
 
             var dic = new Dictionary<string, Tuple<string, Type>>();
 

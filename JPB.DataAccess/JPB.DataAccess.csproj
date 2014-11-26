@@ -82,6 +82,12 @@
     <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />
     <Compile Include="Pager\Contracts\IWrapperDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataConverterPager.cs" />
+    <Compile Include="QueryBuilder\EnumerationMode.cs" />
+    <Compile Include="QueryBuilder\QueryBuilder.cs" />
+    <Compile Include="QueryBuilder\QueryBuilderExtentions.cs" />
+    <Compile Include="QueryBuilder\QueryEagerEnumerator.cs" />
+    <Compile Include="QueryBuilder\QueryLazyEnumerator.cs" />
+    <Compile Include="QueryBuilder\QueryPart.cs" />
     <Compile Include="QueryExtentions.cs" />
     <Compile Include="ModelsAnotations\Annotations.cs" />
     <Compile Include="ModelsAnotations\ModelAnotations.cs" />

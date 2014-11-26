@@ -109,55 +109,5 @@ namespace JPB.DataAccess.MySql
         {
             return new MySql(ConnectionString);
         }
-
-        public IDbDataParameter CreateParameter_Bit(string strName, bool nullable = false)
-        {
-            return new MySqlParameter(strName, MySqlDbType.Bit);
-        }
-
-        public IDbDataParameter CreateParameter_Int(string strName, bool nullable = false)
-        {
-            return new MySqlParameter(strName, MySqlDbType.Int32);
-        }
-
-        public IDbDataParameter CreateParameter_SmallInt(string strName)
-        {
-            return new MySqlParameter(strName, MySqlDbType.Int24);
-        }
-
-        public IDbDataParameter CreateParameter_BigInt(string strName)
-        {
-            return new MySqlParameter(strName, MySqlDbType.Int64);
-        }
-
-        public IDbDataParameter CreateParameter_VarChar(string strName, int iSize, bool nullable = false)
-        {
-            return new MySqlParameter(strName, MySqlDbType.VarChar);
-        }
-
-        public IDbDataParameter CreateParameter_NVarChar(string strName, int iSize, bool nullable = false)
-        {
-            return new MySqlParameter(strName, MySqlDbType.VarChar);
-        }
-
-        public IDbDataParameter CreateParameter_NVarChar_MAX(string strName)
-        {
-            return new MySqlParameter(strName, MySqlDbType.VarChar);
-        }
-
-        public IDbDataParameter CreateParameter_DateTime(string strName, bool nullable = false)
-        {
-            return new MySqlParameter(strName, MySqlDbType.DateTime);
-        }
-
-        public IDbDataParameter CreateParameter_Time(string strName, bool nullable = false)
-        {
-            return new MySqlParameter(strName, MySqlDbType.Time);
-        }
-
-        public IDbDataParameter CreateParameter_SmallDateTime(string strName)
-        {
-            return new MySqlParameter(strName, MySqlDbType.DateTime);
-        }
     }
 }

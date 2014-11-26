@@ -51,7 +51,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
         {
             get
             {
-                var cn = (OleDbConnection) CreateConnection();
+                var cn = (OleDbConnection)CreateConnection();
                 return cn.DataSource;
             }
         }
@@ -63,13 +63,13 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
 
         public IDbCommand CreateCommand(string strSql, IDbConnection conn)
         {
-            return new OleDbCommand(strSql, (OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
+            return new OleDbCommand(strSql, (OleDbConnection)(conn is OleDbConnection ? conn : CreateConnection()));
         }
 
         public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
         {
             var oleDbCommand = new OleDbCommand(strSql,
-                (OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
+                (OleDbConnection)(conn is OleDbConnection ? conn : CreateConnection()));
 
             foreach (var dbDataParameter in fields)
             {
@@ -92,7 +92,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
         {
             using (var adapter = new OleDbDataAdapter())
             {
-                adapter.SelectCommand = (OleDbCommand) cmd;
+                adapter.SelectCommand = (OleDbCommand)cmd;
 
                 var table = new DataTable(name);
                 adapter.Fill(table);
@@ -104,85 +104,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
             }
         }
 
-        public void Import(DataTable dt, IDbCommand cmd)
-        {
-            using (var adapter = new OleDbDataAdapter())
-            {
-                adapter.SelectCommand = (OleDbCommand) cmd;
-
-                foreach (DataRow row in dt.Rows)
-                    row.SetAdded();
-
-                adapter.Update(dt);
-            }
-        }
-
-        public string GetTimeStamp()
-        {
-            return GetTimeStamp(DateTime.Now);
-        }
-
-        public string GetTimeStamp(DateTime dtValue)
-        {
-            DateTime dt = dtValue;
-
-            return string.Format(
-                "CONVERT(datetime,'{0:d4}-{1:d2}-{2:d2} {3:d2}:{4:d2}:{5:d2}',120)",
-                dt.Year, dt.Month, dt.Day,
-                dt.Hour, dt.Minute, dt.Second);
-        }
-
-        public string[] GetTables(IDbConnection conn, string strFilter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string[] GetTableColumns(IDbConnection conn, string strTableName, params object[] exclude)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int DropTable(IDbConnection conn, string strTableName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CompactDatabase(string strSource, string strDest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ShrinkDatabase(string strConnectionString)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void PrepareQuery(IDbConnection conn, string strSql)
-        {
-            throw new NotImplementedException();
-        }
-
         public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetViewsSql(string strName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetStoredProcedureSql(string strName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SupportsView(IDbConnection conn, string strName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SupportsStoredProcedure(IDbConnection conn, string strName)
         {
             throw new NotImplementedException();
         }

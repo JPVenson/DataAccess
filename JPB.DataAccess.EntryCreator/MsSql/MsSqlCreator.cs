@@ -98,6 +98,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
             Console.WriteLine(@"\add           Adds elements to existing cs classes");
             Console.WriteLine(@"    Options: ");
             Console.WriteLine(@"            \ctor [\r]   Adds a loader Constructor to all classes and if \r is set existing ctors that impliments IDataReader will be overwritten");
+            Console.WriteLine(@"\exit          Stops the execution of the program");
             RenderMenuAction();
         }
 
@@ -154,12 +155,20 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                                     break;
                             }
                         }
+                        else
+                        {
+                            RenderCtorCompiler(false);
+                        }
+                        break;
+                    case @"\exit":
+                        return;
+                        break;
+
+                    default:
+                        RenderMenuAction();
                         break;
                 }
             }
-
-            Console.WriteLine("Done ... end of program");
-            Console.ReadKey();
         }
 
         private void RenderCtorCompiler(bool replaceExisting)
@@ -364,6 +373,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                                 {
                                     selectedTable.NewTableName = string.Empty;
                                 }
+
                                 else
                                 {
                                     selectedTable.NewTableName = parts[2];
@@ -554,13 +564,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                 classes.Add(generatedClass);
 
                 generatedClass.TargetName = proc.NewTableName;
-
-                foreach (var spParamter in proc.Parameter.ParamaterSpParams)
-                {
-                    var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
-                    var spcName = spParamter.Parameter;
-                    generatedClass.AddProperty(spcName, targetType);
-                }
+                if (proc.Parameter.ParamaterSpParams != null)
+                    foreach (var spParamter in proc.Parameter.ParamaterSpParams)
+                    {
+                        var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
+                        var spcName = spParamter.Parameter;
+                        generatedClass.AddProperty(spcName, targetType);
+                    }
             }
 
             foreach (var codeTypeDeclaration in classes)

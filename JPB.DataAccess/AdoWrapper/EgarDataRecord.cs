@@ -53,82 +53,113 @@ namespace JPB.DataAccess.AdoWrapper
 
         public int GetOrdinal(string name)
         {
-            return (int) Objects.FirstOrDefault(s => s.Key == name).Value;
+            return (int)Objects.FirstOrDefault(s => s.Key == name).Value;
         }
 
         public bool GetBoolean(int i)
         {
-            return (bool) GetValue(i);
+            return (bool)GetValue(i);
         }
 
         public byte GetByte(int i)
         {
-            return (byte) GetValue(i);
+            return (byte)GetValue(i);
         }
 
         public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
         {
-            throw new NotImplementedException();
+            var value = (byte[])GetValue(i);
+            if (fieldOffset > value.Length)
+                throw new ArgumentOutOfRangeException("fieldOffset");
+
+            if (bufferoffset > buffer.Length)
+                throw new ArgumentOutOfRangeException("bufferoffset");
+
+            if (length > value.Length)
+                throw new ArgumentOutOfRangeException("bufferoffset");
+
+            long j;
+            for (j = fieldOffset; j < value.Length || j < length; j++)
+            {
+                buffer[j + bufferoffset] = value[j];
+            }
+            return j;
         }
 
         public char GetChar(int i)
         {
-            return (char) GetValue(i);
+            return (char)GetValue(i);
         }
 
         public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
         {
-            throw new NotImplementedException();
+            var value = (char[])GetValue(i);
+            if (fieldoffset > value.Length)
+                throw new ArgumentOutOfRangeException("fieldoffset");
+
+            if (bufferoffset > buffer.Length)
+                throw new ArgumentOutOfRangeException("bufferoffset");
+
+            if (length > value.Length)
+                throw new ArgumentOutOfRangeException("bufferoffset");
+
+            long j;
+            for (j = fieldoffset; j < value.Length || j < length; j++)
+            {
+                buffer[j + bufferoffset] = value[j];
+            }
+            return j;
         }
 
         public Guid GetGuid(int i)
         {
-            return (Guid) GetValue(i);
+            return (Guid)GetValue(i);
         }
 
         public short GetInt16(int i)
         {
-            return (short) GetValue(i);
+            return (short)GetValue(i);
         }
 
         public int GetInt32(int i)
         {
-            return (int) GetValue(i);
+            return (int)GetValue(i);
         }
 
         public long GetInt64(int i)
         {
-            return (long) GetValue(i);
+            return (long)GetValue(i);
         }
 
         public float GetFloat(int i)
         {
-            return (float) GetValue(i);
+            return (float)GetValue(i);
         }
 
         public double GetDouble(int i)
         {
-            return (double) GetValue(i);
+            return (double)GetValue(i);
         }
 
         public string GetString(int i)
         {
-            return (string) GetValue(i);
+            return (string)GetValue(i);
         }
 
         public decimal GetDecimal(int i)
         {
-            return (decimal) GetValue(i);
+            return (decimal)GetValue(i);
         }
 
         public DateTime GetDateTime(int i)
         {
-            return (DateTime) GetValue(i);
+            return (DateTime)GetValue(i);
         }
 
         public IDataReader GetData(int i)
         {
             throw new NotImplementedException();
+            //return new XmlDataRecord(GetString(i), typeof(object));
         }
 
         public bool IsDBNull(int i)

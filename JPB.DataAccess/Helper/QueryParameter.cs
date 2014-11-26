@@ -23,5 +23,10 @@ namespace JPB.DataAccess.Helper
         public object Value { get; set; }
 
         #endregion
+
+        public override string ToString()
+        {
+            return this.Value.ToString();
+        }
     }
 }

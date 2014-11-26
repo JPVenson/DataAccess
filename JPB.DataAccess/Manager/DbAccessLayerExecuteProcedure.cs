@@ -38,15 +38,15 @@ namespace JPB.DataAccess.Manager
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TE">The result</typeparam>
-        public TE ExecuteProcedure<T, TE>(T target) where TE : class
+        public List<TE> ExecuteProcedure<T, TE>(T target) where TE : class
         {
-            return ExecuteProcedure(typeof(T), typeof(TE), target) as TE;
+            return ExecuteProcedure(typeof(T), typeof(TE), target) as List<TE>;
         }
 
         /// <summary>
         /// Executes a Procedure object into the Database
         /// </summary>
-        public object ExecuteProcedure(Type type, Type resultType, object target)
+        public List<object> ExecuteProcedure(Type type, Type resultType, object target)
         {
             var command = CreateProcedureCall(type, target, Database);
             return Database.EnumerateDataRecords(command)
@@ -140,7 +140,6 @@ namespace JPB.DataAccess.Manager
             sb.Append(t.GetTableName());
             sb.Append(CreateProcedureHeader(t));
             var caller = new ProcCaller(sb.ToString());
-
             return caller.CreateCommand(target, db);
         }
 

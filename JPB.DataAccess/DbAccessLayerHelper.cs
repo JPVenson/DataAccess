@@ -156,7 +156,7 @@ namespace JPB.DataAccess
         }
 
         /// <summary>
-        /// Maps all propertys of <param name="type"></param> into the Db columns
+        /// Maps all propertys of <param name="type"></param> into the Database columns
         /// </summary>
         /// <param name="type"></param>
         /// <param name="ignore"></param>
@@ -167,7 +167,7 @@ namespace JPB.DataAccess
         }
 
         /// <summary>
-        /// Maps all propertys of typeof(T) into the Db columns
+        /// Maps all propertys of typeof(T) into the Database columns
         /// </summary>
         /// <param name="ignore"></param>
         /// <typeparam name="T"></typeparam>
@@ -177,11 +177,14 @@ namespace JPB.DataAccess
             return CreatePropertyNames(typeof(T), ignore);
         }
 
-        internal static IEnumerable<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query)
+        internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query)
         {
             return database.Run(
                 s =>
                 {
+                    //Skip enumeration and make a Direkt loading
+                    //This increeses Performance
+
                     var records = new List<IDataRecord>();
 
                     using (var dr = query.ExecuteReader())

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.QueryBuilder;
 
 namespace UnitTestProject1
 {
@@ -138,6 +139,11 @@ namespace UnitTestProject1
             //accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
             //writer.Close();
             Console.ReadLine();
+
+            foreach (var item in accessLayer.Query().Select(typeof(Image)))
+            {
+
+            }
         }
     }
 }

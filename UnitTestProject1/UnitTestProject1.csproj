@@ -68,6 +68,7 @@
     <Compile Include="TestingAutoEntrys\LoadTree.cs" />
     <Compile Include="TestingAutoEntrys\LoadXmlTest.cs" />
     <Compile Include="TestingAutoEntrys\LoadXmlTester.cs" />
+    <Compile Include="UnitTest1.cs" />
     <Compile Include="UnitTestLoadXml.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>

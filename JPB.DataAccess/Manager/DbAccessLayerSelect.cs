@@ -199,7 +199,7 @@ namespace JPB.DataAccess.Manager
             return CreateSelect(typeof(T), db, query, paramenter);
         }
 
-        private static IDbCommand CreateSelectQueryFactory(Type type, IDatabase db, params object[] parameter)
+        internal static IDbCommand CreateSelectQueryFactory(Type type, IDatabase db, params object[] parameter)
         {
             //try to get the attribute for static selection
             if (parameter != null && !parameter.Any())

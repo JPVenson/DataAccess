@@ -10,7 +10,7 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.MySql
 {
-    public class MySqlUntypedDataPager : IDataPager
+    public class MySqlUntypedDataPager<T> : IDataPager<T>
     {
         public MySqlUntypedDataPager()
         {
@@ -52,55 +52,60 @@ namespace JPB.DataAccess.MySql
         }
 
         public long MaxPage { get; private set; }
-        
+
         public int PageSize { get; set; }
 
         public Type TargetType { get; set; }
 
         public void LoadPage(DbAccessLayer dbAccess)
         {
-            //SyncHelper(CurrentPageItems.Clear);
+            SyncHelper(() => CurrentPageItems.Clear());
 
-            //var pk = TargetType.GetPK();
+            var pk = TargetType.GetPK();
 
-            //if (FirstID == -1 || LastID == -1)
-            //{
-            //    var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long), "SELECT " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk + " LIMIT 1").FirstOrDefault();
-            //    if (firstOrDefault != null)
-            //        FirstID = (long)firstOrDefault;
+            if (FirstID == -1 || LastID == -1)
+            {
+                var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long), "SELECT " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk + " LIMIT 1").FirstOrDefault();
+                if (firstOrDefault != null)
+                    FirstID = (long)firstOrDefault;
 
-            //    var lastId = dbAccess.RunPrimetivSelect(typeof(long), "SELECT " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk + " DESC LIMIT 1").FirstOrDefault();
-            //    if (lastId != null)
-            //        LastID = (long)lastId;
-            //}
+                var lastId = dbAccess.RunPrimetivSelect(typeof(long), "SELECT " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk + " DESC LIMIT 1").FirstOrDefault();
+                if (lastId != null)
+                    LastID = (long)lastId;
+            }
 
-            //var maxItems = dbAccess.RunPrimetivSelect(typeof(long), "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName()).FirstOrDefault();
-            //if (maxItems != null)
-            //{
-            //    long parsedCount;
-            //    long.TryParse(maxItems.ToString(), out parsedCount);
-            //    MaxPage = ((long)parsedCount) / PageSize;
-            //}
+            var maxItems = dbAccess.RunPrimetivSelect(typeof(long), "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName()).FirstOrDefault();
+            if (maxItems != null)
+            {
+                long parsedCount;
+                long.TryParse(maxItems.ToString(), out parsedCount);
+                MaxPage = ((long)parsedCount) / PageSize;
+            }
 
-            //var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
-            //{
-            //    PagedRows = CurrentPage * PageSize,
-            //    PageSize
-            //});
+            var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
+            {
+                PagedRows = CurrentPage * PageSize,
+                PageSize
+            });
 
-            //foreach (var item in selectWhere)
-            //{
-            //    dynamic item1 = item;
-            //    SyncHelper(() => CurrentPageItems.Add(item1));
-            //}
+            foreach (var item in selectWhere)
+            {
+                dynamic item1 = item;
+                SyncHelper(() => CurrentPageItems.Add(item1));
+            }
         }
 
-        public ICollection CurrentPageItems { get; private set; }
+        ICollection IDataPager.CurrentPageItems
+        {
+            get { return new ArrayList(this.CurrentPageItems.ToArray()); }
+        }
+
+        public ICollection<T> CurrentPageItems { get; protected set; }
 
         private Action<Action> _syncHelper;
         private long _currentPage;
         private bool _cache;
-    
+
         public Action<Action> SyncHelper
         {
             get { return _syncHelper; }

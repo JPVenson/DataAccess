@@ -101,89 +101,11 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
             }
         }
 
-        public void Import(DataTable dt, IDbCommand cmd)
-        {
-            using (var adapter = new OleDbDataAdapter())
-            {
-                adapter.SelectCommand = (OleDbCommand) cmd;
-
-                foreach (DataRow row in dt.Rows)
-                    row.SetAdded();
-
-                adapter.Update(dt);
-            }
-        }
-
-        public string GetTimeStamp()
-        {
-            return GetTimeStamp(DateTime.Now);
-        }
-
-        public string GetTimeStamp(DateTime dtValue)
-        {
-            DateTime dt = dtValue;
-
-            return string.Format(
-                "CONVERT(datetime,'{0:d4}-{1:d2}-{2:d2} {3:d2}:{4:d2}:{5:d2}',120)",
-                dt.Year, dt.Month, dt.Day,
-                dt.Hour, dt.Minute, dt.Second);
-        }
-
-        public string[] GetTables(IDbConnection conn, string strFilter)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string[] GetTableColumns(IDbConnection conn, string strTableName, params object[] exclude)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int DropTable(IDbConnection conn, string strTableName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CompactDatabase(string strSource, string strDest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ShrinkDatabase(string strConnectionString)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void PrepareQuery(IDbConnection conn, string strSql)
-        {
-            throw new NotImplementedException();
-        }
-
         public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
         {
-            throw new NotImplementedException();
+            return this.CreateCommand("SELECT LAST_INSERT_ID( );", conn);
         }
-
-        public string GetViewsSql(string strName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetStoredProcedureSql(string strName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SupportsView(IDbConnection conn, string strName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool SupportsStoredProcedure(IDbConnection conn, string strName)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public IDataPager<T> CreatePager<T>()
         {
             throw new NotImplementedException();
