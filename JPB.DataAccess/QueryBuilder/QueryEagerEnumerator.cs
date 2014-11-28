@@ -42,21 +42,23 @@ namespace JPB.DataAccess.QueryBuilder
         {
             _task.Wait();
 
-            counter++;
             try
             {
+                counter++;
+
                 if (elements.Count >= counter)
                 {
                     Current = elements[counter];
                     return true;
                 }
 
-                if (enumerateDataRecords.Count > counter)
+                if (enumerateDataRecords.Count < counter)
                     return false;
 
-                var dataRecord = enumerateDataRecords.ElementAt(counter);
+                var dataRecord = enumerateDataRecords.ElementAt(counter - 1);
                 Current = DataConverterExtensions.SetPropertysViaReflection(_type, dataRecord);
                 elements.Add(Current);
+
                 return true;
             }
             catch (Exception)
@@ -71,5 +73,23 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         public object Current { get; private set; }
+    }
+
+    public class QueryEagerEnumerator<T> : QueryEagerEnumerator, IEnumerator<T>
+    {
+        public QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
+            : base(queryBuilder, type)
+        {
+        }
+
+        public void Dispose()
+        {
+
+        }
+
+        public new T Current
+        {
+            get { return (T)base.Current; }
+        }
     }
 }

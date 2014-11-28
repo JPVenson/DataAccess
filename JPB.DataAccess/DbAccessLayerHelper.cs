@@ -33,7 +33,7 @@ namespace JPB.DataAccess
                     propertyInfo =>
                     {
                         PropertyInfo property =
-                            type.GetProperty(DataConverterExtensions.ReMapSchemaToEntiysProp(type, propertyInfo));
+                            type.GetProperty(type.ReMapSchemaToEntiysProp(propertyInfo));
                         object dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
                         return dataValue;
                     }).ToArray();

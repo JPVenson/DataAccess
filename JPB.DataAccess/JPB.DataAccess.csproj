@@ -84,7 +84,7 @@
     <Compile Include="AdoWrapper\MsSql\MsSqlDataConverterPager.cs" />
     <Compile Include="QueryBuilder\EnumerationMode.cs" />
     <Compile Include="QueryBuilder\QueryBuilder.cs" />
-    <Compile Include="QueryBuilder\QueryBuilderExtentions.cs" />
+    <Compile Include="QueryBuilder\MsQueryBuilderExtentions.cs" />
     <Compile Include="QueryBuilder\QueryEagerEnumerator.cs" />
     <Compile Include="QueryBuilder\QueryLazyEnumerator.cs" />
     <Compile Include="QueryBuilder\QueryPart.cs" />

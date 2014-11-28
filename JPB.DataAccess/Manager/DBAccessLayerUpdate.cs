@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Manager
             {
                 var query = CreateSelect(typeof(T), Database, entry.GetPK<T, long>());
                 RaiseKnownUpdate(query, Database);
-                var @select = Select<T>(query).FirstOrDefault();
+                var @select = RunSelect<T>(query).FirstOrDefault();
 
                 bool updated = false;
                 PropertyInfo[] propertys = typeof(T).GetProperties();

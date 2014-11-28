@@ -7,7 +7,10 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.QueryBuilder
 {
-    public static class QueryBuilderExtentions
+    /// <summary>
+    /// Provieds A set of extentions for Microsoft SQL Serve
+    /// </summary>
+    public static class MsQueryBuilderExtentions
     {
         /// <summary>
         /// Adds a Query part to <paramref name="builder"/>
@@ -16,7 +19,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <param name="query"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static QueryBuilder Query(this QueryBuilder builder, string query, params IQueryParameter[] parameters)
+        public static QueryBuilder QueryQ(this QueryBuilder builder, string query, params IQueryParameter[] parameters)
         {
             return builder.Add(new QueryPart(query, parameters));
         }
@@ -28,7 +31,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <param name="query"></param>
         /// <param name="paramerters"></param>
         /// <returns></returns>
-        public static QueryBuilder Query(this QueryBuilder builder, string query, dynamic paramerters = null)
+        public static QueryBuilder QueryD(this QueryBuilder builder, string query, dynamic paramerters)
         {
             if (paramerters != null)
             {
@@ -60,7 +63,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder Query(this QueryBuilder builder, string query, params object[] args)
         {
-            return builder.Query(string.Format(query, args));
+            return builder.QueryQ(string.Format(query, args));
         }
 
         /// <summary>
@@ -221,7 +224,7 @@ namespace JPB.DataAccess.QueryBuilder
             if (index == -1 || part == null)
                 return query;
 
-            part.Prefix = part.Prefix.Insert(index + @select.Length, "TOP " + top);
+            part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
 
             return query;
         }

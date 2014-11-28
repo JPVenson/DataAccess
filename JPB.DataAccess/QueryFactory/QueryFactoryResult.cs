@@ -8,6 +8,13 @@ namespace JPB.DataAccess.QueryFactory
     /// </summary>
     public class QueryFactoryResult : IQueryFactoryResult
     {
+        public QueryFactoryResult(QueryBuilder.QueryBuilder builder)
+        {
+            var compileFlat = builder.CompileFlat();
+            Query = compileFlat.Item1;
+            this.Parameters = compileFlat.Item2;
+        }
+
         public QueryFactoryResult(string query)
         {
             Query = query;

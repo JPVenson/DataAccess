@@ -18,18 +18,45 @@ namespace JPB.DataAccess.DebuggerHelper
     public class QueryDebugger
     {
         /// <summary>
-        /// Creates a Debugger that contains some debugging datas
+        /// Creates a Debugger that contains some debugging data
         /// </summary>
         /// <param name="command"></param>
+        /// <param name="source"></param>
         internal QueryDebugger(IDbCommand command, IDatabase source)
         {
             //Init async because this could be time consuming
             _loaded = false;
             Init();
             var debugquery = new StringBuilder(command.CommandText);
-            var formartCommandToQuery = source.FormartCommandToQuery(command);
+            string formartCommandToQuery;
+            if (source != null)
+            {
+                formartCommandToQuery = source.FormartCommandToQuery(command);
+            }
+            else
+            {
+                formartCommandToQuery = this.GenericCommandToQuery(command);
+            }
+
             DebuggerQuery = debugquery.ToString();
             SqlQuery = formartCommandToQuery;
+        }
+
+        private string GenericCommandToQuery(IDbCommand command)
+        {
+            var sql = new StringBuilder();
+
+            if (!string.IsNullOrEmpty(command.Connection.Database))
+                sql.AppendLine("USE " + command.Connection.Database + ";");
+
+            sql.Append(command.CommandText);
+
+            foreach (IDataParameter parameter in command.Parameters)
+            {
+                sql.Replace(parameter.ParameterName, ParameterValue(parameter));
+            }
+
+            return sql.ToString();
         }
 
         static QueryDebugger()

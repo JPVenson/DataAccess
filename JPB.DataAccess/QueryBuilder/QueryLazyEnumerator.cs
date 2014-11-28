@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.QueryBuilder
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class QueryLazyEnumerator : IEnumerator
     {
         private readonly QueryBuilder _queryBuilder;
@@ -47,5 +50,19 @@ namespace JPB.DataAccess.QueryBuilder
                 return DataConverterExtensions.SetPropertysViaReflection(_type, executeReader);
             }
         }
+    }
+
+    public class QueryLazyEnumerator<T> : QueryLazyEnumerator, IEnumerator<T>
+    {
+        public QueryLazyEnumerator(QueryBuilder queryBuilder, Type type) : base(queryBuilder, type)
+        {
+        }
+
+        public void Dispose()
+        {
+            
+        }
+
+        public new T Current { get { return (T) base.Current; } }
     }
 }
