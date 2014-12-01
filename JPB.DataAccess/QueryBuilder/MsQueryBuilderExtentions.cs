@@ -232,7 +232,7 @@ namespace JPB.DataAccess.QueryBuilder
         public static QueryBuilder WithParamerters(this QueryBuilder query, dynamic paramerters)
         {
             IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-            query.Query("", parameters.ToArray());
+            query.QueryQ("", parameters.ToArray());
             return query;
         }
     }

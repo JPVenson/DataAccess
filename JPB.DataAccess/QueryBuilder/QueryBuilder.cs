@@ -118,7 +118,11 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public QueryBuilder<T> ForResult<T>()
         {
-            return this as QueryBuilder<T>;
+            return new QueryBuilder<T>(this.Database)
+            {
+                EnumerationMode = EnumerationMode,
+                Parts = Parts
+            };
         }
     }
 
