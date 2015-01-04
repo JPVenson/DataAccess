@@ -33,7 +33,7 @@ namespace JPB.DataAccess.QueryBuilder
             _task = new Task(() =>
             {
                 var query = _queryBuilder.Compile();
-                enumerateDataRecords = _queryBuilder.Database.EnumerateDataRecords(query);
+                enumerateDataRecords = _queryBuilder.Database.EnumerateDataRecords(query, true);
             });
             _task.Start();
         }

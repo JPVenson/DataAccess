@@ -177,20 +177,29 @@ namespace JPB.DataAccess
             return CreatePropertyNames(typeof(T), ignore);
         }
 
-        internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query)
+        internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
         {
             return database.Run(
                 s =>
                 {
-                    //Skip enumeration and make a Direkt loading
+                    //Skip enumeration and make a Direct loading
                     //This increeses Performance
-
+                   
                     var records = new List<IDataRecord>();
 
                     using (var dr = query.ExecuteReader())
                     {
                         while (dr.Read())
-                            records.Add(dr.CreateEgarRecord());
+                        {
+                            if (egarLoading)
+                            {
+                                records.Add(dr.CreateEgarRecord());
+                            }
+                            else
+                            {
+                                records.Add(dr);
+                            }
+                        }
                         dr.Close();
                     }
                     return records;

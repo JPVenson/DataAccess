@@ -2,16 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Management.Instrumentation;
 using System.Threading.Tasks;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.QueryBuilder
 {
-    /// <summary>
-    /// Provieds A set of extentions for Microsoft SQL Serve
-    /// </summary>
-    public static class MsQueryBuilderExtentions
+    public static class QueryBuilderExtentions
     {
         /// <summary>
         /// Adds a Query part to <paramref name="builder"/>
@@ -20,7 +18,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <param name="query"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static QueryBuilder QueryQ(this QueryBuilder builder, string query, params IQueryParameter[] parameters)
+        public static QueryBuilder Query(this QueryBuilder builder, string query, params IQueryParameter[] parameters)
         {
             return builder.Add(new QueryPart(query, parameters));
         }
@@ -32,7 +30,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <param name="query"></param>
         /// <param name="paramerters"></param>
         /// <returns></returns>
-        public static QueryBuilder QueryD(this QueryBuilder builder, string query, dynamic paramerters)
+        public static QueryBuilder Query(this QueryBuilder builder, string query, dynamic paramerters = null)
         {
             if (paramerters != null)
             {
@@ -64,7 +62,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder Query(this QueryBuilder builder, string query, params object[] args)
         {
-            return builder.QueryQ(string.Format(query, args));
+            return builder.Query(string.Format(query, args));
         }
 
         /// <summary>
@@ -211,7 +209,20 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
+        /// Adds a JOIN to the Statement
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public static QueryBuilder Join<T,TE>(this QueryBuilder query, string mode)
+        {
+            var targetTable = typeof(TE).GetTableName();
+            return query.Query(mode + " JOIN {0} ON {1} = {2}", targetTable, typeof(TE), typeof(T));
+        }
+
+        /// <summary>
         /// Inserts a TOP Cluases into an existing Select
+        /// This will alter an existing Select
         /// </summary>
         /// <param name="query"></param>
         /// <param name="top"></param>
@@ -223,23 +234,19 @@ namespace JPB.DataAccess.QueryBuilder
             var part = query.Parts.FirstOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(select, System.StringComparison.Ordinal)) != -1);
 
             if (index == -1 || part == null)
-                return query;
+            {
+                throw new InstanceNotFoundException("There is no Select Statement please Create a Select first");
+            }
 
-            part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
+            part.Prefix = part.Prefix.Insert(index + @select.Length, "TOP " + top);
 
             return query;
         }
 
-        /// <summary>
-        /// Adds Parameter to the Query object without adding a Statement
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="paramerters"></param>
-        /// <returns></returns>
         public static QueryBuilder WithParamerters(this QueryBuilder query, dynamic paramerters)
         {
             IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-            query.QueryQ(string.Empty, parameters.ToArray());
+            query.Query("", parameters.ToArray());
             return query;
         }
 
@@ -250,7 +257,10 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static async Task<IEnumerable<T>> ConfigurateAwaiter<T>(this QueryBuilder<T> query)
         {
-            var task = new Task<IEnumerable<T>>(query.ToArray);
+            var task = new Task<IEnumerable<T>>(() =>
+            {
+                var resu = query.ToArray();
+            });
 
             task.Start();
             await task;

@@ -177,6 +177,19 @@ namespace JPB.DataAccess.Manager
         }
 
         /// <summary>
+        /// Check for Availability 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> CheckDatabaseAsync()
+        {
+            if (Database == null)
+                return false;
+            Database.Connect(false);
+            Database.CloseConnection();
+            return true;
+        }
+
+        /// <summary>
         /// Wraps a Query and its Paramters and then executes it
         /// </summary>
         /// <param name="query"></param>

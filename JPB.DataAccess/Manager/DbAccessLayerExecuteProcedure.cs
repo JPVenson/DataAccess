@@ -49,7 +49,7 @@ namespace JPB.DataAccess.Manager
         public List<object> ExecuteProcedure(Type type, Type resultType, object target)
         {
             var command = CreateProcedureCall(type, target, Database);
-            return Database.EnumerateDataRecords(command)
+            return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
                 .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(resultType, dataRecord))
                 .ToList();
         }

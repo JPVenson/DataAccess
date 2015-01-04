@@ -113,17 +113,27 @@ namespace JPB.DataAccess.ModelsAnotations
 
     #endregion
 
+    /// <summary>
+    /// Ignores this Property when creating an Update or Insert statement
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     public class InsertIgnore : DataAccessAttribute
     {
     }
 
+    /// <summary>
+    /// Indicates this Property to be resolved as a ForeignKey
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     public class ForeignKeyAttribute : InsertIgnore
     {
         public string KeyName { get; set; }
     }
 
+    /// <summary>
+    /// Indicates that this property is a Primary key
+    /// Requert for Selection over PK 
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
     public class PrimaryKeyAttribute : DataAccessAttribute
     {
@@ -147,7 +157,6 @@ namespace JPB.DataAccess.ModelsAnotations
     public sealed class RowVersionAttribute : InsertIgnore
     {
     }
-
 
     /// <summary>
     ///     Marks a property to be ignored by the complete searching logic
