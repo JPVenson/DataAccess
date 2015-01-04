@@ -121,8 +121,6 @@ namespace JPB.DataAccess.EntityCreator
 #endif
             }
 
-
-
             new MsSqlCreator().CreateEntrys(connectionString, outputDir, string.Empty);
         }
 
