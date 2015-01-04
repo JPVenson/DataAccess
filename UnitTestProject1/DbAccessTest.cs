@@ -13,22 +13,22 @@ namespace UnitTestProject1
         public string testName = "TestDD";
         public static DbAccessLayer AccessLayer { get; set; }
 
-        private static void Main()
-        {
-            var dbAccessTest = new DbAccessTest();
-            try
-            {
-                //dbAccessTest.MySQlTest();
-                CleanUp();
+        //private static void Main()
+        //{
+        //    var dbAccessTest = new DbAccessTest();
+        //    try
+        //    {
+        //        //dbAccessTest.MySQlTest();
+        //        CleanUp();
 
-                dbAccessTest.ACheckInserts();
-                dbAccessTest.BCheckSelects();
-            }
-            finally
-            {
-                CleanUp();
-            }
-        }
+        //        dbAccessTest.ACheckInserts();
+        //        dbAccessTest.BCheckSelects();
+        //    }
+        //    finally
+        //    {
+        //        CleanUp();
+        //    }
+        //}
 
         [ClassCleanup]
         public static void CleanUp()
