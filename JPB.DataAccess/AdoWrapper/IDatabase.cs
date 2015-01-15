@@ -85,10 +85,8 @@ namespace JPB.DataAccess.AdoWrapper
         ///     Required
         ///     When a new Connection is requested this function is used
         /// </summary>
-        /// <param name="bUseTransaction"></param>
-        void Connect(bool bUseTransaction);
+        void Connect(IsolationLevel? levl = null);
 
-        void TransactionCommit();
         void TransactionRollback();
 
         /// <summary>
@@ -132,7 +130,7 @@ namespace JPB.DataAccess.AdoWrapper
         /// <param name="value"></param>
         /// <returns></returns>
         IDataParameter CreateParameter(string strName, object value);
-        
+
         /// <summary>
         ///     Required
         ///     Execute a Query and map the result that is created with the func
@@ -153,7 +151,7 @@ namespace JPB.DataAccess.AdoWrapper
         /// <param name="func"></param>
         /// <returns></returns>
         IEnumerable<T> GetEntitiesList<T>(IDbCommand cmd, Func<IDataRecord, T> func);
-        
+
         /// <summary>
         ///     Required
         ///     Opens a Connection or reuse an existing one and then execute the action
@@ -174,6 +172,14 @@ namespace JPB.DataAccess.AdoWrapper
         /// </summary>
         /// <param name="action"></param>
         void RunInTransaction(Action<IDatabase> action);
+
+        /// <summary>
+        ///     Required
+        ///     Opens a Connection or reuse an existing one and then execute the action
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="transaction"></param>
+        void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction);
 
         /// <summary>
         ///     Required

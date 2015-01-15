@@ -14,7 +14,7 @@ namespace JPB.DataAccess.AdoWrapper
     /// 
     /// </summary>
     [DebuggerDisplay("OpenRuns {_handlecounter}, IsConnectionOpen {_conn2 != null}, IsTransactionOpen {_trans != null}")]
-    public sealed class Database : IDatabase
+    public sealed class DefaultDatabaseAccess : IDatabase
     {
         private IDbConnection _conn2;
         private volatile int _handlecounter;
@@ -82,34 +82,23 @@ namespace JPB.DataAccess.AdoWrapper
             return _trans;
         }
 
-        public void Connect(bool bUseTransaction)
+        public void Connect(IsolationLevel? levl = null)
         {
             //check for an Active connection
-            if (null == GetConnection())
+            if (null == _conn2)
                 //No Connection open one
-                _conn2 = _strategy.CreateConnection();
-            
+                _conn2 = GetConnection();
             //Connection exists check for open
-            if (GetConnection().State != ConnectionState.Open)
-                GetConnection().Open();
+            if (_conn2.State != ConnectionState.Open)
+                _conn2.Open();
 
             //This is the First call of connect so we Could
             //define it as Transaction
-            if (_handlecounter == 0 && bUseTransaction) 
-                    _trans = GetConnection().BeginTransaction();
+            if (_handlecounter == 0 && levl != null)
+                _trans = _conn2.BeginTransaction(levl.GetValueOrDefault());
 
             //We created a Connection and proceed now with the DB access
             _handlecounter++;
-        }
-
-        public void TransactionCommit()
-        {
-            //All previous DB actions are Successfull so Commit the changes
-            if (_trans != null && _handlecounter == 0)
-            {
-                _trans.Commit();
-                _trans = null;
-            }
         }
 
         public void TransactionRollback()
@@ -134,12 +123,14 @@ namespace JPB.DataAccess.AdoWrapper
             if (_handlecounter > 0)
                 _handlecounter--;
 
-            if (GetConnection() != null && _handlecounter == 0)
+            if (_conn2 != null && _handlecounter == 0)
             {
                 if (_trans != null)
-                TransactionCommit();
+                {
+                    _trans.Commit();
+                }
                 _trans = null;
-                GetConnection().Close();
+                _conn2.Close();
             }
         }
 
@@ -249,7 +240,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public IDatabase Clone()
         {
-            var db = new Database();
+            var db = new DefaultDatabaseAccess();
             db.Attach((IDatabaseStrategy)_strategy.Clone());
             return db;
         }
@@ -261,7 +252,7 @@ namespace JPB.DataAccess.AdoWrapper
         public void ProcessEntitiesList(string strQuery, Action<IDataRecord> action, bool bHandleConnection)
         {
             if (bHandleConnection)
-                Connect(false);
+                Connect();
 
             try
             {
@@ -283,7 +274,7 @@ namespace JPB.DataAccess.AdoWrapper
             bool bHandleConnection)
         {
             if (bHandleConnection)
-                Connect(false);
+                Connect();
 
             try
             {
@@ -312,7 +303,7 @@ namespace JPB.DataAccess.AdoWrapper
         public IEnumerable<T> GetEntitiesList<T>(string strQuery, Func<IDataRecord, T> func, bool bHandleConnection)
         {
             if (bHandleConnection)
-                Connect(false);
+                Connect();
 
             try
             {
@@ -345,7 +336,7 @@ namespace JPB.DataAccess.AdoWrapper
             bool bHandleConnection)
         {
             if (bHandleConnection)
-                Connect(false);
+                Connect();
 
             try
             {
@@ -373,7 +364,7 @@ namespace JPB.DataAccess.AdoWrapper
             var htRes = new Dictionary<K, V>();
 
             if (bHandleConnection)
-                Connect(false);
+                Connect();
 
             try
             {
@@ -428,7 +419,7 @@ namespace JPB.DataAccess.AdoWrapper
             bool bHandleConnection, string strExceptionMessage = null)
         {
             if (bHandleConnection)
-                Connect(false);
+                Connect();
 
             IDataReader dr = null;
             try
@@ -475,7 +466,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             try
             {
-                Connect(false);
+                Connect();
 
                 action(this);
             }
@@ -489,7 +480,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             try
             {
-                Connect(false);
+                Connect();
 
                 return func(this);
             }
@@ -504,11 +495,28 @@ namespace JPB.DataAccess.AdoWrapper
         {
             try
             {
-                Connect(true);
+                Connect();
 
                 action(this);
+            }
+            catch
+            {
+                TransactionRollback();
+                throw;
+            }
+            finally
+            {
+                CloseConnection();
+            }
+        }
 
-                TransactionCommit();
+        public void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction)
+        {
+            try
+            {
+                Connect(transaction);
+
+                action(this);
             }
             catch
             {
@@ -525,11 +533,9 @@ namespace JPB.DataAccess.AdoWrapper
         {
             try
             {
-                Connect(true);
+                Connect(IsolationLevel.ReadUncommitted);
 
                 T res = func(this);
-
-                TransactionCommit();
 
                 return res;
             }
@@ -546,7 +552,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         #endregion Query Helper
 
-        ~Database()
+        ~DefaultDatabaseAccess()
         {
             Dispose(false);
         }
@@ -563,12 +569,12 @@ namespace JPB.DataAccess.AdoWrapper
             }
         }
 
-        public static Database Create(IDatabaseStrategy strategy)
+        public static DefaultDatabaseAccess Create(IDatabaseStrategy strategy)
         {
             if (null == strategy)
                 return null;
 
-            var db = new Database();
+            var db = new DefaultDatabaseAccess();
             db.Attach(strategy);
             return db;
         }
@@ -616,7 +622,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public void OpenAndCloseDatabase()
         {
-            Connect(false);
+            Connect();
             CloseConnection();
         }
 

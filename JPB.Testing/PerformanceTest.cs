@@ -61,17 +61,17 @@ namespace UnitTestProject1
         {
             //Clear old entrys
             var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
-            accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
+            //accessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users;DELETE FROM Images;"));
 
-            ////accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
-            ////                                                                     " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
-            ////                                                                     " UserName NVARCHAR(MAX)," +
-            ////                                                                     ");"));
+            //accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
+            //                                                                     " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+            //                                                                     " UserName NVARCHAR(MAX)," +
+            //                                                                     ");"));
 
-            ////accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
-            ////                                                         " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
-            ////                                                         " Content NVARCHAR(MAX)," +
-            ////                                                         ");"));
+            //accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
+            //                                                         " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+            //                                                         " Content NVARCHAR(MAX)," +
+            //                                                         ");"));
 
             var itemsList = new List<User>();
 
@@ -85,7 +85,6 @@ namespace UnitTestProject1
             //Create the cache
             accessLayer.Select<User>();
 
-            //first try normal Inserting
             Console.WriteLine("Test Managed Insert Range");
             TraceAction(() =>
             {

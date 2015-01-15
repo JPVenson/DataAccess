@@ -49,7 +49,7 @@ namespace JPB.DataAccess.Manager
             : this()
         {
             DbType = dbType;
-            Database = new Database();
+            Database = new DefaultDatabaseAccess();
 
             if (dbType == DbTypes.Unknown)
             {
@@ -78,7 +78,7 @@ namespace JPB.DataAccess.Manager
             SelectDbAccessLayer();
             UpdateDbAccessLayer();
 
-            Database = new Database();
+            Database = new DefaultDatabaseAccess();
             Database.Attach(type);
         }
 
@@ -97,7 +97,7 @@ namespace JPB.DataAccess.Manager
 
             ResolveDbType(database.GetType().FullName);
 
-            Database = new Database();
+            Database = new DefaultDatabaseAccess();
             Database.Attach(database);
         }
 
@@ -171,7 +171,7 @@ namespace JPB.DataAccess.Manager
         {
             if (Database == null)
                 return false;
-            Database.Connect(false);
+            Database.Connect();
             Database.CloseConnection();
             return true;
         }
@@ -184,7 +184,7 @@ namespace JPB.DataAccess.Manager
         {
             if (Database == null)
                 return false;
-            Database.Connect(false);
+            Database.Connect();
             Database.CloseConnection();
             return true;
         }

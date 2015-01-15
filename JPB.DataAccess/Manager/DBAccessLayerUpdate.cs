@@ -25,13 +25,16 @@ namespace JPB.DataAccess.Manager
 
         public bool Update<T>(T entry, bool checkRowVersion = false)
         {
-            if (checkRowVersion)
+            return Database.RunInTransaction(s =>
             {
-                if (!CheckRowVersion(entry))
-                    return false;
-            }
-            Update(entry, Database);
-            return true;
+                if (checkRowVersion)
+                {
+                    if (!CheckRowVersion(entry))
+                        return false;
+                }
+                Update(entry, Database);
+                return true;
+            });
         }
 
         /// <summary>
@@ -72,32 +75,35 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public bool RefreshKeepObject<T>(T entry)
         {
-            if (!CheckRowVersion(entry))
+            return Database.RunInTransaction(s =>
             {
-                var query = CreateSelect(typeof(T), Database, entry.GetPK<T, long>());
-                RaiseKnownUpdate(query, Database);
-                var @select = RunSelect<T>(query).FirstOrDefault();
-
-                bool updated = false;
-                PropertyInfo[] propertys = typeof(T).GetProperties();
-                foreach (PropertyInfo propertyInfo in propertys)
+                if (!CheckRowVersion(entry))
                 {
-                    object oldValue = propertyInfo.GetConvertedValue(entry);
-                    object newValue = propertyInfo.GetConvertedValue(@select);
+                    var query = CreateSelect(typeof(T), Database, entry.GetPK<T, long>());
+                    RaiseKnownUpdate(query, Database);
+                    var @select = RunSelect<T>(query).FirstOrDefault();
 
-                    if (newValue == null && oldValue == null ||
-                        (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
-                        continue;
+                    bool updated = false;
+                    PropertyInfo[] propertys = typeof(T).GetProperties();
+                    foreach (PropertyInfo propertyInfo in propertys)
+                    {
+                        object oldValue = propertyInfo.GetConvertedValue(entry);
+                        object newValue = propertyInfo.GetConvertedValue(@select);
 
-                    propertyInfo.SetValue(@select, newValue);
-                    updated = true;
+                        if (newValue == null && oldValue == null ||
+                            (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
+                            continue;
+
+                        propertyInfo.SetValue(@select, newValue);
+                        updated = true;
+                    }
+
+                    @select.LoadNavigationProps(Database);
+
+                    return updated;
                 }
-
-                @select.LoadNavigationProps(Database);
-
-                return updated;
-            }
-            return false;
+                return false;
+            });
         }
 
         /// <summary>
@@ -121,8 +127,11 @@ namespace JPB.DataAccess.Manager
                     string rowVersionprop = type.MapEntiysPropToSchema(rowVersion.Name);
                     string staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " +
                                               type.GetPK() + " = " + entry.GetPK();
-                    byte[] scalarValue = RunPrimetivSelect<byte[]>(staticRowVersion).FirstOrDefault();
-                    return scalarValue != null && scalarValue.SequenceEqual(rowversionValue);
+
+                    var skalar = this.Database.GetSkalar(staticRowVersion);
+                    if (skalar == null)
+                        return false;
+                    return ((byte[]) skalar).SequenceEqual(rowversionValue);
                 }
                 return false;
             }
