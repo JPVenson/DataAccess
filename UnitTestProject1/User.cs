@@ -4,11 +4,12 @@ using JPB.DataAccess.ModelsAnotations;
 namespace UnitTestProject1
 {
     [ForModel("Users")]
+    [SelectFactory("SELECT * FROM Users")]
     public class User
     {
         [ForModel("UserName")]
         public string Name { get; set; }
-        
+
         [PrimaryKey]
         [ForModel("User_ID")]
         public long UserId { get; set; }

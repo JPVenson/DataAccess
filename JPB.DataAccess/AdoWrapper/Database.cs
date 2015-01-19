@@ -28,6 +28,9 @@ namespace JPB.DataAccess.AdoWrapper
             return _strategy.CreateConverterPager<T, TE>();
         }
 
+        /// <summary>
+        /// Get the last Executed Query wrapped by a Debugger
+        /// </summary>
         public QueryDebugger LastExecutedQuery { get; private set; }
 
         public IDataPager<T> CreatePager<T>()
@@ -101,6 +104,9 @@ namespace JPB.DataAccess.AdoWrapper
             _handlecounter++;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void TransactionRollback()
         {
             //Error inside the call
