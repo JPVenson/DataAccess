@@ -153,7 +153,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
         {
-            IDbCommand cmd = _strategy.CreateCommand(GetConnection(), strSql, fields);
+            IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection(), fields);
             LastExecutedQuery = cmd.CreateQueryDebugger(this);
             if (_trans != null)
                 cmd.Transaction = _trans;

@@ -23,10 +23,17 @@ namespace JPB.DataAccess.QueryBuilder
         internal readonly IDatabase Database;
         protected readonly Type _forType;
 
+        internal int _autoParameterCounter;
+
         /// <summary>
         /// Defines the Way how the Data will be loaded
         /// </summary>
         public EnumerationMode EnumerationMode { get; set; }
+
+        /// <summary>
+        /// If enabled Variables that are only used for parameters will be Renamed if there Existing multible times
+        /// </summary>
+        public bool AllowParamterRenaming { get; set; }
 
         public QueryBuilder(IDatabase database, Type forType)
             : this(database)
@@ -77,6 +84,22 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public QueryBuilder Add(QueryPart part)
         {
+            if (AllowParamterRenaming)
+            {
+                foreach (var queryParameter in part.QueryParameters)
+                {
+                    var fod = this.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
+
+                    if (fod == null)
+                        continue;
+
+                    //parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the Query
+                    var name = fod.Name;
+                    var newName = GetParamaterAutoID().ToString().CheckParamter();
+                    part.Prefix = part.Prefix.Replace(name, newName);
+                    queryParameter.Name = newName;
+                }   
+            }
             Parts.Add(part);
             return this;
         }
@@ -123,6 +146,21 @@ namespace JPB.DataAccess.QueryBuilder
                 EnumerationMode = EnumerationMode,
                 Parts = Parts
             };
+        }
+
+        /// <summary>
+        /// Incriment the counter +1 and retunres the value
+        /// </summary>
+        /// <returns></returns>
+        public int GetParamaterAutoID()
+        {
+            return ++_autoParameterCounter;
+        }
+
+        public QueryBuilder SetAutoRenaming(bool value)
+        {
+            this.AllowParamterRenaming = value;
+            return this;
         }
     }
 

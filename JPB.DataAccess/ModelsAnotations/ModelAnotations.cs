@@ -20,11 +20,11 @@ namespace JPB.DataAccess.ModelsAnotations
     //{
     //    public FactoryBaseAttribute()
     //    {
-    //        DbQuery = DbTypes.Unknown;
+    //        DbQuery = DbAccessType.Unknown;
     //    }
     //    // This is a positional argument
 
-    //    public DbTypes DbQuery { get; set; }
+    //    public DbAccessType DbQuery { get; set; }
     //}
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]

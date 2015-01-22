@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -156,18 +157,50 @@ namespace JPB.DataAccess.QueryBuilder
             return query;
         }
 
+        /// <summary>
+        /// Creates a Common Table Expression that selects a Specific type
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="target"></param>
+        /// <param name="cteName"></param>
+        /// <param name="useStarOperator"></param>
+        /// <returns></returns>
+        public static QueryBuilder SubSelect(this QueryBuilder query, Action<QueryBuilder> subSelect)
+        {
+            query.Query("(");
+            subSelect(query);
+            query.Query(")");
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a Common Table Expression that selects a Specific type
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="target"></param>
+        /// <param name="cteName"></param>
+        /// <param name="useStarOperator"></param>
+        /// <returns></returns>
+        public static QueryBuilder SubSelect(this QueryBuilder query, Type type)
+        {
+            query.Query("(");
+            query.Select(type);
+            query.Query(")");
+            return query;
+        }
+
         ///// <summary>
         ///// Creates a Common Table Expression that selects a Specific type
         ///// </summary>
         ///// <param name="query"></param>
-        ///// <param name="header"></param>
+        ///// <param name="subSelect"></param>
         ///// <param name="cteName"></param>
         ///// <param name="useStarOperator"></param>
         ///// <returns></returns>
-        //public static QueryBuilder WithCteForQuery(this QueryBuilder query, Action<QueryBuilder> header, string cteName)
+        //public static QueryBuilder WithCteForQuery(this QueryBuilder query, Action<QueryBuilder> subSelect, string cteName)
         //{
         //    var queryBuilder = new QueryBuilder(query.Database);
-        //    header(queryBuilder);
+        //    subSelect(queryBuilder);
         //    var compileFlat = queryBuilder.CompileFlat();
         //    var cteBuilder = new StringBuilder();
         //    cteBuilder.Append("WITH ");
@@ -187,6 +220,29 @@ namespace JPB.DataAccess.QueryBuilder
         public static QueryBuilder As(this QueryBuilder query, string alias)
         {
             return query.Query("AS " + alias);
+        }
+
+        /// <summary>
+        /// Add an AS part
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="alias"></param>
+        /// <returns></returns>
+        public static QueryBuilder Contains(this QueryBuilder query, string alias)
+        {
+            return query.Query("CONTAINS ({0})", alias);
+        }
+
+        /// <summary>
+        /// Add an AS part
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="alias"></param>
+        /// <returns></returns>
+        public static QueryBuilder Contains(this QueryBuilder query, object alias)
+        {
+            var paramaterAutoId = query.GetParamaterAutoID();
+            return query.QueryQ(string.Format("CONTAINS (@{0})", paramaterAutoId), new QueryParameter(paramaterAutoId.ToString(CultureInfo.InvariantCulture), alias));
         }
 
         /// <summary>

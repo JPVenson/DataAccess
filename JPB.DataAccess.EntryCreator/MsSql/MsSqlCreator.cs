@@ -22,7 +22,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
         public void CreateEntrys(string connection, string outputPath, string database)
         {
             TargetDir = outputPath;
-            Manager = new DbAccessLayer(DbTypes.MsSql, connection);
+            Manager = new DbAccessLayer(DbAccessType.MsSql, connection);
             bool checkDatabase;
             try
             {

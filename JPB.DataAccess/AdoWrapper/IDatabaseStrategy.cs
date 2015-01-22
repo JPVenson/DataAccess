@@ -12,13 +12,23 @@ namespace JPB.DataAccess.AdoWrapper
         /// </summary>
         DbAccessType SourceDatabase { get; }
 
+        /// <summary>
+        /// An Valid Connection string for the given Strategy
+        /// </summary>
         string ConnectionString { get; set; }
+        /// <summary>
+        /// Optional used when connecting to a Local file
+        /// </summary>
         string DatabaseFile { get; }
+        /// <summary>
+        /// Should return the current database if availibe
+        /// </summary>
         string ServerName { get; }
-        IDbConnection CreateConnection();
 
+
+        IDbConnection CreateConnection();
         IDbCommand CreateCommand(string strSql, IDbConnection conn);
-        IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields);
+        IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields);
         IDataParameter CreateParameter(string strName, object value);
 
         IDbDataAdapter CreateDataAdapter(IDbCommand cmd);

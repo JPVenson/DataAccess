@@ -15,7 +15,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
     /// </summary>
     public class MsSql : IDatabaseStrategy
     {
-        private readonly string _strDatabase;
         private const string TEMPLATE_MSSQL_UNTRUSTED =
             "server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
 
@@ -26,7 +25,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
         public MsSql(string strServer, string strDatabase)
         {
-            _strDatabase = strDatabase;
             _connStr = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
         }
 
@@ -104,7 +102,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             return cmd;
         }
 
-        public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
+        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
         {
             var cmd = (SqlCommand)CreateCommand(strSql, conn);
 

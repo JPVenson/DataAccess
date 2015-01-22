@@ -16,6 +16,9 @@ namespace UnitTestProject1
     {
         public static void Main()
         {
+
+
+
             new PerformanceTest().TestMethod1();
         }
 
@@ -72,7 +75,7 @@ namespace UnitTestProject1
             //                                                         " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
             //                                                         " Content NVARCHAR(MAX)," +
             //                                                         ");"));
-
+            
             var itemsList = new List<User>();
 
             var count = 500;
