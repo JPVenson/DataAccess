@@ -125,8 +125,7 @@ namespace JPB.DataAccess
             {
                 PropertyInfo = propertyInfo;
                 PropertyName = propertyInfo.Name;
-                this.AttributeInfoCaches =
-                    propertyInfo.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToArray();
+                this.AttributeInfoCaches = propertyInfo.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToArray();
             }
 
             public PropertyInfo PropertyInfo { get; private set; }

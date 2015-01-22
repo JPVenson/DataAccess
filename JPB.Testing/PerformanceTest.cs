@@ -83,6 +83,7 @@ namespace UnitTestProject1
             }
 
             //Create the cache
+
             accessLayer.Select<User>();
 
             Console.WriteLine("Test Managed Insert Range");

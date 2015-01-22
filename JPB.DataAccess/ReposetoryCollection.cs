@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 
@@ -9,6 +10,13 @@ namespace JPB.DataAccess
 {
     internal class ReposetoryCollection<TE> : ICollection<TE>
     {
+        //static ReposetoryCollection()
+        //{
+        //    ctor = typeof(ReposetoryCollection<>).GetConstructor(new[] { typeof(IEnumerable) });
+        //}
+
+        //internal static readonly ConstructorInfo ctor;
+
         public ReposetoryCollection(IEnumerable enumeration)
         {
             _flatCollectionOfPrimaryKeys = new Dictionary<long, CollectionStates>();

@@ -140,7 +140,7 @@ namespace JPB.DataAccess.QueryBuilder
             if (paramerters != null)
             {
                 IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return query.Query("WHERE " + condition, parameters.ToArray());
+                return query.QueryQ(string.Format("WHERE {0}", condition), parameters.ToArray());
             }
             return query.Query("WHERE {0}", condition);
         }
@@ -157,7 +157,7 @@ namespace JPB.DataAccess.QueryBuilder
             if (paramerters != null)
             {
                 IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return query.Query("AND " + condition, parameters.ToArray());
+                return query.QueryQ(string.Format("AND {0}", condition), parameters.ToArray());
             }
             return query.Query("AND {0}", condition);
         }
@@ -174,7 +174,7 @@ namespace JPB.DataAccess.QueryBuilder
             if (paramerters != null)
             {
                 IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return query.Query("OR " + condition, parameters.ToArray());
+                return query.QueryQ("OR " + condition, parameters.ToArray());
             }
             return query.Query("OR {0}", condition);
         }
@@ -195,6 +195,32 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public abstract class JoinMode
+        {
+            internal JoinMode(string joinType)
+            {
+                JoinType = joinType;
+            }
+
+            public string JoinType { get; private set; }
+        }
+
+        /// <summary>
+        /// Adds a JOIN to the Statement
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public static QueryBuilder Join(this QueryBuilder query, JoinMode mode, Type source, Type target)
+        {
+            return Join(query, mode.JoinType, source, target);
+        }
+
+        /// <summary>
         /// Adds a JOIN to the Statement
         /// </summary>
         /// <param name="query"></param>
@@ -204,19 +230,37 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder Join(this QueryBuilder query, string mode, Type source, Type target)
         {
-            var sourcePK = source.GetPK();
+            if (query == null) throw new ArgumentNullException("query");
+            if (mode == null) throw new ArgumentNullException("mode");
+            if (source == null) throw new ArgumentNullException("source");
+            if (target == null) throw new ArgumentNullException("target");
+
+            var sourcePK = source.GetFK(target);
             var targetPK = target.GetPK();
             var targetTable = target.GetTableName();
             return query.Query(mode + " JOIN {0} ON {1} = {2}", targetTable, targetPK, sourcePK);
         }
 
         /// <summary>
-        /// Inserts a TOP Cluases into an existing Select
+        /// Adds a JOIN to the Statement
         /// </summary>
         /// <param name="query"></param>
-        /// <param name="top"></param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="mode"></param>
         /// <returns></returns>
-        public static QueryBuilder MsTop(this QueryBuilder query, int top)
+        public static QueryBuilder Join<Source,Target>(this QueryBuilder query, JoinMode mode)
+        {
+            return Join(query, mode, typeof (Source), typeof (Target));
+        }
+
+        /// <summary>
+        /// Inserts a TOP statement into an existing TSQL Select
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="top">a Non negativ number</param>
+        /// <returns></returns>
+        public static QueryBuilder MsTop(this QueryBuilder query, uint top)
         {
             int index = -1;
             var select = "SELECT";
@@ -228,6 +272,17 @@ namespace JPB.DataAccess.QueryBuilder
             part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
 
             return query;
+        }
+
+        /// <summary>
+        /// Inserts a TOP statement into an existing MySQL Select
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="top"></param>
+        /// <returns></returns>
+        public static QueryBuilder MyTop(this QueryBuilder query, uint top)
+        {
+            return query.Query("LIMIT BY {0}", top);
         }
 
         /// <summary>

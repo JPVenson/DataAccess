@@ -138,22 +138,20 @@ namespace JPB.DataAccess.Manager
             var sb = new StringBuilder();
             sb.Append("EXECUTE ");
             sb.Append(t.GetTableName());
-            sb.Append(CreateProcedureHeader(t));
-            var caller = new ProcCaller(sb.ToString());
+            foreach (var queryParameter in CreateProcedureHeader(t))
+            {
+                sb.Append(queryParameter.Name);
+            }
+            var caller = new ProcedureProcessor(sb.ToString());
             return caller.CreateCommand(target, db);
         }
 
         private static IEnumerable<IQueryParameter> CreateProcedureHeader(Type t)
         {
-            var properysOfT = t.GetProperties();
-
-            foreach (var propertyInfo in properysOfT)
-            {
-                yield return new QueryParameter(t.MapEntiysPropToSchema(propertyInfo.Name), null);
-            }
+            return t.GetProperties().Select(propertyInfo => new QueryParameter(t.MapEntiysPropToSchema(propertyInfo.Name), null));
         }
 
-        interface IProcCaller
+        interface IProcedureProcessor
         {
             string Query { get; }
             Type TargetType { set; }
@@ -161,9 +159,9 @@ namespace JPB.DataAccess.Manager
             IDbCommand CreateCommand(object target, IDatabase db);
         }
 
-        private class ProcCaller : IProcCaller
+        private class ProcedureProcessor : IProcedureProcessor
         {
-            public ProcCaller(string query)
+            public ProcedureProcessor(string query)
             {
                 Query = query;
                 QueryParameters = new List<IQueryParameter>();

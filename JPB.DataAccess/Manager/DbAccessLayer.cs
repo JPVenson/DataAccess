@@ -48,14 +48,13 @@ namespace JPB.DataAccess.Manager
         public DbAccessLayer(DbTypes dbType, string connection)
             : this()
         {
-            DbType = dbType;
-            Database = new DefaultDatabaseAccess();
-
             if (dbType == DbTypes.Unknown)
             {
-                throw new InvalidEnumArgumentException("dbType", (int)DbTypes.Unknown, typeof(DbTypes));
+                throw new InvalidEnumArgumentException("dbType", (int) DbTypes.Unknown, typeof (DbTypes));
             }
 
+            DbType = dbType;
+            Database = new DefaultDatabaseAccess();
             Database.Attach(ProviderCollection.FirstOrDefault(s => s.Key == dbType).Value.GenerateStrategy(connection));
         }
 

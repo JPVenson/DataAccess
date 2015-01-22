@@ -82,33 +82,24 @@ namespace JPB.DataAccess
         public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, string query, IEnumerable<IQueryParameter> values)
         {
             IDbCommand cmd = CreateCommand(db, query);
-            if (values != null)
-                foreach (IQueryParameter queryParameter in values)
-                {
-                    IDbDataParameter dbDataParameter = cmd.CreateParameter();
-                    dbDataParameter.Value = queryParameter.Value;
-                    dbDataParameter.ParameterName = !queryParameter.Name.StartsWith("@")
-                        ? "@" + queryParameter.Name
-                        : queryParameter.Name;
-                    cmd.Parameters.Add(dbDataParameter);
-                }
+            if (values == null)
+                return cmd;
+            foreach (var queryParameter in values)
+            {
+                IDbDataParameter dbDataParameter = cmd.CreateParameter();
+                dbDataParameter.Value = queryParameter.Value;
+                dbDataParameter.ParameterName = queryParameter.Name.CheckParamter();
+                cmd.Parameters.Add(dbDataParameter);
+            }
             return cmd;
         }
 
         internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(dynamic parameter)
         {
-            var list = new List<IQueryParameter>();
-
-            PropertyInfo[] propertys = ((Type)parameter.GetType()).GetProperties();
-
-            for (int i = 0; i < propertys.Length; i++)
-            {
-                PropertyInfo element = propertys[i];
-                dynamic value = DataConverterExtensions.GetParamaterValue(parameter, element.Name);
-                list.Add(new QueryParameter { Name = "@" + element.Name, Value = value });
-            }
-
-            return list;
+            return (from element in ((Type) parameter.GetType()).GetProperties()
+                let value = DataConverterExtensions.GetParamaterValue(parameter, element.Name)
+                select new QueryParameter {Name = element.Name.CheckParamter(), Value = value}).Cast<IQueryParameter>()
+                .ToList();
         }
 
         /// <summary>
@@ -389,7 +380,7 @@ where TE : DataAccessAttribute
 
             //check the type to be a Strategy
 
-            if (!type.GetInterfaces().Contains(typeof(IDatabaseStrategy)))
+            if (typeof(IDatabaseStrategy).IsAssignableFrom(type))
             {
                 throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
             }
@@ -397,8 +388,7 @@ where TE : DataAccessAttribute
             //try constructor injection
             ConstructorInfo ctOfType =
                 type.GetConstructors()
-                    .FirstOrDefault(
-                        s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
+                    .FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
             if (ctOfType != null)
             {
                 return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
@@ -408,7 +398,6 @@ where TE : DataAccessAttribute
                 throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
 
             instanceOfType.ConnectionString = connection;
-
             return instanceOfType;
         }
     }

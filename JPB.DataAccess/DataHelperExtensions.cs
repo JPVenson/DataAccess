@@ -10,5 +10,12 @@ namespace JPB.DataAccess
         {
             source.Add(db.CreateParameter(name, parameter));
         }
+
+        public static string CheckParamter(this string paramName)
+        {
+            return !paramName.StartsWith("@")
+                ? "@" + paramName
+                : paramName;
+        }
     }
 }
