@@ -3,9 +3,11 @@
     /// <summary>
     ///     Defines a Common set of DBTypes
     /// </summary>
-    public enum DbTypes
+    public enum DbAccessType
     {
-        //default 
+        /// <summary>
+        /// default
+        /// </summary>
         Unknown = 0,
         MsSql,
         MySql,

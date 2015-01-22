@@ -15,7 +15,7 @@ namespace JPB.DataAccess.Pager.Contracts
     public interface IDataPager
     {
         /// <summary>
-        /// Not Imp
+        /// Not Implimented
         /// </summary>
         bool Cache { get; set; }
 
@@ -25,7 +25,7 @@ namespace JPB.DataAccess.Pager.Contracts
         bool RaiseEvents { get; set; }
 
         /// <summary>
-        /// Raised if new Page is loaded
+        /// Raised if new Page is loading
         /// </summary>
         event Action NewPageLoading;
 
@@ -62,7 +62,7 @@ namespace JPB.DataAccess.Pager.Contracts
         /// <summary>
         /// Additional Commands to append to the base load command
         /// </summary>
-        ICollection CurrentPageItems { get; }
+        IEnumerable CurrentPageItems { get; }
 
         /// <summary>
         /// 

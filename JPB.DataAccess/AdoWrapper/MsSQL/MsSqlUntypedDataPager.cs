@@ -12,8 +12,15 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class MsSqlUntypedDataPager<T> : IDataPager<T>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public MsSqlUntypedDataPager()
         {
             CurrentPage = 0;
@@ -90,7 +97,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             List<dynamic> selectWhere = null;
             dbAccess.Database.RunInTransaction(s =>
             {
-                var finalCOmmands = new List<IDbCommand>();
                 IDbCommand finalAppendCommand = null;
                 if (AppendedComands.Any())
                 {
@@ -129,11 +135,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 if (CheckVersionForFetch())
                 {
                     command = DbAccessLayer.CreateSelect(TargetType, s,
-                        "ORDER BY " + pk + " ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new IQueryParameter[]
-                    {
-                        new QueryParameter("PagedRows", CurrentPage*PageSize),
-                        new QueryParameter("PageSize", PageSize),
-                    });
+                        "ORDER BY " + pk + " ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY",
+                        new IQueryParameter[]
+                        {
+                            new QueryParameter("PagedRows", CurrentPage*PageSize),
+                            new QueryParameter("PageSize", PageSize),
+                        });
                 }
                 else
                 {
@@ -153,14 +160,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
                     queryBuilde.Append("SELECT * FROM CTE ");
 
-                    var parameters = new List<IQueryParameter>(new[]
+                    command = s.CreateCommandWithParameterValues(queryBuilde.ToString(), new List<IQueryParameter>(new[]
                     {
                         new QueryParameter("Pk", pk),
                         new QueryParameter("PagedRows", CurrentPage),
                         new QueryParameter("PageSize", PageSize),
-                    });
-
-                    command = s.CreateCommandWithParameterValues(queryBuilde.ToString(), parameters);
+                    }));
                 }
 
                 if (finalAppendCommand != null)
@@ -181,9 +186,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             RaiseNewPageLoaded();
         }
 
-        ICollection IDataPager.CurrentPageItems
+        IEnumerable IDataPager.CurrentPageItems
         {
-            get { return new ArrayList(this.CurrentPageItems.ToArray()); }
+            get { return this.CurrentPageItems; }
         }
 
         private bool? _checkRun;
@@ -195,7 +200,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
         {
             if (_checkRun != null)
                 return _checkRun.Value;
-
 
             var versionParts = SqlVersion.Split('.');
 
@@ -243,6 +247,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             return _checkRun != null && _checkRun.Value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Action<Action> SyncHelper
         {
             get { return _syncHelper; }

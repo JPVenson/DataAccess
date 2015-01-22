@@ -1,11 +1,17 @@
 using System;
 using System.Data;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
 {
     public interface IDatabaseStrategy : ICloneable
     {
+        /// <summary>
+        /// Defines the database type this Strategy is used for
+        /// </summary>
+        DbAccessType SourceDatabase { get; }
+
         string ConnectionString { get; set; }
         string DatabaseFile { get; }
         string ServerName { get; }

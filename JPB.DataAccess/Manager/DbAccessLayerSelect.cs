@@ -215,7 +215,7 @@ namespace JPB.DataAccess.Manager
             //try to get a Factory mehtod
             //var methods =
             //    type.GetMethods()
-            //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(DbType)*/));
+            //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
 
             MethodInfo[] methods =
                 type.GetMethods()

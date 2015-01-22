@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace JPB.DataAccess.Manager
 {
-    public class PreDefinedProviderCollection : IReadOnlyCollection<KeyValuePair<DbTypes, string>>
+    public class PreDefinedProviderCollection : IReadOnlyCollection<KeyValuePair<DbAccessType, string>>
     {
-        private readonly Dictionary<DbTypes, string> _preDefinedProvider = new Dictionary<DbTypes, string>
+        private readonly Dictionary<DbAccessType, string> _preDefinedProvider = new Dictionary<DbAccessType, string>
         {
-            {DbTypes.MsSql, "JPB.DataAccess.AdoWrapper.MsSql.MsSql"},
-            {DbTypes.OleDb, "JPB.DataAccess.AdoWrapper.OleDB.OleDb"},
-            {DbTypes.Obdc, "JPB.DataAccess.AdoWrapper.Obdc.Obdc"},
-            {DbTypes.MySql, "JPB.DataAccess.MySql.MySql"},
-            {DbTypes.SqLite, "JPB.DataAccess.SqlLite.SqLite"},
+            {DbAccessType.MsSql, "JPB.DataAccess.AdoWrapper.MsSql.MsSql"},
+            {DbAccessType.OleDb, "JPB.DataAccess.AdoWrapper.OleDB.OleDb"},
+            {DbAccessType.Obdc, "JPB.DataAccess.AdoWrapper.Obdc.Obdc"},
+            {DbAccessType.MySql, "JPB.DataAccess.MySql.MySql"},
+            {DbAccessType.SqLite, "JPB.DataAccess.SqlLite.SqLite"},
         };
 
-        public IEnumerator<KeyValuePair<DbTypes, string>> GetEnumerator()
+        public IEnumerator<KeyValuePair<DbAccessType, string>> GetEnumerator()
         {
             return _preDefinedProvider.GetEnumerator();
         }

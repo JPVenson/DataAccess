@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.AdoWrapper.MsSql;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 using MySql.Data.MySqlClient;
 
@@ -35,6 +36,14 @@ namespace JPB.DataAccess.MySql
         public MySql(string strConnStr)
         {
             ConnectionString = strConnStr;
+        }
+
+        public DbAccessType SourceDatabase
+        {
+            get
+            {
+                return DbAccessType.MySql;
+            }
         }
 
         public string ConnectionString { get; set; }

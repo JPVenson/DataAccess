@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -42,7 +43,6 @@ namespace JPB.DataAccess.QueryBuilder
 
             return builder.Add(new QueryPart(query));
         }
-
 
         /// <summary>
         /// Adds a Query part to <paramref name="builder"/>
@@ -118,6 +118,67 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
+        /// Creates a Common Table Expression that selects a Specific type
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="target"></param>
+        /// <param name="cteName"></param>
+        /// <param name="useStarOperator"></param>
+        /// <returns></returns>
+        public static QueryBuilder WithCteForType(this QueryBuilder query, Type target, string cteName, bool useStarOperator = false)
+        {
+            var cteBuilder = new StringBuilder();
+            cteBuilder.Append("WITH ");
+            cteBuilder.Append(cteName);
+            cteBuilder.Append(" (");
+            cteBuilder.Append(!useStarOperator ? target.CreatePropertyCSV() : "*");
+            cteBuilder.Append(") AS (");
+            cteBuilder.Append(DbAccessLayer.CreateSelect(target));
+            cteBuilder.Append(")");
+            query.Query(cteBuilder.ToString());
+
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a Common Table Expression that selects a Specific type
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="target"></param>
+        /// <param name="cteName"></param>
+        /// <param name="useStarOperator"></param>
+        /// <returns></returns>
+        public static QueryBuilder InBracket(this QueryBuilder query, Action<QueryBuilder> header)
+        {
+            query.Query("(");
+            header(query);
+            query.Query(")");
+            return query;
+        }
+
+        ///// <summary>
+        ///// Creates a Common Table Expression that selects a Specific type
+        ///// </summary>
+        ///// <param name="query"></param>
+        ///// <param name="header"></param>
+        ///// <param name="cteName"></param>
+        ///// <param name="useStarOperator"></param>
+        ///// <returns></returns>
+        //public static QueryBuilder WithCteForQuery(this QueryBuilder query, Action<QueryBuilder> header, string cteName)
+        //{
+        //    var queryBuilder = new QueryBuilder(query.Database);
+        //    header(queryBuilder);
+        //    var compileFlat = queryBuilder.CompileFlat();
+        //    var cteBuilder = new StringBuilder();
+        //    cteBuilder.Append("WITH ");
+        //    cteBuilder.Append(cteName);
+        //    cteBuilder.Append(" AS ( ");
+        //    cteBuilder.Append(compileFlat.Item1);
+        //    query.Parts.Add(new QueryPart(cteBuilder.ToString(), compileFlat.Item2));
+        //    return query;
+        //}
+
+        /// <summary>
         /// Add an AS part
         /// </summary>
         /// <param name="query"></param>
@@ -126,6 +187,17 @@ namespace JPB.DataAccess.QueryBuilder
         public static QueryBuilder As(this QueryBuilder query, string alias)
         {
             return query.Query("AS " + alias);
+        }
+
+        /// <summary>
+        /// Add an AS part
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="over"></param>
+        /// <returns></returns>
+        public static QueryBuilder RowNumberOrder(this QueryBuilder query, string over, bool Desc = false)
+        {
+            return query.Query("ROW_NUMBER() OVER (ORDER BY {0} {1})", over, Desc ? "DESC" : "ASC");
         }
 
         /// <summary>
@@ -249,40 +321,39 @@ namespace JPB.DataAccess.QueryBuilder
         /// <param name="target"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
-        public static QueryBuilder Join<Source,Target>(this QueryBuilder query, JoinMode mode)
+        public static QueryBuilder Join<Source, Target>(this QueryBuilder query, JoinMode mode)
         {
-            return Join(query, mode, typeof (Source), typeof (Target));
+            return Join(query, mode, typeof(Source), typeof(Target));
         }
 
         /// <summary>
-        /// Inserts a TOP statement into an existing TSQL Select
+        /// Inserts a TOP statement 
         /// </summary>
         /// <param name="query"></param>
         /// <param name="top">a Non negativ number</param>
         /// <returns></returns>
-        public static QueryBuilder MsTop(this QueryBuilder query, uint top)
+        public static QueryBuilder Top(this QueryBuilder query, uint top)
         {
-            int index = -1;
-            var select = "SELECT";
-            var part = query.Parts.FirstOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(select, System.StringComparison.Ordinal)) != -1);
+            switch (query.Database.TargetDatabase)
+            {
+                case DbAccessType.MsSql:
+                    {
+                        int index = -1;
+                        var select = "SELECT";
+                        var part = query.Parts.FirstOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(@select, System.StringComparison.Ordinal)) != -1);
 
-            if (index == -1 || part == null)
-                return query;
+                        if (index == -1 || part == null)
+                            return query;
 
-            part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
-
+                        part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
+                    }
+                    break;
+                case DbAccessType.MySql:
+                    return query.Query("LIMIT BY {0}", top);
+                default:
+                    throw new NotSupportedException("For the Selected DB type is no Top implimentations Avaibile");
+            }
             return query;
-        }
-
-        /// <summary>
-        /// Inserts a TOP statement into an existing MySQL Select
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="top"></param>
-        /// <returns></returns>
-        public static QueryBuilder MyTop(this QueryBuilder query, uint top)
-        {
-            return query.Query("LIMIT BY {0}", top);
         }
 
         /// <summary>

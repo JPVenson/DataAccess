@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Windows.Input;
 using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
@@ -12,6 +13,11 @@ namespace JPB.DataAccess.AdoWrapper
     /// </summary>
     public interface IDatabase : IDisposable
     {
+        /// <summary>
+        /// Defines the Target database we are conneting to
+        /// </summary>
+        DbAccessType TargetDatabase { get; } 
+
         /// <summary>
         /// NotImp
         /// </summary>

@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Odbc;
 using System.Data.OleDb;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.Odbc
@@ -39,6 +40,14 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
         public object Clone()
         {
             return new Obdc(ConnectionString);
+        }
+
+        public DbAccessType SourceDatabase
+        {
+            get
+            {
+                return DbAccessType.Obdc;
+            }
         }
 
         public string ConnectionString { get; set; }

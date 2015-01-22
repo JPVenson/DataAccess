@@ -95,9 +95,9 @@ namespace JPB.DataAccess.MySql
             }
         }
 
-        ICollection IDataPager.CurrentPageItems
+        IEnumerable IDataPager.CurrentPageItems
         {
-            get { return new ArrayList(this.CurrentPageItems.ToArray()); }
+            get { return this.CurrentPageItems; }
         }
 
         public ICollection<T> CurrentPageItems { get; protected set; }

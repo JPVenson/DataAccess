@@ -20,7 +20,7 @@ namespace JPB.DataAccess.Manager
     /// <summary>
     /// Contanins some Helper mehtods for CRUD operation
     /// </summary>
-    [DebuggerDisplay("DB={DbType}, QueryDebug={Database.LastExecutedQuery.DebuggerQuery}")]
+    [DebuggerDisplay("DB={dbAccessType}, QueryDebug={Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
         [DebuggerStepThrough]
 #endif
@@ -43,19 +43,19 @@ namespace JPB.DataAccess.Manager
         /// <summary>
         ///     Create a DbAccessLayer that uses a Predefined type and Connection string
         /// </summary>
-        /// <param name="dbType">Can be anything execpt for <code>DbTypes.Unknown</code></param>
+        /// <param name="dbAccessType">Can be anything execpt for <code>DbAccessType.Unknown</code></param>
         /// <param name="connection"></param>
-        public DbAccessLayer(DbTypes dbType, string connection)
+        public DbAccessLayer(DbAccessType dbAccessType, string connection)
             : this()
         {
-            if (dbType == DbTypes.Unknown)
+            if (dbAccessType == DbAccessType.Unknown)
             {
-                throw new InvalidEnumArgumentException("dbType", (int) DbTypes.Unknown, typeof (DbTypes));
+                throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof (DbAccessType));
             }
 
-            DbType = dbType;
+            DbAccessType = dbAccessType;
             Database = new DefaultDatabaseAccess();
-            Database.Attach(ProviderCollection.FirstOrDefault(s => s.Key == dbType).Value.GenerateStrategy(connection));
+            Database.Attach(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection));
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace JPB.DataAccess.Manager
 
             ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
-            IDatabaseStrategy type = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
+            var type = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
 
             SelectDbAccessLayer();
             UpdateDbAccessLayer();
@@ -102,7 +102,7 @@ namespace JPB.DataAccess.Manager
 
         /// <summary>
         /// Creates a DbAccessLayer with a new Database
-        /// DbType will be Guessed
+        /// dbAccessType will be Guessed
         /// </summary>
         /// <param name="database"></param>
         public DbAccessLayer(IDatabase database)
@@ -113,32 +113,32 @@ namespace JPB.DataAccess.Manager
             SelectDbAccessLayer();
             UpdateDbAccessLayer();
 
-            DbType = DbTypes.Unknown;
+            DbAccessType = DbAccessType.Unknown;
             Database = database;
         }
 
         private void ResolveDbType(string fullTypeNameToIDatabaseStrategy)
         {
             // ReSharper disable once PossibleInvalidOperationException
-            KeyValuePair<DbTypes, string>? firstOrDefault =
-                ProviderCollection.Select(s => (KeyValuePair<DbTypes, string>?)s)
+            KeyValuePair<DbAccessType, string>? firstOrDefault =
+                ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?)s)
                     .FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
             if (firstOrDefault == null)
             {
-                DbType = DbTypes.Unknown;
+                DbAccessType = DbAccessType.Unknown;
             }
             else
             {
-                DbType = firstOrDefault.Value.Key;
+                DbAccessType = firstOrDefault.Value.Key;
             }
         }
 
        
 
         /// <summary>
-        /// Selected DbType
+        /// Selected dbAccessType
         /// </summary>
-        public DbTypes DbType { get; private set; }
+        public DbAccessType DbAccessType { get; private set; }
 
         /// <summary>
         /// Current Database

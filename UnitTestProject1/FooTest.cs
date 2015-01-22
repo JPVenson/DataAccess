@@ -28,7 +28,7 @@ public class FooTest
 
     public FooTest()
     {
-        var access = new DbAccessLayer(DbTypes.MsSql, "Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
+        var access = new DbAccessLayer(DbAccessType.MsSql, "Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
         var @select = access.Select<Foo>("SomeName");
     }
 }

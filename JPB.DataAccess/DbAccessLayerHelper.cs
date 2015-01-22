@@ -16,6 +16,14 @@ namespace JPB.DataAccess
 {
     public static class DbAccessLayerHelper
     {
+
+        public static IEnumerable<IQueryParameter> AsQueryParameter(this IDataParameterCollection source)
+        {
+            return
+                (from IDataParameter parameter in source
+                    select new QueryParameter(parameter.ParameterName, parameter.Value));
+        }
+
         /// <summary>
         /// Wraps a <param name="query"></param> on a given <param name="type"></param> by including <param name="entry"></param>'s 
         /// propertys that are defined in <param name="propertyInfos"></param>
@@ -96,9 +104,9 @@ namespace JPB.DataAccess
 
         internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(dynamic parameter)
         {
-            return (from element in ((Type) parameter.GetType()).GetProperties()
-                let value = DataConverterExtensions.GetParamaterValue(parameter, element.Name)
-                select new QueryParameter {Name = element.Name.CheckParamter(), Value = value}).Cast<IQueryParameter>()
+            return (from element in ((Type)parameter.GetType()).GetProperties()
+                    let value = DataConverterExtensions.GetParamaterValue(parameter, element.Name)
+                    select new QueryParameter { Name = element.Name.CheckParamter(), Value = value }).Cast<IQueryParameter>()
                 .ToList();
         }
 
@@ -175,7 +183,7 @@ namespace JPB.DataAccess
                 {
                     //Skip enumeration and make a Direct loading
                     //This increeses Performance
-                   
+
                     var records = new List<IDataRecord>();
 
                     using (var dr = query.ExecuteReader())
@@ -283,7 +291,7 @@ where TE : DataAccessAttribute
             //try to get a Factory mehtod
             //var methods =
             //    type.GetMethods()
-            //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(DbType)*/));
+            //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
 
             MethodInfo[] methods =
                 type.GetMethods().Where(s => s.GetCustomAttributes(false).Any(e => e is TE)).ToArray();

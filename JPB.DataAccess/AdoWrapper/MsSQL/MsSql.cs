@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
@@ -46,6 +47,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
         }
 
         #region IDatabaseStrategy Members
+
+        public DbAccessType SourceDatabase
+        {
+            get
+            {
+                return DbAccessType.MsSql;
+            }
+        }
 
         public string ConnectionString
         {

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper
@@ -48,6 +49,16 @@ namespace JPB.DataAccess.AdoWrapper
         {
             _strategy = null;
             CloseConnection();
+        }
+
+        public DbAccessType TargetDatabase
+        {
+            get
+            {
+                if(_strategy == null)
+                    return DbAccessType.Unknown;
+                return _strategy.SourceDatabase;
+            }
         }
 
         public bool IsAttached

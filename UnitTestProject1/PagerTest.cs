@@ -108,7 +108,7 @@ namespace UnitTestProject1
 
                 if (input == "n")
                 {
-                    if (DataPager.CurrentPageItems.Count < DataPager.PageSize)
+                    if (DataPager.CurrentPageItems.Cast<object>().Count<object>() < DataPager.PageSize)
                     {
                         DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
                         foreach (var source in DataPager.CurrentPageItems)
@@ -127,7 +127,7 @@ namespace UnitTestProject1
                     {
                         ConsolePropertyGrid.SourceList.Add(source);
                     }
-                    if (DataPager.CurrentPageItems.Count == 0)
+                    if (!DataPager.CurrentPageItems.Cast<object>().Any())
                     {
                         DataPager.CurrentPage--;
                         DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
