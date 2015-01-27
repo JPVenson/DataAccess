@@ -127,5 +127,10 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
         {
             throw new NotImplementedException();
         }
+
+        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -129,5 +129,10 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
         {
             return command.ToString();
         }
+
+        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

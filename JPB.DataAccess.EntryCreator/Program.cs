@@ -6,8 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using JPB.DataAccess.EntityCreator.MsSql;
-using Microsoft.Data.ConnectionUI;
-
 namespace JPB.DataAccess.EntityCreator
 {
     public class Program
