@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.MySql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject1
@@ -13,22 +14,23 @@ namespace UnitTestProject1
         public string testName = "TestDD";
         public static DbAccessLayer AccessLayer { get; set; }
 
-        //private static void Main()
-        //{
-        //    var dbAccessTest = new DbAccessTest();
-        //    try
-        //    {
-        //        //dbAccessTest.MySQlTest();
-        //        CleanUp();
+        public static void Main()
+        {
+            var dbAccessTest = new DbAccessTest();
+            try
+            {
+                //dbAccessTest.MySQlTest();
+                dbAccessTest.MySQlTest();
+                CleanUp();
 
-        //        dbAccessTest.ACheckInserts();
-        //        dbAccessTest.BCheckSelects();
-        //    }
-        //    finally
-        //    {
-        //        CleanUp();
-        //    }
-        //}
+                dbAccessTest.ACheckInserts();
+                dbAccessTest.BCheckSelects();
+            }
+            finally
+            {
+                CleanUp();
+            }
+        }
 
         [ClassCleanup]
         public static void CleanUp()
@@ -36,49 +38,44 @@ namespace UnitTestProject1
             AccessLayer.Database.Run(s => s.ExecuteNonQuery("DELETE FROM users"));
         }
 
-        //[TestInitialize]
-        //public void MySQlTest()
-        //{
-        //    var accessLayer = new DbAccessLayer(new MySql("Server=192.168.1.9;Uid=admin"));
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("IF EXISTS (select * from sys.databases where name='TestDB')" +
-        //                                                                         " DROP DATABASE TestDB"));
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE DATABASE TestDB"));
+        public void MySQlTest()
+        {
 
-        //    accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
-        //                                                                         " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
-        //                                                                         " UserName NVARCHAR(MAX)," +
-        //                                                                         ");"));
+            AccessLayer = new DbAccessLayer(new MsSql("Server=rdbms.strato.de;Database=DB1992477;Uid=U1992477;Pwd=155975532Ab"));
 
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
-        //                                                             " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
-        //                                                             " Content NVARCHAR(MAX)," +
-        //                                                             ");"));
+            AccessLayer.CheckDatabase();
 
-        //    AccessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
-        //}
+            AccessLayer.ExecuteGenericCommand(AccessLayer.Database.CreateCommand("CREATE TABLE Users (" +
+                                                                                 " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                                 " UserName NVARCHAR(MAX)," +
+                                                                                 ");"));
 
-        //[TestInitialize]
-        //public void MsSQlTest()
-        //{
-        //    var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Integrated Security=True;"));
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("IF EXISTS (select * from sys.databases where name='TestDB')" +
-        //                                                                         " DROP DATABASE TestDB"));
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE DATABASE TestDB"));
+            AccessLayer.ExecuteGenericCommand(AccessLayer.Database.CreateCommand("CREATE TABLE Images (" +
+                                                                     " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                     " Content NVARCHAR(MAX)," +
+                                                                     ");"));
+        }
 
-        //    accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
-        //                                                                         " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
-        //                                                                         " UserName NVARCHAR(MAX)," +
-        //                                                                         ");"));
+        public void MsSQlTest()
+        {
+            var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Integrated Security=True;"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("IF EXISTS (select * from sys.databases where name='TestDB')" +
+                                                                                 " DROP DATABASE TestDB"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE DATABASE TestDB"));
 
-        //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
-        //                                                             " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
-        //                                                             " Content NVARCHAR(MAX)," +
-        //                                                             ");"));
+            accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Users (" +
+                                                                                 " User_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                                 " UserName NVARCHAR(MAX)," +
+                                                                                 ");"));
 
-        //    AccessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
-        //}
+            accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("CREATE TABLE Images (" +
+                                                                     " Image_ID BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL," +
+                                                                     " Content NVARCHAR(MAX)," +
+                                                                     ");"));
+
+            AccessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
+        }
 
         [TestMethod]
         public void ACheckInserts()

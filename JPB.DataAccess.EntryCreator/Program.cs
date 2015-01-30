@@ -15,6 +15,38 @@ namespace JPB.DataAccess.EntityCreator
 
         }
 
+        public class ArgumentWrapper
+        {
+            public string OutputDirectory { get; set; }
+            public string ConnectionString { get; set; }
+
+            //public static ArgumentWrapper ParseArguments(string[] args)
+            //{
+            //    var argW = new ArgumentWrapper();
+            //    foreach (var arg in args)
+            //    {
+            //        var outp = GetArgument(arg, "/out");
+            //        var con = GetArgument(arg, "/con");
+            //        if (!string.IsNullOrEmpty(outp))
+            //        {
+            //            OutputDirectory = 
+            //        }
+            //    }
+            //}
+
+            private static string GetArgument(string value, string key)
+            {
+                if (value.StartsWith(key))
+                {
+                    return value.Substring(key.Length);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         [STAThread]
         static void Main(string[] args)
         {
@@ -23,11 +55,10 @@ namespace JPB.DataAccess.EntityCreator
             string outputDir;
             string connectionString;
 
-
             if (args.Any())
             {
-                if(args.First().ToLower() == @"\?")
-                prog.RenderHelp();
+                if (args.First().ToLower() == @"\?")
+                    prog.RenderHelp();
                 if (args.Count() == 2)
                 {
                     outputDir = args.ElementAt(0);
@@ -42,9 +73,8 @@ namespace JPB.DataAccess.EntityCreator
             else
             {
 #if DEBUG
-            outputDir = @"D:\test";
-            //string connectionString = "Data Source=S-SQL-DPE2;Initial Catalog=BatchRemoting;Integrated Security=False;User Id=BatchRemotingJobServer;Password=BatchServer;MultipleActiveResultSets=True";
-            connectionString = @"Data Source=(localdb)\Projects;Initial Catalog=TestDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False";
+                outputDir = @"D:\test";
+                connectionString = @"Data Source=(localdb)\Projects;Initial Catalog=TestDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False";
 #else
                 Console.WriteLine("Enter output dir");
 
@@ -126,9 +156,9 @@ namespace JPB.DataAccess.EntityCreator
         {
             Console.WriteLine("Creates cs Entrys based on a Database ( currently MsSQL only )");
             Console.WriteLine();
-            Console.WriteLine("Usage: output [[/con]] ");
+            Console.WriteLine("Usage: [/out] [/con] ");
             Console.WriteLine();
-            Console.WriteLine("\t output     A existing Directory where all cs classes are written to");
+            Console.WriteLine("\t /out     A existing Directory where all cs classes are written to");
             Console.WriteLine("\t /con       Specifys the Connection property to a existing Database");
         }
     }

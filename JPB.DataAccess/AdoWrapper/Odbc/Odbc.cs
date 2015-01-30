@@ -72,7 +72,7 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
             return new OdbcCommand(strSql, (OdbcConnection) (conn is OdbcConnection ? conn : CreateConnection()));
         }
 
-        public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
+        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
         {
             var oleDbCommand = new OdbcCommand(strSql,
                 (OdbcConnection) (conn is OdbcConnection ? conn : CreateConnection()));
@@ -128,11 +128,6 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
         public string FormartCommandToQuery(IDbCommand command)
         {
             return command.ToString();
-        }
-
-        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
-        {
-            throw new NotImplementedException();
         }
     }
 }

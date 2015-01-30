@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.SqlLite", "..\JPB.DataAccess.SqlLite\JPB.DataAccess.SqlLite.csproj", "{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{456F719E-2DB1-4D01-82E8-01E4175492B6}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -74,6 +76,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{5521D9CF-7862-4E43-8263-878879E45CE2} = {456F719E-2DB1-4D01-82E8-01E4175492B6}
 		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA} = {3CCB4445-528B-4954-A37E-494193585819}
 		{DE42F7ED-51B5-4118-831B-05EFEEECD7AC} = {3CCB4445-528B-4954-A37E-494193585819}
 	EndGlobalSection

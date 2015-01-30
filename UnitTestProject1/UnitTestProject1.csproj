@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5521D9CF-7862-4E43-8263-878879E45CE2}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UnitTestProject1</RootNamespace>
     <AssemblyName>UnitTestProject1</AssemblyName>
@@ -55,7 +55,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ConsolePropertyGrid.cs" />
+    <Compile Include="Helper\ConsolePropertyGrid.cs" />
     <Compile Include="DbAccessTest.cs" />
     <Compile Include="FooTest.cs" />
     <Compile Include="Image.cs" />
@@ -72,6 +72,10 @@
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj">
+      <Project>{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}</Project>
+      <Name>JPB.DataAccess.MySql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
       <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
       <Name>JPB.DataAccess</Name>

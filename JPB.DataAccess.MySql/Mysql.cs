@@ -61,7 +61,7 @@ namespace JPB.DataAccess.MySql
             return new MySqlCommand(strSql, conn as MySqlConnection);
         }
 
-        public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
+        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
         {
             var mySqlCommand = new MySqlCommand(strSql, conn as MySqlConnection);
             foreach (var dbDataParameter in fields)

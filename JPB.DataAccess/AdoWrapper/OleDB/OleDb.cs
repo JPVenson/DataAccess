@@ -75,7 +75,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
             return new OleDbCommand(strSql, (OleDbConnection)(conn is OleDbConnection ? conn : CreateConnection()));
         }
 
-        public IDbCommand CreateCommand(IDbConnection conn, string strSql, params IDataParameter[] fields)
+        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
         {
             var oleDbCommand = new OleDbCommand(strSql,
                 (OleDbConnection)(conn is OleDbConnection ? conn : CreateConnection()));
@@ -124,11 +124,6 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
         }
 
         public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
         {
             throw new NotImplementedException();
         }
