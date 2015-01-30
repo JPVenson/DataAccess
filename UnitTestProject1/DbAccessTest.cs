@@ -41,7 +41,7 @@ namespace UnitTestProject1
         public void MySQlTest()
         {
 
-            AccessLayer = new DbAccessLayer(new MsSql("Server=rdbms.strato.de;Database=DB1992477;Uid=U1992477;Pwd=155975532Ab"));
+            AccessLayer = new DbAccessLayer(new MsSql(""));
 
             AccessLayer.CheckDatabase();
 
