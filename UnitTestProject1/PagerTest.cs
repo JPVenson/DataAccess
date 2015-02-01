@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
@@ -13,11 +15,11 @@ namespace UnitTestProject1
     [TestClass]
     public class PagerTest
     {
-        //public static void Main()
-        //{
-        //    var test = new PagerTest();
-        //    test.TestMethod1();
-        //}
+        public static void Main()
+        {
+            var test = new PagerTest();
+            test.TestMethod1();
+        }
 
         [ForModel("PagerTest")]
         public class TestPagerTest
@@ -27,6 +29,12 @@ namespace UnitTestProject1
 
             public string PropA { get; set; }
             public string PropB { get; set; }
+            [IgnoreReflection]
+            public string PropB12 { get; set; }
+            [IgnoreReflection]
+            public string PropB3 { get; set; }
+            [IgnoreReflection]
+            public string PropB12313 { get; set; }
         }
 
         public IDataPager DataPager { get; set; }
@@ -51,9 +59,17 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod1()
         {
-            ConsolePropertyGrid = new ConsolePropertyGrid();
-            ConsolePropertyGrid.Target = typeof(TestPagerTest);
-            types.Add(new TypeWrapper(ConsolePropertyGrid.Target));
+
+            var contoler = new ConsoleGridControler();
+            contoler.ConsoleGrid.Target = typeof(TestPagerTest);
+            contoler.ConsoleGrid.RenderSum = true;
+            contoler.ConsoleGrid.RenderRowNumber = true;
+            contoler.ConsoleGrid.ObserveList = false;
+            contoler.ConsoleGrid.RenderTypeName = false;
+            contoler.ConsoleGrid.ClearConsole = false;
+            contoler.ConsoleGrid.SourceList = new ObservableCollection<object>();
+
+            types.Add(new TypeWrapper(contoler.ConsoleGrid.Target));
             types.Add(new TypeWrapper(typeof(User)));
 
             var accessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Integrated Security=True;"));
@@ -75,197 +91,265 @@ namespace UnitTestProject1
                 accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
             }
 
-            Console.WriteLine("Insert 100 Rows");
-            for (int i = 0; i < 100; i++)
-            {
-                Console.WriteLine("Row " + i + 100);
-                accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
-            }
-            Console.WriteLine("Insert 100 Rows");
+            //Console.WriteLine("Insert 100 Rows");
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    Console.WriteLine("Row " + i + 100);
+            //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
+            //}
+            //Console.WriteLine("Insert 100 Rows");
 
-            for (int i = 0; i < 100; i++)
-            {
-                Console.WriteLine("Row " + i + 200);
-                accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
-            }
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    Console.WriteLine("Row " + i + 200);
+            //    accessLayer.ExecuteGenericCommand(accessLayer.Database.CreateCommand("INSERT INTO PagerTest VALUES ('Rand_' + CONVERT(NVARCHAR(MAX),RAND()), 'Rand2_' + CONVERT(NVARCHAR(MAX), NEWID()));"));
+            //}
+
             Console.Clear();
             Console.WriteLine("Inserting done");
             DataPager = accessLayer.Database.CreatePager<TestPagerTest>();
             DataPager.CurrentPage = 1;
+            DataPager.PageSize = 15;
             DataPager.LoadPage(accessLayer); 
-            ConsolePropertyGrid.SourceList.Clear();
             foreach (var source in DataPager.CurrentPageItems)
             {
-                ConsolePropertyGrid.SourceList.Add(source);
+                contoler.ConsoleGrid.SourceList.Add(source);
             }
             var input = "";
-            ConsolePropertyGrid.RenderGrid();
 
-            while (input != "exit")
+            contoler.Commands.Add(new DelegateCommand("exit", s =>
             {
-                var consoleKeyInfo = Console.ReadKey();
-                input = consoleKeyInfo.KeyChar.ToString();
+                contoler.StopDispatcherLoop = true;
+            }));
 
-                if (input == "n")
+            contoler.Commands.Add(new DelegateCommand("n", s =>
+            {
+                if (DataPager.CurrentPageItems.Cast<object>().Count<object>() < DataPager.PageSize)
                 {
-                    if (DataPager.CurrentPageItems.Cast<object>().Count<object>() < DataPager.PageSize)
-                    {
-                        DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
-                        foreach (var source in DataPager.CurrentPageItems)
-                        {
-                            ConsolePropertyGrid.SourceList.Add(source);
-                        }
-                        ConsolePropertyGrid.ExtraInfos.Append("last page reached ...");
-                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
-                        ConsolePropertyGrid.RenderGrid();
-                        continue;
-                    }
+                    DataPager.LoadPage(accessLayer);
 
-                    DataPager.CurrentPage++;
-                    DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
+                    contoler.ConsoleGrid.SourceList.Clear();
                     foreach (var source in DataPager.CurrentPageItems)
                     {
-                        ConsolePropertyGrid.SourceList.Add(source);
+                        contoler.ConsoleGrid.SourceList.Add(source);
                     }
-                    if (!DataPager.CurrentPageItems.Cast<object>().Any())
-                    {
-                        DataPager.CurrentPage--;
-                        DataPager.LoadPage(accessLayer); ConsolePropertyGrid.SourceList.Clear();
-                        foreach (var source in DataPager.CurrentPageItems)
-                        {
-                            ConsolePropertyGrid.SourceList.Add(source);
-                        }
-                        ConsolePropertyGrid.ExtraInfos.Append("last page reached ...");
-                    }
-                    ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
-
-                    ConsolePropertyGrid.RenderGrid();
-                    continue;
-                }
-                if (input == "m")
-                {
-                    if (DataPager.CurrentPage == 0)
-                    {
-                        ConsolePropertyGrid.ExtraInfos.AppendLine("First page reached ...");
-                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
-                    }
-                    else
-                    {
-                        DataPager.CurrentPage--;
-                        DataPager.LoadPage(accessLayer);
-                        ConsolePropertyGrid.SourceList.Clear();
-                        foreach (var source in DataPager.CurrentPageItems)
-                        {
-                            ConsolePropertyGrid.SourceList.Add(source);
-                        }
-                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
-                    }
-
-                    ConsolePropertyGrid.RenderGrid();
-                    continue;
+                    contoler.ConsoleGrid.ExtraInfos.Append("last page reached ...");
+                    contoler.ConsoleGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+                    return true;
                 }
 
-                if (input == @"?")
+                DataPager.CurrentPage++;
+                DataPager.LoadPage(accessLayer);
+                var items = DataPager.CurrentPageItems.Cast<object>().ToArray();
+                contoler.ConsoleGrid.ClearConsole = contoler.ConsoleGrid.SourceList.Count != items.Length;
+                contoler.ConsoleGrid.SourceList.Clear();
+                foreach (var source in items)
                 {
-                    Console.Clear();
-                    Console.WriteLine("Any input will be converted to lower chars");
-                    Console.WriteLine("n - Page + 1");
-                    Console.WriteLine("m - Page - 1");
-                    Console.WriteLine("a [Number] - Page size = Number");
-                    Console.WriteLine("c [Number] - Change type to type with number = Number");
-                    Console.WriteLine("c - get types with number");
-                    Console.WriteLine("[Number] - Page = Number");
-                    continue;
+                    contoler.ConsoleGrid.SourceList.Add(source);
                 }
-
-                input = input + Console.ReadLine();
-
-                if (input.StartsWith("a"))
+                if (!items.Any())
                 {
-                    var nr = input.Substring(1, input.Length - 1);
-                    nr = nr.Trim();
-
-                    int pageSize;
-
-                    var npageSize = int.TryParse(nr, out pageSize);
-                    if (npageSize)
+                    DataPager.CurrentPage--;
+                    DataPager.LoadPage(accessLayer); 
+                    contoler.ConsoleGrid.SourceList.Clear();
+                    foreach (var source in items)
                     {
-                        DataPager.PageSize = pageSize;
-                        DataPager.LoadPage(accessLayer);
-                        ConsolePropertyGrid.SourceList.Clear();
-                        foreach (var source in DataPager.CurrentPageItems)
-                        {
-                            ConsolePropertyGrid.SourceList.Add(source);
-                        }
-                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+                        contoler.ConsoleGrid.SourceList.Add(source);
                     }
+                    contoler.ConsoleGrid.ExtraInfos.Append("last page reached ...");
                 }
-                else if (input.StartsWith("c"))
+                contoler.ConsoleGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+                return true;
+            }));
+
+            contoler.Commands.Add(new DelegateCommand("m", s =>
+            {
+                if (DataPager.CurrentPage == 0)
                 {
-                    var nr = input.Substring(1, input.Length - 1);
-                    nr = nr.Trim();
-
-                    int pageSize;
-
-                    var npageSize = int.TryParse(nr, out pageSize);
-                    if (npageSize)
-                    {
-                        try
-                        {
-                            ConsolePropertyGrid.Target = Type.GetType(this.types[pageSize].Type);
-                            ConsolePropertyGrid.SourceList.Clear();
-                            DataPager.CurrentPage = 0;
-                            DataPager.LoadPage(accessLayer);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex);
-                        }
-                    }
-                    else
-                    {
-                        var objects = ConsolePropertyGrid.SourceList.ToArray();
-                        ConsolePropertyGrid.SourceList.Clear();
-                        var oldTarget = ConsolePropertyGrid.Target;
-                        ConsolePropertyGrid.Target = typeof(TypeWrapper);
-                        foreach (var typeWrapper in this.types)
-                        {
-                            ConsolePropertyGrid.SourceList.Add(typeWrapper);
-                        }
-
-                        ConsolePropertyGrid.RenderGrid();
-                        ConsolePropertyGrid.SourceList.Clear();
-                        foreach (var o in objects)
-                        {
-                            ConsolePropertyGrid.SourceList.Add(o);
-                        }
-                        ConsolePropertyGrid.Target = oldTarget;
-                        continue;
-                    }
+                    contoler.ConsoleGrid.ExtraInfos.Append("First page reached ...");
+                    contoler.ConsoleGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                 }
                 else
                 {
-                    int pageNumer;
-
-                    var tryParse = int.TryParse(input, out pageNumer);
-
-                    if (tryParse)
+                    DataPager.CurrentPage--;
+                    DataPager.LoadPage(accessLayer);
+                    var items = DataPager.CurrentPageItems.Cast<object>().ToArray<object>();
+                    contoler.ConsoleGrid.ClearConsole = contoler.ConsoleGrid.SourceList.Count != items.Length;
+                    contoler.ConsoleGrid.SourceList.Clear();
+                    foreach (var source in items)
                     {
-                        DataPager.CurrentPage = pageNumer;
-                        DataPager.LoadPage(accessLayer); 
-                        ConsolePropertyGrid.SourceList.Clear();
-                        foreach (var source in DataPager.CurrentPageItems)
-                        {
-                            ConsolePropertyGrid.SourceList.Add(source);
-                        }
-                        ConsolePropertyGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+                        contoler.ConsoleGrid.SourceList.Add(source);
                     }
+                    contoler.ConsoleGrid.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
                 }
-                ConsolePropertyGrid.RenderGrid();
-            }
+            }));
+
+            contoler.Run();
+
+            //while (input != "exit")
+            //{
+            //    var consoleKeyInfo = Console.ReadKey();
+            //    input = consoleKeyInfo.KeyChar.ToString();
+
+            //    if (input == "n")
+            //    {
+            //        if (DataPager.CurrentPageItems.Cast<object>().Count<object>() < DataPager.PageSize)
+            //        {
+            //            DataPager.LoadPage(accessLayer);
+
+            //            GridControl.SourceList.Clear();
+            //            foreach (var source in DataPager.CurrentPageItems)
+            //            {
+            //                GridControl.SourceList.Add(source);
+            //            }
+            //            GridControl.ExtraInfos.Append("last page reached ...");
+            //            GridControl.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+            //            GridControl.RenderGrid();
+            //            continue;
+            //        }
+
+            //        DataPager.CurrentPage++;
+            //        DataPager.LoadPage(accessLayer); GridControl.SourceList.Clear();
+            //        foreach (var source in DataPager.CurrentPageItems)
+            //        {
+            //            GridControl.SourceList.Add(source);
+            //        }
+            //        if (!DataPager.CurrentPageItems.Cast<object>().Any())
+            //        {
+            //            DataPager.CurrentPage--;
+            //            DataPager.LoadPage(accessLayer); GridControl.SourceList.Clear();
+            //            foreach (var source in DataPager.CurrentPageItems)
+            //            {
+            //                GridControl.SourceList.Add(source);
+            //            }
+            //            GridControl.ExtraInfos.Append("last page reached ...");
+            //        }
+            //        GridControl.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+
+            //        GridControl.RenderGrid();
+            //        continue;
+            //    }
+            //    if (input == "m")
+            //    {
+            //        if (DataPager.CurrentPage == 0)
+            //        {
+            //            GridControl.ExtraInfos.Append("First page reached ...");
+            //            GridControl.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+            //        }
+            //        else
+            //        {
+            //            DataPager.CurrentPage--;
+            //            DataPager.LoadPage(accessLayer);
+            //            GridControl.SourceList.Clear();
+            //            foreach (var source in DataPager.CurrentPageItems)
+            //            {
+            //                GridControl.SourceList.Add(source);
+            //            }
+            //            GridControl.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+            //        }
+
+            //        GridControl.RenderGrid();
+            //        continue;
+            //    }
+
+            //    if (input == @"?")
+            //    {
+            //        Console.Clear();
+            //        Console.WriteLine("Any input will be converted to lower chars");
+            //        Console.WriteLine("n - Page + 1");
+            //        Console.WriteLine("m - Page - 1");
+            //        Console.WriteLine("a [Number] - Page size = Number");
+            //        Console.WriteLine("c [Number] - Change type to type with number = Number");
+            //        Console.WriteLine("c - get types with number");
+            //        Console.WriteLine("[Number] - Page = Number");
+            //        continue;
+            //    }
+
+            //    input = input + Console.ReadLine();
+
+            //    if (input.StartsWith("a"))
+            //    {
+            //        var nr = input.Substring(1, input.Length - 1);
+            //        nr = nr.Trim();
+
+            //        int pageSize;
+
+            //        var npageSize = int.TryParse(nr, out pageSize);
+            //        if (npageSize)
+            //        {
+            //            DataPager.PageSize = pageSize;
+            //            DataPager.LoadPage(accessLayer);
+            //            GridControl.SourceList.Clear();
+            //            foreach (var source in DataPager.CurrentPageItems)
+            //            {
+            //                GridControl.SourceList.Add(source);
+            //            }
+            //            GridControl.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+            //        }
+            //    }
+            //    else if (input.StartsWith("c"))
+            //    {
+            //        var nr = input.Substring(1, input.Length - 1);
+            //        nr = nr.Trim();
+
+            //        int pageSize;
+
+            //        var npageSize = int.TryParse(nr, out pageSize);
+            //        if (npageSize)
+            //        {
+            //            try
+            //            {
+            //                GridControl.Target = Type.GetType(this.types[pageSize].Type);
+            //                GridControl.SourceList.Clear();
+            //                DataPager.CurrentPage = 0;
+            //                DataPager.LoadPage(accessLayer);
+            //            }
+            //            catch (Exception ex)
+            //            {
+            //                Console.WriteLine(ex);
+            //            }
+            //        }
+            //        else
+            //        {
+            //            var objects = GridControl.SourceList.ToArray();
+            //            GridControl.SourceList.Clear();
+            //            var oldTarget = GridControl.Target;
+            //            GridControl.Target = typeof(TypeWrapper);
+            //            foreach (var typeWrapper in this.types)
+            //            {
+            //                GridControl.SourceList.Add(typeWrapper);
+            //            }
+
+            //            GridControl.RenderGrid();
+            //            GridControl.SourceList.Clear();
+            //            foreach (var o in objects)
+            //            {
+            //                GridControl.SourceList.Add(o);
+            //            }
+            //            GridControl.Target = oldTarget;
+            //            continue;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        int pageNumer;
+
+            //        var tryParse = int.TryParse(input, out pageNumer);
+
+            //        if (tryParse)
+            //        {
+            //            DataPager.CurrentPage = pageNumer;
+            //            DataPager.LoadPage(accessLayer); 
+            //            GridControl.SourceList.Clear();
+            //            foreach (var source in DataPager.CurrentPageItems)
+            //            {
+            //                GridControl.SourceList.Add(source);
+            //            }
+            //            GridControl.ExtraInfos.Append("Page: " + DataPager.CurrentPage);
+            //        }
+            //    }
+            //    GridControl.RenderGrid();
+            //}
         }
-
-
-        public ConsolePropertyGrid ConsolePropertyGrid { get; set; }
     }
 }

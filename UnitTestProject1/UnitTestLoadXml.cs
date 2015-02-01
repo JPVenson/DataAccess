@@ -17,7 +17,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod1()
         {
-            var ConsolePropertyGrid = new ConsolePropertyGrid();
+            var ConsolePropertyGrid = new ConsoleGrid();
             ConsolePropertyGrid.Target = typeof(PagerTest.TestPagerTest);
             var tableName = "LoadXmlTest";
             var tableName2 = "LoadXmlTester";

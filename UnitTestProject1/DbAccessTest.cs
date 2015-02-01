@@ -14,23 +14,23 @@ namespace UnitTestProject1
         public string testName = "TestDD";
         public static DbAccessLayer AccessLayer { get; set; }
 
-        public static void Main()
-        {
-            var dbAccessTest = new DbAccessTest();
-            try
-            {
-                //dbAccessTest.MySQlTest();
-                dbAccessTest.MySQlTest();
-                CleanUp();
+        //public static void Main()
+        //{
+        //    var dbAccessTest = new DbAccessTest();
+        //    try
+        //    {
+        //        //dbAccessTest.MySQlTest();
+        //        dbAccessTest.MySQlTest();
+        //        CleanUp();
 
-                dbAccessTest.ACheckInserts();
-                dbAccessTest.BCheckSelects();
-            }
-            finally
-            {
-                CleanUp();
-            }
-        }
+        //        dbAccessTest.ACheckInserts();
+        //        dbAccessTest.BCheckSelects();
+        //    }
+        //    finally
+        //    {
+        //        CleanUp();
+        //    }
+        //}
 
         [ClassCleanup]
         public static void CleanUp()
@@ -91,7 +91,7 @@ namespace UnitTestProject1
             img.Text = "BLA";
             img = AccessLayer.InsertWithSelect(img);
 
-            ConsolePropertyGrid.RenderList(new List<Image>() { img });
+            ConsoleGrid.RenderList(new List<Image>() { img });
 
             Console.ReadKey();
             
@@ -105,7 +105,7 @@ namespace UnitTestProject1
         {
             List<User> @select = AccessLayer.Select<User>("test");
 
-            ConsolePropertyGrid.RenderList(@select);
+            ConsoleGrid.RenderList(@select);
             Console.ReadKey();
 
             Assert.AreEqual(@select.Count, 3);
@@ -118,7 +118,7 @@ namespace UnitTestProject1
             Assert.AreEqual(user.Name, testName);
 
             List<User> users = AccessLayer.SelectNative<User>("SELECT * FROM Users");
-            ConsolePropertyGrid.RenderList(users);
+            ConsoleGrid.RenderList(users);
             Console.ReadKey();
 
 
@@ -131,7 +131,7 @@ namespace UnitTestProject1
 
             List<User> selectWhere = AccessLayer.SelectWhere<User>("AS s WHERE s.User_ID != 0");
 
-            ConsolePropertyGrid.RenderList(selectWhere);
+            ConsoleGrid.RenderList(selectWhere);
             Console.ReadKey();
 
             Assert.AreEqual(count, selectWhere.Count);

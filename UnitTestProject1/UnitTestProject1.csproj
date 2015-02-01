@@ -55,9 +55,16 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Helper\ConsolePropertyGrid.cs" />
+    <Compile Include="Helper\ColloredStringBuilder.cs" />
+    <Compile Include="Helper\ConsoleColorInfo.cs" />
+    <Compile Include="Helper\ConsoleGrid.cs" />
     <Compile Include="DbAccessTest.cs" />
     <Compile Include="FooTest.cs" />
+    <Compile Include="Helper\ConsoleGridControler.cs" />
+    <Compile Include="Helper\DefaultConsolePropertyGridStyle.cs" />
+    <Compile Include="Helper\IConsolePropertyGridStyle.cs" />
+    <Compile Include="Helper\IGridControlerCommand.cs" />
+    <Compile Include="Helper\ValueInformations.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="LoadXmlTest.cs" />
     <Compile Include="PocoUsers.cs" />
