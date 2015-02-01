@@ -345,7 +345,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query)
         {
-            RaiseUnknownSelect(query, database);
+            RaiseSelect(query, database);
             return
                 DbAccessLayerHelper.EnumerateDataRecords(database, query, true)
                     .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(type, dataRecord))
@@ -518,7 +518,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public IEnumerable<object> RunPrimetivSelect(Type type, IDbCommand command)
         {
-            RaiseKnownSelect(command, Database);
+            RaiseSelect(command, Database);
             return DbAccessLayerHelper.EnumerateDataRecords(Database, command, LoadCompleteResultBeforeMapping).Select(s => s[0]).ToList();
         }
 

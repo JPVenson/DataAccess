@@ -54,10 +54,11 @@ namespace JPB.DataAccess.Manager
                 //}
 
                 var insertRangeCommand = CreateInsertRangeCommand(entry.ToArray(), c);
+                //TODO 
+                RaiseInsert(entry, insertRangeCommand.First(), c);
 
                 foreach (var item in insertRangeCommand)
                 {
-                    RaiseKnownInsert(item, c);
                     c.ExecuteNonQuery(item);
                 }
             });
@@ -181,7 +182,7 @@ namespace JPB.DataAccess.Manager
             {
                 var dbCommand = CreateInsert(type, entry, s);
                 var mergeCommands = MergeCommands(s, dbCommand, s.GetlastInsertedIdCommand());
-                RaiseUnknwonInsert(mergeCommands, s);
+                RaiseInsert(entry, mergeCommands, s);
                 var skalar = s.GetSkalar(mergeCommands);
                 object getlastInsertedId = skalar;
                 return Select(type, Convert.ToInt64(getlastInsertedId), s);

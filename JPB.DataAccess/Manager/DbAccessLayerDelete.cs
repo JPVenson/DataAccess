@@ -16,7 +16,7 @@ namespace JPB.DataAccess.Manager
         public void Delete<T>(T entry)
         {
             var deleteCommand = typeof(T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, this.Database, CreateDelete);
-            RaiseKnownDelete(deleteCommand, Database);
+            RaiseDelete(entry, deleteCommand, Database);
             this.Database.Run(s =>
             {
                 s.ExecuteNonQuery(deleteCommand);
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.Manager
         public static void Delete<T>(T entry, IDatabase db, params object[] parameter)
         {
             var deleteCommand = typeof(T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db, CreateDelete, parameter);
-            RaiseUnknownDelete(deleteCommand, db);
+            RaiseDelete(entry, deleteCommand, db);
             db.Run(s =>
             {
                 s.ExecuteNonQuery(deleteCommand);

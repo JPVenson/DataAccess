@@ -29,96 +29,48 @@ namespace JPB.DataAccess.Manager
         /// </summary>
         public static bool RaiseStaticEvents { get; set; }
 
-        public static event DatabaseActionHandler OnUnknownDelete;
-        public event DatabaseActionHandler OnDelete;
-        public static event DatabaseActionHandler OnUnknownSelect;
-        public event DatabaseActionHandler OnKnownSelect;
-        public static event DatabaseActionHandler OnUnknownUpdate;
-        public event DatabaseActionHandler OnKnownUpdate;
-        public static event DatabaseActionHandler OnUnknownInsert;
-        public event DatabaseActionHandler OnKnownUInsert;
+        public static event DatabaseActionHandler OnDelete;
+        public static event DatabaseActionHandler OnSelect;
+        public static event DatabaseActionHandler OnUpdate;
+        public static event DatabaseActionHandler OnInsert;
 
-        protected static void RaiseUnknownDelete(IDbCommand query, IDatabase source)
+        protected static void RaiseDelete(object sender, IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;
 
-            var handler = OnUnknownDelete;
-            if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
-        }
-
-        protected virtual void RaiseKnownDelete(IDbCommand query, IDatabase source)
-        {
-            RaiseUnknownDelete(query, source);
-            if (!RaiseEvents)
-                return;
-            //Async invoke
             var handler = OnDelete;
             if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
+                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
-        protected static void RaiseUnknownSelect(IDbCommand query, IDatabase source)
+        protected static void RaiseSelect(IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;
-            var handler = OnUnknownSelect;
+            var handler = OnSelect;
             if (handler != null)
                 handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
-        protected virtual void RaiseKnownSelect(IDbCommand query, IDatabase source)
-        {
-            RaiseUnknownSelect(query, source);
-            if (!RaiseEvents)
-                return;
-            //Async invoke
-            var handler = OnKnownSelect;
-            if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
-        }
-
-        protected static void RaiseUnknwonUpdate(IDbCommand query, IDatabase source)
+        protected static void RaiseUpdate(object sender, IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;
 
-            var handler = OnUnknownUpdate;
+            var handler = OnUpdate;
             if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
+                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
-        protected virtual void RaiseKnownUpdate(IDbCommand query, IDatabase source)
-        {
-            RaiseUnknwonUpdate(query, source);
-            if (!RaiseEvents)
-                return;
-            //Async invoke
-            var handler = OnKnownUpdate;
-            if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
-        }
-
-        protected static void RaiseUnknwonInsert(IDbCommand query, IDatabase source)
+        protected static void RaiseInsert(object sender, IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;
 
-            var handler = OnUnknownInsert;
+            var handler = OnInsert;
             if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
-        }
-
-        protected virtual void RaiseKnownInsert(IDbCommand query, IDatabase source)
-        {
-            RaiseUnknwonInsert(query, source);
-            if (!RaiseEvents)
-                return;
-            //Async invoke
-            var handler = OnKnownUInsert;
-            if (handler != null)
-                handler.BeginInvoke(this, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
+                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
     }
 }
