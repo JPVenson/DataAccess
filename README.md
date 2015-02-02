@@ -8,12 +8,12 @@ USAGE:
 
 class with different name then the Table
 	
-		[ForModel("TableNameOfFooTable")]
-	    public class Foo
+	    [ForModel("TableNameOfFooTable")]
+	    public class Foo { }
 	
 class with same name than Table
 	
-	    public class TableNameOfFooTable
+	    public class TableNameOfFooTable { }
 	  
 	  
 To use the Complete helper Function you need to annotate the:
@@ -23,7 +23,7 @@ RowVersion property with the [RowVersion] attribute
 
 USAGE:
 
-	    [PrimaryKey]
+	[PrimaryKey]
         [ForModel("User_ID")]
         public long UserId { get; set; }
 
@@ -53,7 +53,7 @@ USAGE:
     public Foo(IDataRecord record)
     {
       //TODO load propertys from record
-      //At this point the connection is already closed and the data are stored into the Record
+      //At this point the connection is already closed and the data are stored into the Record if you do not change the LoadCompleteResultBeforeMapping property to false
     }  
     
     public Foo()
@@ -61,7 +61,7 @@ USAGE:
       //other ctors
     }  
     
-    public Foo(Fooa foo)
+    public Foo(Northwind nord)
     {
     
     }  
@@ -135,3 +135,67 @@ USAGE:
 		List<Foo> foos = layer.Select<Foo>();
 		
 This will Create a DB connection, Enumerate all propertys or call a factory, to create a Select Statement, then execute this statement and load the propertys back into the object via reflection or Factory.
+
+Performace.
+
+Performace is also very importend. The Solution contains a Console application that will access your localdb to create test tables and insert and select from and to it. Then it will generate a small report with the times. 
+Compare it to Dapper or EF.
+
+Extend it.
+
+You can add any Database as long as you impliemnt the IDatabaseStrategy for it. There are default implimentations for MsSql, MsSql and Untested for Odbc and OleDb. The ORM is desgined to word on top of this Ado.net implimentations. You can use the Ado wrapper as Usual by using the Database property of DbAccessLayer or simply by creating the IDatabase implimentation.
+
+QueryBuilder.
+
+There is a implimentation that is not using IQueryable but IEnumerable. There is also an Unsupported IQueryable implimentation but its constructor is marked as Obsolete. The working implimentation uses Extention mehtods to write SQL confrom strings into a list. At the end the string are parsed with parameter optional and then the statement can be executed syncronly or asyncronly by enumerating the collection.
+
+	Example:
+	var withParamerters = new DbAccessLayer(DbAccessType.MsSql, "")
+                .Query()
+                //Create a new Query object that handles all calls
+                .Select<Foo>()
+                //Create a select query for type
+                .As("s")
+                //add the "AS (alias)" query part
+                .Join<Foo, Foo>(TJoinMode.Left)
+                //add a Join on a table by using the TJoin for left joins
+                .Where("", new { param = 1 })
+                //For allmost all mehtods we can overhand a dynamic object for paramethers it is not
+                //Importend where we do that they are handled globaly
+                .InBracket(s =>
+                {
+                    //This is for a better readability everything inside this action will be wrapped into "( )"
+                    s.QueryD("s.Id < @param");
+                    //We can also add anything with QueryD QueryQ and Query
+                    s.Or("s.Name CONTAINS @param2");
+                    //Create an Or statement
+                })
+                .WithParamerters(new { param2 = "test" });
+        //We can also add the paramthers at the end or when every we would like to
+
+        var compileFlat = withParamerters.CompileFlat();
+        //This will return as a local compiled statement from this query without executing on server
+        Console.WriteLine(compileFlat.Item1);
+        
+	Output:
+	SELECT ID, Name FROM Foo AS s 
+		LEFT JOIN Foo ON Foo.ID = Foo.FK_Self 
+		WHERE ( s.Id < @param OR s.Name CONTAINS @param2 ) 
+		
+	We could also call ToArray() or To List or loop throu it inside an ForEach.
+	
+            foreach (object withParamerter in withParamerters)
+            {
+                Console.WriteLine(withParamerter /*this is still an object*/);
+            }
+        To create a strongly typed Query just call 
+            foreach (Foo withParamerter in withParamerters.ForResult<Foo>();)
+            {
+                Console.WriteLine(withParamerter /*this is now casted to Foo*/);
+            }
+        at the end just before executing.
+        
+        
+        Future:
+        
+        I am currently working on some TCP intirgration for Realtime state changeing. The Project will be partial OpenSource 	because the TCP wrapper isn't for now.
