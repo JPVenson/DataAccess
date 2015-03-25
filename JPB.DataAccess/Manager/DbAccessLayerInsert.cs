@@ -16,11 +16,22 @@ namespace JPB.DataAccess.Manager
         /// <summary>
         /// Insert a <param name="entry"></param>
         /// </summary>
+        /// <param name="type"></param>
+        /// <param name="entry"></param>
+        /// <typeparam name="T"></typeparam>
+        public void Insert(Type type, object entry)
+        {
+            Insert(type, entry, Database);
+        }
+
+        /// <summary>
+        /// Insert a <param name="entry"></param>
+        /// </summary>
         /// <param name="entry"></param>
         /// <typeparam name="T"></typeparam>
         public void Insert<T>(T entry)
         {
-            Insert(entry, Database);
+            Insert(typeof(T), entry);
         }
 
         /// <summary>
@@ -168,6 +179,18 @@ namespace JPB.DataAccess.Manager
         public static void Insert<T>(T entry, IDatabase db)
         {
             db.Run(s => { s.ExecuteNonQuery(CreateInsert(typeof(T), entry, s)); });
+        }
+
+        /// <summary>
+        /// Creates and Executes a Insert statement for a given <param name="entry"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="entry"></param>
+        /// <param name="db"></param>
+        /// <typeparam name="T"></typeparam>
+        public static void Insert(Type type, object entry, IDatabase db)
+        {
+            db.Run(s => { s.ExecuteNonQuery(CreateInsert(type, entry, s)); });
         }
 
         /// <summary>

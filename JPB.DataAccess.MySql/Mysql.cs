@@ -114,6 +114,11 @@ namespace JPB.DataAccess.MySql
             return command.ToString();
         }
 
+        public string ConvertParameter(DbType type)
+        {
+            return new MySqlParameter { DbType = type }.MySqlDbType.ToString();
+        }
+
         public object Clone()
         {
             return new MySql(ConnectionString);

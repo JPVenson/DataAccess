@@ -252,6 +252,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             return CommandAsMsSql(command);
         }
 
+        public string ConvertParameter(DbType type)
+        {
+            return new SqlParameter { DbType = type }.SqlDbType.ToString();
+        }
+
         /// <summary>
         /// 
         /// </summary>

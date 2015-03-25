@@ -8,6 +8,14 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess
 {
+    public enum CollectionStates
+    {
+        Added,
+        Removed,
+        Unchanged,
+        Changed
+    }
+
     internal class ReposetoryCollection<TE> : ICollection<TE>
     {
         //static ReposetoryCollection()
@@ -36,11 +44,6 @@ namespace JPB.DataAccess
             }
         }
 
-        internal enum CollectionStates
-        {
-            Added,
-            Removed,
-        }
 
         private readonly Dictionary<long, CollectionStates> _flatCollectionOfPrimaryKeys;
 

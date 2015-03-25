@@ -129,5 +129,10 @@ namespace JPB.DataAccess.AdoWrapper.Odbc
         {
             return command.ToString();
         }
+
+        public string ConvertParameter(DbType type)
+        {
+            return type.ToString();
+        }
     }
 }

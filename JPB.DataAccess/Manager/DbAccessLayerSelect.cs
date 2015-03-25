@@ -12,6 +12,7 @@ using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 using JPB.DataAccess.QueryProvider;
+using JPB.DataAccess;
 
 namespace JPB.DataAccess.Manager
 {
@@ -347,7 +348,7 @@ namespace JPB.DataAccess.Manager
         {
             RaiseSelect(query, database);
             return
-                DbAccessLayerHelper.EnumerateDataRecords(database, query, true)
+                database.EnumerateDataRecords(query, true)
                     .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(type, dataRecord))
                     .ToList();
         }
@@ -519,7 +520,7 @@ namespace JPB.DataAccess.Manager
         public IEnumerable<object> RunPrimetivSelect(Type type, IDbCommand command)
         {
             RaiseSelect(command, Database);
-            return DbAccessLayerHelper.EnumerateDataRecords(Database, command, LoadCompleteResultBeforeMapping).Select(s => s[0]).ToList();
+            return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping).Select(s => s[0]).ToList();
         }
 
         /// <summary>
@@ -552,7 +553,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="parameters"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> RunPrimetivSelect<T>(string query, dynamic parameters) where T : class
+        public List<T> RunPrimetivSelect<T>(string query, dynamic parameters)
         {
             IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(parameters);
             var runPrimetivSelect = RunPrimetivSelect(typeof(T), query, enumarateFromDynamics);
@@ -566,7 +567,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="parameters"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> RunPrimetivSelect<T>(string query, IEnumerable<IQueryParameter> parameters) where T : class
+        public List<T> RunPrimetivSelect<T>(string query, IEnumerable<IQueryParameter> parameters)
         {
             return RunPrimetivSelect(typeof(T), query, parameters).Cast<T>().ToList();
         }
@@ -577,7 +578,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="query"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> RunPrimetivSelect<T>(string query) where T : class
+        public List<T> RunPrimetivSelect<T>(string query)
         {
             return RunPrimetivSelect<T>(query, new List<IQueryParameter>());
         }
@@ -735,5 +736,22 @@ namespace JPB.DataAccess.Manager
         }
 
         #endregion
+
+        public List<List<object>> ExecuteMARS(IDbCommand bulk, params Type[] marsTypes)
+        {
+            var mars = Database.EnumerateMarsDataRecords(bulk, true);
+            var concatedMarsToType = new List<Tuple<Type, List<IDataRecord>>>();
+            for (int index = 0; index < mars.Count; index++)
+            {
+                var dataRecord = mars[index];
+                var expectedResult = marsTypes[index];
+                concatedMarsToType.Add(new Tuple<Type, List<IDataRecord>>(expectedResult, dataRecord));
+            }
+
+            var list = concatedMarsToType.Select(s => s.Item2.Select(e => s.Item1.SetPropertysViaReflection(e)).AsParallel().ToList()).AsParallel().ToList();
+
+
+            return list;
+        }
     }
 }

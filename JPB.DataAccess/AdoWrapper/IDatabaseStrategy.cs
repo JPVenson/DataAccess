@@ -47,5 +47,13 @@ namespace JPB.DataAccess.AdoWrapper
         /// <param name="command"></param>
         /// <returns></returns>
         string FormartCommandToQuery(IDbCommand command);
+
+
+        /// <summary>
+        /// Converts the Generic DbType to the Specific represntation
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        string ConvertParameter(DbType type);
     }
 }

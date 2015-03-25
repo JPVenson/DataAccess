@@ -27,17 +27,25 @@ namespace JPB.DataAccess.Manager
 
     public partial class DbAccessLayer
     {
+        static DbAccessLayer()
+        {
+            SProcedureDbAccessLayer();
+        }
+
         private IDatabase _database;
 
         /// <summary>
         /// Defines a set of Providers that are inclueded in this DLL or are weak refernced.
         /// </summary>
         public PreDefinedProviderCollection ProviderCollection { get; private set; }
-        
+
         internal DbAccessLayer()
         {
             ProviderCollection = new PreDefinedProviderCollection();
             LoadCompleteResultBeforeMapping = true;
+
+            SelectDbAccessLayer();
+            UpdateDbAccessLayer();
         }
 
         /// <summary>
@@ -50,7 +58,7 @@ namespace JPB.DataAccess.Manager
         {
             if (dbAccessType == DbAccessType.Unknown)
             {
-                throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof (DbAccessType));
+                throw new InvalidEnumArgumentException("dbAccessType", (int)DbAccessType.Unknown, typeof(DbAccessType));
             }
 
             DbAccessType = dbAccessType;
@@ -74,9 +82,6 @@ namespace JPB.DataAccess.Manager
 
             var type = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
 
-            SelectDbAccessLayer();
-            UpdateDbAccessLayer();
-
             Database = new DefaultDatabaseAccess();
             Database.Attach(type);
         }
@@ -91,8 +96,6 @@ namespace JPB.DataAccess.Manager
         {
             if (database == null)
                 throw new ArgumentNullException("database");
-            SelectDbAccessLayer();
-            UpdateDbAccessLayer();
 
             ResolveDbType(database.GetType().FullName);
 
@@ -110,8 +113,6 @@ namespace JPB.DataAccess.Manager
         {
             if (database == null)
                 throw new ArgumentNullException("database");
-            SelectDbAccessLayer();
-            UpdateDbAccessLayer();
 
             DbAccessType = DbAccessType.Unknown;
             Database = database;
@@ -133,7 +134,7 @@ namespace JPB.DataAccess.Manager
             }
         }
 
-       
+
 
         /// <summary>
         /// Selected dbAccessType
@@ -198,8 +199,9 @@ namespace JPB.DataAccess.Manager
         {
             IDbCommand command = DbAccessLayerHelper.CreateCommand(Database, query);
 
-            foreach (IQueryParameter item in values)
-                command.Parameters.AddWithValue(item.Name, item.Value, Database);
+            if (values != null)
+                foreach (IQueryParameter item in values)
+                    command.Parameters.AddWithValue(item.Name, item.Value, Database);
 
             return Database.Run(s => s.ExecuteNonQuery(command));
         }
@@ -224,7 +226,7 @@ namespace JPB.DataAccess.Manager
         {
             return Database.Run(s => s.ExecuteNonQuery(command));
         }
-        
+
 
         /// <summary>
         /// if set the created reader of an read operation will be completely stored then the open connection will be closed

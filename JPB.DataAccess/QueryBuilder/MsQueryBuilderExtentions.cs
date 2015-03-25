@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Pager.Contracts;
+using JPB.DataAccess.QueryProvider;
 
 namespace JPB.DataAccess.QueryBuilder
 {
@@ -43,6 +45,18 @@ namespace JPB.DataAccess.QueryBuilder
             }
 
             return builder.Add(new QueryPart(query));
+        }
+
+        /// <summary>
+        /// Adds a Query part to <paramref name="builder"/>
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="query"></param>
+        /// <param name="paramerters"></param>
+        /// <returns></returns>
+        public static QueryBuilder QueryD(this QueryBuilder builder, string query)
+        {
+            return QueryD(builder, query, null);
         }
 
         /// <summary>
@@ -137,7 +151,6 @@ namespace JPB.DataAccess.QueryBuilder
             cteBuilder.Append(DbAccessLayer.CreateSelect(target));
             cteBuilder.Append(")");
             query.Query(cteBuilder.ToString());
-
             return query;
         }
 
@@ -171,6 +184,26 @@ namespace JPB.DataAccess.QueryBuilder
             subSelect(query);
             query.Query(")");
             return query;
+        }
+
+        /// <summary>
+        /// Wraps the Existing command into a DataPager for the underlying Database
+        /// Accepts only Where statements
+        /// 
+        /// <example>
+        /// 
+        /// </example>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public static IDataPager AsPager<T>(this QueryBuilder query, int pageSize)
+        {
+            var targetQuery = query.Compile();
+            var dbAccess = query.Database.CreatePager<T>();
+            dbAccess.AppendedComands.Add(targetQuery);
+            dbAccess.PageSize = pageSize;
+            return dbAccess;
         }
 
         /// <summary>
@@ -223,7 +256,7 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
-        /// Add an AS part
+        /// Add an Contains part
         /// </summary>
         /// <param name="query"></param>
         /// <param name="alias"></param>
@@ -234,7 +267,7 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
-        /// Add an AS part
+        /// Add an Contains part
         /// </summary>
         /// <param name="query"></param>
         /// <param name="alias"></param>
@@ -246,7 +279,7 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
-        /// Add an AS part
+        /// Add an RowNumberOrder part
         /// </summary>
         /// <param name="query"></param>
         /// <param name="over"></param>
@@ -316,10 +349,11 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder Join(this QueryBuilder query, Type source, Type target)
         {
-            var sourcePK = source.GetPK();
+            var sourcePK = source.GetFK(target);
             var targetPK = target.GetPK();
             var targetTable = target.GetTableName();
-            return query.Query("LEFT JOIN {0} ON {1} = {2}", targetTable, targetPK, sourcePK);
+            var sourceTable = source.GetTableName();
+            return query.Query(" JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
         }
 
         /// <summary>
@@ -366,7 +400,8 @@ namespace JPB.DataAccess.QueryBuilder
             var sourcePK = source.GetFK(target);
             var targetPK = target.GetPK();
             var targetTable = target.GetTableName();
-            return query.Query(mode + " JOIN {0} ON {1} = {2}", targetTable, targetPK, sourcePK);
+            var sourceTable = source.GetTableName();
+            return query.Query(mode + " JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
         }
 
         /// <summary>

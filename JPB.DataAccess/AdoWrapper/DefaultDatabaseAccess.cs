@@ -194,6 +194,11 @@ namespace JPB.DataAccess.AdoWrapper
             return this._strategy.FormartCommandToQuery(comm);
         }
 
+        public string ConvertParameter(DbType type)
+        {
+            return this._strategy.ConvertParameter(type);
+        }
+
         public object GetlastInsertedID()
         {
             using (var cmd = GetlastInsertedIdCommand())

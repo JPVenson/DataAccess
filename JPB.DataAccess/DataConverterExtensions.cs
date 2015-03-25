@@ -456,6 +456,10 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static object LoadNavigationProps(this object source, IDatabase accessLayer)
         {
+
+            //Get nav Propertys
+
+
             foreach (var propertyInfo in GetNavigationProps(source.GetType()))
             {
                 //var firstOrDefault = source.GetFK<long>(propertyInfo.ClassName);
@@ -797,7 +801,7 @@ namespace JPB.DataAccess
         /// <param name="type"></param>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static object SetPropertysViaReflection(Type type, IDataRecord reader)
+        public static object SetPropertysViaReflection(this Type type, IDataRecord reader)
         {
             bool created;
             var source = type.CreateInstance(reader, out created);

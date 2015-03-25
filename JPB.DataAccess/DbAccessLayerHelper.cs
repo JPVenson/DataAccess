@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.IO;
@@ -9,13 +10,31 @@ using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
+using JPB.DataAccess.DbCollection;
 
 namespace JPB.DataAccess
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class DbAccessLayerHelper
     {
+        /// <summary>
+        /// Creates a DbCollection for the specifiy type
+        /// To Limit the output create a new Type and then define the statement
+        /// </summary>
+        /// <param name="layer"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static DbCollection<T> CreateDbCollection<T>(this DbAccessLayer layer) 
+            where T : class, 
+            INotifyPropertyChanged
+        {
+            return new DbCollection<T>(layer, layer.Select<T>());
+        }
 
         public static IEnumerable<IQueryParameter> AsQueryParameter(this IDataParameterCollection source)
         {
@@ -104,6 +123,16 @@ namespace JPB.DataAccess
 
         internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(dynamic parameter)
         {
+            if (parameter is IQueryParameter)
+            {
+                return new[] { parameter as IQueryParameter };
+            }
+
+            if (parameter is IEnumerable<IQueryParameter>)
+            {
+                return parameter;
+            }
+
             return (from element in ((Type)parameter.GetType()).GetProperties()
                     let value = DataConverterExtensions.GetParamaterValue(parameter, element.Name)
                     select new QueryParameter { Name = element.Name.CheckParamter(), Value = value }).Cast<IQueryParameter>()
@@ -140,8 +169,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         internal static string CreatePropertyCSV(this Type type, params string[] ignore)
         {
-            IEnumerable<string> propertyNames = CreatePropertyNames(type, ignore);
-            return propertyNames.Aggregate((e, f) => e + ", " + f);
+            return CreatePropertyNames(type, ignore).Aggregate((e, f) => e + ", " + f);
         }
 
         /// <summary>
@@ -178,28 +206,45 @@ namespace JPB.DataAccess
 
         internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
         {
+            return EnumerateMarsDataRecords(database, query, egarLoading).FirstOrDefault();
+        }
+
+        internal static List<List<IDataRecord>> EnumerateMarsDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
+        {
             return database.Run(
                 s =>
                 {
                     //Skip enumeration and make a Direct loading
                     //This increeses Performance
 
-                    var records = new List<IDataRecord>();
+                    var records = new List<List<IDataRecord>>();
 
                     using (var dr = query.ExecuteReader())
                     {
-                        while (dr.Read())
+                        try
                         {
-                            if (egarLoading)
+                            do
                             {
-                                records.Add(dr.CreateEgarRecord());
-                            }
-                            else
-                            {
-                                records.Add(dr);
-                            }
+                                var resultSet = new List<IDataRecord>();
+                                while (dr.Read())
+                                {
+                                    if (egarLoading)
+                                    {
+                                        resultSet.Add(dr.CreateEgarRecord());
+                                    }
+                                    else
+                                    {
+                                        resultSet.Add(dr);
+                                    }
+                                }
+                                records.Add(resultSet);
+
+                            } while (dr.NextResult());
                         }
-                        dr.Close();
+                        finally
+                        {
+                            dr.Close();
+                        }
                     }
                     return records;
                 });
@@ -388,7 +433,7 @@ where TE : DataAccessAttribute
 
             //check the type to be a Strategy
 
-            if (typeof(IDatabaseStrategy).IsAssignableFrom(type))
+            if (!typeof(IDatabaseStrategy).IsAssignableFrom(type))
             {
                 throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
             }

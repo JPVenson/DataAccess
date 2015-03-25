@@ -50,7 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdoWrapper\Database.cs" />
+    <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
     <Compile Include="AdoWrapper\IDatabase.cs" />
     <Compile Include="AdoWrapper\IDatabaseStrategy.cs" />
@@ -62,6 +62,7 @@
     <Compile Include="DataConverterExtensions.cs" />
     <Compile Include="DataHelperExtensions.cs" />
     <Compile Include="DbAccessLayerHelper.cs" />
+    <Compile Include="DbCollection\DbCollection.cs" />
     <Compile Include="DbEventArgs\DatabaseActionEvent.cs" />
     <Compile Include="DebuggerHelper\QueryDebugger.cs" />
     <Compile Include="Helper\IQueryParameter.cs" />

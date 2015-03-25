@@ -19,6 +19,11 @@ namespace JPB.DataAccess.AdoWrapper.OleDB
             return command.ToString();
         }
 
+        public string ConvertParameter(DbType type)
+        {
+            return type.ToString();
+        }
+
         public OleDb(string strServer, string strDatabase)
         {
             ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
