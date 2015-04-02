@@ -1,5 +1,9 @@
 This lib is for an EF like DataAccess.
 
+
+Folow me on Gitter:
+<p><a href="https://gitter.im/JPVenson/DataAccess?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=body_badge" target="_blank" class=""><img src="https://camo.githubusercontent.com/da2edb525cde1455a622c58c0effc3a90b9a181c/68747470733a2f2f6261646765732e6769747465722e696d2f4a6f696e253230436861742e737667" alt="Gitter" data-canonical-src="https://badges.gitter.im/Join%20Chat.svg" style="max-width:100%;"></a></p>
+
 Usage and Annotating is Attribute based.
 
 To work with an POCO just name the class like the Table you want to operate Or place the [ForModel(name)] attribute on  it and specify the DB Column name. This works on Class|Table level as on Propertys|Columns.
