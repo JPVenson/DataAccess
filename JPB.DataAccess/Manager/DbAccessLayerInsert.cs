@@ -13,6 +13,11 @@ namespace JPB.DataAccess.Manager
 {
     partial class DbAccessLayer
     {
+        private void DbAccessLayer_Insert()
+        {
+            RangerInsertPation = 25;
+        }
+
         /// <summary>
         /// Insert a <param name="entry"></param>
         /// </summary>
@@ -48,7 +53,7 @@ namespace JPB.DataAccess.Manager
         /// <summary>
         /// get the size of the Partition of the singel InsertStatements
         /// </summary>
-        public static int RangerInsertPation { get { return 25; } }
+        public static uint RangerInsertPation { get; set; }
 
         /// <summary>
         /// Creates AutoStatements in the size of RangerInsertPation
@@ -59,17 +64,13 @@ namespace JPB.DataAccess.Manager
         {
             Database.RunInTransaction(c =>
             {
-                //foreach (var item in entry)
-                //{
-                //    this.ExecuteGenericCommand(_CreateInsert(item, c));
-                //}
-
                 var insertRangeCommand = CreateInsertRangeCommand(entry.ToArray(), c);
                 //TODO 
-                RaiseInsert(entry, insertRangeCommand.First(), c);
-
+                uint curr = 0;
                 foreach (var item in insertRangeCommand)
                 {
+                    curr += RangerInsertPation;
+                    RaiseInsert(entry.Skip(((int)curr)).Take((int)RangerInsertPation), item, c);
                     c.ExecuteNonQuery(item);
                 }
             });
@@ -84,43 +85,33 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IDbCommand[] CreateInsertRangeCommand<T>(T[] entrys, IDatabase db)
         {
-            var resultSet = new List<IDataParameter>();
-            var stringBuilder = new StringBuilder();
-
             var commands = new List<IDbCommand>();
+            IDbCommand insertRange = null;
 
-            int toke = 0;
+            uint toke = 0;
+            var type = typeof(T);
 
             for (int i = 0; i < entrys.Count(); i++)
             {
-                var singelCommand = _CreateInsert(typeof(T), entrys[i], db);
-                var singelCommandText = singelCommand.CommandText;
-                var singelParamter = singelCommand.Parameters.Cast<IDataParameter>();
-                foreach (var parameter in singelParamter)
-                {
-                    var newName = parameter.ParameterName + "" + i;
-                    singelCommandText = singelCommandText.Replace(parameter.ParameterName, newName);
-                    resultSet.Add(db.CreateParameter(newName, parameter.Value));
-                }
+                var singelCommand = _CreateInsert(type, entrys[i], db);
 
-                stringBuilder.AppendLine(singelCommandText + ";");
+                if (insertRange == null)
+                {
+                    insertRange = singelCommand;
+                    continue;
+                }
+                else
+                {
+                    insertRange = MergeCommands(db, insertRange, singelCommand, true);
+                }
                 toke++;
 
                 if (toke == RangerInsertPation)
                 {
                     toke = 0;
-                    //Create MultiCommand
-                    var dbDataParameters = resultSet.ToArray();
-                    commands.Add(db.CreateCommand(stringBuilder.ToString(), dbDataParameters));
-                    stringBuilder.Clear();
-                    resultSet.Clear();
+                    commands.Add(insertRange);
+                    insertRange = null;
                 }
-            }
-
-            if (toke != 0)
-            {
-                commands.Add(db.CreateCommand(stringBuilder.ToString(), resultSet.ToArray()));
-                stringBuilder.Clear();
             }
 
             return commands.ToArray();
@@ -167,7 +158,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
         {
-            return type.CheckInstanceForAttriute<InsertFactoryMethodAttribute>(entry, db, (e, f) => _CreateInsert(type, e, f), parameter);
+            return type.CreateCommandOfClassAttribute<InsertFactoryMethodAttribute>(entry, db, (e, f) => _CreateInsert(type, e, f), parameter);
         }
 
         /// <summary>
@@ -193,6 +184,12 @@ namespace JPB.DataAccess.Manager
             db.Run(s => { s.ExecuteNonQuery(CreateInsert(type, entry, s)); });
         }
 
+        internal static IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
+        {
+            var dbCommand = CreateInsert(type, entry, db);
+            return MergeCommands(db, dbCommand, db.GetlastInsertedIdCommand());
+        }
+
         /// <summary>
         /// Creates and Executes a Insert statement for a given <param name="entry"></param>
         /// </summary>
@@ -203,12 +200,9 @@ namespace JPB.DataAccess.Manager
         {
             return db.Run(s =>
             {
-                var dbCommand = CreateInsert(type, entry, s);
-                var mergeCommands = MergeCommands(s, dbCommand, s.GetlastInsertedIdCommand());
+                var mergeCommands = CreateInsertWithSelectCommand(type, entry, db);
                 RaiseInsert(entry, mergeCommands, s);
-                var skalar = s.GetSkalar(mergeCommands);
-                object getlastInsertedId = skalar;
-                return Select(type, Convert.ToInt64(getlastInsertedId), s);
+                return Select(type, Convert.ToInt64(s.GetSkalar(mergeCommands)), s);
             });
         }
 
@@ -263,7 +257,7 @@ namespace JPB.DataAccess.Manager
                     //Parameter is found twice in both commands so rename it
                     if (!autoRename)
                     {
-                        throw new ArgumentOutOfRangeException("base", "");
+                        throw new ArgumentOutOfRangeException("@base", string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands", parameter.ParameterName));
                     }
                     else
                     {

@@ -52,8 +52,8 @@
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
-    <Compile Include="AdoWrapper\IDatabase.cs" />
-    <Compile Include="AdoWrapper\IDatabaseStrategy.cs" />
+    <Compile Include="Contacts\IDatabase.cs" />
+    <Compile Include="Contacts\IDatabaseStrategy.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSql.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlUntypedDataPager.cs" />
     <Compile Include="AdoWrapper\Odbc\Odbc.cs" />
@@ -77,7 +77,7 @@
     <Compile Include="Manager\DbAccessType.cs" />
     <Compile Include="Manager\PreDefinedProviderCollection.cs" />
     <Compile Include="Contacts\IValueConverter.cs" />
-    <Compile Include="ModelsAnotations\ILoadFromXmlStrategy.cs" />
+    <Compile Include="Contacts\ILoadFromXmlStrategy.cs" />
     <Compile Include="ModelsAnotations\LoadStrategy.cs" />
     <Compile Include="Pager\Contracts\IDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />

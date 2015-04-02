@@ -41,24 +41,7 @@ namespace JPB.DataAccess.DebuggerHelper
             DebuggerQuery = debugquery.ToString();
             SqlQuery = formartCommandToQuery;
         }
-
-        private string GenericCommandToQuery(IDbCommand command)
-        {
-            var sql = new StringBuilder();
-
-            if (!string.IsNullOrEmpty(command.Connection.Database))
-                sql.AppendLine("USE " + command.Connection.Database + ";");
-
-            sql.Append(command.CommandText);
-
-            foreach (IDataParameter parameter in command.Parameters)
-            {
-                sql.Replace(parameter.ParameterName, ParameterValue(parameter));
-            }
-
-            return sql.ToString();
-        }
-
+        
         static QueryDebugger()
         {
             //Store assembly to exclude API calls
@@ -106,6 +89,7 @@ namespace JPB.DataAccess.DebuggerHelper
         private void Init()
         {
             var frames = new StackTrace().GetFrames();
+            //This call is a bit of work so kick it off to a Task and let it run
             _wokerTask = new Task(() =>
             {
                 try
@@ -142,6 +126,27 @@ namespace JPB.DataAccess.DebuggerHelper
             _wokerTask.Start();
         }
 
+        private string GenericCommandToQuery(IDbCommand command)
+        {
+            var sql = new StringBuilder();
+
+            if (!string.IsNullOrEmpty(command.Connection.Database))
+                sql.AppendLine("USE " + command.Connection.Database + ";");
+
+            sql.Append(command.CommandText);
+
+            foreach (IDataParameter parameter in command.Parameters)
+            {
+                sql.Replace(parameter.ParameterName, ParameterValue(parameter));
+            }
+
+            return sql.ToString();
+        }
+
+        public async void AwaitTask()
+        {
+            await this._wokerTask;
+        }
 
         /// <summary>
         /// 

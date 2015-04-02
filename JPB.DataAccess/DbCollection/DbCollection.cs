@@ -40,6 +40,11 @@ namespace JPB.DataAccess.DbCollection
             _internalCollection = new List<StateHolder>();
             _changeTracker = new Dictionary<T, List<string>>();
 
+            if (subset is IOrderedEnumerable<T>)
+            {
+                throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
+            }
+
             foreach (var item in subset)
             {
                 Add(item, CollectionStates.Unchanged);
@@ -138,19 +143,19 @@ namespace JPB.DataAccess.DbCollection
 
         public int IndexOf(T item)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("This Collection has a Bag behavior and does not support this Action");
             //return _internalCollection.IndexOf(item);
         }
 
         public void Insert(int index, T item)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("This Collection has a Bag behavior and does not support this Action");
             //_internalCollection.Insert(index, item);
         }
 
         public void RemoveAt(int index)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException("This Collection has a Bag behavior and does not support this Action");
             //_internalCollection.RemoveAt(index);
         }
 
@@ -167,7 +172,7 @@ namespace JPB.DataAccess.DbCollection
                 switch (pair.State)
                 {
                     case CollectionStates.Added:
-                        tempCommand = DbAccessLayer.CreateInsert(typeof(T), pair.Value, _layer.Database);
+                        tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof(T), pair.Value, _layer.Database);
                         break;
                     case CollectionStates.Removed:
                         tempCommand = DbAccessLayer.CreateDelete(pair.Value, _layer.Database);
@@ -189,10 +194,13 @@ namespace JPB.DataAccess.DbCollection
             }
 
             var results = _layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
-
-            foreach (var result in results)
+            //Added 
+            var added = _internalCollection.Where(s => s.State == CollectionStates.Added).ToArray();
+            for (int i = 0; i < added.Length; i++)
             {
-                
+                var addedOne = added[i];
+                var newId = results[i];
+                DbAccessLayer.CopyPropertys(addedOne, newId);
             }
 
             foreach (var collectionStatese in _internalCollection.ToArray())

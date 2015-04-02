@@ -14,7 +14,6 @@ namespace UnitTestProject1
         //    new UnitTestLoadXml().TestMethod1();
         //}
 
-        [TestMethod]
         public void TestMethod1()
         {
             var ConsolePropertyGrid = new ConsoleGrid();

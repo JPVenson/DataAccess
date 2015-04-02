@@ -59,6 +59,8 @@
     <Compile Include="TestModels\TestProcAResult.cs" />
     <Compile Include="TestModels\TestProcA.cs" />
     <Compile Include="TestModels\User.cs" />
+    <Compile Include="PagerUnitTest.cs" />
+    <Compile Include="UnitTest1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">

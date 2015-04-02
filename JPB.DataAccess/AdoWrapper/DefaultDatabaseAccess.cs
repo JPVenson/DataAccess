@@ -136,7 +136,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             Debug.Assert(_handlecounter >= 0);
 
-            //This is not the last call of Close so decreese the counter
+            //This is not the last call of Close so decrease the counter
             if (_handlecounter > 0)
                 _handlecounter--;
 

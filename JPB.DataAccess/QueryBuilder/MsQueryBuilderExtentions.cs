@@ -353,7 +353,7 @@ namespace JPB.DataAccess.QueryBuilder
             var targetPK = target.GetPK();
             var targetTable = target.GetTableName();
             var sourceTable = source.GetTableName();
-            return query.Query(" JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
+            return query.Query("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
         }
 
         /// <summary>
@@ -442,7 +442,7 @@ namespace JPB.DataAccess.QueryBuilder
                 case DbAccessType.MySql:
                     return query.Query("LIMIT BY {0}", top);
                 default:
-                    throw new NotSupportedException("For the Selected DB type is no Top implimentations Avaibile");
+                    throw new NotSupportedException("For the Selected DB type is no Top implementations Available");
             }
             return query;
         }

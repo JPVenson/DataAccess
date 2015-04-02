@@ -16,6 +16,8 @@ namespace JPB.DataAccess.UnitTests
     {
         static DbAccessLayer expectWrapper;
 
+        public const string ConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
+
         [TestInitialize]
         public async void InitTest()
         {
@@ -23,10 +25,9 @@ namespace JPB.DataAccess.UnitTests
                 return;
 
             var dbType = DbAccessType.MsSql;
-            var connectionString = "Data Source=(localdb)\\Projects;Integrated Security=True;";
             var dbname = "testDB";
 
-            expectWrapper = new DbAccessLayer(dbType, connectionString);
+            expectWrapper = new DbAccessLayer(dbType, ConnectionString);
             Assert.AreEqual(expectWrapper.DbAccessType, dbType);
 
             var checkDatabase = expectWrapper.CheckDatabase();
@@ -42,7 +43,7 @@ namespace JPB.DataAccess.UnitTests
             expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
             expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
 
-            expectWrapper = new DbAccessLayer(dbType, string.Format(connectionString + "Initial Catalog={0};", dbname));
+            expectWrapper = new DbAccessLayer(dbType, string.Format(ConnectionString + "Initial Catalog={0};", dbname));
 
             expectWrapper.ExecuteGenericCommand(
                 expectWrapper.Database.CreateCommand(
@@ -230,13 +231,16 @@ namespace JPB.DataAccess.UnitTests
         [TestMethod]
         public void SelectModelsSelect()
         {
-            var refSelect = expectWrapper.Select<Users_PK>(1);
+            RangeInsertTest();
+            var firstAvaibleUser = expectWrapper.Query().Select<Users>().Top(1).ForResult<Users>().First();
+
+            var refSelect = expectWrapper.Select<Users_PK>(firstAvaibleUser.User_ID);
             Assert.IsNotNull(refSelect);
 
-            var userSelectAlternatingProperty = expectWrapper.Select<Users_PK_IDFM>(1);
+            var userSelectAlternatingProperty = expectWrapper.Select<Users_PK_IDFM>(firstAvaibleUser.User_ID);
             Assert.IsNotNull(userSelectAlternatingProperty);
 
-            var userSelectStaticSel = expectWrapper.Select<Users_PK_IDFM_CLASSEL>(1);
+            var userSelectStaticSel = expectWrapper.Select<Users_PK_IDFM_CLASSEL>(firstAvaibleUser.User_ID);
             Assert.IsNotNull(userSelectStaticSel);
         }
 

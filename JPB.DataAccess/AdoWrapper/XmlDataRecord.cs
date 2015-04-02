@@ -32,7 +32,7 @@ namespace JPB.DataAccess.AdoWrapper
 
         private readonly Type _target;
         private readonly XElement baseElement;
-
+        
         internal XmlDataRecord(string xmlStream, Type target)
         {
             _target = target;
@@ -55,17 +55,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             return baseElement.Elements().ElementAt(i).Name.LocalName;
         }
-
-        public string GetDataTypeName(int i)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Type GetFieldType(int i)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public object GetValue(int i)
         {
             var name = GetName(i);
@@ -86,6 +76,27 @@ namespace JPB.DataAccess.AdoWrapper
             return type;
         }
 
+        #region Unsupported
+
+        public string GetDataTypeName(int i)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Type GetFieldType(int i)
+        {
+            throw new NotImplementedException();
+        }
+
+        object IDataRecord.this[int i]
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        object IDataRecord.this[string name]
+        {
+            get { throw new NotImplementedException(); }
+        }
         public int GetValues(object[] values)
         {
             throw new NotImplementedException();
@@ -176,20 +187,12 @@ namespace JPB.DataAccess.AdoWrapper
             throw new NotImplementedException();
         }
 
+        #endregion  
+           
         public int FieldCount
         {
             get { return baseElement.Elements().Count(); }
-        }
-
-        object IDataRecord.this[int i]
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        object IDataRecord.this[string name]
-        {
-            get { throw new NotImplementedException(); }
-        }
+        }            
 
         public IEnumerable<XmlDataRecord> CreateListOfItems()
         {

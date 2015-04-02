@@ -8,7 +8,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace UnitTestProject1
 {
-    [TestClass]
     public class DbAccessTest
     {
         public string testName = "TestDD";
@@ -77,7 +76,6 @@ namespace UnitTestProject1
             AccessLayer = new DbAccessLayer(new MsSql("Data Source=(localdb)\\Projects;Initial Catalog=TestDB;Integrated Security=True;"));
         }
 
-        [TestMethod]
         public void ACheckInserts()
         {
             var user = new User();
@@ -100,7 +98,6 @@ namespace UnitTestProject1
             AccessLayer.Update(updatedUser);
         }
 
-        [TestMethod]
         public void BCheckSelects()
         {
             List<User> @select = AccessLayer.Select<User>("test");
@@ -142,7 +139,6 @@ namespace UnitTestProject1
             Assert.AreEqual(@where.UserId, lastID);
         }
 
-        [TestMethod]
         public void CCheckUpdate()
         {
             List<User> @select = AccessLayer.Select<User>();
@@ -167,11 +163,11 @@ namespace UnitTestProject1
             }
         }
 
-        [TestMethod]
         public void DCheckAttributeSelect()
         {
             List<PocoUsers> @select = AccessLayer.Select<PocoUsers>();
             Assert.AreEqual(@select.Count, 3);
         }
+
     }
 }

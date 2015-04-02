@@ -56,7 +56,6 @@ namespace UnitTestProject1
 
         public List<TypeWrapper> types = new List<TypeWrapper>();
 
-        [TestMethod]
         public void TestMethod1()
         {
 

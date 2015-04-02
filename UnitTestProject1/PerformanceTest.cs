@@ -45,7 +45,6 @@ namespace UnitTestProject1
             watch.Reset();
         }
 
-        [TestMethod]
         public void TestMethod1()
         {
             //Clear old entrys

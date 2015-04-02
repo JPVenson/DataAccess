@@ -31,7 +31,7 @@ namespace JPB.DataAccess.QueryBuilder
         public EnumerationMode EnumerationMode { get; set; }
 
         /// <summary>
-        /// If enabled Variables that are only used for parameters will be Renamed if there Existing multible times
+        /// If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
         /// </summary>
         public bool AllowParamterRenaming { get; set; }
 
@@ -44,10 +44,10 @@ namespace JPB.DataAccess.QueryBuilder
         public QueryBuilder(IDatabase database)
         {
             this.Database = database;
-            Parts = new ObservableCollection<QueryPart>();
+            Parts = new List<QueryPart>();
         }
 
-        internal ObservableCollection<QueryPart> Parts { get; set; }
+        internal List<QueryPart> Parts { get; set; }
 
         /// <summary>
         /// Will concat all QueryParts into a statement and will check for Spaces
@@ -149,7 +149,7 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
-        /// Incriment the counter +1 and retunres the value
+        /// Increment the counter +1 and return the value
         /// </summary>
         /// <returns></returns>
         public int GetParamaterAutoID()

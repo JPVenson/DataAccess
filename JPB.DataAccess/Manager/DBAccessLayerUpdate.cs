@@ -79,9 +79,9 @@ namespace JPB.DataAccess.Manager
         ///     Will update all propertys of entry when
         ///     T contains a Valid RowVersion property
         ///     AND
-        ///     RowVersion property is not equals the DB version
-        ///     OR
-        ///     T does not contain any RowVersion
+        ///         RowVersion property is not equals the DB version
+        ///         OR
+        ///         T does not contain any RowVersion
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entry"></param>
@@ -92,24 +92,12 @@ namespace JPB.DataAccess.Manager
             {
                 if (!CheckRowVersion(entry))
                 {
-                    var query = CreateSelect(typeof(T), Database, entry.GetPK<T, long>());
+                    var query = CreateSelect(entry.GetType(), Database, entry.GetPK<T, long>());
                     RaiseUpdate(entry, query, s);
                     var @select = RunSelect<T>(query).FirstOrDefault();
 
                     bool updated = false;
-                    PropertyInfo[] propertys = typeof(T).GetProperties();
-                    foreach (PropertyInfo propertyInfo in propertys)
-                    {
-                        object oldValue = propertyInfo.GetConvertedValue(entry);
-                        object newValue = propertyInfo.GetConvertedValue(@select);
-
-                        if (newValue == null && oldValue == null ||
-                            (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
-                            continue;
-
-                        propertyInfo.SetValue(@select, newValue);
-                        updated = true;
-                    }
+                    CopyPropertys(entry, @select);
 
                     @select.LoadNavigationProps(Database);
 
@@ -117,6 +105,25 @@ namespace JPB.DataAccess.Manager
                 }
                 return false;
             });
+        }
+
+        static internal bool CopyPropertys(object @base, object newObject)
+        {
+            var updated = false;
+            PropertyInfo[] propertys = @base.GetType().GetProperties();
+            foreach (PropertyInfo propertyInfo in propertys)
+            {
+                object oldValue = propertyInfo.GetConvertedValue(@base);
+                object newValue = propertyInfo.GetConvertedValue(newObject);
+
+                if (newValue == null && oldValue == null ||
+                    (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
+                    continue;
+
+                propertyInfo.SetValue(@base, newValue);
+                updated = true;
+            }
+            return updated;
         }
 
         /// <summary>

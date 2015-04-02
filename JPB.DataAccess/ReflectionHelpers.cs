@@ -30,7 +30,7 @@ namespace JPB.DataAccess
         public static Attribute[] GetCustomAttributes(this Type type)
         {
             if (IsAnonymousType(type))
-                return new Attribute[0]; //anonymos types does not have any Attributes
+                return new Attribute[0]; //Anonymous types does not have any Attributes
 
             return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
         }
@@ -38,7 +38,7 @@ namespace JPB.DataAccess
         public static Attribute[] GetCustomAttributes(this PropertyInfo type)
         {
             if (IsAnonymousType(type.DeclaringType))
-                return new Attribute[0]; //anonymos types does not have any Attributes
+                return new Attribute[0]; //Anonymous types does not have any Attributes
 
             var deb = ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
 
@@ -48,7 +48,7 @@ namespace JPB.DataAccess
         public static Attribute[] GetCustomAttributes(this MethodInfo type)
         {
             if (IsAnonymousType(type.DeclaringType))
-                return new Attribute[0]; //anonymos types does not have any Attributes
+                return new Attribute[0]; //Anonymous types does not have any Attributes
 
             var deb = ReflecionStore.GetOrCreateMethodInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
 

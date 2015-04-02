@@ -329,11 +329,11 @@ namespace JPB.DataAccess
         }
 
 
-        internal static IDbCommand CheckInstanceForAttriute<TE>(this Type type, object entry, IDatabase db,
+        internal static IDbCommand CreateCommandOfClassAttribute<TE>(this Type type, object entry, IDatabase db,
 Func<object, IDatabase, IDbCommand> fallback, params object[] param)
 where TE : DataAccessAttribute
         {
-            //try to get a Factory mehtod
+            //try to get a Factory method
             //var methods =
             //    type.GetMethods()
             //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
@@ -371,10 +371,10 @@ where TE : DataAccessAttribute
                     return fallback(entry, db);
                 }
 
-                MethodInfo method = searchMethodWithFittingParams.First();
+                MethodInfo method = searchMethodWithFittingParams.Single();
 
                 //must be public static
-                if (!method.IsStatic)
+                if (method.IsStatic)
                 {
                     object[] cleanParams = param != null && param.Any() ? param : null;
                     object invoke = method.Invoke(entry, cleanParams);
@@ -399,7 +399,7 @@ where TE : DataAccessAttribute
             Func<T, IDatabase, IDbCommand> fallback, params object[] param)
             where TE : DataAccessAttribute
         {
-            return CheckInstanceForAttriute<TE>(type, entry, db, (o, database) => fallback((T)o, database), param);
+            return CreateCommandOfClassAttribute<TE>(type, entry, db, (o, database) => fallback((T)o, database), param);
         }
 
         internal static IDatabaseStrategy GenerateStrategy(this string fullValidIdentifyer, string connection)
