@@ -62,10 +62,6 @@
       <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
       <Name>JPB.DataAccess</Name>
     </ProjectReference>
-    <ProjectReference Include="..\UnitTestProject1\UnitTestProject1.csproj">
-      <Project>{5521D9CF-7862-4E43-8263-878879E45CE2}</Project>
-      <Name>UnitTestProject1</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
