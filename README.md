@@ -203,3 +203,6 @@ There is a implimentation that is not using IQueryable but IEnumerable. There is
         Future:
         
         I am currently working on some TCP intirgration for Realtime state changeing. The Project will be partial OpenSource 	because the TCP wrapper isn't for now.
+
+
+[![Join the chat at https://gitter.im/JPVenson/DataAccess](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/JPVenson/DataAccess?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
