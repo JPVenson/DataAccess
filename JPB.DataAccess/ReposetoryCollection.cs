@@ -18,14 +18,7 @@ namespace JPB.DataAccess
 
     internal class ReposetoryCollection<TE> : ICollection<TE>
     {
-        //static ReposetoryCollection()
-        //{
-        //    ctor = typeof(ReposetoryCollection<>).GetConstructor(new[] { typeof(IEnumerable) });
-        //}
-
-        //internal static readonly ConstructorInfo ctor;
-
-        public ReposetoryCollection(IEnumerable enumeration)
+        internal ReposetoryCollection(IEnumerable enumeration)
         {
             _flatCollectionOfPrimaryKeys = new Dictionary<long, CollectionStates>();
 
@@ -43,7 +36,6 @@ namespace JPB.DataAccess
                     _items.Add((TE)item);
             }
         }
-
 
         private readonly Dictionary<long, CollectionStates> _flatCollectionOfPrimaryKeys;
 

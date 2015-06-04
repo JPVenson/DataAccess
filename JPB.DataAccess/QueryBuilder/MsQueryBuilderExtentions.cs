@@ -15,7 +15,7 @@ namespace JPB.DataAccess.QueryBuilder
     /// <summary>
     /// Provieds A set of extentions for Microsoft SQL Serve
     /// </summary>
-    public static class MsQueryBuilderExtentions
+    public static partial class MsQueryBuilderExtentions
     {
         /// <summary>
         /// Adds a Query part to <paramref name="builder"/>
@@ -26,7 +26,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder QueryQ(this QueryBuilder builder, string query, params IQueryParameter[] parameters)
         {
-            return builder.Add(new QueryPart(query, parameters));
+            return builder.Add(new GenericQueryPart(query, parameters));
         }
 
         /// <summary>
@@ -41,10 +41,10 @@ namespace JPB.DataAccess.QueryBuilder
             if (paramerters != null)
             {
                 IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return builder.Add(new QueryPart(query, parameters));
+                return builder.Add(new GenericQueryPart(query, parameters));
             }
 
-            return builder.Add(new QueryPart(query));
+            return builder.Add(new GenericQueryPart(query));
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder Query(this QueryBuilder builder, IDbCommand command)
         {
-            return builder.Add(QueryPart.FromCommand(command));
+            return builder.Add(GenericQueryPart.FromCommand(command));
         }
 
         /// <summary>
@@ -150,7 +150,35 @@ namespace JPB.DataAccess.QueryBuilder
             cteBuilder.Append(") AS (");
             cteBuilder.Append(DbAccessLayer.CreateSelect(target));
             cteBuilder.Append(")");
-            query.Query(cteBuilder.ToString());
+            query.Add(new CteQueryPart(cteBuilder.ToString()));
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a Common Table Expression that selects a Specific type
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="target"></param>
+        /// <param name="cteName"></param>
+        /// <param name="useStarOperator"></param>
+        /// <returns></returns>
+        public static QueryBuilder WithCte(this QueryBuilder query, string cteName, Action<QueryBuilder> cteAction)
+        {
+            var lod = query.Parts.LastOrDefault();
+            var prefix = string.Empty;
+
+            if (lod is CteQueryPart)
+            {
+                prefix = string.Format(", {0} AS", cteName);
+            }
+            else
+            {
+                prefix = string.Format("WITH {0} AS ", cteName);
+            }
+
+            query.Add(new GenericQueryPart(prefix));
+            cteAction(query);
+            query.Add(new GenericQueryPart(""));
             return query;
         }
 
@@ -202,6 +230,79 @@ namespace JPB.DataAccess.QueryBuilder
             var targetQuery = query.Compile();
             var dbAccess = query.Database.CreatePager<T>();
             dbAccess.AppendedComands.Add(targetQuery);
+            dbAccess.PageSize = pageSize;
+            return dbAccess;
+        }
+
+        public static QueryBuilder SelectStar(this QueryBuilder query, Action<QueryBuilder> from)
+        {
+            query.Query("SELECT * FROM");
+            from(query);
+            return query;
+        }
+
+        public static QueryBuilder Between(this QueryBuilder query, Action<QueryBuilder> from)
+        {
+            query.Query("BETWEEN");
+            from(query);
+            return query;
+        }
+
+        public static QueryBuilder SelectStar(this QueryBuilder query)
+        {
+            query.Query("SELECT * FROM");
+            return query;
+        }
+
+        public static QueryBuilder Between(this QueryBuilder query)
+        {
+            query.Query("BETWEEN");
+            return query;
+        }
+
+        public static QueryBuilder SelectStar(this QueryBuilder query, Type type)
+        {
+            query.Query("SELECT * FROM {0}", type.GetTableName());
+            return query;
+        }
+
+        public static QueryBuilder Between(this QueryBuilder query, Action<QueryBuilder> valueA, Action<QueryBuilder> valueB)
+        {
+            query.Between();
+            query.InBracket(valueA);
+            query.And();
+            query.InBracket(valueB);
+            return query;
+        }
+
+        public static QueryBuilder Between(this QueryBuilder query, Double valueA, Double valueB)
+        {
+            var paramaterAAutoId = query.GetParamaterAutoID().ToString();
+            var paramaterBAutoId = query.GetParamaterAutoID().ToString();
+
+            query.Query("BETWEEN @{0} AND @{1}", paramaterAAutoId, paramaterBAutoId);
+            query.QueryQ("",
+                new QueryParameter(paramaterAAutoId, valueA),
+                new QueryParameter(paramaterBAutoId, valueB));
+            return query;
+        }
+
+        /// <summary>
+        /// Wraps the Existing command into a DataPager for the underlying Database
+        /// Accepts only Where statements
+        /// 
+        /// <example>
+        /// 
+        /// </example>
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public static IWrapperDataPager<T, TE> AsPagerViewModel<T, TE>(this QueryBuilder query, int pageSize)
+        {
+            var targetQuery = query.Compile();
+            var dbAccess = query.Database.CreatePager<T, TE>();
+            dbAccess.BaseQuery = targetQuery;
             dbAccess.PageSize = pageSize;
             return dbAccess;
         }
@@ -321,6 +422,18 @@ namespace JPB.DataAccess.QueryBuilder
                 return query.QueryQ(string.Format("AND {0}", condition), parameters.ToArray());
             }
             return query.Query("AND {0}", condition);
+        }
+
+        /// <summary>
+        /// Adds And Condition
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="condition"></param>
+        /// <param name="paramerters"></param>
+        /// <returns></returns>
+        public static QueryBuilder And(this QueryBuilder query)
+        {
+            return query.Query("AND");
         }
 
         /// <summary>

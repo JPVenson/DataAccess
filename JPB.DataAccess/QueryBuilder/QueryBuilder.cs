@@ -44,10 +44,10 @@ namespace JPB.DataAccess.QueryBuilder
         public QueryBuilder(IDatabase database)
         {
             this.Database = database;
-            Parts = new List<QueryPart>();
+            Parts = new List<GenericQueryPart>();
         }
 
-        internal List<QueryPart> Parts { get; set; }
+        internal List<GenericQueryPart> Parts { get; set; }
 
         /// <summary>
         /// Will concat all QueryParts into a statement and will check for Spaces
@@ -82,7 +82,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// </summary>
         /// <param name="part"></param>
         /// <returns></returns>
-        public QueryBuilder Add(QueryPart part)
+        public QueryBuilder Add(GenericQueryPart part)
         {
             if (AllowParamterRenaming)
             {
@@ -112,23 +112,24 @@ namespace JPB.DataAccess.QueryBuilder
         {
             var sb = new StringBuilder();
             var queryParts = Parts.ToArray();
-            QueryPart pref = null;
+            string prefRender = null;
             var param = new List<IQueryParameter>();
 
             foreach (var queryPart in queryParts)
             {
                 //take care of spaces
                 //check if the last statement ends with a space or the next will start with one
-                if (pref != null)
+                var renderCurrent = queryPart.Render();
+                if (prefRender != null)
                 {
-                    if (!pref.Prefix.EndsWith(" ", true, CultureInfo.InvariantCulture) || !queryPart.Prefix.StartsWith(" ", true, CultureInfo.InvariantCulture))
+                    if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) || !renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
                     {
-                        queryPart.Prefix = " " + queryPart.Prefix;
+                        renderCurrent = " " + renderCurrent;
                     }
                 }
-                sb.Append(queryPart.Prefix);
+                sb.Append(renderCurrent);
                 param.AddRange(queryPart.QueryParameters);
-                pref = queryPart;
+                prefRender = renderCurrent;
             }
 
             return new Tuple<string, IEnumerable<IQueryParameter>>(sb.ToString(), param);
@@ -175,7 +176,7 @@ namespace JPB.DataAccess.QueryBuilder
         {
         }
 
-        public QueryBuilder<T> Add(QueryPart part)
+        public QueryBuilder<T> Add(GenericQueryPart part)
         {
             base.Add(part);
             return this;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.Odbc;
 using System.Linq;
 using System.Reflection;
@@ -221,6 +222,23 @@ namespace JPB.DataAccess.Manager
         {
             var mergedCommandText = @base.CommandText + " " + last.CommandText;
             return MergeTextToParameters(db, mergedCommandText, @base, last, autoRename);
+        }
+
+        /// <summary>
+        /// Not Connection save
+        /// Must be executed inside a Valid Connection
+        /// Takes <paramref name="base"/> as base of Connection propertys
+        /// Merges the Command text of Both commands sepperated by a space
+        /// Creats a new command based on <param name="db"></param> and Adds the Merged Commandtext and all parameter to it
+        /// </summary>
+        /// <param name="base"></param>
+        /// <param name="last"></param>
+        /// <param name="autoRename">allows an Automatik renaming of multible Commands</param>
+        /// <returns></returns>
+        public static IDbCommand InsertCommands(IDatabase db, IDbCommand @base, IDbCommand toInsert, bool autoRename = false)
+        {
+            var mergedCommandText = string.Format(@base.CommandText, toInsert);
+            return MergeTextToParameters(db, mergedCommandText, @base, toInsert, autoRename);
         }
 
         /// <summary>

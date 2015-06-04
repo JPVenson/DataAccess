@@ -8,12 +8,11 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static JPB.DataAccess.QueryBuilder.MsQueryBuilderExtentions;
 
 namespace JPB.DataAccess.QueryBuilder
 {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    public static class MsQueryBuilderTypedExtentions
+    public static partial class MsQueryBuilderExtentions
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     {
         /// <summary>
@@ -25,7 +24,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder<T> QueryQ<T>(this QueryBuilder<T> builder, string query, params IQueryParameter[] parameters)
         {
-            return builder.Add(new QueryPart(query, parameters));
+            return builder.Add(new GenericQueryPart(query, parameters));
         }
 
         /// <summary>
@@ -40,10 +39,10 @@ namespace JPB.DataAccess.QueryBuilder
             if (paramerters != null)
             {
                 IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return builder.Add(new QueryPart(query, parameters));
+                return builder.Add(new GenericQueryPart(query, parameters));
             }
 
-            return builder.Add(new QueryPart(query));
+            return builder.Add(new GenericQueryPart(query));
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder<T> Query<T>(this QueryBuilder<T> builder, IDbCommand command)
         {
-            return builder.Add(QueryPart.FromCommand(command));
+            return builder.Add(GenericQueryPart.FromCommand(command));
         }
 
         /// <summary>

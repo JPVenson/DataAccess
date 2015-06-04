@@ -653,7 +653,7 @@ namespace JPB.DataAccess.Manager
 
             return objects;
         }
-
+        
         /// <summary>
         /// Runs <param name="command"></param> and parses output into <param name="type"></param>
         /// </summary>
@@ -701,6 +701,19 @@ namespace JPB.DataAccess.Manager
         {
             IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
             return SelectNative(type, query, enumarateFromDynamics);
+        }
+
+        /// <summary>
+        /// Runs <param name="query"></param> and parses output into <param name="type"></param>
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="query"></param>
+        /// <param name="paramenter"></param>
+        /// <returns></returns>
+        public List<object> SelectNative(Type type, IDbCommand command, dynamic paramenter)
+        {
+            IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
+            return SelectNative(type, command, enumarateFromDynamics);
         }
 
         /// <summary>

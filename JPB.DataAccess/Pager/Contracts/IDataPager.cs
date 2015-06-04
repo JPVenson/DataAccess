@@ -80,5 +80,7 @@ namespace JPB.DataAccess.Pager.Contracts
         /// Additional Commands to append to the base load command
         /// </summary>
         new ICollection<T> CurrentPageItems { get; }
+
+        IDbCommand BaseQuery { get; set; }
     }
 }

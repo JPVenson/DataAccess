@@ -29,7 +29,7 @@ namespace JPB.DataAccess
         /// <param name="layer"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static DbCollection<T> CreateDbCollection<T>(this DbAccessLayer layer) 
+        public static DbCollection<T> CreateDbCollection<T>(this DbAccessLayer layer)
             where T : class, 
             INotifyPropertyChanged
         {
@@ -40,7 +40,7 @@ namespace JPB.DataAccess
         {
             return
                 (from IDataParameter parameter in source
-                    select new QueryParameter(parameter.ParameterName, parameter.Value));
+                 select new QueryParameter(parameter.ParameterName, parameter.Value));
         }
 
         /// <summary>
@@ -65,6 +65,23 @@ namespace JPB.DataAccess
                         return dataValue;
                     }).ToArray();
             return db.CreateCommandWithParameterValues(query, propertyvalues);
+        }
+
+        /// <summary>
+        /// Wrappes a String into a Command
+        /// </summary>
+        /// <param name="commandText"></param>
+        /// <param name="db"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static IDbCommand CreateCommand(this string commandText, IDatabase db, object param = null)
+        {
+            return db.CreateCommand(commandText, EnumarateFromDynamics(param).FromUserDefinedToSystemParameters(db));
+        }
+
+        public static IDataParameter[] FromUserDefinedToSystemParameters(this IEnumerable<IQueryParameter> parma, IDatabase db)
+        {
+            return parma.Select(s => db.CreateParameter(s.Name, s.Value)).ToArray();
         }
 
         /// <summary>
@@ -121,8 +138,11 @@ namespace JPB.DataAccess
             return cmd;
         }
 
-        internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(dynamic parameter)
+        internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(this object parameter)
         {
+            if (parameter == null)
+                return new IQueryParameter[0];
+
             if (parameter is IQueryParameter)
             {
                 return new[] { parameter as IQueryParameter };
@@ -130,7 +150,7 @@ namespace JPB.DataAccess
 
             if (parameter is IEnumerable<IQueryParameter>)
             {
-                return parameter;
+                return parameter as IEnumerable<IQueryParameter>;
             }
 
             return (from element in ((Type)parameter.GetType()).GetProperties()
@@ -138,6 +158,24 @@ namespace JPB.DataAccess
                     select new QueryParameter { Name = element.Name.CheckParamter(), Value = value }).Cast<IQueryParameter>()
                 .ToList();
         }
+
+        //internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(dynamic parameter)
+        //{
+        //    if (parameter is IQueryParameter)
+        //    {
+        //        return new[] { parameter as IQueryParameter };
+        //    }
+
+        //    if (parameter is IEnumerable<IQueryParameter>)
+        //    {
+        //        return parameter;
+        //    }
+
+        //    return (from element in ((Type)parameter.GetType()).GetProperties()
+        //            let value = DataConverterExtensions.GetParamaterValue(parameter, element.Name)
+        //            select new QueryParameter { Name = element.Name.CheckParamter(), Value = value }).Cast<IQueryParameter>()
+        //        .ToList();
+        //}
 
         /// <summary>
         /// Returns all Propertys that can be loaded due reflection

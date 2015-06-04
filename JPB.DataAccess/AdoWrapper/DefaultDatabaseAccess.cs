@@ -104,7 +104,10 @@ namespace JPB.DataAccess.AdoWrapper
                 _conn2 = GetConnection();
             //Connection exists check for open
             if (_conn2.State != ConnectionState.Open)
-                _conn2.Open();
+                lock (typeof(DefaultDatabaseAccess))
+                {
+                    _conn2.Open();
+                }
 
             //This is the First call of connect so we Could
             //define it as Transaction
