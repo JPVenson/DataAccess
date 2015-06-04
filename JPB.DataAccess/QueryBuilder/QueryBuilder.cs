@@ -175,6 +175,12 @@ namespace JPB.DataAccess.QueryBuilder
         {
         }
 
+        public QueryBuilder<T> Add(QueryPart part)
+        {
+            base.Add(part);
+            return this;
+        }
+
         public new IEnumerator<T> GetEnumerator()
         {
             if (_forType == null)

@@ -16,6 +16,11 @@ namespace JPB.DataAccess
             ReflecionStore = new ReflecionStore();
         }
 
+        /// <summary>
+        /// Anonymous type check by naming convention
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static Boolean IsAnonymousType(this Type type)
         {
             //Boolean hasCompilerGeneratedAttribute = type.GetCustomAttributes().Any(s => s is CompilerGeneratedAttribute);

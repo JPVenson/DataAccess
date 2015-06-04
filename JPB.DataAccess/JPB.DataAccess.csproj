@@ -84,6 +84,7 @@
     <Compile Include="Pager\Contracts\IWrapperDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataConverterPager.cs" />
     <Compile Include="QueryBuilder\EnumerationMode.cs" />
+    <Compile Include="QueryBuilder\MsQueryBuilderTypedExtentions.cs" />
     <Compile Include="QueryBuilder\QueryBuilder.cs" />
     <Compile Include="QueryBuilder\MsQueryBuilderExtentions.cs" />
     <Compile Include="QueryBuilder\QueryEagerEnumerator.cs" />

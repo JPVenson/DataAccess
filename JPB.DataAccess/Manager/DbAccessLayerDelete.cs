@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Manager
                 s.ExecuteNonQuery(deleteCommand);
             });
         }
-
+        
         internal static IDbCommand CreateDelete<T>(T entry, IDatabase db)
         {
             Type type = typeof(T);
