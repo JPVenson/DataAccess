@@ -122,6 +122,7 @@ namespace JPB.DataAccess.Manager
 
             var procedureProcessor = new ProcedureProcessor(sb.ToString());
             procedureProcessor.QueryParameters = procParams;
+            ValidateEntity(procParam);
             return procedureProcessor.CreateCommand(procParam, db);
         }
 

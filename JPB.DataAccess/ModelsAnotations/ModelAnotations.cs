@@ -27,6 +27,10 @@ namespace JPB.DataAccess.ModelsAnotations
     //    public DbAccessType DbQuery { get; set; }
     //}
 
+    /// <summary>
+    /// Marks a Method as an Factory mehtod
+    /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public class DeleteFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
     {
@@ -227,7 +231,7 @@ namespace JPB.DataAccess.ModelsAnotations
         /// </summary>
         /// <param name="fieldName"></param>
         public FromXmlAttribute(string fieldName)
-            :base(fieldName)
+            : base(fieldName)
         {
             FieldName = fieldName;
         }
@@ -255,6 +259,11 @@ namespace JPB.DataAccess.ModelsAnotations
                     throw new ArgumentException("Not able to assgin value from IloadFromXMLStrategy");
                 _loadFromXmlStrategy = value;
             }
+        }
+
+        internal ILoadFromXmlStrategy CreateLoader()
+        {
+            return (ILoadFromXmlStrategy)Activator.CreateInstance(_loadFromXmlStrategy);
         }
     }
 

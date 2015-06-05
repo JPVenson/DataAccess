@@ -42,6 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -74,6 +75,7 @@
     <Compile Include="Manager\DbAccessLayerInsert.cs" />
     <Compile Include="Manager\DbAccessLayerSelect.cs" />
     <Compile Include="Manager\DBAccessLayerUpdate.cs" />
+    <Compile Include="Manager\DbAccessLayerValidation.cs" />
     <Compile Include="Manager\DbAccessType.cs" />
     <Compile Include="Manager\PreDefinedProviderCollection.cs" />
     <Compile Include="Contacts\IValueConverter.cs" />

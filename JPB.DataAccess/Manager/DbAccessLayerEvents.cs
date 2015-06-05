@@ -17,11 +17,19 @@ namespace JPB.DataAccess.Manager
     /// <param name="e"></param>
     public delegate void DatabaseActionHandler(object sender, DatabaseActionEvent e);
 
+    /// <summary>
+    /// A database operation is done
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public delegate void DatabaseFailedActionHandler(object sender, Exception e);
+
     partial class DbAccessLayer
     {
         /// <summary>
         /// Should raise Instance bound Events
         /// </summary>
+        [Obsolete]
         public bool RaiseEvents { get; set; }
 
         /// <summary>
@@ -33,8 +41,9 @@ namespace JPB.DataAccess.Manager
         public static event DatabaseActionHandler OnSelect;
         public static event DatabaseActionHandler OnUpdate;
         public static event DatabaseActionHandler OnInsert;
+        public static event DatabaseFailedActionHandler OnException;
 
-        protected static void RaiseDelete(object sender, IDbCommand query, IDatabase source)
+        protected internal static void RaiseDelete(object sender, IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;
@@ -44,7 +53,17 @@ namespace JPB.DataAccess.Manager
                 handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
-        protected static void RaiseSelect(IDbCommand query, IDatabase source)
+        protected internal static void RaiseException(object sender, Exception ex)
+        {
+            if (!RaiseStaticEvents)
+                return;
+
+            var handler = OnException;
+            if (handler != null)
+                handler.BeginInvoke(sender, ex, s => { }, null);
+        }
+
+        protected internal static void RaiseSelect(IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;
@@ -53,7 +72,7 @@ namespace JPB.DataAccess.Manager
                 handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
-        protected static void RaiseUpdate(object sender, IDbCommand query, IDatabase source)
+        protected internal static void RaiseUpdate(object sender, IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;
@@ -63,7 +82,7 @@ namespace JPB.DataAccess.Manager
                 handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
         }
 
-        protected static void RaiseInsert(object sender, IDbCommand query, IDatabase source)
+        protected internal static void RaiseInsert(object sender, IDbCommand query, IDatabase source)
         {
             if (!RaiseStaticEvents)
                 return;

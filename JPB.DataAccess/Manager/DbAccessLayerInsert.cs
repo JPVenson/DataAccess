@@ -147,6 +147,7 @@ namespace JPB.DataAccess.Manager
 
             string[] orignialProps = type.GetPropertysViaRefection(ignore).ToArray();
 
+            ValidateEntity(entry);
             return db.CreateCommandWithParameterValues(type, query, orignialProps, entry);
         }
 

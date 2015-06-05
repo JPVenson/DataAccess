@@ -28,6 +28,7 @@ namespace JPB.DataAccess.Manager
             Type type = typeof(T);
             string proppk = type.GetPK();
             string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @0";
+            ValidateEntityPk(entry);
             return db.CreateCommandWithParameterValues(query, new object[] { entry.GetPK<T, long>() });
         }
 
