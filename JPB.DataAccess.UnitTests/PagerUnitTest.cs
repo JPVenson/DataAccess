@@ -21,7 +21,7 @@ namespace JPB.DataAccess.UnitTests
             var dbType = DbAccessType.MsSql;
             var dbname = "testDB";
 
-            expectWrapper = new DbAccessLayer(dbType, CheckWrapperBaseTests.ConnectionString);
+            expectWrapper = new DbAccessLayer(dbType, CheckWrapperBaseTests.SConnectionString);
             Assert.AreEqual(expectWrapper.DbAccessType, dbType);
 
             var checkDatabase = expectWrapper.CheckDatabase();
@@ -37,7 +37,7 @@ namespace JPB.DataAccess.UnitTests
             expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
             expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
 
-            expectWrapper = new DbAccessLayer(dbType, string.Format(CheckWrapperBaseTests.ConnectionString + "Initial Catalog={0};", dbname));
+            expectWrapper = new DbAccessLayer(dbType, string.Format(CheckWrapperBaseTests.SConnectionString + "Initial Catalog={0};", dbname));
 
             expectWrapper.ExecuteGenericCommand(
                 expectWrapper.Database.CreateCommand(
@@ -84,7 +84,7 @@ namespace JPB.DataAccess.UnitTests
             #region CheckEvents
             var triggeredNewPageLoaded = false;
             var triggeredNewPageLoading = false;
-
+            
             pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
             pager.NewPageLoading += () => triggeredNewPageLoading = true;
 

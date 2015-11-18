@@ -59,6 +59,24 @@ namespace UnitTestProject1
         public string UserName { get; set; }
     }
 
+    public class ConfigLessUser
+    {
+        public long PropertyA { get; set; }
+        public string PropertyB { get; set; }
+    }
+
+    public class UsersWithStaticInsert
+    {
+        public long User_ID { get; set; }
+        public string UserName { get; set; }
+
+        [InsertFactoryMethod]
+        public string Insert()
+        {
+            return string.Format("INSERT INTO {0} VALUES ('{1}')", UsersMeta.UserTable, this.UserName);
+        }
+    }
+
     [ForModel(UsersMeta.UserTable)]
     public class Users_PK
     {
@@ -119,7 +137,7 @@ namespace UnitTestProject1
         public long UserId { get; set; }
         public string UserName { get; set; }
 
-        [SelectFactoryMehtod]
+        [SelectFactoryMethod]
         public static string GetSelectStatement()
         {
             return UsersMeta.SelectStatement;
@@ -135,7 +153,7 @@ namespace UnitTestProject1
         public long UserId { get; set; }
         public string UserName { get; set; }
 
-        [SelectFactoryMehtod]
+        [SelectFactoryMethod]
         public static IQueryFactoryResult GetSelectStatement()
         {
             return new QueryFactoryResult(UsersMeta.SelectStatement);
@@ -151,7 +169,7 @@ namespace UnitTestProject1
         public long UserId { get; set; }
         public string UserName { get; set; }
 
-        [SelectFactoryMehtod]
+        [SelectFactoryMethod]
         public static IQueryFactoryResult GetSelectStatement(int whereID)
         {
             return new QueryFactoryResult(UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA", new QueryParameter("paramA", whereID));
