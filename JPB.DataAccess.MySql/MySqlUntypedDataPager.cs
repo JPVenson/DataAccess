@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
+using MySql.Data.MySqlClient;
 
 namespace JPB.DataAccess.MySql
 {
@@ -63,18 +65,40 @@ namespace JPB.DataAccess.MySql
 
             var pk = TargetType.GetPK();
 
+            var targetQuery = BaseQuery;
+            if (targetQuery == null)
+            {
+                targetQuery = dbAccess.Database.CreateCommand(TargetType.GetTableName());
+            }
+
+            IDbCommand FirstIdCommand = targetQuery;
+            if (AppendedComands.Any())
+            {
+                FirstIdCommand = this.AppendedComands.Aggregate(FirstIdCommand,
+                    (e, f) => DbAccessLayer.ConcatCommands(dbAccess.Database, e, f));
+            }
+
+
             if (FirstID == -1 || LastID == -1)
             {
-                var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long), "SELECT " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk + " LIMIT 1").FirstOrDefault();
+
+                var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long),
+                    DbAccessLayer.InsertCommands(dbAccess.Database,
+                        ("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
                 if (firstOrDefault != null)
                     FirstID = (long)firstOrDefault;
 
-                var lastId = dbAccess.RunPrimetivSelect(typeof(long), "SELECT " + pk + " FROM " + TargetType.GetTableName() + " ORDER BY " + pk + " DESC LIMIT 1").FirstOrDefault();
+                var lastId = dbAccess.RunPrimetivSelect(typeof(long),
+                    DbAccessLayer.InsertCommands(dbAccess.Database,
+                    ("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " DESC LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
                 if (lastId != null)
                     LastID = (long)lastId;
             }
 
-            var maxItems = dbAccess.RunPrimetivSelect(typeof(long), "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName()).FirstOrDefault();
+            var maxItems = dbAccess.RunPrimetivSelect(typeof(long),
+    DbAccessLayer.InsertCommands(dbAccess.Database,
+    ("SELECT COUNT( * ) AS NR FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
+
             if (maxItems != null)
             {
                 long parsedCount;
@@ -82,11 +106,20 @@ namespace JPB.DataAccess.MySql
                 MaxPage = ((long)parsedCount) / PageSize;
             }
 
-            var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
-            {
-                PagedRows = CurrentPage * PageSize,
-                PageSize
-            });
+            var realSelect = DbAccessLayer.InsertCommands(dbAccess.Database,
+                ("SELECT * FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand);
+
+            var selectWhere = dbAccess.SelectNative(this.TargetType, realSelect, new
+                    {
+                        PagedRows = CurrentPage * PageSize,
+                        PageSize
+                    });
+
+            //var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
+            //{
+            //    PagedRows = CurrentPage * PageSize,
+            //    PageSize
+            //});
 
             foreach (var item in selectWhere)
             {
@@ -99,6 +132,8 @@ namespace JPB.DataAccess.MySql
         {
             get { return this.CurrentPageItems; }
         }
+
+        public IDbCommand BaseQuery { get; set; }
 
         public ICollection<T> CurrentPageItems { get; protected set; }
 

@@ -319,6 +319,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                     }
                     break;
                 case CommandType.Text:
+                case CommandType.TableDirect:
                     foreach (var sp in sc.Parameters.Cast<SqlParameter>())
                     {
                         sql.AppendLine("DECLARE " + " @" + sp.ParameterName + " " + sp.SqlDbType + " = " + QueryDebugger.ParameterValue(sp) + ";");

@@ -199,7 +199,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
                 createFactoryMethod.Name = "Invoke" + TargetName;
                 createFactoryMethod.ReturnType = new CodeTypeReference(typeof(QueryFactoryResult));
                 createFactoryMethod.CustomAttributes.Add(
-                    new CodeAttributeDeclaration(typeof(SelectFactoryMehtodAttribute).FullName));
+                    new CodeAttributeDeclaration(typeof(SelectFactoryMethodAttribute).FullName));
 
                 //Create the Params
                 string query = "EXEC " + TargetName;

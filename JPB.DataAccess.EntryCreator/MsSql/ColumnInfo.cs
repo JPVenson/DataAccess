@@ -10,7 +10,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
     {
         private SqlDbType _targetType2;
 
-        [SelectFactoryMehtod()]
+        [SelectFactoryMethod()]
         public static IQueryFactoryResult SelectColumns(string tableName)
         {
             return new QueryFactoryResult("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND TABLE_CATALOG = @database", new[]

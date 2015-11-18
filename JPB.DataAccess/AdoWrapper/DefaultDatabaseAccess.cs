@@ -520,7 +520,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             try
             {
-                Connect();
+                Connect(IsolationLevel.ReadUncommitted);
 
                 action(this);
             }

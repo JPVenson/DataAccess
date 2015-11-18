@@ -97,7 +97,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
         public void LoadPage(DbAccessLayer dbAccess)
         {
-            List<dynamic> selectWhere = null;
+            dynamic[] selectWhere = null;
             dbAccess.Database.RunInTransaction(s =>
             {
                 IDbCommand finalAppendCommand = null;
@@ -107,6 +107,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 }
                 else
                 {
+                    if(BaseQuery == null)
+                    {
+                        BaseQuery = DbAccessLayer.CreateSelect<T>(dbAccess.Database);
+                    }
+
                     finalAppendCommand = BaseQuery;
                 }
 
@@ -119,12 +124,15 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
                 var pk = TargetType.GetPK();
 
-                var selectMaxCommand = dbAccess.Query().Query("WITH CTE AS")
+                var selectMaxCommand = dbAccess
+                    .Query()
+                    .Query("WITH CTE AS")
                     .InBracket(query =>
                     {
                         query.Query(finalAppendCommand);
                     })
-                    .Query("SELECT COUNT( * ) FROM CTE")
+                    .LineBreak()
+                    .Query("SELECT COUNT(1) FROM CTE")
                     .Compile();
 
                 ////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
