@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess;
 using JPB.DataAccess.Helper;
-using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
 {
@@ -128,7 +124,7 @@ namespace JPB.DataAccess.Manager
 
         private static IEnumerable<IQueryParameter> CreateProcedureHeader(Type t)
         {
-            return t.GetProperties().Select(propertyInfo => new QueryParameter(t.MapEntiysPropToSchema(propertyInfo.Name), propertyInfo.PropertyType));
+            return ConfigHelper.GetPropertiesEx(t).Select(propertyInfo => new QueryParameter(t.MapEntiysPropToSchema(propertyInfo.Name), propertyInfo.PropertyType));
         }
 
         interface IProcedureProcessor

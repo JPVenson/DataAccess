@@ -41,7 +41,7 @@ namespace JPB.DataAccess.DebuggerHelper
             DebuggerQuery = debugquery.ToString();
             SqlQuery = formartCommandToQuery;
         }
-        
+
         static QueryDebugger()
         {
             //Store assembly to exclude API calls
@@ -133,19 +133,16 @@ namespace JPB.DataAccess.DebuggerHelper
             if (!string.IsNullOrEmpty(command.Connection.Database))
                 sql.AppendLine("USE " + command.Connection.Database + ";");
 
-            sql.Append(command.CommandText);
-
             foreach (IDataParameter parameter in command.Parameters)
             {
-                sql.Replace(parameter.ParameterName, ParameterValue(parameter));
+                sql.AppendFormat("DECLARE {0} {1} = ", parameter.ParameterName, 0, ParameterValue(parameter));
+                sql.AppendLine();
             }
 
-            return sql.ToString();
-        }
 
-        public async void AwaitTask()
-        {
-            await this._wokerTask;
+            sql.Append(command.CommandText);
+
+            return sql.ToString();
         }
 
         /// <summary>

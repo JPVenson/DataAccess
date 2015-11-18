@@ -75,15 +75,6 @@ namespace JPB.DataAccess.ModelsAnotations
     }
 
     /// <summary>
-    ///     Marks a mehtod as an Factory method
-    ///     The method must be Public | Static and return a <code>string</code> or <code>IQueryFactoryResult</code>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class SelectFactoryMehtodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
-    {
-    }
-
-    /// <summary>
     ///     Provieds a Query ( parametes not used ) for selection
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
@@ -132,7 +123,7 @@ namespace JPB.DataAccess.ModelsAnotations
     public class ForeignKeyAttribute : InsertIgnore
     {
         public string KeyName { get; set; }
-    }
+    }   
 
     /// <summary>
     /// Indicates that this property is a Primary key

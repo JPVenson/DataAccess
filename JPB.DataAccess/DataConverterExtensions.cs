@@ -22,6 +22,8 @@ using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.DbCollection;
+using System.Data.SqlTypes;
 
 #endregion
 
@@ -118,7 +120,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static PropertyInfo GetParamater(this object source, string name)
         {
-            return ReflectionHelpers.GetProperties(source.GetType()).FirstOrDefault(s => s.Name == name);
+            return ConfigHelper.GetPropertiesEx(source.GetType()).FirstOrDefault(s => s.Name == name);
         }
 
         /// <summary>
@@ -160,7 +162,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static string GetPKPropertyName(this Type type)
         {
-            PropertyInfo name = ReflectionHelpers.GetProperties(type).FirstOrDefault(CheckForPK);
+            PropertyInfo name = ConfigHelper.GetPropertiesEx(type).FirstOrDefault(CheckForPK);
             return name == null ? null : name.Name;
         }
 
@@ -171,8 +173,8 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static string GetPK(this Type type)
         {
-            var name = GetPKPropertyName(type);
-            return MapEntiysPropToSchema(type, name == null ? null : name);
+            PropertyInfo name = ConfigHelper.GetPropertiesEx(type).FirstOrDefault(CheckForPK);
+            return MapEntiysPropToSchema(type, name == null ? null : name.Name);
         }
 
         /// <summary>
@@ -182,7 +184,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static PropertyInfo[] GetFKs(this Type type)
         {
-            return ReflectionHelpers.GetProperties(type).Where(CheckForFK).ToArray();
+            return ConfigHelper.GetPropertiesEx(type).Where(CheckForFK).ToArray();
         }
 
         /// <summary>
@@ -193,7 +195,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static string GetFK(this Type type, Type fkType)
         {
-            PropertyInfo prop = ReflectionHelpers.GetProperties(type).FirstOrDefault(info =>
+            PropertyInfo prop = ConfigHelper.GetPropertiesEx(type).FirstOrDefault(info =>
             {
                 if (!info.GetGetMethod().IsVirtual)
                 {
@@ -216,7 +218,7 @@ namespace JPB.DataAccess
         public static string GetFK(this Type type, string name)
         {
             name = type.ReMapSchemaToEntiysProp(name);
-            PropertyInfo prop = ReflectionHelpers.GetProperties(type).FirstOrDefault(info => CheckForFK(info, name));
+            PropertyInfo prop = ConfigHelper.GetPropertiesEx(type).FirstOrDefault(info => CheckForFK(info, name));
             return prop == null ? null : prop.Name;
         }
 
@@ -266,10 +268,23 @@ namespace JPB.DataAccess
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static long GetPK<T>(this T source)
+        public static object GetPK<T>(this T source)
         {
-            return GetPK<T, long>(source);
+            return GetPK<T, object>(source);
         }
+
+        /// <summary>
+        ///     Gets the PK value of the Object
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static Type GetPKType<T>(this T source)
+        {
+            string pk = source.GetType().GetPKPropertyName();
+            return source.GetType().GetProperty(pk).PropertyType;
+        }
+
 
         /// <summary>
         /// Gets the Primary key of <typeparam name="T"></typeparam> and convert it the <typeparam name="E"></typeparam>
@@ -280,8 +295,8 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static E GetPK<T, E>(this T source)
         {
-            string pk = source.GetType().GetPKPropertyName();
-            return (E)source.GetType().GetProperty(pk).GetConvertedValue(source);
+            string pk = typeof(T).GetPKPropertyName();
+            return (E)ConfigHelper.GetPropertiesEx(typeof(T)).First(s => s.Name == pk).GetConvertedValue(source);
         }
 
 
@@ -294,7 +309,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
         {
-            foreach (var s1 in ReflectionHelpers.GetProperties(type))
+            foreach (var s1 in ConfigHelper.GetPropertiesEx(type))
             {
                 if (ignore.Contains(s1.Name))
                     continue;
@@ -341,7 +356,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static string MapEntiysPropToSchema(this Type type, string prop)
         {
-            return (from propertyInfo in ReflectionHelpers.GetProperties(type)
+            return (from propertyInfo in ConfigHelper.GetPropertiesEx(type)
                     where propertyInfo.Name == prop
                     let formodle =
                             propertyInfo.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel
@@ -378,9 +393,9 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static string ReMapSchemaToEntiysProp(this Type type, string prop)
         {
-            foreach (var propertyInfo in from propertyInfo in ReflectionHelpers.GetProperties(type)
+            foreach (var propertyInfo in from propertyInfo in ConfigHelper.GetPropertiesEx(type)
                                          let customAttributes =
-                                                                               propertyInfo.GetCustomAttributes()
+                                                 propertyInfo.GetCustomAttributes()
                                                  .FirstOrDefault(s => s is ForModel) as ForModel
                                          where
                                              customAttributes != null &&
@@ -391,7 +406,7 @@ namespace JPB.DataAccess
         }
 
         /// <summary>
-        /// Checks the <param name="info"></param> declaring type to be an List
+        /// Checks the info declaring type to be an List
         /// </summary>
         /// <param name="info"></param>
         /// <returns></returns>
@@ -423,7 +438,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static PropertyInfo[] GetNavigationProps(this Type type)
         {
-            return ReflectionHelpers.GetProperties(type).Where(s => s.GetGetMethod(false).IsVirtual).ToArray();
+            return ConfigHelper.GetPropertiesEx(type).Where(s => s.GetGetMethod(false).IsVirtual).ToArray();
         }
 
         /// <summary>
@@ -459,7 +474,6 @@ namespace JPB.DataAccess
 
             //Get nav Propertys
 
-
             foreach (var propertyInfo in GetNavigationProps(source.GetType()))
             {
                 //var firstOrDefault = source.GetFK<long>(propertyInfo.ClassName);
@@ -473,7 +487,7 @@ namespace JPB.DataAccess
                 Type targetType = null;
                 if (CheckForListInterface(propertyInfo))
                 {
-                    long pk = source.GetPK();
+                    object pk = source.GetPK();
                     var targetName = firstOrDefault.KeyName;
                     targetType = propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 
@@ -500,17 +514,15 @@ namespace JPB.DataAccess
                         continue;
 
                     targetType = propertyInfo.PropertyType;
-                    sqlCommand = DbAccessLayer.CreateSelect(targetType, accessLayer, (long)fkproperty);
+                    sqlCommand = DbAccessLayer.CreateSelect(targetType, accessLayer, (object)fkproperty);
                 }
 
                 var orDefault = DbAccessLayer.RunSelect(targetType, accessLayer, sqlCommand);
 
+                //result is list and property is list
                 if (CheckForListInterface(orDefault) && CheckForListInterface(propertyInfo))
                 {
-                    //MethodInfo castMethod =
-                    //    typeof(StaticHelper).GetMethod("CastToEnumerable").MakeGenericMethod(targetType);
-
-                    var constructorInfo = typeof(ReposetoryCollection<>).MakeGenericType(targetType).GetConstructor(new[] { typeof(IEnumerable) });
+                    var constructorInfo = typeof(DbCollection<>).MakeGenericType(targetType).GetConstructor(new[] { typeof(IEnumerable) });
 
                     Debug.Assert(constructorInfo != null, "constructorInfo != null");
                     var reproCollection = constructorInfo.Invoke(new object[] { orDefault });
@@ -565,20 +577,20 @@ namespace JPB.DataAccess
             var listofpropertys = new Dictionary<string, object>();
             var type = instance.GetType();
 
-            var propertys = ReflectionHelpers.GetProperties(type);
+            var propertys = ConfigHelper.GetPropertiesEx(type);
             var instanceOfFallbackList = new Dictionary<string, object>();
 
             for (int i = 0; i < reader.FieldCount; i++)
                 listofpropertys.Add(ReMapSchemaToEntiysProp(type, reader.GetName(i)), reader.GetValue(i));
 
-            listofpropertys.AsParallel().ForAll(item =>
+            foreach (var item in listofpropertys)
             {
                 var property = propertys.FirstOrDefault(s => s.Name == item.Key);
                 if (property != null)
                 {
                     var value = item.Value;
-                    object resultValue = null;
-                    var any = property.GetCustomAttributes().FirstOrDefault(s => s is ValueConverterAttribute) as ValueConverterAttribute;
+                    var attributes = property.GetCustomAttributes();
+                    var any = attributes.FirstOrDefault(s => s is ValueConverterAttribute) as ValueConverterAttribute;
 
                     //Should the SQL value be converted
                     if (any != null)
@@ -587,10 +599,10 @@ namespace JPB.DataAccess
                         var valueConverter = any.CreateConverter();
                         value = valueConverter.Convert(value, property.PropertyType, any.Parameter,
                             CultureInfo.CurrentCulture);
-                    }
+                    }                 
 
                     var isXmlField =
-                        property.GetCustomAttributes().FirstOrDefault(s => s is FromXmlAttribute) as FromXmlAttribute;
+                        attributes.FirstOrDefault(s => s is FromXmlAttribute) as FromXmlAttribute;
 
                     //should the Content be considerd as XML text?
                     if (isXmlField != null)
@@ -599,41 +611,34 @@ namespace JPB.DataAccess
                         var xmlStream = value.ToString();
                         if (String.IsNullOrEmpty(xmlStream))
                         {
-                            //There is no source so let the propert as is
-                            //Maybe set it to null to indicate that the source is allso null
-                            return;
+                            continue;
                         }
-                        if (isXmlField.LoadFromXmlStrategy != null)
+
+                        //Check for List
+                        //if this is a list we are expecting other entrys inside
+                        if (CheckForListInterface(property))
                         {
-                            resultValue = isXmlField.CreateLoader().LoadFromXml(xmlStream);
+                            //target Property is of type list
+                            //so expect a xml valid list Take the first element and expect the propertys inside this first element
+                            var record = XmlDataRecord.TryParse(xmlStream, property.PropertyType.GetGenericArguments().FirstOrDefault());
+                            var xmlDataRecords = record.CreateListOfItems();
+
+                            var genericArguments = property.PropertyType.GetGenericArguments().FirstOrDefault();
+                            var enumerableOfItems = xmlDataRecords.Select(xmlDataRecord => SetPropertysViaReflection(genericArguments, xmlDataRecord)).ToList();
+
+                            var caster = typeof(ReposetoryCollection<>).MakeGenericType(genericArguments).GetConstructor(new[] { typeof(IEnumerable) });
+
+                            Debug.Assert(caster != null, "caster != null");
+
+                            var castedList = caster.Invoke(new object[] { enumerableOfItems });
+                            property.SetValue(instance, castedList);
                         }
                         else
                         {
-                            //Check for List
-                            //if this is a list we are expecting other entrys inside
-                            if (CheckForListInterface(property))
-                            {
-                                //target Property is of type list
-                                //so expect a xml valid list Take the first element and expect the propertys inside this first element
-                                var record = XmlDataRecord.TryParse(xmlStream, property.PropertyType.GetGenericArguments().FirstOrDefault());
-                                var xmlDataRecords = record.CreateListOfItems();
+                            //the t
+                            var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType, XmlDataRecord.TryParse(xmlStream, property.PropertyType));
 
-                                var genericArguments = property.PropertyType.GetGenericArguments().FirstOrDefault();
-                                var enumerableOfItems = xmlDataRecords.Select(xmlDataRecord => SetPropertysViaReflection(genericArguments, xmlDataRecord)).ToList();
-
-                                var caster = typeof(ReposetoryCollection<>).MakeGenericType(genericArguments).GetConstructor(new[] { typeof(IEnumerable) });
-
-                                Debug.Assert(caster != null, "caster != null");
-
-                                var castedList = caster.Invoke(new object[] { enumerableOfItems });
-                                property.SetValue(instance, castedList);
-                            }
-                            else
-                            {
-                                //the t
-                                var xmlSerilizedProperty = SetPropertysViaReflection(property.PropertyType, XmlDataRecord.TryParse(xmlStream, property.PropertyType));
-                                property.SetValue(instance, xmlSerilizedProperty);
-                            }
+                            property.SetValue(instance, xmlSerilizedProperty);
                         }
                     }
                     else if (value is DBNull || value == null)
@@ -642,9 +647,9 @@ namespace JPB.DataAccess
                     }
                     else
                     {
-                        resultValue = ChangeType(value, property.PropertyType);
+                        var changedType = ChangeType(value, property.PropertyType);
+                        property.SetValue(instance, changedType, null);
                     }
-                    property.SetValue(instance, resultValue, null);
                 }
                 //This variable is null if we tried to find a property with the LoadNotImplimentedDynamicAttribute but did not found it
                 else if (instanceOfFallbackList != null)
@@ -674,7 +679,7 @@ namespace JPB.DataAccess
                         }
                     }
                 }
-            });
+            }
 
             if (reader is IDisposable)
             {
@@ -745,8 +750,8 @@ namespace JPB.DataAccess
         /// <param name="fullLoaded">Is loaded by a Ctor</param>
         /// <returns></returns>
         public static object CreateInstance(this Type type, IDataRecord reader, out bool fullLoaded)
-        {
-            var constructorInfos = type.GetConstructors();
+        {            
+            var constructorInfos = ConfigHelper.ReflecionStore.GetOrCreateClassInfoCache(type).ConstructorInfoCaches.Select(f => f.MethodInfo);
 
             var constructor = constructorInfos.FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is ObjectFactoryMethodAttribute)) ??
                 constructorInfos.FirstOrDefault(s =>
@@ -826,7 +831,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static IEnumerable<string> GetPropertysViaRefection(this Type type, params string[] ignore)
         {
-            return ReflectionHelpers.GetProperties(type).Select(s => s.Name).Except(ignore);
+            return ConfigHelper.GetPropertiesEx(type).Select(s => s.Name).Except(ignore);
         }
     }
 }

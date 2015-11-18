@@ -177,8 +177,22 @@ namespace JPB.DataAccess.QueryBuilder
             }
 
             query.Add(new GenericQueryPart(prefix));
-            cteAction(query);
+            query.InBracket(cteAction);
             query.Add(new GenericQueryPart(""));
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a Common Table Expression that selects a Specific type
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="target"></param>
+        /// <param name="cteName"></param>
+        /// <param name="useStarOperator"></param>
+        /// <returns></returns>
+        public static QueryBuilder LineBreak(this QueryBuilder query)
+        {
+            query.Query(Environment.NewLine);
             return query;
         }
 
@@ -544,11 +558,11 @@ namespace JPB.DataAccess.QueryBuilder
                     {
                         int index = -1;
                         var select = "SELECT";
-                        var part = query.Parts.FirstOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(@select, System.StringComparison.Ordinal)) != -1);
+                        var part = query.Parts.LastOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(@select, System.StringComparison.Ordinal)) != -1);
 
                         if (index == -1 || part == null)
-                            return query;
-
+                            throw new NotSupportedException("Please create a Select Statement befor calling this");
+                            
                         part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
                     }
                     break;

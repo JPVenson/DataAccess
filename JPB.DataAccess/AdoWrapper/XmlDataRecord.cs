@@ -71,7 +71,7 @@ namespace JPB.DataAccess.AdoWrapper
 
             var mapEntiysPropToSchema = this._target.ReMapSchemaToEntiysProp(name);
 
-            var firstOrDefault = _target.GetProperties().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
+            var firstOrDefault = ConfigHelper.GetPropertiesEx(_target).FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
             if (firstOrDefault == null)
                 return null;
 

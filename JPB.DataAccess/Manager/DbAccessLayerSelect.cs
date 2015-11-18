@@ -26,7 +26,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="type"></param>
         /// <param name="pk"></param>
         /// <returns></returns>
-        public object Select(Type type, long pk)
+        public object Select(Type type, object pk)
         {
             return Select(type, pk, Database);
         }
@@ -38,7 +38,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="pk"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T Select<T>(long pk)
+        public T Select<T>(object pk)
         {
             return (T)Select(typeof(T), pk);
         }
@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="pk"></param>
         /// <param name="db"></param>
         /// <returns></returns>
-        protected static object Select(Type type, long pk, IDatabase db)
+        protected static object Select(Type type, object pk, IDatabase db)
         {
             return Select(type, db, CreateSelect(type, db, pk)).FirstOrDefault();
         }
@@ -64,7 +64,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="db"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        protected static T Select<T>(long pk, IDatabase db)
+        protected static T Select<T>(object pk, IDatabase db)
         {
             //return Select<T>(db, CreateSelect<T>(db, pk)).FirstOrDefault();
             return (T)Select(typeof(T), pk, db);
@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="type"></param>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public List<object> Select(Type type, params object[] parameter)
+        public object[] Select(Type type, params object[] parameter)
         {
             return Select(type, Database, parameter);
         }
@@ -88,10 +88,10 @@ namespace JPB.DataAccess.Manager
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public List<T> Select<T>(params object[] parameter)
+        public T[] Select<T>(params object[] parameter)
         {
-            List<object> objects = Select(typeof(T), parameter);
-            return objects.Cast<T>().ToList();
+            object[] objects = Select(typeof(T), parameter);
+            return objects.Cast<T>().ToArray();
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="db"></param>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        protected static List<object> Select(Type type, IDatabase db, params object[] parameter)
+        protected static object[] Select(Type type, IDatabase db, params object[] parameter)
         {
             return Select(type, db, CreateSelectQueryFactory(type, db, parameter));
         }
@@ -112,9 +112,9 @@ namespace JPB.DataAccess.Manager
         /// <param name="db"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        protected static List<T> Select<T>(IDatabase db)
+        protected static T[] Select<T>(IDatabase db)
         {
-            return Select(typeof(T), db).Cast<T>().ToList();
+            return Select(typeof(T), db).Cast<T>().ToArray();
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="db"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        protected static List<object> Select(Type type, IDatabase db, IDbCommand command)
+        protected static object[] Select(Type type, IDatabase db, IDbCommand command)
         {
             return SelectNative(type, db, command);
         }
@@ -135,9 +135,9 @@ namespace JPB.DataAccess.Manager
         /// <param name="db"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        protected static List<T> Select<T>(IDatabase db, IDbCommand command)
+        protected static T[] Select<T>(IDatabase db, IDbCommand command)
         {
-            return Select(typeof(T), db, command).Cast<T>().ToList();
+            return Select(typeof(T), db, command).Cast<T>().ToArray();
         }
 
         #endregion
@@ -219,9 +219,9 @@ namespace JPB.DataAccess.Manager
             //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
 
             MethodInfo[] methods =
-                type.GetMethods()
+                ConfigHelper.GetMethods(type)
                     .Where(s => !s.IsConstructor && !s.IsSpecialName)
-                    .Where(s => s.GetCustomAttributes(false).Any(e => e is SelectFactoryMehtodAttribute))
+                    .Where(s => s.GetCustomAttributes(false).Any(e => e is SelectFactoryMethodAttribute))
                     .ToArray();
 
             if (methods.Any())
@@ -285,7 +285,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="db"></param>
         /// <param name="pk"></param>
         /// <returns></returns>
-        public static IDbCommand CreateSelect(Type type, IDatabase db, long pk)
+        public static IDbCommand CreateSelect(Type type, IDatabase db, object pk)
         {
             string proppk = type.GetPK();
             string query = CreateSelectQueryFactory(type, db).CommandText + " WHERE " + proppk + " = @pk";
@@ -301,7 +301,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="pk"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IDbCommand CreateSelect<T>(IDatabase db, long pk)
+        public static IDbCommand CreateSelect<T>(IDatabase db, object pk)
         {
             return CreateSelect(typeof(T), db, pk);
         }
@@ -349,7 +349,7 @@ namespace JPB.DataAccess.Manager
             RaiseSelect(query, database);
             return
                 database.EnumerateDataRecords(query, true)
-                    .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(type, dataRecord))
+                    .Select(type.SetPropertysViaReflection)
                     .ToList();
         }
 
@@ -589,9 +589,9 @@ namespace JPB.DataAccess.Manager
         /// <param name="query"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> SelectNative<T>(string query) where T : class
+        public T[] SelectNative<T>(string query) where T : class
         {
-            return SelectNative(typeof(T), query).Cast<T>().ToList();
+            return SelectNative(typeof(T), query).Cast<T>().ToArray();
         }
 
         /// <summary>
@@ -600,7 +600,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="type"></param>
         /// <param name="query"></param>
         /// <returns></returns>
-        public List<object> SelectNative(Type type, string query)
+        public object[] SelectNative(Type type, string query)
         {
             return Select(type, Database, DbAccessLayerHelper.CreateCommand(Database, query));
         }
@@ -614,7 +614,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="command"></param>
         /// <param name="multiRow"></param>
         /// <returns></returns>
-        public static List<object> SelectNative(Type type, IDatabase database, IDbCommand command, bool multiRow)
+        public static object[] SelectNative(Type type, IDatabase database, IDbCommand command, bool multiRow)
         {
             if (!multiRow)
                 return SelectNative(type, database, command);
@@ -634,7 +634,7 @@ namespace JPB.DataAccess.Manager
              * are loading the result an then loading based on that the items             
              */
 
-            return RunSelect(type, database, command).AsParallel().Select(s => s.LoadNavigationProps(database)).ToList();
+            return RunSelect(type, database, command).AsParallel().Select(s => s.LoadNavigationProps(database)).ToArray();
         }
 
         /// <summary>
@@ -644,14 +644,14 @@ namespace JPB.DataAccess.Manager
         /// <param name="database"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        public static List<object> SelectNative(Type type, IDatabase database, IDbCommand command)
+        public static object[] SelectNative(Type type, IDatabase database, IDbCommand command)
         {
             List<object> objects = RunSelect(type, database, command);
 
             foreach (object model in objects)
                 model.LoadNavigationProps(database);
 
-            return objects;
+            return objects.ToArray();
         }
         
         /// <summary>
@@ -660,7 +660,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="type"></param>
         /// <param name="command"></param>
         /// <returns></returns>
-        public List<object> SelectNative(Type type, IDbCommand command)
+        public object[] SelectNative(Type type, IDbCommand command)
         {
             return SelectNative(type, Database, command);
         }
@@ -672,7 +672,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="query"></param>
         /// <param name="paramenter"></param>
         /// <returns></returns>
-        public List<object> SelectNative(Type type, string query, IEnumerable<IQueryParameter> paramenter)
+        public object[] SelectNative(Type type, string query, IEnumerable<IQueryParameter> paramenter)
         {
             IDbCommand dbCommand = Database.CreateCommandWithParameterValues(query, paramenter);
             return SelectNative(type, dbCommand);
@@ -697,7 +697,7 @@ namespace JPB.DataAccess.Manager
         /// <param name="query"></param>
         /// <param name="paramenter"></param>
         /// <returns></returns>
-        public List<object> SelectNative(Type type, string query, dynamic paramenter)
+        public object[] SelectNative(Type type, string query, dynamic paramenter)
         {
             IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
             return SelectNative(type, query, enumarateFromDynamics);
@@ -713,7 +713,13 @@ namespace JPB.DataAccess.Manager
         public List<object> SelectNative(Type type, IDbCommand command, dynamic paramenter)
         {
             IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
-            return SelectNative(type, command, enumarateFromDynamics);
+
+            foreach (var enumarateFromDynamic in enumarateFromDynamics)
+            {
+                command.Parameters.AddWithValue(enumarateFromDynamic.Name, enumarateFromDynamic.Value, Database);
+            }
+
+            return RunSelect(type, command);
         }
 
         /// <summary>
@@ -723,10 +729,10 @@ namespace JPB.DataAccess.Manager
         /// <param name="paramenter"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> SelectNative<T>(string query, dynamic paramenter)
+        public T[] SelectNative<T>(string query, dynamic paramenter)
         {
-            var objects = ((List<object>)SelectNative(typeof(T), query, paramenter));
-            return objects.Cast<T>().ToList();
+            var objects = (object[])SelectNative(typeof(T), query, (dynamic)paramenter);
+            return objects.Cast<T>().ToArray();
         }
 
         #endregion

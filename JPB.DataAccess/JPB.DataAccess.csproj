@@ -53,6 +53,12 @@
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
+    <Compile Include="Config\ConfigurationResolver.cs" />
+    <Compile Include="Config\Model\AttributeInfoCache.cs" />
+    <Compile Include="Config\Model\ClassInfoCache.cs" />
+    <Compile Include="Config\Model\ConstructorInfoCache.cs" />
+    <Compile Include="Config\Model\MethodInfoCache.cs" />
+    <Compile Include="Config\Model\PropertyInfoCache.cs" />
     <Compile Include="Contacts\IDatabase.cs" />
     <Compile Include="Contacts\IDatabaseStrategy.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSql.cs" />
@@ -105,8 +111,8 @@
     <Compile Include="QueryProvider\QueryProvider.cs" />
     <Compile Include="QueryProvider\TestQueryProvider.cs" />
     <Compile Include="QueryProvider\TypeSystem.cs" />
-    <Compile Include="ReflecionStore.cs" />
-    <Compile Include="ReflectionHelpers.cs" />
+    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\ConfigHelpers.cs" />
     <Compile Include="ReposetoryCollection.cs" />
     <Compile Include="StaticHelper.cs" />
   </ItemGroup>

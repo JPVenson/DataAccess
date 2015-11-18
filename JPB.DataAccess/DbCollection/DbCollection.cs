@@ -13,9 +13,9 @@ namespace JPB.DataAccess.DbCollection
     /// <summary>
     /// WIP Observes the local collection and allows a Generic save update remove and insert
     /// </summary>
-    public class DbCollection<T> : IList<T> where T : class, INotifyPropertyChanged
+    public class DbCollection<T> : ICollection<T> where T : class, INotifyPropertyChanged
     {
-        class StateHolder
+        private class StateHolder
         {
             public StateHolder(T value, CollectionStates state)
             {
@@ -32,11 +32,8 @@ namespace JPB.DataAccess.DbCollection
             this._internalCollection.Add(new StateHolder(value, state));
         }
 
-        private readonly DbAccessLayer _layer;
-
-        internal DbCollection(DbAccessLayer layer, IEnumerable<T> subset)
+        internal DbCollection(IEnumerable<T> subset)
         {
-            _layer = layer;
             _internalCollection = new List<StateHolder>();
             _changeTracker = new Dictionary<T, List<string>>();
 
@@ -141,30 +138,13 @@ namespace JPB.DataAccess.DbCollection
             get { return false; }
         }
 
-        public int IndexOf(T item)
-        {
-            throw new NotImplementedException("This Collection has a Bag behavior and does not support this Action");
-            //return _internalCollection.IndexOf(item);
-        }
-
-        public void Insert(int index, T item)
-        {
-            throw new NotImplementedException("This Collection has a Bag behavior and does not support this Action");
-            //_internalCollection.Insert(index, item);
-        }
-
-        public void RemoveAt(int index)
-        {
-            throw new NotImplementedException("This Collection has a Bag behavior and does not support this Action");
-            //_internalCollection.RemoveAt(index);
-        }
-
         /// <summary>
         /// Sync the Changes to this Collection to the Database
         /// </summary>
-        public void SaveChanges()
+        public void SaveChanges(DbAccessLayer _layer)
         {
             var bulk = _layer.Database.CreateCommand("");
+            var removed = new List<T>();
 
             foreach (var pair in _internalCollection)
             {
@@ -176,6 +156,7 @@ namespace JPB.DataAccess.DbCollection
                         break;
                     case CollectionStates.Removed:
                         tempCommand = DbAccessLayer.CreateDelete(pair.Value, _layer.Database);
+                        removed.Add(pair.Value);
                         break;
                     case CollectionStates.Unchanged:
                         tempCommand = null;
@@ -189,7 +170,7 @@ namespace JPB.DataAccess.DbCollection
 
                 if (tempCommand != null)
                 {
-                    bulk = DbAccessLayer.MergeCommands(_layer.Database, bulk, tempCommand, true);
+                    bulk = _layer.Database.MergeCommands(bulk, tempCommand, true);
                 }
             }
 
@@ -200,7 +181,14 @@ namespace JPB.DataAccess.DbCollection
             {
                 var addedOne = added[i];
                 var newId = results[i];
-                DbAccessLayer.CopyPropertys(addedOne, newId);
+                DbAccessLayer.CopyPropertys(addedOne.Value, newId);
+            }
+
+            //Removed
+            foreach (var item in removed)
+            {
+                var fod = _internalCollection.First(s => s.Value == item);
+                _internalCollection.Remove(fod);
             }
 
             foreach (var collectionStatese in _internalCollection.ToArray())
@@ -212,7 +200,7 @@ namespace JPB.DataAccess.DbCollection
         public T this[int index]
         {
             get { return _internalCollection.ElementAt(index).Value; }
-            set { this.Insert(index, value); }
+            set { throw new NotSupportedException(); }
         }
     }
 }

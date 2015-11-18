@@ -9,6 +9,7 @@ using System.Text;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess;
 
 namespace JPB.DataAccess.Manager
 {
@@ -103,7 +104,7 @@ namespace JPB.DataAccess.Manager
                 }
                 else
                 {
-                    insertRange = MergeCommands(db, insertRange, singelCommand, true);
+                    insertRange = db.MergeCommands(insertRange, singelCommand, true);
                 }
                 toke++;
 
@@ -115,6 +116,7 @@ namespace JPB.DataAccess.Manager
                 }
             }
 
+            commands.Add(insertRange);
             return commands.ToArray();
         }
 
@@ -128,7 +130,7 @@ namespace JPB.DataAccess.Manager
         public static IDbCommand _CreateInsert(Type type, object entry, IDatabase db)
         {
             string[] ignore =
-                type.GetProperties()
+                ConfigHelper.GetPropertiesEx(type)
                     .Where(
                         s =>
                             s.CheckForPK() ||
@@ -171,7 +173,8 @@ namespace JPB.DataAccess.Manager
         /// <typeparam name="T"></typeparam>
         public static void Insert<T>(T entry, IDatabase db)
         {
-            db.Run(s => { s.ExecuteNonQuery(CreateInsert(typeof(T), entry, s)); });
+            Insert(typeof(T), entry, db);
+            //db.Run(s => { s.ExecuteNonQuery(CreateInsert(typeof(T), entry, s)); });
         }
 
         /// <summary>
@@ -189,7 +192,7 @@ namespace JPB.DataAccess.Manager
         internal static IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
         {
             var dbCommand = CreateInsert(type, entry, db);
-            return MergeCommands(db, dbCommand, db.GetlastInsertedIdCommand());
+            return db.MergeCommands(dbCommand, db.GetlastInsertedIdCommand());
         }
 
         /// <summary>
@@ -204,7 +207,7 @@ namespace JPB.DataAccess.Manager
             {
                 var mergeCommands = CreateInsertWithSelectCommand(type, entry, db);
                 RaiseInsert(entry, mergeCommands, s);
-                return Select(type, Convert.ToInt64(s.GetSkalar(mergeCommands)), s);
+                return Select(type, s.GetSkalar(mergeCommands), s);
             });
         }
 
@@ -221,8 +224,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IDbCommand ConcatCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
         {
-            var mergedCommandText = @base.CommandText + " " + last.CommandText;
-            return MergeTextToParameters(db, mergedCommandText, @base, last, autoRename);
+            return db.MergeTextToParameters(@base, last, autoRename);
         }
 
         /// <summary>
@@ -238,64 +240,10 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public static IDbCommand InsertCommands(IDatabase db, IDbCommand @base, IDbCommand toInsert, bool autoRename = false)
         {
-            var mergedCommandText = string.Format(@base.CommandText, toInsert);
-            return MergeTextToParameters(db, mergedCommandText, @base, toInsert, autoRename);
-        }
-
-        /// <summary>
-        /// Not Connection save
-        /// Must be executed inside a Valid Connection
-        /// </summary>
-        /// <param name="base"></param>
-        /// <param name="last"></param>
-        /// <param name="autoRename">allows an Automatik renaming of multible Commands</param>
-        /// <returns></returns>
-        public static IDbCommand MergeCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
-        {
-            var mergedCommandText = @base.CommandText + ";" + last.CommandText;
-            return MergeTextToParameters(db, mergedCommandText, @base, last, autoRename);
-        }
-
-        private static IDbCommand MergeTextToParameters(IDatabase db,
-            string mergedCommandText,
-            IDbCommand @base,
-            IDbCommand last,
-            bool autoRename = false)
-        {
-            var paramter = new List<IQueryParameter>();
-
-            foreach (IDataParameter parameter in @base.Parameters.Cast<IDataParameter>())
-            {
-                paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
-            }
-
-            foreach (var parameter in last.Parameters.Cast<IDataParameter>())
-            {
-                if (paramter.Any(s => s.Name == parameter.ParameterName))
-                {
-                    //Parameter is found twice in both commands so rename it
-                    if (!autoRename)
-                    {
-                        throw new ArgumentOutOfRangeException("@base", string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands", parameter.ParameterName));
-                    }
-                    else
-                    {
-                        int counter = 1;
-                        var parameterName = parameter.ParameterName;
-                        while (paramter.Any(s => s.Name == parameterName))
-                        {
-                            parameterName = string.Format("{0}_{1}", parameterName, counter);
-                        }
-
-                        parameter.ParameterName = parameterName;
-                    }
-                }
-
-                paramter.Add(new QueryParameter() { Name = parameter.ParameterName, Value = parameter.Value });
-            }
-
-            return db.CreateCommandWithParameterValues(mergedCommandText, paramter);
-        }
+            throw new NotSupportedException();
+            //var mergedCommandText = string.Format(@base.CommandText, toInsert);
+            //return db.MergeTextToParameters(mergedCommandText, @base, toInsert, autoRename);
+        }     
 
         /// <summary>
         /// Creates and Executes a Insert statement for a given <param name="entry"></param> and selectes that

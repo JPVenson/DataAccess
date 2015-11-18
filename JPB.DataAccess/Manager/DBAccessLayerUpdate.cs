@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess;
+using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.Manager
 {
@@ -67,7 +70,7 @@ namespace JPB.DataAccess.Manager
             {
                 if (!CheckRowVersion(entry))
                 {
-                    var query = CreateSelect(typeof(T), s, entry.GetPK<T, long>());
+                    var query = CreateSelect(typeof(T), s, entry.GetPK<T, object>());
                     RaiseUpdate(entry, query, s);
                     return RunSelect<T>(query).FirstOrDefault();
                 }
@@ -92,7 +95,7 @@ namespace JPB.DataAccess.Manager
             {
                 if (!CheckRowVersion(entry))
                 {
-                    var query = CreateSelect(entry.GetType(), Database, entry.GetPK<T, long>());
+                    var query = CreateSelect(entry.GetType(), Database, entry.GetPK<T, object>());
                     RaiseUpdate(entry, query, s);
                     var @select = RunSelect<T>(query).FirstOrDefault();
 
@@ -110,8 +113,8 @@ namespace JPB.DataAccess.Manager
         static internal bool CopyPropertys(object @base, object newObject)
         {
             var updated = false;
-            PropertyInfo[] propertys = @base.GetType().GetProperties();
-            foreach (PropertyInfo propertyInfo in propertys)
+            var propertys = ConfigHelper.GetPropertiesEx(@base.GetType());
+            foreach (var propertyInfo in propertys)
             {
                 object oldValue = propertyInfo.GetConvertedValue(@base);
                 object newValue = propertyInfo.GetConvertedValue(newObject);
@@ -126,6 +129,15 @@ namespace JPB.DataAccess.Manager
             return updated;
         }
 
+        public static object GetDefault(Type type)
+        {
+            if (type.IsValueType)
+            {
+                return Activator.CreateInstance(type);
+            }
+            return null;
+        }
+
         /// <summary>
         ///     Checks the Row version of the local entry and the server on
         /// </summary>
@@ -135,14 +147,13 @@ namespace JPB.DataAccess.Manager
         private bool CheckRowVersion<T>(T entry)
         {
             Type type = typeof(T);
-            PropertyInfo rowVersion =
-                entry.GetType()
-                    .GetProperties()
+            var rowVersion =
+                ConfigHelper.GetPropertiesEx(entry.GetType())
                     .FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is RowVersionAttribute));
             if (rowVersion != null)
             {
                 var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
-                if (rowversionValue != null || entry.GetPK() == 0)
+                if (rowversionValue != null || entry.GetPK() == GetDefault(entry.GetPKType()))
                 {
                     string rowVersionprop = type.MapEntiysPropToSchema(rowVersion.Name);
                     string staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " +
@@ -169,7 +180,7 @@ namespace JPB.DataAccess.Manager
             string pk = type.GetPK();
 
             string[] ignore =
-                type.GetProperties()
+                ConfigHelper.GetPropertiesEx(type)
                     .Where(s => s.CheckForPK() || s.GetCustomAttributes().Any(e => e is InsertIgnore))
                     .Select(s => s.Name)
                     .Concat(type.CreateIgnoreList())
@@ -177,18 +188,23 @@ namespace JPB.DataAccess.Manager
 
             string[] propertyInfos = DbAccessLayerHelper.CreatePropertyNames<T>(ignore).ToArray();
 
-            string prop = " SET ";
+            var queryBuilder = new QueryBuilder.QueryBuilder(db);
+            queryBuilder.QueryD("UPDATE");
+            queryBuilder.QueryD(type.GetTableName());
+            queryBuilder.QueryD("SET");
             for (int index = 0; index < propertyInfos.Length; index++)
             {
                 string info = propertyInfos[index];
-                prop = prop + (info + " = @" + index + ",");
+                var property = type.GetProperty(type.ReMapSchemaToEntiysProp(info));
+                object dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
+                queryBuilder.QueryQ(string.Format("{0} = @{1}", info, index), new QueryParameter(index.ToString(), dataValue));
+                if(index + 1 < propertyInfos.Length)
+                    queryBuilder.QueryD(",");
             }
 
-            prop = prop.Remove(prop.Length - 1);
+            queryBuilder.Where(string.Format("{0} = @pkValue", pk), new { pkValue = entry.GetPK() });
 
-            string query = "UPDATE " + type.GetTableName() + prop + " WHERE " + pk + " = " + entry.GetPK();
-
-            return db.CreateCommandWithParameterValues(query, propertyInfos, entry);
+            return queryBuilder.Compile();
         }
 
         /// <summary>

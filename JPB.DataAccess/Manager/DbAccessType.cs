@@ -6,6 +6,11 @@
     public enum DbAccessType
     {
         /// <summary>
+        /// For Developing
+        /// Not itend for your use!
+        /// </summary>
+        Experimental = -1,
+        /// <summary>
         /// default
         /// </summary>
         Unknown = 0,
@@ -13,6 +18,6 @@
         MySql,
         OleDb,
         Obdc,
-        SqLite
+        SqLite,
     }
 }

@@ -5,7 +5,6 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
@@ -22,6 +21,66 @@ namespace JPB.DataAccess
     /// </summary>
     public static class DbAccessLayerHelper
     {
+
+        /// <summary>
+        /// Not Connection save
+        /// Must be executed inside a Valid Connection
+        /// </summary>
+        /// <param name="base"></param>
+        /// <param name="last"></param>
+        /// <param name="autoRename">allows an Automatik renaming of multible Commands</param>
+        /// <returns></returns>
+        public static IDbCommand MergeCommands(this IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
+        {
+            return db.MergeTextToParameters(@base, last, autoRename);
+        }
+
+        internal static IDbCommand MergeTextToParameters(this IDatabase db,
+            IDbCommand @base,
+            IDbCommand last,
+            bool autoRename = false)
+        {
+            var parameter = new List<IQueryParameter>();
+
+            foreach (IDataParameter item in @base.Parameters.Cast<IDataParameter>())
+            {
+                parameter.Add(new QueryParameter() { Name = item.ParameterName, Value = item.Value });
+            }
+            var commandText = last.CommandText;
+
+            foreach (var item in last.Parameters.Cast<IDataParameter>())
+            {
+                if (parameter.Any(s => s.Name == item.ParameterName))
+                {
+                    //Parameter is found twice in both commands so rename it
+                    if (!autoRename)
+                    {
+                        throw new ArgumentOutOfRangeException("@base", string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands", item.ParameterName));
+                    }
+                    else
+                    {
+                        int counter = 1;
+                        var parameterName = item.ParameterName;
+                        var buffParam = parameterName;
+                        while (parameter.Any(s => s.Name == buffParam))
+                        {
+                            buffParam = string.Format("{0}_{1}", parameterName, counter);
+                            counter++;
+                        }
+                        commandText = commandText.Replace(item.ParameterName, buffParam);
+
+                        item.ParameterName = buffParam;
+                    }
+                }
+
+                parameter.Add(new QueryParameter() { Name = item.ParameterName, Value = item.Value });
+            }
+
+
+
+            return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, parameter);
+        }
+
         /// <summary>
         /// Creates a DbCollection for the specifiy type
         /// To Limit the output create a new Type and then define the statement
@@ -33,7 +92,7 @@ namespace JPB.DataAccess
             where T : class, 
             INotifyPropertyChanged
         {
-            return new DbCollection<T>(layer, layer.Select<T>());
+            return new DbCollection<T>(layer.Select<T>());
         }
 
         public static IEnumerable<IQueryParameter> AsQueryParameter(this IDataParameterCollection source)
@@ -59,7 +118,7 @@ namespace JPB.DataAccess
                 propertyInfos.Select(
                     propertyInfo =>
                     {
-                        PropertyInfo property =
+                        var property =
                             type.GetProperty(type.ReMapSchemaToEntiysProp(propertyInfo));
                         object dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
                         return dataValue;
@@ -153,7 +212,7 @@ namespace JPB.DataAccess
                 return parameter as IEnumerable<IQueryParameter>;
             }
 
-            return (from element in ((Type)parameter.GetType()).GetProperties()
+            return (from element in ConfigHelper.GetPropertiesEx(((Type)parameter.GetType()))
                     let value = DataConverterExtensions.GetParamaterValue(parameter, element.Name)
                     select new QueryParameter { Name = element.Name.CheckParamter(), Value = value }).Cast<IQueryParameter>()
                 .ToList();
@@ -318,7 +377,7 @@ namespace JPB.DataAccess
         public static string[] CreateIgnoreList(this Type type)
         {
             return
-                type.GetProperties()
+                ConfigHelper.GetPropertiesEx(type)
                     .Where(
                         s =>
                             s.GetGetMethod(false).IsVirtual ||
@@ -367,23 +426,27 @@ namespace JPB.DataAccess
         }
 
 
-        internal static IDbCommand CreateCommandOfClassAttribute<TE>(this Type type, object entry, IDatabase db,
-Func<object, IDatabase, IDbCommand> fallback, params object[] param)
-where TE : DataAccessAttribute
+        internal static IDbCommand CreateCommandOfClassAttribute<TE>(
+            this Type type,
+            object entry, 
+            IDatabase db,
+            Func<object, IDatabase, IDbCommand> fallback, 
+            params object[] param)
+            where TE : DataAccessAttribute
         {
             //try to get a Factory method
             //var methods =
             //    type.GetMethods()
             //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
 
-            MethodInfo[] methods =
-                type.GetMethods().Where(s => s.GetCustomAttributes(false).Any(e => e is TE)).ToArray();
+            var methods =
+                ConfigHelper.GetMethods(type).Where(s => s.GetCustomAttributes(false).Any(e => e is TE)).ToArray();
 
             if (methods.Any())
             {
-                MethodInfo[] searchMethodWithFittingParams = methods.Where(s =>
+                var searchMethodWithFittingParams = methods.Where(s =>
                 {
-                    ParameterInfo[] parameterInfos = s.GetParameters();
+                    var parameterInfos = s.GetParameters();
 
                     if (parameterInfos.Length != param.Length)
                     {
@@ -392,7 +455,7 @@ where TE : DataAccessAttribute
 
                     for (int i = 0; i < parameterInfos.Length; i++)
                     {
-                        ParameterInfo para = parameterInfos[i];
+                        var para = parameterInfos[i];
                         object tryParam = param[i];
                         if (tryParam == null)
                             return false;
@@ -409,10 +472,11 @@ where TE : DataAccessAttribute
                     return fallback(entry, db);
                 }
 
-                MethodInfo method = searchMethodWithFittingParams.Single();
+                var method = searchMethodWithFittingParams.Single();
 
-                //must be public static
-                if (method.IsStatic)
+                //must be public static if attribute is Select
+                if (typeof(TE) != typeof(SelectFactoryMethodAttribute) 
+                    || (typeof(TE) == typeof(SelectFactoryMethodAttribute) && method.IsStatic))
                 {
                     object[] cleanParams = param != null && param.Any() ? param : null;
                     object invoke = method.Invoke(entry, cleanParams);
@@ -451,16 +515,16 @@ where TE : DataAccessAttribute
                 IEnumerable<string> parallelQuery = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.dll",
                     SearchOption.TopDirectoryOnly);
 
-                Assembly assam = null;
+                //Assembly assam = null;
 
                 Parallel.ForEach(parallelQuery, (s, e) =>
                 {
-                    Assembly loadFile = Assembly.LoadFile(s);
+                    var loadFile = System.Reflection.Assembly.LoadFile(s);
                     Type resolve = loadFile.GetType(fullValidIdentifyer);
                     if (resolve != null)
                     {
                         type = resolve;
-                        assam = loadFile;
+                        //assam = loadFile;
                         e.Break();
                     }
                 });
@@ -477,7 +541,7 @@ where TE : DataAccessAttribute
             }
 
             //try constructor injection
-            ConstructorInfo ctOfType =
+            var ctOfType =
                 type.GetConstructors()
                     .FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
             if (ctOfType != null)

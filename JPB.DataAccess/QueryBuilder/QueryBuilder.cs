@@ -77,6 +77,18 @@ namespace JPB.DataAccess.QueryBuilder
             return this.Compile().ExecuteGenericCommand(Database);
         }
 
+        public QueryBuilder WithEnumerationMode(EnumerationMode mode)
+        {
+            this.EnumerationMode = mode;
+            return this;
+        }
+
+        public QueryBuilder WithParamterRenaming(bool mode)
+        {
+            this.AllowParamterRenaming = mode;
+            return this;
+        }
+
         /// <summary>
         /// Adds a Query part to the Local collection
         /// </summary>

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess
 {
+    [Serializable]
     public enum CollectionStates
     {
         Added,
@@ -16,32 +17,33 @@ namespace JPB.DataAccess
         Changed
     }
 
-    internal class ReposetoryCollection<TE> : ICollection<TE>
+    [Obsolete]
+    internal class ReposetoryCollection<T> : ICollection<T>
     {
         internal ReposetoryCollection(IEnumerable enumeration)
         {
-            _flatCollectionOfPrimaryKeys = new Dictionary<long, CollectionStates>();
+            _flatCollectionOfPrimaryKeys = new Dictionary<object, CollectionStates>();
 
-            var foo = (enumeration as IEnumerable<TE>);
+            var foo = (enumeration as IEnumerable<T>);
             if (foo != null)
             {
                 _items = foo.ToList();
             }
 
-            _items = new List<TE>();
+            _items = new List<T>();
 
             if (enumeration != null)
             {
                 foreach (object item in enumeration)
-                    _items.Add((TE)item);
+                    _items.Add((T)item);
             }
         }
 
-        private readonly Dictionary<long, CollectionStates> _flatCollectionOfPrimaryKeys;
+        private readonly Dictionary<object, CollectionStates> _flatCollectionOfPrimaryKeys;
 
-        private List<TE> _items;
+        private List<T> _items;
 
-        IEnumerator<TE> IEnumerable<TE>.GetEnumerator()
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return _items.GetEnumerator();
         }
@@ -63,7 +65,7 @@ namespace JPB.DataAccess
             }
         }
 
-        public void Add(TE item)
+        public void Add(T item)
         {
             this._flatCollectionOfPrimaryKeys.Add(item.GetPK(), CollectionStates.Added);
             _items.Add(item);
@@ -78,17 +80,17 @@ namespace JPB.DataAccess
             _items.Clear();
         }
 
-        public bool Contains(TE item)
+        public bool Contains(T item)
         {
             return _items.Contains(item);
         }
 
-        public void CopyTo(TE[] array, int arrayIndex)
+        public void CopyTo(T[] array, int arrayIndex)
         {
             _items.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(TE item)
+        public bool Remove(T item)
         {
             var pk = item.GetPK();
             if (_items.Remove(item))

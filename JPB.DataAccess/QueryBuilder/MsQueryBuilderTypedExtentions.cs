@@ -169,13 +169,15 @@ namespace JPB.DataAccess.QueryBuilder
         }
 
         /// <summary>
-        /// Creates a Common Table Expression that selects a Specific type
+        /// Creates a Subselect
         /// </summary>
         /// <param name="query"></param>
         /// <param name="target"></param>
         /// <param name="cteName"></param>
         /// <param name="useStarOperator"></param>
         /// <returns></returns>
+        /// 
+        [Obsolete("Use the InBracket Mehtod",true)]
         public static QueryBuilder<T> SubSelect<T>(this QueryBuilder<T> query, Action<QueryBuilder<T>> subSelect)
         {
             query.Query("(");
@@ -405,7 +407,7 @@ namespace JPB.DataAccess.QueryBuilder
                 case DbAccessType.MySql:
                     return query.Query("LIMIT BY {0}", top);
                 default:
-                    throw new NotSupportedException("For the Selected DB type is no Top implementations Available");
+                    throw new NotSupportedException("For the Selected DB type is no Top implementations Available. Use Query insted");
             }
             return query;
         }
