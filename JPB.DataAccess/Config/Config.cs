@@ -41,7 +41,7 @@ namespace JPB.DataAccess.Configuration
         /// Indicates the usage of Reflection
         /// </summary>
         public bool UseReflection { get; private set; }
-             
+
         /// <summary>
         /// Gets an Cache object if exists or creats one
         /// </summary>
@@ -53,11 +53,15 @@ namespace JPB.DataAccess.Configuration
             var name = type.Name;
             var element = SClassInfoCaches.FirstOrDefault(s => s.Type == declareingType && s.PropertyInfoCaches.Any(e => e.PropertyName == name));
 
-            if (element == null)
+            lock (typeof(Config))
             {
-                var declaringType = type.ReflectedType;
-                SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                if (element == null)
+                {
+                    var declaringType = type.ReflectedType;
+                    SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                }
             }
+
 
             return element.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == type.Name);
         }
@@ -69,10 +73,12 @@ namespace JPB.DataAccess.Configuration
         internal ClassInfoCache GetOrCreateClassInfoCache(Type type)
         {
             var element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
-
-            if (element == null)
+            lock (typeof(Config))
             {
-                SClassInfoCaches.Add(element = new ClassInfoCache(type));
+                if (element == null)
+                {
+                    SClassInfoCaches.Add(element = new ClassInfoCache(type));
+                }
             }
 
             return element;
@@ -87,11 +93,13 @@ namespace JPB.DataAccess.Configuration
             var declareingType = type.ReflectedType;
             var name = type.Name;
             var element = SClassInfoCaches.FirstOrDefault(s => s.Type == declareingType && s.MethodInfoCaches.Any(e => e.MethodName == name));
-
-            if (element == null)
+            lock (typeof(Config))
             {
-                var declaringType = type.ReflectedType;
-                SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                if (element == null)
+                {
+                    var declaringType = type.ReflectedType;
+                    SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                }
             }
 
             return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);

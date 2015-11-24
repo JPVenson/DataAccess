@@ -9,11 +9,14 @@ using System.Linq;
 using JPB.DataAccess.EntityCreator.Compiler;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
+using System.Xml.Serialization;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
     public class MsSqlCreator : IEntryCreator
     {
+      
+
         public static DbAccessLayer Manager;
         List<TableInfoModel> _tableNames;
 
@@ -57,7 +60,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
             _storedProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
 
             Console.WriteLine("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", _tableNames.Count, _views.Count, _storedProcs.Count);
-            RenderMenu();
+            RenderMenu();          
         }
 
 
@@ -94,6 +97,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
             Console.WriteLine("Actions: ");
 
             Console.WriteLine(@"\compile       Starts the Compiling of all Tables");
+            Console.WriteLine(@"\ns            Defines a default Namespace");
             Console.WriteLine(@"\autoGenNames  Defines all names after a common naming convention");
             Console.WriteLine(@"\add           Adds elements to existing cs classes");
             Console.WriteLine(@"    Options: ");
@@ -104,7 +108,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
         private void RenderMenuAction()
         {
-            var readLine = Console.ReadLine();
+            var readLine = Program.GetNextOption();
             if (string.IsNullOrEmpty(readLine))
             {
                 Console.Clear();
@@ -137,6 +141,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                     case @"\autogennames":
                         AutoAlignNames();
                         break;
+                    case @"\ns":
+                        SetNamespace();
+                        break;
                     case @"\compile":
                         RenderCompiler();
                         break;
@@ -162,13 +169,23 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                         break;
                     case @"\exit":
                         return;
-                        break;
 
                     default:
                         RenderMenuAction();
                         break;
                 }
             }
+        }
+
+        private void SetNamespace()
+        {
+            Console.WriteLine("Enter your DefaultNamespace");
+            var ns = Program.GetNextOption();
+            foreach (var item in _tableNames.Concat(_views))
+            {
+                item.NewNamespace = ns;
+            }
+            RenderMenu();
         }
 
         private void RenderCtorCompiler(bool replaceExisting)
@@ -293,7 +310,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
             }
 
             Console.WriteLine("Renaming is done");
-            Console.ReadKey();
             RenderMenu();
         }
 
@@ -349,7 +365,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
             Console.WriteLine(@"\back");
             Console.WriteLine("         Go back to Main Menu");
 
-            var readLine = Console.ReadLine();
+            var readLine = Program.GetNextOption();
             if (string.IsNullOrEmpty(readLine))
             {
                 RenderMenu();
@@ -504,9 +520,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                         RenderTableMenu(selectedTable);
                         break;
                 }
-
-            Console.ReadKey();
-            Console.Clear();
+            
             RenderTableMenu(selectedTable);
         }
 
@@ -525,6 +539,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                 var targetCsName = tableInfoModel.GetClassName();
 
                 var compiler = new ClassCompiler(TargetDir, targetCsName);
+                compiler.Namespace = tableInfoModel.NewNamespace;
                 compiler.TargetName = targetCsName;
                 classes.Add(compiler);
 
@@ -536,12 +551,14 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                         codeMemberProperty.CustomAttributes.Add(
                             new CodeAttributeDeclaration(typeof(PrimaryKeyAttribute).Name));
                     }
-                    if (columInfoModel.ColumnInfo.TargetType2 == SqlDbType.Timestamp)
+                    if (columInfoModel.ColumnInfo.TargetType2 == "Timestamp")
                     {
                         codeMemberProperty.CustomAttributes.Add(
                            new CodeAttributeDeclaration(typeof(RowVersionAttribute).Name));
                     }
                 }
+
+                compiler.GenerateTypeConstructor(false);
 
                 if (tableInfoModel.CreateSelectFactory)
                 {
@@ -579,9 +596,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                 codeTypeDeclaration.CompileClass();
             }
 
-            Console.WriteLine("Created all files");
-
-            Console.ReadKey();
+            Console.WriteLine("Created all files");            
         }
 
         public string SqlVersion { get; set; }

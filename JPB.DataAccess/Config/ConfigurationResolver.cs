@@ -14,7 +14,7 @@ namespace JPB.DataAccess.Config
     {
         private Configuration.Config config;
 
-        public ConfigurationResolver(Configuration.Config config)
+        internal ConfigurationResolver(Configuration.Config config)
         {
             this.config = config;
         }
@@ -66,10 +66,10 @@ namespace JPB.DataAccess.Config
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
-        public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
-        {
-            SetPropertyAttribute(exp, new ForModel(value));
-        }
+public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
+{
+    SetPropertyAttribute(exp, new ForModel(value));
+}
 
         /// <summary>
         /// Set the Primary key 
@@ -122,24 +122,25 @@ namespace JPB.DataAccess.Config
         }
 
 
-        ///// <summary>
-        ///// Set the Primary key 
-        ///// </summary>
-        ///// <param name="config"></param>
-        ///// <param name="PropertyName"></param>
-        //public void SetUpdateFactoryKey<TProp>(Expression<Func<T, TProp>> exp)
-        //{
-        //    SetMethodAttribute(exp, new UpdateFactoryMethodAttribute());
-        //}
-
         /// <summary>
         /// Set the Primary key 
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
-        public void SetStaticQueryKey(string query)
+        public void SetTableNameKey<TProp>(Expression<Func<T, TProp>> exp, string name)
         {
-
+            SetClassAttribute(new ForModel(name));
         }
+
+
+        ///// <summary>
+        ///// Set the Primary key 
+        ///// </summary>
+        ///// <param name="config"></param>
+        ///// <param name="PropertyName"></param>
+        //public void SetStaticQueryKey(string query)
+        //{
+
+        //}
     }
 }

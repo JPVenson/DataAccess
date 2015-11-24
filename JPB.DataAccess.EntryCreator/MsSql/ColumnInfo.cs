@@ -8,7 +8,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 {
     public class ColumnInfo
     {
-        private SqlDbType _targetType2;
+        private string _targetType2;
 
         [SelectFactoryMethod()]
         public static IQueryFactoryResult SelectColumns(string tableName)
@@ -33,7 +33,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
         public Type TargetType { get; set; }
 
         [ForModel("DATA_TYPE")]
-        public SqlDbType TargetType2
+        public string TargetType2
         {
             get { return _targetType2; }
             set

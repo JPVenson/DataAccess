@@ -1,4 +1,5 @@
 ﻿using JPB.DataAccess.Config.Model;
+using JPB.DataAccess.ModelsAnotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,21 @@ namespace JPB.DataAccess.Configuration.Model
                 this.PropertyInfoCaches = type.GetProperties().Select(s => new PropertyInfoCache(s)).ToList();
                 this.MethodInfoCaches = type.GetMethods().Select(s => new MethodInfoCache(s)).ToList();
                 this.ConstructorInfoCaches = type.GetConstructors().Select(s => new ConstructorInfoCache(s)).ToList();
+
+                this.CheckForConfig();
+            }
+        }
+
+        private void CheckForConfig()
+        {
+            var configMethods = this.MethodInfoCaches.Where(f => f.AttributeInfoCaches.Any(e => e is ConfigMehtodAttribute)).ToArray();
+            if (!configMethods.Any())
+                return;
+
+            var config = new Config();
+            foreach (var item in configMethods)
+            {
+                item.MethodInfo.Invoke(null, new object[] { config });
             }
         }
 

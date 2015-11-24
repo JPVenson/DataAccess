@@ -4,7 +4,6 @@ using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
-
     public class StoredPrcInfoModel
     {
         public StoredProcedureInformation Parameter { get; set; }
@@ -34,13 +33,14 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
         public bool CreateSelectFactory { get; set; }
         public bool CreateDataRecordLoader { get; set; }
+        public string NewNamespace { get; set; }
 
         public TableInfoModel(TableInformations info, string database)
         {
             CreateSelectFactory = true;
             Info = info;
             Database = database;
-            ColumnInfos = MsSqlCreator.Manager.Select<ColumnInfo>(Info.TableName).Select(s => new ColumInfoModel(s)).ToList();
+            ColumnInfos = MsSqlCreator.Manager.Select<ColumnInfo>(new object[] { Info.TableName }).Select(s => new ColumInfoModel(s)).ToList();
 
             var firstOrDefault = MsSqlCreator.Manager.RunPrimetivSelect(typeof(string),
                 "SELECT COLUMN_NAME " +

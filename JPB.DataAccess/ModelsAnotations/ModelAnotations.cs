@@ -28,6 +28,15 @@ namespace JPB.DataAccess.ModelsAnotations
     //}
 
     /// <summary>
+    /// When a methode is marked with this attribute it can be used to configurate the current class. Must be public static void
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    sealed class ConfigMehtodAttribute : DataAccessAttribute
+    {
+
+    }
+
+    /// <summary>
     /// Marks a Method as an Factory mehtod
     /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
     /// </summary>

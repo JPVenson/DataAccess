@@ -129,6 +129,7 @@ namespace JPB.DataAccess.UnitTests
             expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
             var config = new Configuration.Config();
+            
             config.SetConfig<ConfigLessUser>(f =>
             {
                 f.SetClassAttribute(new ForModel(UsersMeta.UserTable));

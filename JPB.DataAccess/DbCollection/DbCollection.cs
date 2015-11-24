@@ -7,9 +7,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
+using System.Collections.ObjectModel;
 
 namespace JPB.DataAccess.DbCollection
 {
+    public class NonObservableDbCollection<T> : IEnumerable<T>
+    {
+        public NonObservableDbCollection(IEnumerable enumerable)
+        {
+            _base = new List<T>();
+            foreach (T item in enumerable)
+            {
+                _base.Add(item);
+            }
+        }
+
+        private List<T> _base;
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _base.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _base.GetEnumerator();
+        }
+    }
+
     /// <summary>
     /// WIP Observes the local collection and allows a Generic save update remove and insert
     /// </summary>
@@ -32,7 +57,24 @@ namespace JPB.DataAccess.DbCollection
             this._internalCollection.Add(new StateHolder(value, state));
         }
 
-        internal DbCollection(IEnumerable<T> subset)
+        public DbCollection(IEnumerable subset)
+        {
+            _internalCollection = new List<StateHolder>();
+            _changeTracker = new Dictionary<T, List<string>>();
+
+            if (subset is IOrderedEnumerable<T>)
+            {
+                throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
+            }
+
+            foreach (T item in subset)
+            {
+                Add(item, CollectionStates.Unchanged);
+                item.PropertyChanged += item_PropertyChanged;
+            }
+        }
+
+        public DbCollection(IEnumerable<T> subset)
         {
             _internalCollection = new List<StateHolder>();
             _changeTracker = new Dictionary<T, List<string>>();

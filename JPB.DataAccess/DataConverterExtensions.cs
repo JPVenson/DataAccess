@@ -625,12 +625,25 @@ namespace JPB.DataAccess
 
                             var genericArguments = property.PropertyType.GetGenericArguments().FirstOrDefault();
                             var enumerableOfItems = xmlDataRecords.Select(xmlDataRecord => SetPropertysViaReflection(genericArguments, xmlDataRecord)).ToList();
+                            object castedList;
 
-                            var caster = typeof(ReposetoryCollection<>).MakeGenericType(genericArguments).GetConstructor(new[] { typeof(IEnumerable) });
+                            if (genericArguments.IsClass && genericArguments.GetInterface("INotifyPropertyChanged") != null)
+                            {
+                                var caster = typeof(DbCollection<>).MakeGenericType(genericArguments).GetConstructor(new[] { typeof(IEnumerable) });
 
-                            Debug.Assert(caster != null, "caster != null");
+                                Debug.Assert(caster != null, "caster != null");
 
-                            var castedList = caster.Invoke(new object[] { enumerableOfItems });
+                                castedList = caster.Invoke(new object[] { enumerableOfItems });
+                            }
+                            else
+                            {
+                                var caster = typeof(NonObservableDbCollection<>).MakeGenericType(genericArguments).GetConstructor(new[] { typeof(IEnumerable) });
+
+                                Debug.Assert(caster != null, "caster != null");
+
+                                castedList = caster.Invoke(new object[] { enumerableOfItems });
+                            }                                    
+
                             property.SetValue(instance, castedList);
                         }
                         else

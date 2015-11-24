@@ -1,21 +1,54 @@
 using System;
 using System.Data;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Globalization;
 using JPB.DataAccess.Contacts;
+using System.Collections.Generic;
+using Microsoft.SqlServer.Server;
+using Microsoft.SqlServer.Types;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
     public class DbTypeToCsType : IValueConverter
     {
+        static DbTypeToCsType()
+        {
+            var all = typeof(SqlGeography).Assembly.GetTypes();
+
+            foreach (var item in all)
+            {
+                if(item.Name == "SqlGeography")
+                {
+                    Console.WriteLine();
+                }
+
+                var attributes = item.GetCustomAttributes(true);
+
+                if(attributes.Any(f => f is SqlUserDefinedTypeAttribute))
+                {
+                    _userDefinedTypes.Add(item.Name.Replace("Sql", ""), item);
+                }
+            }
+        }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return GetClrType(value as string);
         }
 
+        private static Dictionary<string, Type> _userDefinedTypes = new Dictionary<string, Type>();
+
+
         public static Type GetClrType(string sqlType)
         {
             SqlDbType result;
-            Enum.TryParse(sqlType, true, out result);
+            var resultState = Enum.TryParse(sqlType, true, out result);
+            if(!resultState)
+            {
+                return _userDefinedTypes.First(s => s.Key.ToLower() == sqlType).Value;
+            }           
+
             return GetClrType(result);
         }
 
