@@ -69,7 +69,7 @@ namespace JPB.DataAccess.AdoWrapper
         {
             var name = GetName(i);
 
-            var mapEntiysPropToSchema = this._target.ReMapSchemaToEntiysProp(name);
+            var mapEntiysPropToSchema = ConfigHelper.GetLocalToDbSchemaMapping(this._target, name);
 
             var firstOrDefault = ConfigHelper.GetPropertiesEx(_target).FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
             if (firstOrDefault == null)

@@ -21,6 +21,7 @@ namespace JPB.DataAccess.Manager
         /// </summary>
         private static void SProcedureDbAccessLayer()
         {
+            //not that cool maybe move this to another place or using the exisiting mehtods
             DbTypeMap = new Dictionary<Type, DbType>();
 
             DbTypeMap[typeof(byte)] = DbType.Byte;
@@ -135,7 +136,7 @@ namespace JPB.DataAccess.Manager
 
         private static IEnumerable<IQueryParameter> CreateProcedureHeader(Type t)
         {
-            return ConfigHelper.GetPropertiesEx(t).Select(propertyInfo => new QueryParameter(t.MapEntiysPropToSchema(propertyInfo.Name), propertyInfo.PropertyType));
+            return ConfigHelper.GetPropertiesEx(t).Select(propertyInfo => new QueryParameter(t.GetLocalToDbSchemaMapping(propertyInfo.Name), propertyInfo.PropertyType));
         }
 
         interface IProcedureProcessor
@@ -168,7 +169,7 @@ namespace JPB.DataAccess.Manager
 
                 foreach (var queryParameter in QueryParameters)
                 {
-                    var realName = TargetType.ReMapSchemaToEntiysProp(queryParameter.Name);
+                    var realName = TargetType.GetLocalToDbSchemaMapping(queryParameter.Name);
                     var value = TargetType.GetProperty(realName).GetValue(target);
                     dbCommand.Parameters.AddWithValue(queryParameter.Name.CheckParamter(), value, db);
                 }

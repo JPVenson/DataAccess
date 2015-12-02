@@ -1,4 +1,5 @@
 using JPB.DataAccess.Configuration;
+using JPB.DataAccess.Configuration.Model;
 using JPB.DataAccess.ModelsAnotations;
 using System;
 using System.Diagnostics;
@@ -26,14 +27,25 @@ namespace JPB.DataAccess
         /// <returns></returns>
         internal static Boolean IsAnonymousType(this Type type)
         {
+            //http://stackoverflow.com/questions/1650681/determining-whether-a-type-is-an-anonymous-type
+            //awesome!
+            return type.Namespace == null;
             //Boolean hasCompilerGeneratedAttribute = type.GetCustomAttributes().Any(s => s is CompilerGeneratedAttribute);
-            Boolean nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
+            //Boolean nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
             //Boolean isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
-
-            return nameContainsAnonymousType;
+            //return nameContainsAnonymousType;
         }
 
         internal static Configuration.Config ReflecionStore { get; set; }
+
+        internal static ClassInfoCache GetClassInfo(this Type type)
+        {
+            if (IsAnonymousType(type))
+                return new ClassInfoCache(type); //Anonymous types does not have any Attributes
+
+            return ReflecionStore.GetOrCreateClassInfoCache(type);
+
+        }
 
         internal static Attribute[] GetCustomAttributes(this Type type)
         {
@@ -63,12 +75,36 @@ namespace JPB.DataAccess
             return deb;
         }
 
+        internal static string GetLocalToDbSchemaMapping(this Type type, string name)
+        {
+            if (IsAnonymousType(type))
+                return name;
+
+            return ReflecionStore.GetOrCreateClassInfoCache(type).SchemaMappingLocalToDatabase(name);
+        }
+
+        internal static string GetDbToLocalSchemaMapping(this Type type, string name)
+        {
+            if (IsAnonymousType(type))
+                return name;
+
+            return ReflecionStore.GetOrCreateClassInfoCache(type).SchemaMappingDatabaseToLocal(name);
+        }
+
         internal static PropertyInfo[] GetPropertiesEx(this Type type)
         {
             if (IsAnonymousType(type))
                 return type.GetProperties();
 
             return ReflecionStore.GetOrCreateClassInfoCache(type).PropertyInfoCaches.ToArray().Select(s => s.PropertyInfo).ToArray();
+        }
+
+        internal static string[] GetSchemaMapping(this Type type)
+        {
+            if (IsAnonymousType(type))
+                return type.GetPropertiesEx().Select(s => s.Name).ToArray();
+
+            return ReflecionStore.GetOrCreateClassInfoCache(type).LocalToDbSchemaMapping();
         }
 
         internal static MethodInfo[] GetMethods(this Type type)

@@ -13,6 +13,10 @@ namespace JPB.DataAccess.DbCollection
 {
     public class NonObservableDbCollection<T> : IEnumerable<T>
     {
+        /// <summary>
+        /// Internal use only
+        /// </summary>
+        /// <param name="enumerable"></param>
         public NonObservableDbCollection(IEnumerable enumerable)
         {
             _base = new List<T>();
@@ -56,7 +60,10 @@ namespace JPB.DataAccess.DbCollection
         {
             this._internalCollection.Add(new StateHolder(value, state));
         }
-
+        /// <summary>
+        /// Internal use only
+        /// </summary>
+        /// <param name="subset"></param>
         public DbCollection(IEnumerable subset)
         {
             _internalCollection = new List<StateHolder>();
@@ -73,7 +80,10 @@ namespace JPB.DataAccess.DbCollection
                 item.PropertyChanged += item_PropertyChanged;
             }
         }
-
+        /// <summary>
+        /// Internal use only
+        /// </summary>
+        /// <param name="subset"></param>
         public DbCollection(IEnumerable<T> subset)
         {
             _internalCollection = new List<StateHolder>();

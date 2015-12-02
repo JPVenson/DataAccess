@@ -18,14 +18,10 @@ namespace JPB.DataAccess.Configuration.Model
             this.ConstructorInfoCaches = new List<ConstructorInfoCache>();
             ClassName = type.FullName;
             Type = type;
-            if (type != null)
-            { 
-                this.AttributeInfoCaches = type.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToList();
-                this.PropertyInfoCaches = type.GetProperties().Select(s => new PropertyInfoCache(s)).ToList();
-                this.MethodInfoCaches = type.GetMethods().Select(s => new MethodInfoCache(s)).ToList();
-                this.ConstructorInfoCaches = type.GetConstructors().Select(s => new ConstructorInfoCache(s)).ToList();
-
-            }
+            this.AttributeInfoCaches = type.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToList();
+            this.PropertyInfoCaches = type.GetProperties().Select(s => new PropertyInfoCache(s)).ToList();
+            this.MethodInfoCaches = type.GetMethods().Select(s => new MethodInfoCache(s)).ToList();
+            this.ConstructorInfoCaches = type.GetConstructors().Select(s => new ConstructorInfoCache(s)).ToList();
         }
 
         public void CheckForConfig()
@@ -53,9 +49,84 @@ namespace JPB.DataAccess.Configuration.Model
 
         public string ClassName { get; private set; }
         public Type Type { get; private set; }
+        /// <summary>
+        /// Key is C# Property name and Value is DB Eqivalent
+        /// </summary>
+        public Dictionary<string, string> SchemaMappingValues { get; private set; }
         public List<PropertyInfoCache> PropertyInfoCaches { get; private set; }
         public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
         public List<MethodInfoCache> MethodInfoCaches { get; private set; }
         public List<ConstructorInfoCache> ConstructorInfoCaches { get; set; }
+
+        internal string SchemaMappingLocalToDatabase(string cSharpName)
+        {
+            CreateSchemaMapping();
+            var mappings = SchemaMappingValues.FirstOrDefault(s => s.Key.Equals(cSharpName));
+            if (mappings.Equals(default(KeyValuePair<string, string>)))
+            {
+                return cSharpName;
+            }
+            return mappings.Value;
+        }
+
+        internal string SchemaMappingDatabaseToLocal(string databaseName)
+        {
+            CreateSchemaMapping();
+            var mappings = SchemaMappingValues.FirstOrDefault(s => s.Value.Equals(databaseName));
+            if (mappings.Equals(default(KeyValuePair<string, string>)))
+            {
+                return databaseName;
+            }
+            return mappings.Key;
+        }
+
+        internal void CreateSchemaMapping()
+        {
+            if (SchemaMappingValues == null)
+            {
+                SchemaMappingValues = new Dictionary<string, string>();
+                foreach (var item in PropertyInfoCaches)
+                {
+                    var forModel = item.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
+                    if (forModel != null)
+                    {
+                        SchemaMappingValues.Add(item.PropertyName, (forModel.Attribute as ForModel).AlternatingName);
+                    }
+                    else
+                    {
+                        SchemaMappingValues.Add(item.PropertyName, item.PropertyName);
+                    }
+                }
+            }
+        }
+
+        internal string[] LocalToDbSchemaMapping()
+        {
+            CreateSchemaMapping();
+            return SchemaMappingValues.Values.ToArray();
+        }
+
+        internal string[] DbToLocalSchemaMapping()
+        {
+            CreateSchemaMapping();
+            if (SchemaMappingValues == null)
+            {
+                SchemaMappingValues = new Dictionary<string, string>();
+                foreach (var item in PropertyInfoCaches)
+                {
+                    var forModel = item.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
+                    if (forModel != null)
+                    {
+                        SchemaMappingValues.Add(item.PropertyName, (forModel.Attribute as ForModel).AlternatingName);
+                    }
+                    else
+                    {
+                        SchemaMappingValues.Add(item.PropertyName, item.PropertyName);
+                    }
+                }
+            }
+
+            return SchemaMappingValues.Values.ToArray();
+        }
     }
 }

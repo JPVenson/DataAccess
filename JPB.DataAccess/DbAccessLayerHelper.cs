@@ -119,7 +119,7 @@ namespace JPB.DataAccess
                     propertyInfo =>
                     {
                         var property =
-                            type.GetProperty(type.ReMapSchemaToEntiysProp(propertyInfo));
+                            type.GetProperty(type.GetDbToLocalSchemaMapping(propertyInfo));
                         object dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
                         return dataValue;
                     }).ToArray();
@@ -266,7 +266,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         internal static string CreatePropertyCSV(this Type type, params string[] ignore)
         {
-            return CreatePropertyNames(type, ignore).Aggregate((e, f) => e + ", " + f);
+            return CreatePropertyNamesAndMap(type, ignore).Aggregate((e, f) => e + ", " + f);
         }
 
         /// <summary>
@@ -285,7 +285,7 @@ namespace JPB.DataAccess
         /// <param name="type"></param>
         /// <param name="ignore"></param>
         /// <returns></returns>
-        internal static IEnumerable<string> CreatePropertyNames(this Type type, params string[] ignore)
+        internal static IEnumerable<string> CreatePropertyNamesAndMap(this Type type, params string[] ignore)
         {
             return DataConverterExtensions.MapEntiyToSchema(type, ignore).ToList();
         }
@@ -296,9 +296,9 @@ namespace JPB.DataAccess
         /// <param name="ignore"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        internal static IEnumerable<string> CreatePropertyNames<T>(params string[] ignore)
+        internal static IEnumerable<string> CreatePropertyNamesAndMap<T>(params string[] ignore)
         {
-            return CreatePropertyNames(typeof(T), ignore);
+            return CreatePropertyNamesAndMap(typeof(T), ignore);
         }
 
         internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
@@ -355,7 +355,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         internal static IEnumerable<string> CreatePropertyNames(Type type, bool ignorePK = false)
         {
-            return ignorePK ? CreatePropertyNames(type, type.GetPK()) : CreatePropertyNames(type, new string[0]);
+            return ignorePK ? CreatePropertyNamesAndMap(type, type.GetPK()) : CreatePropertyNamesAndMap(type, new string[0]);
         }
 
         /// <summary>
@@ -366,7 +366,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         internal static IEnumerable<string> CreatePropertyNames<T>(bool ignorePK = false)
         {
-            return ignorePK ? CreatePropertyNames<T>(typeof(T).GetPK()) : CreatePropertyNames<T>(new string[0]);
+            return ignorePK ? CreatePropertyNamesAndMap<T>(typeof(T).GetPK()) : CreatePropertyNamesAndMap<T>(new string[0]);
         }
 
         /// <summary>

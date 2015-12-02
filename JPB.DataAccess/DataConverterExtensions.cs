@@ -17,6 +17,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
+using JPB.DataAccess;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
@@ -174,7 +175,7 @@ namespace JPB.DataAccess
         public static string GetPK(this Type type)
         {
             PropertyInfo name = ConfigHelper.GetPropertiesEx(type).FirstOrDefault(CheckForPK);
-            return MapEntiysPropToSchema(type, name == null ? null : name.Name);
+            return type.GetLocalToDbSchemaMapping(name == null ? null : name.Name);
         }
 
         /// <summary>
@@ -217,7 +218,7 @@ namespace JPB.DataAccess
         /// <returns></returns>
         public static string GetFK(this Type type, string name)
         {
-            name = type.ReMapSchemaToEntiysProp(name);
+            name = type.GetDbToLocalSchemaMapping(name);
             PropertyInfo prop = ConfigHelper.GetPropertiesEx(type).FirstOrDefault(info => CheckForFK(info, name));
             return prop == null ? null : prop.Name;
         }
@@ -307,6 +308,7 @@ namespace JPB.DataAccess
         /// <param name="type"></param>
         /// <param name="ignore"></param>
         /// <returns></returns>
+        //[Obsolete("Use ConfigHelper.GetSchema instead", true)]
         public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
         {
             foreach (var s1 in ConfigHelper.GetPropertiesEx(type))
@@ -354,6 +356,7 @@ namespace JPB.DataAccess
         /// <param name="type"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
+        [Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
         public static string MapEntiysPropToSchema(this Type type, string prop)
         {
             return (from propertyInfo in ConfigHelper.GetPropertiesEx(type)
@@ -369,6 +372,7 @@ namespace JPB.DataAccess
         /// </summary>
         /// <param name="prop"></param>
         /// <returns></returns>
+        [Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
         public static string MapEntiysPropToSchema<T>(string prop)
         {
             return MapEntiysPropToSchema(typeof(T), prop);
@@ -380,6 +384,7 @@ namespace JPB.DataAccess
         /// <param name="prop"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
         public static string ReMapSchemaToEntiysProp<T>(string prop)
         {
             return ReMapSchemaToEntiysProp(typeof(T), prop);
@@ -391,6 +396,7 @@ namespace JPB.DataAccess
         /// <param name="type"></param>
         /// <param name="prop"></param>
         /// <returns></returns>
+        [Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
         public static string ReMapSchemaToEntiysProp(this Type type, string prop)
         {
             foreach (var propertyInfo in from propertyInfo in ConfigHelper.GetPropertiesEx(type)
@@ -573,15 +579,17 @@ namespace JPB.DataAccess
         {
             if (reader == null)
                 return instance;
-
-            var listofpropertys = new Dictionary<string, object>();
+            
             var type = instance.GetType();
 
-            var propertys = ConfigHelper.GetPropertiesEx(type);
+            //Left c# property name and right the object to read from the reader
+            var listofpropertys = new Dictionary<string, object>();
+
+            var propertys = type.GetPropertiesEx();
             var instanceOfFallbackList = new Dictionary<string, object>();
 
             for (int i = 0; i < reader.FieldCount; i++)
-                listofpropertys.Add(ReMapSchemaToEntiysProp(type, reader.GetName(i)), reader.GetValue(i));
+                listofpropertys.Add(type.GetDbToLocalSchemaMapping(reader.GetName(i)), reader.GetValue(i));
 
             foreach (var item in listofpropertys)
             {
@@ -599,7 +607,7 @@ namespace JPB.DataAccess
                         var valueConverter = any.CreateConverter();
                         value = valueConverter.Convert(value, property.PropertyType, any.Parameter,
                             CultureInfo.CurrentCulture);
-                    }                 
+                    }
 
                     var isXmlField =
                         attributes.FirstOrDefault(s => s is FromXmlAttribute) as FromXmlAttribute;
@@ -642,7 +650,7 @@ namespace JPB.DataAccess
                                 Debug.Assert(caster != null, "caster != null");
 
                                 castedList = caster.Invoke(new object[] { enumerableOfItems });
-                            }                                    
+                            }
 
                             property.SetValue(instance, castedList);
                         }
@@ -763,7 +771,7 @@ namespace JPB.DataAccess
         /// <param name="fullLoaded">Is loaded by a Ctor</param>
         /// <returns></returns>
         public static object CreateInstance(this Type type, IDataRecord reader, out bool fullLoaded)
-        {            
+        {
             var constructorInfos = ConfigHelper.ReflecionStore.GetOrCreateClassInfoCache(type).ConstructorInfoCaches.Select(f => f.MethodInfo);
 
             var constructor = constructorInfos.FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is ObjectFactoryMethodAttribute)) ??

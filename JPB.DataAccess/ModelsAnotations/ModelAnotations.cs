@@ -4,6 +4,7 @@ using System.ComponentModel;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.QueryFactory;
+using System.Linq;
 
 namespace JPB.DataAccess.ModelsAnotations
 {
@@ -190,6 +191,13 @@ namespace JPB.DataAccess.ModelsAnotations
     public sealed class ValueConverterAttribute : Attribute
     {
         private readonly Type _converter;
+        private static Dictionary<object, IValueConverter> _converterInstance;
+
+        static ValueConverterAttribute()
+        {
+            _converterInstance = new Dictionary<object, IValueConverter>();
+        }
+
 
         // This is a positional argument
         public ValueConverterAttribute(Type converter)
@@ -200,6 +208,8 @@ namespace JPB.DataAccess.ModelsAnotations
             {
                 throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
             }
+
+            this.Parameter = string.Empty;
         }
 
         // This is a positional argument
@@ -213,7 +223,14 @@ namespace JPB.DataAccess.ModelsAnotations
 
         internal IValueConverter CreateConverter()
         {
-            return (IValueConverter)Activator.CreateInstance(_converter);
+            var fod = _converterInstance.FirstOrDefault(s => s.Key.Equals(this.Parameter));
+            if(fod.Equals(default(KeyValuePair<object,IValueConverter>)))
+            {
+                var instance = (IValueConverter)Activator.CreateInstance(_converter);
+                return instance;
+            }
+
+            return fod.Value;
         }
     }
 
@@ -225,6 +242,7 @@ namespace JPB.DataAccess.ModelsAnotations
     public sealed class FromXmlAttribute : ForModel
     {
         private Type _loadFromXmlStrategy;
+        private static ILoadFromXmlStrategy _loadFromXmlStrategyInstance;
 
         /// <summary>
         /// 
@@ -263,7 +281,7 @@ namespace JPB.DataAccess.ModelsAnotations
 
         internal ILoadFromXmlStrategy CreateLoader()
         {
-            return (ILoadFromXmlStrategy)Activator.CreateInstance(_loadFromXmlStrategy);
+            return _loadFromXmlStrategyInstance ?? (_loadFromXmlStrategyInstance = (ILoadFromXmlStrategy)Activator.CreateInstance(_loadFromXmlStrategy));
         }
     }
 

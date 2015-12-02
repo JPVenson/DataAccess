@@ -155,7 +155,7 @@ namespace JPB.DataAccess.Manager
                 var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
                 if (rowversionValue != null || entry.GetPK() == GetDefault(entry.GetPKType()))
                 {
-                    string rowVersionprop = type.MapEntiysPropToSchema(rowVersion.Name);
+                    string rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.Name);
                     string staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " +
                                               type.GetPK() + " = " + entry.GetPK();
 
@@ -186,7 +186,7 @@ namespace JPB.DataAccess.Manager
                     .Concat(type.CreateIgnoreList())
                     .ToArray();
 
-            string[] propertyInfos = DbAccessLayerHelper.CreatePropertyNames<T>(ignore).ToArray();
+            string[] propertyInfos = DbAccessLayerHelper.CreatePropertyNamesAndMap<T>(ignore).ToArray();
 
             var queryBuilder = new QueryBuilder.QueryBuilder(db);
             queryBuilder.QueryD("UPDATE");
@@ -195,7 +195,7 @@ namespace JPB.DataAccess.Manager
             for (int index = 0; index < propertyInfos.Length; index++)
             {
                 string info = propertyInfos[index];
-                var property = type.GetProperty(type.ReMapSchemaToEntiysProp(info));
+                var property = type.GetProperty(type.GetDbToLocalSchemaMapping(info));
                 object dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
                 queryBuilder.QueryQ(string.Format("{0} = @{1}", info, index), new QueryParameter(index.ToString(), dataValue));
                 if(index + 1 < propertyInfos.Length)

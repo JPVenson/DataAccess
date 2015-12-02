@@ -138,7 +138,7 @@ namespace JPB.DataAccess.Manager
                     .Select(s => s.Name)
                     .Concat(type.CreateIgnoreList())
                     .ToArray();
-            string[] propertyInfos = type.CreatePropertyNames(ignore).ToArray();
+            string[] propertyInfos = type.CreatePropertyNamesAndMap(ignore).ToArray();
             string csvprops = type.CreatePropertyCSV(ignore);
 
             string values = "";

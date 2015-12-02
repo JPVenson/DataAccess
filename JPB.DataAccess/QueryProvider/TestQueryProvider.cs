@@ -96,7 +96,7 @@ namespace JPB.DataAccess.QueryProvider
             string maybeNotRealColumnName = expressionAsString.Substring(indexOfDot, indexOfOperator - indexOfDot);
             expressionAsString = expressionAsString.Remove(indexOfDot, indexOfOperator - indexOfDot);
             expressionAsString = expressionAsString.Insert(indexOfDot,
-                type.MapEntiysPropToSchema(maybeNotRealColumnName));
+                type.GetLocalToDbSchemaMapping(maybeNotRealColumnName));
             expressionAsString = expressionAsString.Replace('(', ' ');
             expressionAsString = expressionAsString.Replace(')', ' ');
 
