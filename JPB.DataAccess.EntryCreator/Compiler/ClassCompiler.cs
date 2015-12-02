@@ -128,9 +128,10 @@ namespace JPB.DataAccess.EntityCreator.Compiler
             //Write static members
             _base.IsClass = true;
             _base.TypeAttributes = TypeAttributes.Sealed | TypeAttributes.Public;
+            _base.IsPartial = true;
 
             //Add Code Generated Attribute
-            var generatedCodeAttribute = new GeneratedCodeAttribute(AttrbuteHeader, "1.0.0.5");
+            var generatedCodeAttribute = new GeneratedCodeAttribute(AttrbuteHeader, "1.0.0.7");
             var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
                 new CodeAttributeArgument(
                 new CodePrimitiveExpression(generatedCodeAttribute.Tool)),
@@ -156,10 +157,10 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
             using (fileStream)
             {
-                
+
                 var writer = new StreamWriter(fileStream, Encoding.UTF8);
                 writer.NewLine = Environment.NewLine;
-                
+
                 var cp = new CompilerParameters();
                 cp.ReferencedAssemblies.Add("System.dll");
                 cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
@@ -182,7 +183,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
                 importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ModelsAnotations"));
                 importNameSpace.Types.Add(_base);
                 compileUnit.Namespaces.Add(importNameSpace);
-                
+
                 Provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
                 {
                     BlankLinesBetweenMembers = false,
@@ -226,22 +227,24 @@ namespace JPB.DataAccess.EntityCreator.Compiler
                 var listOfParams = new CodeObjectCreateExpression(typeof(List<IQueryParameter>));
                 var listOfParamscreator = new CodeVariableDeclarationStatement(typeof(List<IQueryParameter>), nameOfListOfParamater, listOfParams);
                 createFactoryMethod.Statements.Add(listOfParamscreator);
-                var codeMemberProperties = _base.Members.Cast<CodeMemberProperty>().ToArray();
-
-                for (int i = 0; i < codeMemberProperties.Count(); i++)
+                int i = 0;
+                foreach (var item in _base.Members)
                 {
-                    var variable = codeMemberProperties.ElementAt(i);
-                    var paramName = "param" + i;
-                    query += " @" + paramName + " ";
-                    var createParams = new CodeObjectCreateExpression(typeof(QueryParameter),
-                        new CodePrimitiveExpression(paramName),
-                        new CodeVariableReferenceExpression(variable.Name));
-                    var addToList =
-                        new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater),
-                            "Add", createParams);
+                    if(item is CodeMemberProperty)
+                    {
+                        var variable = item as CodeMemberProperty;
+                        var paramName = "param" + i++;
+                        query += " @" + paramName + " ";
+                        var createParams = new CodeObjectCreateExpression(typeof(QueryParameter),
+                            new CodePrimitiveExpression(paramName),
+                            new CodeVariableReferenceExpression(variable.Name));
+                        var addToList =
+                            new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater),
+                                "Add", createParams);
 
-                    createFactoryMethod.Statements.Add(addToList);
-                }
+                        createFactoryMethod.Statements.Add(addToList);
+                    }
+                }             
 
                 //Finaly create the instance
                 var createFactory = new CodeObjectCreateExpression(typeof(QueryFactoryResult),
@@ -277,6 +280,11 @@ namespace JPB.DataAccess.EntityCreator.Compiler
             {
                 var forModel = new ForModel(info.ColumnInfo.ColumnName);
                 codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name, new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName))));
+            }
+            if (info.IsRowVersion)
+            {
+                var forModel = new RowVersionAttribute();
+                codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name));
             }
             return codeMemberProperty;
         }
@@ -323,28 +331,55 @@ namespace JPB.DataAccess.EntityCreator.Compiler
             foreach (var columInfoModel in propertyToDbColumn)
             {
                 var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"), new CodePrimitiveExpression(columInfoModel.Key));
-                CodeCastExpression castExp;
 
-                castExp = new CodeCastExpression(
-                                 new CodeTypeReference(columInfoModel.Value.Item2, CodeTypeReferenceOptions.GenericTypeParameter),
-                                 codeIndexerExpression);
+                var baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
+                var refToProperty = new CodeVariableReferenceExpression(columInfoModel.Value.Item1);
 
-                var setExpr = new CodeAssignStatement(new CodeVariableReferenceExpression(columInfoModel.Value.Item1), castExp);
-                codeConstructor.Statements.Add(setExpr);
+                if (baseType != null)
+                {
+                    var variableName = columInfoModel.Key.ToLower();
+                    var uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
+                    var bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
+                    var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
+                    var checkForDbNull = new CodeConditionStatement();
+                    checkForDbNull.Condition = new CodeBinaryOperatorExpression(uncastLocalVariableRef,
+                        CodeBinaryOperatorType.IdentityEquality,
+                        new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"));
+
+                    var setToNull = new CodeAssignStatement(refToProperty,
+                        new CodeDefaultValueExpression(
+                            new CodeTypeReference(baseType)));
+                    var setToValue = new CodeAssignStatement(refToProperty,
+                        new CodeCastExpression(
+                      new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
+                      uncastLocalVariableRef));
+                    checkForDbNull.TrueStatements.Add(setToNull);
+                    checkForDbNull.FalseStatements.Add(setToValue);
+                    codeConstructor.Statements.Add(bufferVariable);
+                    codeConstructor.Statements.Add(buffAssignment);
+                    codeConstructor.Statements.Add(checkForDbNull);
+                }
+                else
+                {
+                    CodeExpression castExp = new CodeCastExpression(
+                      new CodeTypeReference(columInfoModel.Value.Item2, CodeTypeReferenceOptions.GenericTypeParameter),
+                      codeIndexerExpression);
+                    var setExpr = new CodeAssignStatement(refToProperty, castExp);
+                    codeConstructor.Statements.Add(setExpr);
+                }
             }
-
             return codeConstructor;
         }
 
         internal CodeConstructor GenerateTypeConstructor(bool factory = true)
         {
             var codeConstructor = new CodeConstructor();
-            if(factory)
+            if (factory)
             {
                 codeConstructor.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ObjectFactoryMethodAttribute).Name));
                 codeConstructor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(IDataRecord).Name, "record"));
             }
-          
+
             codeConstructor.Attributes = MemberAttributes.Public;
             _base.Members.Insert(0, codeConstructor);
             return codeConstructor;
@@ -370,7 +405,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
                 var tuple = new Tuple<string, Type>(item.Name, Type.GetType(item.Type.BaseType, null, (e, f, g) =>
                 {
-                    var baseType = Type.GetType(f);                   
+                    var baseType = Type.GetType(f);
                     if (baseType == null)
                     {
                         if (_externalTypes == null)
@@ -384,7 +419,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
                         baseType = _externalTypes.Single(s => s.FullName == f);
                     }
 
-                    if(item.Type.ArrayElementType != null)
+                    if (item.Type.ArrayElementType != null)
                     {
                         baseType = Type.GetType(item.Type.ArrayElementType.BaseType).MakeArrayType();
                     }
@@ -393,7 +428,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
                         baseType = typeof(Nullable<>).MakeGenericType(item.Type.TypeArguments.Cast<CodeTypeReference>().Select(z => Type.GetType(z.BaseType)).ToArray());
                     }
 
-                    return baseType;                    
+                    return baseType;
 
                 }));
                 if (tuple.Item2 == null)

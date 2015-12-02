@@ -83,7 +83,7 @@ namespace JPB.DataAccess.Manager
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TE">The result</typeparam>
-        public List<TE> ExecuteProcedure<T, TE>(T procParam) where TE : class
+        public List<TE> ExecuteProcedure<T, TE>(T procParam)
         {
             return ExecuteProcedure(typeof(T), typeof(TE), procParam).Cast<TE>().ToList();
         }
@@ -96,6 +96,17 @@ namespace JPB.DataAccess.Manager
             var command = CreateProcedureCall(procParamType, procParam, Database);
             return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
                 .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(resultType, dataRecord))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Executes a Procedure object into the Database
+        /// </summary>
+        public List<object> ExecuteProcedurePrimetiv(Type procParamType, Type resultType, object procParam)
+        {
+            var command = CreateProcedureCall(procParamType, procParam, Database);
+            return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
+                .Select(dataRecord => dataRecord[0])
                 .ToList();
         }
 

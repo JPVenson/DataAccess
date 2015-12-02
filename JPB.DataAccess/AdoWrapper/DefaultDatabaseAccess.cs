@@ -168,6 +168,11 @@ namespace JPB.DataAccess.AdoWrapper
             return _strategy.CreateParameter(strName, value);
         }
 
+        /// <summary>
+        /// Executes a query against the database
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
         public int ExecuteNonQuery(IDbCommand cmd)
         {
             if (null == GetConnection())
@@ -179,9 +184,15 @@ namespace JPB.DataAccess.AdoWrapper
             return cmd.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// executes the query against the database and wrapps all params by using a counter. First param @0,@1,@n
+        /// </summary>
+        /// <param name="strSql"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int ExecuteNonQuery(string strSql, params object[] obj)
         {
-            return DoExecuteNonQuery(string.Format(strSql, obj));
+            return DoExecuteNonQuery(strSql, obj);
         }
 
         public IDbCommand GetlastInsertedIdCommand()
@@ -610,6 +621,23 @@ namespace JPB.DataAccess.AdoWrapper
                 throw new Exception("DB2.ExecuteNonQuery: void connection");
 
             using (IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection()))
+            {
+                if (_trans != null)
+                    cmd.Transaction = _trans;
+                LastExecutedQuery = cmd.CreateQueryDebugger(this);
+
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        private int DoExecuteNonQuery(string strSql, params object[] param)
+        {
+            if (null == GetConnection())
+                throw new Exception("DB2.ExecuteNonQuery: void connection");
+            int counter = 0;
+            using (IDbCommand cmd = _strategy.CreateCommand(strSql,
+                GetConnection(), 
+                param.Select(s => this.CreateParameter(counter++.ToString(), s)).ToArray()))
             {
                 if (_trans != null)
                     cmd.Transaction = _trans;

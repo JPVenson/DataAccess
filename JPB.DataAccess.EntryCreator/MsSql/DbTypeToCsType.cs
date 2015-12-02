@@ -18,11 +18,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
             foreach (var item in all)
             {
-                if(item.Name == "SqlGeography")
-                {
-                    Console.WriteLine();
-                }
-
                 var attributes = item.GetCustomAttributes(true);
 
                 if(attributes.Any(f => f is SqlUserDefinedTypeAttribute))

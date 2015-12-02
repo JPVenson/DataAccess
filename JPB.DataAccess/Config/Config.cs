@@ -59,6 +59,7 @@ namespace JPB.DataAccess.Configuration
                 {
                     var declaringType = type.ReflectedType;
                     SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                    element.CheckForConfig();
                 }
             }
 
@@ -78,6 +79,7 @@ namespace JPB.DataAccess.Configuration
                 if (element == null)
                 {
                     SClassInfoCaches.Add(element = new ClassInfoCache(type));
+                    element.CheckForConfig();
                 }
             }
 
@@ -99,6 +101,7 @@ namespace JPB.DataAccess.Configuration
                 {
                     var declaringType = type.ReflectedType;
                     SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                    element.CheckForConfig();
                 }
             }
 

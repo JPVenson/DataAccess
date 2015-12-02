@@ -25,13 +25,12 @@ namespace JPB.DataAccess.Configuration.Model
                 this.MethodInfoCaches = type.GetMethods().Select(s => new MethodInfoCache(s)).ToList();
                 this.ConstructorInfoCaches = type.GetConstructors().Select(s => new ConstructorInfoCache(s)).ToList();
 
-                this.CheckForConfig();
             }
         }
 
-        private void CheckForConfig()
+        public void CheckForConfig()
         {
-            var configMethods = this.MethodInfoCaches.Where(f => f.AttributeInfoCaches.Any(e => e is ConfigMehtodAttribute)).ToArray();
+            var configMethods = MethodInfoCaches.Where(f => f.AttributeInfoCaches.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
             if (!configMethods.Any())
                 return;
 

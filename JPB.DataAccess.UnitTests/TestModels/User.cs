@@ -5,6 +5,7 @@ using System.Runtime.Remoting.Messaging;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
+using JPB.DataAccess.Configuration;
 
 namespace UnitTestProject1
 {
@@ -61,6 +62,24 @@ namespace UnitTestProject1
 
     public class ConfigLessUser
     {
+        public long PropertyA { get; set; }
+        public string PropertyB { get; set; }
+    }
+
+    public class ConfigLessUserInplaceConfig
+    {
+        [ConfigMehtod]
+        public static void Config(Config config)
+        {
+            config.SetConfig<ConfigLessUserInplaceConfig>(f =>
+            {
+                f.SetClassAttribute(new ForModel(UsersMeta.UserTable));
+                f.SetPrimaryKey(e => e.PropertyA);
+                f.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
+                f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);
+            });
+        }
+
         public long PropertyA { get; set; }
         public string PropertyB { get; set; }
     }

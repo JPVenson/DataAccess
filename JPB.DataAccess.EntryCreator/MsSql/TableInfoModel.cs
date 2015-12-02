@@ -72,11 +72,16 @@ namespace JPB.DataAccess.EntityCreator.MsSql
     {
         public ColumInfoModel(ColumnInfo columnInfo)
         {
-            ColumnInfo = columnInfo;
+            ColumnInfo = columnInfo;  
+            if(columnInfo.TargetType2.ToLower() == "timestamp")
+            {
+                IsRowVersion = true;
+            }        
         }
 
         public ColumnInfo ColumnInfo { get; set; }
         public string NewColumnName { get; set; }
+        public bool IsRowVersion { get; set; }
 
         public bool PrimaryKey { get; set; }
 

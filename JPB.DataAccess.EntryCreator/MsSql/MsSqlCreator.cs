@@ -577,7 +577,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                     continue;
 
                 var targetCsName = proc.GetClassName();
-                var generatedClass = new ClassCompiler(TargetDir, targetCsName);
+                var generatedClass = new ClassCompiler(TargetDir, targetCsName, true);
                 classes.Add(generatedClass);
 
                 generatedClass.TargetName = proc.NewTableName;
@@ -585,7 +585,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                     foreach (var spParamter in proc.Parameter.ParamaterSpParams)
                     {
                         var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
-                        var spcName = spParamter.Parameter;
+                        var spcName = spParamter.Parameter.Replace("@","");
                         generatedClass.AddProperty(spcName, targetType);
                     }
             }

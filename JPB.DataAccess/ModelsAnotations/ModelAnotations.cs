@@ -31,7 +31,7 @@ namespace JPB.DataAccess.ModelsAnotations
     /// When a methode is marked with this attribute it can be used to configurate the current class. Must be public static void
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    sealed class ConfigMehtodAttribute : DataAccessAttribute
+    public sealed class ConfigMehtodAttribute : DataAccessAttribute
     {
 
     }
