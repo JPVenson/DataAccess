@@ -18,7 +18,7 @@ namespace JPB.DataAccess.QueryBuilder
     /// <summary>
     /// 
     /// </summary>
-    public class QueryBuilder : IEnumerable
+    public class QueryBuilder : IEnumerable, ICloneable
     {
         internal readonly IDatabase Database;
         protected readonly Type _forType;
@@ -174,6 +174,15 @@ namespace JPB.DataAccess.QueryBuilder
         {
             this.AllowParamterRenaming = value;
             return this;
+        }
+
+        public object Clone()
+        {
+            return new QueryBuilder(this.Database)
+            {
+                EnumerationMode = EnumerationMode,
+                Parts = Parts
+            };
         }
     }
 

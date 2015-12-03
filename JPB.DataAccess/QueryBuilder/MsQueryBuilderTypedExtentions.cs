@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -177,7 +178,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <param name="useStarOperator"></param>
         /// <returns></returns>
         /// 
-        [Obsolete("Use the InBracket Mehtod",true)]
+        [Obsolete("Use the InBracket Mehtod", true)]
         public static QueryBuilder<T> SubSelect<T>(this QueryBuilder<T> query, Action<QueryBuilder<T>> subSelect)
         {
             query.Query("(");
@@ -265,6 +266,17 @@ namespace JPB.DataAccess.QueryBuilder
         public static QueryBuilder<T> RowNumberOrder<T>(this QueryBuilder<T> query, string over, bool Desc = false)
         {
             return query.Query("ROW_NUMBER() OVER (ORDER BY {0} {1})", over, Desc ? "DESC" : "ASC");
+        }
+
+        /// <summary>
+        /// Add an RowNumberOrder part
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="over"></param>
+        /// <returns></returns>
+        public static QueryBuilder<T> RowNumberOrder<T, TProp>(this QueryBuilder<T> query, Expression<Func<T, TProp>> exp, bool Desc = false)
+        {
+            return query.Query("ROW_NUMBER() OVER (ORDER BY {0} {1})", ConfigHelper.GetPropertyInfoFromLabda(exp), Desc ? "DESC" : "ASC");
         }
 
         /// <summary>
@@ -407,7 +419,7 @@ namespace JPB.DataAccess.QueryBuilder
                 case DbAccessType.MySql:
                     return query.Query("LIMIT BY {0}", top);
                 default:
-                    throw new NotSupportedException("For the Selected DB type is no Top implementations Available. Use Query insted");
+                    throw new NotSupportedException("For the Selected DB type is no Top implementations Available. Use QueryD insted");
             }
             return query;
         }

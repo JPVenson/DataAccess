@@ -25,7 +25,6 @@ namespace JPB.DataAccess
                 predicate
             };
 
-
             MethodCallExpression methodCallExpression = Expression.Call(null, info, expressions);
 
             return

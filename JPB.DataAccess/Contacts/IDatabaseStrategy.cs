@@ -24,9 +24,12 @@ namespace JPB.DataAccess.AdoWrapper
         /// Should return the current database if availibe
         /// </summary>
         string ServerName { get; }
-
-
+        /// <summary>
+        /// Creates a new Provider specific Connection that will held open until all actors want to close it
+        /// </summary>
+        /// <returns></returns>
         IDbConnection CreateConnection();
+
         IDbCommand CreateCommand(string strSql, IDbConnection conn);
         IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields);
         IDataParameter CreateParameter(string strName, object value);

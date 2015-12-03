@@ -52,7 +52,7 @@ namespace JPB.DataAccess.Config
         }
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set a Forgin key on a Property
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
@@ -62,17 +62,17 @@ namespace JPB.DataAccess.Config
         }
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set a ForModel key on a Property
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
-public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
-{
-    SetPropertyAttribute(exp, new ForModel(value));
-}
+        public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
+        {
+            SetPropertyAttribute(exp, new ForModel(value));
+        }
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set a delete factory mehtod
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
@@ -82,7 +82,7 @@ public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
         }
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set a Object factory mehtod
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
@@ -92,7 +92,7 @@ public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
         }
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set a Select method
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
@@ -102,7 +102,7 @@ public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
         }
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set a Insert mehtod
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
@@ -112,7 +112,7 @@ public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
         }
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set a Update mehtod
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>
@@ -123,7 +123,7 @@ public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
 
 
         /// <summary>
-        /// Set the Primary key 
+        /// Set the Table Name ForModel key
         /// </summary>
         /// <param name="config"></param>
         /// <param name="PropertyName"></param>

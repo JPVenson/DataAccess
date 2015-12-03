@@ -311,7 +311,7 @@ namespace JPB.DataAccess
             return database.Run(
                 s =>
                 {
-                    //Skip enumeration and make a Direct loading
+                    //Skip enumeration and parsing and make a Direct loading
                     //This increeses Performance
 
                     var records = new List<List<IDataRecord>>();
