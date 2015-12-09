@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;

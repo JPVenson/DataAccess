@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace JPB.DataAccess.Configuration.Model
+namespace JPB.DataAccess.Config.Model
 {
-    internal class PropertyInfoCache
+    /// <summary>
+    /// 
+    /// </summary>
+    public class PropertyInfoCache
     {
         public PropertyInfoCache(PropertyInfo propertyInfo)
         {
@@ -23,6 +24,8 @@ namespace JPB.DataAccess.Configuration.Model
         public PropertyInfo PropertyInfo { get; private set; }
         public string PropertyName { get; private set; }
         public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
+        
+        public AttributeInfoCache ForModel { get; private set; }
 
         internal static PropertyInfoCache Logical(string info)
         {

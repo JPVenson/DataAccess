@@ -223,7 +223,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                     command = selectQuery.Compile();
                 }
 
-                selectWhere = DbAccessLayer.SelectNative(TargetType, s, command);
+                selectWhere = DbAccessLayer.SelectNative(TargetType, s, command, true);
             });
 
             foreach (var item in selectWhere)

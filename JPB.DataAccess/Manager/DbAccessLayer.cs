@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbEventArgs;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;

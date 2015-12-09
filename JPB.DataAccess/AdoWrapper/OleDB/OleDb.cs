@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Data.OleDb;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 

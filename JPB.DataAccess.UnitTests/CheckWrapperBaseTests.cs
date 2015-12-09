@@ -41,7 +41,7 @@ namespace JPB.DataAccess.UnitTests
             get { return SConnectionString; }
         }
 
-      
+
         [TestInitialize]
         public async void InitTest()
         {
@@ -128,7 +128,7 @@ namespace JPB.DataAccess.UnitTests
 
             expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
-            var config = new Configuration.Config();
+            var config = new Config.Config();
 
             config.SetConfig<ConfigLessUser>(f =>
             {
@@ -156,7 +156,7 @@ namespace JPB.DataAccess.UnitTests
             var insGuid = Guid.NewGuid().ToString();
 
             expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
-                     
+
 
             expectWrapper.Insert(new ConfigLessUserInplaceConfig() { PropertyB = insGuid });
             var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.UserTable);
@@ -178,7 +178,7 @@ namespace JPB.DataAccess.UnitTests
 
             expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
-            var config = new Configuration.Config();
+            var config = new Config.Config();
             config.SetConfig<ConfigLessUser>(f =>
             {
                 f.SetClassAttribute(new ForModel(UsersMeta.UserTable));
@@ -305,6 +305,7 @@ namespace JPB.DataAccess.UnitTests
         [TestMethod]
         public void SelectBase()
         {
+            this.InsertTest();
             var refSelect = expectWrapper.Select<Users>();
             Assert.IsTrue(refSelect.Length > 0);
 

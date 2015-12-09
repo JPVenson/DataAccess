@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.ModelsAnotations
+﻿namespace JPB.DataAccess.Contacts
 {
     /// <summary>
     /// Used to load a Xml based Entry from a xml text

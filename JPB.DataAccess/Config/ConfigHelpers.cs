@@ -1,14 +1,11 @@
-using JPB.DataAccess.Configuration;
-using JPB.DataAccess.Configuration.Model;
-using JPB.DataAccess.ModelsAnotations;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
+using JPB.DataAccess.Config.Model;
 
-namespace JPB.DataAccess
+namespace JPB.DataAccess.Config
 {
 #if !DEBUG
     [DebuggerStepThrough]
@@ -17,7 +14,7 @@ namespace JPB.DataAccess
     {
         static ConfigHelper()
         {
-            ReflecionStore = new Configuration.Config();
+            ReflecionStore = new Config();
         }
 
         /// <summary>
@@ -36,7 +33,7 @@ namespace JPB.DataAccess
             //return nameContainsAnonymousType;
         }
 
-        internal static Configuration.Config ReflecionStore { get; set; }
+        internal static Config ReflecionStore { get; set; }
 
         internal static ClassInfoCache GetClassInfo(this Type type)
         {
@@ -47,30 +44,30 @@ namespace JPB.DataAccess
 
         }
 
-        internal static Attribute[] GetCustomAttributes(this Type type)
+        internal static IEnumerable<Attribute> GetCustomAttributes(this Type type)
         {
             if (IsAnonymousType(type))
                 return new Attribute[0]; //Anonymous types does not have any Attributes
 
-            return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
+            return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
         }
 
-        internal static Attribute[] GetCustomAttributes(this PropertyInfo type)
+        internal static IEnumerable<Attribute> GetCustomAttributes(this PropertyInfo type)
         {
             if (IsAnonymousType(type.DeclaringType))
                 return new Attribute[0]; //Anonymous types does not have any Attributes
 
-            var deb = ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
+            var deb = ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
 
             return deb;
         }
 
-        internal static Attribute[] GetCustomAttributes(this MethodInfo type)
+        internal static IEnumerable<Attribute> GetCustomAttributes(this MethodInfo type)
         {
             if (IsAnonymousType(type.DeclaringType))
                 return new Attribute[0]; //Anonymous types does not have any Attributes
 
-            var deb = ReflecionStore.GetOrCreateMethodInfoCache(type).AttributeInfoCaches.ToArray().Select(s => s.Attribute).ToArray();
+            var deb = ReflecionStore.GetOrCreateMethodInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
 
             return deb;
         }
@@ -91,12 +88,15 @@ namespace JPB.DataAccess
             return ReflecionStore.GetOrCreateClassInfoCache(type).SchemaMappingDatabaseToLocal(name);
         }
 
-        internal static PropertyInfo[] GetPropertiesEx(this Type type)
+        internal static IEnumerable<PropertyInfo> GetPropertiesEx(this Type type)
         {
             if (IsAnonymousType(type))
                 return type.GetProperties();
 
-            return ReflecionStore.GetOrCreateClassInfoCache(type).PropertyInfoCaches.ToArray().Select(s => s.PropertyInfo).ToArray();
+            return ReflecionStore
+                .GetOrCreateClassInfoCache(type)
+                .PropertyInfoCaches
+                .Select(s => s.PropertyInfo);
         }
 
         internal static string[] GetSchemaMapping(this Type type)
@@ -107,12 +107,12 @@ namespace JPB.DataAccess
             return ReflecionStore.GetOrCreateClassInfoCache(type).LocalToDbSchemaMapping();
         }
 
-        internal static MethodInfo[] GetMethods(this Type type)
+        internal static IEnumerable<MethodInfo> GetMethods(this Type type)
         {
             if (IsAnonymousType(type))
                 return type.GetMethods();
 
-            return ReflecionStore.GetOrCreateClassInfoCache(type).MethodInfoCaches.ToArray().Select(s => s.MethodInfo).ToArray();
+            return ReflecionStore.GetOrCreateClassInfoCache(type).MethodInfoCaches.ToArray().Select(s => s.MethodInfo);
         }
 
         public static string GetPropertyInfoFromLabda<TSource, TProperty>(
@@ -150,7 +150,7 @@ namespace JPB.DataAccess
             if (propInfo == null)
                 throw new ArgumentException(string.Format(
                     "Expression '{0}' refers to a field, not a property.",
-                    propertyLambda.ToString()));          
+                    propertyLambda.ToString()));
 
             return propInfo.Name;
         }

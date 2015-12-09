@@ -9,7 +9,6 @@ namespace JPB.DataAccess.UnitTests
     [TestClass]
     public class PagerUnitTest
     {
-
         static DbAccessLayer expectWrapper;
 
         [TestInitialize]

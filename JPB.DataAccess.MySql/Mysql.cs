@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.AdoWrapper.MsSql;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 using MySql.Data.MySqlClient;

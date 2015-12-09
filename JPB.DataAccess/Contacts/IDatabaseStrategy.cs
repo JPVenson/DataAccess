@@ -3,7 +3,7 @@ using System.Data;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
-namespace JPB.DataAccess.AdoWrapper
+namespace JPB.DataAccess.Contacts
 {
     public interface IDatabaseStrategy : ICloneable
     {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbEventArgs;
 using JPB.DataAccess.DebuggerHelper;
 

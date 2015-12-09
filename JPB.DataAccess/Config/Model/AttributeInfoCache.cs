@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace JPB.DataAccess.Configuration.Model
+namespace JPB.DataAccess.Config.Model
 {
-    internal class AttributeInfoCache
+    public class AttributeInfoCache
     {
         public Attribute Attribute { get; private set; }
         public object AttributeName { get; private set; }

@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace JPB.DataAccess.Configuration.Model
+namespace JPB.DataAccess.Config.Model
 {
-    internal class MethodInfoCache
+    public class MethodInfoCache
     {
         public MethodInfoCache(MethodInfo mehtodInfo)
         {

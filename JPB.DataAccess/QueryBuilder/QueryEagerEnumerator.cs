@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using JPB.DataAccess.Config;
 
 namespace JPB.DataAccess.QueryBuilder
 {
@@ -56,7 +57,7 @@ namespace JPB.DataAccess.QueryBuilder
                     return false;
 
                 var dataRecord = enumerateDataRecords.ElementAt(counter - 1);
-                Current = DataConverterExtensions.SetPropertysViaReflection(_type, dataRecord);
+                Current = _type.GetClassInfo().SetPropertysViaReflection(dataRecord);
                 elements.Add(Current);
 
                 return true;

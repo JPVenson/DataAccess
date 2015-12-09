@@ -1,14 +1,12 @@
-﻿using JPB.DataAccess.Config.Model;
-using JPB.DataAccess.ModelsAnotations;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.Configuration.Model
+namespace JPB.DataAccess.Config.Model
 {
-    internal class ClassInfoCache
+    public class ClassInfoCache
     {
         public ClassInfoCache(Type type)
         {
@@ -22,6 +20,10 @@ namespace JPB.DataAccess.Configuration.Model
             this.PropertyInfoCaches = type.GetProperties().Select(s => new PropertyInfoCache(s)).ToList();
             this.MethodInfoCaches = type.GetMethods().Select(s => new MethodInfoCache(s)).ToList();
             this.ConstructorInfoCaches = type.GetConstructors().Select(s => new ConstructorInfoCache(s)).ToList();
+
+            this.ForModel = this.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
+            this.SelectFactory = this.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute);
+            this.HasRelations = this.AttributeInfoCaches.Any(s => s.Attribute is ForeignKeyAttribute);
         }
 
         public void CheckForConfig()
@@ -36,19 +38,15 @@ namespace JPB.DataAccess.Configuration.Model
                 item.MethodInfo.Invoke(null, new object[] { config });
             }
         }
-
-        internal PropertyInfoCache GetOrCreatePropertyCache(string info)
-        {
-            var fod = PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == info);
-            if (fod != null)
-                return fod;
-            fod = PropertyInfoCache.Logical(info);
-            PropertyInfoCaches.Add(fod);
-            return fod;
-        }
-
+        
         public string ClassName { get; private set; }
         public Type Type { get; private set; }
+        public Func<IDataRecord, object> Factory { get; set; }
+        public bool FullFactory { get; set; }
+
+        public AttributeInfoCache ForModel { get; private set; }
+        public AttributeInfoCache SelectFactory { get; private set; }
+
         /// <summary>
         /// Key is C# Property name and Value is DB Eqivalent
         /// </summary>
@@ -57,6 +55,7 @@ namespace JPB.DataAccess.Configuration.Model
         public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
         public List<MethodInfoCache> MethodInfoCaches { get; private set; }
         public List<ConstructorInfoCache> ConstructorInfoCaches { get; set; }
+        public bool HasRelations { get; private set; }
 
         internal string SchemaMappingLocalToDatabase(string cSharpName)
         {

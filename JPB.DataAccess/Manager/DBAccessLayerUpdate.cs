@@ -2,6 +2,8 @@
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Config;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess;
 using JPB.DataAccess.QueryBuilder;
@@ -113,7 +115,7 @@ namespace JPB.DataAccess.Manager
         static internal bool CopyPropertys(object @base, object newObject)
         {
             var updated = false;
-            var propertys = ConfigHelper.GetPropertiesEx(@base.GetType());
+            var propertys = @base.GetType().GetPropertiesEx();
             foreach (var propertyInfo in propertys)
             {
                 object oldValue = propertyInfo.GetConvertedValue(@base);

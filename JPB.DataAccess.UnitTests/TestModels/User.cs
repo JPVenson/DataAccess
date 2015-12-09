@@ -2,10 +2,10 @@
 using System.Data;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
+using JPB.DataAccess.Config;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
-using JPB.DataAccess.Configuration;
 
 namespace UnitTestProject1
 {

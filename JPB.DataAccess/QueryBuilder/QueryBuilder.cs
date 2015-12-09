@@ -10,6 +10,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.QueryProvider;
 

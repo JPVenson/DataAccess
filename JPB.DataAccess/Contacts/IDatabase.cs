@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Windows.Input;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
-namespace JPB.DataAccess.AdoWrapper
+namespace JPB.DataAccess.Contacts
 {
     /// <summary>
     /// Database wrapper interface

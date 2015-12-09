@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using JPB.DataAccess.Config;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess;
 using JPB.DataAccess.Manager;

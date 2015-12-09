@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess;
+using JPB.DataAccess.Config;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.Manager
@@ -95,8 +97,10 @@ namespace JPB.DataAccess.Manager
         public List<object> ExecuteProcedure(Type procParamType, Type resultType, object procParam)
         {
             var command = CreateProcedureCall(procParamType, procParam, Database);
+            var typeInfo = resultType.GetClassInfo();
+
             return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
-                .Select(dataRecord => DataConverterExtensions.SetPropertysViaReflection(resultType, dataRecord))
+                .Select(typeInfo.SetPropertysViaReflection)
                 .ToList();
         }
 

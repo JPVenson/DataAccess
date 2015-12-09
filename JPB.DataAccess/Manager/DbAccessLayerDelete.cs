@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbEventArgs;
 using JPB.DataAccess.ModelsAnotations;
 

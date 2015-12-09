@@ -1,5 +1,4 @@
-﻿using JPB.DataAccess.Configuration.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.Config.Model
 {
-    internal class ConstructorInfoCache
+    public class ConstructorInfoCache
     {
         public ConstructorInfoCache(ConstructorInfo mehtodInfo)
         {

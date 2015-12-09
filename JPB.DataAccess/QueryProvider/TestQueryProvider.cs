@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using JPB.DataAccess.Config;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 
@@ -65,7 +66,7 @@ namespace JPB.DataAccess.QueryProvider
                 queryBuilder.Append(processParameter(exp.Item1, exp.Item2));
             }
 
-            return DbAccessLayer.RunSelect(type, DbAccessLayer.Database, queryBuilder.ToString(), _parameters);
+            return DbAccessLayer.RunSelect(type, DbAccessLayer.Database, queryBuilder.ToString(), _parameters , false);
         }
 
 

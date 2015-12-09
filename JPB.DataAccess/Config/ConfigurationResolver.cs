@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JPB.DataAccess.Configuration;
 using System.Linq.Expressions;
-using JPB.DataAccess.Configuration.Model;
+using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Config
 {
     public class ConfigurationResolver<T>
     {
-        private Configuration.Config config;
+        private Config config;
 
-        internal ConfigurationResolver(Configuration.Config config)
+        internal ConfigurationResolver(Config config)
         {
             this.config = config;
         }
@@ -23,7 +23,7 @@ namespace JPB.DataAccess.Config
         {
             var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
             var info = ConfigHelper.GetPropertyInfoFromLabda(exp);
-            var fod = classInfo.GetOrCreatePropertyCache(info);
+            var fod = classInfo.PropertyInfoCaches.First(s => s.PropertyName == info);
             fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
         }
 
@@ -39,6 +39,18 @@ namespace JPB.DataAccess.Config
         {
             var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
             classInfo.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+        }
+
+        /// <summary>
+        /// Set a Mehtod for creating an instance. When FullLoad is true the Framework assumes that the Factory has loaded all infos from the IDataRecord into the new Object
+        /// </summary>
+        /// <param name="factory"></param>
+        /// <param name="fullLoad"></param>
+        public void SetFactory(Func<IDataRecord, object> factory, bool fullLoad)
+        {
+            var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
+            classInfo.Factory = factory;
+            classInfo.FullFactory = fullLoad;
         }
 
         /// <summary>

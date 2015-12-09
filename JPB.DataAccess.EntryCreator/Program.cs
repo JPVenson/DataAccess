@@ -1,56 +1,21 @@
 ﻿using System;
 using System.Data;
-using System.Data.Common;
 using System.Data.Sql;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using JPB.DataAccess.EntityCreator.MsSql;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Collections.Generic;
+using Clipboard = System.Windows.Clipboard;
+using MessageBox = System.Windows.MessageBox;
+using TextDataFormat = System.Windows.TextDataFormat;
 
 namespace JPB.DataAccess.EntityCreator
 {
     public class Program
     {
-        public Program()
-        {
-
-        }
-
-        public class ArgumentWrapper
-        {
-            public string OutputDirectory { get; set; }
-            public string ConnectionString { get; set; }
-
-            //public static ArgumentWrapper ParseArguments(string[] args)
-            //{
-            //    var argW = new ArgumentWrapper();
-            //    foreach (var arg in args)
-            //    {
-            //        var outp = GetArgument(arg, "/out");
-            //        var con = GetArgument(arg, "/con");
-            //        if (!string.IsNullOrEmpty(outp))
-            //        {
-            //            OutputDirectory = 
-            //        }
-            //    }
-            //}
-
-            private static string GetArgument(string value, string key)
-            {
-                if (value.StartsWith(key))
-                {
-                    return value.Substring(key.Length);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
         public static Options Options { get; set; }
         private static List<string> _op = new List<string>();
         static int index = 0;

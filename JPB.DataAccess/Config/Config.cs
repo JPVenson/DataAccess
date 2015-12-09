@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.Configuration.Model;
-using JPB.DataAccess.Config;
+using JPB.DataAccess.Config.Model;
 
-namespace JPB.DataAccess.Configuration
+namespace JPB.DataAccess.Config
 {
     /// <summary>
     /// Class info Storage
@@ -20,18 +17,23 @@ namespace JPB.DataAccess.Configuration
     {
         static Config()
         {
-            SClassInfoCaches = new ConcurrentBag<ClassInfoCache>();
+            SClassInfoCaches = new List<ClassInfoCache>();
         }
 
         /// <summary>
         /// Creates a new Instance for configuration
         /// </summary>
-        /// <param name="enableReflection">If set reflection will be used to enumerate all used class instances</param>
+        /// <param name="enableReflection">If set reflection will be used to enumerate all used class instances [Not used]</param>
         public Config(bool enableReflection = true)
         {
             this.UseReflection = enableReflection;
         }
 
+        /// <summary>
+        /// Allows you to alter the Config store that holds T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="validator"></param>
         public void SetConfig<T>(Action<ConfigurationResolver<T>> validator)
         {
             validator(new ConfigurationResolver<T>(this));
@@ -53,19 +55,16 @@ namespace JPB.DataAccess.Configuration
             var name = type.Name;
             var element = SClassInfoCaches.FirstOrDefault(s => s.Type == declareingType && s.PropertyInfoCaches.Any(e => e.PropertyName == name));
 
-            lock (typeof(Config))
+            if (element == null)
             {
-                if (element == null)
-                {
-                    var declaringType = type.ReflectedType;
-                    SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
-                    element.CheckForConfig();
-                }
+                var declaringType = type.ReflectedType;
+                SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                element.CheckForConfig();
             }
-
 
             return element.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == type.Name);
         }
+
         /// <summary>
         /// Gets an Cache object if exists or creats one
         /// </summary>
@@ -74,17 +73,15 @@ namespace JPB.DataAccess.Configuration
         internal ClassInfoCache GetOrCreateClassInfoCache(Type type)
         {
             var element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
-            lock (typeof(Config))
+            if (element == null)
             {
-                if (element == null)
-                {
-                    SClassInfoCaches.Add(element = new ClassInfoCache(type));
-                    element.CheckForConfig();
-                }
+                SClassInfoCaches.Add(element = new ClassInfoCache(type));
+                element.CheckForConfig();
             }
 
             return element;
         }
+
         /// <summary>
         /// Gets an Cache object if exists or creats one
         /// </summary>
@@ -95,19 +92,16 @@ namespace JPB.DataAccess.Configuration
             var declareingType = type.ReflectedType;
             var name = type.Name;
             var element = SClassInfoCaches.FirstOrDefault(s => s.Type == declareingType && s.MethodInfoCaches.Any(e => e.MethodName == name));
-            lock (typeof(Config))
+            if (element == null)
             {
-                if (element == null)
-                {
-                    var declaringType = type.ReflectedType;
-                    SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
-                    element.CheckForConfig();
-                }
+                var declaringType = type.ReflectedType;
+                SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+                element.CheckForConfig();
             }
 
             return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);
         }
 
-        internal static ConcurrentBag<ClassInfoCache> SClassInfoCaches { get; private set; }
+        internal static List<ClassInfoCache> SClassInfoCaches { get; private set; }
     }
 }

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.DebuggerHelper
 {
@@ -90,6 +91,7 @@ namespace JPB.DataAccess.DebuggerHelper
         {
             var frames = new StackTrace().GetFrames();
             //This call is a bit of work so kick it off to a Task and let it run
+            //we have to do it here because inside of the task this info is lost
             _wokerTask = new Task(() =>
             {
                 try

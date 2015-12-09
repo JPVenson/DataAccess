@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Config;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
@@ -377,7 +379,7 @@ namespace JPB.DataAccess
         public static string[] CreateIgnoreList(this Type type)
         {
             return
-                ConfigHelper.GetPropertiesEx(type)
+                type.GetPropertiesEx()
                     .Where(
                         s =>
                             s.GetGetMethod(false).IsVirtual ||
@@ -408,10 +410,12 @@ namespace JPB.DataAccess
         public static List<T> ExecuteGenericCreateModelsCommand<T>(this IDbCommand command, IDatabase db)
             where T : class, new()
         {
+            var info = typeof (T).GetClassInfo();
             return db.Run(
                 s =>
-                    s.GetEntitiesList(command, DataConverterExtensions.SetPropertysViaReflection<T>)
-                        .ToList());
+                    s.GetEntitiesList(command, info.SetPropertysViaReflection)
+                    .Cast<T>()
+                    .ToList());
         }
 
         /// <summary>

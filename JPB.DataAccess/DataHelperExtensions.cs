@@ -1,5 +1,6 @@
 using System.Data;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess
 {

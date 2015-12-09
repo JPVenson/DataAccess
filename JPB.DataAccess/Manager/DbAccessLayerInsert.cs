@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Config;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess;
@@ -49,7 +51,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public T InsertWithSelect<T>(T entry)
         {
-            return InsertWithSelect(entry, Database);
+            return InsertWithSelect(entry, Database, LoadCompleteResultBeforeMapping);
         }
 
         /// <summary>
@@ -201,13 +203,13 @@ namespace JPB.DataAccess.Manager
         /// <param name="entry"></param>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static object InsertWithSelect(Type type, object entry, IDatabase db)
+        public static object InsertWithSelect(Type type, object entry, IDatabase db, bool egarLoading)
         {
             return db.Run(s =>
             {
                 var mergeCommands = CreateInsertWithSelectCommand(type, entry, db);
                 RaiseInsert(entry, mergeCommands, s);
-                return Select(type, s.GetSkalar(mergeCommands), s);
+                return Select(type, s.GetSkalar(mergeCommands), s, egarLoading);
             });
         }
 
@@ -252,9 +254,9 @@ namespace JPB.DataAccess.Manager
         /// <param name="db"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T InsertWithSelect<T>(T entry, IDatabase db)
+        public static T InsertWithSelect<T>(T entry, IDatabase db, bool egarLoading)
         {
-            return (T)InsertWithSelect(typeof(T), entry, db);
+            return (T)InsertWithSelect(typeof(T), entry, db, egarLoading);
         }
     }
 }

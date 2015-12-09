@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using JPB.DataAccess.Config;
+using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.QueryBuilder
@@ -13,7 +15,7 @@ namespace JPB.DataAccess.QueryBuilder
     public class QueryLazyEnumerator : IEnumerator, IDisposable
     {
         private readonly QueryBuilder _queryBuilder;
-        private readonly Type _type;
+        private readonly ClassInfoCache _type;
         private IDataReader executeReader;
         private Task _loadingTask;
         private DbAccessLayer _accessLayer;
@@ -21,7 +23,7 @@ namespace JPB.DataAccess.QueryBuilder
         public QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
         {
             _queryBuilder = queryBuilder;
-            _type = type;
+            _type = type.GetClassInfo();
             _accessLayer = new DbAccessLayer(queryBuilder.Database);
             _accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
             executeReader = _queryBuilder.Compile().ExecuteReader();
@@ -54,7 +56,7 @@ namespace JPB.DataAccess.QueryBuilder
         {
             get
             {
-                return DataConverterExtensions.SetPropertysViaReflection(_type, executeReader);
+                return _type.SetPropertysViaReflection(executeReader);
             }
         }
     }

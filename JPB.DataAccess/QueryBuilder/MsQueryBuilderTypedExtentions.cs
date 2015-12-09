@@ -1,4 +1,5 @@
-﻿using JPB.DataAccess.Helper;
+﻿using JPB.DataAccess.Config;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 using System;
@@ -102,7 +103,7 @@ namespace JPB.DataAccess.QueryBuilder
         /// <returns></returns>
         public static QueryBuilder<T> Select<T>(this QueryBuilder<T> query, Type type)
         {
-            return query.Query(DbAccessLayer.CreateSelectQueryFactory(type, query.Database));
+            return query.Query(DbAccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.Database));
         }
 
         /// <summary>
