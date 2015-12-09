@@ -227,7 +227,7 @@ namespace JPB.DataAccess.Manager
             //        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
 
             var methods =
-                type.ConstructorInfoCaches
+                type.MethodInfoCaches
                     .Where(s => s.AttributeInfoCaches.Any(e => e.Attribute is SelectFactoryMethodAttribute))
                     .ToArray();
 

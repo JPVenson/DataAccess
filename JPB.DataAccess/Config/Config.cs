@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.Config.Model;
-
+#if !DEBUG
+using System.Diagnostics;
+#endif
 namespace JPB.DataAccess.Config
 {
     /// <summary>
