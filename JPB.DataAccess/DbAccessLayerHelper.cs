@@ -308,7 +308,7 @@ namespace JPB.DataAccess
             return EnumerateMarsDataRecords(database, query, egarLoading).FirstOrDefault();
         }
 
-        internal static List<List<IDataRecord>> EnumerateMarsDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
+        internal static List<List<IDataRecord>> EnumerateMarsDataRecords(this IDatabase database, IDbCommand query, bool egarLoading = true)
         {
             return database.Run(
                 s =>
@@ -327,14 +327,7 @@ namespace JPB.DataAccess
                                 var resultSet = new List<IDataRecord>();
                                 while (dr.Read())
                                 {
-                                    if (egarLoading)
-                                    {
-                                        resultSet.Add(dr.CreateEgarRecord());
-                                    }
-                                    else
-                                    {
-                                        resultSet.Add(dr);
-                                    }
+                                    resultSet.Add(dr.CreateEgarRecord());
                                 }
                                 records.Add(resultSet);
 
