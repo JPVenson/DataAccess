@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Manager
 
             var handler = OnDelete;
             if (handler != null)
-                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
+                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
         }
 
         protected internal static void RaiseException(object sender, Exception ex)
@@ -70,7 +70,7 @@ namespace JPB.DataAccess.Manager
                 return;
             var handler = OnSelect;
             if (handler != null)
-                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
+                handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
         }
 
         protected internal static void RaiseUpdate(object sender, IDbCommand query, IDatabase source)
@@ -80,7 +80,7 @@ namespace JPB.DataAccess.Manager
 
             var handler = OnUpdate;
             if (handler != null)
-                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
+                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
         }
 
         protected internal static void RaiseInsert(object sender, IDbCommand query, IDatabase source)
@@ -90,7 +90,7 @@ namespace JPB.DataAccess.Manager
 
             var handler = OnInsert;
             if (handler != null)
-                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger()), s => { }, null);
+                handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
         }
     }
 }

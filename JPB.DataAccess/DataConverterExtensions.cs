@@ -47,9 +47,26 @@ namespace JPB.DataAccess
         /// <param name="command"></param>
         /// <param name="source"></param>
         /// <returns></returns>
+        internal static QueryDebugger CreateQueryDebuggerAuto(this IDbCommand command, IDatabase source)
+        {
+            if (DbAccessLayer.Debugger)
+            {
+                return new QueryDebugger(command, source);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static QueryDebugger CreateQueryDebugger(this IDbCommand command, IDatabase source = null)
         {
-            return null;
             return new QueryDebugger(command, source);
         }
 
@@ -465,9 +482,9 @@ namespace JPB.DataAccess
         /// <param name="accessLayer"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T LoadNavigationProps<T>(this T source, IDatabase accessLayer)
+        public static T LoadNavigationProps<T>(this T source, IDatabase accessLayer, bool egarloading = false)
         {
-            return (T)LoadNavigationProps(source as object, accessLayer);
+            return (T)LoadNavigationProps(source as object, accessLayer, egarloading);
         }
 
         /// <summary>

@@ -85,8 +85,8 @@ namespace JPB.DataAccess.Manager
         ///     T contains a Valid RowVersion property
         ///     AND
         ///         RowVersion property is not equals the DB version
-        ///         OR
-        ///         T does not contain any RowVersion
+        ///     OR
+        ///     T does not contain any RowVersion
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entry"></param>

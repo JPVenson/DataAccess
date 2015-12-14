@@ -81,6 +81,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
         public static StringBuilder CreateHeader()
         {
             var copyrightBuilder = new StringBuilder();
+            return copyrightBuilder;
 
             copyrightBuilder.AppendLine("o--------------------------------o");
             copyrightBuilder.AppendLine("| Made by Jean - Pierre Bachmann |");

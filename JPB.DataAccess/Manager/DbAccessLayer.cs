@@ -14,9 +14,8 @@ using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
-#if !DEBUG
 using System.Diagnostics;
-#endif
+
 namespace JPB.DataAccess.Manager
 {
     /// <summary>
@@ -32,18 +31,23 @@ namespace JPB.DataAccess.Manager
         static DbAccessLayer()
         {
             SProcedureDbAccessLayer();
+            ProviderCollection = new PreDefinedProviderCollection();
         }
 
         private IDatabase _database;
 
         /// <summary>
+        /// Enables the automatic creation of QueryDebugger objects on each created IDbCommand
+        /// </summary>
+        public static bool Debugger { get; set; } = false;
+
+        /// <summary>
         /// Defines a set of Providers that are inclueded in this DLL or are weak refernced.
         /// </summary>
-        public PreDefinedProviderCollection ProviderCollection { get; private set; }
+        public static PreDefinedProviderCollection ProviderCollection { get; private set; }
 
         internal DbAccessLayer()
         {
-            ProviderCollection = new PreDefinedProviderCollection();
             LoadCompleteResultBeforeMapping = true;
 
             SelectDbAccessLayer();
@@ -164,7 +168,7 @@ namespace JPB.DataAccess.Manager
                 }
             }
         }
-             
+
 
         /// <summary>
         /// Check for Availability 

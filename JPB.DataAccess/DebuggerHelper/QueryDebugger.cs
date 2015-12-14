@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.DebuggerHelper
 {
@@ -25,11 +26,18 @@ namespace JPB.DataAccess.DebuggerHelper
         /// <param name="source"></param>
         internal QueryDebugger(IDbCommand command, IDatabase source)
         {
+            Init();
             //Init async because this could be time consuming
             _loaded = false;
-            Init();
+         
             var debugquery = new StringBuilder(command.CommandText);
             string formartCommandToQuery;
+            if(UseDefaultDatabase != null && source == null)
+            {
+                source = new DefaultDatabaseAccess();
+                source.Attach(UseDefaultDatabase);
+            }
+
             if (source != null)
             {
                 formartCommandToQuery = source.FormartCommandToQuery(command);
@@ -50,6 +58,11 @@ namespace JPB.DataAccess.DebuggerHelper
         }
 
         static readonly Assembly Assembly;
+
+        /// <summary>
+        /// When set to true the Query debugger creates an own instance the the Default database connection assumd by the type of the IDbCommand it contains
+        /// </summary>
+        public static IDatabaseStrategy UseDefaultDatabase { get; set; }
 
         /// <summary>
         /// Stores the exact executed query
@@ -92,14 +105,14 @@ namespace JPB.DataAccess.DebuggerHelper
             var frames = new StackTrace().GetFrames();
             //This call is a bit of work so kick it off to a Task and let it run
             //we have to do it here because inside of the task this info is lost
-            _wokerTask = new Task(() =>
+            _wokerTask = new Task((stack) =>
             {
                 try
                 {
                     IEnumerable<StackFrame> stackFrames;
-                    if (frames != null)
+                    if (stack != null)
                     {
-                        stackFrames = frames.Where(s =>
+                        stackFrames = (stack as IEnumerable<StackFrame>).Where(s =>
                         {
                             var methodBase = s.GetMethod();
                             if (Assembly.DefinedTypes.Contains(methodBase.DeclaringType))
@@ -123,8 +136,7 @@ namespace JPB.DataAccess.DebuggerHelper
                 {
                     _loaded = true;
                 }
-            });
-
+            }, frames, TaskCreationOptions.PreferFairness);
             _wokerTask.Start();
         }
 
@@ -133,15 +145,16 @@ namespace JPB.DataAccess.DebuggerHelper
             var sql = new StringBuilder();
 
             if (!string.IsNullOrEmpty(command.Connection.Database))
-                sql.AppendLine("USE " + command.Connection.Database + ";");
+                sql.AppendLine("USE [" + command.Connection.Database + "];");
 
             foreach (IDataParameter parameter in command.Parameters)
             {
-                sql.AppendFormat("DECLARE {0} {1} = ", parameter.ParameterName, 0, ParameterValue(parameter));
+                sql.AppendFormat("DECLARE {0} {1} = {2}",
+                    parameter.ParameterName, 
+                    parameter.DbType.ToString().ToUpper(), 
+                    ParameterValue(parameter));
                 sql.AppendLine();
             }
-
-
             sql.Append(command.CommandText);
 
             return sql.ToString();

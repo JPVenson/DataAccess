@@ -272,7 +272,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             Boolean firstParam = true;
 
             if (!string.IsNullOrEmpty(sc.Connection.Database))
-                sql.AppendLine("USE " + sc.Connection.Database + ";");
+                sql.AppendLine("USE  [" + sc.Connection.Database + "];");
 
             switch (sc.CommandType)
             {
@@ -323,7 +323,16 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                 case CommandType.TableDirect:
                     foreach (var sp in sc.Parameters.Cast<SqlParameter>())
                     {
-                        sql.AppendLine("DECLARE " + " @" + sp.ParameterName + " " + sp.SqlDbType + " = " + QueryDebugger.ParameterValue(sp) + ";");
+                        var paramTypeCompiler = sp.SqlDbType.ToString().ToUpper();
+                        if(sp.Size > 0)
+                        {
+                            paramTypeCompiler += "(" + sp.Size + ")";
+                        }
+                                                
+                        sql.AppendLine("DECLARE " + " " 
+                            + sp.ParameterName + " " 
+                            + paramTypeCompiler + " = " 
+                            + QueryDebugger.ParameterValue(sp) + ";");
                     }
 
                     sql.AppendLine(sc.CommandText);

@@ -94,6 +94,92 @@ namespace JPB.DataAccess.UnitTests
         }
 
         [TestMethod]
+        public void Update()
+        {
+            InsertTest();
+            var singleEntity = expectWrapper
+                .Query()
+                .Select<Users>()
+                .Top(1)
+                .ForResult<Users>()
+                .Single();
+            Assert.IsNotNull(singleEntity);
+
+            var preName = singleEntity.UserName;
+            var postName = Guid.NewGuid().ToString();
+            Assert.IsNotNull(preName);
+
+            singleEntity.UserName = postName;
+            expectWrapper.Update(singleEntity);
+
+            var refEntity = expectWrapper.Select<Users>(singleEntity.User_ID);
+            Assert.IsNotNull(refEntity);
+            Assert.AreEqual(singleEntity.User_ID, refEntity.User_ID);
+            Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
+        }
+
+
+        [TestMethod]
+        public void Refresh()
+        {
+            InsertTest();
+            var singleEntity = expectWrapper
+                .Query()
+                .Select<Users>()
+                .Top(1)
+                .ForResult<Users>()
+                .Single();
+            var id = singleEntity.User_ID;
+            Assert.IsNotNull(singleEntity);
+
+            var preName = singleEntity.UserName;
+            var postName = Guid.NewGuid().ToString();
+            Assert.IsNotNull(preName);
+
+            singleEntity.UserName = postName;
+            expectWrapper.Update(singleEntity);
+            singleEntity.UserName = null;
+
+            singleEntity = expectWrapper.Refresh(singleEntity);
+            var refEntity = expectWrapper.Select<Users>(id);
+
+            Assert.IsNotNull(refEntity);
+            Assert.AreEqual(id, refEntity.User_ID);
+            Assert.AreEqual(singleEntity.User_ID, refEntity.User_ID);
+            Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
+        }
+
+        [TestMethod]
+        public void RefreshInplace()
+        {
+            InsertTest();
+            var singleEntity = expectWrapper
+                .Query()
+                .Select<Users>()
+                .Top(1)
+                .ForResult<Users>()
+                .Single();
+            var id = singleEntity.User_ID;
+            Assert.IsNotNull(singleEntity);
+
+            var preName = singleEntity.UserName;
+            var postName = Guid.NewGuid().ToString();
+            Assert.IsNotNull(preName);
+
+            singleEntity.UserName = postName;
+            expectWrapper.Update(singleEntity);
+            singleEntity.UserName = null;
+
+            expectWrapper.RefreshKeepObject(singleEntity);
+            var refEntity = expectWrapper.Select<Users>(id);
+
+            Assert.IsNotNull(refEntity);
+            Assert.AreEqual(id, refEntity.User_ID);
+            Assert.AreEqual(singleEntity.User_ID, refEntity.User_ID);
+            Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
+        }
+
+        [TestMethod]
         public void ExecuteGenericCommand()
         {
             var resultSelect1 = expectWrapper.ExecuteGenericCommand("Select 10", null);

@@ -191,7 +191,14 @@ namespace JPB.DataAccess.Manager
             db.Run(s => { s.ExecuteNonQuery(CreateInsert(type, entry, s)); });
         }
 
-        internal static IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
+        /// <summary>
+        /// Creates an insert command with appended LastInsertedIDCommand from the IDatabase interface
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="entry"></param>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public static IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
         {
             var dbCommand = CreateInsert(type, entry, db);
             return db.MergeCommands(dbCommand, db.GetlastInsertedIdCommand());
