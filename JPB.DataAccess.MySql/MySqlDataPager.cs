@@ -14,9 +14,9 @@ namespace JPB.DataAccess.MySql
             CurrentPageItems = new ObservableCollection<T>();
         }
 
-        public new ICollection<T> CurrentPageItems { get; private set; }
+        public override ICollection<T> CurrentPageItems { get; protected set; }
 
-        public new void LoadPage(DbAccessLayer dbAccess)
+        public override void LoadPage(DbAccessLayer dbAccess)
         {
             base.LoadPage(dbAccess);
         }

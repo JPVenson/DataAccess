@@ -97,7 +97,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
         public void LoadPage(DbAccessLayer dbAccess)
         {
-            dynamic[] selectWhere = null;
+            T[] selectWhere = null;
             dbAccess.Database.RunInTransaction(s =>
             {
                 IDbCommand finalAppendCommand = null;
@@ -223,7 +223,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                     command = selectQuery.Compile();
                 }
 
-                selectWhere = DbAccessLayer.SelectNative(TargetType, s, command, true);
+                selectWhere = DbAccessLayer.SelectNative(TargetType, s, command, true) as T[];
             });
 
             foreach (var item in selectWhere)

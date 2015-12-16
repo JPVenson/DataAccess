@@ -332,7 +332,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
                         sql.AppendLine("DECLARE " + " " 
                             + sp.ParameterName + " " 
                             + paramTypeCompiler + " = " 
-                            + QueryDebugger.ParameterValue(sp) + ";");
+                            + ParameterValue(sp) + ";");
                     }
 
                     sql.AppendLine(sc.CommandText);
@@ -340,6 +340,59 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
             }
 
             return sql.ToString();
+        }
+
+        public static String ParameterValue(SqlParameter sp)
+        {
+            String retval = "";
+
+            switch (sp.SqlDbType)
+            {
+                case SqlDbType.BigInt:                 
+                case SqlDbType.Decimal:                
+                case SqlDbType.Float:         
+                case SqlDbType.Int:          
+                case SqlDbType.Real:            
+                case SqlDbType.TinyInt:            
+                case SqlDbType.Money:               
+                case SqlDbType.SmallInt:
+                case SqlDbType.SmallMoney:               
+                case SqlDbType.Udt:
+                    retval = sp.Value.ToString().Replace("'", "''");
+                    break;
+
+                case SqlDbType.Bit:
+                    retval = (sp.Value is bool && (bool)sp.Value) ? "1" : "0";
+                    break;
+
+                case SqlDbType.Binary:  
+                case SqlDbType.Char:                
+                case SqlDbType.DateTime:
+                case SqlDbType.Image:               
+                case SqlDbType.NChar:           
+                case SqlDbType.NText:            
+                case SqlDbType.NVarChar:                       
+                case SqlDbType.UniqueIdentifier:
+                case SqlDbType.SmallDateTime:
+                case SqlDbType.Text:               
+                case SqlDbType.Timestamp:
+                case SqlDbType.VarBinary:               
+                case SqlDbType.VarChar:          
+                case SqlDbType.Variant:             
+                case SqlDbType.Xml:
+                case SqlDbType.Structured:           
+                case SqlDbType.Date:          
+                case SqlDbType.Time:             
+                case SqlDbType.DateTime2:            
+                case SqlDbType.DateTimeOffset:
+                    retval = "'" + sp.Value.ToString().Replace("'", "''") + "'";
+                    break;
+                default:
+                    retval = sp.Value.ToString().Replace("'", "''");
+                    break;
+            }           
+
+            return retval;
         }
 
         public object Clone()

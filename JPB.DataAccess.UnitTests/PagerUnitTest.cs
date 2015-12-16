@@ -12,7 +12,7 @@ namespace JPB.DataAccess.UnitTests
         static DbAccessLayer expectWrapper;
 
         [TestInitialize]
-        public async void InitTest()
+        public void InitTest()
         {
             if (expectWrapper != null)
                 return;
@@ -26,9 +26,7 @@ namespace JPB.DataAccess.UnitTests
             var checkDatabase = expectWrapper.CheckDatabase();
             Assert.IsTrue(checkDatabase);
 
-            checkDatabase = await expectWrapper.CheckDatabaseAsync();
-            Assert.IsTrue(checkDatabase);
-
+        
             var redesginDatabase = string.Format(
                 "IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
                 dbname);

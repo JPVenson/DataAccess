@@ -43,7 +43,7 @@ namespace JPB.DataAccess.UnitTests
 
 
         [TestInitialize]
-        public async void InitTest()
+        public void InitTest()
         {
             if (expectWrapper != null)
                 return;
@@ -54,10 +54,7 @@ namespace JPB.DataAccess.UnitTests
             Assert.AreEqual(expectWrapper.DbAccessType, DbAccessType);
 
             var checkDatabase = expectWrapper.CheckDatabase();
-            Assert.IsTrue(checkDatabase);
-
-            checkDatabase = await expectWrapper.CheckDatabaseAsync();
-            Assert.IsTrue(checkDatabase);
+            Assert.IsTrue(checkDatabase);         
 
             var redesginDatabase = string.Format(
                 "IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
@@ -338,7 +335,7 @@ namespace JPB.DataAccess.UnitTests
         public void ProcedureParamTest()
         {
             RangeInsertTest();
-            const int procParamA = 5;
+            //const int procParamA = 5;
 
             var expectedUser =
                 expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams()

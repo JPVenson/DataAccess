@@ -746,22 +746,11 @@ namespace JPB.DataAccess.Manager
 
         #endregion
 
-        #region experimental
-
-        private TestQueryProvider _testQueryProvider;
+        #region experimental       
 
         private void SelectDbAccessLayer()
         {
-            _testQueryProvider = new TestQueryProvider(this);
-        }
-
-        [Obsolete("Not implimented", true)]
-        public IQueryable<T> SelectQuery<T>()
-        {
-            MethodInfo makeGenericMethod = ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T));
-            MethodCallExpression methodCallExpression = Expression.Call(Expression.Constant(this), makeGenericMethod);
-            return _testQueryProvider.CreateQuery<T>(methodCallExpression);
-        }
+        }       
 
         #endregion
 

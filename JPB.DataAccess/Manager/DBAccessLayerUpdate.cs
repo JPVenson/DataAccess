@@ -7,7 +7,6 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess;
 using JPB.DataAccess.QueryBuilder;
-using JPB.DataAccess.QueryBuilder;
 using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.Manager

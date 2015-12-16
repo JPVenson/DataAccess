@@ -17,7 +17,6 @@ namespace JPB.DataAccess.QueryBuilder
         private readonly QueryBuilder _queryBuilder;
         private readonly ClassInfoCache _type;
         private IDataReader executeReader;
-        private Task _loadingTask;
         private DbAccessLayer _accessLayer;
 
         public QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
@@ -65,12 +64,7 @@ namespace JPB.DataAccess.QueryBuilder
     {
         public QueryLazyEnumerator(QueryBuilder queryBuilder, Type type) : base(queryBuilder, type)
         {
-        }
-
-        public void Dispose()
-        {
-            
-        }
+        }       
 
         public new T Current { get { return (T) base.Current; } }
     }

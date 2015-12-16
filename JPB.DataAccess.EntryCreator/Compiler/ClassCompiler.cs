@@ -83,17 +83,17 @@ namespace JPB.DataAccess.EntityCreator.Compiler
             var copyrightBuilder = new StringBuilder();
             return copyrightBuilder;
 
-            copyrightBuilder.AppendLine("o--------------------------------o");
-            copyrightBuilder.AppendLine("| Made by Jean - Pierre Bachmann |");
-            copyrightBuilder.AppendLine("| Visit my Github page for more  |");
-            copyrightBuilder.AppendLine("|              infos             |");
-            copyrightBuilder.AppendLine("|  https://github.com/JPVenson/  |");
-            copyrightBuilder.AppendLine("|            DataAccess          |");
-            copyrightBuilder.AppendLine("|              Email:            |");
-            copyrightBuilder.AppendLine("|  jean-pierre_bachmann@live.de  |");
-            copyrightBuilder.AppendLine("o--------------------------------o");
+            //copyrightBuilder.AppendLine("o--------------------------------o");
+            //copyrightBuilder.AppendLine("| Made by Jean - Pierre Bachmann |");
+            //copyrightBuilder.AppendLine("| Visit my Github page for more  |");
+            //copyrightBuilder.AppendLine("|              infos             |");
+            //copyrightBuilder.AppendLine("|  https://github.com/JPVenson/  |");
+            //copyrightBuilder.AppendLine("|            DataAccess          |");
+            //copyrightBuilder.AppendLine("|              Email:            |");
+            //copyrightBuilder.AppendLine("|  jean-pierre_bachmann@live.de  |");
+            //copyrightBuilder.AppendLine("o--------------------------------o");
 
-            return copyrightBuilder;
+            //return copyrightBuilder;
         }
 
         public void CompileClass()

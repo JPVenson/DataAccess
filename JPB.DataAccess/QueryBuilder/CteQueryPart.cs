@@ -9,8 +9,8 @@ namespace JPB.DataAccess.QueryBuilder
     /// </summary>
     public class CteQueryPart : GenericQueryPart
     {
-        private readonly Action<QueryBuilder> _cteAction;
-        private readonly QueryBuilder _nestedQueryPart;
+        //private readonly Action<QueryBuilder> _cteAction;
+        //private readonly QueryBuilder _nestedQueryPart;
 
         public CteQueryPart(string prefix, IEnumerable<IQueryParameter> parameters)
             : base(prefix, parameters)

@@ -63,7 +63,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
             RenderMenu();          
         }
 
-
         private readonly string[] usings = new[]
         {
             "JPB.DataAccess.ModelsAnotations",
@@ -601,8 +600,34 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
         public string SqlVersion { get; set; }
 
-        private bool Is2000;
-        private bool Is2014;
+        public bool Is2000
+        {
+            get
+            {
+                return _is2000;
+            }
+
+            set
+            {
+                _is2000 = value;
+            }
+        }
+
+        public bool Is2014
+        {
+            get
+            {
+                return _is2014;
+            }
+
+            set
+            {
+                _is2014 = value;
+            }
+        }
+
+        private bool _is2000;
+        private bool _is2014;
         private List<TableInfoModel> _views;
         private List<StoredPrcInfoModel> _storedProcs;
 

@@ -43,6 +43,9 @@ namespace JPB.DataAccess.MySql
         public long FirstID { get; private set; }
         public long LastID { get; private set; }
 
+        private void RaiseNewPageLoading() { var handler = NewPageLoading; if (handler != null) handler(); }
+        private void RaiseNewPageLoaded() { var handler = NewPageLoaded; if (handler != null) handler(); }
+
         public long CurrentPage
         {
             get { return _currentPage; }
@@ -59,8 +62,9 @@ namespace JPB.DataAccess.MySql
 
         public Type TargetType { get; set; }
 
-        public void LoadPage(DbAccessLayer dbAccess)
+        public virtual void LoadPage(DbAccessLayer dbAccess)
         {
+            RaiseNewPageLoading();
             SyncHelper(() => CurrentPageItems.Clear());
 
             var pk = TargetType.GetPK();
@@ -110,10 +114,10 @@ namespace JPB.DataAccess.MySql
                 ("SELECT * FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand);
 
             var selectWhere = dbAccess.SelectNative(this.TargetType, realSelect, new
-                    {
-                        PagedRows = CurrentPage * PageSize,
-                        PageSize
-                    });
+            {
+                PagedRows = CurrentPage * PageSize,
+                PageSize
+            });
 
             //var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
             //{
@@ -126,6 +130,8 @@ namespace JPB.DataAccess.MySql
                 dynamic item1 = item;
                 SyncHelper(() => CurrentPageItems.Add(item1));
             }
+
+            RaiseNewPageLoaded();
         }
 
         IEnumerable IDataPager.CurrentPageItems
@@ -135,7 +141,7 @@ namespace JPB.DataAccess.MySql
 
         public IDbCommand BaseQuery { get; set; }
 
-        public ICollection<T> CurrentPageItems { get; protected set; }
+        public virtual ICollection<T> CurrentPageItems { get; protected set; }
 
         private Action<Action> _syncHelper;
         private long _currentPage;

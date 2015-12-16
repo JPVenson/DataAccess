@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("JPB")]
 [assembly: AssemblyProduct("JPB.DataAccess")]
-[assembly: AssemblyCopyright("Copyright © Firma 2014")]
+[assembly: AssemblyCopyright("Copyright © Jean-Pierre Bachmann 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -36,4 +36,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("1.1.3.0010")]
+[assembly: AssemblyFileVersion("1.1.3.0015")]

@@ -198,7 +198,7 @@ namespace JPB.DataAccess.QueryBuilder
         {
         }
 
-        public QueryBuilder<T> Add(GenericQueryPart part)
+        public new QueryBuilder<T> Add(GenericQueryPart part)
         {
             base.Add(part);
             return this;
