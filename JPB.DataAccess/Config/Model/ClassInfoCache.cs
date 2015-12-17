@@ -103,7 +103,7 @@ namespace JPB.DataAccess.Config.Model
 		internal string SchemaMappingDatabaseToLocal(string databaseName)
 		{
 			CreateSchemaMapping();
-			var mappings = SchemaMappingValues.FirstOrDefault(s => s.Value.Equals(databaseName));
+			var mappings = SchemaMappingValues.FirstOrDefault(s => s.Value.Equals(databaseName, StringComparison.InvariantCulture));
 			if (mappings.Equals(default(KeyValuePair<string, string>)))
 			{
 				return databaseName;

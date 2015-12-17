@@ -365,7 +365,7 @@ namespace JPB.DataAccess
 							{
 								while (dr.Read())
 								{
-									records.Add(info.Factory(dr));
+									records.Add(info.SetPropertysViaReflection(dr));
 								}
 
 							} while (dr.NextResult());

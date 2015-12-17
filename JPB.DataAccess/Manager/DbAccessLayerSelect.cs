@@ -364,9 +364,19 @@ namespace JPB.DataAccess.Manager
 
 			if (egarLoading)
 			{
+				var results = database.EnumerateDataRecords(query, true);
+				var recordToNameMapping = new Dictionary<int, PropertyInfoCache>();
+
+				var anyReader = results.First();
+
+				for (int i = 0; i < anyReader.FieldCount; i++)
+				{
+					recordToNameMapping.Add(i, typeInfo.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i))));
+				}
+
 				return
-				database.EnumerateDataRecords(query, true)
-					.Select(typeInfo.SetPropertysViaReflection)
+					results
+					.Select(record => typeInfo.SetPropertysViaReflection(record, recordToNameMapping))
 					.ToArray();
 			}
 			else

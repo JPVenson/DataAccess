@@ -623,29 +623,54 @@ namespace JPB.DataAccess
 		/// Loads all propertys from a DataReader into the given Object
 		/// </summary>
 		/// <param name="instance"></param>
+		/// <param name="info"></param>
 		/// <param name="reader"></param>
-		public static object SetPropertysViaReflection(object instance, ClassInfoCache info, IDataRecord reader)
+		/// <param name="cache"></param>
+		public static object SetPropertysViaReflection(
+			object instance, 
+			ClassInfoCache info, 
+			IDataRecord reader,
+			Dictionary<int, PropertyInfoCache> cache)
 		{
 			if (reader == null)
 				return instance;
-
-			var type = instance.GetType();
-
+			
 			//Left c# property name and right the object to read from the reader
-			var listofpropertys = new Dictionary<string, object>();
+			//var listofpropertys = new Dictionary<string, object>();
 
 			var propertys = info.PropertyInfoCaches.ToArray();
 			var instanceOfFallbackList = new Dictionary<string, object>();
 
-			for (int i = 0; i < reader.FieldCount; i++)
-				listofpropertys.Add(type.GetDbToLocalSchemaMapping(reader.GetName(i)), reader.GetValue(i));
-
-			foreach (var item in listofpropertys)
+			if (cache == null)
 			{
-				var property = propertys.FirstOrDefault(s => s.PropertyName == item.Key);
+				cache = new Dictionary<int, PropertyInfoCache>();
+				for (int i = 0; i < reader.FieldCount; i++)
+				{
+					cache.Add(i, info.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == info.SchemaMappingDatabaseToLocal(reader.GetName(i))));
+				}
+			}
+
+			//for (int i = 0; i < reader.FieldCount; i++)
+			//{
+			//	var dbName = info.SchemaMappingValues.ElementAt(i).Key;
+			//	listofpropertys.Add(info.SchemaMappingDatabaseToLocal(dbName), reader.GetValue(i));
+			//}
+
+			//foreach (var schemaMappingValue in info.SchemaMappingValues)
+			//{
+			//}
+
+			//for (int i = 0; i < reader.FieldCount; i++)
+			//	listofpropertys.Add(type.GetDbToLocalSchemaMapping(reader.GetName(i)), reader.GetValue(i));
+
+
+			for (int i = 0; i < reader.FieldCount; i++)
+			{
+				var property = cache.FirstOrDefault(s => s.Key == i).Value;
+				var value = reader.GetValue(i);
+
 				if (property != null)
 				{
-					var value = item.Value;
 					var attributes = property.AttributeInfoCaches;
 					var valueConverterAttributeModel = attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
 
@@ -735,7 +760,7 @@ namespace JPB.DataAccess
 
 					if (instanceOfFallbackList.Any())
 					{
-						instanceOfFallbackList.Add(item.Key, item.Value);
+						instanceOfFallbackList.Add(reader.GetName(i), value);
 					}
 					else
 					{
@@ -749,7 +774,7 @@ namespace JPB.DataAccess
 								instanceOfFallbackList = new Dictionary<string, object>();
 								maybeFallbackProperty.Setter.Invoke(instance, instanceOfFallbackList);
 							}
-							instanceOfFallbackList.Add(item.Key, item.Value);
+							instanceOfFallbackList.Add(reader.GetName(i), value);
 						}
 						else
 						{
@@ -759,9 +784,16 @@ namespace JPB.DataAccess
 				}
 			}
 
-			if (reader is IDisposable)
+
+			//foreach (var item in listofpropertys)
+			//{
+			//	var property = propertys.FirstOrDefault(s => s.PropertyName == item.Key);
+				
+			//}
+
+			if (reader is EgarDataRecord)
 			{
-				(reader as IDisposable).Dispose();
+				(reader as EgarDataRecord).Dispose();
 			}
 
 			return instance;
@@ -903,7 +935,24 @@ namespace JPB.DataAccess
 			if (created)
 				return source;
 
-			return SetPropertysViaReflection(source, type, reader);
+			return SetPropertysViaReflection(source, type, reader, null);
+		}
+
+
+		/// <summary>
+		/// Creates a new Instance based on possible Ctor's and the given <param name="reader"></param>
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="reader"></param>
+		/// <returns></returns>
+		public static object SetPropertysViaReflection(this ClassInfoCache type, IDataRecord reader, Dictionary<int, PropertyInfoCache> mapping)
+		{
+			bool created;
+			var source = type.CreateInstance(reader, out created);
+			if (created)
+				return source;
+
+			return SetPropertysViaReflection(source, type, reader, mapping);
 		}
 
 		/// <summary>

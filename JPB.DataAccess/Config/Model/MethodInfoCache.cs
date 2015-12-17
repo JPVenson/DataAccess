@@ -42,7 +42,20 @@ namespace JPB.DataAccess.Config.Model
 
 		public object Invoke(object target, params object[] param)
 		{
-			return this.MethodInfo.Invoke(target, param);
+			if (this.Delegate != null)
+			{
+				var para = new object[param.Length + 1];
+				para[0] = target;
+				for (int i = 0; i < param.Length; i++)
+				{
+					para[1 + i] = param[i];
+				}
+				return this.Delegate.DynamicInvoke(para);
+			}
+			else
+			{
+				return this.MethodInfo.Invoke(target, param);
+			}
 		}
 
 		public Delegate Delegate { get; set; }

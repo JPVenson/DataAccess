@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using JPB.DataAccess.ModelsAnotations;
 
@@ -11,7 +12,7 @@ namespace JPB.DataAccess.Config.Model
 	/// </summary>
 	public class PropertyInfoCache
 	{
-		
+
 
 		/// <summary>
 		/// 
@@ -24,13 +25,17 @@ namespace JPB.DataAccess.Config.Model
 			{
 				PropertyInfo = propertyInfo;
 				PropertyName = propertyInfo.Name;
+				var targetType = propertyInfo.PropertyType;
 
 				GetterDelegate = typeof(Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
-				SetterDelegate = typeof(Action<>).MakeGenericType(propertyInfo.DeclaringType);
+				SetterDelegate = typeof(Action<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
 
-				Getter = new MethodInfoCache(PropertyInfo.GetGetMethod());
-				Setter = new MethodInfoCache(PropertyInfo.GetSetMethod());
-				
+				//Getter = new MethodInfoCache(PropertyInfo.GetGetMethod().CreateDelegate(GetterDelegate));
+				//Setter = new MethodInfoCache(PropertyInfo.GetSetMethod().CreateDelegate(SetterDelegate));
+
+				Getter = new MethodInfoCache(GetPropGetter(GetterDelegate, propertyInfo.DeclaringType, PropertyName));
+				Setter = new MethodInfoCache(GetPropSetter(SetterDelegate, propertyInfo.DeclaringType, targetType, PropertyName));
+
 				this.AttributeInfoCaches = propertyInfo
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
@@ -59,9 +64,9 @@ namespace JPB.DataAccess.Config.Model
 		/// <param name="getter"></param>
 		/// <param name="attributes"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public PropertyInfoCache(string name, 
+		public PropertyInfoCache(string name,
 			Action<object, object> setter,
-			Func<object, object> getter, 
+			Func<object, object> getter,
 			params AttributeInfoCache[] attributes)
 		{
 			if (attributes == null)
@@ -75,11 +80,30 @@ namespace JPB.DataAccess.Config.Model
 				Setter = new MethodInfoCache(setter);
 			}
 
-			if(getter != null)
+			if (getter != null)
 			{
 				Getter = new MethodInfoCache(getter);
 			}
-			RenumeratePropertys();     
+			RenumeratePropertys();
+		}
+
+
+		// returns property getter
+		public static Delegate GetPropGetter(Type delegateType, Type typeOfObject, string propertyName)
+		{
+			var paramExpression = Expression.Parameter(typeOfObject, "value");
+			var propertyGetterExpression = Expression.Property(paramExpression, propertyName);
+			return Expression.Lambda(delegateType, propertyGetterExpression, paramExpression).Compile();
+		}
+
+		// returns property setter:
+		public static Delegate GetPropSetter(Type delegateType, Type typeOfObject, Type typeOfProperty, string propertyName)
+		{
+			var paramExpression = Expression.Parameter(typeOfObject);
+			var paramExpression2 = Expression.Parameter(typeOfProperty, propertyName);
+			var propertyGetterExpression = Expression.Property(paramExpression, propertyName);
+			return Expression.Lambda(delegateType, Expression.Assign(propertyGetterExpression, paramExpression2), paramExpression, paramExpression2)
+				.Compile();
 		}
 
 		public Type SetterDelegate { get; private set; }
@@ -91,7 +115,7 @@ namespace JPB.DataAccess.Config.Model
 		public PropertyInfo PropertyInfo { get; private set; }
 		public string PropertyName { get; private set; }
 		public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
-		
+
 		public AttributeInfoCache ForModel { get; private set; }
 		public AttributeInfoCache FromXmlAttribute { get; set; }
 
