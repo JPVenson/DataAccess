@@ -222,13 +222,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
                     command = selectQuery.Compile();
                 }
-
-                selectWhere = DbAccessLayer.SelectNative(TargetType, s, command, true) as T[];
+                //cannot cast to T[] 
+                selectWhere = DbAccessLayer.SelectNative(TargetType, s, command, true).Cast<T>().ToArray();
             });
 
             foreach (var item in selectWhere)
             {
-                dynamic item1 = item;
+                T item1 = item;
                 SyncHelper(() => CurrentPageItems.Add(item1));
             }
 

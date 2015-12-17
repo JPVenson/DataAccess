@@ -9,18 +9,22 @@ namespace JPB.DataAccess.Config.Model
 {
     public class ConstructorInfoCache
     {
-        public ConstructorInfoCache(ConstructorInfo mehtodInfo)
+        public ConstructorInfoCache(ConstructorInfo ctorInfo)
         {
             this.AttributeInfoCaches = new List<AttributeInfoCache>();
-            if (mehtodInfo != null)
+            if (ctorInfo != null)
             {
-                MethodInfo = mehtodInfo;
-                MethodName = mehtodInfo.Name;
+                MethodInfo = ctorInfo;
+                MethodName = ctorInfo.Name;
                 this.AttributeInfoCaches =
-                    mehtodInfo.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToList();
+                    ctorInfo
+                    .GetCustomAttributes(true)
+                    .Where(s => s is Attribute)
+                    .Select(s => new AttributeInfoCache(s as Attribute))
+                    .ToList();
             }
         }
-
+        
         public ConstructorInfo MethodInfo { get; private set; }
         public string MethodName { get; private set; }
         public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }

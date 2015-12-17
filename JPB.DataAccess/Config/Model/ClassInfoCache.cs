@@ -16,10 +16,24 @@ namespace JPB.DataAccess.Config.Model
             this.ConstructorInfoCaches = new List<ConstructorInfoCache>();
             ClassName = type.FullName;
             Type = type;
-            this.AttributeInfoCaches = type.GetCustomAttributes(true).Where(s => s is Attribute).Select(s => new AttributeInfoCache(s as Attribute)).ToList();
-            this.PropertyInfoCaches = type.GetProperties().Select(s => new PropertyInfoCache(s)).ToList();
-            this.MethodInfoCaches = type.GetMethods().Select(s => new MethodInfoCache(s)).ToList();
-            this.ConstructorInfoCaches = type.GetConstructors().Select(s => new ConstructorInfoCache(s)).ToList();
+            
+            this.AttributeInfoCaches = type
+                .GetCustomAttributes(true)
+                .Where(s => s is Attribute)
+                .Select(s => new AttributeInfoCache(s as Attribute))
+                .ToList();
+            this.PropertyInfoCaches = type
+                .GetProperties()
+                .Select(s => new PropertyInfoCache(s))
+                .ToList();
+            this.MethodInfoCaches = type
+                .GetMethods()
+                .Select(s => new MethodInfoCache(s))
+                .ToList();
+            this.ConstructorInfoCaches = type
+                .GetConstructors()
+                .Select(s => new ConstructorInfoCache(s))
+                .ToList();
 
             this.ForModel = this.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
             this.SelectFactory = this.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute);
@@ -28,7 +42,9 @@ namespace JPB.DataAccess.Config.Model
 
         public void CheckForConfig()
         {
-            var configMethods = MethodInfoCaches.Where(f => f.AttributeInfoCaches.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
+            var configMethods = MethodInfoCaches
+                .Where(f => f.AttributeInfoCaches.Any(e => e.Attribute is ConfigMehtodAttribute))
+                .ToArray();
             if (!configMethods.Any())
                 return;
 
@@ -41,6 +57,7 @@ namespace JPB.DataAccess.Config.Model
         
         public string ClassName { get; private set; }
         public Type Type { get; private set; }
+
         public Func<IDataRecord, object> Factory { get; set; }
         public bool FullFactory { get; set; }
 
