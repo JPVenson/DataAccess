@@ -144,6 +144,9 @@ namespace JPB.DataAccess.ModelsAnotations
     {
     }
 
+    /// <summary>
+    /// Allows renaming of the local class name to any name and the mapping from that name to the Db Table name
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class ForModel : DataAccessAttribute
     {
