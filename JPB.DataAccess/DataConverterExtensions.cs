@@ -477,6 +477,20 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
+		/// Checks the info declaring type to be an List
+		/// </summary>
+		/// <param name="info"></param>
+		/// <returns></returns>
+		public static bool CheckForListInterface(this PropertyInfoCache info)
+		{
+			if (info.PropertyType == typeof(string))
+				return false;
+			if (info.PropertyType.GetInterface(typeof(IEnumerable).Name) != null)
+				return true;
+			return info.PropertyType.GetInterface(typeof(IEnumerable<>).Name) != null;
+		}
+
+		/// <summary>
 		/// Checks the object instance to be an List
 		/// </summary>
 		/// <param name="info"></param>
@@ -666,7 +680,7 @@ namespace JPB.DataAccess
 
 			for (int i = 0; i < reader.FieldCount; i++)
 			{
-				var property = cache.FirstOrDefault(s => s.Key == i).Value;
+				var property = cache[i];
 				var value = reader.GetValue(i);
 
 				if (property != null)
@@ -690,8 +704,6 @@ namespace JPB.DataAccess
 					//should the Content be considerd as XML text?
 					if (xmlAttributeModel != null)
 					{
-						var xmlAttribute = xmlAttributeModel.Attribute;
-
 						//Get the XML text and check if its null or empty
 						var xmlStream = value.ToString();
 						if (String.IsNullOrEmpty(xmlStream))
@@ -709,7 +721,7 @@ namespace JPB.DataAccess
 							var xmlDataRecords = record.CreateListOfItems();
 
 							var genericArguments = property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault().GetClassInfo();
-							var enumerableOfItems = xmlDataRecords.Select(xmlDataRecord => genericArguments.SetPropertysViaReflection(xmlDataRecord)).ToList();
+							var enumerableOfItems = xmlDataRecords.Select(genericArguments.SetPropertysViaReflection).ToList();
 							object castedList;
 
 							if (genericArguments.Type.IsClass && genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
@@ -749,7 +761,16 @@ namespace JPB.DataAccess
 					}
 					else
 					{
-						var changedType = ChangeType(value, property.PropertyInfo.PropertyType);
+						object changedType;
+						if (value.GetType() != property.PropertyInfo.PropertyType)
+						{
+							changedType = ChangeType(value, property.PropertyInfo.PropertyType);
+						}
+						else
+						{
+							changedType = value;
+						}
+
 						property.Setter.Invoke(instance, changedType);
 					}
 				}

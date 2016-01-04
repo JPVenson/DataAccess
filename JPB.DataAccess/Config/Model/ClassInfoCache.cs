@@ -10,30 +10,26 @@ namespace JPB.DataAccess.Config.Model
 	{
 		public ClassInfoCache(Type type)
 		{
-			this.AttributeInfoCaches = new List<AttributeInfoCache>();
-			this.PropertyInfoCaches = new List<PropertyInfoCache>();
-			this.MethodInfoCaches = new List<MethodInfoCache>();
-			this.ConstructorInfoCaches = new List<ConstructorInfoCache>();
+			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>();
+			this.PropertyInfoCaches = new HashSet<PropertyInfoCache>();
+			this.MethodInfoCaches = new HashSet<MethodInfoCache>();
+			this.ConstructorInfoCaches = new HashSet<ConstructorInfoCache>();
 			ClassName = type.FullName;
 			Type = type;
 
-			this.AttributeInfoCaches = type
+			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(type
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
-				.Select(s => new AttributeInfoCache(s as Attribute))
-				.ToList();
-			this.PropertyInfoCaches = type
+				.Select(s => new AttributeInfoCache(s as Attribute)));
+			this.PropertyInfoCaches = new HashSet<PropertyInfoCache>(type
 				.GetProperties()
-				.Select(s => new PropertyInfoCache(s))
-				.ToList();
-			this.MethodInfoCaches = type
+				.Select(s => new PropertyInfoCache(s)));
+			this.MethodInfoCaches = new HashSet<MethodInfoCache>(type
 				.GetMethods()
-				.Select(s => new MethodInfoCache(s))
-				.ToList();
-			this.ConstructorInfoCaches = type
+				.Select(s => new MethodInfoCache(s)));
+			this.ConstructorInfoCaches = new HashSet<ConstructorInfoCache>(type
 				.GetConstructors()
-				.Select(s => new ConstructorInfoCache(s))
-				.ToList();
+				.Select(s => new ConstructorInfoCache(s)));
 		}
 
 		/// <summary>
@@ -58,16 +54,28 @@ namespace JPB.DataAccess.Config.Model
 			var configMethods = MethodInfoCaches
 				.Where(f => f.AttributeInfoCaches.Any(e => e.Attribute is ConfigMehtodAttribute))
 				.ToArray();
-			if (!configMethods.Any())
-				return;
-
-			var config = new Config();
-			foreach (var item in configMethods)
+			if (configMethods.Any())
 			{
-				item.MethodInfo.Invoke(null, new object[] { config });
-			}
+				var config = new Config();
+				foreach (var item in configMethods)
+				{
+					item.MethodInfo.Invoke(null, new object[] { config });
+				}
 
-			RenumeratePropertys(true);
+				RenumeratePropertys(true);
+			}
+			var hasAutoGeneratorAttribute = this.AttributeInfoCaches.Any(f => f.Attribute is AutoGenerateCtorAttribute);
+			if (hasAutoGeneratorAttribute)
+			{
+				CreateFactory();
+			}
+		}
+
+		public void CreateFactory()
+		{
+			if (!FullFactory)
+				this.Factory = FactoryHelper.CreateFactory(Type, Config.ConstructorSettings);
+			this.FullFactory = true;
 		}
 
 		public string ClassName { get; private set; }
@@ -83,10 +91,10 @@ namespace JPB.DataAccess.Config.Model
 		/// Key is C# Property name and Value is DB Eqivalent
 		/// </summary>
 		public Dictionary<string, string> SchemaMappingValues { get; private set; }
-		public List<PropertyInfoCache> PropertyInfoCaches { get; private set; }
-		public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
-		public List<MethodInfoCache> MethodInfoCaches { get; private set; }
-		public List<ConstructorInfoCache> ConstructorInfoCaches { get; set; }
+		public HashSet<PropertyInfoCache> PropertyInfoCaches { get; private set; }
+		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
+		public HashSet<MethodInfoCache> MethodInfoCaches { get; private set; }
+		public HashSet<ConstructorInfoCache> ConstructorInfoCaches { get; set; }
 		public bool HasRelations { get; private set; }
 
 		internal string SchemaMappingLocalToDatabase(string cSharpName)

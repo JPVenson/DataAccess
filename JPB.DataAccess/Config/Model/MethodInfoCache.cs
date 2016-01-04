@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace JPB.DataAccess.Config.Model
 {
-	public class MethodInfoCache
+	public class MethodInfoCache : IComparable<MethodInfoCache>
 	{
 		public MethodInfoCache(MethodInfo mehtodInfo)
 		{
@@ -15,7 +15,6 @@ namespace JPB.DataAccess.Config.Model
 			{
 				MethodInfo = mehtodInfo;
 				MethodName = mehtodInfo.Name;
-				Delegate = ExtractDelegate(MethodInfo);
 				this.AttributeInfoCaches = mehtodInfo
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
@@ -40,7 +39,13 @@ namespace JPB.DataAccess.Config.Model
 			}
 		}
 
-		public object Invoke(object target, params object[] param)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="param"></param>
+		/// <returns></returns>
+		public virtual object Invoke(object target, params object[] param)
 		{
 			if (this.Delegate != null)
 			{
@@ -77,6 +82,11 @@ namespace JPB.DataAccess.Config.Model
 				delegateType = Expression.GetFuncType(args.ToArray());
 			}
 			return Delegate.CreateDelegate(delegateType, null, method);           
+		}
+
+		public int CompareTo(MethodInfoCache other)
+		{
+			return this.MethodName.CompareTo(other.MethodName);
 		}
 	}
 }

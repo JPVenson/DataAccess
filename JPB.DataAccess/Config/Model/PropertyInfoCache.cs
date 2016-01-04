@@ -7,13 +7,59 @@ using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Config.Model
 {
+
+	class PropertyHelper : MethodInfoCache
+	{
+		private readonly PropertyInfo _propertyInfo;
+		private dynamic _getter;
+		private dynamic _setter;
+
+		public PropertyHelper(MethodInfo mehtodInfo)
+			: base(mehtodInfo)
+		{
+		}
+
+		public PropertyHelper(Delegate fakeMehtod)
+			: base(fakeMehtod)
+		{
+		}
+
+		public PropertyHelper()
+			: base((MethodInfo)null)
+		{
+
+		}
+
+		public void SetGet(dynamic getter)
+		{
+			this._getter = getter;
+		}
+
+		public void SetSet(dynamic setter)
+		{
+			this._setter = setter;
+		}
+
+		public override object Invoke(dynamic target, params dynamic[] param)
+		{
+			if (_getter != null)
+			{
+				return _getter(target);
+			}
+			else
+			{
+				dynamic paramOne = param[0];
+				_setter(target, paramOne);
+				return null;
+			}
+		}
+	}
+
 	/// <summary>
 	/// 
 	/// </summary>
-	public class PropertyInfoCache
+	public class PropertyInfoCache : IComparable<PropertyInfoCache>
 	{
-
-
 		/// <summary>
 		/// 
 		/// </summary>
@@ -25,16 +71,58 @@ namespace JPB.DataAccess.Config.Model
 			{
 				PropertyInfo = propertyInfo;
 				PropertyName = propertyInfo.Name;
-				var targetType = propertyInfo.PropertyType;
+				PropertyType = propertyInfo.PropertyType;
 
 				GetterDelegate = typeof(Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
 				SetterDelegate = typeof(Action<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
 
+				var builder = typeof(Expression)
+					.GetMethods()
+					.First(s => s.Name == "Lambda" && s.ContainsGenericParameters);
+
+				var thisRef = Expression.Parameter(propertyInfo.DeclaringType, "that");
+				var accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
+
+				var getExpression = builder
+					.MakeGenericMethod(GetterDelegate)
+					.Invoke(null, new object[]
+					{
+						accessField,
+						new[]{thisRef}
+					}) as dynamic;
+
+				var valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
+				var setter = Expression.Assign(
+					accessField,
+					valueRef);
+
+				var setExpression = builder
+					.MakeGenericMethod(SetterDelegate)
+					.Invoke(null, new object[]
+					{
+						setter,
+						new []{thisRef,valueRef}
+					}) as dynamic;
+
+				var getterDelegate = getExpression.Compile();
+				Getter = new PropertyHelper();
+				((PropertyHelper)Getter).SetGet(getterDelegate);
+
+				var setterDelegate = setExpression.Compile();
+				Setter = new PropertyHelper();
+				((PropertyHelper)Setter).SetSet(setterDelegate);
+
+
+
+
 				//Getter = new MethodInfoCache(PropertyInfo.GetGetMethod().CreateDelegate(GetterDelegate));
 				//Setter = new MethodInfoCache(PropertyInfo.GetSetMethod().CreateDelegate(SetterDelegate));
 
-				Getter = new MethodInfoCache(GetPropGetter(GetterDelegate, propertyInfo.DeclaringType, PropertyName));
-				Setter = new MethodInfoCache(GetPropSetter(SetterDelegate, propertyInfo.DeclaringType, targetType, PropertyName));
+				//Getter = new MethodInfoCache(GetPropGetter(GetterDelegate, propertyInfo.DeclaringType, PropertyName));
+				//Setter = new MethodInfoCache(GetPropSetter(SetterDelegate, propertyInfo.DeclaringType, targetType, PropertyName));
+
+				//Getter = new MethodInfoCache(PropertyInfo.GetGetMethod());
+				//Setter = new MethodInfoCache(PropertyInfo.GetSetMethod());
 
 				this.AttributeInfoCaches = propertyInfo
 					.GetCustomAttributes(true)
@@ -46,6 +134,10 @@ namespace JPB.DataAccess.Config.Model
 			}
 		}
 
+
+		/// <summary>
+		/// For internal Usage only
+		/// </summary>
 		public void RenumeratePropertys()
 		{
 			IsPrimaryKey = AttributeInfoCaches.Any(f => f.Attribute is PrimaryKeyAttribute);
@@ -112,6 +204,8 @@ namespace JPB.DataAccess.Config.Model
 		public MethodInfoCache Setter { get; private set; }
 		public MethodInfoCache Getter { get; private set; }
 
+		public Type PropertyType { get; set; }
+
 		public PropertyInfo PropertyInfo { get; private set; }
 		public string PropertyName { get; private set; }
 		public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
@@ -122,6 +216,16 @@ namespace JPB.DataAccess.Config.Model
 		public bool IsPrimaryKey { get; private set; }
 		public bool InsertIgnore { get; private set; }
 		public bool IsNavProperty { get; private set; }
+
+		public int CompareTo(PropertyInfoCache other)
+		{
+			return this.GetHashCode() - other.GetHashCode();
+		}
+
+		public override int GetHashCode()
+		{
+			return this.PropertyName.GetHashCode();
+		}
 
 		//internal static PropertyInfoCache Logical(string info)
 		//{

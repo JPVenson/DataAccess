@@ -189,6 +189,8 @@ namespace JPB.DataAccess.UnitTests
 			Assert.AreEqual(resultSelect1, -1);
 		}
 
+
+
 		[TestMethod]
 		public void InsertTest()
 		{
@@ -202,6 +204,23 @@ namespace JPB.DataAccess.UnitTests
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
+		}
+
+		[TestMethod]
+		public void AutoGenerateConstructor()
+		{
+			this.InsertTest();
+			var refSelect = expectWrapper.Select<UsersAutoGenerateConstructor>();
+			Assert.IsTrue(refSelect.Length > 0);
+
+			var testInsertName = Guid.NewGuid().ToString();
+			var testUser = expectWrapper.InsertWithSelect(new UsersAutoGenerateConstructor() { UserName = testInsertName });
+			Assert.IsNotNull(testUser);
+			Assert.AreNotEqual(testUser.User_ID, default(long));
+
+			var selTestUser = expectWrapper.Select<UsersAutoGenerateConstructor>(testUser.User_ID);
+			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
+			Assert.AreEqual(selTestUser.User_ID, testUser.User_ID);
 		}
 
 		[TestMethod]

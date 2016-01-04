@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net.Configuration;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.QueryFactory;
@@ -8,294 +9,307 @@ using System.Linq;
 
 namespace JPB.DataAccess.ModelsAnotations
 {
-    public class DataAccessAttribute : Attribute
-    {
-    }
+	public class DataAccessAttribute : Attribute
+	{
+	}
 
-    #region FactoryAttributes
+	#region FactoryAttributes
 
-    //Work in Progress
+	//Work in Progress
 
-    //[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    //public class FactoryBaseAttribute : Attribute
-    //{
-    //    public FactoryBaseAttribute()
-    //    {
-    //        DbQuery = DbAccessType.Unknown;
-    //    }
-    //    // This is a positional argument
+	//[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+	//public class FactoryBaseAttribute : Attribute
+	//{
+	//    public FactoryBaseAttribute()
+	//    {
+	//        DbQuery = DbAccessType.Unknown;
+	//    }
+	//    // This is a positional argument
 
-    //    public DbAccessType DbQuery { get; set; }
-    //}
+	//    public DbAccessType DbQuery { get; set; }
+	//}
 
-    /// <summary>
-    /// When a methode is marked with this attribute it can be used to configurate the current class. Must be public static void
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class ConfigMehtodAttribute : DataAccessAttribute
-    {
+	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	public sealed class AutoGenerateCtorAttribute : DataAccessAttribute
+	{
+		public AutoGenerateCtorAttribute()
+		{
+		}
+	}
 
-    }
+	/// <summary>
+	/// When a methode is marked with this attribute it can be used to configurate the current class. Must be public static void
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	public sealed class ConfigMehtodAttribute : DataAccessAttribute
+	{
 
-    /// <summary>
-    /// Marks a Method as an Factory mehtod
-    /// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    public class DeleteFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
-    {
-    }
+	}
 
-    /// <summary>
-    ///     Marks a ctor or a Method as an Factory method
-    ///     The ctor must have only one param that is of type IDataRecord
-    ///     The Method must have only one param that is of type IDataRecord and returns a new Instance
-    ///     The Method must be static
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
-    public sealed class ObjectFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
-    {
-    }
+	/// <summary>
+	/// Marks a Method as an Factory mehtod
+	/// The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+	public class DeleteFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	{
+	}
 
-    /// <summary>
-    ///     Marks a mehtod as an Factory method
-    ///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class SelectFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
-    {
-    }
+	/// <summary>
+	///     Marks a ctor or a Method as an Factory method
+	///     The ctor must have only one param that is of type IDataRecord
+	///     The Method must have only one param that is of type IDataRecord and returns a new Instance
+	///     The Method must be static
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
+	public sealed class ObjectFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	{
+	}
 
-    /// <summary>
-    ///     Marks a mehtod as an Factory method
-    ///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class InsertFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
-    {
-    }
+	/// <summary>
+	///     Marks a mehtod as an Factory method
+	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	public sealed class SelectFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	{
+	}
 
-    /// <summary>
-    ///     Marks a mehtod as an Factory method
-    ///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class UpdateFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
-    {
-    }
+	/// <summary>
+	///     Marks a mehtod as an Factory method
+	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	public sealed class InsertFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	{
+	}
 
-    /// <summary>
-    ///     Provieds a Query ( parametes not used ) for selection
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    public sealed class SelectFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
-    {
-        public SelectFactoryAttribute(string query)
-        {
-            Query = query;
-        }
+	/// <summary>
+	///     Marks a mehtod as an Factory method
+	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	public sealed class UpdateFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	{
+	}
 
-        public string Query { get; private set; }
+	/// <summary>
+	///     Provieds a Query ( parametes not used ) for selection
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	public sealed class SelectFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
+	{
+		public SelectFactoryAttribute(string query)
+		{
+			Query = query;
+		}
 
-        public IEnumerable<IQueryParameter> Parameters { get; private set; }
-    }
+		public string Query { get; private set; }
 
-    /// <summary>
-    ///     Provieds a Query ( parametes not used ) for selection
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    public sealed class StoredProcedureFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
-    {
-        public StoredProcedureFactoryAttribute(string query)
-        {
-            Query = query;
-        }
+		public IEnumerable<IQueryParameter> Parameters { get; private set; }
+	}
 
-        public string Query { get; private set; }
+	/// <summary>
+	///     Provieds a Query ( parametes not used ) for selection
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	public sealed class StoredProcedureFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
+	{
+		public StoredProcedureFactoryAttribute(string query)
+		{
+			Query = query;
+		}
 
-        public IEnumerable<IQueryParameter> Parameters { get; private set; }
-    }
+		public string Query { get; private set; }
 
-    #endregion
+		public IEnumerable<IQueryParameter> Parameters { get; private set; }
+	}
 
-    /// <summary>
-    /// Ignores this Property when creating an Update or Insert statement
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-    public class InsertIgnore : DataAccessAttribute
-    {
-    }
+	#endregion
 
-    /// <summary>
-    /// Indicates this Property to be resolved as a ForeignKey
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-    public class ForeignKeyAttribute : InsertIgnore
-    {
-        public string KeyName { get; set; }
-    }   
+	/// <summary>
+	/// Ignores this Property when creating an Update or Insert statement
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	public class InsertIgnore : DataAccessAttribute
+	{
+	}
 
-    /// <summary>
-    /// Indicates that this property is a Primary key
-    /// Requert for Selection over PK 
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-    public class PrimaryKeyAttribute : DataAccessAttribute
-    {
-    }
+	/// <summary>
+	/// Indicates this Property to be resolved as a ForeignKey
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	public class ForeignKeyAttribute : InsertIgnore
+	{
+		public string KeyName { get; set; }
+	}   
 
-    /// <summary>
-    /// Allows renaming of the local class name to any name and the mapping from that name to the Db Table name
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class ForModel : DataAccessAttribute
-    {
-        public ForModel(string alternatingName)
-        {
-            AlternatingName = alternatingName;
-        }
+	/// <summary>
+	/// Indicates that this property is a Primary key
+	/// Requert for Selection over PK 
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	public class PrimaryKeyAttribute : DataAccessAttribute
+	{
+	}
 
-        public string AlternatingName { get; set; }
-    }
+	/// <summary>
+	/// Allows renaming of the local class name to any name and the mapping from that name to the Db Table name
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	public class ForModel : DataAccessAttribute
+	{
+		public ForModel(string alternatingName)
+		{
+			AlternatingName = alternatingName;
+		}
 
-    /// <summary>
-    ///     A rowstate that is used to Detect a newer version
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class RowVersionAttribute : InsertIgnore
-    {
-    }
+		public string AlternatingName { get; set; }
+	}
 
-    /// <summary>
-    ///     Marks a property to be ignored by the complete searching logic
-    ///     TO BE SUPPORTED
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-    public class IgnoreReflectionAttribute : DataAccessAttribute
-    {
-    }
+	/// <summary>
+	///     A rowstate that is used to Detect a newer version
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	public sealed class RowVersionAttribute : InsertIgnore
+	{
+	}
 
-    /// <summary>
-    ///     Marks the property that will be used to hold all non existing Columns
-    ///     Must be of Type <code>IDictionary string Object</code>
-    ///     Only for Automatik Loading
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class LoadNotImplimentedDynamicAttribute : IgnoreReflectionAttribute
-    {
-    }
+	/// <summary>
+	///     Marks a property to be ignored by the complete searching logic
+	///     TO BE SUPPORTED
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+	public class IgnoreReflectionAttribute : DataAccessAttribute
+	{
+	}
 
-    /// <summary>
-    /// Adds a Converter that is used to convert from an DB object to an C# object
-    /// The Converter must inhert from
-    /// ModelAnotations.IValueConverter
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
-    public sealed class ValueConverterAttribute : Attribute
-    {
-        private readonly Type _converter;
-        private static Dictionary<object, IValueConverter> _converterInstance;
+	/// <summary>
+	///     Marks the property that will be used to hold all non existing Columns
+	///     Must be of Type <code>IDictionary string Object</code>
+	///     Only for Automatik Loading
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	public sealed class LoadNotImplimentedDynamicAttribute : IgnoreReflectionAttribute
+	{
+	}
 
-        static ValueConverterAttribute()
-        {
-            _converterInstance = new Dictionary<object, IValueConverter>();
-        }
+	/// <summary>
+	/// Adds a Converter that is used to convert from an DB object to an C# object
+	/// The Converter must inhert from
+	/// ModelAnotations.IValueConverter
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+	public sealed class ValueConverterAttribute : DataAccessAttribute
+	{
+		internal readonly Type _converter;
+		private static Dictionary<object, IValueConverter> _converterInstance;
 
+		static ValueConverterAttribute()
+		{
+			_converterInstance = new Dictionary<object, IValueConverter>();
+		}
 
-        // This is a positional argument
-        public ValueConverterAttribute(Type converter)
-        {
-            this._converter = converter;
+		internal ValueConverterAttribute(IValueConverter runtimeSupport, object para)
+		{
+			_converterInstance.Add(para, runtimeSupport);
+		}
 
-            if (!typeof(IValueConverter).IsAssignableFrom(converter))
-            {
-                throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
-            }
+		// This is a positional argument
+		public ValueConverterAttribute(Type converter)
+		{
+			this._converter = converter;
 
-            this.Parameter = string.Empty;
-        }
+			if (!typeof(IValueConverter).IsAssignableFrom(converter))
+			{
+				throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
+			}
 
-        // This is a positional argument
-        public ValueConverterAttribute(Type converter, object parameter)
-            : this(converter)
-        {
-            this.Parameter = parameter;
-        }
+			this.Parameter = string.Empty;
+		}
 
-        public object Parameter { get; private set; }
+		// This is a positional argument
+		public ValueConverterAttribute(Type converter, object parameter)
+			: this(converter)
+		{
+			this.Parameter = parameter;
+		}
 
-        internal IValueConverter CreateConverter()
-        {
-            var fod = _converterInstance.FirstOrDefault(s => s.Key.Equals(this.Parameter));
-            if(fod.Equals(default(KeyValuePair<object,IValueConverter>)))
-            {
-                var instance = (IValueConverter)Activator.CreateInstance(_converter);
-                return instance;
-            }
+		public object Parameter { get; private set; }
 
-            return fod.Value;
-        }
-    }
+		internal IValueConverter CreateConverter()
+		{
+			var fod = _converterInstance.FirstOrDefault(s => s.Key.Equals(this.Parameter));
+			if(fod.Equals(default(KeyValuePair<object,IValueConverter>)))
+			{
+				var instance = (IValueConverter)Activator.CreateInstance(_converter);
+				_converterInstance.Add(Parameter, instance);
+				return instance;
+			}
 
-    /// <summary>
-    /// Marks a Property as XML Serilized
-    /// If marked the output field from the query will be Serlized to the given object
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-    public sealed class FromXmlAttribute : ForModel
-    {
-        private Type _loadFromXmlStrategy;
-        private static ILoadFromXmlStrategy _loadFromXmlStrategyInstance;
+			return fod.Value;
+		}
+	}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fieldName"></param>
-        public FromXmlAttribute(string fieldName)
-            : base(fieldName)
-        {
-            FieldName = fieldName;
-        }
+	/// <summary>
+	/// Marks a Property as XML Serilized
+	/// If marked the output field from the query will be Serlized to the given object
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	public sealed class FromXmlAttribute : ForModel
+	{
+		private Type _loadFromXmlStrategy;
+		private static ILoadFromXmlStrategy _loadFromXmlStrategyInstance;
 
-        /// <summary>
-        /// The name of the Field inside the result stream
-        /// </summary>
-        public string FieldName { get; set; }
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="fieldName"></param>
+		public FromXmlAttribute(string fieldName)
+			: base(fieldName)
+		{
+			FieldName = fieldName;
+		}
 
-        /// <summary>
-        /// Specifiys the Strategy that is used to load the Property
-        /// </summary>
-        [DefaultValue("IncludeInSelect")]
-        public LoadStrategy LoadStrategy { get; set; }
+		/// <summary>
+		/// The name of the Field inside the result stream
+		/// </summary>
+		public string FieldName { get; set; }
 
-        /// <summary>
-        /// if set the type will be used to define a user logic for the Serialization process
-        /// </summary>
-        public Type LoadFromXmlStrategy
-        {
-            get { return _loadFromXmlStrategy; }
-            set
-            {
-                if (!typeof(ILoadFromXmlStrategy).IsAssignableFrom(value))
-                    throw new ArgumentException("Not able to assgin value from IloadFromXMLStrategy");
-                _loadFromXmlStrategy = value;
-            }
-        }
+		/// <summary>
+		/// Specifiys the Strategy that is used to load the Property
+		/// </summary>
+		[DefaultValue("IncludeInSelect")]
+		public LoadStrategy LoadStrategy { get; set; }
 
-        internal ILoadFromXmlStrategy CreateLoader()
-        {
-            return _loadFromXmlStrategyInstance ?? (_loadFromXmlStrategyInstance = (ILoadFromXmlStrategy)Activator.CreateInstance(_loadFromXmlStrategy));
-        }
-    }
+		/// <summary>
+		/// if set the type will be used to define a user logic for the Serialization process
+		/// </summary>
+		public Type LoadFromXmlStrategy
+		{
+			get { return _loadFromXmlStrategy; }
+			set
+			{
+				if (!typeof(ILoadFromXmlStrategy).IsAssignableFrom(value))
+					throw new ArgumentException("Not able to assgin value from IloadFromXMLStrategy");
+				_loadFromXmlStrategy = value;
+			}
+		}
 
-    /// <summary>
-    /// Marks a class as a StoredPrecedure wrapper
-    /// if the marked class contains a Generic Arguement
-    ///     The result stream from the Select Statement will be parsed into the generic arguement
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    public class StoredProcedureAttribute : InsertIgnore
-    {
+		internal ILoadFromXmlStrategy CreateLoader()
+		{
+			return _loadFromXmlStrategyInstance ?? (_loadFromXmlStrategyInstance = (ILoadFromXmlStrategy)Activator.CreateInstance(_loadFromXmlStrategy));
+		}
+	}
 
-    }
+	/// <summary>
+	/// Marks a class as a StoredPrecedure wrapper
+	/// if the marked class contains a Generic Arguement
+	///     The result stream from the Select Statement will be parsed into the generic arguement
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	public class StoredProcedureAttribute : InsertIgnore
+	{
+
+	}
 }

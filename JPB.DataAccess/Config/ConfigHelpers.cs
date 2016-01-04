@@ -38,7 +38,7 @@ namespace JPB.DataAccess.Config
 
         internal static Config ReflecionStore { get; set; }
 
-        internal static ClassInfoCache GetClassInfo(this Type type)
+        public static ClassInfoCache GetClassInfo(this Type type)
         {
             if (IsAnonymousType(type))
                 return new ClassInfoCache(type); //Anonymous types does not have any Attributes

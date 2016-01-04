@@ -62,6 +62,15 @@ namespace UnitTestProject1
 		public string UserName { get; set; }
 	}
 
+	[AutoGenerateCtor]
+	[ForModel(UsersMeta.UserTable)]
+	public class UsersAutoGenerateConstructor
+	{
+		[PrimaryKey]
+		public long User_ID { get; set; }
+		public string UserName { get; set; }
+	}
+
 	public class ConfigLessUser
 	{
 		public long PropertyA { get; set; }
