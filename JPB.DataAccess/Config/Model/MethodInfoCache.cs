@@ -6,41 +6,43 @@ using System.Reflection;
 
 namespace JPB.DataAccess.Config.Model
 {
+	/// <summary>
+	/// Infos about the Method
+	/// </summary>
 	public class MethodInfoCache : IComparable<MethodInfoCache>
 	{
-		public MethodInfoCache(MethodInfo mehtodInfo)
+		internal MethodInfoCache(MethodInfo mehtodInfo)
 		{
-			this.AttributeInfoCaches = new List<AttributeInfoCache>();
-			if (mehtodInfo != null)
-			{
-				MethodInfo = mehtodInfo;
-				MethodName = mehtodInfo.Name;
-				this.AttributeInfoCaches = mehtodInfo
-					.GetCustomAttributes(true)
-					.Where(s => s is Attribute)
-					.Select(s => new AttributeInfoCache(s as Attribute))
-					.ToList();
-			}
+			if (mehtodInfo == null) 
+				throw new ArgumentNullException("mehtodInfo");
+			MethodInfo = mehtodInfo;
+			MethodName = mehtodInfo.Name;
+			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(mehtodInfo
+				.GetCustomAttributes(true)
+				.Where(s => s is Attribute)
+				.Select(s => new AttributeInfoCache(s as Attribute)));
 		}
 
-		public MethodInfoCache(Delegate fakeMehtod)
+		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params AttributeInfoCache[] attributes)
 		{
-			this.AttributeInfoCaches = new List<AttributeInfoCache>();
-			if (fakeMehtod != null)
-			{
-				MethodInfo = fakeMehtod.GetMethodInfo();
-				MethodName = MethodInfo.Name;
-				Delegate = fakeMehtod;
-				this.AttributeInfoCaches = MethodInfo
-					.GetCustomAttributes(true)
-					.Where(s => s is Attribute)
-					.Select(s => new AttributeInfoCache(s as Attribute))
-					.ToList();
-			}
+			if (fakeMehtod == null) 
+				throw new ArgumentNullException("fakeMehtod");
+			MethodInfo = fakeMehtod.GetMethodInfo();
+			MethodName = string.IsNullOrEmpty(name) ? MethodInfo.Name : name;
+			Delegate = fakeMehtod;
+			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(MethodInfo
+				.GetCustomAttributes(true)
+				.Where(s => s is Attribute)
+				.Select(s => new AttributeInfoCache(s as Attribute)).Concat(attributes));
+		}
+
+		internal protected MethodInfoCache()
+		{
+			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>();
 		}
 
 		/// <summary>
-		/// 
+		/// Easy access to the underlying delegate
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="param"></param>
@@ -63,10 +65,25 @@ namespace JPB.DataAccess.Config.Model
 			}
 		}
 
+		/// <summary>
+		/// if set this method does not exist so we fake it
+		/// </summary>
 		public Delegate Delegate { get; set; }
+
+		/// <summary>
+		/// Direct Reflection 
+		/// </summary>
 		public MethodInfo MethodInfo { get; private set; }
+
+		/// <summary>
+		/// The name of the method
+		/// </summary>
 		public string MethodName { get; private set; }
-		public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
+
+		/// <summary>
+		/// All Attributes on this Method
+		/// </summary>
+		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
 
 		internal static Delegate ExtractDelegate(MethodInfo method)
 		{
@@ -86,7 +103,7 @@ namespace JPB.DataAccess.Config.Model
 
 		public int CompareTo(MethodInfoCache other)
 		{
-			return this.MethodName.CompareTo(other.MethodName);
+			return System.String.Compare(this.MethodName, other.MethodName, System.StringComparison.Ordinal);
 		}
 	}
 }

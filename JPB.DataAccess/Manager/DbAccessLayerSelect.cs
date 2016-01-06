@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Config;
 using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
-using JPB.DataAccess.QueryProvider;
-using JPB.DataAccess;
 
 namespace JPB.DataAccess.Manager
 {
@@ -322,11 +317,11 @@ namespace JPB.DataAccess.Manager
 		{
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
-			sb.Append(type.CreatePropertyCSV(
+			sb.Append(type.CreatePropertyCsv(
 				type
 				.GetClassInfo()
 				.PropertyInfoCaches
-				.Where(f => f.IsNavProperty)
+				.Where(f => f.ForginKeyAttribute != null)
 				.Select(f => f.PropertyName)
 				.ToArray()));
 			sb.Append(" FROM ");

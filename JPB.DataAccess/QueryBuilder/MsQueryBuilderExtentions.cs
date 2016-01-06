@@ -9,7 +9,6 @@ using JPB.DataAccess.Config;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
-using JPB.DataAccess.QueryProvider;
 
 namespace JPB.DataAccess.QueryBuilder
 {
@@ -147,7 +146,7 @@ namespace JPB.DataAccess.QueryBuilder
             cteBuilder.Append("WITH ");
             cteBuilder.Append(cteName);
             cteBuilder.Append(" (");
-            cteBuilder.Append(!useStarOperator ? target.CreatePropertyCSV() : "*");
+            cteBuilder.Append(!useStarOperator ? target.CreatePropertyCsv() : "*");
             cteBuilder.Append(") AS (");
             cteBuilder.Append(DbAccessLayer.CreateSelect(target));
             cteBuilder.Append(")");

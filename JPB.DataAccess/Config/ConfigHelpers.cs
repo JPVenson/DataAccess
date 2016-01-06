@@ -13,6 +13,9 @@ namespace JPB.DataAccess.Config
 #if !DEBUG
     [DebuggerStepThrough]
 #endif
+    /// <summary>
+    /// 
+    /// </summary>
     public static class ConfigHelper
     {
         static ConfigHelper()
@@ -38,10 +41,15 @@ namespace JPB.DataAccess.Config
 
         internal static Config ReflecionStore { get; set; }
 
+        /// <summary>
+        /// Get the ClassInfoCache object for the type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static ClassInfoCache GetClassInfo(this Type type)
         {
             if (IsAnonymousType(type))
-                return new ClassInfoCache(type); //Anonymous types does not have any Attributes
+                return new ClassInfoCache(type, true); //Anonymous types does not have any Attributes
 
             return ReflecionStore.GetOrCreateClassInfoCache(type);
 

@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Config
 	{
 		static Config()
 		{
-			SClassInfoCaches = new List<ClassInfoCache>();
+			SClassInfoCaches = new HashSet<ClassInfoCache>();
 			ConstructorSettings = new FactoryHelperSettings();
 		}
 
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.Config
 		public void SetConfig<T>(Action<ConfigurationResolver<T>> validator)
 		{
 			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof(T))));
-			GetOrCreateClassInfoCache(typeof(T)).RenumeratePropertys(true);
+			GetOrCreateClassInfoCache(typeof(T)).Refresh(true);
 		}
 
 		/// <summary>
@@ -116,6 +116,6 @@ namespace JPB.DataAccess.Config
 			return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);
 		}
 
-		internal static List<ClassInfoCache> SClassInfoCaches { get; private set; }
+		internal static HashSet<ClassInfoCache> SClassInfoCaches { get; private set; }
 	}
 }

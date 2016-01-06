@@ -130,7 +130,7 @@ namespace JPB.DataAccess.Manager
 			return updated;
 		}
 
-		public static object GetDefault(Type type)
+		internal static object GetDefault(Type type)
 		{
 			if (type.IsValueType)
 			{
@@ -190,11 +190,11 @@ namespace JPB.DataAccess.Manager
 			var ignore =
 				classInfo
 					.PropertyInfoCaches
-					.Where(s => s.IsPrimaryKey || s.InsertIgnore || s.IsNavProperty)
+					.Where(s => s.IsPrimaryKey || s.InsertIgnore || s.ForginKeyAttribute != null)
 					.Select(s => s.PropertyName)
 					.ToArray();
 
-			string[] propertyInfos = DbAccessLayerHelper.CreatePropertyNamesAndMap<T>(ignore).ToArray();
+			string[] propertyInfos = DbAccessLayerHelper.FilterDbSchemaMapping<T>(ignore).ToArray();
 
 			var queryBuilder = new QueryBuilder.QueryBuilder(db);
 			queryBuilder.QueryD("UPDATE");

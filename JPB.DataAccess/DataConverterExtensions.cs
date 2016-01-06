@@ -332,73 +332,46 @@ namespace JPB.DataAccess
 		/// <param name="ignore"></param>
 		/// <returns></returns>
 		//[Obsolete("Use ConfigHelper.GetSchema instead", true)]
-		public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
-		{
-			var info = type.GetClassInfo();
-			foreach (var property in info.PropertyInfoCaches)
-			{
-				if (ignore.Contains(property.PropertyName))
-				{
-					continue;
-				}
+		//public static IEnumerable<string> MapEntiyToSchema(Type type, string[] ignore)
+		//{
+		//	var info = type.GetClassInfo();
+		//	foreach (var property in info.PropertyInfoCaches)
+		//	{
+		//		if (ignore.Contains(property.PropertyName))
+		//		{
+		//			continue;
+		//		}
 
-				if (property.FromXmlAttribute != null)
-				{
-					var xml = property.FromXmlAttribute.Attribute as FromXmlAttribute;
-					if (xml.LoadStrategy == LoadStrategy.IncludeInSelect)
-					{
-						if (xml.AlternatingName != property.PropertyName)
-							yield return xml.AlternatingName;
-						yield return property.PropertyName;
-						continue;
-					}
-				}
+		//		if (property.FromXmlAttribute != null)
+		//		{
+		//			var xml = property.FromXmlAttribute.Attribute as FromXmlAttribute;
+		//			if (xml.LoadStrategy == LoadStrategy.IncludeInSelect)
+		//			{
+		//				if (xml.AlternatingName != property.PropertyName)
+		//					yield return xml.AlternatingName;
+		//				yield return property.PropertyName;
+		//				continue;
+		//			}
+		//		}
 
-				if (property.ForModel != null)
-				{
-					yield return (property.ForModel.Attribute as ForModel).AlternatingName;
-					continue;
-				}
-				yield return property.PropertyName;
-			}
-
-			//foreach (var s1 in type.GetPropertiesEx())
-			//{
-			//	if (ignore.Contains(s1.Name))
-			//		continue;
-
-			//	if (s1.GetGetMethod().IsVirtual && s1.GetCustomAttributes().Any(s =>
-			//	{
-			//		var isAttr = s is FromXmlAttribute;
-
-			//		if (!isAttr)
-			//			return false;
-
-			//		var att = s as FromXmlAttribute;
-			//		if (att.LoadStrategy == LoadStrategy.IncludeInSelect)
-			//			return true;
-			//		return false;
-			//	}))
-			//	{
-			//		yield return ((FromXmlAttribute)s1.GetCustomAttributes().First(s => s is FromXmlAttribute)).FieldName;
-			//	}
-			//	else if (!s1.GetGetMethod().IsVirtual && !s1.GetCustomAttributes().Any(s => s is IgnoreReflectionAttribute))
-			//	{
-			//		var formodle = s1.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel;
-			//		yield return formodle != null ? formodle.AlternatingName : s1.Name;
-			//	}
-			//}
-		}
+		//		if (property.ForModel != null)
+		//		{
+		//			yield return (property.ForModel.Attribute as ForModel).AlternatingName;
+		//			continue;
+		//		}
+		//		yield return property.PropertyName;
+		//	}
+		//}
 
 		/// <summary>
 		/// Returns an Orderd list of all Converted names that <typeparam name="T"></typeparam> contains, exept for all Propertynames that are defined in <param name="ignore"></param>
 		/// </summary>
 		/// <param name="ignore"></param>
 		/// <returns></returns>
-		public static IEnumerable<string> MapEntiyToSchema<T>(string[] ignore)
-		{
-			return MapEntiyToSchema(typeof(T), ignore);
-		}
+		//public static IEnumerable<string> MapEntiyToSchema<T>(string[] ignore)
+		//{
+		//	return MapEntiyToSchema(typeof(T), ignore);
+		//}
 
 		/// <summary>
 		/// Maps one propertyname of <param name="type"></param> into the corresponding DbName that is defined by the object
@@ -407,15 +380,15 @@ namespace JPB.DataAccess
 		/// <param name="type"></param>
 		/// <param name="prop"></param>
 		/// <returns></returns>
-		[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
-		public static string MapEntiysPropToSchema(this Type type, string prop)
-		{
-			return (from propertyInfo in ConfigHelper.GetPropertiesEx(type)
-					where propertyInfo.Name == prop
-					let formodle =
-							propertyInfo.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel
-					select formodle != null ? formodle.AlternatingName : propertyInfo.Name).FirstOrDefault();
-		}
+		//[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
+		//public static string MapEntiysPropToSchema(this Type type, string prop)
+		//{
+		//	return (from propertyInfo in ConfigHelper.GetPropertiesEx(type)
+		//			where propertyInfo.Name == prop
+		//			let formodle =
+		//					propertyInfo.GetCustomAttributes().FirstOrDefault(s => s is ForModel) as ForModel
+		//			select formodle != null ? formodle.AlternatingName : propertyInfo.Name).FirstOrDefault();
+		//}
 
 		/// <summary>
 		/// Maps one propertyname of <param name="type"></param> into the corresponding DbName that is defined by the object
@@ -423,11 +396,11 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <param name="prop"></param>
 		/// <returns></returns>
-		[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
-		public static string MapEntiysPropToSchema<T>(string prop)
-		{
-			return MapEntiysPropToSchema(typeof(T), prop);
-		}
+		//[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
+		//public static string MapEntiysPropToSchema<T>(string prop)
+		//{
+		//	return MapEntiysPropToSchema(typeof(T), prop);
+		//}
 
 		/// <summary>
 		/// Maps a DbName into the corresponding C# property or class
@@ -435,11 +408,11 @@ namespace JPB.DataAccess
 		/// <param name="prop"></param>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
-		public static string ReMapSchemaToEntiysProp<T>(string prop)
-		{
-			return ReMapSchemaToEntiysProp(typeof(T), prop);
-		}
+		//[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
+		//public static string ReMapSchemaToEntiysProp<T>(string prop)
+		//{
+		//	return ReMapSchemaToEntiysProp(typeof(T), prop);
+		//}
 
 		/// <summary>
 		/// Maps a DbName into the corresponding C# property or class
@@ -447,20 +420,20 @@ namespace JPB.DataAccess
 		/// <param name="type"></param>
 		/// <param name="prop"></param>
 		/// <returns></returns>
-		[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
-		public static string ReMapSchemaToEntiysProp(this Type type, string prop)
-		{
-			foreach (var propertyInfo in from propertyInfo in ConfigHelper.GetPropertiesEx(type)
-										 let customAttributes =
-												 propertyInfo.GetCustomAttributes()
-												 .FirstOrDefault(s => s is ForModel) as ForModel
-										 where
-											 customAttributes != null &&
-											 customAttributes.AlternatingName == prop
-										 select propertyInfo)
-				return propertyInfo.Name;
-			return prop;
-		}
+		//[Obsolete("Replaced with ConfigHelper.GetSchemaMapping", true)]
+		//public static string ReMapSchemaToEntiysProp(this Type type, string prop)
+		//{
+		//	foreach (var propertyInfo in from propertyInfo in ConfigHelper.GetPropertiesEx(type)
+		//								 let customAttributes =
+		//										 propertyInfo.GetCustomAttributes()
+		//										 .FirstOrDefault(s => s is ForModel) as ForModel
+		//								 where
+		//									 customAttributes != null &&
+		//									 customAttributes.AlternatingName == prop
+		//								 select propertyInfo)
+		//		return propertyInfo.Name;
+		//	return prop;
+		//}
 
 		/// <summary>
 		/// Checks the info declaring type to be an List
@@ -984,7 +957,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static IEnumerable<string> GetPropertysViaRefection(this Type type, params string[] ignore)
 		{
-			return type.GetPropertiesEx().Select(s => s.Name).Except(ignore);
+			return type.GetClassInfo().PropertyInfoCaches.Where(f => !ignore.Contains(f.DbName)).Select(s => s.PropertyName);
 		}
 	}
 }

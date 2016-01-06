@@ -241,15 +241,15 @@ namespace JPB.DataAccess.UnitTests
 			});
 
 			expectWrapper.Insert(new ConfigLessUser() { PropertyB = insGuid });
+
+			var elements = expectWrapper.Select<ConfigLessUser>();
+			Assert.AreEqual(elements.Length, 1);
+
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.UserTable);
 			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
-
-			var elements = expectWrapper.Select<ConfigLessUser>();
-
-			Assert.AreEqual(elements.Length, 1);
 		}
 
 		[TestMethod]
@@ -259,14 +259,13 @@ namespace JPB.DataAccess.UnitTests
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 			expectWrapper.Insert(new ConfigLessUserInplaceConfig() { PropertyB = insGuid });
+
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.UserTable);
 			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
-
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
-
+			
 			var elements = expectWrapper.Select<ConfigLessUserInplaceConfig>();
-
 			Assert.AreEqual(elements.Length, 1);
 		}
 

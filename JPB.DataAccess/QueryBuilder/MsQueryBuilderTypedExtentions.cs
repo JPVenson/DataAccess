@@ -146,7 +146,7 @@ namespace JPB.DataAccess.QueryBuilder
             cteBuilder.Append("WITH ");
             cteBuilder.Append(cteName);
             cteBuilder.Append(" (");
-            cteBuilder.Append(!useStarOperator ? target.CreatePropertyCSV() : "*");
+            cteBuilder.Append(!useStarOperator ? target.CreatePropertyCsv() : "*");
             cteBuilder.Append(") AS (");
             cteBuilder.Append(DbAccessLayer.CreateSelect(target));
             cteBuilder.Append(")");

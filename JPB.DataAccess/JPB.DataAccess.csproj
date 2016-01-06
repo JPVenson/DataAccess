@@ -103,21 +103,14 @@
     <Compile Include="QueryBuilder\QueryLazyEnumerator.cs" />
     <Compile Include="QueryBuilder\GenericQueryPart.cs" />
     <Compile Include="QueryBuilder\TJoinMode.cs" />
-    <Compile Include="QueryExtentions.cs" />
     <Compile Include="ModelsAnotations\Annotations.cs" />
     <Compile Include="ModelsAnotations\ModelAnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryFactory\Contracts\IQuerySelectFactory.cs" />
     <Compile Include="QueryFactory\IQueryFactoryResult.cs" />
     <Compile Include="QueryFactory\QueryFactoryResult.cs" />
-    <Compile Include="QueryProvider\Query.cs" />
-    <Compile Include="QueryProvider\QueryProvider.cs" />
-    <Compile Include="QueryProvider\TestQueryProvider.cs" />
-    <Compile Include="QueryProvider\TypeSystem.cs" />
     <Compile Include="Config\Config.cs" />
     <Compile Include="Config\ConfigHelpers.cs" />
-    <Compile Include="ReposetoryCollection.cs" />
-    <Compile Include="StaticHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

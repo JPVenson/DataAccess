@@ -7,26 +7,35 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.Config.Model
 {
-    public class ConstructorInfoCache
-    {
-        public ConstructorInfoCache(ConstructorInfo ctorInfo)
-        {
-            this.AttributeInfoCaches = new List<AttributeInfoCache>();
-            if (ctorInfo != null)
-            {
-                MethodInfo = ctorInfo;
-                MethodName = ctorInfo.Name;
-                this.AttributeInfoCaches =
-                    ctorInfo
-                    .GetCustomAttributes(true)
-                    .Where(s => s is Attribute)
-                    .Select(s => new AttributeInfoCache(s as Attribute))
-                    .ToList();
-            }
-        }
-        
-        public ConstructorInfo MethodInfo { get; private set; }
-        public string MethodName { get; private set; }
-        public List<AttributeInfoCache> AttributeInfoCaches { get; private set; }
-    }
+	/// <summary>
+	/// Infos about the Ctor
+	/// </summary>
+	public class ConstructorInfoCache
+	{
+
+		internal ConstructorInfoCache(ConstructorInfo ctorInfo)
+		{
+			MethodInfo = ctorInfo;
+			MethodName = ctorInfo.Name;
+			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(ctorInfo
+				.GetCustomAttributes(true)
+				.Where(s => s is Attribute)
+				.Select(s => new AttributeInfoCache(s as Attribute)));
+		}
+		
+		/// <summary>
+		/// Direct Reflection
+		/// </summary>
+		public ConstructorInfo MethodInfo { get; private set; }
+
+		/// <summary>
+		/// The name of the constructor
+		/// </summary>
+		public string MethodName { get; private set; }
+
+		/// <summary>
+		/// All Attributes
+		/// </summary>
+		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
+	}
 }

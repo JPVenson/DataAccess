@@ -137,11 +137,11 @@ namespace JPB.DataAccess.Manager
 				classInfo
 					.PropertyInfoCaches
 					.Where(f => f.IsPrimaryKey || f.InsertIgnore)
-					.Select(s => s.PropertyName)
+					.Select(s => s.DbName)
 					.ToArray();
 
-			string[] propertyInfos = type.CreatePropertyNamesAndMap(ignore).ToArray();
-			string csvprops = type.CreatePropertyCSV(ignore);
+			string[] propertyInfos = type.FilterDbSchemaMapping(ignore).ToArray();
+			string csvprops = type.CreatePropertyCsv(ignore);
 
 			string values = "";
 			for (int index = 0; index < propertyInfos.Length; index++)

@@ -217,8 +217,8 @@ namespace JPB.DataAccess
 				return parameter as IEnumerable<IQueryParameter>;
 			}
 
-			return (from element in ConfigHelper.GetPropertiesEx(((Type)parameter.GetType()))
-					let value = DataConverterExtensions.GetParamaterValue(parameter, element.Name)
+			return (from element in ((Type)parameter.GetType()).GetPropertiesEx()
+					let value = parameter.GetParamaterValue(element.Name)
 					select new QueryParameter { Name = element.Name.CheckParamter(), Value = value }).Cast<IQueryParameter>()
 				.ToList();
 		}
@@ -247,7 +247,7 @@ namespace JPB.DataAccess
 		/// <param name="type"></param>
 		/// <param name="ignorePk"></param>
 		/// <returns></returns>
-		public static string CreatePropertyCSV(this Type type, bool ignorePk = false)
+		public static string CreatePropertyCsv(this Type type, bool ignorePk = false)
 		{
 			return CreatePropertyNames(type, ignorePk).Aggregate((e, f) => e + ", " + f);
 		}
@@ -258,9 +258,9 @@ namespace JPB.DataAccess
 		/// <param name="ignorePk"></param>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static string CreatePropertyCSV<T>(bool ignorePk = false)
+		public static string CreatePropertyCsv<T>(bool ignorePk = false)
 		{
-			return CreatePropertyCSV(typeof(T), ignorePk);
+			return CreatePropertyCsv(typeof(T), ignorePk);
 		}
 
 		/// <summary>
@@ -269,9 +269,9 @@ namespace JPB.DataAccess
 		/// <param name="type"></param>
 		/// <param name="ignore"></param>
 		/// <returns></returns>
-		internal static string CreatePropertyCSV(this Type type, params string[] ignore)
+		internal static string CreatePropertyCsv(this Type type, params string[] ignore)
 		{
-			return CreatePropertyNamesAndMap(type, ignore).Aggregate((e, f) => e + ", " + f);
+			return FilterDbSchemaMapping(type, ignore).Aggregate((e, f) => e + ", " + f);
 		}
 
 		/// <summary>
@@ -279,9 +279,9 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <param name="ignore"></param>
 		/// <returns></returns>
-		internal static string CreatePropertyCSV<T>(params string[] ignore)
+		internal static string CreatePropertyCsv<T>(params string[] ignore)
 		{
-			return CreatePropertyCSV(typeof(T), ignore);
+			return CreatePropertyCsv(typeof(T), ignore);
 		}
 
 		/// <summary>
@@ -290,9 +290,9 @@ namespace JPB.DataAccess
 		/// <param name="type"></param>
 		/// <param name="ignore"></param>
 		/// <returns></returns>
-		internal static IEnumerable<string> CreatePropertyNamesAndMap(this Type type, params string[] ignore)
+		internal static IEnumerable<string> FilterDbSchemaMapping(this Type type, params string[] ignore)
 		{
-			return DataConverterExtensions.MapEntiyToSchema(type, ignore).ToList();
+			return type.GetClassInfo().LocalToDbSchemaMapping().Where(f => !ignore.Contains(f));
 		}
 
 		/// <summary>
@@ -301,9 +301,9 @@ namespace JPB.DataAccess
 		/// <param name="ignore"></param>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		internal static IEnumerable<string> CreatePropertyNamesAndMap<T>(params string[] ignore)
+		internal static IEnumerable<string> FilterDbSchemaMapping<T>(params string[] ignore)
 		{
-			return CreatePropertyNamesAndMap(typeof(T), ignore);
+			return FilterDbSchemaMapping(typeof(T), ignore);
 		}
 
 		internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
@@ -387,7 +387,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> CreatePropertyNames(Type type, bool ignorePK = false)
 		{
-			return ignorePK ? CreatePropertyNamesAndMap(type, type.GetPK()) : CreatePropertyNamesAndMap(type, new string[0]);
+			return ignorePK ? FilterDbSchemaMapping(type, type.GetPK()) : FilterDbSchemaMapping(type, new string[0]);
 		}
 
 		/// <summary>
@@ -398,9 +398,9 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> CreatePropertyNames<T>(bool ignorePK = false)
 		{
-			return ignorePK ? CreatePropertyNamesAndMap<T>(typeof(T).GetPK()) : CreatePropertyNamesAndMap<T>(new string[0]);
+			return ignorePK ? FilterDbSchemaMapping<T>(typeof(T).GetPK()) : FilterDbSchemaMapping<T>(new string[0]);
 		}
-		
+
 		/// <summary>
 		/// Wraps a Parameterless string into a Command for the given DB
 		/// </summary>
@@ -423,7 +423,7 @@ namespace JPB.DataAccess
 		public static List<T> ExecuteGenericCreateModelsCommand<T>(this IDbCommand command, IDatabase db)
 			where T : class, new()
 		{
-			var info = typeof (T).GetClassInfo();
+			var info = typeof(T).GetClassInfo();
 			return db.Run(
 				s =>
 					s.GetEntitiesList(command, info.SetPropertysViaReflection)
@@ -445,9 +445,9 @@ namespace JPB.DataAccess
 
 		internal static IDbCommand CreateCommandOfClassAttribute<TE>(
 			this Type type,
-			object entry, 
+			object entry,
 			IDatabase db,
-			Func<object, IDatabase, IDbCommand> fallback, 
+			Func<object, IDatabase, IDbCommand> fallback,
 			params object[] param)
 			where TE : DataAccessAttribute
 		{
@@ -492,7 +492,7 @@ namespace JPB.DataAccess
 				var method = searchMethodWithFittingParams.Single();
 
 				//must be public static if attribute is Select
-				if (typeof(TE) != typeof(SelectFactoryMethodAttribute) 
+				if (typeof(TE) != typeof(SelectFactoryMethodAttribute)
 					|| (typeof(TE) == typeof(SelectFactoryMethodAttribute) && method.IsStatic))
 				{
 					object[] cleanParams = param != null && param.Any() ? param : null;
