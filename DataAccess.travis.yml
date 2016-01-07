@@ -1,0 +1,6 @@
+language: csharp#
+solution: JPB.DataAccess.sln
+mono:
+  - latest
+script:
+  - xbuild /p:Configuration=Release JPB.DataAccess.sln
