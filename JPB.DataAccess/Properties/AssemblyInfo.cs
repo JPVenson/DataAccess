@@ -6,13 +6,14 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("JPB.DataAccess")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("ORM that uses Reflection and IL code to create POCO's and fill them with data")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("JPB")]
 [assembly: AssemblyProduct("JPB.DataAccess")]
 [assembly: AssemblyCopyright("Copyright © Jean-Pierre Bachmann 2016")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCulture("EN-US")]
+[assembly: AssemblyDefaultAlias("DataAccess")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -35,5 +36,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("1.1.3.0015")]
+[assembly: AssemblyVersion("2.0.*")]
+[assembly: AssemblyFileVersion("2.0.0.0000")]
