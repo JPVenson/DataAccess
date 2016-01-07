@@ -362,6 +362,9 @@ namespace JPB.DataAccess.Manager
 				var results = database.EnumerateDataRecords(query, true);
 				var recordToNameMapping = new Dictionary<int, PropertyInfoCache>();
 
+				if (!results.Any())
+					return new ArrayList();
+
 				var anyReader = results.First();
 
 				for (int i = 0; i < anyReader.FieldCount; i++)

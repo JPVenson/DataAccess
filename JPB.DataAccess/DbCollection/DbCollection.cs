@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,9 @@ namespace JPB.DataAccess.DbCollection
 		/// Internal use only
 		/// </summary>
 		/// <param name="enumerable"></param>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public NonObservableDbCollection(IEnumerable enumerable)
 		{
 			_base = new List<T>();
@@ -68,6 +72,9 @@ namespace JPB.DataAccess.DbCollection
 		/// Internal use only
 		/// </summary>
 		/// <param name="subset"></param>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable subset)
 		{
 			_internalCollection = new List<StateHolder>();
@@ -88,6 +95,9 @@ namespace JPB.DataAccess.DbCollection
 		/// Internal use only
 		/// </summary>
 		/// <param name="subset"></param>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable<T> subset)
 		{
 			_internalCollection = new List<StateHolder>();

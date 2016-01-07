@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using JPB.DataAccess.ModelsAnotations;
 
@@ -49,7 +51,16 @@ namespace JPB.DataAccess.Config.Model
 			this.SelectFactory = this.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute);
 			this.HasRelations = this.AttributeInfoCaches.Any(s => s.Attribute is ForeignKeyAttribute);
 			CreateSchemaMapping();
-			CheckForConfig();
+			CheckCtor();
+		}
+
+		internal void CheckCtor()
+		{
+			var hasAutoGeneratorAttribute = this.AttributeInfoCaches.Any(f => f.Attribute is AutoGenerateCtorAttribute);
+			if (hasAutoGeneratorAttribute && this.Factory == null)
+			{
+				CreateFactory();
+			}
 		}
 
 		internal void CheckForConfig()
@@ -66,11 +77,6 @@ namespace JPB.DataAccess.Config.Model
 				}
 
 				Refresh(true);
-			}
-			var hasAutoGeneratorAttribute = this.AttributeInfoCaches.Any(f => f.Attribute is AutoGenerateCtorAttribute);
-			if (hasAutoGeneratorAttribute)
-			{
-				CreateFactory();
 			}
 		}
 
@@ -98,6 +104,10 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		/// Internal Use only
 		/// </summary>
+		[DebuggerHidden]
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool FullFactory { get; set; }
 
 		/// <summary>
@@ -140,6 +150,10 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		/// Internal use Only
 		/// </summary>
+		[DebuggerHidden]
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool HasRelations { get; private set; }
 
 		internal string SchemaMappingLocalToDatabase(string cSharpName)

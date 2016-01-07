@@ -54,7 +54,7 @@ namespace JPB.DataAccess.UnitTests
 			Assert.AreEqual(expectWrapper.DbAccessType, DbAccessType);
 
 			var checkDatabase = expectWrapper.CheckDatabase();
-			Assert.IsTrue(checkDatabase);         
+			Assert.IsTrue(checkDatabase);
 
 			var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
@@ -189,8 +189,6 @@ namespace JPB.DataAccess.UnitTests
 			Assert.AreEqual(resultSelect1, -1);
 		}
 
-
-
 		[TestMethod]
 		public void InsertTest()
 		{
@@ -207,23 +205,6 @@ namespace JPB.DataAccess.UnitTests
 		}
 
 		[TestMethod]
-		public void AutoGenerateConstructor()
-		{
-			this.InsertTest();
-			var refSelect = expectWrapper.Select<UsersAutoGenerateConstructor>();
-			Assert.IsTrue(refSelect.Length > 0);
-
-			var testInsertName = Guid.NewGuid().ToString();
-			var testUser = expectWrapper.InsertWithSelect(new UsersAutoGenerateConstructor() { UserName = testInsertName });
-			Assert.IsNotNull(testUser);
-			Assert.AreNotEqual(testUser.User_ID, default(long));
-
-			var selTestUser = expectWrapper.Select<UsersAutoGenerateConstructor>(testUser.User_ID);
-			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
-			Assert.AreEqual(selTestUser.User_ID, testUser.User_ID);
-		}
-
-		[TestMethod]
 		public void ConfigLess()
 		{
 			var insGuid = Guid.NewGuid().ToString();
@@ -231,6 +212,8 @@ namespace JPB.DataAccess.UnitTests
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
 			var config = new Config.Config();
+
+			Config.Config.Clear();
 
 			config.SetConfig<ConfigLessUser>(f =>
 			{
@@ -250,11 +233,13 @@ namespace JPB.DataAccess.UnitTests
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
+			Config.Config.Clear();
 		}
 
 		[TestMethod]
 		public void ConfigLessInplace()
 		{
+			Config.Config.Clear();
 			var insGuid = Guid.NewGuid().ToString();
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
@@ -264,15 +249,17 @@ namespace JPB.DataAccess.UnitTests
 			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
-			
+
 			var elements = expectWrapper.Select<ConfigLessUserInplaceConfig>();
 			Assert.AreEqual(elements.Length, 1);
+			Config.Config.Clear();
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(SqlException))]
 		public void ConfigLessFail()
 		{
+			Config.Config.Clear();
 			var insGuid = Guid.NewGuid().ToString();
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
@@ -292,6 +279,7 @@ namespace JPB.DataAccess.UnitTests
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
+			Config.Config.Clear();
 		}
 
 		[TestMethod]
@@ -422,6 +410,8 @@ namespace JPB.DataAccess.UnitTests
 		[TestMethod]
 		public void SelectNative()
 		{
+			InsertTest();
+
 			var refSelect = expectWrapper.SelectNative<Users>(UsersMeta.SelectStatement);
 			Assert.IsTrue(refSelect.Any());
 
@@ -441,6 +431,7 @@ namespace JPB.DataAccess.UnitTests
 		[TestMethod]
 		public void SelectPrimitivSelect()
 		{
+			InsertTest();
 			var refSelect = expectWrapper.RunPrimetivSelect<long>(UsersMeta.SelectStatement);
 			Assert.IsTrue(refSelect.Any());
 

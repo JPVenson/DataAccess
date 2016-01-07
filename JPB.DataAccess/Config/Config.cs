@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.Config.Model;
@@ -43,6 +45,17 @@ namespace JPB.DataAccess.Config
 		{
 			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof(T))));
 			GetOrCreateClassInfoCache(typeof(T)).Refresh(true);
+		}
+
+		/// <summary>
+		/// For Internal use Only
+		/// </summary>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public static void Clear()
+		{
+			Config.SClassInfoCaches.Clear();
 		}
 
 		/// <summary>

@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("JPB.DataAccess")]
 [assembly: AssemblyCopyright("Copyright © Jean-Pierre Bachmann 2016")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("EN-US")]
+[assembly: AssemblyCulture("")]
 [assembly: AssemblyDefaultAlias("DataAccess")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
