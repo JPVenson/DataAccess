@@ -1,8 +1,9 @@
-language: csharp#
+language: csharp
 solution: JPB.DataAccess.sln
 sudo: required
 install:
   - nuget restore JPB.DataAccess.sln
+  - mono .nuget/nuget.exe restore
 mono:
   - latest
 script:
