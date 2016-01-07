@@ -25,6 +25,9 @@ namespace JPB.DataAccess.Config
 			ConstructorSettings = new FactoryHelperSettings();
 		}
 
+		/// <summary>
+		/// The settings that are used to create a DOM ctor
+		/// </summary>
 		public static FactoryHelperSettings ConstructorSettings { get; private set; }
 
 		/// <summary>

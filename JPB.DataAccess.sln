@@ -18,32 +18,23 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		ExternalRelease|Any CPU = ExternalRelease|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.ExternalRelease|Any CPU.ActiveCfg = ExternalRelease|Any CPU
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.ExternalRelease|Any CPU.Build.0 = ExternalRelease|Any CPU
 		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
 		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
 		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
 		{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
