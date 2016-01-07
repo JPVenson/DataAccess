@@ -1,5 +1,7 @@
 language: csharp#
 solution: JPB.DataAccess.sln
+install:
+  - nuget restore JPB.DataAccess.sln
 mono:
   - latest
 script:
