@@ -13,19 +13,16 @@ namespace JPB.DataAccess.Config.Model
 	{
 		internal ClassInfoCache(Type type, bool anon = false)
 		{
-			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>();
-			this.PropertyInfoCaches = new HashSet<PropertyInfoCache>();
-			this.MethodInfoCaches = new HashSet<MethodInfoCache>();
-			this.ConstructorInfoCaches = new HashSet<ConstructorInfoCache>();
 			ClassName = type.FullName;
 			Type = type;
 			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(type
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
 					.Select(s => new AttributeInfoCache(s as Attribute)));
-			this.PropertyInfoCaches = new HashSet<PropertyInfoCache>(type
+			this.PropertyInfoCaches = new Dictionary<string, PropertyInfoCache>(type
 				.GetProperties()
-				.Select(s => new PropertyInfoCache(s, anon)));
+				.Select(s => new PropertyInfoCache(s, anon))
+				.ToDictionary(s => s.PropertyName, s => s));
 			this.MethodInfoCaches = new HashSet<MethodInfoCache>(type
 				.GetMethods()
 				.Select(s => new MethodInfoCache(s)));
@@ -36,7 +33,8 @@ namespace JPB.DataAccess.Config.Model
 		}
 
 		/// <summary>
-		/// When alternating the Configuration you have to call this method to renew the property enumerations. This also happens after the usage of the config attribute
+		/// When alternating the Configuration you have to call this method to renew the property enumerations. 
+		/// This also happens after the usage of the config attribute
 		/// </summary>
 		/// <param name="withSubProperty"></param>
 		public void Refresh(bool withSubProperty)
@@ -44,13 +42,14 @@ namespace JPB.DataAccess.Config.Model
 			if (withSubProperty)
 				foreach (var propertyInfoCach in PropertyInfoCaches)
 				{
-					propertyInfoCach.Refresh();
+					propertyInfoCach.Value.Refresh();
 				}
 
 			this.ForModel = this.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
 			this.SelectFactory = this.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute);
 			this.HasRelations = this.AttributeInfoCaches.Any(s => s.Attribute is ForeignKeyAttribute);
 			CreateSchemaMapping();
+			CheckForConfig();
 		}
 
 		internal void CheckForConfig()
@@ -116,10 +115,12 @@ namespace JPB.DataAccess.Config.Model
 		/// </summary>
 		public Dictionary<string, string> SchemaMappingValues { get; private set; }
 
+		private Dictionary<string, string> _invertedSchema; 
+
 		/// <summary>
 		/// All Propertys
 		/// </summary>
-		public HashSet<PropertyInfoCache> PropertyInfoCaches { get; private set; }
+		public Dictionary<string, PropertyInfoCache> PropertyInfoCaches { get; private set; }
 
 		/// <summary>
 		/// All Attributes on class level
@@ -153,28 +154,30 @@ namespace JPB.DataAccess.Config.Model
 
 		internal string SchemaMappingDatabaseToLocal(string databaseName)
 		{
-			var mappings = SchemaMappingValues.FirstOrDefault(s => s.Value.Equals(databaseName, StringComparison.InvariantCulture));
-			if (mappings.Equals(default(KeyValuePair<string, string>)))
+			string mappings;
+			if (!_invertedSchema.TryGetValue(databaseName, out mappings))
 			{
 				return databaseName;
 			}
-			return mappings.Key;
+			return mappings;
+
+
+			//var mappings = SchemaMappingValues.FirstOrDefault(s => s.Value.Equals(databaseName, StringComparison.InvariantCulture));
+			//if (mappings.Equals(default(KeyValuePair<string, string>)))
+			//{
+			//	return databaseName;
+			//}
+			//return mappings.Key;
 		}
 
 		internal void CreateSchemaMapping()
 		{
 			SchemaMappingValues = new Dictionary<string, string>();
+			_invertedSchema = new Dictionary<string, string>();
 			foreach (var item in PropertyInfoCaches)
 			{
-				var forModel = item.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
-				if (forModel != null)
-				{
-					SchemaMappingValues.Add(item.PropertyName, (forModel.Attribute as ForModel).AlternatingName);
-				}
-				else
-				{
-					SchemaMappingValues.Add(item.PropertyName, item.PropertyName);
-				}
+				SchemaMappingValues.Add(item.Value.PropertyName, item.Value.DbName);
+				_invertedSchema.Add(item.Value.DbName, item.Value.PropertyName);
 			}
 		}
 
@@ -183,26 +186,18 @@ namespace JPB.DataAccess.Config.Model
 			return SchemaMappingValues.Values.ToArray();
 		}
 
-		internal string[] DbToLocalSchemaMapping()
-		{
-			if (SchemaMappingValues == null)
-			{
-				SchemaMappingValues = new Dictionary<string, string>();
-				foreach (var item in PropertyInfoCaches)
-				{
-					var forModel = item.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
-					if (forModel != null)
-					{
-						SchemaMappingValues.Add(item.PropertyName, (forModel.Attribute as ForModel).AlternatingName);
-					}
-					else
-					{
-						SchemaMappingValues.Add(item.PropertyName, item.PropertyName);
-					}
-				}
-			}
+		//internal string[] DbToLocalSchemaMapping()
+		//{
+		//	if (SchemaMappingValues == null)
+		//	{
+		//		SchemaMappingValues = new Dictionary<string, string>();
+		//		foreach (var item in PropertyInfoCaches)
+		//		{
+		//			SchemaMappingValues.Add(item.Value.PropertyName, item.Value.DbName);
+		//		}
+		//	}
 
-			return SchemaMappingValues.Values.ToArray();
-		}
+		//	return SchemaMappingValues.Values.ToArray();
+		//}
 	}
 }

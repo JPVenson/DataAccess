@@ -321,8 +321,8 @@ namespace JPB.DataAccess.Manager
 				type
 				.GetClassInfo()
 				.PropertyInfoCaches
-				.Where(f => f.ForginKeyAttribute != null)
-				.Select(f => f.PropertyName)
+				.Where(f => f.Value.ForginKeyAttribute != null)
+				.Select(f => f.Key)
 				.ToArray()));
 			sb.Append(" FROM ");
 			sb.Append(type.GetTableName());
@@ -366,7 +366,10 @@ namespace JPB.DataAccess.Manager
 
 				for (int i = 0; i < anyReader.FieldCount; i++)
 				{
-					recordToNameMapping.Add(i, typeInfo.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i))));
+					PropertyInfoCache val = null;
+					typeInfo.PropertyInfoCaches.TryGetValue(typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i)),
+					out val);
+					recordToNameMapping.Add(i, val);
 				}
 
 				return

@@ -123,8 +123,8 @@ namespace JPB.DataAccess
 				propertyInfos.Select(
 					propertyInfo =>
 					{
-						var property =
-							classInfo.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == propertyInfo);
+						PropertyInfoCache property ;
+						classInfo.PropertyInfoCaches.TryGetValue(propertyInfo, out property);
 						object dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
 						return dataValue;
 					}).ToArray();

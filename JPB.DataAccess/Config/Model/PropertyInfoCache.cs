@@ -13,10 +13,7 @@ namespace JPB.DataAccess.Config.Model
 		private readonly PropertyInfo _propertyInfo;
 		private dynamic _getter;
 		private dynamic _setter;
-
-
-
-
+		
 		public void SetGet(dynamic getter)
 		{
 			this._getter = getter;
@@ -117,8 +114,6 @@ namespace JPB.DataAccess.Config.Model
 				//Getter = new MethodInfoCache(GetPropGetter(GetterDelegate, propertyInfo.DeclaringType, PropertyName));
 				//Setter = new MethodInfoCache(GetPropSetter(SetterDelegate, propertyInfo.DeclaringType, targetType, PropertyName));
 
-
-
 				this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(propertyInfo
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
@@ -132,8 +127,7 @@ namespace JPB.DataAccess.Config.Model
 		{
 			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>();
 		}
-
-
+		
 		/// <summary>
 		/// For internal Usage only
 		/// </summary>

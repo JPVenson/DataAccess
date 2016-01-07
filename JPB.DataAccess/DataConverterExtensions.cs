@@ -142,7 +142,9 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static PropertyInfoCache GetParamater(this object source, string name)
 		{
-			return source.GetType().GetClassInfo().PropertyInfoCaches.First(s => s.PropertyName == name);
+			PropertyInfoCache val;
+			source.GetType().GetClassInfo().PropertyInfoCaches.TryGetValue(name, out val);
+			return val;
 		}
 
 		/// <summary>
@@ -255,7 +257,9 @@ namespace JPB.DataAccess
 		{
 			Type type = source.GetType();
 			string pk = type.GetFK(name);
-			return (E)type.GetClassInfo().PropertyInfoCaches.First(s => s.PropertyName == pk).GetConvertedValue(source);
+			PropertyInfoCache val;
+			type.GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			return (E)val.GetConvertedValue(source);
 		}
 
 		/// <summary>
@@ -269,7 +273,9 @@ namespace JPB.DataAccess
 		public static TE GetFK<T, TE>(this T source, string name)
 		{
 			string pk = typeof(T).GetFK(name);
-			return (TE)typeof(T).GetClassInfo().PropertyInfoCaches.First(s => s.PropertyName == pk).GetConvertedValue(source);
+			PropertyInfoCache val;
+			typeof(T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			return (TE)val.GetConvertedValue(source);
 		}
 		
 		internal static object GetConvertedValue(this PropertyInfoCache source, object instance)
@@ -318,10 +324,9 @@ namespace JPB.DataAccess
 		public static E GetPK<T, E>(this T source)
 		{
 			string pk = typeof(T).GetPKPropertyName();
-			return (E)typeof(T)
-				.GetClassInfo()
-				.PropertyInfoCaches
-				.First(s => s.PropertyName == pk)
+			PropertyInfoCache val;
+			typeof(T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			return (E)val
 				.GetConvertedValue(source);
 		}
 
@@ -633,7 +638,9 @@ namespace JPB.DataAccess
 				cache = new Dictionary<int, PropertyInfoCache>();
 				for (int i = 0; i < reader.FieldCount; i++)
 				{
-					cache.Add(i, info.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == info.SchemaMappingDatabaseToLocal(reader.GetName(i))));
+					PropertyInfoCache val = null;
+					info.PropertyInfoCaches.TryGetValue(info.SchemaMappingDatabaseToLocal(reader.GetName(i)), out val);
+					cache.Add(i, val);
 				}
 			}
 
@@ -758,15 +765,14 @@ namespace JPB.DataAccess
 					}
 					else
 					{
-						var maybeFallbackProperty = propertys
-							.FirstOrDefault(s => s.AttributeInfoCaches.Any(e => e.Attribute is LoadNotImplimentedDynamicAttribute));
-						if (maybeFallbackProperty != null)
+						var maybeFallbackProperty = propertys.FirstOrDefault(s => s.Value.AttributeInfoCaches.Any(e => e.Attribute is LoadNotImplimentedDynamicAttribute));
+						if (!maybeFallbackProperty.Equals(default(KeyValuePair<string, PropertyInfoCache>)))
 						{
-							instanceOfFallbackList = (Dictionary<string, object>)maybeFallbackProperty.Getter.Invoke(instance);
+							instanceOfFallbackList = (Dictionary<string, object>)maybeFallbackProperty.Value.Getter.Invoke(instance);
 							if (instanceOfFallbackList == null)
 							{
 								instanceOfFallbackList = new Dictionary<string, object>();
-								maybeFallbackProperty.Setter.Invoke(instance, instanceOfFallbackList);
+								maybeFallbackProperty.Value.Setter.Invoke(instance, instanceOfFallbackList);
 							}
 							instanceOfFallbackList.Add(reader.GetName(i), value);
 						}
@@ -957,7 +963,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static IEnumerable<string> GetPropertysViaRefection(this Type type, params string[] ignore)
 		{
-			return type.GetClassInfo().PropertyInfoCaches.Where(f => !ignore.Contains(f.DbName)).Select(s => s.PropertyName);
+			return type.GetClassInfo().PropertyInfoCaches.Select(f => f.Value).Where(f => !ignore.Contains(f.DbName)).Select(s => s.PropertyName);
 		}
 	}
 }

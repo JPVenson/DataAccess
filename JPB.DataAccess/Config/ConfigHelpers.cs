@@ -107,7 +107,7 @@ namespace JPB.DataAccess.Config
             return ReflecionStore
                 .GetOrCreateClassInfoCache(type)
                 .PropertyInfoCaches
-                .Select(s => s.PropertyInfo);
+                .Select(s => s.Value.PropertyInfo);
         }
 
         internal static string[] GetSchemaMapping(this Type type)

@@ -45,7 +45,7 @@ namespace JPB.DataAccess.Config
 		public void SetPropertyAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
 			var info = ConfigHelper.GetPropertyInfoFromLabda(exp);
-			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.PropertyName == info);
+			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
 			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
 		}
 		
@@ -55,9 +55,9 @@ namespace JPB.DataAccess.Config
 		/// <typeparam name="TProp"></typeparam>
 		/// <param name="info"></param>
 		/// <param name="attribute"></param>
-		public void SetPropertyAttribute<TProp>(string info, DataAccessAttribute attribute)
+		public void SetPropertyAttribute(string info, DataAccessAttribute attribute)
 		{
-			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.PropertyName == info);
+			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
 			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
 		}
 
@@ -118,14 +118,14 @@ namespace JPB.DataAccess.Config
 			if (name == null)
 				throw new ArgumentNullException("name");
 
-			if (ClassInfoCache.PropertyInfoCaches.Any(s => s.PropertyName == name))
+			if (ClassInfoCache.PropertyInfoCaches.Any(s => s.Key == name))
 				throw new ArgumentOutOfRangeException("name", "Property name does exist. Cannot define a property twice");
 
 			if (setter == null && getter == null)
 				throw new ArgumentNullException("setter", "Propertys must define at least one accessor. You cannot define a property without getter and setter");
 
 			var propInfo = new PropertyInfoCache<T, TE>(name, setter, getter, attributes);
-			ClassInfoCache.PropertyInfoCaches.Add(propInfo);
+			ClassInfoCache.PropertyInfoCaches.Add(name, propInfo);
 		}
 
 		/// <summary>

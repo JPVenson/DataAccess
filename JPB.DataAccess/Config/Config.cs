@@ -72,7 +72,7 @@ namespace JPB.DataAccess.Config
 			
 			var declareingType = type.ReflectedType;
 			var element = GetOrCreateClassInfoCache(declareingType);
-			return element.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == type.Name);
+			return element.PropertyInfoCaches.FirstOrDefault(s => s.Key == type.Name).Value;
 		}
 
 		/// <summary>

@@ -136,6 +136,7 @@ namespace JPB.DataAccess.Manager
 			string[] ignore =
 				classInfo
 					.PropertyInfoCaches
+					.Select(s => s.Value)
 					.Where(f => f.IsPrimaryKey || f.InsertIgnore)
 					.Select(s => s.DbName)
 					.ToArray();
