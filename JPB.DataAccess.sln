@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess", "JPB.DataAccess.csproj", "{46E06D7F-F55A-4B10-978D-13607BE17CB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess", "JPB.DataAccess\JPB.DataAccess.csproj", "{46E06D7F-F55A-4B10-978D-13607BE17CB9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Strategys", "Strategys", "{3CCB4445-528B-4954-A37E-494193585819}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.EntityCreator", "..\JPB.DataAccess.EntryCreator\JPB.DataAccess.EntityCreator.csproj", "{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.EntityCreator", "JPB.DataAccess.EntryCreator\JPB.DataAccess.EntityCreator.csproj", "{3AD5D28E-DB61-47F4-9425-AADBBB338C1B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj", "{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj", "{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{456F719E-2DB1-4D01-82E8-01E4175492B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.UnitTests", "..\JPB.DataAccess.UnitTests\JPB.DataAccess.UnitTests.csproj", "{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.UnitTests", "JPB.DataAccess.UnitTests\JPB.DataAccess.UnitTests.csproj", "{C64AC65F-5C91-4128-98DF-0D4FCD62AD8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
