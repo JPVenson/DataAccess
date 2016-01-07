@@ -2,8 +2,8 @@ language: csharp#
 solution: JPB.DataAccess.sln
 sudo: required
 install:
-  - nuget restore "JPB.DataAccess.sln"
+  - nuget restore JPB.DataAccess.sln
 mono:
   - latest
 script:
-  - xbuild /p:Configuration=Release "JPB.DataAccess.sln"
+  - xbuild JPB.DataAccess.sln
