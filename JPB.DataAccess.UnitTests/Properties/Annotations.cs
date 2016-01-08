@@ -59,7 +59,7 @@ namespace JPB.DataAccess.UnitTests.Annotations
     AllowMultiple = false, Inherited = true)]
   public sealed class StringFormatMethodAttribute : Attribute
   {
-    /// <param name="formatParameterName">
+    /// <paramref name="formatParameterName">
     /// Specifies which parameter of an annotated method should be treated as format-string
     /// </param>
     public StringFormatMethodAttribute(string formatParameterName)

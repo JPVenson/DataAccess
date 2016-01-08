@@ -7,17 +7,17 @@ using System.Reflection;
 namespace JPB.DataAccess.Config.Model
 {
 	/// <summary>
-	/// Infos about the Method
+	///     Infos about the Method
 	/// </summary>
 	public class MethodInfoCache : IComparable<MethodInfoCache>
 	{
 		internal MethodInfoCache(MethodInfo mehtodInfo)
 		{
-			if (mehtodInfo == null) 
+			if (mehtodInfo == null)
 				throw new ArgumentNullException("mehtodInfo");
 			MethodInfo = mehtodInfo;
 			MethodName = mehtodInfo.Name;
-			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(mehtodInfo
+			AttributeInfoCaches = new HashSet<AttributeInfoCache>(mehtodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new AttributeInfoCache(s as Attribute)));
@@ -25,31 +25,54 @@ namespace JPB.DataAccess.Config.Model
 
 		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params AttributeInfoCache[] attributes)
 		{
-			if (fakeMehtod == null) 
+			if (fakeMehtod == null)
 				throw new ArgumentNullException("fakeMehtod");
 			MethodInfo = fakeMehtod.GetMethodInfo();
 			MethodName = string.IsNullOrEmpty(name) ? MethodInfo.Name : name;
 			Delegate = fakeMehtod;
-			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>(MethodInfo
+			AttributeInfoCaches = new HashSet<AttributeInfoCache>(MethodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new AttributeInfoCache(s as Attribute)).Concat(attributes));
 		}
 
-		internal protected MethodInfoCache()
+		protected internal MethodInfoCache()
 		{
-			this.AttributeInfoCaches = new HashSet<AttributeInfoCache>();
+			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
 		}
 
 		/// <summary>
-		/// Easy access to the underlying delegate
+		///     if set this method does not exist so we fake it
 		/// </summary>
-		/// <param name="target"></param>
-		/// <param name="param"></param>
+		public Delegate Delegate { get; set; }
+
+		/// <summary>
+		///     Direct Reflection
+		/// </summary>
+		public MethodInfo MethodInfo { get; private set; }
+
+		/// <summary>
+		///     The name of the method
+		/// </summary>
+		public string MethodName { get; private set; }
+
+		/// <summary>
+		///     All Attributes on this Method
+		/// </summary>
+		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
+
+		public int CompareTo(MethodInfoCache other)
+		{
+			return String.Compare(MethodName, other.MethodName, StringComparison.Ordinal);
+		}
+
+		/// <summary>
+		///     Easy access to the underlying delegate
+		/// </summary>
 		/// <returns></returns>
 		public virtual object Invoke(object target, params object[] param)
 		{
-			if (this.Delegate != null)
+			if (Delegate != null)
 			{
 				var para = new object[param.Length + 1];
 				para[0] = target;
@@ -57,53 +80,26 @@ namespace JPB.DataAccess.Config.Model
 				{
 					para[1 + i] = param[i];
 				}
-				return this.Delegate.DynamicInvoke(para);
+				return Delegate.DynamicInvoke(para);
 			}
-			else
-			{
-				return this.MethodInfo.Invoke(target, param);
-			}
+			return MethodInfo.Invoke(target, param);
 		}
-
-		/// <summary>
-		/// if set this method does not exist so we fake it
-		/// </summary>
-		public Delegate Delegate { get; set; }
-
-		/// <summary>
-		/// Direct Reflection 
-		/// </summary>
-		public MethodInfo MethodInfo { get; private set; }
-
-		/// <summary>
-		/// The name of the method
-		/// </summary>
-		public string MethodName { get; private set; }
-
-		/// <summary>
-		/// All Attributes on this Method
-		/// </summary>
-		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
 
 		internal static Delegate ExtractDelegate(MethodInfo method)
 		{
-			List<Type> args = new List<Type>(
+			var args = new List<Type>(
 				method.GetParameters().Select(p => p.ParameterType));
 			Type delegateType;
-			if (method.ReturnType == typeof(void))
+			if (method.ReturnType == typeof (void))
 			{
 				delegateType = Expression.GetActionType(args.ToArray());
 			}
-			else {
+			else
+			{
 				args.Add(method.ReturnType);
 				delegateType = Expression.GetFuncType(args.ToArray());
 			}
-			return Delegate.CreateDelegate(delegateType, null, method);           
-		}
-
-		public int CompareTo(MethodInfoCache other)
-		{
-			return System.String.Compare(this.MethodName, other.MethodName, System.StringComparison.Ordinal);
+			return Delegate.CreateDelegate(delegateType, null, method);
 		}
 	}
 }

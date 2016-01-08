@@ -82,6 +82,7 @@
     <Compile Include="DebuggerHelper\QueryDebugger.cs" />
     <Compile Include="Helper\IQueryParameter.cs" />
     <Compile Include="Helper\QueryParameter.cs" />
+    <Compile Include="Helper\StringBuilderIntend.cs" />
     <Compile Include="Manager\DbAccessLayer.cs" />
     <Compile Include="Manager\DbAccessLayerDelete.cs" />
     <Compile Include="Manager\DbAccessLayerEvents.cs" />
@@ -108,10 +109,8 @@
     <Compile Include="QueryBuilder\QueryLazyEnumerator.cs" />
     <Compile Include="QueryBuilder\GenericQueryPart.cs" />
     <Compile Include="QueryBuilder\TJoinMode.cs" />
-    <Compile Include="ModelsAnotations\Annotations.cs" />
     <Compile Include="ModelsAnotations\ModelAnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryFactory\Contracts\IQuerySelectFactory.cs" />
     <Compile Include="QueryFactory\IQueryFactoryResult.cs" />
     <Compile Include="QueryFactory\QueryFactoryResult.cs" />
     <Compile Include="Config\Config.cs" />

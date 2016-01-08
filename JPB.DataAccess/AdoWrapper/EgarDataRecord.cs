@@ -13,21 +13,9 @@ namespace JPB.DataAccess.AdoWrapper
 			for (int i = 0; i < sourceRecord.FieldCount; i++)
 			{
 				object obj = sourceRecord.GetValue(i);
-				var name = sourceRecord.GetName(i);
+				string name = sourceRecord.GetName(i);
 				Objects.Add(new MemoryValueHolder(name, obj));
 			}
-		}
-
-		internal struct MemoryValueHolder
-		{
-			public MemoryValueHolder(string key, object value) : this()
-			{
-				Value = value;
-				Key = key;
-			}
-
-			public string Key { get; private set; }
-			public object Value { get; private set; }
 		}
 
 		internal List<MemoryValueHolder> Objects { get; set; }
@@ -65,22 +53,22 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public int GetOrdinal(string name)
 		{
-			return (int)Objects.FirstOrDefault(s => s.Key == name).Value;
+			return (int) Objects.FirstOrDefault(s => s.Key == name).Value;
 		}
 
 		public bool GetBoolean(int i)
 		{
-			return (bool)GetValue(i);
+			return (bool) GetValue(i);
 		}
 
 		public byte GetByte(int i)
 		{
-			return (byte)GetValue(i);
+			return (byte) GetValue(i);
 		}
 
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			var value = (byte[])GetValue(i);
+			var value = (byte[]) GetValue(i);
 			if (fieldOffset > value.Length)
 				throw new ArgumentOutOfRangeException("fieldOffset");
 
@@ -100,12 +88,12 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public char GetChar(int i)
 		{
-			return (char)GetValue(i);
+			return (char) GetValue(i);
 		}
 
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			var value = (char[])GetValue(i);
+			var value = (char[]) GetValue(i);
 			if (fieldoffset > value.Length)
 				throw new ArgumentOutOfRangeException("fieldoffset");
 
@@ -125,47 +113,47 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public Guid GetGuid(int i)
 		{
-			return (Guid)GetValue(i);
+			return (Guid) GetValue(i);
 		}
 
 		public short GetInt16(int i)
 		{
-			return (short)GetValue(i);
+			return (short) GetValue(i);
 		}
 
 		public int GetInt32(int i)
 		{
-			return (int)GetValue(i);
+			return (int) GetValue(i);
 		}
 
 		public long GetInt64(int i)
 		{
-			return (long)GetValue(i);
+			return (long) GetValue(i);
 		}
 
 		public float GetFloat(int i)
 		{
-			return (float)GetValue(i);
+			return (float) GetValue(i);
 		}
 
 		public double GetDouble(int i)
 		{
-			return (double)GetValue(i);
+			return (double) GetValue(i);
 		}
 
 		public string GetString(int i)
 		{
-			return (string)GetValue(i);
+			return (string) GetValue(i);
 		}
 
 		public decimal GetDecimal(int i)
 		{
-			return (decimal)GetValue(i);
+			return (decimal) GetValue(i);
 		}
 
 		public DateTime GetDateTime(int i)
 		{
-			return (DateTime)GetValue(i);
+			return (DateTime) GetValue(i);
 		}
 
 		public IDataReader GetData(int i)
@@ -199,8 +187,9 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				var firstOrDefault = Objects.FirstOrDefault(s => s.Key == name);
-				if (!firstOrDefault.Equals(default(MemoryValueHolder))){
+				MemoryValueHolder firstOrDefault = Objects.FirstOrDefault(s => s.Key == name);
+				if (!firstOrDefault.Equals(default(MemoryValueHolder)))
+				{
 					object value = firstOrDefault.Value;
 					return value;
 				}
@@ -212,6 +201,18 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			Objects.Clear();
 			Objects = null;
+		}
+
+		internal struct MemoryValueHolder
+		{
+			public MemoryValueHolder(string key, object value) : this()
+			{
+				Value = value;
+				Key = key;
+			}
+
+			public string Key { get; private set; }
+			public object Value { get; private set; }
 		}
 	}
 }

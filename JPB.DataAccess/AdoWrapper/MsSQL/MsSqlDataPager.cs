@@ -1,31 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using JPB.DataAccess.Manager;
-using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {
-    public class MsSqlDataPager<T> : MsSqlUntypedDataPager<T>
-    {
-        static MsSqlDataPager()
-        {
-            _type = typeof(T);
-        }
+	public class MsSqlDataPager<T> : MsSqlUntypedDataPager<T>
+	{
+		private static Type _type;
 
-        public MsSqlDataPager()
-            : base()
-        {
-            TargetType = _type;
-        }
-        
-        private static Type _type;
+		static MsSqlDataPager()
+		{
+			_type = typeof (T);
+		}
 
-        public new ICollection<T> CurrentPageItems
-        {
-            get { return base.CurrentPageItems; }
-        }
-    }
+		public MsSqlDataPager()
+		{
+			TargetType = _type;
+		}
+
+		public new ICollection<T> CurrentPageItems
+		{
+			get { return base.CurrentPageItems; }
+		}
+	}
 }

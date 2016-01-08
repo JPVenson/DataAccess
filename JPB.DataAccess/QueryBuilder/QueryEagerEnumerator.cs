@@ -8,89 +8,88 @@ using JPB.DataAccess.Config;
 
 namespace JPB.DataAccess.QueryBuilder
 {
-    public class QueryEagerEnumerator : IEnumerator
-    {
-        private readonly QueryBuilder _queryBuilder;
-        private readonly Type _type;
-        List<IDataRecord> enumerateDataRecords;
-        private ArrayList elements;
-        private int counter;
-        Task _task;
+	internal class QueryEagerEnumerator : IEnumerator
+	{
+		private readonly QueryBuilder _queryBuilder;
+		private readonly Type _type;
+		private readonly ArrayList _elements;
+		private Task _task;
+		private int _counter;
+		private List<IDataRecord> _enumerateDataRecords;
 
-        public QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
-        {
-            _queryBuilder = queryBuilder;
-            _type = type;
-            elements = new ArrayList();
-            counter = 0;
-            Load();
-        }
+		internal QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
+		{
+			_queryBuilder = queryBuilder;
+			_type = type;
+			_elements = new ArrayList();
+			_counter = 0;
+			Load();
+		}
 
-        /// <summary>
-        /// Mehtod for async loading this will bring us some m secs
-        /// </summary>
-        private void Load()
-        {
-            _task = new Task(() =>
-            {
-                var query = _queryBuilder.Compile();
-                enumerateDataRecords = _queryBuilder.Database.EnumerateDataRecords(query, true);
-            });
-            _task.Start();
-        }
+		public bool MoveNext()
+		{
+			_task.Wait();
 
-        public bool MoveNext()
-        {
-            _task.Wait();
+			try
+			{
+				_counter++;
 
-            try
-            {
-                counter++;
+				if (_elements.Count >= _counter)
+				{
+					Current = _elements[_counter];
+					return true;
+				}
 
-                if (elements.Count >= counter)
-                {
-                    Current = elements[counter];
-                    return true;
-                }
+				if (_enumerateDataRecords.Count < _counter)
+					return false;
 
-                if (enumerateDataRecords.Count < counter)
-                    return false;
+				IDataRecord dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
+				Current = _type.GetClassInfo().SetPropertysViaReflection(dataRecord);
+				_elements.Add(Current);
 
-                var dataRecord = enumerateDataRecords.ElementAt(counter - 1);
-                Current = _type.GetClassInfo().SetPropertysViaReflection(dataRecord);
-                elements.Add(Current);
+				return true;
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
 
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
+		public void Reset()
+		{
+			_counter = 0;
+		}
 
-        public void Reset()
-        {
-            counter = 0;
-        }
+		public object Current { get; private set; }
 
-        public object Current { get; private set; }
-    }
+		/// <summary>
+		///     Mehtod for async loading this will bring us some m secs
+		/// </summary>
+		private void Load()
+		{
+			_task = new Task(() =>
+			{
+				IDbCommand query = _queryBuilder.Compile();
+				_enumerateDataRecords = _queryBuilder.Database.EnumerateDataRecords(query, true);
+			});
+			_task.Start();
+		}
+	}
 
-    public class QueryEagerEnumerator<T> : QueryEagerEnumerator, IEnumerator<T>
-    {
-        public QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
-            : base(queryBuilder, type)
-        {
-        }
+	internal class QueryEagerEnumerator<T> : QueryEagerEnumerator, IEnumerator<T>
+	{
+		internal QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
+			: base(queryBuilder, type)
+		{
+		}
 
-        public void Dispose()
-        {
+		public void Dispose()
+		{
+		}
 
-        }
-
-        public new T Current
-        {
-            get { return (T)base.Current; }
-        }
-    }
+		public new T Current
+		{
+			get { return (T) base.Current; }
+		}
+	}
 }

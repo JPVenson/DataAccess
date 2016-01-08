@@ -5,23 +5,21 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
-using System.Collections.ObjectModel;
 
 namespace JPB.DataAccess.DbCollection
 {
 	/// <summary>
-	/// For internal use only
+	///     For internal use only
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class NonObservableDbCollection<T> : IEnumerable<T>
 	{
+		private readonly List<T> _base;
+
 		/// <summary>
-		/// Internal use only
+		///     Internal use only
 		/// </summary>
-		/// <param name="enumerable"></param>
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -33,8 +31,6 @@ namespace JPB.DataAccess.DbCollection
 				_base.Add(item);
 			}
 		}
-
-		private List<T> _base;
 
 		public IEnumerator<T> GetEnumerator()
 		{
@@ -48,30 +44,17 @@ namespace JPB.DataAccess.DbCollection
 	}
 
 	/// <summary>
-	/// WIP Observes the local collection and allows a Generic save update remove and insert
+	///     WIP Observes the local collection and allows a Generic save update remove and insert
 	/// </summary>
 	public class DbCollection<T> : ICollection<T> where T : class, INotifyPropertyChanged
 	{
-		private class StateHolder
-		{
-			public StateHolder(T value, CollectionStates state)
-			{
-				Value = value;
-				State = state;
-			}
+		private readonly IDictionary<T, List<string>> _changeTracker;
 
-			public T Value { get; set; }
-			public CollectionStates State { get; set; }
-		}
+		private readonly List<StateHolder> _internalCollection;
 
-		private void Add(T value, CollectionStates state)
-		{
-			this._internalCollection.Add(new StateHolder(value, state));
-		}
 		/// <summary>
-		/// Internal use only
+		///     Internal use only
 		/// </summary>
-		/// <param name="subset"></param>
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -91,10 +74,10 @@ namespace JPB.DataAccess.DbCollection
 				item.PropertyChanged += item_PropertyChanged;
 			}
 		}
+
 		/// <summary>
-		/// Internal use only
+		///     Internal use only
 		/// </summary>
-		/// <param name="subset"></param>
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -108,32 +91,24 @@ namespace JPB.DataAccess.DbCollection
 				throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
 			}
 
-			foreach (var item in subset)
+			foreach (T item in subset)
 			{
 				Add(item, CollectionStates.Unchanged);
 				item.PropertyChanged += item_PropertyChanged;
 			}
 		}
 
-		void item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		/// <summary>
+		/// </summary>
+		/// <exception cref="NotSupportedException"></exception>
+		public T this[int index]
 		{
-			var listEntry = new List<string>();
-			var trackerEntry = _changeTracker.FirstOrDefault(s => s.Key == sender as T);
-			if (trackerEntry.Equals(default(KeyValuePair<T, List<string>>)))
+			get { return _internalCollection.ElementAt(index).Value; }
+			set
 			{
-				_changeTracker.Add(sender as T, listEntry);
+				throw new NotSupportedException("Collection has a Bag behavior and does not support a Set on a specific position");
 			}
-			else
-			{
-				listEntry = trackerEntry.Value;
-			}
-			if (!listEntry.Contains(e.PropertyName))
-				listEntry.Add(e.PropertyName);
 		}
-
-		private readonly IDictionary<T, List<string>> _changeTracker;
-
-		private readonly List<StateHolder> _internalCollection;
 
 		public IEnumerator<T> GetEnumerator()
 		{
@@ -145,7 +120,7 @@ namespace JPB.DataAccess.DbCollection
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return ((IEnumerable)_internalCollection).GetEnumerator();
+			return ((IEnumerable) _internalCollection).GetEnumerator();
 		}
 
 		public void Add(T item)
@@ -155,26 +130,10 @@ namespace JPB.DataAccess.DbCollection
 
 		public void Clear()
 		{
-			foreach (var pair in _internalCollection)
+			foreach (StateHolder pair in _internalCollection)
 			{
 				Remove(pair.Value);
 			}
-		}
-
-		private bool ChangeState(T item, CollectionStates state)
-		{
-			var fod = _internalCollection.FirstOrDefault(s => s.Value == item);
-
-			if (fod == null)
-				return false;
-
-			fod.State = state;
-			return true;
-		}
-
-		public CollectionStates GetEntryState(T item)
-		{
-			return _internalCollection.FirstOrDefault(s => s.Value == item).State;
 		}
 
 		public bool Contains(T item)
@@ -204,21 +163,58 @@ namespace JPB.DataAccess.DbCollection
 			get { return false; }
 		}
 
+		private void Add(T value, CollectionStates state)
+		{
+			_internalCollection.Add(new StateHolder(value, state));
+		}
+
+		private void item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var listEntry = new List<string>();
+			KeyValuePair<T, List<string>> trackerEntry = _changeTracker.FirstOrDefault(s => s.Key == sender as T);
+			if (trackerEntry.Equals(default(KeyValuePair<T, List<string>>)))
+			{
+				_changeTracker.Add(sender as T, listEntry);
+			}
+			else
+			{
+				listEntry = trackerEntry.Value;
+			}
+			if (!listEntry.Contains(e.PropertyName))
+				listEntry.Add(e.PropertyName);
+		}
+
+		private bool ChangeState(T item, CollectionStates state)
+		{
+			StateHolder fod = _internalCollection.FirstOrDefault(s => s.Value == item);
+
+			if (fod == null)
+				return false;
+
+			fod.State = state;
+			return true;
+		}
+
+		public CollectionStates GetEntryState(T item)
+		{
+			return _internalCollection.FirstOrDefault(s => s.Value == item).State;
+		}
+
 		/// <summary>
-		/// Sync the Changes to this Collection to the Database
+		///     Sync the Changes to this Collection to the Database
 		/// </summary>
 		public void SaveChanges(DbAccessLayer _layer)
 		{
-			var bulk = _layer.Database.CreateCommand("");
+			IDbCommand bulk = _layer.Database.CreateCommand("");
 			var removed = new List<T>();
 
-			foreach (var pair in _internalCollection)
+			foreach (StateHolder pair in _internalCollection)
 			{
 				IDbCommand tempCommand;
 				switch (pair.State)
 				{
 					case CollectionStates.Added:
-						tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof(T), pair.Value, _layer.Database);
+						tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof (T), pair.Value, _layer.Database);
 						break;
 					case CollectionStates.Removed:
 						tempCommand = DbAccessLayer.CreateDelete(pair.Value, _layer.Database);
@@ -240,38 +236,39 @@ namespace JPB.DataAccess.DbCollection
 				}
 			}
 
-			var results = _layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
+			T[] results = _layer.ExecuteMARS(bulk, typeof (T)).SelectMany(s => s).Cast<T>().ToArray();
 			//Added 
-			var added = _internalCollection.Where(s => s.State == CollectionStates.Added).ToArray();
+			StateHolder[] added = _internalCollection.Where(s => s.State == CollectionStates.Added).ToArray();
 			for (int i = 0; i < added.Length; i++)
 			{
-				var addedOne = added[i];
-				var newId = results[i];
+				StateHolder addedOne = added[i];
+				T newId = results[i];
 				DbAccessLayer.CopyPropertys(addedOne.Value, newId);
 			}
 
 			//Removed
-			foreach (var item in removed)
+			foreach (T item in removed)
 			{
-				var fod = _internalCollection.First(s => s.Value == item);
+				StateHolder fod = _internalCollection.First(s => s.Value == item);
 				_internalCollection.Remove(fod);
 			}
 
-			foreach (var collectionStatese in _internalCollection.ToArray())
+			foreach (StateHolder collectionStatese in _internalCollection.ToArray())
 			{
-				this.ChangeState(collectionStatese.Value, CollectionStates.Unchanged);
+				ChangeState(collectionStatese.Value, CollectionStates.Unchanged);
 			}
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="index"></param>
-		/// <exception cref="NotSupportedException"></exception>
-		public T this[int index]
+		private class StateHolder
 		{
-			get { return _internalCollection.ElementAt(index).Value; }
-			set { throw new NotSupportedException("Collection has a Bag behavior and does not support a Set on a specific position"); }
+			public StateHolder(T value, CollectionStates state)
+			{
+				Value = value;
+				State = state;
+			}
+
+			public T Value { get; set; }
+			public CollectionStates State { get; set; }
 		}
 	}
 

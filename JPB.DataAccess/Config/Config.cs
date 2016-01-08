@@ -1,18 +1,19 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.Config.Model;
+
 #if !DEBUG
 using System.Diagnostics;
 #endif
+
 namespace JPB.DataAccess.Config
 {
 	/// <summary>
-	/// Class info Storage
+	///     Class info Storage
 	/// </summary>
 #if !DEBUG
 	[DebuggerStepThrough]
@@ -26,50 +27,47 @@ namespace JPB.DataAccess.Config
 		}
 
 		/// <summary>
-		/// The settings that are used to create a DOM ctor
+		///     The settings that are used to create a DOM ctor
 		/// </summary>
 		public static FactoryHelperSettings ConstructorSettings { get; private set; }
 
 		/// <summary>
-		/// Creates a new Instance for configuration
+		///     Creates a new Instance for configuration
 		/// </summary>
-		/// <param name="enableReflection">If set reflection will be used to enumerate all used class instances [Not used]</param>
 		public Config(bool enableReflection = true)
 		{
-			this.UseReflection = enableReflection;
+			UseReflection = enableReflection;
 		}
 
 		/// <summary>
-		/// Allows you to alter the Config store that holds T
+		///     Allows you to alter the Config store that holds <typeparamref name="T"></typeparamref>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		/// <param name="validator"></param>
 		public void SetConfig<T>(Action<ConfigurationResolver<T>> validator)
 		{
-			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof(T))));
-			GetOrCreateClassInfoCache(typeof(T)).Refresh(true);
+			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof (T))));
+			GetOrCreateClassInfoCache(typeof (T)).Refresh(true);
 		}
 
 		/// <summary>
-		/// For Internal use Only
+		///     For Internal use Only
 		/// </summary>
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void Clear()
 		{
-			Config.SClassInfoCaches.Clear();
+			SClassInfoCaches.Clear();
 		}
 
 		/// <summary>
-		/// Indicates the usage of Reflection
+		///     Indicates the usage of Reflection
 		/// </summary>
 		public bool UseReflection { get; private set; }
 
 		/// <summary>
-		/// Gets an Cache object if exists or creats one
+		///     Gets an Cache object if exists or creats one
 		/// </summary>
-		/// <param name="type"></param>
 		/// <returns></returns>
 		internal PropertyInfoCache GetOrCreatePropertyInfoCache(PropertyInfo type)
 		{
@@ -80,25 +78,24 @@ namespace JPB.DataAccess.Config
 			//if (element == null)
 			//{
 			//	var declaringType = type.ReflectedType;
-			//	SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+			//	SClassInfoCaches.Append(element = new ClassInfoCache(declaringType));
 			//	element.CheckForConfig();
 			//}
 
 			//return element.PropertyInfoCaches.FirstOrDefault(s => s.PropertyName == type.Name);
-			
-			var declareingType = type.ReflectedType;
-			var element = GetOrCreateClassInfoCache(declareingType);
+
+			Type declareingType = type.ReflectedType;
+			ClassInfoCache element = GetOrCreateClassInfoCache(declareingType);
 			return element.PropertyInfoCaches.FirstOrDefault(s => s.Key == type.Name).Value;
 		}
 
 		/// <summary>
-		/// Gets an Cache object if exists or creats one
+		///     Gets an Cache object if exists or creats one
 		/// </summary>
-		/// <param name="type"></param>
 		/// <returns></returns>
 		internal ClassInfoCache GetOrCreateClassInfoCache(Type type)
 		{
-			var element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
+			ClassInfoCache element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
 			if (element == null)
 			{
 				SClassInfoCaches.Add(element = new ClassInfoCache(type));
@@ -109,9 +106,8 @@ namespace JPB.DataAccess.Config
 		}
 
 		/// <summary>
-		/// Gets an Cache object if exists or creats one
+		///     Gets an Cache object if exists or creats one
 		/// </summary>
-		/// <param name="type"></param>
 		/// <returns></returns>
 		internal MethodInfoCache GetOrCreateMethodInfoCache(MethodInfo type)
 		{
@@ -121,17 +117,32 @@ namespace JPB.DataAccess.Config
 			//if (element == null)
 			//{
 			//	var declaringType = type.ReflectedType;
-			//	SClassInfoCaches.Add(element = new ClassInfoCache(declaringType));
+			//	SClassInfoCaches.Append(element = new ClassInfoCache(declaringType));
 			//	element.CheckForConfig();
 			//}
 
 			//return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);
 
-			var declareingType = type.ReflectedType;
-			var element = GetOrCreateClassInfoCache(declareingType);
+			Type declareingType = type.ReflectedType;
+			ClassInfoCache element = GetOrCreateClassInfoCache(declareingType);
 			return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);
 		}
 
 		internal static HashSet<ClassInfoCache> SClassInfoCaches { get; private set; }
+
+		/// <summary>
+		///     Append
+		///     <typeparamref name="T"/>
+		///     as an Optimistic input to the store.
+		///     This allows you to explicit control when the Config store will enumerate the type object.
+		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public Config Include<T>()
+		{
+			GetOrCreateClassInfoCache(typeof (T));
+			return this;
+		}
 	}
 }

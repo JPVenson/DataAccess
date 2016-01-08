@@ -5,58 +5,59 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.Contacts
 {
-    public interface IDatabaseStrategy : ICloneable
-    {
-        /// <summary>
-        /// Defines the database type this Strategy is used for
-        /// </summary>
-        DbAccessType SourceDatabase { get; }
+	public interface IDatabaseStrategy : ICloneable
+	{
+		/// <summary>
+		///     Defines the database type this Strategy is used for
+		/// </summary>
+		DbAccessType SourceDatabase { get; }
 
-        /// <summary>
-        /// An Valid Connection string for the given Strategy
-        /// </summary>
-        string ConnectionString { get; set; }
-        /// <summary>
-        /// Optional used when connecting to a Local file
-        /// </summary>
-        string DatabaseFile { get; }
-        /// <summary>
-        /// Should return the current database if availibe
-        /// </summary>
-        string ServerName { get; }
-        /// <summary>
-        /// Creates a new Provider specific Connection that will held open until all actors want to close it
-        /// </summary>
-        /// <returns></returns>
-        IDbConnection CreateConnection();
+		/// <summary>
+		///     An Valid Connection string for the given Strategy
+		/// </summary>
+		string ConnectionString { get; set; }
 
-        IDbCommand CreateCommand(string strSql, IDbConnection conn);
-        IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields);
-        IDataParameter CreateParameter(string strName, object value);
+		/// <summary>
+		///     Optional used when connecting to a Local file
+		/// </summary>
+		string DatabaseFile { get; }
 
-        IDbDataAdapter CreateDataAdapter(IDbCommand cmd);
+		/// <summary>
+		///     Should return the current database if availibe
+		/// </summary>
+		string ServerName { get; }
 
-        DataTable CreateDataTable(string name, IDbCommand cmd);
-        
-        IDbCommand GetlastInsertedID_Cmd(IDbConnection conn);
+		/// <summary>
+		///     Creates a new Provider specific Connection that will held open until all actors want to close it
+		/// </summary>
+		/// <returns></returns>
+		IDbConnection CreateConnection();
 
-        IDataPager<T> CreatePager<T>();
+		IDbCommand CreateCommand(string strSql, IDbConnection conn);
+		IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields);
+		IDataParameter CreateParameter(string strName, object value);
 
-        IWrapperDataPager<T,TE> CreateConverterPager<T, TE>();
+		IDbDataAdapter CreateDataAdapter(IDbCommand cmd);
 
-        /// <summary>
-        /// Formarts a Command into a Query after the Strategy rules
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        string FormartCommandToQuery(IDbCommand command);
+		DataTable CreateDataTable(string name, IDbCommand cmd);
+
+		IDbCommand GetlastInsertedID_Cmd(IDbConnection conn);
+
+		IDataPager<T> CreatePager<T>();
+
+		IWrapperDataPager<T, TE> CreateConverterPager<T, TE>();
+
+		/// <summary>
+		///     Formarts a Command into a Query after the Strategy rules
+		/// </summary>
+		/// <returns></returns>
+		string FormartCommandToQuery(IDbCommand command);
 
 
-        /// <summary>
-        /// Converts the Generic DbType to the Specific represntation
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        string ConvertParameter(DbType type);
-    }
+		/// <summary>
+		///     Converts the Generic DbType to the Specific represntation
+		/// </summary>
+		/// <returns></returns>
+		string ConvertParameter(DbType type);
+	}
 }

@@ -1,55 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {
-    /// <summary>
-    /// Converts all items from T to TE
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TE"></typeparam>
-    public class MsSqlDataConverterPager<T, TE> :
-        MsSqlDataPager<T>,
-        IWrapperDataPager<T, TE>
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public MsSqlDataConverterPager()
-        {
-            SyncHelper = action => action();
-            base.NewPageLoaded += OnNewPageLoaded;
-            base.RaiseEvents = true;
-            CurrentPageItems = new ObservableCollection<TE>();
-        }
+	/// <summary>
+	///     Converts all items from T to TE
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="TE"></typeparam>
+	public class MsSqlDataConverterPager<T, TE> :
+		MsSqlDataPager<T>,
+		IWrapperDataPager<T, TE>
+	{
+		/// <summary>
+		/// </summary>
+		public MsSqlDataConverterPager()
+		{
+			SyncHelper = action => action();
+			base.NewPageLoaded += OnNewPageLoaded;
+			base.RaiseEvents = true;
+			CurrentPageItems = new ObservableCollection<TE>();
+		}
 
-        private void OnNewPageLoaded()
-        {
-            CurrentPageItems.Clear();
+		/// <summary>
+		/// </summary>
+		public new bool RaiseEvents
+		{
+			get { return true; }
+			set { }
+		}
 
-            foreach (var currentPageItem in base.CurrentPageItems)
-            {
-                CurrentPageItems.Add(Converter(currentPageItem));
-            }
-        }
+		public Func<T, TE> Converter { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public new bool RaiseEvents
-        {
-            get { return true; }
-            set { }
-        }
+		public new ICollection<TE> CurrentPageItems { get; protected set; }
 
-        public Func<T, TE> Converter { get; set; }
+		private void OnNewPageLoaded()
+		{
+			CurrentPageItems.Clear();
 
-        public new ICollection<TE> CurrentPageItems { get; protected set; }
-    }
+			foreach (T currentPageItem in base.CurrentPageItems)
+			{
+				CurrentPageItems.Add(Converter(currentPageItem));
+			}
+		}
+	}
 }

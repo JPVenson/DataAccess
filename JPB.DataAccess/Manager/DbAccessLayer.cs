@@ -2,30 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Globalization;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.DbEventArgs;
-using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
-using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryFactory;
-using System.Diagnostics;
+using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.Manager
 {
 	/// <summary>
-	/// Contanins some Helper mehtods for CRUD operation
+	///     Contanins some Helper mehtods for CRUD operation
 	/// </summary>
 	[DebuggerDisplay("DB={dbAccessType}, QueryDebug={Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
 		[DebuggerStepThrough]
 #endif
-
 	public partial class DbAccessLayer
 	{
 		static DbAccessLayer()
@@ -38,12 +30,12 @@ namespace JPB.DataAccess.Manager
 		private IDatabase _database;
 
 		/// <summary>
-		/// Enables the automatic creation of QueryDebugger objects on each created IDbCommand
+		///     Enables the automatic creation of QueryDebugger objects on each created IDbCommand
 		/// </summary>
 		public static bool Debugger { get; set; }
 
 		/// <summary>
-		/// Defines a set of Providers that are inclueded in this DLL or are weak refernced.
+		///     Defines a set of Providers that are inclueded in this DLL or are weak refernced.
 		/// </summary>
 		public static PreDefinedProviderCollection ProviderCollection { get; private set; }
 
@@ -58,26 +50,24 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Create a DbAccessLayer that uses a Predefined type and Connection string
 		/// </summary>
-		/// <param name="dbAccessType">Can be anything execpt for <code>DbAccessType.Unknown</code></param>
-		/// <param name="connection"></param>
 		public DbAccessLayer(DbAccessType dbAccessType, string connection)
 			: this()
 		{
 			if (dbAccessType == DbAccessType.Unknown)
 			{
-				throw new InvalidEnumArgumentException("dbAccessType", (int)DbAccessType.Unknown, typeof(DbAccessType));
+				throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof (DbAccessType));
 			}
 
 			DbAccessType = dbAccessType;
 			Database = new DefaultDatabaseAccess();
-			Database.Attach(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection));
+			var database = ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection);
+			Database.Attach(database);
+			DatabaseStrategy = database;
 		}
 
 		/// <summary>
-		/// Create a DbAccessLAyer with exernal Strategy
+		///     Create a DbAccessLAyer with exernal Strategy
 		/// </summary>
-		/// <param name="fullTypeNameToIDatabaseStrategy">Full type name of Strategy class</param>
-		/// <param name="connection"></param>
 		/// <exception cref="ArgumentNullException"></exception>
 		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection)
 			: this()
@@ -87,16 +77,16 @@ namespace JPB.DataAccess.Manager
 
 			ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
-			var type = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
+			IDatabaseStrategy database = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
 
 			Database = new DefaultDatabaseAccess();
-			Database.Attach(type);
+			Database.Attach(database);
+			DatabaseStrategy = database;
 		}
 
 		/// <summary>
-		/// Create a DbAccessLayer with a new Database
+		///     Create a DbAccessLayer with a new Database
 		/// </summary>
-		/// <param name="database"></param>
 		/// <exception cref="ArgumentNullException"></exception>
 		public DbAccessLayer(IDatabaseStrategy database)
 			: this()
@@ -108,13 +98,13 @@ namespace JPB.DataAccess.Manager
 
 			Database = new DefaultDatabaseAccess();
 			Database.Attach(database);
+			DatabaseStrategy = database;
 		}
 
 		/// <summary>
-		/// Creates a DbAccessLayer with a new Database
-		/// dbAccessType will be Guessed
+		///     Creates a DbAccessLayer with a new Database
+		///     dbAccessType will be Guessed
 		/// </summary>
-		/// <param name="database"></param>
 		public DbAccessLayer(IDatabase database)
 			: this()
 		{
@@ -129,7 +119,7 @@ namespace JPB.DataAccess.Manager
 		{
 			// ReSharper disable once PossibleInvalidOperationException
 			KeyValuePair<DbAccessType, string>? firstOrDefault =
-				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?)s)
+				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
 					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
 			if (firstOrDefault == null)
 			{
@@ -141,17 +131,20 @@ namespace JPB.DataAccess.Manager
 			}
 		}
 
-
+		/// <summary>
+		/// For Internal Use only
+		/// </summary>
+		public IDatabaseStrategy DatabaseStrategy { get; private set; }
 
 		/// <summary>
-		/// Selected dbAccessType
+		///     Selected dbAccessType
 		/// </summary>
 		public DbAccessType DbAccessType { get; private set; }
 
 		/// <summary>
-		/// Current Database
-		/// Can be used to write multi statements
-		/// Is used for ALL NonStatic statments creators
+		///     Current Database
+		///     Can be used to write multi statements
+		///     Is used for ALL NonStatic statments creators
 		/// </summary>
 		public IDatabase Database
 		{
@@ -172,7 +165,7 @@ namespace JPB.DataAccess.Manager
 
 
 		/// <summary>
-		/// Check for Availability 
+		///     Check for Availability
 		/// </summary>
 		/// <returns></returns>
 		public bool CheckDatabase()
@@ -182,13 +175,11 @@ namespace JPB.DataAccess.Manager
 			Database.Connect();
 			Database.CloseConnection();
 			return true;
-		}     
+		}
 
 		/// <summary>
-		/// Wraps a Query and its Paramters and then executes it
+		///     Wraps a Query and its Paramters and then executes it
 		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="values"></param>
 		/// <returns></returns>
 		public int ExecuteGenericCommand(string query, IEnumerable<IQueryParameter> values)
 		{
@@ -202,20 +193,18 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		/// Wraps a Query and its Paramters from Dynamic and then executes it
+		///     Wraps a Query and its Paramters from Dynamic and then executes it
 		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="paramenter"></param>
 		/// <returns></returns>
 		public int ExecuteGenericCommand(string query, dynamic paramenter)
 		{
-			return ExecuteGenericCommand(query, (IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
+			return ExecuteGenericCommand(query,
+				(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
 		}
 
 		/// <summary>
-		/// Execute a Query and without Paramters
+		///     Execute a Query and without Paramters
 		/// </summary>
-		/// <param name="command"></param>
 		/// <returns></returns>
 		public int ExecuteGenericCommand(IDbCommand command)
 		{
@@ -224,38 +213,36 @@ namespace JPB.DataAccess.Manager
 
 
 		/// <summary>
-		/// if set the created reader of an read operation will be completely stored then the open connection will be closed
-		/// Default is true
+		///     if set the created reader of an read operation will be completely stored then the open connection will be closed
+		///     Default is true
 		/// </summary>
 		public bool LoadCompleteResultBeforeMapping { get; set; }
 
 		/// <summary>
-		/// Creates a Strong typed query that awaits a Result
+		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
-		/// <param name="targetType"></param>
 		/// <returns></returns>
 		public QueryBuilder.QueryBuilder Query()
 		{
-			return new QueryBuilder.QueryBuilder(this.Database);
+			return new QueryBuilder.QueryBuilder(Database);
 		}
 
 		/// <summary>
-		/// Creates a Strong typed query that awaits a Result
+		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
-		/// <param name="targetType"></param>
 		/// <returns></returns>
 		public QueryBuilder.QueryBuilder Query(Type targetType)
 		{
-			return new QueryBuilder.QueryBuilder(this.Database, targetType);
+			return new QueryBuilder.QueryBuilder(Database, targetType);
 		}
 
 		/// <summary>
-		/// Creates a Strong typed query that awaits a Result
+		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
 		/// <returns></returns>
 		public QueryBuilder.QueryBuilder Query<T>()
 		{
-			return new QueryBuilder.QueryBuilder<T>(this.Database);
+			return new QueryBuilder<T>(Database);
 		}
 	}
 }

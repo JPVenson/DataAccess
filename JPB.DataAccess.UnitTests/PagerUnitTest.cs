@@ -1,4 +1,5 @@
 ﻿using System;
+using JPB.DataAccess.DebuggerHelper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using JPB.DataAccess.Manager;
 using UnitTestProject1;
@@ -52,12 +53,14 @@ namespace JPB.DataAccess.UnitTests
 																		  "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
 																		  "END "));
 
+			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
 		}
 
 
-		//[TestMethod]
+		[TestMethod]
 		public void PagerCall()
 		{
+
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
 			var upperCountTestUsers = 100;

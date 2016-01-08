@@ -1,45 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
+using System.Reflection;
 using System.Xml.Linq;
 using JPB.DataAccess.Config;
-using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper
 {
 	public class XmlDataRecord : IDataRecord
 	{
-		/// <summary>
-		/// This is our standart solution for Seriliation
-		/// takes care of the loader strategy
-		/// </summary>
-		/// <param name="xmlStream"></param>
-		/// <param name="target"></param>
-		/// <returns></returns>
-		public static XmlDataRecord TryParse(string xmlStream, Type target)
-		{
-			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
-				return null;
-			try
-			{
-				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
-				return new XmlDataRecord(xDocument, target);
-			}
-			catch (Exception ex)
-			{
-				DbAccessLayer.RaiseException(null, ex);
-				return null;
-			}
-		}
-
 		private readonly Type _target;
 		private readonly XElement baseElement;
 
@@ -68,22 +39,27 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public object GetValue(int i)
 		{
-			var name = GetName(i);
+			string name = GetName(i);
 
-			var mapEntiysPropToSchema = ConfigHelper.GetLocalToDbSchemaMapping(this._target, name);
+			string mapEntiysPropToSchema = _target.GetLocalToDbSchemaMapping(name);
 
-			var firstOrDefault = ConfigHelper.GetPropertiesEx(_target).FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
+			PropertyInfo firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
 			if (firstOrDefault == null)
 				return null;
 
-			var propertyType = firstOrDefault.PropertyType;
-			var xElement = baseElement.Elements().ElementAt(i);
+			Type propertyType = firstOrDefault.PropertyType;
+			XElement xElement = baseElement.Elements().ElementAt(i);
 
 			if (xElement.HasElements)
 				return xElement.ToString();
 
-			var type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
+			object type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
 			return type;
+		}
+
+		public int FieldCount
+		{
+			get { return baseElement.Elements().Count(); }
 		}
 
 		#region Unsupported
@@ -107,6 +83,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get { throw new NotImplementedException(); }
 		}
+
 		public int GetValues(object[] values)
 		{
 			throw new NotImplementedException();
@@ -199,16 +176,31 @@ namespace JPB.DataAccess.AdoWrapper
 
 		#endregion
 
-		public int FieldCount
+		/// <summary>
+		///     This is our standart solution for Seriliation
+		///     takes care of the loader strategy
+		/// </summary>
+		/// <returns></returns>
+		public static XmlDataRecord TryParse(string xmlStream, Type target)
 		{
-			get { return baseElement.Elements().Count(); }
+			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
+				return null;
+			try
+			{
+				XDocument xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
+				return new XmlDataRecord(xDocument, target);
+			}
+			catch (Exception ex)
+			{
+				DbAccessLayer.RaiseException(null, ex);
+				return null;
+			}
 		}
 
 		public IEnumerable<XmlDataRecord> CreateListOfItems()
 		{
-			var xNodes = baseElement.Elements();
-			return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), this._target));
+			IEnumerable<XElement> xNodes = baseElement.Elements();
+			return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), _target));
 		}
-
 	}
 }

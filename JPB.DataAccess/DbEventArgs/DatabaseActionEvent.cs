@@ -1,14 +1,15 @@
-﻿using JPB.DataAccess.DebuggerHelper;
+﻿using System;
+using JPB.DataAccess.DebuggerHelper;
 
 namespace JPB.DataAccess.DbEventArgs
 {
-    public class DatabaseActionEvent : System.EventArgs
-    {
-        public DatabaseActionEvent(QueryDebugger queryDebugger)
-        {
-            QueryDebugger = queryDebugger;
-        }
+	public class DatabaseActionEvent : EventArgs
+	{
+		public DatabaseActionEvent(QueryDebugger queryDebugger)
+		{
+			QueryDebugger = queryDebugger;
+		}
 
-        public QueryDebugger QueryDebugger { get; private set; }
-    }
+		public QueryDebugger QueryDebugger { get; private set; }
+	}
 }

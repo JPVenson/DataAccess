@@ -2,70 +2,67 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
 using JPB.DataAccess.Config;
 using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.QueryBuilder
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public class QueryLazyEnumerator : IEnumerator, IDisposable
-    {
-        private readonly QueryBuilder _queryBuilder;
-        private readonly ClassInfoCache _type;
-        private IDataReader executeReader;
-        private DbAccessLayer _accessLayer;
+	/// <summary>
+	/// </summary>
+	internal class QueryLazyEnumerator : IEnumerator, IDisposable
+	{
+		private readonly DbAccessLayer _accessLayer;
+		private readonly ClassInfoCache _type;
+		private readonly IDataReader _executeReader;
 
-        public QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
-        {
-            _queryBuilder = queryBuilder;
-            _type = type.GetClassInfo();
-            _accessLayer = new DbAccessLayer(queryBuilder.Database);
-            _accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
-            executeReader = _queryBuilder.Compile().ExecuteReader();
-        }
+		internal QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
+		{
+			_type = type.GetClassInfo();
+			_accessLayer = new DbAccessLayer(queryBuilder.Database);
+			_accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
+			_executeReader = queryBuilder.Compile().ExecuteReader();
+		}
 
-        public void Dispose()
-        {
-            _accessLayer.Database.CloseConnection();
-        }
-        
-        public bool MoveNext()
-        {
-            if (executeReader.IsClosed)
-            {
-                Dispose();
-                return false;
-            }
+		public void Dispose()
+		{
+			_accessLayer.Database.CloseConnection();
+		}
 
-            if (executeReader.Read())
-                return true;
-            return false;
-        }
+		public bool MoveNext()
+		{
+			if (_executeReader.IsClosed)
+			{
+				Dispose();
+				return false;
+			}
 
-        public void Reset()
-        {
-            throw new NotImplementedException();
-        }
+			if (_executeReader.Read())
+				return true;
+			return false;
+		}
 
-        public object Current
-        {
-            get
-            {
-                return _type.SetPropertysViaReflection(executeReader);
-            }
-        }
-    }
+		public void Reset()
+		{
+			throw new NotImplementedException();
+		}
 
-    public class QueryLazyEnumerator<T> : QueryLazyEnumerator, IEnumerator<T>
-    {
-        public QueryLazyEnumerator(QueryBuilder queryBuilder, Type type) : base(queryBuilder, type)
-        {
-        }       
+		public object Current
+		{
+			get { return _type.SetPropertysViaReflection(_executeReader); }
+		}
+	}
 
-        public new T Current { get { return (T) base.Current; } }
-    }
+	internal class QueryLazyEnumerator<T> : QueryLazyEnumerator, IEnumerator<T>
+	{
+		internal QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
+			: base(queryBuilder, type)
+		{
+		}
+
+		public new T Current
+		{
+			get { return (T) base.Current; }
+		}
+	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.QueryBuilder;
@@ -88,16 +89,19 @@ namespace JPB.DataAccess.UnitTests
 																		  "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
 																		  "END "));
 
+			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
+
 		}
 
 		[TestMethod]
 		public void Update()
 		{
 			InsertTest();
-			var singleEntity = expectWrapper
+			var query = expectWrapper
 				.Query()
 				.Select<Users>()
-				.Top(1)
+				.Top(1);
+			var singleEntity = query
 				.ForResult<Users>()
 				.Single();
 			Assert.IsNotNull(singleEntity);

@@ -3,105 +3,105 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Config.Model;
+using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CSharp;
 
 namespace JPB.DataAccess.Config
 {
 	/// <summary>
-	/// 
 	/// </summary>
 	public class FactoryHelperSettings
 	{
 		/// <summary>
-		/// Check and throw exception if not all propertys can be accessed by the Super class
+		///     Check and throw exception if not all propertys can be accessed by the Super class
 		/// </summary>
 		public bool EnforcePublicPropertys { get; set; }
+
 		/// <summary>
-		/// If any error is thrown so throw exception
+		///     If any error is thrown so throw exception
 		/// </summary>
 		public bool EnforceCreation { get; set; }
+
 		/// <summary>
-		/// [Not Implimented]
-		/// Shame on me.
-		/// To set all propertys from the outside ill create a super class that inherts from the POCO .
-		/// to get rid of this super class you can set this property to true then the superclass will be cased into its baseclass.
-		/// If set to true the factory will cast the object to its base class and hide the super creation
+		///     [Not Implimented]
+		///     Shame on me.
+		///     To set all propertys from the outside ill create a super class that inherts from the POCO .
+		///     to get rid of this super class you can set this property to true then the superclass will be cased into its
+		///     baseclass.
+		///     If set to true the factory will cast the object to its base class and hide the super creation
 		/// </summary>
 		public bool HideSuperCreation { get; set; }
 
 		/// <summary>
-		/// Include PDB debug infos 
+		///     Include PDB debug infos
 		/// </summary>
 		public bool CreateDebugCode { get; set; }
 	}
 
 	/// <summary>
-	/// Only for internal use
+	///     Only for internal use
 	/// </summary>
 	public class FactoryHelper
 	{
-		public FactoryHelper()
-		{
-
-		}
-
 		public static CodeConstructor GenerateTypeConstructor(bool factory = true)
 		{
 			var codeConstructor = new CodeConstructor();
 			if (factory)
 			{
-				codeConstructor.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ObjectFactoryMethodAttribute).Name));
-				codeConstructor.Parameters.Add(new CodeParameterDeclarationExpression(typeof(IDataRecord).Name, "record"));
+				codeConstructor.CustomAttributes.Add(new CodeAttributeDeclaration(typeof (ObjectFactoryMethodAttribute).Name));
+				codeConstructor.Parameters.Add(new CodeParameterDeclarationExpression(typeof (IDataRecord).Name, "record"));
 			}
 
 			codeConstructor.Attributes = MemberAttributes.Public;
 			return codeConstructor;
 		}
 
-		public static CodeConstructor GenerateTypeConstructorEx(Type target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
+		public static CodeConstructor GenerateTypeConstructorEx(Type target, FactoryHelperSettings settings,
+			CodeNamespace importNameSpace)
 		{
 			//Key = Column Name
 			//Value = 
 			//Value 1 = MethodName
 			//Value 2 = Type
-			var codeConstructor = GenerateTypeConstructor();
+			CodeConstructor codeConstructor = GenerateTypeConstructor();
 
-			foreach (var propertyInfoCache in target.GetClassInfo().PropertyInfoCaches.Values)
+			foreach (PropertyInfoCache propertyInfoCache in target.GetClassInfo().PropertyInfoCaches.Values)
 			{
 				string columnName = propertyInfoCache.DbName;
 
 				if (settings.EnforcePublicPropertys)
 				{
 					if (propertyInfoCache.Getter.MethodInfo.IsPrivate)
-						throw new AccessViolationException(string.Format("The Getter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
+						throw new AccessViolationException(string.Format(
+							"The Getter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
 					if (propertyInfoCache.Setter.MethodInfo.IsPrivate)
-						throw new AccessViolationException(string.Format("The Setter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
+						throw new AccessViolationException(string.Format(
+							"The Setter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
 				}
 
-				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"), new CodePrimitiveExpression(columnName));
+				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
+					new CodePrimitiveExpression(columnName));
 
-				var variableName = columnName.ToLower();
+				string variableName = columnName.ToLower();
 				CodeVariableDeclarationStatement bufferVariable = null;
 				var refToProperty = new CodeVariableReferenceExpression(propertyInfoCache.PropertyName);
 
-				var attributes = propertyInfoCache.AttributeInfoCaches;
-				var valueConverterAttributeModel = attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
-				var isXmlProperty = attributes.FirstOrDefault(s => s.Attribute is FromXmlAttribute);
+				HashSet<AttributeInfoCache> attributes = propertyInfoCache.AttributeInfoCaches;
+				AttributeInfoCache valueConverterAttributeModel =
+					attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
+				AttributeInfoCache isXmlProperty = attributes.FirstOrDefault(s => s.Attribute is FromXmlAttribute);
 				CodeVariableReferenceExpression uncastLocalVariableRef = null;
 
 				if (isXmlProperty != null)
 				{
-					bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
+					bufferVariable = new CodeVariableDeclarationStatement(typeof (object), variableName);
 					codeConstructor.Statements.Add(bufferVariable);
 					uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
 					var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
@@ -111,22 +111,22 @@ namespace JPB.DataAccess.Config
 					checkXmlForNull.Condition = new CodeBinaryOperatorExpression(
 						new CodeVariableReferenceExpression(variableName),
 						CodeBinaryOperatorType.ValueEquality,
-						new CodeDefaultValueExpression(new CodeTypeReference(typeof(object))));
+						new CodeDefaultValueExpression(new CodeTypeReference(typeof (object))));
 					codeConstructor.Statements.Add(checkXmlForNull);
 
-					var xmlRecordType = new CodeTypeReferenceExpression(typeof(XmlDataRecord));
+					var xmlRecordType = new CodeTypeReferenceExpression(typeof (XmlDataRecord));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.Config"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess"));
 
 					if (propertyInfoCache.CheckForListInterface())
 					{
-						var typeArgument = propertyInfoCache.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
+						Type typeArgument = propertyInfoCache.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 						var generica = new CodeTypeReferenceExpression(typeArgument);
 
-						var tryParse = new CodeMethodInvokeExpression(xmlRecordType, 
-										"TryParse",
-										new CodeCastExpression(typeof(string), uncastLocalVariableRef),
-										generica);
+						var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
+							"TryParse",
+							new CodeCastExpression(typeof (string), uncastLocalVariableRef),
+							generica);
 
 						var xmlDataRecords = new CodeMethodInvokeExpression(tryParse, "CreateListOfItems");
 						var xmlRecordsToObjects = new CodeMethodInvokeExpression(xmlDataRecords, "Select",
@@ -135,12 +135,12 @@ namespace JPB.DataAccess.Config
 						CodeObjectCreateExpression collectionCreate;
 						if (typeArgument.IsClass && typeArgument.GetInterface("INotifyPropertyChanged") != null)
 						{
-							collectionCreate = new CodeObjectCreateExpression(typeof(DbCollection.DbCollection<>),
+							collectionCreate = new CodeObjectCreateExpression(typeof (DbCollection<>),
 								xmlRecordsToObjects);
 						}
 						else
 						{
-							collectionCreate = new CodeObjectCreateExpression(typeof(DbCollection.NonObservableDbCollection<>),
+							collectionCreate = new CodeObjectCreateExpression(typeof (NonObservableDbCollection<>),
 								xmlRecordsToObjects);
 						}
 
@@ -152,13 +152,14 @@ namespace JPB.DataAccess.Config
 						var typeofProperty = new CodeTypeOfExpression(propertyInfoCache.PropertyType);
 						var getClassInfo = new CodeMethodInvokeExpression(typeofProperty, "GetClassInfo");
 
-						var tryParse = new CodeMethodInvokeExpression(xmlRecordType, 
-										"TryParse",
-										new CodeCastExpression(typeof(string), uncastLocalVariableRef),
-										typeofProperty);
+						var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
+							"TryParse",
+							new CodeCastExpression(typeof (string), uncastLocalVariableRef),
+							typeofProperty);
 
 						var setProps = new CodeMethodInvokeExpression(getClassInfo, "SetPropertysViaReflection", tryParse);
-						var setExpr = new CodeAssignStatement(refToProperty, new CodeCastExpression(propertyInfoCache.PropertyType, setProps));
+						var setExpr = new CodeAssignStatement(refToProperty,
+							new CodeCastExpression(propertyInfoCache.PropertyType, setProps));
 						checkXmlForNull.TrueStatements.Add(setExpr);
 					}
 				}
@@ -167,7 +168,7 @@ namespace JPB.DataAccess.Config
 					//Should the SQL value be converted
 					if (valueConverterAttributeModel != null)
 					{
-						bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
+						bufferVariable = new CodeVariableDeclarationStatement(typeof (object), variableName);
 						codeConstructor.Statements.Add(bufferVariable);
 						uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
 						var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
@@ -176,8 +177,8 @@ namespace JPB.DataAccess.Config
 						var converter = valueConverterAttributeModel.Attribute as ValueConverterAttribute;
 						//Create the converter and then convert the value before everything else
 
-						importNameSpace.Imports.Add(new CodeNamespaceImport(converter._converter.Namespace));
-						var converterCall = new CodeObjectCreateExpression(converter._converter);
+						importNameSpace.Imports.Add(new CodeNamespaceImport(converter.Converter.Namespace));
+						var converterCall = new CodeObjectCreateExpression(converter.Converter);
 						var converterInstanceCall = new CodeMethodInvokeExpression(converterCall, "Convert",
 							new CodeVariableReferenceExpression(variableName),
 							new CodeTypeOfExpression(propertyInfoCache.PropertyType),
@@ -188,18 +189,18 @@ namespace JPB.DataAccess.Config
 						codeConstructor.Statements.Add(codeAssignment);
 					}
 
-					var baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
+					Type baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
 
-					if (propertyInfoCache.PropertyType == typeof(string))
+					if (propertyInfoCache.PropertyType == typeof (string))
 					{
-						baseType = typeof(string);
+						baseType = typeof (string);
 					}
 
 					if (baseType != null)
 					{
 						if (bufferVariable == null)
 						{
-							bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
+							bufferVariable = new CodeVariableDeclarationStatement(typeof (object), variableName);
 							codeConstructor.Statements.Add(bufferVariable);
 							uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
 							var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
@@ -216,8 +217,8 @@ namespace JPB.DataAccess.Config
 								new CodeTypeReference(baseType)));
 						var setToValue = new CodeAssignStatement(refToProperty,
 							new CodeCastExpression(
-						  new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
-						  uncastLocalVariableRef));
+								new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
+								uncastLocalVariableRef));
 						checkForDbNull.TrueStatements.Add(setToNull);
 						checkForDbNull.FalseStatements.Add(setToValue);
 						codeConstructor.Statements.Add(checkForDbNull);
@@ -225,8 +226,8 @@ namespace JPB.DataAccess.Config
 					else
 					{
 						CodeExpression castExp = new CodeCastExpression(
-						  new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
-						  codeIndexerExpression);
+							new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
+							codeIndexerExpression);
 						var setExpr = new CodeAssignStatement(refToProperty, castExp);
 						codeConstructor.Statements.Add(setExpr);
 					}
@@ -235,33 +236,35 @@ namespace JPB.DataAccess.Config
 			return codeConstructor;
 		}
 
-		public static CodeConstructor GenerateTypeConstructor(IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
+		public static CodeConstructor GenerateTypeConstructor(
+			IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
 		{
 			//Key = Column Name
 			//Value = 
 			//Value 1 = MethodName
 			//Value 2 = Type
 
-			var codeConstructor = GenerateTypeConstructor();
+			CodeConstructor codeConstructor = GenerateTypeConstructor();
 			var config = new Config();
 
 			foreach (var columInfoModel in propertyToDbColumn)
 			{
-				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"), new CodePrimitiveExpression(columInfoModel.Key));
+				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
+					new CodePrimitiveExpression(columInfoModel.Key));
 
-				var baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
+				Type baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
 				var refToProperty = new CodeVariableReferenceExpression(columInfoModel.Value.Item1);
 
-				if (columInfoModel.Value.Item2 == typeof(string))
+				if (columInfoModel.Value.Item2 == typeof (string))
 				{
-					baseType = typeof(string);
+					baseType = typeof (string);
 				}
 
 				if (baseType != null)
 				{
-					var variableName = columInfoModel.Key.ToLower();
+					string variableName = columInfoModel.Key.ToLower();
 					var uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
-					var bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
+					var bufferVariable = new CodeVariableDeclarationStatement(typeof (object), variableName);
 					var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
 					var checkForDbNull = new CodeConditionStatement();
 					checkForDbNull.Condition = new CodeBinaryOperatorExpression(uncastLocalVariableRef,
@@ -273,8 +276,8 @@ namespace JPB.DataAccess.Config
 							new CodeTypeReference(baseType)));
 					var setToValue = new CodeAssignStatement(refToProperty,
 						new CodeCastExpression(
-					  new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
-					  uncastLocalVariableRef));
+							new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
+							uncastLocalVariableRef));
 					checkForDbNull.TrueStatements.Add(setToNull);
 					checkForDbNull.FalseStatements.Add(setToValue);
 					codeConstructor.Statements.Add(bufferVariable);
@@ -284,8 +287,8 @@ namespace JPB.DataAccess.Config
 				else
 				{
 					CodeExpression castExp = new CodeCastExpression(
-					  new CodeTypeReference(columInfoModel.Value.Item2, CodeTypeReferenceOptions.GenericTypeParameter),
-					  codeIndexerExpression);
+						new CodeTypeReference(columInfoModel.Value.Item2, CodeTypeReferenceOptions.GenericTypeParameter),
+						codeIndexerExpression);
 					var setExpr = new CodeAssignStatement(refToProperty, castExp);
 					codeConstructor.Statements.Add(setExpr);
 				}
@@ -298,7 +301,7 @@ namespace JPB.DataAccess.Config
 			var writer = new StringWriter();
 			writer.NewLine = Environment.NewLine;
 
-			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions()
+			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions
 			{
 				BlankLinesBetweenMembers = false,
 				VerbatimOrder = true,
@@ -314,8 +317,8 @@ namespace JPB.DataAccess.Config
 			CodeNamespace importNameSpace;
 			importNameSpace = new CodeNamespace(target.Namespace);
 			var cp = new CompilerParameters();
-			var codeConstructor = GenerateTypeConstructorEx(target, settings, importNameSpace);
-			var superName = target.Name + "_super";
+			CodeConstructor codeConstructor = GenerateTypeConstructorEx(target, settings, importNameSpace);
+			string superName = target.Name + "_super";
 			var compiler = new CodeTypeDeclaration(superName);
 			compiler.IsClass = true;
 			compiler.IsPartial = true;
@@ -352,7 +355,7 @@ namespace JPB.DataAccess.Config
 
 			compileUnit.Namespaces.Add(importNameSpace);
 			var provider = new CSharpCodeProvider();
-			var compileAssemblyFromDom = provider.CompileAssemblyFromDom(cp, compileUnit);
+			CompilerResults compileAssemblyFromDom = provider.CompileAssemblyFromDom(cp, compileUnit);
 			if (compileAssemblyFromDom.Errors.Count > 0 && settings.EnforceCreation)
 			{
 				var ex =
@@ -367,9 +370,9 @@ namespace JPB.DataAccess.Config
 				throw ex;
 			}
 
-			var compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
+			Assembly compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
 
-			var constructorInfos = compiledAssembly.DefinedTypes.First().GetConstructors();
+			ConstructorInfo[] constructorInfos = compiledAssembly.DefinedTypes.First().GetConstructors();
 			if (!constructorInfos.Any())
 			{
 				if (settings.EnforceCreation)
@@ -385,12 +388,12 @@ namespace JPB.DataAccess.Config
 				throw ex;
 			}
 
-			var matchingCtor = constructorInfos.FirstOrDefault(s =>
+			ConstructorInfo matchingCtor = constructorInfos.FirstOrDefault(s =>
 			{
-				var param = s.GetParameters();
+				ParameterInfo[] param = s.GetParameters();
 				if (param.Length != 1)
 					return false;
-				if (param.FirstOrDefault().ParameterType != typeof(IDataRecord))
+				if (param.FirstOrDefault().ParameterType != typeof (IDataRecord))
 					return false;
 				return true;
 			});
@@ -399,7 +402,8 @@ namespace JPB.DataAccess.Config
 			{
 				if (settings.EnforceCreation)
 					return null;
-				var ex = new InvalidDataException(string.Format("There where was an unknown error due compilation. No CTOR was build"));
+				var ex =
+					new InvalidDataException(string.Format("There where was an unknown error due compilation. No CTOR was build"));
 
 				ex.Data.Add("Object", compileAssemblyFromDom);
 				foreach (CompilerError error in compileAssemblyFromDom.Errors)
@@ -408,15 +412,15 @@ namespace JPB.DataAccess.Config
 				}
 				throw ex;
 			}
-			var dm = new DynamicMethod("Create" + target.Name, target, new[] { typeof(IDataRecord) }, target, true);
-			var il = dm.GetILGenerator();
+			var dm = new DynamicMethod("Create" + target.Name, target, new[] {typeof (IDataRecord)}, target, true);
+			ILGenerator il = dm.GetILGenerator();
 			Func<IDataRecord, object> func;
 			il.Emit(OpCodes.Ldarg_0);
 			il.Emit(OpCodes.Newobj, matchingCtor);
 
 			if (settings.HideSuperCreation)
 			{
-				var variable = il.DeclareLocal(target);
+				LocalBuilder variable = il.DeclareLocal(target);
 				il.Emit(OpCodes.Stloc, variable);
 				il.Emit(OpCodes.Ldloc, variable);
 				il.Emit(OpCodes.Castclass, target);
@@ -436,7 +440,7 @@ namespace JPB.DataAccess.Config
 				il.Emit(OpCodes.Ret);
 			}
 
-			func = (Func<IDataRecord, object>)dm.CreateDelegate(typeof(Func<IDataRecord, object>));
+			func = (Func<IDataRecord, object>) dm.CreateDelegate(typeof (Func<IDataRecord, object>));
 			return func;
 
 			//var paramCtor = Expression.Parameter(typeof(IDataRecord), "val");
@@ -451,7 +455,7 @@ namespace JPB.DataAccess.Config
 
 		public static T Cast<T>(object o)
 		{
-			return (T)o;
+			return (T) o;
 		}
 
 		//var an = new AssemblyName();
