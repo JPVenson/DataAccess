@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using JPB.DataAccess.Config.Model;
 
 #if !DEBUG
@@ -66,6 +67,11 @@ namespace JPB.DataAccess.Config
 		public bool UseReflection { get; private set; }
 
 		/// <summary>
+		///		If Enabled the GetOrCreateClassInfoCache mehtod will be locked due usage
+		/// </summary>
+		public bool EnableThreadSafety { get; set; }
+
+		/// <summary>
 		///     Gets an Cache object if exists or creats one
 		/// </summary>
 		/// <returns></returns>
@@ -95,11 +101,22 @@ namespace JPB.DataAccess.Config
 		/// <returns></returns>
 		internal ClassInfoCache GetOrCreateClassInfoCache(Type type)
 		{
+			if (this.EnableThreadSafety)
+			{
+				Monitor.Enter(SClassInfoCaches);
+			}
+
 			ClassInfoCache element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.FullName);
 			if (element == null)
 			{
 				SClassInfoCaches.Add(element = new ClassInfoCache(type));
 				element.CheckForConfig();
+			}
+
+			if (this.EnableThreadSafety)
+			{
+				Monitor.Pulse(SClassInfoCaches);
+				Monitor.Exit(SClassInfoCaches);
 			}
 
 			return element;

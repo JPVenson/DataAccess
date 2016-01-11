@@ -93,8 +93,8 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public List<object> ExecuteProcedure(Type procParamType, Type resultType, object procParam)
 		{
-			IDbCommand command = CreateProcedureCall(procParamType, procParam, Database);
-			ClassInfoCache typeInfo = resultType.GetClassInfo();
+			var command = CreateProcedureCall(procParamType, procParam, Database);
+			var typeInfo = resultType.GetClassInfo();
 
 			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
 				.Select(typeInfo.SetPropertysViaReflection)
@@ -118,9 +118,9 @@ namespace JPB.DataAccess.Manager
 			sb.Append("EXECUTE ");
 			sb.Append(procParamType.GetTableName());
 			sb.Append(" ");
-			IQueryParameter[] procParams = CreateProcedureHeader(procParamType).ToArray();
+			var procParams = CreateProcedureHeader(procParamType).ToArray();
 			int count = 0;
-			foreach (IQueryParameter queryParameter in procParams)
+			foreach (var queryParameter in procParams)
 			{
 				count++;
 				sb.Append(queryParameter.Name.CheckParamter());
@@ -169,9 +169,9 @@ namespace JPB.DataAccess.Manager
 				if (TargetType == null)
 					TargetType = target.GetType();
 
-				IDbCommand dbCommand = db.CreateCommand(Query);
+				var dbCommand = db.CreateCommand(Query);
 
-				foreach (IQueryParameter queryParameter in QueryParameters)
+				foreach (var queryParameter in QueryParameters)
 				{
 					string realName = TargetType.GetLocalToDbSchemaMapping(queryParameter.Name);
 					object value = TargetType.GetProperty(realName).GetValue(target);
