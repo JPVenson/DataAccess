@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Pager.Contracts;
@@ -134,10 +135,11 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
-		public static QueryBuilder WithCte(this QueryBuilder query, string cteName, Action<QueryBuilder> cteAction, bool subCte = false)
+		public static QueryBuilder WithCte(this QueryBuilder query, string cteName, Action<QueryBuilder> cteAction,
+			bool subCte = false)
 		{
-			GenericQueryPart lod = query.Parts.LastOrDefault();
-			string prefix = string.Empty;
+			var lod = query.Parts.LastOrDefault();
+			var prefix = string.Empty;
 
 			if (lod is CteQueryPart || subCte)
 			{
@@ -200,15 +202,15 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static IDataPager AsPager<T>(this QueryBuilder query, int pageSize)
 		{
-			IDbCommand targetQuery = query.Compile();
-			IDataPager<T> dbAccess = query.Database.CreatePager<T>();
+			var targetQuery = query.Compile();
+			var dbAccess = query.Database.CreatePager<T>();
 			dbAccess.AppendedComands.Add(targetQuery);
 			dbAccess.PageSize = pageSize;
 			return dbAccess;
 		}
 
 		/// <summary>
-		/// Creates a Query that uses the * Operator to select all date from the inner query
+		///     Creates a Query that uses the * Operator to select all date from the inner query
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="from"></param>
@@ -223,7 +225,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// Adds a select * from without a table name, to the query
+		///     Adds a select * from without a table name, to the query
 		/// </summary>
 		/// <param name="query"></param>
 		/// <returns></returns>
@@ -232,9 +234,9 @@ namespace JPB.DataAccess.QueryBuilder
 			query.Query("SELECT * FROM");
 			return query;
 		}
-		
+
 		/// <summary>
-		/// Adds a Select * from followed by the table name of the entity that is used in the <paramref name="type"/>
+		///     Adds a Select * from followed by the table name of the entity that is used in the <paramref name="type" />
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="type"></param>
@@ -247,7 +249,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// Adds a Between statement followed by anything added from the action
+		///     Adds a Between statement followed by anything added from the action
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="from"></param>
@@ -259,10 +261,9 @@ namespace JPB.DataAccess.QueryBuilder
 			return query;
 		}
 
-	
 
 		/// <summary>
-		/// Adds a Between statement to the query
+		///     Adds a Between statement to the query
 		/// </summary>
 		/// <param name="query"></param>
 		/// <returns></returns>
@@ -273,9 +274,9 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 
-
 		/// <summary>
-		/// Adds a between statement followed by a query defined in <paramref name="valueA"/> folowed by an and statement and an secound query defined in the <paramref name="valueB"/>
+		///     Adds a between statement followed by a query defined in <paramref name="valueA" /> folowed by an and statement and
+		///     an secound query defined in the <paramref name="valueB" />
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="valueA"></param>
@@ -292,7 +293,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// Adds a static beween statement for the given 2 values
+		///     Adds a static beween statement for the given 2 values
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="valueA"></param>
@@ -300,8 +301,8 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Between(this QueryBuilder query, Double valueA, Double valueB)
 		{
-			string paramaterAAutoId = query.GetParamaterAutoId().ToString();
-			string paramaterBAutoId = query.GetParamaterAutoId().ToString();
+			var paramaterAAutoId = query.GetParamaterAutoId().ToString();
+			var paramaterBAutoId = query.GetParamaterAutoId().ToString();
 
 			query.Query("BETWEEN @{0} AND @{1}", paramaterAAutoId, paramaterBAutoId);
 			query.QueryQ("",
@@ -320,8 +321,8 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static IWrapperDataPager<T, TE> AsPagerViewModel<T, TE>(this QueryBuilder query, int pageSize)
 		{
-			IDbCommand targetQuery = query.Compile();
-			IWrapperDataPager<T, TE> dbAccess = query.Database.CreatePager<T, TE>();
+			var targetQuery = query.Compile();
+			var dbAccess = query.Database.CreatePager<T, TE>();
 			dbAccess.BaseQuery = targetQuery;
 			dbAccess.PageSize = pageSize;
 			return dbAccess;
@@ -386,7 +387,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Contains(this QueryBuilder query, object alias)
 		{
-			int paramaterAutoId = query.GetParamaterAutoId();
+			var paramaterAutoId = query.GetParamaterAutoId();
 			return query.QueryQ(string.Format("CONTAINS (@{0})", paramaterAutoId),
 				new QueryParameter(paramaterAutoId.ToString(CultureInfo.InvariantCulture), alias));
 		}
@@ -457,10 +458,10 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Join(this QueryBuilder query, Type source, Type target)
 		{
-			string sourcePK = source.GetFK(target);
-			string targetPK = target.GetPK();
-			string targetTable = target.GetTableName();
-			string sourceTable = source.GetTableName();
+			var sourcePK = source.GetFK(target);
+			var targetPK = target.GetPK();
+			var targetTable = target.GetTableName();
+			var sourceTable = source.GetTableName();
 			return query.Query("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
 		}
 
@@ -484,10 +485,10 @@ namespace JPB.DataAccess.QueryBuilder
 			if (source == null) throw new ArgumentNullException("source");
 			if (target == null) throw new ArgumentNullException("target");
 
-			string sourcePK = source.GetFK(target);
-			string targetPK = target.GetPK();
-			string targetTable = target.GetTableName();
-			string sourceTable = source.GetTableName();
+			var sourcePK = source.GetFK(target);
+			var targetPK = target.GetPK();
+			var targetTable = target.GetTableName();
+			var sourceTable = source.GetTableName();
 			return query.Query(mode + " JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
 		}
 
@@ -510,9 +511,9 @@ namespace JPB.DataAccess.QueryBuilder
 			{
 				case DbAccessType.MsSql:
 				{
-					int index = -1;
-					string select = "SELECT";
-					GenericQueryPart part =
+					var index = -1;
+					var select = "SELECT";
+					var part =
 						query.Parts.LastOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(@select, StringComparison.Ordinal)) != -1);
 
 					if (index == -1 || part == null)
@@ -564,7 +565,7 @@ namespace JPB.DataAccess.QueryBuilder
 			}
 
 			/// <summary>
-			/// Query string
+			///     Query string
 			/// </summary>
 			public string JoinType { get; private set; }
 		}

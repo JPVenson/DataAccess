@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Config.Contract;
 
 namespace JPB.DataAccess.Config.Model
 {
+	[DebuggerDisplay("{PropertyName}")]
+	[Serializable]
 	internal class PropertyHelper : MethodInfoCache
 	{
 		private dynamic _getter;
@@ -28,7 +31,7 @@ namespace JPB.DataAccess.Config.Model
 			{
 				return _getter(target);
 			}
-			dynamic paramOne = param[0];
+			var paramOne = param[0];
 			_setter(target, paramOne);
 			return null;
 		}
@@ -37,87 +40,94 @@ namespace JPB.DataAccess.Config.Model
 	/// <summary>
 	///     Infos about the Property
 	/// </summary>
-	public class PropertyInfoCache : IComparable<PropertyInfoCache>
+	[DebuggerDisplay("{PropertyName}")]
+	[Serializable]
+	public class PropertyInfoCache : IPropertyInfoCache
 	{
 		/// <summary>
 		/// </summary>
 		internal PropertyInfoCache(PropertyInfo propertyInfo, bool anon)
 		{
+			Init(propertyInfo, anon);
+		}
+
+		public PropertyInfoCache()
+		{
+			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
+		}
+
+		public virtual IPropertyInfoCache Init(PropertyInfo propertyInfo, bool anon)
+		{
 			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
 			if (propertyInfo != null)
 			{
+				var getMethod = propertyInfo.GetGetMethod();
+				var setMethod = propertyInfo.GetSetMethod();
 				PropertyInfo = propertyInfo;
 				PropertyName = propertyInfo.Name;
 				PropertyType = propertyInfo.PropertyType;
 
-				GetterDelegate = typeof (Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
-				SetterDelegate = typeof (Action<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
+				GetterDelegate = typeof(Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
+				SetterDelegate = typeof(Action<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
 				if (!anon)
 				{
-					MethodInfo builder = typeof (Expression)
+					var builder = typeof(Expression)
 						.GetMethods()
 						.First(s => s.Name == "Lambda" && s.ContainsGenericParameters);
 
-					ParameterExpression thisRef = Expression.Parameter(propertyInfo.DeclaringType, "that");
-					MemberExpression accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
+					var thisRef = Expression.Parameter(propertyInfo.DeclaringType, "that");
 
-					var getExpression = builder
-						.MakeGenericMethod(GetterDelegate)
-						.Invoke(null, new object[]
+					var accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
+
+					if (getMethod != null && getMethod.IsPublic)
+					{
+						var getExpression = builder
+							.MakeGenericMethod(GetterDelegate)
+							.Invoke(null, new object[]
 						{
 							accessField,
 							new[] {thisRef}
 						}) as dynamic;
 
-					ParameterExpression valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
-					BinaryExpression setter = Expression.Assign(
-						accessField,
-						valueRef);
+						var getterDelegate = getExpression.Compile();
+						Getter = new PropertyHelper();
+						((PropertyHelper)Getter).SetGet(getterDelegate);
+					}
+					if (setMethod != null && setMethod.IsPublic)
+					{
+						var valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
+						var setter = Expression.Assign(
+							accessField,
+							valueRef);
 
-					var setExpression = builder
-						.MakeGenericMethod(SetterDelegate)
-						.Invoke(null, new object[]
+						var setExpression = builder
+							.MakeGenericMethod(SetterDelegate)
+							.Invoke(null, new object[]
 						{
 							setter,
 							new[] {thisRef, valueRef}
 						}) as dynamic;
 
-					dynamic getterDelegate = getExpression.Compile();
-					Getter = new PropertyHelper();
-					((PropertyHelper) Getter).SetGet(getterDelegate);
-
-					dynamic setterDelegate = setExpression.Compile();
-					Setter = new PropertyHelper();
-					((PropertyHelper) Setter).SetSet(setterDelegate);
+						var setterDelegate = setExpression.Compile();
+						Setter = new PropertyHelper();
+						((PropertyHelper)Setter).SetSet(setterDelegate);
+					}
 				}
 				else
 				{
-					MethodInfo getter = PropertyInfo.GetGetMethod();
-					MethodInfo setter = PropertyInfo.GetSetMethod();
-					if (getter != null)
-						Getter = new MethodInfoCache(getter);
-					if (setter != null)
-						Setter = new MethodInfoCache(setter);
+					if (getMethod != null)
+						Getter = new MethodInfoCache(getMethod);
+					if (setMethod != null)
+						Setter = new MethodInfoCache(setMethod);
 				}
-
-				//Getter = new MethodInfoCache(PropertyInfo.GetGetMethod().CreateDelegate(GetterDelegate));
-				//Setter = new MethodInfoCache(PropertyInfo.GetSetMethod().CreateDelegate(SetterDelegate));
-
-				//Getter = new MethodInfoCache(GetPropGetter(GetterDelegate, propertyInfo.DeclaringType, PropertyName));
-				//Setter = new MethodInfoCache(GetPropSetter(SetterDelegate, propertyInfo.DeclaringType, targetType, PropertyName));
 
 				AttributeInfoCaches = new HashSet<AttributeInfoCache>(propertyInfo
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
 					.Select(s => new AttributeInfoCache(s as Attribute)));
-
-				Refresh();
 			}
-		}
 
-		protected PropertyInfoCache()
-		{
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
+			return this;
 		}
 
 		/// <summary>
@@ -150,6 +160,8 @@ namespace JPB.DataAccess.Config.Model
 		/// </summary>
 		public PropertyInfo PropertyInfo { get; protected internal set; }
 
+		//public ClassInfoCache<PropertyInfoCache, AttributeInfoCache, MethodInfoCache, ConstructorInfoCache> PropertyTypeInfo { get; set; }
+
 		/// <summary>
 		///     The name of the Property
 		/// </summary>
@@ -160,81 +172,10 @@ namespace JPB.DataAccess.Config.Model
 		/// </summary>
 		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; protected internal set; }
 
-		/// <summary>
-		///     if known the ForModel attribute
-		/// </summary>
-		public AttributeInfoCache ForModel { get; protected internal set; }
-
-		/// <summary>
-		///     if known the ForXml attribute
-		/// </summary>
-		public AttributeInfoCache FromXmlAttribute { get; protected internal set; }
-
-		/// <summary>
-		///     Is this property a Primary key
-		/// </summary>
-		public bool IsPrimaryKey { get; protected internal set; }
-
-		/// <summary>
-		///     Should this property not be inserterd
-		/// </summary>
-		public bool InsertIgnore { get; protected internal set; }
-
-		/// <summary>
-		///     if known the ForginKey attribute
-		/// </summary>
-		public AttributeInfoCache ForginKeyAttribute { get; protected internal set; }
-
-		/// <summary>
-		///     Returns the For Model name if known or the Propertyname
-		/// </summary>
-		public string DbName
-		{
-			get
-			{
-				if (ForModel != null)
-					return (ForModel.Attribute as ForModel).AlternatingName;
-				return PropertyName;
-			}
-		}
 
 		public int CompareTo(PropertyInfoCache other)
 		{
 			return GetHashCode() - other.GetHashCode();
-		}
-
-		/// <summary>
-		///     For internal Usage only
-		/// </summary>
-		public void Refresh()
-		{
-			IsPrimaryKey = AttributeInfoCaches.Any(f => f.Attribute is PrimaryKeyAttribute);
-			InsertIgnore = AttributeInfoCaches.Any(f => f.Attribute is InsertIgnore);
-			ForginKeyAttribute = PropertyInfo.GetGetMethod().IsVirtual
-				? AttributeInfoCaches.FirstOrDefault(f => f.Attribute is ForeignKeyAttribute)
-				: null;
-			FromXmlAttribute = AttributeInfoCaches.FirstOrDefault(f => f.Attribute is FromXmlAttribute);
-			ForModel = AttributeInfoCaches.FirstOrDefault(f => f.Attribute is ForModel);
-		}
-
-		// returns property getter
-		internal static Delegate GetPropGetter(Type delegateType, Type typeOfObject, string propertyName)
-		{
-			ParameterExpression paramExpression = Expression.Parameter(typeOfObject, "value");
-			MemberExpression propertyGetterExpression = Expression.Property(paramExpression, propertyName);
-			return Expression.Lambda(delegateType, propertyGetterExpression, paramExpression).Compile();
-		}
-
-		// returns property setter:
-		internal static Delegate GetPropSetter(Type delegateType, Type typeOfObject, Type typeOfProperty, string propertyName)
-		{
-			ParameterExpression paramExpression = Expression.Parameter(typeOfObject);
-			ParameterExpression paramExpression2 = Expression.Parameter(typeOfProperty, propertyName);
-			MemberExpression propertyGetterExpression = Expression.Property(paramExpression, propertyName);
-			return
-				Expression.Lambda(delegateType, Expression.Assign(propertyGetterExpression, paramExpression2), paramExpression,
-					paramExpression2)
-					.Compile();
 		}
 
 		public override int GetHashCode()
@@ -242,15 +183,28 @@ namespace JPB.DataAccess.Config.Model
 			return PropertyName.GetHashCode();
 		}
 
-		//internal static PropertyInfoCache Logical(string info)
-		//{
-		//    return new PropertyInfoCache(null)
-		//    {
-		//        PropertyName = info
-		//    };
-		//}
+		// returns property getter
+		internal static Delegate GetPropGetter(Type delegateType, Type typeOfObject, string propertyName)
+		{
+			var paramExpression = Expression.Parameter(typeOfObject, "value");
+			var propertyGetterExpression = Expression.Property(paramExpression, propertyName);
+			return Expression.Lambda(delegateType, propertyGetterExpression, paramExpression).Compile();
+		}
+
+		// returns property setter:
+		internal static Delegate GetPropSetter(Type delegateType, Type typeOfObject, Type typeOfProperty, string propertyName)
+		{
+			var paramExpression = Expression.Parameter(typeOfObject);
+			var paramExpression2 = Expression.Parameter(typeOfProperty, propertyName);
+			var propertyGetterExpression = Expression.Property(paramExpression, propertyName);
+			return
+				Expression.Lambda(delegateType, Expression.Assign(propertyGetterExpression, paramExpression2), paramExpression,
+					paramExpression2)
+					.Compile();
+		}
 	}
 
+	[Serializable]
 	internal class PropertyInfoCache<T, TE> : PropertyInfoCache
 	{
 		internal PropertyInfoCache(string name, Action<T, TE> setter = null, Func<T, TE> getter = null,
@@ -270,7 +224,6 @@ namespace JPB.DataAccess.Config.Model
 			{
 				Getter = new MethodInfoCache(getter);
 			}
-			Refresh();
 		}
 	}
 }

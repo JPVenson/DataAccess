@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper
@@ -39,21 +40,21 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public object GetValue(int i)
 		{
-			string name = GetName(i);
+			var name = GetName(i);
 
-			string mapEntiysPropToSchema = _target.GetLocalToDbSchemaMapping(name);
+			var mapEntiysPropToSchema = _target.GetLocalToDbSchemaMapping(name);
 
-			PropertyInfo firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
+			var firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
 			if (firstOrDefault == null)
 				return null;
 
-			Type propertyType = firstOrDefault.PropertyType;
-			XElement xElement = baseElement.Elements().ElementAt(i);
+			var propertyType = firstOrDefault.PropertyType;
+			var xElement = baseElement.Elements().ElementAt(i);
 
 			if (xElement.HasElements)
 				return xElement.ToString();
 
-			object type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
+			var type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
 			return type;
 		}
 
@@ -187,7 +188,7 @@ namespace JPB.DataAccess.AdoWrapper
 				return null;
 			try
 			{
-				XDocument xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
+				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
 				return new XmlDataRecord(xDocument, target);
 			}
 			catch (Exception ex)
@@ -199,7 +200,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public IEnumerable<XmlDataRecord> CreateListOfItems()
 		{
-			IEnumerable<XElement> xNodes = baseElement.Elements();
+			var xNodes = baseElement.Elements();
 			return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), _target));
 		}
 	}

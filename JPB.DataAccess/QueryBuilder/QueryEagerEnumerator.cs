@@ -5,17 +5,18 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 
 namespace JPB.DataAccess.QueryBuilder
 {
 	internal class QueryEagerEnumerator : IEnumerator
 	{
+		private readonly ArrayList _elements;
 		private readonly QueryBuilder _queryBuilder;
 		private readonly Type _type;
-		private readonly ArrayList _elements;
-		private Task _task;
 		private int _counter;
 		private List<IDataRecord> _enumerateDataRecords;
+		private Task _task;
 
 		internal QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
 		{
@@ -43,7 +44,7 @@ namespace JPB.DataAccess.QueryBuilder
 				if (_enumerateDataRecords.Count < _counter)
 					return false;
 
-				IDataRecord dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
+				var dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
 				Current = _type.GetClassInfo().SetPropertysViaReflection(dataRecord);
 				_elements.Add(Current);
 
@@ -69,7 +70,7 @@ namespace JPB.DataAccess.QueryBuilder
 		{
 			_task = new Task(() =>
 			{
-				IDbCommand query = _queryBuilder.Compile();
+				var query = _queryBuilder.Compile();
 				_enumerateDataRecords = _queryBuilder.Database.EnumerateDataRecords(query, true);
 			});
 			_task.Start();

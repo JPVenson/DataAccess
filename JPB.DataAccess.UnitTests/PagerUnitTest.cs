@@ -77,41 +77,44 @@ namespace JPB.DataAccess.UnitTests
 
 			var refSelect = expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.UserTable)));
 			Assert.AreEqual(testUers.Count, refSelect);
-			
-			var pager = expectWrapper.Database.CreatePager<Users>();
-			Assert.IsNotNull(pager);
 
-			#region CheckEvents
-			var triggeredNewPageLoaded = false;
-			var triggeredNewPageLoading = false;
-			
-			pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
-			pager.NewPageLoading += () => triggeredNewPageLoading = true;
+			using (var pager = expectWrapper.Database.CreatePager<Users>())
+			{
+				Assert.IsNotNull(pager);
 
-			pager.LoadPage(expectWrapper);
+				#region CheckEvents
+				var triggeredNewPageLoaded = false;
+				var triggeredNewPageLoading = false;
 
-			Assert.IsFalse(triggeredNewPageLoaded);
-			Assert.IsFalse(triggeredNewPageLoading);
+				pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
+				pager.NewPageLoading += () => triggeredNewPageLoading = true;
 
-			pager.RaiseEvents = true;
-			pager.LoadPage(expectWrapper);
+				pager.LoadPage(expectWrapper);
 
-			Assert.IsTrue(triggeredNewPageLoaded);
-			Assert.IsTrue(triggeredNewPageLoading);
+				Assert.IsFalse(triggeredNewPageLoaded);
+				Assert.IsFalse(triggeredNewPageLoading);
 
-			#endregion
+				pager.RaiseEvents = true;
+				pager.LoadPage(expectWrapper);
 
-			#region CheckPage Size
-			
-			var oldPageSize = pager.PageSize;
-			var newPageSize = 20;
-			Assert.AreEqual(pager.CurrentPageItems.Count, oldPageSize);
+				Assert.IsTrue(triggeredNewPageLoaded);
+				Assert.IsTrue(triggeredNewPageLoading);
 
-			pager.PageSize = newPageSize;
-			Assert.AreEqual(pager.PageSize, newPageSize);
+				#endregion
 
-			pager.LoadPage(expectWrapper);
-			Assert.AreEqual(pager.CurrentPageItems.Count, newPageSize);
+				#region CheckPage Size
+
+				var oldPageSize = pager.PageSize;
+				var newPageSize = 20;
+				Assert.AreEqual(pager.CurrentPageItems.Count, oldPageSize);
+
+				pager.PageSize = newPageSize;
+				Assert.AreEqual(pager.PageSize, newPageSize);
+
+				pager.LoadPage(expectWrapper);
+				Assert.AreEqual(pager.CurrentPageItems.Count, newPageSize);
+			}
+		
 			
 			#endregion
 		}

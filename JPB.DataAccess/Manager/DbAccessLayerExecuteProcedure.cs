@@ -6,6 +6,7 @@ using System.Text;
 using JPB.DataAccess.Config;
 using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.Manager
@@ -74,7 +75,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public void ExecuteProcedureNonResult(Type type, object procParam)
 		{
-			IDbCommand command = CreateProcedureCall(type, procParam, Database);
+			var command = CreateProcedureCall(type, procParam, Database);
 			Database.ExecuteNonQuery(command);
 		}
 
@@ -106,7 +107,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public List<object> ExecuteProcedurePrimetiv(Type procParamType, Type resultType, object procParam)
 		{
-			IDbCommand command = CreateProcedureCall(procParamType, procParam, Database);
+			var command = CreateProcedureCall(procParamType, procParam, Database);
 			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
 				.Select(dataRecord => dataRecord[0])
 				.ToList();
@@ -119,8 +120,8 @@ namespace JPB.DataAccess.Manager
 			sb.Append(procParamType.GetTableName());
 			sb.Append(" ");
 			var procParams = CreateProcedureHeader(procParamType).ToArray();
-			int count = 0;
-			foreach (var queryParameter in procParams)
+			var count = 0;
+			foreach (IQueryParameter queryParameter in procParams)
 			{
 				count++;
 				sb.Append(queryParameter.Name.CheckParamter());
@@ -171,10 +172,10 @@ namespace JPB.DataAccess.Manager
 
 				var dbCommand = db.CreateCommand(Query);
 
-				foreach (var queryParameter in QueryParameters)
+				foreach (IQueryParameter queryParameter in QueryParameters)
 				{
-					string realName = TargetType.GetLocalToDbSchemaMapping(queryParameter.Name);
-					object value = TargetType.GetProperty(realName).GetValue(target);
+					var realName = TargetType.GetLocalToDbSchemaMapping(queryParameter.Name);
+					var value = TargetType.GetProperty(realName).GetValue(target);
 					dbCommand.Parameters.AddWithValue(queryParameter.Name.CheckParamter(), value, db);
 				}
 

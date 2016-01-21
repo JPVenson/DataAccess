@@ -3,6 +3,7 @@ using System.Data;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
 using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
@@ -80,11 +81,11 @@ namespace UnitTestProject1
 	public class ConfigLessUserInplaceConfig
 	{
 		[ConfigMehtod]
-		public static void Config(Config config)
+		public static void Config(DbConfig configBase)
 		{
-			config.SetConfig<ConfigLessUserInplaceConfig>(f =>
+			configBase.SetConfig<ConfigLessUserInplaceConfig>(f =>
 			{
-				f.SetClassAttribute(new ForModel(UsersMeta.UserTable));
+				f.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
 				f.SetPrimaryKey(e => e.PropertyA);
 				f.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);

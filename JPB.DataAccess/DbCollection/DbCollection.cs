@@ -171,7 +171,7 @@ namespace JPB.DataAccess.DbCollection
 		private void item_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			var listEntry = new List<string>();
-			KeyValuePair<T, List<string>> trackerEntry = _changeTracker.FirstOrDefault(s => s.Key == sender as T);
+			var trackerEntry = _changeTracker.FirstOrDefault(s => s.Key == sender as T);
 			if (trackerEntry.Equals(default(KeyValuePair<T, List<string>>)))
 			{
 				_changeTracker.Add(sender as T, listEntry);
@@ -186,7 +186,7 @@ namespace JPB.DataAccess.DbCollection
 
 		private bool ChangeState(T item, CollectionStates state)
 		{
-			StateHolder fod = _internalCollection.FirstOrDefault(s => s.Value == item);
+			var fod = _internalCollection.FirstOrDefault(s => s.Value == item);
 
 			if (fod == null)
 				return false;
@@ -205,7 +205,7 @@ namespace JPB.DataAccess.DbCollection
 		/// </summary>
 		public void SaveChanges(DbAccessLayer _layer)
 		{
-			IDbCommand bulk = _layer.Database.CreateCommand("");
+			var bulk = _layer.Database.CreateCommand("");
 			var removed = new List<T>();
 
 			foreach (StateHolder pair in _internalCollection)
@@ -236,20 +236,20 @@ namespace JPB.DataAccess.DbCollection
 				}
 			}
 
-			T[] results = _layer.ExecuteMARS(bulk, typeof (T)).SelectMany(s => s).Cast<T>().ToArray();
+			var results = _layer.ExecuteMARS(bulk, typeof (T)).SelectMany(s => s).Cast<T>().ToArray();
 			//Added 
-			StateHolder[] added = _internalCollection.Where(s => s.State == CollectionStates.Added).ToArray();
-			for (int i = 0; i < added.Length; i++)
+			var added = _internalCollection.Where(s => s.State == CollectionStates.Added).ToArray();
+			for (var i = 0; i < added.Length; i++)
 			{
-				StateHolder addedOne = added[i];
-				T newId = results[i];
+				var addedOne = added[i];
+				var newId = results[i];
 				DbAccessLayer.CopyPropertys(addedOne.Value, newId);
 			}
 
 			//Removed
 			foreach (T item in removed)
 			{
-				StateHolder fod = _internalCollection.First(s => s.Value == item);
+				var fod = _internalCollection.First(s => s.Value == item);
 				_internalCollection.Remove(fod);
 			}
 

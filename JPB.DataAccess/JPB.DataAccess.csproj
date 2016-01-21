@@ -42,7 +42,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>strongNameKeyDataAccess.pfx</AssemblyOriginatorKeyFile>
@@ -59,11 +59,24 @@
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
-    <Compile Include="Config\ConfigurationResolver.cs" />
-    <Compile Include="Config\FactoryHelper.cs" />
+    <Compile Include="DbInfoConfig\ConfigHelpers.cs" />
+    <Compile Include="DbInfoConfig\ConfigurationResolver.cs" />
+    <Compile Include="DbInfoConfig\DbConfig.cs" />
+    <Compile Include="DbInfoConfig\FactoryHelper.cs" />
     <Compile Include="Config\Model\AttributeInfoCache.cs" />
     <Compile Include="Config\Model\ClassInfoCache.cs" />
     <Compile Include="Config\Model\ConstructorInfoCache.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\DbAttributeInfoCache.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\DbClassInfoCache.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\DbConstructorInfoCache.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\DbMethodInfoCache.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\DbPropertyInfoCache.cs" />
+    <Compile Include="Config\Contract\IAttributeInfoCache.cs" />
+    <Compile Include="Config\Contract\IClassInfoCache.cs" />
+    <Compile Include="Config\Contract\IConstructorInfoCache.cs" />
+    <Compile Include="Config\Contract\IMethodInfoCache.cs" />
+    <Compile Include="Config\Contract\IPropertyInfoCache.cs" />
+    <Compile Include="Config\Model\MethodArgsInfoCache.cs" />
     <Compile Include="Config\Model\MethodInfoCache.cs" />
     <Compile Include="Config\Model\PropertyInfoCache.cs" />
     <Compile Include="Contacts\IDatabase.cs" />
@@ -112,7 +125,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryFactory\IQueryFactoryResult.cs" />
     <Compile Include="QueryFactory\QueryFactoryResult.cs" />
-    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\ConfigBase.cs" />
     <Compile Include="Config\ConfigHelpers.cs" />
   </ItemGroup>
   <ItemGroup>

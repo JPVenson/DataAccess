@@ -9,7 +9,7 @@ namespace JPB.DataAccess.Pager.Contracts
 	/// <summary>
 	///     Base pager
 	/// </summary>
-	public interface IDataPager
+	public interface IDataPager : IDisposable
 	{
 		/// <summary>
 		///     Not Implimented
@@ -78,7 +78,8 @@ namespace JPB.DataAccess.Pager.Contracts
 		new ICollection<T> CurrentPageItems { get; }
 
 		/// <summary>
-		/// The most simple Select that produces result data. An aditional Query will wrap to enable Pageing, this so be aware of it
+		///     The most simple Select that produces result data. An aditional Query will wrap to enable Pageing, this so be aware
+		///     of it
 		/// </summary>
 		IDbCommand BaseQuery { get; set; }
 	}

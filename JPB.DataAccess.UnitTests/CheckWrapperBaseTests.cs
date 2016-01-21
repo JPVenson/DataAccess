@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -215,13 +216,13 @@ namespace JPB.DataAccess.UnitTests
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
-			var config = new Config.Config();
+			var config = new DbConfig();
 
-			Config.Config.Clear();
+			DbConfig.Clear();
 
 			config.SetConfig<ConfigLessUser>(f =>
 			{
-				f.SetClassAttribute(new ForModel(UsersMeta.UserTable));
+				f.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
 				f.SetPrimaryKey(e => e.PropertyA);
 				f.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);
@@ -237,13 +238,13 @@ namespace JPB.DataAccess.UnitTests
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
-			Config.Config.Clear();
+			DbConfig.Clear();
 		}
 
 		[TestMethod]
 		public void ConfigLessInplace()
 		{
-			Config.Config.Clear();
+			DbConfig.Clear();
 			var insGuid = Guid.NewGuid().ToString();
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
@@ -256,22 +257,22 @@ namespace JPB.DataAccess.UnitTests
 
 			var elements = expectWrapper.Select<ConfigLessUserInplaceConfig>();
 			Assert.AreEqual(elements.Length, 1);
-			Config.Config.Clear();
+			DbConfig.Clear();
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(SqlException))]
 		public void ConfigLessFail()
 		{
-			Config.Config.Clear();
+			DbConfig.Clear();
 			var insGuid = Guid.NewGuid().ToString();
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
-			var config = new Config.Config();
+			var config = new DbConfig();
 			config.SetConfig<ConfigLessUser>(f =>
 			{
-				f.SetClassAttribute(new ForModel(UsersMeta.UserTable));
+				f.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
 				f.SetPrimaryKey(e => e.PropertyA);
 				f.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol + "TEST");
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol + "TEST");
@@ -283,7 +284,7 @@ namespace JPB.DataAccess.UnitTests
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
-			Config.Config.Clear();
+			DbConfig.Clear();
 		}
 
 		[TestMethod]

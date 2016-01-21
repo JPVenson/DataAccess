@@ -5,15 +5,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using JPB.DataAccess.AdoWrapper;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.DbCollection;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CSharp;
 
-namespace JPB.DataAccess.Config
+namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
 	/// </summary>
@@ -48,7 +47,7 @@ namespace JPB.DataAccess.Config
 	/// <summary>
 	///     Only for internal use
 	/// </summary>
-	public class FactoryHelper
+	internal class FactoryHelper
 	{
 		public static CodeConstructor GenerateTypeConstructor(bool factory = true)
 		{
@@ -70,11 +69,11 @@ namespace JPB.DataAccess.Config
 			//Value = 
 			//Value 1 = MethodName
 			//Value 2 = Type
-			CodeConstructor codeConstructor = GenerateTypeConstructor();
+			var codeConstructor = GenerateTypeConstructor();
 
-			foreach (PropertyInfoCache propertyInfoCache in target.GetClassInfo().PropertyInfoCaches.Values)
+			foreach (DbPropertyInfoCache propertyInfoCache in target.GetClassInfo().PropertyInfoCaches.Values)
 			{
-				string columnName = propertyInfoCache.DbName;
+				var columnName = propertyInfoCache.DbName;
 
 				if (settings.EnforcePublicPropertys)
 				{
@@ -89,14 +88,14 @@ namespace JPB.DataAccess.Config
 				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
 					new CodePrimitiveExpression(columnName));
 
-				string variableName = columnName.ToLower();
+				var variableName = columnName.ToLower();
 				CodeVariableDeclarationStatement bufferVariable = null;
 				var refToProperty = new CodeVariableReferenceExpression(propertyInfoCache.PropertyName);
 
-				HashSet<AttributeInfoCache> attributes = propertyInfoCache.AttributeInfoCaches;
-				AttributeInfoCache valueConverterAttributeModel =
+				var attributes = propertyInfoCache.AttributeInfoCaches;
+				var valueConverterAttributeModel =
 					attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
-				AttributeInfoCache isXmlProperty = attributes.FirstOrDefault(s => s.Attribute is FromXmlAttribute);
+				var isXmlProperty = attributes.FirstOrDefault(s => s.Attribute is FromXmlAttribute);
 				CodeVariableReferenceExpression uncastLocalVariableRef = null;
 
 				if (isXmlProperty != null)
@@ -115,12 +114,12 @@ namespace JPB.DataAccess.Config
 					codeConstructor.Statements.Add(checkXmlForNull);
 
 					var xmlRecordType = new CodeTypeReferenceExpression(typeof (XmlDataRecord));
-					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.Config"));
+					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ConfigBase"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess"));
 
 					if (propertyInfoCache.CheckForListInterface())
 					{
-						Type typeArgument = propertyInfoCache.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
+						var typeArgument = propertyInfoCache.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 						var generica = new CodeTypeReferenceExpression(typeArgument);
 
 						var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
@@ -189,7 +188,7 @@ namespace JPB.DataAccess.Config
 						codeConstructor.Statements.Add(codeAssignment);
 					}
 
-					Type baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
+					var baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
 
 					if (propertyInfoCache.PropertyType == typeof (string))
 					{
@@ -244,15 +243,15 @@ namespace JPB.DataAccess.Config
 			//Value 1 = MethodName
 			//Value 2 = Type
 
-			CodeConstructor codeConstructor = GenerateTypeConstructor();
-			var config = new Config();
+			var codeConstructor = GenerateTypeConstructor();
+			var config = new DbConfig();
 
 			foreach (var columInfoModel in propertyToDbColumn)
 			{
 				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
 					new CodePrimitiveExpression(columInfoModel.Key));
 
-				Type baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
+				var baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
 				var refToProperty = new CodeVariableReferenceExpression(columInfoModel.Value.Item1);
 
 				if (columInfoModel.Value.Item2 == typeof (string))
@@ -262,7 +261,7 @@ namespace JPB.DataAccess.Config
 
 				if (baseType != null)
 				{
-					string variableName = columInfoModel.Key.ToLower();
+					var variableName = columInfoModel.Key.ToLower();
 					var uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
 					var bufferVariable = new CodeVariableDeclarationStatement(typeof (object), variableName);
 					var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
@@ -317,8 +316,8 @@ namespace JPB.DataAccess.Config
 			CodeNamespace importNameSpace;
 			importNameSpace = new CodeNamespace(target.Namespace);
 			var cp = new CompilerParameters();
-			CodeConstructor codeConstructor = GenerateTypeConstructorEx(target, settings, importNameSpace);
-			string superName = target.Name + "_super";
+			var codeConstructor = GenerateTypeConstructorEx(target, settings, importNameSpace);
+			var superName = target.Name + "_super";
 			var compiler = new CodeTypeDeclaration(superName);
 			compiler.IsClass = true;
 			compiler.IsPartial = true;
@@ -355,7 +354,7 @@ namespace JPB.DataAccess.Config
 
 			compileUnit.Namespaces.Add(importNameSpace);
 			var provider = new CSharpCodeProvider();
-			CompilerResults compileAssemblyFromDom = provider.CompileAssemblyFromDom(cp, compileUnit);
+			var compileAssemblyFromDom = provider.CompileAssemblyFromDom(cp, compileUnit);
 			if (compileAssemblyFromDom.Errors.Count > 0 && settings.EnforceCreation)
 			{
 				var ex =
@@ -370,9 +369,9 @@ namespace JPB.DataAccess.Config
 				throw ex;
 			}
 
-			Assembly compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
+			var compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
 
-			ConstructorInfo[] constructorInfos = compiledAssembly.DefinedTypes.First().GetConstructors();
+			var constructorInfos = compiledAssembly.DefinedTypes.First().GetConstructors();
 			if (!constructorInfos.Any())
 			{
 				if (settings.EnforceCreation)
@@ -388,9 +387,9 @@ namespace JPB.DataAccess.Config
 				throw ex;
 			}
 
-			ConstructorInfo matchingCtor = constructorInfos.FirstOrDefault(s =>
+			var matchingCtor = constructorInfos.FirstOrDefault(s =>
 			{
-				ParameterInfo[] param = s.GetParameters();
+				var param = s.GetParameters();
 				if (param.Length != 1)
 					return false;
 				if (param.FirstOrDefault().ParameterType != typeof (IDataRecord))
@@ -413,14 +412,14 @@ namespace JPB.DataAccess.Config
 				throw ex;
 			}
 			var dm = new DynamicMethod("Create" + target.Name, target, new[] {typeof (IDataRecord)}, target, true);
-			ILGenerator il = dm.GetILGenerator();
+			var il = dm.GetILGenerator();
 			Func<IDataRecord, object> func;
 			il.Emit(OpCodes.Ldarg_0);
 			il.Emit(OpCodes.Newobj, matchingCtor);
 
 			if (settings.HideSuperCreation)
 			{
-				LocalBuilder variable = il.DeclareLocal(target);
+				var variable = il.DeclareLocal(target);
 				il.Emit(OpCodes.Stloc, variable);
 				il.Emit(OpCodes.Ldloc, variable);
 				il.Emit(OpCodes.Castclass, target);

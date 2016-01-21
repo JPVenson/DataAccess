@@ -2,32 +2,34 @@
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using JPB.DataAccess.Config;
 using JPB.DataAccess.Config.Model;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.Config
+namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class ConfigurationResolver<T>
 	{
-		private Config _config;
+		private DbConfig _configBase;
 
 		internal ConfigurationResolver()
 		{
 		}
 
-		internal ConfigurationResolver(Config config, ClassInfoCache classInfoCache)
+		internal ConfigurationResolver(DbConfig configBase, DbClassInfoCache classInfoCache)
 		{
 			ClassInfoCache = classInfoCache;
-			_config = config;
+			_configBase = configBase;
 		}
 
 		/// <summary>
 		///     Easy access to the known Class Info
 		/// </summary>
-		public ClassInfoCache ClassInfoCache { get; private set; }
+		public DbClassInfoCache ClassInfoCache { get; private set; }
 
 		/// <summary>
 		///     Set a attribute on a property
@@ -35,7 +37,7 @@ namespace JPB.DataAccess.Config
 		/// <typeparam name="TProp"></typeparam>
 		public void SetPropertyAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
-			string info = ConfigHelper.GetPropertyInfoFromLabda(exp);
+			var info = GeneralConfigHelper.GetPropertyInfoFromLabda(exp);
 			PropertyInfoCache fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
 			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
 		}
@@ -55,7 +57,7 @@ namespace JPB.DataAccess.Config
 		/// <typeparam name="TProp"></typeparam>
 		public void SetMethodAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
-			string info = ConfigHelper.GetMehtodInfoFromLabda(exp);
+			var info = GeneralConfigHelper.GetMehtodInfoFromLabda(exp);
 			MethodInfoCache fod = ClassInfoCache.MethodInfoCaches.First(s => s.MethodName == info);
 			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
 		}
@@ -80,7 +82,7 @@ namespace JPB.DataAccess.Config
 				throw new ArgumentNullException("methodBody");
 			if (ClassInfoCache.MethodInfoCaches.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
-			var mehtodInfo = new MethodInfoCache(methodBody, methodName, attributes);
+			var mehtodInfo = new DbMethodInfoCache(methodBody, methodName, attributes);
 			ClassInfoCache.MethodInfoCaches.Add(mehtodInfo);
 		}
 
@@ -98,7 +100,7 @@ namespace JPB.DataAccess.Config
 			if (setter == null && getter == null)
 				throw new ArgumentNullException("setter",
 					"Propertys must define at least one accessor. You cannot define a property without getter and setter");
-			var propInfo = new PropertyInfoCache<T, TE>(name, setter, getter, attributes);
+			var propInfo = new DbPropertyInfoCache<T, TE>(name, setter, getter, attributes);
 			ClassInfoCache.PropertyInfoCaches.Add(name, propInfo);
 		}
 
@@ -107,7 +109,7 @@ namespace JPB.DataAccess.Config
 		/// </summary>
 		public void SetClassAttribute(DataAccessAttribute attribute)
 		{
-			ClassInfoCache.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+			ClassInfoCache.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -172,11 +174,11 @@ namespace JPB.DataAccess.Config
 		}
 
 		/// <summary>
-		///     Set a ForModel key on a Property
+		///     Set a ForModelAttribute key on a Property
 		/// </summary>
 		public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value)
 		{
-			SetPropertyAttribute(exp, new ForModel(value));
+			SetPropertyAttribute(exp, new ForModelAttribute(value));
 		}
 
 		/// <summary>
@@ -220,11 +222,11 @@ namespace JPB.DataAccess.Config
 		}
 
 		/// <summary>
-		///     Set the Table Name ForModel key
+		///     Set the Table Name ForModelAttribute key
 		/// </summary>
 		public void SetTableNameKey<TProp>(Expression<Func<T, TProp>> exp, string name)
 		{
-			SetClassAttribute(new ForModel(name));
+			SetClassAttribute(new ForModelAttribute(name));
 		}
 
 		///// <summary>

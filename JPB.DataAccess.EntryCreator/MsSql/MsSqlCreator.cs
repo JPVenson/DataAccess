@@ -15,8 +15,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 {
     public class MsSqlCreator : IEntryCreator
     {
-      
-
         public static DbAccessLayer Manager;
         List<TableInfoModel> _tableNames;
 
@@ -107,7 +105,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
         private void RenderMenuAction()
         {
-            var readLine = Program.GetNextOption();
+            var readLine = Program.AutoConsole.GetNextOption();
             if (string.IsNullOrEmpty(readLine))
             {
                 Console.Clear();
@@ -179,7 +177,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
         private void SetNamespace()
         {
             Console.WriteLine("Enter your DefaultNamespace");
-            var ns = Program.GetNextOption();
+			var ns = Program.AutoConsole.GetNextOption();
             foreach (var item in _tableNames.Concat(_views))
             {
                 item.NewNamespace = ns;
@@ -245,7 +243,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
                             loadFromFile.Members.Cast<CodeMemberProperty>().FirstOrDefault(e => e.Name == f.Item1);
 
                         var codeAttributeDeclaration = property.CustomAttributes.Cast<CodeAttributeDeclaration>()
-                            .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModel).FullName);
+                            .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModelAttribute).FullName);
                         if (codeAttributeDeclaration != null)
                         {
                             var firstOrDefault =
@@ -343,13 +341,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
         {
             Console.WriteLine("Actions:");
 
-            Console.WriteLine(@"\ForModel   [\c] [ColumnName] [[NewName] | [\d]]  ");
+            Console.WriteLine(@"\ForModelAttribute   [\c] [ColumnName] [[NewName] | [\d]]  ");
             Console.WriteLine(@"        Adds a ForModelAttribute to a Property or class with \c. deletes it with \d");
             Console.WriteLine("Example:");
-            Console.WriteLine(@"        \ForModel \c NewTableName");
-            Console.WriteLine("             Adding a ForModel Attribute to the generated class");
-            Console.WriteLine(@"        \ForModel ID_Column NewName");
-            Console.WriteLine("             Adding a ForModel Attribute to the generated Property with the value NewName");
+            Console.WriteLine(@"        \ForModelAttribute \c NewTableName");
+            Console.WriteLine("             Adding a ForModelAttribute Attribute to the generated class");
+            Console.WriteLine(@"        \ForModelAttribute ID_Column NewName");
+            Console.WriteLine("             Adding a ForModelAttribute Attribute to the generated Property with the value NewName");
             Console.WriteLine();
             Console.WriteLine(@"\Exclude    [Value [true | false]]");
             Console.WriteLine("         Exclude this table from the Process");
@@ -364,7 +362,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
             Console.WriteLine(@"\back");
             Console.WriteLine("         Go back to Main Menu");
 
-            var readLine = Program.GetNextOption();
+			var readLine = Program.AutoConsole.GetNextOption();
             if (string.IsNullOrEmpty(readLine))
             {
                 RenderMenu();
@@ -693,7 +691,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 //          if (!string.IsNullOrEmpty(tableInfoModel.NewTableName))
 //          {
-//              csCreator.Append("[ForModel(");
+//              csCreator.Append("[ForModelAttribute(");
 //              csCreator.Append(tableInfoModel.Info.TableName);
 //              csCreator.AppendLine(")");
 //          }

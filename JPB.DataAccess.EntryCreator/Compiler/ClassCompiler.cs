@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
@@ -145,7 +146,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 			if (!string.IsNullOrEmpty(TargetName))
 			{
-				var forModel = new ForModel(TargetName);
+				var forModel = new ForModelAttribute(TargetName);
 				var codeAttributeDeclaration = new CodeAttributeDeclaration(forModel.GetType().Name,
 					new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName)));
 				_base.CustomAttributes.Add(codeAttributeDeclaration);
@@ -285,7 +286,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 			if (!string.IsNullOrEmpty(info.NewColumnName))
 			{
-				var forModel = new ForModel(info.ColumnInfo.ColumnName);
+				var forModel = new ForModelAttribute(info.ColumnInfo.ColumnName);
 				codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name, new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName))));
 			}
 			if (info.IsRowVersion)
@@ -352,7 +353,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 				var hasForNameAttribute =
 					  item.CustomAttributes.Cast<CodeAttributeDeclaration>()
-						  .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModel).Name);
+						  .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModelAttribute).Name);
 				if (hasForNameAttribute != null)
 					name = (hasForNameAttribute.Arguments.Cast<CodeAttributeArgument>().FirstOrDefault().Value as CodePrimitiveExpression).Value.ToString();
 

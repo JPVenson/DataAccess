@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -13,17 +12,15 @@ using JPB.DataAccess.Helper;
 namespace JPB.DataAccess.QueryBuilder
 {
 	/// <summary>
-	///		Provides functions that can build SQL Querys
+	///     Provides functions that can build SQL Querys
 	/// </summary>
 	public class QueryBuilder : IEnumerable, ICloneable
 	{
 		/// <summary>
-		/// 
 		/// </summary>
 		protected internal readonly IDatabase Database;
 
 		/// <summary>
-		/// 
 		/// </summary>
 		protected internal readonly Type ForType;
 
@@ -59,19 +56,11 @@ namespace JPB.DataAccess.QueryBuilder
 		public bool AllowParamterRenaming { get; set; }
 
 		/// <summary>
-		///		If enabled the QueryBuilder will insert linebreaks after some Commands
+		///     If enabled the QueryBuilder will insert linebreaks after some Commands
 		/// </summary>
 		public bool AutoLinebreak { get; set; }
 
-		internal QueryBuilder AutoLinebreakAction()
-		{
-			if (AutoLinebreak)
-				this.LineBreak();
-			return this;
-		}
-
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <returns></returns>
 		public object Clone()
@@ -84,7 +73,6 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerator GetEnumerator()
@@ -97,13 +85,20 @@ namespace JPB.DataAccess.QueryBuilder
 			return new QueryLazyEnumerator(this, ForType);
 		}
 
+		internal QueryBuilder AutoLinebreakAction()
+		{
+			if (AutoLinebreak)
+				this.LineBreak();
+			return this;
+		}
+
 		/// <summary>
 		///     Will concat all QueryParts into a statement and will check for Spaces
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand Compile()
 		{
-			Tuple<string, IEnumerable<IQueryParameter>> query = CompileFlat();
+			var query = CompileFlat();
 			return Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
 		}
 
@@ -126,7 +121,6 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 
-
 		/// <summary>
 		///     Query like setter for AllowParamterRenaming [Duplicate]
 		/// </summary>
@@ -147,14 +141,14 @@ namespace JPB.DataAccess.QueryBuilder
 			{
 				foreach (IQueryParameter queryParameter in part.QueryParameters)
 				{
-					IQueryParameter fod = Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
+					var fod = Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
 
 					if (fod == null)
 						continue;
 
 					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the Query
-					string name = fod.Name;
-					string newName = GetParamaterAutoId().ToString().CheckParamter();
+					var name = fod.Name;
+					var newName = GetParamaterAutoId().ToString().CheckParamter();
 					part.Prefix = part.Prefix.Replace(name, newName);
 					queryParameter.Name = newName;
 				}
@@ -170,7 +164,7 @@ namespace JPB.DataAccess.QueryBuilder
 		public Tuple<string, IEnumerable<IQueryParameter>> CompileFlat()
 		{
 			var sb = new StringBuilder();
-			GenericQueryPart[] queryParts = Parts.ToArray();
+			var queryParts = Parts.ToArray();
 			string prefRender = null;
 			var param = new List<IQueryParameter>();
 
@@ -178,11 +172,11 @@ namespace JPB.DataAccess.QueryBuilder
 			{
 				//take care of spaces
 				//check if the last statement ends with a space or the next will start with one
-				string renderCurrent = queryPart.Prefix;
+				var renderCurrent = queryPart.Prefix;
 				if (prefRender != null)
 				{
 					if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) ||
-						!renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
+					    !renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
 					{
 						renderCurrent = " " + renderCurrent;
 					}
@@ -229,7 +223,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// Renders the Current Object
+		///     Renders the Current Object
 		/// </summary>
 		/// <returns></returns>
 		public string Render()
@@ -251,7 +245,7 @@ namespace JPB.DataAccess.QueryBuilder
 				.AppendIntedLine("{")
 				.Up();
 
-			foreach (var genericQueryPart in Parts)
+			foreach (GenericQueryPart genericQueryPart in Parts)
 			{
 				genericQueryPart.Render(sb);
 				sb.AppendLine(",");
@@ -279,12 +273,11 @@ namespace JPB.DataAccess.QueryBuilder
 		///     Creates a new Instance of an Query Builder that creates Database aware querys
 		/// </summary>
 		public QueryBuilder(IDatabase database)
-			: base(database, typeof(T))
+			: base(database, typeof (T))
 		{
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <returns></returns>
 		public new IEnumerator<T> GetEnumerator()

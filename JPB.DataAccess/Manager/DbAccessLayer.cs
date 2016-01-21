@@ -60,7 +60,8 @@ namespace JPB.DataAccess.Manager
 
 			DbAccessType = dbAccessType;
 			Database = new DefaultDatabaseAccess();
-			var database = ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection);
+			var database =
+				ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection);
 			Database.Attach(database);
 			DatabaseStrategy = database;
 		}
@@ -77,7 +78,7 @@ namespace JPB.DataAccess.Manager
 
 			ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
-			IDatabaseStrategy database = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
+			var database = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
 
 			Database = new DefaultDatabaseAccess();
 			Database.Attach(database);
@@ -118,7 +119,7 @@ namespace JPB.DataAccess.Manager
 		private void ResolveDbType(string fullTypeNameToIDatabaseStrategy)
 		{
 			// ReSharper disable once PossibleInvalidOperationException
-			KeyValuePair<DbAccessType, string>? firstOrDefault =
+			var firstOrDefault =
 				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
 					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
 			if (firstOrDefault == null)
@@ -132,7 +133,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		/// For Internal Use only
+		///     For Internal Use only
 		/// </summary>
 		public IDatabaseStrategy DatabaseStrategy { get; private set; }
 
@@ -183,7 +184,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public int ExecuteGenericCommand(string query, IEnumerable<IQueryParameter> values)
 		{
-			IDbCommand command = DbAccessLayerHelper.CreateCommand(Database, query);
+			var command = DbAccessLayerHelper.CreateCommand(Database, query);
 
 			if (values != null)
 				foreach (IQueryParameter item in values)

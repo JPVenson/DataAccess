@@ -1,26 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using JPB.DataAccess.Config.Contract;
 
 namespace JPB.DataAccess.Config.Model
 {
 	/// <summary>
 	///     Infos about the Method
 	/// </summary>
-	public class MethodInfoCache : IComparable<MethodInfoCache>
+	[DebuggerDisplay("{MethodName}")]
+	[Serializable]
+	public class MethodInfoCache : IComparable<MethodInfoCache>, IMethodInfoCache
 	{
 		internal MethodInfoCache(MethodInfo mehtodInfo)
 		{
-			if (mehtodInfo == null)
-				throw new ArgumentNullException("mehtodInfo");
-			MethodInfo = mehtodInfo;
-			MethodName = mehtodInfo.Name;
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>(mehtodInfo
-				.GetCustomAttributes(true)
-				.Where(s => s is Attribute)
-				.Select(s => new AttributeInfoCache(s as Attribute)));
+			Init(mehtodInfo);
 		}
 
 		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params AttributeInfoCache[] attributes)
@@ -36,9 +33,28 @@ namespace JPB.DataAccess.Config.Model
 				.Select(s => new AttributeInfoCache(s as Attribute)).Concat(attributes));
 		}
 
-		protected internal MethodInfoCache()
+		public MethodInfoCache()
 		{
 			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
+		}
+
+		public int CompareTo(MethodInfoCache other)
+		{
+			return String.Compare(MethodName, other.MethodName, StringComparison.Ordinal);
+		}
+
+		public IMethodInfoCache Init(MethodInfo mehtodInfo)
+		{
+			if (mehtodInfo == null)
+				throw new ArgumentNullException("mehtodInfo");
+			MethodInfo = mehtodInfo;
+			MethodName = mehtodInfo.Name;
+			AttributeInfoCaches = new HashSet<AttributeInfoCache>(mehtodInfo
+				.GetCustomAttributes(true)
+				.Where(s => s is Attribute)
+				.Select(s => new AttributeInfoCache(s as Attribute)));
+			ArgumentInfoCaches = new HashSet<MethodArgsInfoCache>(mehtodInfo.GetParameters().Select(s => new MethodArgsInfoCache(s)));
+			return this;
 		}
 
 		/// <summary>
@@ -57,14 +73,14 @@ namespace JPB.DataAccess.Config.Model
 		public string MethodName { get; private set; }
 
 		/// <summary>
+		/// Arguments on this Method
+		/// </summary>
+		public HashSet<MethodArgsInfoCache> ArgumentInfoCaches { get; set; }
+
+		/// <summary>
 		///     All Attributes on this Method
 		/// </summary>
 		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
-
-		public int CompareTo(MethodInfoCache other)
-		{
-			return String.Compare(MethodName, other.MethodName, StringComparison.Ordinal);
-		}
 
 		/// <summary>
 		///     Easy access to the underlying delegate
@@ -76,7 +92,7 @@ namespace JPB.DataAccess.Config.Model
 			{
 				var para = new object[param.Length + 1];
 				para[0] = target;
-				for (int i = 0; i < param.Length; i++)
+				for (var i = 0; i < param.Length; i++)
 				{
 					para[1 + i] = param[i];
 				}

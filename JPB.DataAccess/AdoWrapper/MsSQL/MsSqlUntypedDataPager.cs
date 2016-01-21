@@ -34,7 +34,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 		}
 
 		/// <summary>
-		/// Internal Use
+		///     Internal Use
 		/// </summary>
 		public Type TargetType { get; set; }
 
@@ -109,9 +109,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 				SyncHelper(CurrentPageItems.Clear);
 
-				string pk = TargetType.GetPK();
+				var pk = TargetType.GetPK();
 
-				IDbCommand selectMaxCommand = dbAccess
+				var selectMaxCommand = dbAccess
 					.Query()
 					.Query("WITH CTE AS")
 					.InBracket(query => query.Query(finalAppendCommand))
@@ -124,7 +124,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 				//if (finalAppendCommand != null)
 				//    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
 
-				object maxItems = dbAccess.RunPrimetivSelect(typeof (long), selectMaxCommand).FirstOrDefault();
+				var maxItems = dbAccess.RunPrimetivSelect(typeof (long), selectMaxCommand).FirstOrDefault();
 				if (maxItems != null)
 				{
 					long parsedCount;
@@ -149,7 +149,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 						.QueryD(pk)
 						.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
 						{
-							PagedRows = CurrentPage * PageSize,
+							PagedRows = CurrentPage*PageSize,
 							PageSize
 						})
 						.Compile();
@@ -157,7 +157,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 				else
 				{
 					// ReSharper disable ConvertToLambdaExpression
-					QueryBuilder.QueryBuilder selectQuery = dbAccess.Query()
+					var selectQuery = dbAccess.Query()
 						.WithCte("BASECTE", baseCte =>
 						{
 							if (BaseQuery != null)
@@ -208,7 +208,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 			foreach (T item in selectWhere)
 			{
-				T item1 = item;
+				var item1 = item;
 				SyncHelper(() => CurrentPageItems.Add(item1));
 			}
 
@@ -236,24 +236,22 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		protected virtual void RaiseNewPageLoaded()
 		{
 			if (!RaiseEvents)
 				return;
-			Action handler = NewPageLoaded;
+			var handler = NewPageLoaded;
 			if (handler != null) handler();
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		protected virtual void RaiseNewPageLoading()
 		{
 			if (!RaiseEvents)
 				return;
-			Action handler = NewPageLoading;
+			var handler = NewPageLoading;
 			if (handler != null) handler();
 		}
 
@@ -262,7 +260,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 			if (_checkRun != null)
 				return _checkRun.Value;
 
-			string[] versionParts = SqlVersion.Split('.');
+			var versionParts = SqlVersion.Split('.');
 
 			//Target 11.0.2100.60 or higher
 			//      Major Version
@@ -270,10 +268,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 			//      Build Number
 			//      Revision
 
-			int major = int.Parse(versionParts[0]);
-			int minor = int.Parse(versionParts[1]);
-			int build = int.Parse(versionParts[2]);
-			int revision = int.Parse(versionParts[3]);
+			var major = int.Parse(versionParts[0]);
+			var minor = int.Parse(versionParts[1]);
+			var build = int.Parse(versionParts[2]);
+			var revision = int.Parse(versionParts[3]);
 
 			if (major > 11)
 			{
@@ -306,6 +304,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 			}
 
 			return _checkRun != null && _checkRun.Value;
+		}
+
+		public void Dispose()
+		{
+			BaseQuery.Dispose();
+			CurrentPageItems.Clear();
 		}
 	}
 }

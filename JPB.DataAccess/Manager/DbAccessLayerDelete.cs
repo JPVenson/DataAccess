@@ -13,7 +13,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(T entry)
 		{
-			IDbCommand deleteCommand = typeof (T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, Database,
+			var deleteCommand = typeof (T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, Database,
 				CreateDelete);
 			RaiseDelete(entry, deleteCommand, Database);
 			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
@@ -21,9 +21,9 @@ namespace JPB.DataAccess.Manager
 
 		internal static IDbCommand CreateDelete<T>(T entry, IDatabase db)
 		{
-			Type type = typeof (T);
-			string proppk = type.GetPK();
-			string query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @0";
+			var type = typeof (T);
+			var proppk = type.GetPK();
+			var query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @0";
 			return db.CreateCommandWithParameterValues(query, new[] {entry.GetPK()});
 		}
 
@@ -34,7 +34,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public static void Delete<T>(T entry, IDatabase db, params object[] parameter)
 		{
-			IDbCommand deleteCommand = typeof (T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db,
+			var deleteCommand = typeof (T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db,
 				CreateDelete, parameter);
 			RaiseDelete(entry, deleteCommand, db);
 			db.Run(s => { s.ExecuteNonQuery(deleteCommand); });

@@ -29,28 +29,32 @@ namespace JPB.DataAccess.Manager
 		public static bool RaiseStaticEvents { get; set; }
 
 		/// <summary>
-		/// Will be triggerd when any DbAccessLayer tries to handle a Delete Statement.
-		/// Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will be triggerd when any DbAccessLayer tries to handle a Delete Statement.
+		///     Will only be triggerd when setting RaiseStaticEvents to true
 		/// </summary>
 		public static event DatabaseActionHandler OnDelete;
+
 		/// <summary>
-		/// Will be triggerd when any DbAccessLayer tries to handle a Select Statement.
-		/// Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will be triggerd when any DbAccessLayer tries to handle a Select Statement.
+		///     Will only be triggerd when setting RaiseStaticEvents to true
 		/// </summary>
 		public static event DatabaseActionHandler OnSelect;
+
 		/// <summary>
-		/// Will be triggerd when any DbAccessLayer tries to handle a Update Statement.
-		/// Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will be triggerd when any DbAccessLayer tries to handle a Update Statement.
+		///     Will only be triggerd when setting RaiseStaticEvents to true
 		/// </summary>
 		public static event DatabaseActionHandler OnUpdate;
+
 		/// <summary>
-		/// Will be triggerd when any DbAccessLayer tries to handle a Insert Statement.
-		/// Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will be triggerd when any DbAccessLayer tries to handle a Insert Statement.
+		///     Will only be triggerd when setting RaiseStaticEvents to true
 		/// </summary>
 		public static event DatabaseActionHandler OnInsert;
+
 		/// <summary>
-		/// Will be triggerd when any exception is thrown !Related! to the XML Parsin process
-		/// Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will be triggerd when any exception is thrown !Related! to the XML Parsin process
+		///     Will only be triggerd when setting RaiseStaticEvents to true
 		/// </summary>
 		public static event DatabaseFailedActionHandler OnException;
 
@@ -59,7 +63,7 @@ namespace JPB.DataAccess.Manager
 			if (!RaiseStaticEvents)
 				return;
 
-			DatabaseActionHandler handler = OnDelete;
+			var handler = OnDelete;
 			if (handler != null)
 				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
 		}
@@ -69,7 +73,7 @@ namespace JPB.DataAccess.Manager
 			if (!RaiseStaticEvents)
 				return;
 
-			DatabaseFailedActionHandler handler = OnException;
+			var handler = OnException;
 			if (handler != null)
 				handler.BeginInvoke(sender, ex, s => { }, null);
 		}
@@ -78,7 +82,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (!RaiseStaticEvents)
 				return;
-			DatabaseActionHandler handler = OnSelect;
+			var handler = OnSelect;
 			if (handler != null)
 				handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
 		}
@@ -88,7 +92,7 @@ namespace JPB.DataAccess.Manager
 			if (!RaiseStaticEvents)
 				return;
 
-			DatabaseActionHandler handler = OnUpdate;
+			var handler = OnUpdate;
 			if (handler != null)
 				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
 		}
@@ -98,7 +102,7 @@ namespace JPB.DataAccess.Manager
 			if (!RaiseStaticEvents)
 				return;
 
-			DatabaseActionHandler handler = OnInsert;
+			var handler = OnInsert;
 			if (handler != null)
 				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
 		}

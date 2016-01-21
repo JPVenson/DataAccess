@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.Config;
 using JPB.DataAccess.Config.Model;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.QueryBuilder
@@ -13,8 +15,8 @@ namespace JPB.DataAccess.QueryBuilder
 	internal class QueryLazyEnumerator : IEnumerator, IDisposable
 	{
 		private readonly DbAccessLayer _accessLayer;
-		private readonly ClassInfoCache _type;
 		private readonly IDataReader _executeReader;
+		private readonly DbClassInfoCache _type;
 
 		internal QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
 		{

@@ -191,7 +191,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 		public string GetTimeStamp(DateTime dtValue)
 		{
-			DateTime dt = dtValue;
+			var dt = dtValue;
 
 			return string.Format(
 				"CONVERT(datetime,'{0:d4}-{1:d2}-{2:d2} {3:d2}:{4:d2}:{5:d2}',120)",
@@ -214,7 +214,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 		public string[] GetTableColumns(IDbConnection conn, string strTableName, params object[] exclude)
 		{
-			string sql = string.Format(
+			var sql = string.Format(
 				"select NAME from SYSCOLUMNS where ID=(select ID from SYSOBJECTS where TYPE = 'U' AND NAME = '{0}')",
 				strTableName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
@@ -229,7 +229,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 		public int DropTable(IDbConnection conn, String strTableName)
 		{
-			string sql = String.Format("DROP TABLE {0}", strTableName);
+			var sql = String.Format("DROP TABLE {0}", strTableName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 				return cmd.ExecuteNonQuery();
 		}
@@ -246,7 +246,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 		public bool SupportsView(IDbConnection conn, String strName)
 		{
-			string sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
+			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 			using (IDataReader dr = cmd.ExecuteReader())
 				return (dr.Read());
@@ -254,7 +254,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 		public bool SupportsStoredProcedure(IDbConnection conn, String strName)
 		{
-			string sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
+			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 			using (IDataReader dr = cmd.ExecuteReader())
 				return (dr.Read());
@@ -269,7 +269,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 				return sc.CommandText;
 
 			var sql = new StringBuilder();
-			Boolean firstParam = true;
+			var firstParam = true;
 
 			if (!string.IsNullOrEmpty(sc.Connection.Database))
 				sql.AppendLine("USE  [" + sc.Connection.Database + "];");
@@ -322,7 +322,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 				case CommandType.TableDirect:
 					foreach (SqlParameter sp in sc.Parameters.Cast<SqlParameter>())
 					{
-						string paramTypeCompiler = sp.SqlDbType.ToString().ToUpper();
+						var paramTypeCompiler = sp.SqlDbType.ToString().ToUpper();
 						if (sp.Size > 0)
 						{
 							paramTypeCompiler += "(" + sp.Size + ")";
@@ -343,7 +343,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 		public static String ParameterValue(SqlParameter sp)
 		{
-			String retval = "";
+			var retval = "";
 
 			switch (sp.SqlDbType)
 			{

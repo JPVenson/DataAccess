@@ -2,15 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using JPB.DataAccess.Config.Contract;
 
 namespace JPB.DataAccess.Config.Model
 {
 	/// <summary>
 	///     Infos about the Ctor
 	/// </summary>
-	public class ConstructorInfoCache
+	[Serializable]
+	public class ConstructorInfoCache : IConstructorInfoCache
 	{
+		public ConstructorInfoCache()
+		{
+		}
+
 		internal ConstructorInfoCache(ConstructorInfo ctorInfo)
+		{
+			Init(ctorInfo);
+		}
+
+		public IConstructorInfoCache Init(ConstructorInfo ctorInfo)
 		{
 			MethodInfo = ctorInfo;
 			MethodName = ctorInfo.Name;
@@ -18,6 +29,7 @@ namespace JPB.DataAccess.Config.Model
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new AttributeInfoCache(s as Attribute)));
+			return this;
 		}
 
 		/// <summary>

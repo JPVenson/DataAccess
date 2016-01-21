@@ -5,7 +5,7 @@ using System.Reflection;
 namespace JPB.DataAccess.QueryBuilder
 {
 	/// <summary>
-	/// Jon modes for TSQL. This is an helper method that can be used to create JOINs by using the Query Builder
+	///     Jon modes for TSQL. This is an helper method that can be used to create JOINs by using the Query Builder
 	/// </summary>
 // ReSharper disable once InconsistentNaming
 	public class TJoinMode : MsQueryBuilderExtentions.JoinMode
@@ -30,7 +30,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// Returns a list of all Join values known be the system
+		///     Returns a list of all Join values known be the system
 		/// </summary>
 		/// <returns></returns>
 		public static IEnumerable<MsQueryBuilderExtentions.JoinMode> GetJoins()
