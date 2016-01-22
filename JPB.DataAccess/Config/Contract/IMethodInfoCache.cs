@@ -10,7 +10,7 @@ namespace JPB.DataAccess.Config.Contract
 		/// <summary>
 		///     if set this method does not exist so we fake it
 		/// </summary>
-		Delegate Delegate { get; set; }
+		Delegate Delegate { get; }
 
 		/// <summary>
 		///     Direct Reflection

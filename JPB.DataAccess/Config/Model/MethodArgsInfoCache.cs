@@ -48,6 +48,6 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		/// Direct reflection
 		/// </summary>
-		public ParameterInfo ParameterInfo { get; set; }
+		public ParameterInfo ParameterInfo { get; private set; }
 	}
 }

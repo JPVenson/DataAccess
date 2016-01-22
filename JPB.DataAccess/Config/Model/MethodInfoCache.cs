@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		///     if set this method does not exist so we fake it
 		/// </summary>
-		public Delegate Delegate { get; set; }
+		public Delegate Delegate { get; private set; }
 
 		/// <summary>
 		///     Direct Reflection
@@ -75,7 +75,7 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		/// Arguments on this Method
 		/// </summary>
-		public HashSet<MethodArgsInfoCache> ArgumentInfoCaches { get; set; }
+		public HashSet<MethodArgsInfoCache> ArgumentInfoCaches { get; private set; }
 
 		/// <summary>
 		///     All Attributes on this Method
