@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryBuilder;
 
@@ -110,8 +109,8 @@ namespace JPB.DataAccess.Manager
 		internal static bool CopyPropertys(object @base, object newObject)
 		{
 			var updated = false;
-			IEnumerable<PropertyInfoCache> propertys = @base.GetType().GetClassInfo().PropertyInfoCaches.Select(f => f.Value);
-			foreach (PropertyInfoCache propertyInfo in propertys)
+			var propertys = @base.GetType().GetClassInfo().PropertyInfoCaches.Select(f => f.Value);
+			foreach (var propertyInfo in propertys)
 			{
 				var oldValue = propertyInfo.GetConvertedValue(@base);
 				var newValue = propertyInfo.GetConvertedValue(newObject);

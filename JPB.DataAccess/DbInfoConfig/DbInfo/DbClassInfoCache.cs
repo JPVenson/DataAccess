@@ -4,9 +4,9 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Contract;
-using JPB.DataAccess.Config.Model;
+using System.Runtime.CompilerServices;
+using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
@@ -17,6 +17,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	public class DbClassInfoCache :
 		ClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache>
 	{
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbClassInfoCache()
 		{
 			SchemaMappingValues = new Dictionary<string, string>();
@@ -30,8 +33,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			SchemaMappingValues = new Dictionary<string, string>();
 			Refresh(true);
 		}
-
-
+		
 		public override IClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache> Init(Type type, bool anon = false)
 		{
 			var item = base.Init(type, anon);
@@ -93,12 +95,12 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		///		If known the Property with an RowVersion Attribute
 		/// </summary>
-		public PropertyInfoCache RowVersionProperty { get; private set; }
+		public DbPropertyInfoCache RowVersionProperty { get; private set; }
 
 		/// <summary>
 		///		If knwon the Property with an PrimaryKey Attribute
 		/// </summary>
-		public PropertyInfoCache PrimaryKeyProperty { get; private set; }
+		public DbPropertyInfoCache PrimaryKeyProperty { get; private set; }
 
 		/// <summary>
 		///     When alternating the Configuration you have to call this method to renew the property enumerations.

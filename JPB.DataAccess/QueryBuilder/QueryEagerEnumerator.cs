@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using JPB.DataAccess.Config;
 using JPB.DataAccess.DbInfoConfig;
 
 namespace JPB.DataAccess.QueryBuilder
 {
-	internal class QueryEagerEnumerator : IEnumerator
+	internal class QueryEagerEnumerator : IEnumerator, IDisposable
 	{
 		private readonly ArrayList _elements;
 		private readonly QueryBuilder _queryBuilder;
@@ -74,6 +73,14 @@ namespace JPB.DataAccess.QueryBuilder
 				_enumerateDataRecords = _queryBuilder.Database.EnumerateDataRecords(query, true);
 			});
 			_task.Start();
+		}
+
+		public void Dispose()
+		{
+			if(_task != null)
+				_task.Dispose();
+			_enumerateDataRecords.Clear();
+			_elements.Clear();
 		}
 	}
 

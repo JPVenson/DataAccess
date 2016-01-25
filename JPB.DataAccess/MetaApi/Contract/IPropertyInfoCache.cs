@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using JPB.DataAccess.Config.Model;
+using JPB.DataAccess.MetaApi.Model;
 
-namespace JPB.DataAccess.Config.Contract
+namespace JPB.DataAccess.MetaApi.Contract
 {
 	/// <summary>
 	/// </summary>
-	public interface IPropertyInfoCache : IComparable<PropertyInfoCache>
+	public interface IPropertyInfoCache<TAtt>
+		: IComparable<IPropertyInfoCache<TAtt>>,
+		IEquatable<IPropertyInfoCache<TAtt>> where TAtt : class, IAttributeInfoCache, new()
 	{
 		/// <summary>
 		///     the type of the Setter delegate
@@ -22,12 +24,12 @@ namespace JPB.DataAccess.Config.Contract
 		/// <summary>
 		///     The Setter mehtod can be null
 		/// </summary>
-		MethodInfoCache Setter { get; }
+		IMethodInfoCache<TAtt> Setter { get; }
 
 		/// <summary>
 		///     The Getter Method can be null
 		/// </summary>
-		MethodInfoCache Getter { get; }
+		IMethodInfoCache<TAtt> Getter { get; }
 
 		/// <summary>
 		///     The return type of the property
@@ -47,10 +49,14 @@ namespace JPB.DataAccess.Config.Contract
 		/// <summary>
 		///     All Attributes on this Property
 		/// </summary>
-		HashSet<AttributeInfoCache> AttributeInfoCaches { get; }
+		HashSet<TAtt> AttributeInfoCaches { get; }
 
-		IPropertyInfoCache Init(PropertyInfo propertyInfo, bool anon);
-
-		int GetHashCode();
+		/// <summary>
+		/// Sets all propertys on this instance
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		/// <param name="anon"></param>
+		/// <returns></returns>
+		IPropertyInfoCache<TAtt> Init(PropertyInfo propertyInfo, bool anon);
 	}
 }

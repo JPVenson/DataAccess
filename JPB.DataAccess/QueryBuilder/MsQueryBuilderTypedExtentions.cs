@@ -5,10 +5,10 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using JPB.DataAccess.Config;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.QueryBuilder
@@ -226,7 +226,7 @@ namespace JPB.DataAccess.QueryBuilder
 		public static QueryBuilder<T> RowNumberOrder<T, TProp>(this QueryBuilder<T> query, Expression<Func<T, TProp>> exp,
 			bool Desc = false)
 		{
-			return query.Query("ROW_NUMBER() OVER (ORDER BY {0} {1})", GeneralConfigHelper.GetPropertyInfoFromLabda(exp),
+			return query.Query("ROW_NUMBER() OVER (ORDER BY {0} {1})", MetaInfoStoreExtentions.GetPropertyInfoFromLabda(exp),
 				Desc ? "DESC" : "ASC");
 		}
 

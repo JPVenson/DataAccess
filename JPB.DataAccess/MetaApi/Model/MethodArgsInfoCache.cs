@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-namespace JPB.DataAccess.Config.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
 	/// Infos about Arguments delcared on a Mehtod
@@ -13,10 +14,12 @@ namespace JPB.DataAccess.Config.Model
 	[Serializable]
 	public class MethodArgsInfoCache
 	{
-
 		/// <summary>
-		/// 
-		/// </summary>
+		/// For Internal use only
+		/// </summary>	
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public MethodArgsInfoCache()
 		{
 			Attributes = new HashSet<AttributeInfoCache>();
@@ -24,6 +27,8 @@ namespace JPB.DataAccess.Config.Model
 
 		public MethodArgsInfoCache(ParameterInfo parameterInfo)
 		{
+			if (!string.IsNullOrEmpty(ArgumentName))
+				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 			ParameterInfo = parameterInfo;
 			ArgumentName = parameterInfo.Name;
 			this.Type = parameterInfo.ParameterType;
@@ -31,18 +36,11 @@ namespace JPB.DataAccess.Config.Model
 				.GetCustomAttributes(true)
 				.Select(s => new AttributeInfoCache(s as Attribute)));
 		}
-		/// <summary>
-		/// The name of this Param
-		/// </summary>
+
 		public string ArgumentName { get; private set; }
-		/// <summary>
-		/// The type of this Param
-		/// </summary>
+
 		public Type Type { get; private set; }
 
-		/// <summary>
-		/// All Attached Attributes
-		/// </summary>
 		public HashSet<AttributeInfoCache> Attributes { get; private set; }
 
 		/// <summary>

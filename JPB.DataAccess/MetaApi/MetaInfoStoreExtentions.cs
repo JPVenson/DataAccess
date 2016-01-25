@@ -6,9 +6,12 @@ using System.Reflection;
 using System.Diagnostics;
 #endif
 
-namespace JPB.DataAccess.Config
+namespace JPB.DataAccess.MetaApi
 {
-	public static class GeneralConfigHelper
+	/// <summary>
+	/// Extention methods for easy access to meta infos
+	/// </summary>
+	public static class MetaInfoStoreExtentions
 	{
 		/// <summary>
 		///     Anonymous type check by naming convention

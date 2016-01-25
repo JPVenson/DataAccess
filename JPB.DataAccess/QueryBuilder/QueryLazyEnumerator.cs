@@ -2,8 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;

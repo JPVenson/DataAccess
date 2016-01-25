@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using JPB.DataAccess.Config.Contract;
+using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.MetaApi.Model.Equatable;
 
-namespace JPB.DataAccess.Config.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	[DebuggerDisplay("{PropertyName}")]
 	[Serializable]
-	internal class PropertyHelper : MethodInfoCache
+	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt> where TAtt : class, IAttributeInfoCache, new()
 	{
 		private dynamic _getter;
 		private dynamic _setter;
@@ -42,7 +44,8 @@ namespace JPB.DataAccess.Config.Model
 	/// </summary>
 	[DebuggerDisplay("{PropertyName}")]
 	[Serializable]
-	public class PropertyInfoCache : IPropertyInfoCache
+	public class PropertyInfoCache<TAtt> : IPropertyInfoCache<TAtt>
+		where TAtt: class, IAttributeInfoCache, new()
 	{
 		/// <summary>
 		/// </summary>
@@ -51,14 +54,22 @@ namespace JPB.DataAccess.Config.Model
 			Init(propertyInfo, anon);
 		}
 
+		/// <summary>
+		/// For internal use Only
+		/// </summary>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public PropertyInfoCache()
 		{
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
 		}
 
-		public virtual IPropertyInfoCache Init(PropertyInfo propertyInfo, bool anon)
+		public virtual IPropertyInfoCache<TAtt> Init(PropertyInfo propertyInfo, bool anon)
 		{
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
+			if (!string.IsNullOrEmpty(PropertyName))
+				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
+
+			AttributeInfoCaches = new HashSet<TAtt>();
 			if (propertyInfo != null)
 			{
 				var getMethod = propertyInfo.GetGetMethod();
@@ -90,8 +101,8 @@ namespace JPB.DataAccess.Config.Model
 						}) as dynamic;
 
 						var getterDelegate = getExpression.Compile();
-						Getter = new PropertyHelper();
-						((PropertyHelper)Getter).SetGet(getterDelegate);
+						Getter = new PropertyHelper<TAtt>();
+						((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
 					}
 					if (setMethod != null && setMethod.IsPublic)
 					{
@@ -109,22 +120,22 @@ namespace JPB.DataAccess.Config.Model
 						}) as dynamic;
 
 						var setterDelegate = setExpression.Compile();
-						Setter = new PropertyHelper();
-						((PropertyHelper)Setter).SetSet(setterDelegate);
+						Setter = new PropertyHelper<TAtt>();
+						((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
 					}
 				}
 				else
 				{
 					if (getMethod != null)
-						Getter = new MethodInfoCache(getMethod);
+						Getter = new MethodInfoCache<TAtt>(getMethod);
 					if (setMethod != null)
-						Setter = new MethodInfoCache(setMethod);
+						Setter = new MethodInfoCache<TAtt>(setMethod);
 				}
 
-				AttributeInfoCaches = new HashSet<AttributeInfoCache>(propertyInfo
+				AttributeInfoCaches = new HashSet<TAtt>(propertyInfo
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
-					.Select(s => new AttributeInfoCache(s as Attribute)));
+					.Select(s => new TAtt().Init(s as Attribute) as TAtt));
 			}
 
 			return this;
@@ -143,12 +154,12 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		///     The Setter mehtod can be null
 		/// </summary>
-		public MethodInfoCache Setter { get; protected internal set; }
+		public IMethodInfoCache<TAtt> Setter { get; protected internal set; }
 
 		/// <summary>
 		///     The Getter Method can be null
 		/// </summary>
-		public MethodInfoCache Getter { get; protected internal set; }
+		public IMethodInfoCache<TAtt> Getter { get; protected internal set; }
 
 		/// <summary>
 		///     The return type of the property
@@ -170,17 +181,21 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		///     All Attributes on this Property
 		/// </summary>
-		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; protected internal set; }
+		public HashSet<TAtt> AttributeInfoCaches { get; protected internal set; }
 
-
-		public int CompareTo(PropertyInfoCache other)
+		public int CompareTo(IPropertyInfoCache<TAtt> other)
 		{
-			return GetHashCode() - other.GetHashCode();
+			return new PropertyEquatableComparer<TAtt>().Compare(this, other);
+		}
+
+		public bool Equals(IPropertyInfoCache<TAtt> other)
+		{
+			return new PropertyEquatableComparer<TAtt>().Equals(this, other);
 		}
 
 		public override int GetHashCode()
 		{
-			return PropertyName.GetHashCode();
+			return new PropertyEquatableComparer<TAtt>().GetHashCode(this);
 		}
 
 		// returns property getter
@@ -205,7 +220,7 @@ namespace JPB.DataAccess.Config.Model
 	}
 
 	[Serializable]
-	internal class PropertyInfoCache<T, TE> : PropertyInfoCache
+	internal class PropertyInfoCache<T, TE, TAtt> : PropertyInfoCache<TAtt> where TAtt : class, IAttributeInfoCache, new()
 	{
 		internal PropertyInfoCache(string name, Action<T, TE> setter = null, Func<T, TE> getter = null,
 			params AttributeInfoCache[] attributes)
@@ -217,12 +232,12 @@ namespace JPB.DataAccess.Config.Model
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache(setter);
+				Setter = new MethodInfoCache<TAtt>(setter);
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache(getter);
+				Getter = new MethodInfoCache<TAtt>(getter);
 			}
 		}
 	}

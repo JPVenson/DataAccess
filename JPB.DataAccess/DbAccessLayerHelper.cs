@@ -8,8 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;

@@ -16,8 +16,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using JPB.DataAccess.AdoWrapper;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
@@ -25,6 +23,7 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 
 #endregion
@@ -119,7 +118,7 @@ namespace JPB.DataAccess
 		///     retuns the Cashed Property info from Refection Cash
 		/// </summary>
 		/// <returns></returns>
-		public static PropertyInfoCache GetParamater(this object source, string name)
+		public static DbPropertyInfoCache GetParamater(this object source, string name)
 		{
 			DbPropertyInfoCache val;
 			source.GetType().GetClassInfo().PropertyInfoCaches.TryGetValue(name, out val);
@@ -255,7 +254,7 @@ namespace JPB.DataAccess
 			return (TE) val.GetConvertedValue(source);
 		}
 
-		internal static object GetConvertedValue(this PropertyInfoCache source, object instance)
+		internal static object GetConvertedValue(this DbPropertyInfoCache source, object instance)
 		{
 			var converterAttributeModel =
 				source.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
@@ -326,7 +325,7 @@ namespace JPB.DataAccess
 		///     Checks the info declaring type to be an List
 		/// </summary>
 		/// <returns></returns>
-		public static bool CheckForListInterface(this PropertyInfoCache info)
+		public static bool CheckForListInterface(this DbPropertyInfoCache info)
 		{
 			if (info.PropertyType == typeof (string))
 				return false;
@@ -519,7 +518,7 @@ namespace JPB.DataAccess
 
 			for (var i = 0; i < reader.FieldCount; i++)
 			{
-				PropertyInfoCache property = cache[i];
+				var property = cache[i];
 				var value = reader.GetValue(i);
 
 				if (property != null)
@@ -756,7 +755,7 @@ namespace JPB.DataAccess
 			else
 			{
 				//check for a Factory mehtod
-				MethodInfoCache factory =
+				var factory =
 					classInfo.MethodInfoCaches
 						.FirstOrDefault(s => s.AttributeInfoCaches.Any(f => f.Attribute is ObjectFactoryMethodAttribute));
 

@@ -114,7 +114,7 @@ namespace JPB.DataAccess.DbInfoConfig
 					codeConstructor.Statements.Add(checkXmlForNull);
 
 					var xmlRecordType = new CodeTypeReferenceExpression(typeof (XmlDataRecord));
-					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ConfigBase"));
+					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.MetaInfoStore"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess"));
 
 					if (propertyInfoCache.CheckForListInterface())

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using JPB.DataAccess.Config.Contract;
+using System.Runtime.CompilerServices;
+using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.MetaApi.Model.Equatable;
 
-namespace JPB.DataAccess.Config.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
 	///     for internal use only
@@ -13,23 +16,32 @@ namespace JPB.DataAccess.Config.Model
 	[Serializable]
 	public class ClassInfoCache<TProp, TAttr, TMeth, TCtor>
 		: IClassInfoCache<TProp, TAttr, TMeth, TCtor>
-		where TProp : class, IPropertyInfoCache, new()
+		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
-		where TMeth : class, IMethodInfoCache, new()
-		where TCtor : class, IConstructorInfoCache, new()
+		where TMeth : class, IMethodInfoCache<TAttr>, new()
+		where TCtor : class, IConstructorInfoCache<TAttr>, new()
 	{
 		internal ClassInfoCache(Type type, bool anon = false)
 		{
 			Init(type, anon);
 		}
 
+		/// <summary>
+		/// For internal use Only
+		/// </summary>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public ClassInfoCache()
 		{
-			
+
 		}
 
 		public virtual IClassInfoCache<TProp, TAttr, TMeth, TCtor> Init(Type type, bool anon = false)
 		{
+			if (!string.IsNullOrEmpty(ClassName))
+				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
+
 			ClassName = type.Name;
 			Type = type;
 			AttributeInfoCaches = new HashSet<TAttr>(type
@@ -78,5 +90,17 @@ namespace JPB.DataAccess.Config.Model
 		///     All Constructors
 		/// </summary>
 		public HashSet<TCtor> ConstructorInfoCaches { get; private set; }
+
+		[MethodImpl(MethodImplOptions.ForwardRef)]
+		public bool Equals(IClassInfoCache other)
+		{
+			return new ClassInfoEquatableComparer().Equals(this, other);
+		}
+
+		[MethodImpl(MethodImplOptions.ForwardRef)]
+		public int CompareTo(IClassInfoCache other)
+		{
+			return new ClassInfoEquatableComparer().Compare(this, other);
+		}
 	}
 }

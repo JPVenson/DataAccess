@@ -2,9 +2,9 @@
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.MetaApi;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig
@@ -37,9 +37,9 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <typeparam name="TProp"></typeparam>
 		public void SetPropertyAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
-			var info = GeneralConfigHelper.GetPropertyInfoFromLabda(exp);
-			PropertyInfoCache fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
-			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+			var info = MetaInfoStoreExtentions.GetPropertyInfoFromLabda(exp);
+			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
+			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -47,8 +47,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		public void SetPropertyAttribute(string info, DataAccessAttribute attribute)
 		{
-			PropertyInfoCache fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
-			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
+			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -57,9 +57,9 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <typeparam name="TProp"></typeparam>
 		public void SetMethodAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
-			var info = GeneralConfigHelper.GetMehtodInfoFromLabda(exp);
-			MethodInfoCache fod = ClassInfoCache.MethodInfoCaches.First(s => s.MethodName == info);
-			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+			var info = MetaInfoStoreExtentions.GetMehtodInfoFromLabda(exp);
+			var fod = ClassInfoCache.MethodInfoCaches.First(s => s.MethodName == info);
+			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -67,14 +67,14 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		public void SetMethodAttribute(string info, DataAccessAttribute attribute)
 		{
-			MethodInfoCache fod = ClassInfoCache.MethodInfoCaches.First(s => s.MethodName == info);
-			fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+			var fod = ClassInfoCache.MethodInfoCaches.First(s => s.MethodName == info);
+			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod(string methodName, Delegate methodBody, params AttributeInfoCache[] attributes)
+		public void CreateMethod(string methodName, Delegate methodBody, params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");

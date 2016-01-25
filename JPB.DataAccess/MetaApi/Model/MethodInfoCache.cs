@@ -1,58 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using JPB.DataAccess.Config.Contract;
+using JPB.DataAccess.MetaApi.Contract;
 
-namespace JPB.DataAccess.Config.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
 	///     Infos about the Method
 	/// </summary>
 	[DebuggerDisplay("{MethodName}")]
 	[Serializable]
-	public class MethodInfoCache : IComparable<MethodInfoCache>, IMethodInfoCache
+	public class MethodInfoCache<TAtt> :
+		IMethodInfoCache<TAtt> 
+		where TAtt : class, IAttributeInfoCache, new()
 	{
 		internal MethodInfoCache(MethodInfo mehtodInfo)
 		{
 			Init(mehtodInfo);
 		}
 
-		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params AttributeInfoCache[] attributes)
+		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params TAtt[] attributes)
 		{
 			if (fakeMehtod == null)
 				throw new ArgumentNullException("fakeMehtod");
 			MethodInfo = fakeMehtod.GetMethodInfo();
 			MethodName = string.IsNullOrEmpty(name) ? MethodInfo.Name : name;
 			Delegate = fakeMehtod;
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>(MethodInfo
+			AttributeInfoCaches = new HashSet<TAtt>(MethodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
-				.Select(s => new AttributeInfoCache(s as Attribute)).Concat(attributes));
+				.Select(s => new TAtt().Init(s as Attribute) as TAtt).Concat(attributes));
 		}
 
+		/// <summary>
+		/// For internal use Only
+		/// </summary>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public MethodInfoCache()
 		{
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>();
+			AttributeInfoCaches = new HashSet<TAtt>();
 		}
 
-		public int CompareTo(MethodInfoCache other)
+		public IMethodInfoCache<TAtt> Init(MethodInfo mehtodInfo)
 		{
-			return String.Compare(MethodName, other.MethodName, StringComparison.Ordinal);
-		}
+			if (!string.IsNullOrEmpty(MethodName))
+				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 
-		public IMethodInfoCache Init(MethodInfo mehtodInfo)
-		{
 			if (mehtodInfo == null)
 				throw new ArgumentNullException("mehtodInfo");
 			MethodInfo = mehtodInfo;
 			MethodName = mehtodInfo.Name;
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>(mehtodInfo
+			AttributeInfoCaches = new HashSet<TAtt>(mehtodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
-				.Select(s => new AttributeInfoCache(s as Attribute)));
+				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
 			ArgumentInfoCaches = new HashSet<MethodArgsInfoCache>(mehtodInfo.GetParameters().Select(s => new MethodArgsInfoCache(s)));
 			return this;
 		}
@@ -80,7 +87,7 @@ namespace JPB.DataAccess.Config.Model
 		/// <summary>
 		///     All Attributes on this Method
 		/// </summary>
-		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
+		public HashSet<TAtt> AttributeInfoCaches { get; private set; }
 
 		/// <summary>
 		///     Easy access to the underlying delegate
@@ -116,6 +123,16 @@ namespace JPB.DataAccess.Config.Model
 				delegateType = Expression.GetFuncType(args.ToArray());
 			}
 			return Delegate.CreateDelegate(delegateType, null, method);
+		}
+
+		public bool Equals(IMethodInfoCache<TAtt> other)
+		{
+			return new MethodInfoCacheEquatableComparer<TAtt>().Equals(this, other);
+		}
+
+		public int CompareTo(IMethodInfoCache<TAtt> other)
+		{
+			return new MethodInfoCacheEquatableComparer<TAtt>().Compare(this, other);
 		}
 	}
 }

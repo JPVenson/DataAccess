@@ -1,5 +1,7 @@
 ﻿using System;
-using JPB.DataAccess.Config.Model;
+using System.ComponentModel;
+using System.Diagnostics;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
@@ -8,6 +10,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbAttributeInfoCache : AttributeInfoCache
 	{
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbAttributeInfoCache()
 		{
 		}

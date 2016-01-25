@@ -8,9 +8,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using JPB.DataAccess.Config.Contract;
+using JPB.DataAccess.MetaApi.Contract;
 
-namespace JPB.DataAccess.Config
+namespace JPB.DataAccess.MetaApi
 {
 	/// <summary>
 	///     Class info Storage. When this is a Global config store you should may never call the dispose method because it would erase all knwon types
@@ -18,12 +18,12 @@ namespace JPB.DataAccess.Config
 #if !DEBUG
 	[DebuggerStepThrough]
 #endif
-	public class ConfigBase<TClass, TProp, TAttr, TMeth, TCtor> : IDisposable
+	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor> : IDisposable
 		where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor>, new()
-		where TProp : class, IPropertyInfoCache, new()
+		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
-		where TMeth /*HeHeHe*/ : class, IMethodInfoCache, new()
-		where TCtor : class, IConstructorInfoCache, new()
+		where TMeth /*HeHeHe*/ : class, IMethodInfoCache<TAttr>, new()
+		where TCtor : class, IConstructorInfoCache<TAttr>, new()
 	{
 		/// <summary>
 		/// Is this instance mapped to the global Cache or does it only maintain its informations as long as it exists
@@ -33,7 +33,7 @@ namespace JPB.DataAccess.Config
 		/// <summary>
 		/// Creates a new Instance for storing class informations. Allows you to define if this is ether the global config store or a local one
 		/// </summary>
-		public ConfigBase(bool isGlobal)
+		public MetaInfoStore(bool isGlobal)
 		{
 			IsGlobal = isGlobal;
 			_classInfoCaches = new HashSet<TClass>();
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.Config
 		/// <summary>
 		/// Creates a new Instance for accessing the Global Config store
 		/// </summary>
-		public ConfigBase() 
+		public MetaInfoStore() 
 			: this(true)
 		{
 			
@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Config
 		/// <summary>
 		/// 
 		/// </summary>
-		static ConfigBase()
+		static MetaInfoStore()
 		{
 			ClassInfoCaches = new HashSet<TClass>();
 		}
@@ -131,7 +131,6 @@ namespace JPB.DataAccess.Config
 			{
 				if (EnableThreadSafety)
 				{
-					Monitor.Pulse(SClassInfoCaches);
 					Monitor.Exit(SClassInfoCaches);
 				}
 			}
@@ -151,28 +150,26 @@ namespace JPB.DataAccess.Config
 
 		/// <summary>
 		///     Append
-		///     <typeparamref name="T" />
 		///     as an Optimistic input to the store.
-		///     This allows you to explicit control when the ConfigBase store will enumerate the type object.
+		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
 		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public ConfigBase<TClass, TProp, TAttr, TMeth, TCtor> Include<T>()
+		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor> Include<T>()
 		{
 			return this.Include(typeof(T));
 		}
 
 		/// <summary>
 		///     Append
-		///     <typeparamref name="T" />
 		///     as an Optimistic input to the store.
-		///     This allows you to explicit control when the ConfigBase store will enumerate the type object.
+		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
 		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public ConfigBase<TClass, TProp, TAttr, TMeth, TCtor> Include(Type t)
+		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor> Include(Type t)
 		{
 			GetOrCreateClassInfoCache(t);
 			return this;

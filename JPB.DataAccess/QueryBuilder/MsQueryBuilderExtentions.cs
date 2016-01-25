@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JPB.DataAccess.Config;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;

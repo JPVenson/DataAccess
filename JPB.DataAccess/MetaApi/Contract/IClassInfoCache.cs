@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace JPB.DataAccess.Config.Contract
+namespace JPB.DataAccess.MetaApi.Contract
 {
 	/// <summary>
 	/// 
@@ -10,11 +10,11 @@ namespace JPB.DataAccess.Config.Contract
 	/// <typeparam name="TAttr"></typeparam>
 	/// <typeparam name="TMeth"></typeparam>
 	/// <typeparam name="TCtor"></typeparam>
-	public interface IClassInfoCache<TProp, TAttr, TMeth, TCtor>
-		where TProp : class, IPropertyInfoCache, new()
+	public interface IClassInfoCache<TProp, TAttr, TMeth, TCtor> : IClassInfoCache
+		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
-		where TMeth : class, IMethodInfoCache, new()
-		where TCtor : class, IConstructorInfoCache, new()
+		where TMeth : class, IMethodInfoCache<TAttr>, new()
+		where TCtor : class, IConstructorInfoCache<TAttr>, new()
 	{
 		/// <summary>
 		/// 
@@ -23,17 +23,7 @@ namespace JPB.DataAccess.Config.Contract
 		/// <param name="anon"></param>
 		/// <returns></returns>
 		IClassInfoCache<TProp, TAttr, TMeth, TCtor> Init(Type type, bool anon = false);
-
-		/// <summary>
-		///     The .net ClassName
-		/// </summary>
-		string ClassName { get; }
-
-		/// <summary>
-		///     The .net Type instance
-		/// </summary>
-		Type Type { get; }
-
+		
 		/// <summary>
 		///     All Propertys
 		/// </summary>
@@ -53,5 +43,21 @@ namespace JPB.DataAccess.Config.Contract
 		///     All Constructors
 		/// </summary>
 		HashSet<TCtor> ConstructorInfoCaches { get; }
+	}
+
+	/// <summary>
+	/// Defines the most basic infos about an class
+	/// </summary>
+	public interface IClassInfoCache : IEquatable<IClassInfoCache>, IComparable<IClassInfoCache>
+	{
+		/// <summary>
+		///     The .net ClassName
+		/// </summary>
+		string ClassName { get; }
+
+		/// <summary>
+		///     The .net Type instance
+		/// </summary>
+		Type Type { get; } 
 	}
 }

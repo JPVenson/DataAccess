@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.Config;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.MetaApi;
 
 namespace JPB.DataAccess.DbInfoConfig
 {
@@ -30,7 +30,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <returns></returns>
 		public static DbClassInfoCache GetClassInfo(this Type type)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type))
 				return new DbClassInfoCache(type, true); //Anonymous types does not have any Attributes
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type);
@@ -38,7 +38,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static IEnumerable<Attribute> GetCustomAttributes(this Type type)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type))
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
@@ -46,7 +46,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static IEnumerable<Attribute> GetCustomAttributes(this PropertyInfo type)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type.DeclaringType))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type.DeclaringType))
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
 			var deb =
@@ -57,7 +57,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static IEnumerable<Attribute> GetCustomAttributes(this MethodInfo type)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type.DeclaringType))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type.DeclaringType))
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
 			var deb = ReflecionStore.GetOrCreateMethodInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
@@ -67,7 +67,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static string GetLocalToDbSchemaMapping(this Type type, string name)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type))
 				return name;
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type).SchemaMappingLocalToDatabase(name);
@@ -75,7 +75,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static string GetDbToLocalSchemaMapping(this Type type, string name)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type))
 				return name;
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type).SchemaMappingDatabaseToLocal(name);
@@ -83,7 +83,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static IEnumerable<PropertyInfo> GetPropertiesEx(this Type type)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type))
 				return type.GetProperties();
 
 			return ReflecionStore
@@ -94,7 +94,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static string[] GetSchemaMapping(this Type type)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type))
 				return type.GetPropertiesEx().Select(s => s.Name).ToArray();
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type).LocalToDbSchemaMapping();
@@ -102,7 +102,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static IEnumerable<MethodInfo> GetMethods(this Type type)
 		{
-			if (GeneralConfigHelper.IsAnonymousType(type))
+			if (MetaInfoStoreExtentions.IsAnonymousType(type))
 				return type.GetMethods();
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type).MethodInfoCaches.ToArray().Select(s => s.MethodInfo);

@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using JPB.DataAccess.Config;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 

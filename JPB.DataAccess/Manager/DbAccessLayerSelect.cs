@@ -5,12 +5,11 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
@@ -202,7 +201,7 @@ namespace JPB.DataAccess.Manager
 			//    type.GetMethods()
 			//        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
 
-			MethodInfoCache[] methods =
+			var methods =
 				type.MethodInfoCaches
 					.Where(s => s.AttributeInfoCaches.Any(e => e.Attribute is SelectFactoryMethodAttribute))
 					.ToArray();

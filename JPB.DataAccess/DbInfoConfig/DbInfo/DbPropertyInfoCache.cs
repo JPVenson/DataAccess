@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.Config.Model;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
@@ -18,12 +20,12 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache(setter);
+				Setter = new MethodInfoCache<DbAttributeInfoCache>(setter);
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache(getter);
+				Getter = new MethodInfoCache<DbAttributeInfoCache>(getter);
 			}
 		}
 	}
@@ -31,8 +33,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// <summary>
 	///     Infos about the Property
 	/// </summary>
-	public class DbPropertyInfoCache : PropertyInfoCache
+	public class DbPropertyInfoCache : PropertyInfoCache<DbAttributeInfoCache>
 	{
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbPropertyInfoCache()
 		{
 		}

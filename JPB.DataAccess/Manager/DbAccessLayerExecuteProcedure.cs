@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
