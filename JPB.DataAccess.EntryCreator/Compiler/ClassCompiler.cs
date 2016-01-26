@@ -325,14 +325,14 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return property;
 		}
 
-		public CodeConstructor GenerateTypeConstructor(bool factory = true)
+		public CodeMemberMethod GenerateTypeConstructor(bool factory = true)
 		{
 			var ctor = FactoryHelper.GenerateTypeConstructor(factory);
 			_base.Members.Insert(0, ctor);
 			return ctor;
 		}
 
-		public CodeConstructor GenerateTypeConstructor(
+		public CodeMemberMethod GenerateTypeConstructor(
 			IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
 		{
 			return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn);
@@ -340,7 +340,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		private Type[] _externalTypes;
 
-		internal CodeConstructor GenerateTypeConstructorBasedOnElements()
+		internal CodeMemberMethod GenerateTypeConstructorBasedOnElements()
 		{
 			var codeMemberProperties = _base.Members.Cast<CodeTypeMember>().Where(s => s is CodeMemberProperty).Cast<CodeMemberProperty>().ToArray();
 

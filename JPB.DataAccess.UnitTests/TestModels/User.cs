@@ -55,6 +55,7 @@ namespace UnitTestProject1
 		}
 	}
 
+	[AutoGenerateCtor]
 	public class Users
 	{
 		[PrimaryKey]
@@ -64,7 +65,7 @@ namespace UnitTestProject1
 
 	[AutoGenerateCtor]
 	[ForModel(UsersMeta.UserTable)]
-	public class UsersAutoGenerateConstructor
+	public sealed class UsersAutoGenerateConstructor
 	{
 		[PrimaryKey]
 		public long User_ID { get; set; }
@@ -77,8 +78,37 @@ namespace UnitTestProject1
 		public string PropertyB { get; set; }
 	}
 
-	public class ConfigLessUserInplaceConfig
+	public class ConfigLessUserInplaceConfig_Factory
 	{
+
+		[ObjectFactoryMethodAttribute()]
+		public static UnitTestProject1.ConfigLessUserInplaceConfig Factory(IDataRecord record)
+		{
+			UnitTestProject1.ConfigLessUserInplaceConfig super;
+			super = new UnitTestProject1.ConfigLessUserInplaceConfig();
+			super.PropertyA = ((long)(record["User_ID"]));
+			object username;
+			username = record["UserName"];
+			if ((username == System.DBNull.Value))
+			{
+				super.PropertyB = default(string);
+			}
+			else
+			{
+				super.PropertyB = ((string)(username));
+			}
+			return super;
+		}
+	}
+
+	[AutoGenerateCtor]
+	public sealed class ConfigLessUserInplaceConfig
+	{
+		public ConfigLessUserInplaceConfig()
+		{
+			
+		}
+
 		[ConfigMehtod]
 		public static void Config(DbConfig configBase)
 		{

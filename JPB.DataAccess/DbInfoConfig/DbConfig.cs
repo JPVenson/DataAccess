@@ -35,7 +35,9 @@ namespace JPB.DataAccess.DbInfoConfig
 		public void SetConfig<T>(Action<ConfigurationResolver<T>> validator)
 		{
 			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof(T))));
-			GetOrCreateClassInfoCache(typeof(T)).Refresh(true);
+			var model = GetOrCreateClassInfoCache(typeof(T));
+			model.Refresh(true);
+			model.CheckCtor();
 		}
 
 		/// <summary>

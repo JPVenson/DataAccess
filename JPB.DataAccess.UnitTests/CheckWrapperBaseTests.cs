@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using System.Security;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
@@ -51,6 +52,8 @@ namespace JPB.DataAccess.UnitTests
 				return;
 
 			var dbname = "testDB";
+
+			DbConfig.ConstructorSettings.CreateDebugCode = true;
 
 			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
 			Assert.AreEqual(expectWrapper.DbAccessType, DbAccessType);
@@ -219,6 +222,7 @@ namespace JPB.DataAccess.UnitTests
 			var config = new DbConfig();
 
 			DbConfig.Clear();
+			DbConfig.ConstructorSettings.CreateDebugCode = true;
 
 			config.SetConfig<ConfigLessUser>(f =>
 			{
@@ -241,6 +245,7 @@ namespace JPB.DataAccess.UnitTests
 			DbConfig.Clear();
 		}
 
+		[SecurityCritical]
 		[TestMethod]
 		public void ConfigLessInplace()
 		{

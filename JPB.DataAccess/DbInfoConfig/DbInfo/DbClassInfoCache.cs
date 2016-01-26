@@ -122,7 +122,6 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			PrimaryKeyProperty = PropertyInfoCaches.FirstOrDefault(s => s.Value.PrimaryKeyAttribute != null).Value;
 
 			CreateSchemaMapping();
-			CheckCtor();
 		}
 
 		internal void CheckCtor()
@@ -148,6 +147,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 				}
 
 				Refresh(true);
+				CheckCtor();
 			}
 		}
 

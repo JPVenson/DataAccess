@@ -108,8 +108,6 @@ namespace JPB.DataAccess.DbInfoConfig
 			return ReflecionStore.GetOrCreateClassInfoCache(type).MethodInfoCaches.ToArray().Select(s => s.MethodInfo);
 		}
 
-		
-
 		//internal static string GetPropertyInfoFromLabda<T>(Expression<Func<T>> exp)
 		//{
 		//    Type paramType = exp.Parameters[0].Type;  // first parameter of expression

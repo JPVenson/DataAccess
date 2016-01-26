@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Security;
 using System.Text;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
@@ -722,6 +723,7 @@ namespace JPB.DataAccess
 		///     Creates an instance based on a Ctor injection or Reflection loading
 		/// </summary>
 		/// <returns></returns>
+		[SecurityCritical]
 		public static object CreateInstance(this DbClassInfoCache classInfo, IDataRecord reader, out bool fullLoaded)
 		{
 			if (classInfo.Factory != null)
