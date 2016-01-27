@@ -393,6 +393,11 @@ namespace JPB.DataAccess.DbInfoConfig
 				superName = target.Name + "_Factory";
 				compiler.Attributes = MemberAttributes.Static;
 			}
+			if (target.GetClassInfo().ConstructorInfoCaches.Any(f => f.Arguments.Any()))
+			{
+				throw new TypeAccessException(string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
+			}
+
 			compiler.Name = superName;
 			compiler.Members.Add(codeConstructor);
 

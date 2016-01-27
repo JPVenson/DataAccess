@@ -14,8 +14,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// <summary>
 	///     for internal use only
 	/// </summary>
-	public class DbClassInfoCache :
-		ClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache>
+	public class DbClassInfoCache : ClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
 		[DebuggerHidden]
 		[Browsable(false)]
@@ -33,8 +32,8 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			SchemaMappingValues = new Dictionary<string, string>();
 			Refresh(true);
 		}
-		
-		public override IClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache> Init(Type type, bool anon = false)
+
+		public override IClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument> Init(Type type, bool anon = false)
 		{
 			var item = base.Init(type, anon);
 			Refresh(true);

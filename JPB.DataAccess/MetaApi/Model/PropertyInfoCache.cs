@@ -12,7 +12,8 @@ namespace JPB.DataAccess.MetaApi.Model
 {
 	[DebuggerDisplay("{PropertyName}")]
 	[Serializable]
-	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt> where TAtt : class, IAttributeInfoCache, new()
+	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> 
+		where TAtt : class, IAttributeInfoCache, new()
 	{
 		private dynamic _getter;
 		private dynamic _setter;
@@ -45,7 +46,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	[DebuggerDisplay("{PropertyName}")]
 	[Serializable]
 	public class PropertyInfoCache<TAtt> : IPropertyInfoCache<TAtt>
-		where TAtt: class, IAttributeInfoCache, new()
+		where TAtt : class, IAttributeInfoCache, new()
 	{
 		/// <summary>
 		/// </summary>
@@ -78,58 +79,108 @@ namespace JPB.DataAccess.MetaApi.Model
 				PropertyName = propertyInfo.Name;
 				PropertyType = propertyInfo.PropertyType;
 
-				GetterDelegate = typeof(Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
-				SetterDelegate = typeof(Action<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
-				if (!anon)
+
+				if (!anon && (getMethod != null || setMethod != null))
 				{
+					var isStatic = getMethod != null
+						? getMethod.Attributes.HasFlag(MethodAttributes.Static)
+						: setMethod.Attributes.HasFlag(MethodAttributes.Static);
 					var builder = typeof(Expression)
 						.GetMethods()
 						.First(s => s.Name == "Lambda" && s.ContainsGenericParameters);
 
-					var thisRef = Expression.Parameter(propertyInfo.DeclaringType, "that");
-
-					var accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
-
-					if (getMethod != null && getMethod.IsPublic)
+					if (isStatic)
 					{
-						var getExpression = builder
-							.MakeGenericMethod(GetterDelegate)
-							.Invoke(null, new object[]
+
+						GetterDelegate = typeof(Func<>).MakeGenericType(propertyInfo.PropertyType);
+						SetterDelegate = typeof(Action<>).MakeGenericType(propertyInfo.PropertyType);
+						var accessField = Expression.Property(null, propertyInfo);
+
+						if (getMethod != null && getMethod.IsPublic)
+						{
+							var getExpression = builder
+								.MakeGenericMethod(GetterDelegate)
+								.Invoke(null, new object[]
+						{
+							accessField,null
+						}) as dynamic;
+
+							var getterDelegate = getExpression.Compile();
+							Getter = new PropertyHelper<TAtt>();
+							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
+						}
+						if (setMethod != null && setMethod.IsPublic)
+						{
+							var valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
+							var setter = Expression.Assign(
+								accessField,
+								valueRef);
+
+							var setExpression = builder
+								.MakeGenericMethod(SetterDelegate)
+								.Invoke(null, new object[]
+						{
+							setter,
+							new[]
+							{
+								valueRef
+							}
+						}) as dynamic;
+
+							var setterDelegate = setExpression.Compile();
+							Setter = new PropertyHelper<TAtt>();
+							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
+						}
+					}
+					else
+					{
+						GetterDelegate = typeof(Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
+						SetterDelegate = typeof(Action<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
+						var thisRef = Expression.Parameter(propertyInfo.DeclaringType, "that");
+
+						var accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
+
+						if (getMethod != null && getMethod.IsPublic)
+						{
+							var getExpression = builder
+								.MakeGenericMethod(GetterDelegate)
+								.Invoke(null, new object[]
 						{
 							accessField,
 							new[] {thisRef}
 						}) as dynamic;
 
-						var getterDelegate = getExpression.Compile();
-						Getter = new PropertyHelper<TAtt>();
-						((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
-					}
-					if (setMethod != null && setMethod.IsPublic)
-					{
-						var valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
-						var setter = Expression.Assign(
-							accessField,
-							valueRef);
+							var getterDelegate = getExpression.Compile();
+							Getter = new PropertyHelper<TAtt>();
+							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
+						}
+						if (setMethod != null && setMethod.IsPublic)
+						{
+							var valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
+							var setter = Expression.Assign(
+								accessField,
+								valueRef);
 
-						var setExpression = builder
-							.MakeGenericMethod(SetterDelegate)
-							.Invoke(null, new object[]
+							var setExpression = builder
+								.MakeGenericMethod(SetterDelegate)
+								.Invoke(null, new object[]
 						{
 							setter,
 							new[] {thisRef, valueRef}
 						}) as dynamic;
 
-						var setterDelegate = setExpression.Compile();
-						Setter = new PropertyHelper<TAtt>();
-						((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
+							var setterDelegate = setExpression.Compile();
+							Setter = new PropertyHelper<TAtt>();
+							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
+						}
 					}
 				}
 				else
 				{
 					if (getMethod != null)
-						Getter = new MethodInfoCache<TAtt>(getMethod);
+						Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(getMethod);
 					if (setMethod != null)
-						Setter = new MethodInfoCache<TAtt>(setMethod);
+						Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(setMethod);
 				}
 
 				AttributeInfoCaches = new HashSet<TAtt>(propertyInfo
@@ -154,12 +205,12 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     The Setter mehtod can be null
 		/// </summary>
-		public IMethodInfoCache<TAtt> Setter { get; protected internal set; }
+		public IMethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> Setter { get; protected internal set; }
 
 		/// <summary>
 		///     The Getter Method can be null
 		/// </summary>
-		public IMethodInfoCache<TAtt> Getter { get; protected internal set; }
+		public IMethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> Getter { get; protected internal set; }
 
 		/// <summary>
 		///     The return type of the property
@@ -232,12 +283,12 @@ namespace JPB.DataAccess.MetaApi.Model
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache<TAtt>(setter);
+				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(setter);
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<TAtt>(getter);
+				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(getter);
 			}
 		}
 	}

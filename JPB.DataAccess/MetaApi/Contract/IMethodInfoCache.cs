@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Security.Policy;
 using JPB.DataAccess.MetaApi.Model;
 
 namespace JPB.DataAccess.MetaApi.Contract
 {
-	public interface IMethodInfoCache<TAtt> :
-		IComparable<IMethodInfoCache<TAtt>>,
-		IEquatable<IMethodInfoCache<TAtt>>
+	public interface IMethodInfoCache<TAtt, TArg> :
+		IComparable<IMethodInfoCache<TAtt, TArg>>,
+		IEquatable<IMethodInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new()
+		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		/// <summary>
 		///     if set this method does not exist so we fake it
@@ -30,8 +32,13 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// </summary>
 		HashSet<TAtt> AttributeInfoCaches { get; }
 
-		IMethodInfoCache<TAtt> Init(MethodInfo info);
-		
+		/// <summary>
+		/// Arguments for this Method
+		/// </summary>
+		HashSet<TArg> Arguments { get; }
+
+		IMethodInfoCache<TAtt, TArg> Init(MethodInfo info);
+
 		/// <summary>
 		///     Easy access to the underlying delegate
 		/// </summary>

@@ -20,12 +20,12 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache<DbAttributeInfoCache>(setter);
+				Setter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(setter);
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<DbAttributeInfoCache>(getter);
+				Getter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(getter);
 			}
 		}
 	}

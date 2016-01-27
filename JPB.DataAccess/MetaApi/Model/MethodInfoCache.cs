@@ -14,16 +14,18 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// </summary>
 	[DebuggerDisplay("{MethodName}")]
 	[Serializable]
-	public class MethodInfoCache<TAtt> :
-		IMethodInfoCache<TAtt> 
-		where TAtt : class, IAttributeInfoCache, new()
+	public class MethodInfoCache<TAtt, TArg> :
+		IMethodInfoCache<TAtt, TArg> 
+		where TAtt : class, IAttributeInfoCache, new() 
+		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		internal MethodInfoCache(MethodInfo mehtodInfo)
 		{
 			Init(mehtodInfo);
 		}
 
-		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params TAtt[] attributes)
+		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params TAtt[] attributes) 
+			: this()
 		{
 			if (fakeMehtod == null)
 				throw new ArgumentNullException("fakeMehtod");
@@ -47,7 +49,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			AttributeInfoCaches = new HashSet<TAtt>();
 		}
 
-		public IMethodInfoCache<TAtt> Init(MethodInfo mehtodInfo)
+		public IMethodInfoCache<TAtt, TArg> Init(MethodInfo mehtodInfo)
 		{
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
@@ -60,7 +62,7 @@ namespace JPB.DataAccess.MetaApi.Model
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
-			ArgumentInfoCaches = new HashSet<MethodArgsInfoCache>(mehtodInfo.GetParameters().Select(s => new MethodArgsInfoCache(s)));
+			Arguments = new HashSet<TArg>(mehtodInfo.GetParameters().Select(s => new TArg().Init(s) as TArg));
 			return this;
 		}
 
@@ -82,7 +84,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		/// Arguments on this Method
 		/// </summary>
-		public HashSet<MethodArgsInfoCache> ArgumentInfoCaches { get; private set; }
+		public HashSet<TArg> Arguments { get; private set; }
 
 		/// <summary>
 		///     All Attributes on this Method
@@ -125,14 +127,14 @@ namespace JPB.DataAccess.MetaApi.Model
 			return Delegate.CreateDelegate(delegateType, null, method);
 		}
 
-		public bool Equals(IMethodInfoCache<TAtt> other)
+		public bool Equals(IMethodInfoCache<TAtt, TArg> other)
 		{
-			return new MethodInfoCacheEquatableComparer<TAtt>().Equals(this, other);
+			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().Equals(this, other);
 		}
 
-		public int CompareTo(IMethodInfoCache<TAtt> other)
+		public int CompareTo(IMethodInfoCache<TAtt, TArg> other)
 		{
-			return new MethodInfoCacheEquatableComparer<TAtt>().Compare(this, other);
+			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().Compare(this, other);
 		}
 	}
 }

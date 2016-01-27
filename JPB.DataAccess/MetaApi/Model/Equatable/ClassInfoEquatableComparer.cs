@@ -9,6 +9,10 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 	{
 		public bool Equals(IClassInfoCache x, IClassInfoCache y)
 		{
+			if (x == null && y == null)
+				return true;
+			if (x == null || y == null)
+				return false;
 			if (x.ClassName != y.ClassName)
 				return false;
 			if (x.Type == y.Type)
@@ -23,6 +27,10 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 
 		public int Compare(IClassInfoCache x, IClassInfoCache y)
 		{
+			if (x == null)
+				return -1;
+			if (y == null)
+				return +1;
 			return System.String.Compare(x.ClassName, y.ClassName, System.StringComparison.Ordinal);
 		}
 	}

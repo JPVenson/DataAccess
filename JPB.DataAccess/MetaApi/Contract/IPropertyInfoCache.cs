@@ -24,12 +24,12 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// <summary>
 		///     The Setter mehtod can be null
 		/// </summary>
-		IMethodInfoCache<TAtt> Setter { get; }
+		IMethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> Setter { get; }
 
 		/// <summary>
 		///     The Getter Method can be null
 		/// </summary>
-		IMethodInfoCache<TAtt> Getter { get; }
+		IMethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> Getter { get; }
 
 		/// <summary>
 		///     The return type of the property

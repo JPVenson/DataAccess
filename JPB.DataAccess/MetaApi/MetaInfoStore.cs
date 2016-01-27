@@ -18,12 +18,13 @@ namespace JPB.DataAccess.MetaApi
 #if !DEBUG
 	[DebuggerStepThrough]
 #endif
-	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor> : IDisposable
-		where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor>, new()
+	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> : IDisposable
+		where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>, new()
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
-		where TMeth /*HeHeHe*/ : class, IMethodInfoCache<TAttr>, new()
-		where TCtor : class, IConstructorInfoCache<TAttr>, new()
+		where TMeth /*HeHeHe*/ : class, IMethodInfoCache<TAttr, TArg>, new()
+		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new() 
+		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
 		/// <summary>
 		/// Is this instance mapped to the global Cache or does it only maintain its informations as long as it exists
@@ -156,7 +157,7 @@ namespace JPB.DataAccess.MetaApi
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor> Include<T>()
+		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include<T>()
 		{
 			return this.Include(typeof(T));
 		}
@@ -169,7 +170,7 @@ namespace JPB.DataAccess.MetaApi
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor> Include(Type t)
+		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(Type t)
 		{
 			GetOrCreateClassInfoCache(t);
 			return this;

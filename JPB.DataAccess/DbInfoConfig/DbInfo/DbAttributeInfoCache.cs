@@ -6,6 +6,11 @@ using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
+	public class DbMethodArgument : MethodArgsInfoCache<DbAttributeInfoCache>
+	{
+		 
+	}
+
 	/// <summary>
 	/// </summary>
 	public class DbAttributeInfoCache : AttributeInfoCache

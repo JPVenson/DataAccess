@@ -10,11 +10,13 @@ namespace JPB.DataAccess.MetaApi.Contract
 	/// <typeparam name="TAttr"></typeparam>
 	/// <typeparam name="TMeth"></typeparam>
 	/// <typeparam name="TCtor"></typeparam>
-	public interface IClassInfoCache<TProp, TAttr, TMeth, TCtor> : IClassInfoCache
+	/// <typeparam name="TArg"></typeparam>
+	public interface IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> : IClassInfoCache
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
-		where TMeth : class, IMethodInfoCache<TAttr>, new()
-		where TCtor : class, IConstructorInfoCache<TAttr>, new()
+		where TMeth : class, IMethodInfoCache<TAttr, TArg>, new()
+		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new() 
+		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
 		/// <summary>
 		/// 
@@ -22,7 +24,7 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// <param name="type"></param>
 		/// <param name="anon"></param>
 		/// <returns></returns>
-		IClassInfoCache<TProp, TAttr, TMeth, TCtor> Init(Type type, bool anon = false);
+		IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false);
 		
 		/// <summary>
 		///     All Propertys

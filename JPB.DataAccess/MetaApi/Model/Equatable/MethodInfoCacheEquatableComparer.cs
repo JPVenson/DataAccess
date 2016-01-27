@@ -3,26 +3,34 @@ using JPB.DataAccess.MetaApi.Contract;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
-	public class MethodInfoCacheEquatableComparer<TAtt> 
-		: IComparer<IMethodInfoCache<TAtt>>,
-			IEqualityComparer<IMethodInfoCache<TAtt>> 
-		where TAtt : class, IAttributeInfoCache, new()
+	public class MethodInfoCacheEquatableComparer<TAtt, TArg>
+		: IComparer<IMethodInfoCache<TAtt, TArg>>,
+			IEqualityComparer<IMethodInfoCache<TAtt, TArg>> 
+		where TAtt : class, IAttributeInfoCache, new() where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
-		public int Compare(IMethodInfoCache<TAtt> x, IMethodInfoCache<TAtt> y)
+		public bool Equals(IMethodInfoCache<TAtt, TArg> x, IMethodInfoCache<TAtt, TArg> y)
 		{
-			return System.String.Compare(x.MethodName, y.MethodName, System.StringComparison.Ordinal);
-		}
-
-		public bool Equals(IMethodInfoCache<TAtt> x, IMethodInfoCache<TAtt> y)
-		{
+			if (x == null && y == null)
+				return true;
+			if (x == null || y == null)
+				return false;
 			if (x.MethodName != y.MethodName)
 				return false;
 			return x.MethodInfo.Equals(y.MethodInfo);
 		}
 
-		public int GetHashCode(IMethodInfoCache<TAtt> obj)
+		public int GetHashCode(IMethodInfoCache<TAtt, TArg> obj)
 		{
 			return obj.GetHashCode();
+		}
+
+		public int Compare(IMethodInfoCache<TAtt, TArg> x, IMethodInfoCache<TAtt, TArg> y)
+		{
+			if (x == null)
+				return -1;
+			if (y == null)
+				return +1;
+			return System.String.Compare(x.MethodName, y.MethodName, System.StringComparison.Ordinal);
 		}
 	}
 }

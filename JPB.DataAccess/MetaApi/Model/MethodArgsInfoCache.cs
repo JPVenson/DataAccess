@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using JPB.DataAccess.MetaApi.Contract;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
@@ -12,7 +13,9 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// </summary>
 	[DebuggerDisplay("{ArgumentName}")]
 	[Serializable]
-	public class MethodArgsInfoCache
+	public class MethodArgsInfoCache<TAtt> 
+		: IMethodArgsInfoCache<TAtt> 
+		where TAtt : class, IAttributeInfoCache, new()
 	{
 		/// <summary>
 		/// For Internal use only
@@ -22,30 +25,46 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public MethodArgsInfoCache()
 		{
-			Attributes = new HashSet<AttributeInfoCache>();
+			Attributes = new HashSet<TAtt>();
 		}
 
-		public MethodArgsInfoCache(ParameterInfo parameterInfo)
+		public MethodArgsInfoCache(ParameterInfo info)
 		{
-			if (!string.IsNullOrEmpty(ArgumentName))
-				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
-			ParameterInfo = parameterInfo;
-			ArgumentName = parameterInfo.Name;
-			this.Type = parameterInfo.ParameterType;
-			Attributes = new HashSet<AttributeInfoCache>(ParameterInfo
-				.GetCustomAttributes(true)
-				.Select(s => new AttributeInfoCache(s as Attribute)));
+			this.Init(info);
 		}
 
 		public string ArgumentName { get; private set; }
 
 		public Type Type { get; private set; }
-
-		public HashSet<AttributeInfoCache> Attributes { get; private set; }
+		
+		public HashSet<TAtt> Attributes { get; private set; }
 
 		/// <summary>
 		/// Direct reflection
 		/// </summary>
 		public ParameterInfo ParameterInfo { get; private set; }
+
+		public virtual IMethodArgsInfoCache<TAtt> Init(ParameterInfo info)
+		{
+			if (!string.IsNullOrEmpty(ArgumentName))
+				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
+			ParameterInfo = info;
+			ArgumentName = info.Name;
+			this.Type = info.ParameterType;
+			Attributes = new HashSet<TAtt>(ParameterInfo
+				.GetCustomAttributes(true)
+				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
+			return this;
+		}
+
+		public int CompareTo(IMethodArgsInfoCache<TAtt> other)
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Equals(IMethodArgsInfoCache<TAtt> other)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

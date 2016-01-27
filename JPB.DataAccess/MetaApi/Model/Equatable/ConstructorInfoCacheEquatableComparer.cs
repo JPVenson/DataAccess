@@ -7,23 +7,32 @@ using JPB.DataAccess.MetaApi.Contract;
 
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
-	public class ConstructorInfoCacheEquatableComparer<TAtt>
-		: IEqualityComparer<IConstructorInfoCache<TAtt>>,
-		IComparer<IConstructorInfoCache<TAtt>>
-		where TAtt : class, IAttributeInfoCache, new()
+	public class ConstructorInfoCacheEquatableComparer<TAtt, TArg>
+		: IEqualityComparer<IConstructorInfoCache<TAtt, TArg>>,
+		IComparer<IConstructorInfoCache<TAtt, TArg>>
+		where TAtt : class, IAttributeInfoCache, new() 
+		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
-		public bool Equals(IConstructorInfoCache<TAtt> x, IConstructorInfoCache<TAtt> y)
+		public bool Equals(IConstructorInfoCache<TAtt, TArg> x, IConstructorInfoCache<TAtt, TArg> y)
 		{
+			if (x == null && y == null)
+				return true;
+			if (x == null || y == null)
+				return false;
 			return x.MethodName != y.MethodName;
 		}
 
-		public int GetHashCode(IConstructorInfoCache<TAtt> obj)
+		public int GetHashCode(IConstructorInfoCache<TAtt, TArg> obj)
 		{
 			return obj.GetHashCode();
 		}
 
-		public int Compare(IConstructorInfoCache<TAtt> x, IConstructorInfoCache<TAtt> y)
+		public int Compare(IConstructorInfoCache<TAtt, TArg> x, IConstructorInfoCache<TAtt, TArg> y)
 		{
+			if (x == null)
+				return -1;
+			if (y == null)
+				return +1;
 			return x.CompareTo(y);
 		}
 	}

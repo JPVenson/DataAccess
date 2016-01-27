@@ -14,12 +14,13 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// </summary>
 	[DebuggerDisplay("{ClassName}")]
 	[Serializable]
-	public class ClassInfoCache<TProp, TAttr, TMeth, TCtor>
-		: IClassInfoCache<TProp, TAttr, TMeth, TCtor>
+	public class ClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
+		: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
-		where TMeth : class, IMethodInfoCache<TAttr>, new()
-		where TCtor : class, IConstructorInfoCache<TAttr>, new()
+		where TMeth : class, IMethodInfoCache<TAttr, TArg>, new()
+		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
+		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
 		internal ClassInfoCache(Type type, bool anon = false)
 		{
@@ -37,8 +38,11 @@ namespace JPB.DataAccess.MetaApi.Model
 
 		}
 
-		public virtual IClassInfoCache<TProp, TAttr, TMeth, TCtor> Init(Type type, bool anon = false)
+		public virtual IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false)
 		{
+			if (type == null)
+				throw new ArgumentNullException("type");
+
 			if (!string.IsNullOrEmpty(ClassName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 

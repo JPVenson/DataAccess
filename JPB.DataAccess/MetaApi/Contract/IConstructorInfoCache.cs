@@ -9,10 +9,11 @@ namespace JPB.DataAccess.MetaApi.Contract
 	/// Holts all infos about an Constructor
 	/// </summary>
 	/// <typeparam name="TAtt"></typeparam>
-	public interface IConstructorInfoCache<TAtt> : 
-		IComparable<IConstructorInfoCache<TAtt>>, 
-		IEquatable<IConstructorInfoCache<TAtt>>
+	public interface IConstructorInfoCache<TAtt, TArg> :
+		IComparable<IConstructorInfoCache<TAtt, TArg>>,
+		IEquatable<IConstructorInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new()
+		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		/// <summary>
 		///     Direct Reflection
@@ -29,6 +30,11 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// </summary>
 		HashSet<TAtt> AttributeInfoCaches { get; }
 
-		IConstructorInfoCache<TAtt> Init(ConstructorInfo ctorInfo);
+		/// <summary>
+		/// Arguments defined for this Constructor
+		/// </summary>
+		HashSet<TArg> Arguments { get; }
+
+		IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo);
 	}
 }

@@ -9,7 +9,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// <summary>
 	///     Infos about the Method
 	/// </summary>
-	public class DbMethodInfoCache : MethodInfoCache<DbAttributeInfoCache>
+	public class DbMethodInfoCache : MethodInfoCache<DbAttributeInfoCache, DbMethodArgument>
 	{
 		internal DbMethodInfoCache(MethodInfo mehtodInfo) : base(mehtodInfo)
 		{

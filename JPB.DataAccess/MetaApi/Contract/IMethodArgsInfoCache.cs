@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace JPB.DataAccess.MetaApi.Contract
 {
-	public interface IMethodArgsInfoCache<TArg> : IComparable<IMethodArgsInfoCache<TArg>>, IEquatable<IMethodArgsInfoCache<TArg>>
-		where TArg: IAttributeInfoCache
+	public interface IMethodArgsInfoCache<TArg> 
+		: IComparable<IMethodArgsInfoCache<TArg>>, IEquatable<IMethodArgsInfoCache<TArg>>
+		where TArg: class, IAttributeInfoCache, new() 
 	{
 		/// <summary>
 		/// The name of this Param
@@ -28,5 +30,7 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// Direct reflection
 		/// </summary>
 		ParameterInfo ParameterInfo { get; }
+
+		IMethodArgsInfoCache<TArg> Init(ParameterInfo info);
 	}
 }

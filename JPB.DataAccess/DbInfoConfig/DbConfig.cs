@@ -7,7 +7,7 @@ namespace JPB.DataAccess.DbInfoConfig
 	/// <summary>
 	/// 
 	/// </summary>
-	public class DbConfig : MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache>
+	public class DbConfig : MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
 		static DbConfig()
 		{

@@ -13,7 +13,9 @@ namespace JPB.DataAccess.MetaApi.Model
 	///     Infos about the Ctor
 	/// </summary>
 	[Serializable]
-	public class ConstructorInfoCache<TAtt> : IConstructorInfoCache<TAtt> where TAtt : class, IAttributeInfoCache, new()
+	public class ConstructorInfoCache<TAtt, TArg> : IConstructorInfoCache<TAtt, TArg> 
+		where TAtt : class, IAttributeInfoCache, new() 
+		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		/// <summary>
 		/// For internal use only
@@ -30,7 +32,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			Init(ctorInfo);
 		}
 
-		public IConstructorInfoCache<TAtt> Init(ConstructorInfo ctorInfo)
+		public IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
 		{
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
@@ -40,6 +42,7 @@ namespace JPB.DataAccess.MetaApi.Model
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
+			Arguments = new HashSet<TArg>(ctorInfo.GetParameters().Select(f => new TArg().Init(f) as TArg));
 			return this;
 		}
 
@@ -58,14 +61,18 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public HashSet<TAtt> AttributeInfoCaches { get; private set; }
 
-		public int CompareTo(IConstructorInfoCache<TAtt> other)
+
+
+		public HashSet<TArg> Arguments { get; private set; }
+
+		public int CompareTo(IConstructorInfoCache<TAtt, TArg> other)
 		{
-			return new ConstructorInfoCacheEquatableComparer<TAtt>().Compare(this, other);
+			return new ConstructorInfoCacheEquatableComparer<TAtt, TArg>().Compare(this, other);
 		}
 
-		public bool Equals(IConstructorInfoCache<TAtt> other)
+		public bool Equals(IConstructorInfoCache<TAtt, TArg> other)
 		{
-			return new ConstructorInfoCacheEquatableComparer<TAtt>().Equals(this, other);
+			return new ConstructorInfoCacheEquatableComparer<TAtt, TArg>().Equals(this, other);
 		}
 	}
 }
