@@ -3,3 +3,14 @@
 ################################################################################
 
 /TestResults
+/JPB.DataAccess/bin
+/JPB.DataAccess/obj
+/JPB.DataAccess/packages
+/JPB.DataAccess/TestResults
+/JPB.DataAccess.EntryCreator/bin
+/JPB.DataAccess.EntryCreator/obj
+/JPB.DataAccess.MySql/obj/Debug
+/JPB.DataAccess.MySql/obj/Release
+/JPB.DataAccess.UnitTests/bin
+/JPB.DataAccess.UnitTests/obj
+/packages
