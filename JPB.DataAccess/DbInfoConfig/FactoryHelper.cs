@@ -62,6 +62,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			else
 			{
 				pocoCreator = new CodeConstructor();
+				pocoCreator.Attributes = MemberAttributes.Public;
 			}
 			pocoCreator.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ObjectFactoryMethodAttribute).Name));
 			pocoCreator.Parameters.Add(new CodeParameterDeclarationExpression(typeof(IDataRecord).Name, "record"));
@@ -398,6 +399,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new TypeAccessException(string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
 			}
 
+			compiler.Attributes |= MemberAttributes.Public;
 			compiler.Name = superName;
 			compiler.Members.Add(codeConstructor);
 
