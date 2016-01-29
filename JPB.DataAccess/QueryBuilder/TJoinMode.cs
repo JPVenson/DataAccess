@@ -7,7 +7,7 @@ namespace JPB.DataAccess.QueryBuilder
 	/// <summary>
 	///     Jon modes for TSQL. This is an helper method that can be used to create JOINs by using the Query Builder
 	/// </summary>
-// ReSharper disable once InconsistentNaming
+	// ReSharper disable once InconsistentNaming
 	public class TJoinMode : MsQueryBuilderExtentions.JoinMode
 	{
 #pragma warning disable 1591
@@ -39,11 +39,25 @@ namespace JPB.DataAccess.QueryBuilder
 				return _joints;
 
 			_joints =
-				typeof (TJoinMode)
+				typeof(TJoinMode)
 					.GetFields(BindingFlags.Static)
 					.Select(s => s.GetValue(null))
 					.Cast<TJoinMode>();
 			return _joints;
+		}
+	}
+
+	/// <summary>
+	///		Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the Query Builder
+	/// </summary>
+	public class TApplyMode : MsQueryBuilderExtentions.ApplyMode
+	{
+		public static readonly TApplyMode Outer = new TApplyMode("OUTER APPLY");
+		public static readonly TApplyMode Cross = new TApplyMode("CROSS APPLY");
+
+		public TApplyMode(string applyType)
+			: base(applyType)
+		{
 		}
 	}
 }

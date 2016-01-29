@@ -139,7 +139,7 @@ namespace JPB.DataAccess.QueryBuilder
 		{
 			if (AllowParamterRenaming)
 			{
-				foreach (IQueryParameter queryParameter in part.QueryParameters)
+				foreach (var queryParameter in part.QueryParameters)
 				{
 					var fod = Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
 

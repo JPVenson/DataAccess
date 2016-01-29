@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper.MsSql;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -80,7 +82,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		///     Adds a Update - Statement
+		///     Adds a Select - Statement
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
@@ -97,7 +99,45 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Update<T>(this QueryBuilder query, T obj)
 		{
-			return query.Update(typeof (T), obj);
+			return query.Update(typeof(T), obj);
+		}
+
+		/// <summary>
+		///		Declares a new Variable of the Given SQL Type by using its length 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static QueryBuilder SetVariable(this QueryBuilder query, string name, object value)
+		{
+			var transpiledValue = MsSql.ParameterValue(new SqlParameter(name, value));
+			var sqlName = name;
+			if (!sqlName.StartsWith("@"))
+				sqlName = "@" + sqlName;
+
+			query.Query("SET {0} = {1}", sqlName, transpiledValue);
+			return query;
+		}
+
+		/// <summary>
+		///		Declares a new Variable of the Given SQL Type by using its length 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static QueryBuilder DeclareVariable(this QueryBuilder query, string name, SqlDbType type, int length = int.MaxValue, object value = null)
+		{
+			var sqlName = name;
+			if (!sqlName.StartsWith("@"))
+				sqlName = "@" + sqlName;
+			var typeName = type.ToString();
+			if (new SqlParameter("xxx", type).Size > 0)
+			{
+				typeName = "(MAX)";
+			}
+
+			query.Query("DECLARE {0} {1};", sqlName, typeName);
+			if (value != null)
+				query.SetVariable(sqlName, value);
+			return query;
 		}
 
 		/// <summary>
@@ -132,6 +172,17 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
+		/// Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
+		/// </summary>
+		/// <param name="query"></param>
+		/// <param name="target"></param>
+		/// <returns></returns>
+		public static QueryBuilder ForXml(this QueryBuilder query, Type target)
+		{
+			return query.Query("FOR XML PATH('{0}'),ROOT('ArrayOf{0}'), TYPE", target.Name);
+		}
+
+		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
 		public static QueryBuilder WithCte(this QueryBuilder query, string cteName, Action<QueryBuilder> cteAction,
@@ -152,7 +203,7 @@ namespace JPB.DataAccess.QueryBuilder
 			query.AutoLinebreakAction();
 			query.Add(new GenericQueryPart(prefix));
 			query.InBracket(cteAction);
-			query.Add(new GenericQueryPart(""));
+			query.Add(new CteQueryPart(""));
 			return query;
 		}
 
@@ -362,6 +413,14 @@ namespace JPB.DataAccess.QueryBuilder
 		//    return query;
 		//}
 
+		public static QueryBuilder Apply(this QueryBuilder query, ApplyMode mode, Action<QueryBuilder> innerText, string asId)
+		{
+			query.Query(mode.ApplyType);
+			query.InBracket(innerText);
+			query.As(asId);
+			return query;
+		}
+
 		/// <summary>
 		///     Append an AS part
 		/// </summary>
@@ -567,6 +626,19 @@ namespace JPB.DataAccess.QueryBuilder
 			///     Query string
 			/// </summary>
 			public string JoinType { get; private set; }
+		}
+
+		public abstract class ApplyMode
+		{
+			internal ApplyMode(string applyType)
+			{
+				ApplyType = applyType;
+			}
+
+			/// <summary>
+			///     Query string
+			/// </summary>
+			public string ApplyType { get; private set; }
 		}
 	}
 }

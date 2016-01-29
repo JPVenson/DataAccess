@@ -5,6 +5,7 @@ using System.Runtime.Remoting.Messaging;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.QueryBuilder;
 using JPB.DataAccess.QueryFactory;
 
 namespace UnitTestProject1
@@ -245,6 +246,40 @@ namespace UnitTestProject1
 		public static IQueryFactoryResult GetSelectStatement(int whereID)
 		{
 			return new QueryFactoryResult(UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA", new QueryParameter("paramA", whereID));
+		}
+	}
+
+	[ForModel(UsersMeta.UserTable)]
+	public class Users_StaticQueryFactoryForSelect
+	{
+		[PrimaryKey]
+		[ForModel(UsersMeta.UserIDCol)]
+		public long UserId { get; set; }
+		public string UserName { get; set; }
+
+		[SelectFactoryMethod]
+		public static void GetSelectStatement(QueryBuilder builder)
+		{
+			builder.Select(typeof(Users_StaticQueryFactoryForSelect));
+		}
+	}
+
+	[ForModel(UsersMeta.UserTable)]
+	public class Users_StaticQueryFactoryForSelectWithArugments
+	{
+		[PrimaryKey]
+		[ForModel(UsersMeta.UserIDCol)]
+		public long UserId { get; set; }
+		public string UserName { get; set; }
+
+		[SelectFactoryMethod]
+		public static void GetSelectStatement(QueryBuilder builder, long whereId)
+		{
+			builder.Select(typeof(Users_StaticQueryFactoryForSelect))
+				.Where(UsersMeta.UserIDCol + " = @whereId", new
+				{
+					whereId
+				});
 		}
 	}
 }

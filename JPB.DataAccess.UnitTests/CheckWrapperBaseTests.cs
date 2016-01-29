@@ -54,6 +54,7 @@ namespace JPB.DataAccess.UnitTests
 			var dbname = "testDB";
 
 			DbConfig.ConstructorSettings.CreateDebugCode = true;
+			DbAccessLayer.Multipath = true;
 
 			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
 			Assert.AreEqual(expectWrapper.DbAccessType, DbAccessType);
@@ -95,6 +96,41 @@ namespace JPB.DataAccess.UnitTests
 
 			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
 
+		}
+
+		[TestMethod]
+		public void CheckFactory()
+		{
+			this.InsertTest();
+			var refSelect = expectWrapper.Select<Users_StaticQueryFactoryForSelect>();
+			Assert.IsTrue(refSelect.Length > 0);
+
+			var testInsertName = Guid.NewGuid().ToString();
+			var testUser = expectWrapper.InsertWithSelect(new Users_StaticQueryFactoryForSelect() { UserName = testInsertName });
+			Assert.IsNotNull(testUser);
+			Assert.AreNotEqual(testUser.UserId, default(long));
+
+			var selTestUser = expectWrapper.Select<Users_StaticQueryFactoryForSelect>(testUser.UserId);
+			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
+			Assert.AreEqual(selTestUser.UserId, testUser.UserId);
+		}
+
+		[TestMethod]
+		public void CheckFactoryWithArguments()
+		{
+			this.InsertTest();
+			var refSelect = expectWrapper.Select<Users_StaticQueryFactoryForSelectWithArugments>();
+			Assert.IsTrue(refSelect.Length > 0);
+
+			var testInsertName = Guid.NewGuid().ToString();
+			var testUser = expectWrapper.InsertWithSelect(new Users_StaticQueryFactoryForSelectWithArugments() { UserName = testInsertName });
+			Assert.IsNotNull(testUser);
+			Assert.AreNotEqual(testUser.UserId, default(long));
+
+			var selTestUser = expectWrapper.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId }).FirstOrDefault();
+			Assert.IsNotNull(selTestUser);
+			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
+			Assert.AreEqual(selTestUser.UserId, testUser.UserId);
 		}
 
 		[TestMethod]
