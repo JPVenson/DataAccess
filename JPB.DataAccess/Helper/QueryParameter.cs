@@ -1,7 +1,7 @@
 namespace JPB.DataAccess.Helper
 {
 	/// <summary>
-	/// Example Implimentation of IQueryParameter
+	///     Example Implimentation of IQueryParameter
 	/// </summary>
 	public class QueryParameter : IQueryParameter
 	{
@@ -27,10 +27,11 @@ namespace JPB.DataAccess.Helper
 		public object Value { get; set; }
 
 		#endregion
+
 		// ReSharper restore CSharpWarnings::CS1591
 
 		/// <summary>
-		/// Renders the current object
+		///     Renders the current object
 		/// </summary>
 		/// <returns></returns>
 		public string Render()

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Manager
@@ -23,7 +22,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Insert a
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		/// </summary>
 		public void Insert(Type type, object entry)
 		{
@@ -32,7 +31,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Insert a
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		public void Insert<T>(T entry)
@@ -42,7 +41,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Insert a
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		///     ,then selectes this entry based on the last inserted ID and creates a new model
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
@@ -60,7 +59,7 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.RunInTransaction(c =>
 			{
-				IDbCommand[] insertRangeCommand = CreateInsertRangeCommand(entry.ToArray(), c);
+				var insertRangeCommand = CreateInsertRangeCommand(entry.ToArray(), c);
 				//TODO 
 				uint curr = 0;
 				foreach (IDbCommand item in insertRangeCommand)
@@ -83,11 +82,11 @@ namespace JPB.DataAccess.Manager
 			IDbCommand insertRange = null;
 
 			uint toke = 0;
-			Type type = typeof (T);
+			var type = typeof (T);
 
-			for (int i = 0; i < entrys.Count(); i++)
+			for (var i = 0; i < entrys.Count(); i++)
 			{
-				IDbCommand singelCommand = _CreateInsert(type, entrys[i], db);
+				var singelCommand = _CreateInsert(type, entrys[i], db);
 
 				if (insertRange == null)
 				{
@@ -111,31 +110,31 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a single Insert Statement with the propertys of
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		/// </summary>
 		/// <returns></returns>
 		public static IDbCommand _CreateInsert(Type type, object entry, IDatabase db)
 		{
-			ClassInfoCache classInfo = type.GetClassInfo();
+			var classInfo = type.GetClassInfo();
 
-			string[] ignore =
+			var ignore =
 				classInfo
 					.PropertyInfoCaches
 					.Select(s => s.Value)
-					.Where(f => f.IsPrimaryKey || f.InsertIgnore)
+					.Where(f => f.PrimaryKeyAttribute != null || f.InsertIgnore)
 					.Select(s => s.DbName)
 					.ToArray();
 
-			string[] propertyInfos = type.FilterDbSchemaMapping(ignore).ToArray();
-			string csvprops = type.CreatePropertyCsv(ignore);
+			var propertyInfos = type.FilterDbSchemaMapping(ignore).ToArray();
+			var csvprops = type.CreatePropertyCsv(ignore);
 
-			string values = "";
-			for (int index = 0; index < propertyInfos.Length; index++)
+			var values = "";
+			for (var index = 0; index < propertyInfos.Length; index++)
 				values = values + ("@" + index + ",");
 			values = values.Remove(values.Length - 1);
-			string query = "INSERT INTO " + type.GetTableName() + " ( " + csvprops + " ) VALUES ( " + values + " )";
+			var query = "INSERT INTO " + type.GetTableName() + " ( " + csvprops + " ) VALUES ( " + values + " )";
 
-			string[] orignialProps = type.GetPropertysViaRefection(ignore).ToArray();
+			var orignialProps = type.GetPropertysViaRefection(ignore).ToArray();
 
 			ValidateEntity(entry);
 			return db.CreateCommandWithParameterValues(type, query, orignialProps, entry);
@@ -143,9 +142,9 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a single insert statement for a
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		///     uses
-		///     <paramref name="parameter"/>
+		///     <paramref name="parameter" />
 		///     if possible
 		/// </summary>
 		/// <returns></returns>
@@ -157,7 +156,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates and Executes a Insert statement for a given
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		public static void Insert<T>(T entry, IDatabase db)
@@ -168,7 +167,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates and Executes a Insert statement for a given
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		/// </summary>
 		public static void Insert(Type type, object entry, IDatabase db)
 		{
@@ -181,20 +180,20 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public static IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
 		{
-			IDbCommand dbCommand = CreateInsert(type, entry, db);
+			var dbCommand = CreateInsert(type, entry, db);
 			return db.MergeCommands(dbCommand, db.GetlastInsertedIdCommand());
 		}
 
 		/// <summary>
 		///     Creates and Executes a Insert statement for a given
-		///     <paramref name="type"/>
+		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
 		public static object InsertWithSelect(Type type, object entry, IDatabase db, bool egarLoading)
 		{
 			return db.Run(s =>
 			{
-				IDbCommand mergeCommands = CreateInsertWithSelectCommand(type, entry, db);
+				var mergeCommands = CreateInsertWithSelectCommand(type, entry, db);
 				RaiseInsert(entry, mergeCommands, s);
 				return Select(type, s.GetSkalar(mergeCommands), s, egarLoading);
 			});
@@ -206,7 +205,7 @@ namespace JPB.DataAccess.Manager
 		///     Takes <paramref name="base" /> as base of Connection propertys
 		///     Merges the Command text of Both commands sepperated by a space
 		///     Creats a new command based on
-		///     <paramref name="db"/>
+		///     <paramref name="db" />
 		///     and Adds the Merged Commandtext and all parameter to it
 		/// </summary>
 		/// <returns></returns>
@@ -221,7 +220,7 @@ namespace JPB.DataAccess.Manager
 		///     Takes <paramref name="base" /> as base of Connection propertys
 		///     Merges the Command text of Both commands sepperated by a space
 		///     Creats a new command based on
-		///     <paramref name="db"/>
+		///     <paramref name="db" />
 		///     and Adds the Merged Commandtext and all parameter to it
 		/// </summary>
 		/// <returns></returns>
@@ -234,7 +233,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates and Executes a Insert statement for a given
-		///     <paramref name="entry"/>
+		///     <paramref name="entry" />
 		///     and selectes that
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

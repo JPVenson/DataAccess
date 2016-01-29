@@ -2,9 +2,10 @@
 using System.Data;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
-using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.QueryBuilder;
 using JPB.DataAccess.QueryFactory;
 
 namespace UnitTestProject1
@@ -55,6 +56,7 @@ namespace UnitTestProject1
 		}
 	}
 
+	[AutoGenerateCtor]
 	public class Users
 	{
 		[PrimaryKey]
@@ -64,7 +66,7 @@ namespace UnitTestProject1
 
 	[AutoGenerateCtor]
 	[ForModel(UsersMeta.UserTable)]
-	public class UsersAutoGenerateConstructor
+	public sealed class UsersAutoGenerateConstructor
 	{
 		[PrimaryKey]
 		public long User_ID { get; set; }
@@ -77,14 +79,55 @@ namespace UnitTestProject1
 		public string PropertyB { get; set; }
 	}
 
+	//public class ConfigLessUserInplaceConfig_Factory
+	//{
+	//	public partial class ConfigLessUserInplaceConfig_Super : UnitTestProject1.ConfigLessUserInplaceConfig
+	//	{
+	//		[ObjectFactoryMethodAttribute()]
+	//		ConfigLessUserInplaceConfig_Super(IDataRecord record)
+	//		{
+	//			base.PropertyA = ((long)(record["User_ID"]));
+	//			object username;
+	//			username = record["UserName"];
+	//			if ((username == System.DBNull.Value))
+	//			{
+	//				base.PropertyB = default(string);
+	//			}
+	//			else
+	//			{
+	//				base.PropertyB = ((string)(username));
+	//			}
+	//		}
+	//	}
+	//	[ObjectFactoryMethodAttribute()]
+	//	public static UnitTestProject1.ConfigLessUserInplaceConfig Factory(IDataRecord record)
+	//	{
+	//		UnitTestProject1.ConfigLessUserInplaceConfig super;
+	//		super = new UnitTestProject1.ConfigLessUserInplaceConfig();
+	//		super.PropertyA = ((long)(record["User_ID"]));
+	//		object username;
+	//		username = record["UserName"];
+	//		if ((username == System.DBNull.Value))
+	//		{
+	//			super.PropertyB = default(string);
+	//		}
+	//		else
+	//		{
+	//			super.PropertyB = ((string)(username));
+	//		}
+	//		return super;
+	//	}
+	//}
+
+	[AutoGenerateCtor]
 	public class ConfigLessUserInplaceConfig
 	{
 		[ConfigMehtod]
-		public static void Config(Config config)
+		public static void Config(DbConfig configBase)
 		{
-			config.SetConfig<ConfigLessUserInplaceConfig>(f =>
+			configBase.SetConfig<ConfigLessUserInplaceConfig>(f =>
 			{
-				f.SetClassAttribute(new ForModel(UsersMeta.UserTable));
+				f.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
 				f.SetPrimaryKey(e => e.PropertyA);
 				f.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);
@@ -203,6 +246,40 @@ namespace UnitTestProject1
 		public static IQueryFactoryResult GetSelectStatement(int whereID)
 		{
 			return new QueryFactoryResult(UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA", new QueryParameter("paramA", whereID));
+		}
+	}
+
+	[ForModel(UsersMeta.UserTable)]
+	public class Users_StaticQueryFactoryForSelect
+	{
+		[PrimaryKey]
+		[ForModel(UsersMeta.UserIDCol)]
+		public long UserId { get; set; }
+		public string UserName { get; set; }
+
+		[SelectFactoryMethod]
+		public static void GetSelectStatement(QueryBuilder builder)
+		{
+			builder.Select(typeof(Users_StaticQueryFactoryForSelect));
+		}
+	}
+
+	[ForModel(UsersMeta.UserTable)]
+	public class Users_StaticQueryFactoryForSelectWithArugments
+	{
+		[PrimaryKey]
+		[ForModel(UsersMeta.UserIDCol)]
+		public long UserId { get; set; }
+		public string UserName { get; set; }
+
+		[SelectFactoryMethod]
+		public static void GetSelectStatement(QueryBuilder builder, long whereId)
+		{
+			builder.Select(typeof(Users_StaticQueryFactoryForSelect))
+				.Where(UsersMeta.UserIDCol + " = @whereId", new
+				{
+					whereId
+				});
 		}
 	}
 }

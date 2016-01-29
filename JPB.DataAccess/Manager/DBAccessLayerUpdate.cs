@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using JPB.DataAccess.Config;
-using JPB.DataAccess.Config.Model;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryBuilder;
 
@@ -25,7 +26,7 @@ namespace JPB.DataAccess.Manager
 		{
 			db.RunInTransaction(s =>
 			{
-				IDbCommand dbCommand = CreateUpdate(entry, s);
+				var dbCommand = CreateUpdate(entry, s);
 				RaiseUpdate(entry, dbCommand, s);
 				s.ExecuteNonQuery(dbCommand);
 			});
@@ -52,11 +53,11 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Will create a new Object when
-		///     T contains a Valid RowVersion property
+		///     T contains a Valid RowVersionAttribute property
 		///     AND
-		///     RowVersion property is not equals the DB version
+		///     RowVersionAttribute property is not equals the DB version
 		///     OR
-		///     T does not contain any RowVersion
+		///     T does not contain any RowVersionAttribute
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -66,7 +67,7 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					IDbCommand query = CreateSelect(typeof (T), s, entry.GetPK<T, object>());
+					var query = CreateSelect(typeof (T), s, entry.GetPK<T, object>());
 					RaiseUpdate(entry, query, s);
 					return RunSelect<T>(query).FirstOrDefault();
 				}
@@ -76,11 +77,11 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Will update all propertys of entry when
-		///     T contains a Valid RowVersion property
+		///     T contains a Valid RowVersionAttribute property
 		///     AND
-		///     RowVersion property is not equals the DB version
+		///     RowVersionAttribute property is not equals the DB version
 		///     OR
-		///     T does not contain any RowVersion
+		///     T does not contain any RowVersionAttribute
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -90,11 +91,11 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					IDbCommand query = CreateSelect(entry.GetType(), Database, entry.GetPK<T, object>());
+					var query = CreateSelect(entry.GetType(), Database, entry.GetPK<T, object>());
 					RaiseUpdate(entry, query, s);
-					T @select = RunSelect<T>(query).FirstOrDefault();
+					var @select = RunSelect<T>(query).FirstOrDefault();
 
-					bool updated = false;
+					var updated = false;
 					CopyPropertys(entry, @select);
 
 					@select.LoadNavigationProps(Database);
@@ -107,12 +108,12 @@ namespace JPB.DataAccess.Manager
 
 		internal static bool CopyPropertys(object @base, object newObject)
 		{
-			bool updated = false;
-			IEnumerable<PropertyInfoCache> propertys = @base.GetType().GetClassInfo().PropertyInfoCaches.Select(f => f.Value);
-			foreach (PropertyInfoCache propertyInfo in propertys)
+			var updated = false;
+			var propertys = @base.GetType().GetClassInfo().PropertyInfoCaches.Select(f => f.Value);
+			foreach (var propertyInfo in propertys)
 			{
-				object oldValue = propertyInfo.GetConvertedValue(@base);
-				object newValue = propertyInfo.GetConvertedValue(newObject);
+				var oldValue = propertyInfo.GetConvertedValue(@base);
+				var newValue = propertyInfo.GetConvertedValue(newObject);
 
 				if (newValue == null && oldValue == null ||
 				    (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
@@ -140,24 +141,25 @@ namespace JPB.DataAccess.Manager
 		/// <returns>True when the version is Equals, otherwise false</returns>
 		private bool CheckRowVersion<T>(T entry)
 		{
-			Type type = typeof (T);
-			PropertyInfoCache rowVersion =
+			var type = typeof (T);
+			var rowVersion =
 				entry
 					.GetType()
 					.GetClassInfo()
-					.PropertyInfoCaches
-					.Select(f => f.Value)
-					.FirstOrDefault(s => s.AttributeInfoCaches.Any(f => f.Attribute is RowVersionAttribute));
+					.RowVersionProperty;
+					//.PropertyInfoCaches
+					//.Select(f => f.Value)
+					//.FirstOrDefault(s => s.AttributeInfoCaches.Any(f => f.Attribute is RowVersionAttribute));
 			if (rowVersion != null)
 			{
 				var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
 				if (rowversionValue != null || entry.GetPK() == GetDefault(entry.GetPKType()))
 				{
-					string rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
-					string staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " +
+					var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
+					var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.GetTableName() + " WHERE " +
 					                          type.GetPK() + " = " + entry.GetPK();
 
-					object skalar = Database.GetSkalar(staticRowVersion);
+					var skalar = Database.GetSkalar(staticRowVersion);
 					if (skalar == null)
 						return false;
 					return ((byte[]) skalar).SequenceEqual(rowversionValue);
@@ -174,34 +176,34 @@ namespace JPB.DataAccess.Manager
 
 		internal static IDbCommand createUpdate<T>(T entry, IDatabase db)
 		{
-			Type type = typeof (T);
-			ClassInfoCache classInfo = type.GetClassInfo();
-			PropertyInfoCache pkProperty = classInfo.PropertyInfoCaches.FirstOrDefault(s => s.Value.IsPrimaryKey).Value;
+			var type = typeof (T);
+			var classInfo = type.GetClassInfo();
+			var pkProperty = classInfo.PrimaryKeyProperty;
 			if (pkProperty == null)
 				throw new Exception("No primarykey Provied. An autogenerated Update statement could not be created");
-			string pk = classInfo.SchemaMappingLocalToDatabase(pkProperty.PropertyName);
+			var pk = classInfo.SchemaMappingLocalToDatabase(pkProperty.PropertyName);
 
-			string[] ignore =
+			var ignore =
 				classInfo
 					.PropertyInfoCaches
 					.Select(f => f.Value)
-					.Where(s => s.IsPrimaryKey || s.InsertIgnore || s.ForginKeyAttribute != null)
+					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.ForginKeyAttribute != null)
 					.Select(s => s.PropertyName)
 					.ToArray();
 
-			string[] propertyInfos = DbAccessLayerHelper.FilterDbSchemaMapping<T>(ignore).ToArray();
+			var propertyInfos = DbAccessLayerHelper.FilterDbSchemaMapping<T>(ignore).ToArray();
 
 			var queryBuilder = new QueryBuilder.QueryBuilder(db);
 			queryBuilder.QueryD("UPDATE");
 			queryBuilder.QueryD(type.GetTableName());
 			queryBuilder.QueryD("SET");
-			for (int index = 0; index < propertyInfos.Length; index++)
+			for (var index = 0; index < propertyInfos.Length; index++)
 			{
-				string info = propertyInfos[index];
-				string schemaName = type.GetDbToLocalSchemaMapping(info);
-				PropertyInfoCache property;
+				var info = propertyInfos[index];
+				var schemaName = type.GetDbToLocalSchemaMapping(info);
+				DbPropertyInfoCache property;
 				classInfo.PropertyInfoCaches.TryGetValue(schemaName, out property);
-				object dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
+				var dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
 				queryBuilder.QueryQ(string.Format("{0} = @{1}", info, index), new QueryParameter(index.ToString(), dataValue));
 				if (index + 1 < propertyInfos.Length)
 					queryBuilder.QueryD(",");

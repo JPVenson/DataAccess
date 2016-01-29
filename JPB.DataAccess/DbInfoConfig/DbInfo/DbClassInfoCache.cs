@@ -4,47 +4,41 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.Config.Model
+namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
 	/// <summary>
 	///     for internal use only
 	/// </summary>
-	public class ClassInfoCache
+	public class DbClassInfoCache : ClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
-		private Dictionary<string, string> _invertedSchema;
-
-		internal ClassInfoCache(Type type, bool anon = false)
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public DbClassInfoCache()
 		{
-			ClassName = type.FullName;
-			Type = type;
-			AttributeInfoCaches = new HashSet<AttributeInfoCache>(type
-				.GetCustomAttributes(true)
-				.Where(s => s is Attribute)
-				.Select(s => new AttributeInfoCache(s as Attribute)));
-			PropertyInfoCaches = new Dictionary<string, PropertyInfoCache>(type
-				.GetProperties()
-				.Select(s => new PropertyInfoCache(s, anon))
-				.ToDictionary(s => s.PropertyName, s => s));
-			MethodInfoCaches = new HashSet<MethodInfoCache>(type
-				.GetMethods()
-				.Select(s => new MethodInfoCache(s)));
-			ConstructorInfoCaches = new HashSet<ConstructorInfoCache>(type
-				.GetConstructors()
-				.Select(s => new ConstructorInfoCache(s)));
-			CreateSchemaMapping();
+			SchemaMappingValues = new Dictionary<string, string>();
 		}
 
-		/// <summary>
-		///     The .net ClassName
-		/// </summary>
-		public string ClassName { get; private set; }
+		private Dictionary<string, string> _invertedSchema;
 
-		/// <summary>
-		///     The .net Type instance
-		/// </summary>
-		public Type Type { get; private set; }
+		internal DbClassInfoCache(Type type, bool anon = false)
+			: base(type, anon)
+		{
+			SchemaMappingValues = new Dictionary<string, string>();
+			Refresh(true);
+		}
+
+		public override IClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument> Init(Type type, bool anon = false)
+		{
+			var item = base.Init(type, anon);
+			Refresh(true);
+			return item;
+		}
 
 		/// <summary>
 		///     If enumerated a method that creats an Instance and then fills all propertys
@@ -61,14 +55,14 @@ namespace JPB.DataAccess.Config.Model
 		public bool FullFactory { get; set; }
 
 		/// <summary>
-		///     If known the ForModel attribute
+		///     If known the ForModelAttribute attribute
 		/// </summary>
-		public AttributeInfoCache ForModel { get; private set; }
+		public DbAttributeInfoCache<ForModelAttribute> ForModel { get; private set; }
 
 		/// <summary>
 		///     If known the SelectFactory Attribute
 		/// </summary>
-		public AttributeInfoCache SelectFactory { get; private set; }
+		public DbAttributeInfoCache<SelectFactoryAttribute> SelectFactory { get; private set; }
 
 		/// <summary>
 		///     Key is C# Property name and Value is DB Eqivalent
@@ -76,24 +70,17 @@ namespace JPB.DataAccess.Config.Model
 		public Dictionary<string, string> SchemaMappingValues { get; private set; }
 
 		/// <summary>
-		///     All Propertys
+		///		Easy access to the SQL Table name
 		/// </summary>
-		public Dictionary<string, PropertyInfoCache> PropertyInfoCaches { get; private set; }
-
-		/// <summary>
-		///     All Attributes on class level
-		/// </summary>
-		public HashSet<AttributeInfoCache> AttributeInfoCaches { get; private set; }
-
-		/// <summary>
-		///     All Mehtods
-		/// </summary>
-		public HashSet<MethodInfoCache> MethodInfoCaches { get; private set; }
-
-		/// <summary>
-		///     All Constructors
-		/// </summary>
-		public HashSet<ConstructorInfoCache> ConstructorInfoCaches { get; private set; }
+		public string TableName
+		{
+			get
+			{
+				if (ForModel == null)
+					return ClassName;
+				return ForModel.Attribute.AlternatingName;
+			}
+		}
 
 		/// <summary>
 		///     Internal use Only
@@ -103,6 +90,16 @@ namespace JPB.DataAccess.Config.Model
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public bool HasRelations { get; private set; }
+
+		/// <summary>
+		///		If known the Property with an RowVersion Attribute
+		/// </summary>
+		public DbPropertyInfoCache RowVersionProperty { get; private set; }
+
+		/// <summary>
+		///		If knwon the Property with an PrimaryKey Attribute
+		/// </summary>
+		public DbPropertyInfoCache PrimaryKeyProperty { get; private set; }
 
 		/// <summary>
 		///     When alternating the Configuration you have to call this method to renew the property enumerations.
@@ -116,16 +113,19 @@ namespace JPB.DataAccess.Config.Model
 					propertyInfoCach.Value.Refresh();
 				}
 
-			ForModel = AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModel);
-			SelectFactory = AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute);
+			ForModel = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModelAttribute));
+			SelectFactory = DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute));
 			HasRelations = AttributeInfoCaches.Any(s => s.Attribute is ForeignKeyAttribute);
+
+			RowVersionProperty = PropertyInfoCaches.FirstOrDefault(s => s.Value.RowVersionAttribute != null).Value;
+			PrimaryKeyProperty = PropertyInfoCaches.FirstOrDefault(s => s.Value.PrimaryKeyAttribute != null).Value;
+
 			CreateSchemaMapping();
-			CheckCtor();
 		}
 
 		internal void CheckCtor()
 		{
-			bool hasAutoGeneratorAttribute = AttributeInfoCaches.Any(f => f.Attribute is AutoGenerateCtorAttribute);
+			var hasAutoGeneratorAttribute = AttributeInfoCaches.Any(f => f.Attribute is AutoGenerateCtorAttribute);
 			if (hasAutoGeneratorAttribute && Factory == null)
 			{
 				CreateFactory();
@@ -134,31 +134,32 @@ namespace JPB.DataAccess.Config.Model
 
 		internal void CheckForConfig()
 		{
-			MethodInfoCache[] configMethods = MethodInfoCaches
+			var configMethods = MethodInfoCaches
 				.Where(f => f.AttributeInfoCaches.Any(e => e.Attribute is ConfigMehtodAttribute))
 				.ToArray();
 			if (configMethods.Any())
 			{
-				var config = new Config();
-				foreach (MethodInfoCache item in configMethods)
+				var config = new DbConfig();
+				foreach (var item in configMethods)
 				{
-					item.MethodInfo.Invoke(null, new object[] {config});
+					item.MethodInfo.Invoke(null, new object[] { config });
 				}
 
 				Refresh(true);
+				CheckCtor();
 			}
 		}
 
 		internal void CreateFactory()
 		{
 			if (!FullFactory)
-				Factory = FactoryHelper.CreateFactory(Type, Config.ConstructorSettings);
+				Factory = FactoryHelper.CreateFactory(Type, DbConfig.ConstructorSettings);
 			FullFactory = true;
 		}
 
 		internal string SchemaMappingLocalToDatabase(string cSharpName)
 		{
-			KeyValuePair<string, string> mappings = SchemaMappingValues.FirstOrDefault(s => s.Key.Equals(cSharpName));
+			var mappings = SchemaMappingValues.FirstOrDefault(s => s.Key.Equals(cSharpName));
 			if (mappings.Equals(default(KeyValuePair<string, string>)))
 			{
 				return cSharpName;
@@ -174,14 +175,6 @@ namespace JPB.DataAccess.Config.Model
 				return databaseName;
 			}
 			return mappings;
-
-
-			//var mappings = SchemaMappingValues.FirstOrDefault(s => s.Value.Equals(databaseName, StringComparison.InvariantCulture));
-			//if (mappings.Equals(default(KeyValuePair<string, string>)))
-			//{
-			//	return databaseName;
-			//}
-			//return mappings.Key;
 		}
 
 		internal void CreateSchemaMapping()
@@ -199,19 +192,5 @@ namespace JPB.DataAccess.Config.Model
 		{
 			return SchemaMappingValues.Values.ToArray();
 		}
-
-		//internal string[] DbToLocalSchemaMapping()
-		//{
-		//	if (SchemaMappingValues == null)
-		//	{
-		//		SchemaMappingValues = new Dictionary<string, string>();
-		//		foreach (var item in PropertyInfoCaches)
-		//		{
-		//			SchemaMappingValues.Append(item.Value.PropertyName, item.Value.DbName);
-		//		}
-		//	}
-
-		//	return SchemaMappingValues.Values.ToArray();
-		//}
 	}
 }

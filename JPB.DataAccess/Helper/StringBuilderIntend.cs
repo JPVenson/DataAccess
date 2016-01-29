@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace JPB.DataAccess.Helper
 {
@@ -39,7 +36,7 @@ namespace JPB.DataAccess.Helper
 
 		public StringBuilderIntend AppendIntedLine(string value)
 		{
-			for (int i = 0; i < _inted; i++)
+			for (var i = 0; i < _inted; i++)
 			{
 				_source.Append("\t");
 			}
@@ -49,7 +46,7 @@ namespace JPB.DataAccess.Helper
 
 		public StringBuilderIntend AppendInted(string value)
 		{
-			for (int i = 0; i < _inted; i++)
+			for (var i = 0; i < _inted; i++)
 			{
 				_source.Append("\t");
 			}
@@ -78,7 +75,7 @@ namespace JPB.DataAccess.Helper
 
 		public StringBuilderIntend AppendIntedLine(string value, params object[] values)
 		{
-			for (int i = 0; i < _inted; i++)
+			for (var i = 0; i < _inted; i++)
 			{
 				_source.Append("\t");
 			}
@@ -88,7 +85,7 @@ namespace JPB.DataAccess.Helper
 
 		public StringBuilderIntend AppendInted(string value, params object[] values)
 		{
-			for (int i = 0; i < _inted; i++)
+			for (var i = 0; i < _inted; i++)
 			{
 				_source.Append("\t");
 			}
@@ -98,7 +95,7 @@ namespace JPB.DataAccess.Helper
 
 		public override string ToString()
 		{
-			return this._source.ToString();
+			return _source.ToString();
 		}
 	}
 }

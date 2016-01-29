@@ -153,7 +153,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
 		{
-			IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection(), fields);
+			var cmd = _strategy.CreateCommand(strSql, GetConnection(), fields);
 			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
 			if (_trans != null)
 				cmd.Transaction = _trans;
@@ -209,7 +209,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public object GetlastInsertedID()
 		{
-			using (IDbCommand cmd = GetlastInsertedIdCommand())
+			using (var cmd = GetlastInsertedIdCommand())
 				return GetSkalar(cmd);
 		}
 
@@ -235,7 +235,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			lock (this)
 			{
-				using (IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection()))
+				using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 				{
 					if (_trans != null)
 						cmd.Transaction = _trans;
@@ -250,7 +250,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			lock (this)
 			{
-				using (IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection()))
+				using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 				{
 					IDataAdapter da = _strategy.CreateDataAdapter(cmd); //todo//
 					LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
@@ -286,7 +286,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 			try
 			{
-				using (IDataReader dr = GetDataReader(strQuery))
+				using (var dr = GetDataReader(strQuery))
 				{
 					while (dr.Read())
 						yield return func(dr);
@@ -303,7 +303,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IEnumerable<T> GetEntitiesList<T>(IDbCommand cmd, Func<IDataRecord, T> func)
 		{
 			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
-			using (IDataReader dr = cmd.ExecuteReader())
+			using (var dr = cmd.ExecuteReader())
 			{
 				while (dr.Read())
 					yield return func(dr);
@@ -384,7 +384,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				Connect(IsolationLevel.ReadUncommitted);
 
-				T res = func(this);
+				var res = func(this);
 
 				return res;
 			}
@@ -406,7 +406,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 			try
 			{
-				using (IDataReader dr = GetDataReader(strQuery))
+				using (var dr = GetDataReader(strQuery))
 				{
 					while (dr.Read())
 						action(dr);
@@ -428,7 +428,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 			try
 			{
-				using (IDataReader dr = GetDataReader(strQuery))
+				using (var dr = GetDataReader(strQuery))
 				{
 					if (false == dr.Read()) return new Exception(strMessageOnEmpty);
 
@@ -458,7 +458,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 			try
 			{
-				using (IDataReader dr = GetDataReader(strQuery))
+				using (var dr = GetDataReader(strQuery))
 				{
 					long index = -1;
 					while (dr.Read())
@@ -486,11 +486,11 @@ namespace JPB.DataAccess.AdoWrapper
 
 			try
 			{
-				using (IDataReader dr = GetDataReader(strQuery))
+				using (var dr = GetDataReader(strQuery))
 				{
 					while (dr.Read())
 					{
-						KeyValuePair<K, V> kvp = func(dr);
+						var kvp = func(dr);
 						try
 						{
 							htRes.Add(kvp.Key, kvp.Value);
@@ -519,11 +519,11 @@ namespace JPB.DataAccess.AdoWrapper
 			var htRes = new Dictionary<K, V>();
 			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
 
-			using (IDataReader dr = cmd.ExecuteReader())
+			using (var dr = cmd.ExecuteReader())
 			{
 				while (dr.Read())
 				{
-					KeyValuePair<K, V> kvp = func(dr);
+					var kvp = func(dr);
 
 					htRes.Add(kvp.Key, kvp.Value);
 				}
@@ -614,7 +614,7 @@ namespace JPB.DataAccess.AdoWrapper
 			if (null == GetConnection())
 				throw new Exception("DB2.ExecuteNonQuery: void connection");
 
-			using (IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection()))
+			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;
@@ -628,8 +628,8 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			if (null == GetConnection())
 				throw new Exception("DB2.ExecuteNonQuery: void connection");
-			int counter = 0;
-			using (IDbCommand cmd = _strategy.CreateCommand(strSql,
+			var counter = 0;
+			using (var cmd = _strategy.CreateCommand(strSql,
 				GetConnection(),
 				param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
 			{
@@ -645,7 +645,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			if (null == GetConnection()) throw new Exception("DB2.GetDataReader: void connection");
 
-			using (IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection()))
+			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;
@@ -658,7 +658,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			if (null == GetConnection()) throw new Exception("DB2.GetSkalar: void connection");
 
-			using (IDbCommand cmd = _strategy.CreateCommand(strSql, GetConnection()))
+			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;
@@ -675,7 +675,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public static object DBCAST(IDataRecord dr, string strFieldName, object objFallThru)
 		{
-			object obj = dr[strFieldName];
+			var obj = dr[strFieldName];
 			return (null == obj || obj is DBNull) ? objFallThru : obj;
 		}
 

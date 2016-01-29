@@ -5,9 +5,10 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.QueryBuilder
@@ -161,8 +162,8 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static IDataPager AsPager<T>(this QueryBuilder<T> query, int pageSize)
 		{
-			IDbCommand targetQuery = query.Compile();
-			IDataPager<T> dbAccess = query.Database.CreatePager<T>();
+			var targetQuery = query.Compile();
+			var dbAccess = query.Database.CreatePager<T>();
 			dbAccess.AppendedComands.Add(targetQuery);
 			dbAccess.PageSize = pageSize;
 			return dbAccess;
@@ -204,7 +205,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder<T> Contains<T>(this QueryBuilder<T> query, object alias)
 		{
-			int paramaterAutoId = query.GetParamaterAutoId();
+			var paramaterAutoId = query.GetParamaterAutoId();
 			return query.QueryQ(string.Format("CONTAINS (@{0})", paramaterAutoId),
 				new QueryParameter(paramaterAutoId.ToString(CultureInfo.InvariantCulture), alias));
 		}
@@ -225,7 +226,7 @@ namespace JPB.DataAccess.QueryBuilder
 		public static QueryBuilder<T> RowNumberOrder<T, TProp>(this QueryBuilder<T> query, Expression<Func<T, TProp>> exp,
 			bool Desc = false)
 		{
-			return query.Query("ROW_NUMBER() OVER (ORDER BY {0} {1})", ConfigHelper.GetPropertyInfoFromLabda(exp),
+			return query.Query("ROW_NUMBER() OVER (ORDER BY {0} {1})", MetaInfoStoreExtentions.GetPropertyInfoFromLabda(exp),
 				Desc ? "DESC" : "ASC");
 		}
 
@@ -277,10 +278,10 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder<T> Join<T>(this QueryBuilder<T> query, Type source, Type target)
 		{
-			string sourcePK = source.GetFK(target);
-			string targetPK = target.GetPK();
-			string targetTable = target.GetTableName();
-			string sourceTable = source.GetTableName();
+			var sourcePK = source.GetFK(target);
+			var targetPK = target.GetPK();
+			var targetTable = target.GetTableName();
+			var sourceTable = source.GetTableName();
 			return query.Query("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
 		}
 
@@ -304,10 +305,10 @@ namespace JPB.DataAccess.QueryBuilder
 			if (source == null) throw new ArgumentNullException("source");
 			if (target == null) throw new ArgumentNullException("target");
 
-			string sourcePK = source.GetFK(target);
-			string targetPK = target.GetPK();
-			string targetTable = target.GetTableName();
-			string sourceTable = source.GetTableName();
+			var sourcePK = source.GetFK(target);
+			var targetPK = target.GetPK();
+			var targetTable = target.GetTableName();
+			var sourceTable = source.GetTableName();
 			return query.Query(mode + " JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
 		}
 
@@ -330,9 +331,9 @@ namespace JPB.DataAccess.QueryBuilder
 			{
 				case DbAccessType.MsSql:
 				{
-					int index = -1;
-					string select = "SELECT";
-					GenericQueryPart part =
+					var index = -1;
+					var select = "SELECT";
+					var part =
 						query.Parts.FirstOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(@select, StringComparison.Ordinal)) != -1);
 
 					if (index == -1 || part == null)

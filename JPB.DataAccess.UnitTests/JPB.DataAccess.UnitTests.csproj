@@ -60,7 +60,6 @@
     <Compile Include="TestModels\TestProcA.cs" />
     <Compile Include="TestModels\User.cs" />
     <Compile Include="PagerUnitTest.cs" />
-    <Compile Include="UnitTest1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj">

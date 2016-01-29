@@ -10,10 +10,10 @@ namespace JPB.DataAccess.AdoWrapper
 		public EgarDataRecord(IDataRecord sourceRecord)
 		{
 			Objects = new List<MemoryValueHolder>();
-			for (int i = 0; i < sourceRecord.FieldCount; i++)
+			for (var i = 0; i < sourceRecord.FieldCount; i++)
 			{
-				object obj = sourceRecord.GetValue(i);
-				string name = sourceRecord.GetName(i);
+				var obj = sourceRecord.GetValue(i);
+				var name = sourceRecord.GetName(i);
 				Objects.Add(new MemoryValueHolder(name, obj));
 			}
 		}
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public int GetValues(object[] values)
 		{
-			for (int i = 0; i < Objects.Count(); i++)
+			for (var i = 0; i < Objects.Count(); i++)
 			{
 				if (values.Length > i)
 					break;
@@ -176,7 +176,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				object value = GetValue(i);
+				var value = GetValue(i);
 				if (value is DBNull)
 					return null;
 				return value;
@@ -187,10 +187,10 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				MemoryValueHolder firstOrDefault = Objects.FirstOrDefault(s => s.Key == name);
+				var firstOrDefault = Objects.FirstOrDefault(s => s.Key == name);
 				if (!firstOrDefault.Equals(default(MemoryValueHolder)))
 				{
-					object value = firstOrDefault.Value;
+					var value = firstOrDefault.Value;
 					return value;
 				}
 				return null;

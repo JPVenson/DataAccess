@@ -1,7 +1,7 @@
 ﻿namespace JPB.DataAccess.QueryBuilder
 {
 	/// <summary>
-	/// Enum for specifying the way in enumeration that is used by enumerating a QueryBuilder
+	///     Enum for specifying the way in enumeration that is used by enumerating a QueryBuilder
 	/// </summary>
 	public enum EnumerationMode
 	{

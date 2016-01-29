@@ -5,7 +5,7 @@ using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.MySql
 {
-    public class MySqlDataPager<T> : MySqlUntypedDataPager<T>, IDataPager<T>
+    public class MySqlDataPager<T> : MySqlUntypedDataPager<T>
     {
         public MySqlDataPager()
             : base()

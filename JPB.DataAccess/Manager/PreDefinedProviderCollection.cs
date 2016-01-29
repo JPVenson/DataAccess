@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace JPB.DataAccess.Manager
 {
 	/// <summary>
-	/// A list that contains all kown Provider and there Basic implimentation
+	///     A list that contains all kown Provider and there Basic implimentation
 	/// </summary>
 	public class PreDefinedProviderCollection : IReadOnlyCollection<KeyValuePair<DbAccessType, string>>
 	{

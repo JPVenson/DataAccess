@@ -9,7 +9,7 @@ using JPB.DataAccess.QueryFactory;
 namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
-	/// Base type for all maker Attributes
+	///     Base type for all maker Attributes
 	/// </summary>
 	public class DataAccessAttribute : Attribute
 	{
@@ -32,7 +32,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	//}
 
 	/// <summary>
-	/// Marks this class to be allowed by the Framework for the CodeDOM Ado.net ctor creation
+	///     Marks this class to be allowed by the Framework for the CodeDOM Ado.net ctor creation
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 	public sealed class AutoGenerateCtorAttribute : DataAccessAttribute
@@ -102,7 +102,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	public sealed class SelectFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
 	{
 		/// <summary>
-		/// Ctor
+		///     Ctor
 		/// </summary>
 		/// <param name="query"></param>
 		public SelectFactoryAttribute(string query)
@@ -112,12 +112,12 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		/// The Select Query that are used for selection of this Class
+		///     The Select Query that are used for selection of this Class
 		/// </summary>
 		public string Query { get; private set; }
 
 		/// <summary>
-		/// Not in USE
+		///     Not in USE
 		/// </summary>
 		public IEnumerable<IQueryParameter> Parameters { get; private set; }
 	}
@@ -129,7 +129,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	public sealed class StoredProcedureFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
 	{
 		/// <summary>
-		/// ctor
+		///     ctor
 		/// </summary>
 		/// <param name="query"></param>
 		public StoredProcedureFactoryAttribute(string query)
@@ -139,12 +139,12 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		/// The Select Query that are used for selection of this Class
+		///     The Select Query that are used for selection of this Class
 		/// </summary>
 		public string Query { get; private set; }
 
-		/// <summary> 
-		/// Not in USE
+		/// <summary>
+		///     Not in USE
 		/// </summary>
 		public IEnumerable<IQueryParameter> Parameters { get; private set; }
 	}
@@ -155,7 +155,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Ignores this Property when creating an Update or Insert statement
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public class InsertIgnore : DataAccessAttribute
+	public class InsertIgnoreAttribute : DataAccessAttribute
 	{
 	}
 
@@ -163,10 +163,10 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Indicates this Property to be resolved as a ForeignKey
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public class ForeignKeyAttribute : InsertIgnore
+	public class ForeignKeyAttribute : InsertIgnoreAttribute
 	{
 		/// <summary>
-		/// The name of the Column that should be used
+		///     The name of the Column that should be used
 		/// </summary>
 		public string KeyName { get; set; }
 	}
@@ -184,19 +184,18 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Allows renaming of the local class name to any name and the mapping from that name to the Db Table name
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-	public class ForModel : DataAccessAttribute
+	public class ForModelAttribute : DataAccessAttribute
 	{
 		/// <summary>
-		/// Creates a new Instance of ForModel
+		///     Creates a new Instance of ForModelAttribute
 		/// </summary>
-		/// <param name="alternatingName"/>
-		public ForModel(string alternatingName)
+		/// <param name="alternatingName" />
+		public ForModelAttribute(string alternatingName)
 		{
 			AlternatingName = alternatingName;
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		public string AlternatingName { get; private set; }
 	}
@@ -205,7 +204,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     A rowstate that is used to Detect a newer version
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-	public sealed class RowVersionAttribute : InsertIgnore
+	public sealed class RowVersionAttribute : InsertIgnoreAttribute
 	{
 	}
 
@@ -251,9 +250,8 @@ namespace JPB.DataAccess.ModelsAnotations
 
 
 		/// <summary>
-		/// 
 		/// </summary>
-		/// <param name="converter"/>
+		/// <param name="converter" />
 		public ValueConverterAttribute(Type converter)
 		{
 			Converter = converter;
@@ -267,10 +265,9 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
-		/// <param name="converter"/>
-		/// <param name="parameter"/>
+		/// <param name="converter" />
+		/// <param name="parameter" />
 		public ValueConverterAttribute(Type converter, object parameter)
 			: this(converter)
 		{
@@ -278,13 +275,13 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		/// A static object that will be given to the Paramether
+		///     A static object that will be given to the Paramether
 		/// </summary>
 		public object Parameter { get; private set; }
 
 		internal IValueConverter CreateConverter()
 		{
-			KeyValuePair<object, IValueConverter> fod = ConverterInstance.FirstOrDefault(s => s.Key.Equals(Parameter));
+			var fod = ConverterInstance.FirstOrDefault(s => s.Key.Equals(Parameter));
 			if (fod.Equals(default(KeyValuePair<object, IValueConverter>)))
 			{
 				var instance = (IValueConverter) Activator.CreateInstance(Converter);
@@ -301,7 +298,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     If marked the output field from the query will be Serlized to the given object
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-	public sealed class FromXmlAttribute : ForModel
+	public sealed class FromXmlAttribute : ForModelAttribute
 	{
 		private static ILoadFromXmlStrategy _loadFromXmlStrategyInstance;
 		private Type _loadFromXmlStrategy;
@@ -352,7 +349,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The result stream from the Select Statement will be parsed into the generic arguement
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-	public class StoredProcedureAttribute : InsertIgnore
+	public class StoredProcedureAttribute : InsertIgnoreAttribute
 	{
 	}
 }

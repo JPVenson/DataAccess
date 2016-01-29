@@ -156,5 +156,11 @@ namespace JPB.DataAccess.MySql
                     _syncHelper = value;
             }
         }
+
+	    public void Dispose()
+	    {
+		    BaseQuery.Dispose();
+			CurrentPageItems.Clear();
+	    }
     }
 }

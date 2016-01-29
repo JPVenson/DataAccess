@@ -13,7 +13,7 @@ namespace JPB.DataAccess.QueryBuilder
 	public class GenericQueryPart : ICloneable
 	{
 		/// <summary>
-		/// Creates a generic query part that can be used for any query 
+		///     Creates a generic query part that can be used for any query
 		/// </summary>
 		/// <param name="prefix"></param>
 		/// <param name="parameters"></param>
@@ -25,7 +25,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// Creates a generic query part that can be used for any query 
+		///     Creates a generic query part that can be used for any query
 		/// </summary>
 		/// <param name="prefix"></param>
 		public GenericQueryPart(string prefix)
@@ -36,17 +36,16 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// The Partial SQL Query that is contained inside this part
+		///     The Partial SQL Query that is contained inside this part
 		/// </summary>
 		public string Prefix { get; internal set; }
 
 		/// <summary>
-		/// If used the Parameters that are used for this Prefix
+		///     If used the Parameters that are used for this Prefix
 		/// </summary>
 		public IEnumerable<IQueryParameter> QueryParameters { get; set; }
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <returns></returns>
 		public object Clone()
@@ -55,7 +54,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// Wrapps the given <paramref name="command"/> into a new QueryPart by storing its Query statement and parameter
+		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its Query statement and parameter
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
@@ -66,7 +65,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// For display
+		///     For display
 		/// </summary>
 		/// <returns></returns>
 		public virtual string Render()
@@ -77,7 +76,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// For display
+		///     For display
 		/// </summary>
 		/// <returns></returns>
 		internal virtual void Render(StringBuilderIntend sb)
@@ -86,18 +85,18 @@ namespace JPB.DataAccess.QueryBuilder
 				.AppendIntedLine("new GenericQueryPart {")
 				.Up()
 				.AppendIntedLine("Query = \"{0}\",", Prefix)
-				.AppendInted("Parameter[{0}] = ", this.QueryParameters.Count());
-			if (this.QueryParameters.Any())
+				.AppendInted("Parameter[{0}] = ", QueryParameters.Count());
+			if (QueryParameters.Any())
 			{
 				sb.AppendIntedLine("{")
-				.Up();
+					.Up();
 				foreach (QueryParameter queryParameter in QueryParameters.Cast<QueryParameter>())
 				{
 					queryParameter.Render(sb);
 					sb.AppendLine(",");
 				}
 				sb.Down()
-				.AppendIntedLine("}");
+					.AppendIntedLine("}");
 			}
 			else
 			{
@@ -109,7 +108,6 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString()

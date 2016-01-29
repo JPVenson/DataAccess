@@ -46,7 +46,9 @@ namespace JPB.DataAccess.DebuggerHelper
 				source.Attach(UseDefaultDatabase);
 			}
 
-			var formartCommandToQuery = source != null ? source.FormartCommandToQuery(command) : GenericCommandToQuery(command);
+			var formartCommandToQuery = source != null
+				? source.FormartCommandToQuery(command)
+				: GenericCommandToQuery(command);
 
 			DebuggerQuery = debugquery.ToString();
 			SqlQuery = formartCommandToQuery;
@@ -87,7 +89,7 @@ namespace JPB.DataAccess.DebuggerHelper
 
 		private void Init()
 		{
-			StackFrame[] frames = new StackTrace().GetFrames();
+			var frames = new StackTrace().GetFrames();
 			//This call is a bit of work so kick it off to a Task and let it run
 			//we have to do it here because inside of the task this info is lost
 			_wokerTask = new Task(stack =>
@@ -99,7 +101,7 @@ namespace JPB.DataAccess.DebuggerHelper
 					{
 						stackFrames = (stack as IEnumerable<StackFrame>).Where(s =>
 						{
-							MethodBase methodBase = s.GetMethod();
+							var methodBase = s.GetMethod();
 							if (Assembly.DefinedTypes.Contains(methodBase.DeclaringType))
 								return false;
 
@@ -113,7 +115,7 @@ namespace JPB.DataAccess.DebuggerHelper
 					{
 						stackFrames = new List<StackFrame>();
 					}
-					string[] enumerable = stackFrames.Select(s => s.ToString()).ToArray();
+					var enumerable = stackFrames.Select(s => s.ToString()).ToArray();
 					if (enumerable.Any())
 						StackTracer = enumerable.Aggregate((e, f) => e + Environment.NewLine + f);
 				}
@@ -150,7 +152,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		/// <returns></returns>
 		public static String ParameterValue(IDataParameter sp)
 		{
-			String retval = "";
+			var retval = "";
 
 			switch (sp.DbType)
 			{

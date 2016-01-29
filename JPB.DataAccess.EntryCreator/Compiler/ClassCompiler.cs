@@ -6,7 +6,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
-using JPB.DataAccess.Config;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
@@ -145,7 +145,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 			if (!string.IsNullOrEmpty(TargetName))
 			{
-				var forModel = new ForModel(TargetName);
+				var forModel = new ForModelAttribute(TargetName);
 				var codeAttributeDeclaration = new CodeAttributeDeclaration(forModel.GetType().Name,
 					new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName)));
 				_base.CustomAttributes.Add(codeAttributeDeclaration);
@@ -285,7 +285,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 			if (!string.IsNullOrEmpty(info.NewColumnName))
 			{
-				var forModel = new ForModel(info.ColumnInfo.ColumnName);
+				var forModel = new ForModelAttribute(info.ColumnInfo.ColumnName);
 				codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name, new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName))));
 			}
 			if (info.IsRowVersion)
@@ -325,14 +325,14 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return property;
 		}
 
-		public CodeConstructor GenerateTypeConstructor(bool factory = true)
+		public CodeMemberMethod GenerateTypeConstructor(bool factory = true)
 		{
 			var ctor = FactoryHelper.GenerateTypeConstructor(factory);
 			_base.Members.Insert(0, ctor);
 			return ctor;
 		}
 
-		public CodeConstructor GenerateTypeConstructor(
+		public CodeMemberMethod GenerateTypeConstructor(
 			IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
 		{
 			return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn);
@@ -340,7 +340,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		private Type[] _externalTypes;
 
-		internal CodeConstructor GenerateTypeConstructorBasedOnElements()
+		internal CodeMemberMethod GenerateTypeConstructorBasedOnElements()
 		{
 			var codeMemberProperties = _base.Members.Cast<CodeTypeMember>().Where(s => s is CodeMemberProperty).Cast<CodeMemberProperty>().ToArray();
 
@@ -352,7 +352,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 				var hasForNameAttribute =
 					  item.CustomAttributes.Cast<CodeAttributeDeclaration>()
-						  .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModel).Name);
+						  .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModelAttribute).Name);
 				if (hasForNameAttribute != null)
 					name = (hasForNameAttribute.Arguments.Cast<CodeAttributeArgument>().FirstOrDefault().Value as CodePrimitiveExpression).Value.ToString();
 
