@@ -165,6 +165,7 @@ namespace JPB.DataAccess.DbCollection
 
 		private void Add(T value, CollectionStates state)
 		{
+			value.PropertyChanged += item_PropertyChanged;
 			_internalCollection.Add(new StateHolder(value, state));
 		}
 
