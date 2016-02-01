@@ -70,7 +70,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			return pocoCreator;
 		}
 
-		private static CodeMemberMethod GenerateConstructor(Type target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
+		public static CodeMemberMethod GenerateConstructor(Type target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
 		{
 			var codeConstructor = GenerateTypeConstructor();
 			GenerateBody(target, settings, importNameSpace, codeConstructor, new CodeBaseReferenceExpression());
@@ -95,18 +95,13 @@ namespace JPB.DataAccess.DbInfoConfig
 			return codeFactory;
 		}
 
-		public static void GenerateBody(Type sourceType,
+		public static void GenerateBody(Dictionary<string, DbPropertyInfoCache> properties,
 			FactoryHelperSettings settings,
 			CodeNamespace importNameSpace,
 			CodeMemberMethod container,
 			CodeExpression target)
 		{
-			//Key = Column Name
-			//Value = 
-			//Value 1 = MethodName
-			//Value 2 = Type
-
-			foreach (var propertyInfoCache in sourceType.GetClassInfo().PropertyInfoCaches.Values)
+			foreach (var propertyInfoCache in properties.Values)
 			{
 				propertyInfoCache.Refresh();
 
@@ -292,63 +287,89 @@ namespace JPB.DataAccess.DbInfoConfig
 			}
 		}
 
-		public static CodeMemberMethod GenerateTypeConstructor(
-			IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
+		public static void GenerateBody(Type sourceType,
+			FactoryHelperSettings settings,
+			CodeNamespace importNameSpace,
+			CodeMemberMethod container,
+			CodeExpression target)
+		{
+			GenerateBody(sourceType.GetClassInfo().PropertyInfoCaches, settings, importNameSpace, container, target);
+		}
+
+		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn, string altNamespace)
 		{
 			//Key = Column Name
 			//Value = 
-			//Value 1 = MethodName
+			//Value 1 = PropName
 			//Value 2 = Type
 
 			var codeConstructor = GenerateTypeConstructor();
 			var config = new DbConfig();
 
-			foreach (var columInfoModel in propertyToDbColumn)
+			var fakeProps = propertyToDbColumn.Select(f =>
 			{
-				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
-					new CodePrimitiveExpression(columInfoModel.Key));
+				var dbPropertyInfoCache = new DbPropertyInfoCache();
 
-				var baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
-				var refToProperty = new CodeVariableReferenceExpression(columInfoModel.Value.Item1);
-
-				if (columInfoModel.Value.Item2 == typeof(string))
+				if (f.Key != f.Value.Item1)
 				{
-					baseType = typeof(string);
+					dbPropertyInfoCache.AttributeInfoCaches.Add(new DbAttributeInfoCache(new ForModelAttribute(f.Key)));
 				}
 
-				if (baseType != null)
-				{
-					var variableName = columInfoModel.Key.ToLower();
-					var uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
-					var bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
-					var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
-					var checkForDbNull = new CodeConditionStatement();
-					checkForDbNull.Condition = new CodeBinaryOperatorExpression(uncastLocalVariableRef,
-						CodeBinaryOperatorType.IdentityEquality,
-						new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"));
+				dbPropertyInfoCache.PropertyName = f.Value.Item1;
+				dbPropertyInfoCache.PropertyType = f.Value.Item2;
 
-					var setToNull = new CodeAssignStatement(refToProperty,
-						new CodeDefaultValueExpression(
-							new CodeTypeReference(baseType)));
-					var setToValue = new CodeAssignStatement(refToProperty,
-						new CodeCastExpression(
-							new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
-							uncastLocalVariableRef));
-					checkForDbNull.TrueStatements.Add(setToNull);
-					checkForDbNull.FalseStatements.Add(setToValue);
-					codeConstructor.Statements.Add(bufferVariable);
-					codeConstructor.Statements.Add(buffAssignment);
-					codeConstructor.Statements.Add(checkForDbNull);
-				}
-				else
-				{
-					CodeExpression castExp = new CodeCastExpression(
-						new CodeTypeReference(columInfoModel.Value.Item2, CodeTypeReferenceOptions.GenericTypeParameter),
-						codeIndexerExpression);
-					var setExpr = new CodeAssignStatement(refToProperty, castExp);
-					codeConstructor.Statements.Add(setExpr);
-				}
-			}
+				return dbPropertyInfoCache;
+			}).ToDictionary(f => f.PropertyName);
+
+			GenerateBody(fakeProps, new FactoryHelperSettings(), new CodeNamespace(altNamespace), codeConstructor, new CodeThisReferenceExpression());
+
+
+			//foreach (var columInfoModel in propertyToDbColumn)
+			//{
+			//	var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
+			//		new CodePrimitiveExpression(columInfoModel.Key));
+
+			//	var baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
+			//	var refToProperty = new CodeVariableReferenceExpression(columInfoModel.Value.Item1);
+
+			//	if (columInfoModel.Value.Item2 == typeof(string))
+			//	{
+			//		baseType = typeof(string);
+			//	}
+
+			//	if (baseType != null)
+			//	{
+			//		var variableName = columInfoModel.Key.ToLower();
+			//		var uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
+			//		var bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
+			//		var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
+			//		var checkForDbNull = new CodeConditionStatement();
+			//		checkForDbNull.Condition = new CodeBinaryOperatorExpression(uncastLocalVariableRef,
+			//			CodeBinaryOperatorType.IdentityEquality,
+			//			new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"));
+
+			//		var setToNull = new CodeAssignStatement(refToProperty,
+			//			new CodeDefaultValueExpression(
+			//				new CodeTypeReference(baseType)));
+			//		var setToValue = new CodeAssignStatement(refToProperty,
+			//			new CodeCastExpression(
+			//				new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
+			//				uncastLocalVariableRef));
+			//		checkForDbNull.TrueStatements.Add(setToNull);
+			//		checkForDbNull.FalseStatements.Add(setToValue);
+			//		codeConstructor.Statements.Add(bufferVariable);
+			//		codeConstructor.Statements.Add(buffAssignment);
+			//		codeConstructor.Statements.Add(checkForDbNull);
+			//	}
+			//	else
+			//	{
+			//		CodeExpression castExp = new CodeCastExpression(
+			//			new CodeTypeReference(columInfoModel.Value.Item2, CodeTypeReferenceOptions.GenericTypeParameter),
+			//			codeIndexerExpression);
+			//		var setExpr = new CodeAssignStatement(refToProperty, castExp);
+			//		codeConstructor.Statements.Add(setExpr);
+			//	}
+			//}
 			return codeConstructor;
 		}
 
@@ -522,14 +543,9 @@ namespace JPB.DataAccess.DbInfoConfig
 				il.Emit(OpCodes.Call, targetType.GetMethod("Factory"));
 				il.Emit(OpCodes.Ret);
 			}
-	
+
 			var func = (Func<IDataRecord, object>)dm.CreateDelegate(typeof(Func<IDataRecord, object>));
 			return func;
-		}
-
-		public static object a(IDataRecord z)
-		{
-			return e.function(z);
 		}
 
 		public static T Cast<T>(object o)

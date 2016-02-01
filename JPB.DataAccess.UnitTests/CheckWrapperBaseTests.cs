@@ -393,39 +393,39 @@ namespace JPB.DataAccess.UnitTests
 			Assert.AreNotEqual(expectedUser.User_ID, default(long));
 		}
 
-		[TestMethod]
-		public void ProcedureParamLessTest()
-		{
-			var expectedUser = expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
+		//[TestMethod]
+		//public void ProcedureParamLessTest()
+		//{
+		//	var expectedUser = expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
-			Assert.IsNotNull(expectedUser);
-			Assert.AreNotEqual(expectedUser.Count, 0);
+		//	Assert.IsNotNull(expectedUser);
+		//	Assert.AreNotEqual(expectedUser.Count, 0);
 
-			var refSelect = expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.UserTable)));
-			Assert.AreEqual(expectedUser.Count, refSelect);
-		}
+		//	var refSelect = expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.UserTable)));
+		//	Assert.AreEqual(expectedUser.Count, refSelect);
+		//}
 
-		[TestMethod]
-		public void ProcedureParamTest()
-		{
-			RangeInsertTest();
-			//const int procParamA = 5;
+		//[TestMethod]
+		//public void ProcedureParamTest()
+		//{
+		//	RangeInsertTest();
+		//	//const int procParamA = 5;
 
-			var expectedUser =
-				expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams()
-				{
-				});
+		//	var expectedUser =
+		//		expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams()
+		//		{
+		//		});
 
-			Assert.IsNotNull(expectedUser);
-			Assert.AreNotEqual(expectedUser.Count, 0);
+		//	Assert.IsNotNull(expectedUser);
+		//	Assert.AreNotEqual(expectedUser.Count, 0);
 
-			//var refSelect =
-			//    expectWrapper.Database.Run(
-			//        s =>
-			//            s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0} us WHERE {1} > us.User_ID", UsersMeta.UserTable,
-			//                procParamA)));
-			//Assert.AreEqual(expectedUser.Count, refSelect);
-		}
+		//	//var refSelect =
+		//	//    expectWrapper.Database.Run(
+		//	//        s =>
+		//	//            s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0} us WHERE {1} > us.User_ID", UsersMeta.UserTable,
+		//	//                procParamA)));
+		//	//Assert.AreEqual(expectedUser.Count, refSelect);
+		//}
 
 
 		[TestMethod]

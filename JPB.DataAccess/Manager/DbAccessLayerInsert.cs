@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Manager
@@ -86,7 +87,7 @@ namespace JPB.DataAccess.Manager
 
 			for (var i = 0; i < entrys.Count(); i++)
 			{
-				var singelCommand = _CreateInsert(type, entrys[i], db);
+				var singelCommand = CreateInsert(type, entrys[i], db);
 
 				if (insertRange == null)
 				{
@@ -113,10 +114,8 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="entry" />
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand _CreateInsert(Type type, object entry, IDatabase db)
+		public static IDbCommand _CreateInsert(DbClassInfoCache classInfo, object entry, IDatabase db)
 		{
-			var classInfo = type.GetClassInfo();
-
 			var ignore =
 				classInfo
 					.PropertyInfoCaches
@@ -125,19 +124,19 @@ namespace JPB.DataAccess.Manager
 					.Select(s => s.DbName)
 					.ToArray();
 
-			var propertyInfos = type.FilterDbSchemaMapping(ignore).ToArray();
-			var csvprops = type.CreatePropertyCsv(ignore);
+			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
+			var csvprops = classInfo.CreatePropertyCsv(ignore);
 
 			var values = "";
 			for (var index = 0; index < propertyInfos.Length; index++)
 				values = values + ("@" + index + ",");
 			values = values.Remove(values.Length - 1);
-			var query = "INSERT INTO " + type.GetTableName() + " ( " + csvprops + " ) VALUES ( " + values + " )";
+			var query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
 
-			var orignialProps = type.GetPropertysViaRefection(ignore).ToArray();
+			var orignialProps = classInfo.GetPropertysViaRefection(ignore).ToArray();
 
 			ValidateEntity(entry);
-			return db.CreateCommandWithParameterValues(type, query, orignialProps, entry);
+			return db.CreateCommandWithParameterValues(classInfo.Type, query, orignialProps, entry);
 		}
 
 		/// <summary>
@@ -150,8 +149,10 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public static IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
 		{
-			return type.CreateCommandOfClassAttribute<InsertFactoryMethodAttribute>(entry, db,
-				(e, f) => _CreateInsert(type, e, f), parameter);
+			return CreateInsertQueryFactory(type.GetClassInfo(), entry, db, parameter);
+
+			//return type.CreateCommandOfClassAttribute<InsertFactoryMethodAttribute>(entry, db,
+			//	(e, f) => _CreateInsert(type, e, f), parameter);
 		}
 
 		/// <summary>

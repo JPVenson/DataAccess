@@ -30,6 +30,16 @@ namespace JPB.DataAccess.Manager
 		private IDatabase _database;
 
 		/// <summary>
+		/// Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the instance. This field overrides 
+		/// </summary>
+		public static object DefaultAssertionObject;
+
+		/// <summary>
+		/// When specifying an Long as DefaultAssertionObject the PocoPkComparer will use instedt the value casted as int when the property is int instedt of Long and vice versa (more Rewrite operations may follow)
+		/// </summary>
+		public static bool DefaultAssertionObjectRewrite { get; set; }
+
+		/// <summary>
 		///     Enables the automatic creation of QueryDebugger objects on each created IDbCommand
 		/// </summary>
 		public static bool Debugger { get; set; }

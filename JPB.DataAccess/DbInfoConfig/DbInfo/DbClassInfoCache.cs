@@ -36,6 +36,19 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public override IClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument> Init(Type type, bool anon = false)
 		{
 			var item = base.Init(type, anon);
+			foreach (var dbPropertyInfoCach in PropertyInfoCaches)
+			{
+				dbPropertyInfoCach.Value.DeclaringClass = this;
+			}
+			foreach (var dbPropertyInfoCach in MethodInfoCaches)
+			{
+				dbPropertyInfoCach.DeclaringClass = this;
+			}
+			foreach (var dbPropertyInfoCach in ConstructorInfoCaches)
+			{
+				dbPropertyInfoCach.DeclaringClass = this;
+			}
+
 			Refresh(true);
 			return item;
 		}

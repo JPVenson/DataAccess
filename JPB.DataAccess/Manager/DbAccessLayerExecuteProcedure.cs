@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.Manager
@@ -22,41 +23,41 @@ namespace JPB.DataAccess.Manager
 			//not that cool maybe move this to another place or using the exisiting mehtods
 			DbTypeMap = new Dictionary<Type, DbType>();
 
-			DbTypeMap[typeof (byte)] = DbType.Byte;
-			DbTypeMap[typeof (sbyte)] = DbType.SByte;
-			DbTypeMap[typeof (short)] = DbType.Int16;
-			DbTypeMap[typeof (ushort)] = DbType.UInt16;
-			DbTypeMap[typeof (int)] = DbType.Int32;
-			DbTypeMap[typeof (uint)] = DbType.UInt32;
-			DbTypeMap[typeof (long)] = DbType.Int64;
-			DbTypeMap[typeof (ulong)] = DbType.UInt64;
-			DbTypeMap[typeof (float)] = DbType.Single;
-			DbTypeMap[typeof (double)] = DbType.Double;
-			DbTypeMap[typeof (decimal)] = DbType.Decimal;
-			DbTypeMap[typeof (bool)] = DbType.Boolean;
-			DbTypeMap[typeof (string)] = DbType.String;
-			DbTypeMap[typeof (char)] = DbType.StringFixedLength;
-			DbTypeMap[typeof (Guid)] = DbType.Guid;
-			DbTypeMap[typeof (DateTime)] = DbType.DateTime;
-			DbTypeMap[typeof (DateTimeOffset)] = DbType.DateTimeOffset;
+			DbTypeMap[typeof(byte)] = DbType.Byte;
+			DbTypeMap[typeof(sbyte)] = DbType.SByte;
+			DbTypeMap[typeof(short)] = DbType.Int16;
+			DbTypeMap[typeof(ushort)] = DbType.UInt16;
+			DbTypeMap[typeof(int)] = DbType.Int32;
+			DbTypeMap[typeof(uint)] = DbType.UInt32;
+			DbTypeMap[typeof(long)] = DbType.Int64;
+			DbTypeMap[typeof(ulong)] = DbType.UInt64;
+			DbTypeMap[typeof(float)] = DbType.Single;
+			DbTypeMap[typeof(double)] = DbType.Double;
+			DbTypeMap[typeof(decimal)] = DbType.Decimal;
+			DbTypeMap[typeof(bool)] = DbType.Boolean;
+			DbTypeMap[typeof(string)] = DbType.String;
+			DbTypeMap[typeof(char)] = DbType.StringFixedLength;
+			DbTypeMap[typeof(Guid)] = DbType.Guid;
+			DbTypeMap[typeof(DateTime)] = DbType.DateTime;
+			DbTypeMap[typeof(DateTimeOffset)] = DbType.DateTimeOffset;
 
-			DbTypeMap[typeof (byte[])] = DbType.Binary;
-			DbTypeMap[typeof (byte?)] = DbType.Byte;
-			DbTypeMap[typeof (sbyte?)] = DbType.SByte;
-			DbTypeMap[typeof (short?)] = DbType.Int16;
-			DbTypeMap[typeof (ushort?)] = DbType.UInt16;
-			DbTypeMap[typeof (int?)] = DbType.Int32;
-			DbTypeMap[typeof (uint?)] = DbType.UInt32;
-			DbTypeMap[typeof (long?)] = DbType.Int64;
-			DbTypeMap[typeof (ulong?)] = DbType.UInt64;
-			DbTypeMap[typeof (float?)] = DbType.Single;
-			DbTypeMap[typeof (double?)] = DbType.Double;
-			DbTypeMap[typeof (decimal?)] = DbType.Decimal;
-			DbTypeMap[typeof (bool?)] = DbType.Boolean;
-			DbTypeMap[typeof (char?)] = DbType.StringFixedLength;
-			DbTypeMap[typeof (Guid?)] = DbType.Guid;
-			DbTypeMap[typeof (DateTime?)] = DbType.DateTime;
-			DbTypeMap[typeof (DateTimeOffset?)] = DbType.DateTimeOffset;
+			DbTypeMap[typeof(byte[])] = DbType.Binary;
+			DbTypeMap[typeof(byte?)] = DbType.Byte;
+			DbTypeMap[typeof(sbyte?)] = DbType.SByte;
+			DbTypeMap[typeof(short?)] = DbType.Int16;
+			DbTypeMap[typeof(ushort?)] = DbType.UInt16;
+			DbTypeMap[typeof(int?)] = DbType.Int32;
+			DbTypeMap[typeof(uint?)] = DbType.UInt32;
+			DbTypeMap[typeof(long?)] = DbType.Int64;
+			DbTypeMap[typeof(ulong?)] = DbType.UInt64;
+			DbTypeMap[typeof(float?)] = DbType.Single;
+			DbTypeMap[typeof(double?)] = DbType.Double;
+			DbTypeMap[typeof(decimal?)] = DbType.Decimal;
+			DbTypeMap[typeof(bool?)] = DbType.Boolean;
+			DbTypeMap[typeof(char?)] = DbType.StringFixedLength;
+			DbTypeMap[typeof(Guid?)] = DbType.Guid;
+			DbTypeMap[typeof(DateTime?)] = DbType.DateTime;
+			DbTypeMap[typeof(DateTimeOffset?)] = DbType.DateTimeOffset;
 		}
 
 		/// <summary>
@@ -65,7 +66,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void ExecuteProcedureNonResult<T>(T procParam)
 		{
-			ExecuteProcedureNonResult(typeof (T), procParam);
+			ExecuteProcedureNonResult(typeof(T), procParam);
 		}
 
 		/// <summary>
@@ -73,7 +74,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public void ExecuteProcedureNonResult(Type type, object procParam)
 		{
-			var command = CreateProcedureCall(type, procParam, Database);
+			var command = CreateProcedureCall(type.GetClassInfo(), procParam, Database);
 			Database.ExecuteNonQuery(command);
 		}
 
@@ -84,7 +85,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="TE">The result</typeparam>
 		public List<TE> ExecuteProcedure<T, TE>(T procParam)
 		{
-			return ExecuteProcedure(typeof (T), typeof (TE), procParam).Cast<TE>().ToList();
+			return ExecuteProcedure(typeof(T), typeof(TE), procParam).Cast<TE>().ToList();
 		}
 
 		/// <summary>
@@ -92,7 +93,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public List<object> ExecuteProcedure(Type procParamType, Type resultType, object procParam)
 		{
-			var command = CreateProcedureCall(procParamType, procParam, Database);
+			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
 			var typeInfo = resultType.GetClassInfo();
 
 			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
@@ -105,21 +106,21 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public List<object> ExecuteProcedurePrimetiv(Type procParamType, Type resultType, object procParam)
 		{
-			var command = CreateProcedureCall(procParamType, procParam, Database);
+			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
 			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
 				.Select(dataRecord => dataRecord[0])
 				.ToList();
 		}
 
-		private static IDbCommand CreateProcedureCall(Type procParamType, object procParam, IDatabase db)
+		private static IDbCommand CreateProcedureCall(DbClassInfoCache procParamType, object procParam, IDatabase db)
 		{
 			var sb = new StringBuilder();
 			sb.Append("EXECUTE ");
-			sb.Append(procParamType.GetTableName());
+			sb.Append(procParamType.TableName);
 			sb.Append(" ");
 			var procParams = CreateProcedureHeader(procParamType).ToArray();
 			var count = 0;
-			foreach (IQueryParameter queryParameter in procParams)
+			foreach (var queryParameter in procParams)
 			{
 				count++;
 				sb.Append(queryParameter.Name.CheckParamter());
@@ -134,18 +135,18 @@ namespace JPB.DataAccess.Manager
 			return procedureProcessor.CreateCommand(procParam, db);
 		}
 
-		private static IEnumerable<IQueryParameter> CreateProcedureHeader(Type t)
+		private static IEnumerable<IQueryParameter> CreateProcedureHeader(DbClassInfoCache type)
 		{
 			return
-				t.GetPropertiesEx()
+				type.PropertyInfoCaches
 					.Select(
-						propertyInfo => new QueryParameter(t.GetLocalToDbSchemaMapping(propertyInfo.Name), propertyInfo.PropertyType));
+						propertyInfo => new QueryParameter(propertyInfo.Value.DbName, propertyInfo.Value.PropertyType));
 		}
 
 		private interface IProcedureProcessor
 		{
 			string Query { get; }
-			Type TargetType { set; }
+			DbClassInfoCache TargetType { set; }
 			IEnumerable<IQueryParameter> QueryParameters { get; set; }
 			IDbCommand CreateCommand(object target, IDatabase db);
 		}
@@ -161,19 +162,19 @@ namespace JPB.DataAccess.Manager
 			public string Query { get; private set; }
 			public IEnumerable<IQueryParameter> QueryParameters { get; set; }
 
-			public Type TargetType { set; get; }
+			public DbClassInfoCache TargetType { set; get; }
 
 			public IDbCommand CreateCommand(object target, IDatabase db)
 			{
 				if (TargetType == null)
-					TargetType = target.GetType();
+					TargetType = target.GetType().GetClassInfo();
 
 				var dbCommand = db.CreateCommand(Query);
 
-				foreach (IQueryParameter queryParameter in QueryParameters)
+				foreach (var queryParameter in QueryParameters)
 				{
 					var realName = TargetType.GetLocalToDbSchemaMapping(queryParameter.Name);
-					var value = TargetType.GetProperty(realName).GetValue(target);
+					var value = TargetType.PropertyInfoCaches[realName].Getter.Invoke(target);
 					dbCommand.Parameters.AddWithValue(queryParameter.Name.CheckParamter(), value, db);
 				}
 

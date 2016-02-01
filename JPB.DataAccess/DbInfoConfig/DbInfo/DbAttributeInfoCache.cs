@@ -6,11 +6,6 @@ using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
-	public class DbMethodArgument : MethodArgsInfoCache<DbAttributeInfoCache>
-	{
-		 
-	}
-
 	/// <summary>
 	/// </summary>
 	public class DbAttributeInfoCache : AttributeInfoCache
@@ -61,9 +56,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			if (firstOrDefault == null)
 				return null;
 			if (typeof(TAttr) != firstOrDefault.Attribute.GetType())
-				throw new ArgumentException(string.Format("Wrong type supplyed expected {0}", typeof(TAttr).Name));
+				throw new ArgumentException(string.Format("Wrong type supplyed expected '{0}' got '{1}'", typeof(TAttr).Name, firstOrDefault.Attribute.GetType().Name));
 
-			return new DbAttributeInfoCache<TAttr>(firstOrDefault as AttributeInfoCache);
+			return new DbAttributeInfoCache<TAttr>(firstOrDefault);
 		}
 	}
 }

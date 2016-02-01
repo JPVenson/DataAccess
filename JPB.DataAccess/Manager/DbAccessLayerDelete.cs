@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Manager
@@ -13,18 +15,19 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(T entry)
 		{
-			var deleteCommand = typeof (T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, Database,
-				CreateDelete);
+			var deleteCommand = CreateDeleteQueryFactory(entry.GetType().GetClassInfo(), entry, Database);
 			RaiseDelete(entry, deleteCommand, Database);
 			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}
 
-		internal static IDbCommand CreateDelete<T>(T entry, IDatabase db)
+		internal static IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry, IDatabase db)
 		{
-			var type = typeof (T);
-			var proppk = type.GetPK();
-			var query = "DELETE FROM " + type.GetTableName() + " WHERE " + proppk + " = @0";
-			return db.CreateCommandWithParameterValues(query, new[] {entry.GetPK()});
+			if (classInfo.PrimaryKeyProperty == null)
+				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.ClassName));
+
+			var proppk = classInfo.PrimaryKeyProperty.DbName;
+			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
+			return db.CreateCommandWithParameterValues(query, new[] { classInfo.PrimaryKeyProperty.Getter.Invoke(entry) });
 		}
 
 		/// <summary>
@@ -34,8 +37,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public static void Delete<T>(T entry, IDatabase db, params object[] parameter)
 		{
-			var deleteCommand = typeof (T).CheckInstanceForAttriute<T, DeleteFactoryMethodAttribute>(entry, db,
-				CreateDelete, parameter);
+			var deleteCommand = CreateDeleteQueryFactory(entry.GetType().GetClassInfo(), entry, db, parameter);
 			RaiseDelete(entry, deleteCommand, db);
 			db.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}

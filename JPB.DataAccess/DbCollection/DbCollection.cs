@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.DbCollection
@@ -120,7 +121,7 @@ namespace JPB.DataAccess.DbCollection
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return ((IEnumerable) _internalCollection).GetEnumerator();
+			return ((IEnumerable)_internalCollection).GetEnumerator();
 		}
 
 		public void Add(T item)
@@ -215,10 +216,10 @@ namespace JPB.DataAccess.DbCollection
 				switch (pair.State)
 				{
 					case CollectionStates.Added:
-						tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof (T), pair.Value, _layer.Database);
+						tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof(T), pair.Value, _layer.Database);
 						break;
 					case CollectionStates.Removed:
-						tempCommand = DbAccessLayer.CreateDelete(pair.Value, _layer.Database);
+						tempCommand = DbAccessLayer._CreateDelete(typeof(T).GetClassInfo(), pair.Value, _layer.Database);
 						removed.Add(pair.Value);
 						break;
 					case CollectionStates.Unchanged:
@@ -237,7 +238,7 @@ namespace JPB.DataAccess.DbCollection
 				}
 			}
 
-			var results = _layer.ExecuteMARS(bulk, typeof (T)).SelectMany(s => s).Cast<T>().ToArray();
+			var results = _layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
 			//Added 
 			var added = _internalCollection.Where(s => s.State == CollectionStates.Added).ToArray();
 			for (var i = 0; i < added.Length; i++)

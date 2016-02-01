@@ -82,25 +82,6 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Gets the table name from an Entity
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns>The class name or if contains the ForModelAttribute name</returns>
-		public static string GetTableName<T>()
-		{
-			return typeof (T).GetTableName();
-		}
-
-		/// <summary>
-		///     Gets the table name from an Entity
-		/// </summary>
-		/// <returns>The class name or if contains the ForModelAttribute name</returns>
-		public static string GetTableName(this Type type)
-		{
-			return type.GetClassInfo().TableName;
-		}
-
-		/// <summary>
 		///     Gets the Value from a Paramter with Conversion if Nessesary
 		/// </summary>
 		/// <returns></returns>
@@ -166,8 +147,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static string GetPKPropertyName(this Type type)
 		{
-			var name = type.GetPropertiesEx().FirstOrDefault(CheckForPK);
-			return name == null ? null : name.Name;
+			return type.GetClassInfo().PrimaryKeyProperty.PropertyName;
 		}
 
 		/// <summary>
@@ -176,17 +156,16 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static string GetPK(this Type type)
 		{
-			var name = type.GetPropertiesEx().FirstOrDefault(CheckForPK);
-			return type.GetLocalToDbSchemaMapping(name == null ? null : name.Name);
+			return type.GetClassInfo().PrimaryKeyProperty.DbName;
 		}
 
 		/// <summary>
 		///     Returns All forgin keys of the given type
 		/// </summary>
 		/// <returns></returns>
-		public static PropertyInfo[] GetFKs(this Type type)
+		public static DbPropertyInfoCache[] GetFKs(this Type type)
 		{
-			return type.GetPropertiesEx().Where(CheckForFK).ToArray();
+			return type.GetClassInfo().PropertyInfoCaches.Where(f => f.Value.ForginKeyAttribute != null).Select(f => f.Value).ToArray();
 		}
 
 		/// <summary>
@@ -195,64 +174,72 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static string GetFK(this Type type, Type fkType)
 		{
-			var prop = type.GetPropertiesEx().FirstOrDefault(info =>
-			{
-				if (!info.GetGetMethod().IsVirtual)
-				{
-					return false;
-				}
+			var hasFk = type.GetClassInfo()
+				.PropertyInfoCaches
+				.Select(f => f.Value)
+				.Where(f => f.ForginKeyAttribute != null)
+				.FirstOrDefault(f => f.PropertyType == fkType);
+			if (hasFk != null)
+				return hasFk.PropertyName;
+			return null;
 
-				if (info.PropertyType == fkType)
-					return true;
-				return false;
-			});
-			return prop == null ? null : prop.Name;
+			//var prop = type.GetPropertiesEx().FirstOrDefault(info =>
+			//{
+			//	if (!info.GetGetMethod().IsVirtual)
+			//	{
+			//		return false;
+			//	}
+
+			//	if (info.PropertyType == fkType)
+			//		return true;
+			//	return false;
+			//});
+			//return prop == null ? null : prop.Name;
 		}
 
 		/// <summary>
 		///     Get the forgin key based that contains the
-		///     <paramref name="name" />
+		///     <paramref name="databaseName" />
 		/// </summary>
 		/// <returns></returns>
-		public static string GetFK(this Type type, string name)
+		public static string GetFK(this Type type, string databaseName)
 		{
-			name = type.GetDbToLocalSchemaMapping(name);
-			var prop = type.GetPropertiesEx().FirstOrDefault(info => CheckForFK(info, name));
-			return prop == null ? null : prop.Name;
+			var classInfo = type.GetClassInfo();
+			return classInfo.GetDbToLocalSchemaMapping(databaseName);
 		}
 
 		/// <summary>
 		///     retruns the Value of
-		///     <paramref name="name" />
+		///     <paramref name="databaseName" />
 		///     in the type of
 		///     <paramref name="source" />
 		/// </summary>
 		/// <typeparam name="E"></typeparam>
 		/// <returns></returns>
-		public static E GetFK<E>(this object source, string name)
+		public static E GetFK<E>(this object source, string databaseName)
 		{
 			var type = source.GetType();
-			string pk = type.GetFK(name);
+			string pk = type.GetFK(databaseName);
 			DbPropertyInfoCache val;
 			type.GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
-			return (E) val.GetConvertedValue(source);
+			return (E)val.GetConvertedValue(source);
 		}
 
 		/// <summary>
 		///     retruns the Value of
-		///     <paramref name="name" />
+		///     <paramref name="databaseName" />
 		///     in the type of
 		///     <typeparamref name="T"></typeparamref>
 		/// </summary>
 		/// <typeparam name="TE"></typeparam>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static TE GetFK<T, TE>(this T source, string name)
+		public static TE GetFK<T, TE>(this T source, string databaseName)
 		{
-			string pk = typeof (T).GetFK(name);
+			string pk = typeof(T).GetFK(databaseName);
 			DbPropertyInfoCache val;
-			typeof (T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
-			return (TE) val.GetConvertedValue(source);
+			typeof(T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			return (TE)val.GetConvertedValue(source);
 		}
 
 		internal static object GetConvertedValue(this DbPropertyInfoCache source, object instance)
@@ -302,11 +289,10 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static E GetPK<T, E>(this T source)
 		{
-			string pk = typeof (T).GetPKPropertyName();
+			string pk = typeof(T).GetPKPropertyName();
 			DbPropertyInfoCache val;
-			typeof (T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
-			return (E) val
-				.GetConvertedValue(source);
+			typeof(T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			return (E)val.GetConvertedValue(source);
 		}
 
 		/// <summary>
@@ -315,11 +301,11 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static bool CheckForListInterface(this PropertyInfo info)
 		{
-			if (info.PropertyType == typeof (string))
+			if (info.PropertyType == typeof(string))
 				return false;
-			if (info.PropertyType.GetInterface(typeof (IEnumerable).Name) != null)
+			if (info.PropertyType.GetInterface(typeof(IEnumerable).Name) != null)
 				return true;
-			return info.PropertyType.GetInterface(typeof (IEnumerable<>).Name) != null;
+			return info.PropertyType.GetInterface(typeof(IEnumerable<>).Name) != null;
 		}
 
 		/// <summary>
@@ -328,11 +314,11 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static bool CheckForListInterface(this DbPropertyInfoCache info)
 		{
-			if (info.PropertyType == typeof (string))
+			if (info.PropertyType == typeof(string))
 				return false;
-			if (info.PropertyType.GetInterface(typeof (IEnumerable).Name) != null)
+			if (info.PropertyType.GetInterface(typeof(IEnumerable).Name) != null)
 				return true;
-			return info.PropertyType.GetInterface(typeof (IEnumerable<>).Name) != null;
+			return info.PropertyType.GetInterface(typeof(IEnumerable<>).Name) != null;
 		}
 
 		/// <summary>
@@ -342,26 +328,26 @@ namespace JPB.DataAccess
 		public static bool CheckForListInterface(this object info)
 		{
 			return !(info is string) &&
-			       info.GetType().GetInterface(typeof (IEnumerable).Name) != null &&
-			       info.GetType().GetInterface(typeof (IEnumerable<>).Name) != null;
+				   info.GetType().GetInterface(typeof(IEnumerable).Name) != null &&
+				   info.GetType().GetInterface(typeof(IEnumerable<>).Name) != null;
 		}
 
 		/// <summary>
 		///     returns all propertys that are marked as Forgin keys
 		/// </summary>
 		/// <returns></returns>
-		public static PropertyInfo[] GetNavigationProps(this Type type)
+		public static DbPropertyInfoCache[] GetNavigationProps(this Type type)
 		{
-			return type.GetPropertiesEx().Where(s => s.GetGetMethod(false).IsVirtual).ToArray();
+			return type.GetClassInfo().PropertyInfoCaches.Where(s => s.Value.ForginKeyAttribute != null).Select(s => s.Value).ToArray();
 		}
 
 		/// <summary>
 		///     returns all propertys that are marked as Forgin keys
 		/// </summary>
 		/// <returns></returns>
-		public static PropertyInfo[] GetNavigationProps<T>()
+		public static DbPropertyInfoCache[] GetNavigationProps<T>()
 		{
-			return GetNavigationProps(typeof (T));
+			return GetNavigationProps(typeof(T));
 		}
 
 		/// <summary>
@@ -371,7 +357,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static T LoadNavigationProps<T>(this T source, IDatabase accessLayer, bool egarloading = false)
 		{
-			return (T) LoadNavigationProps(source as object, accessLayer, egarloading);
+			return (T)LoadNavigationProps(source as object, accessLayer, egarloading);
 		}
 
 		/// <summary>
@@ -381,7 +367,7 @@ namespace JPB.DataAccess
 		public static object LoadNavigationProps(this object source, IDatabase accessLayer, bool egarLoading)
 		{
 			//Get nav Propertys
-			foreach (PropertyInfo propertyInfo in GetNavigationProps(source.GetType()))
+			foreach (var propertyInfo in GetNavigationProps(source.GetType()))
 			{
 				//var firstOrDefault = source.GetFK<long>(propertyInfo.ClassName);
 				IDbCommand sqlCommand;
@@ -430,11 +416,11 @@ namespace JPB.DataAccess
 				if (CheckForListInterface(orDefault) && CheckForListInterface(propertyInfo))
 				{
 					var constructorInfo =
-						typeof (DbCollection<>).MakeGenericType(targetType).GetConstructor(new[] {typeof (IEnumerable)});
+						typeof(DbCollection<>).MakeGenericType(targetType).GetConstructor(new[] { typeof(IEnumerable) });
 
 					Debug.Assert(constructorInfo != null, "constructorInfo != null");
-					var reproCollection = constructorInfo.Invoke(new object[] {orDefault});
-					propertyInfo.SetValue(source, reproCollection, null);
+					var reproCollection = constructorInfo.Invoke(new object[] { orDefault });
+					propertyInfo.Setter.Invoke(source, reproCollection);
 					foreach (object item in orDefault)
 						item.LoadNavigationProps(accessLayer);
 				}
@@ -442,7 +428,7 @@ namespace JPB.DataAccess
 					continue;
 
 				var @default = orDefault.FirstOrDefault();
-				propertyInfo.SetValue(source, @default, null);
+				propertyInfo.Setter.Invoke(source, @default);
 				@default.LoadNavigationProps(accessLayer);
 			}
 
@@ -459,7 +445,7 @@ namespace JPB.DataAccess
 		public static T SetPropertysViaReflection<T>(DbClassInfoCache info, IDataRecord reader)
 			where T : class
 		{
-			return (T) info.SetPropertysViaReflection(reader);
+			return (T)info.SetPropertysViaReflection(reader);
 		}
 
 		/// <summary>
@@ -477,6 +463,7 @@ namespace JPB.DataAccess
 		/// <summary>
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
+		[Obsolete("This mehtod is replaced by several runtime equal ones. It may be replaced or updated. But it will change that is for sure")]
 		public static object SetPropertysViaReflection(
 			object instance,
 			DbClassInfoCache info,
@@ -569,21 +556,21 @@ namespace JPB.DataAccess
 							if (genericArguments.Type.IsClass && genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
 							{
 								var caster =
-									typeof (DbCollection<>).MakeGenericType(genericArguments.Type).GetConstructor(new[] {typeof (IEnumerable)});
+									typeof(DbCollection<>).MakeGenericType(genericArguments.Type).GetConstructor(new[] { typeof(IEnumerable) });
 
 								Debug.Assert(caster != null, "caster != null");
 
-								castedList = caster.Invoke(new object[] {enumerableOfItems});
+								castedList = caster.Invoke(new object[] { enumerableOfItems });
 							}
 							else
 							{
 								var caster =
-									typeof (NonObservableDbCollection<>).MakeGenericType(genericArguments.Type)
-										.GetConstructor(new[] {typeof (IEnumerable)});
+									typeof(NonObservableDbCollection<>).MakeGenericType(genericArguments.Type)
+										.GetConstructor(new[] { typeof(IEnumerable) });
 
 								Debug.Assert(caster != null, "caster != null");
 
-								castedList = caster.Invoke(new object[] {enumerableOfItems});
+								castedList = caster.Invoke(new object[] { enumerableOfItems });
 							}
 
 							property.Setter.Invoke(instance, castedList);
@@ -602,7 +589,7 @@ namespace JPB.DataAccess
 					}
 					else if (value is DBNull || value == null)
 					{
-						property.Setter.Invoke(instance, new object[] {null});
+						property.Setter.Invoke(instance, new object[] { null });
 					}
 					else
 					{
@@ -619,7 +606,7 @@ namespace JPB.DataAccess
 						property.Setter.Invoke(instance, changedType);
 					}
 				}
-					//This variable is null if we tried to find a property with the LoadNotImplimentedDynamicAttribute but did not found it
+				//This variable is null if we tried to find a property with the LoadNotImplimentedDynamicAttribute but did not found it
 				else if (instanceOfFallbackList != null)
 				{
 					//no property found Look for LoadNotImplimentedDynamicAttribute property to include it
@@ -635,7 +622,7 @@ namespace JPB.DataAccess
 								s => s.Value.AttributeInfoCaches.Any(e => e.Attribute is LoadNotImplimentedDynamicAttribute));
 						if (maybeFallbackProperty.Value != null)
 						{
-							instanceOfFallbackList = (Dictionary<string, object>) maybeFallbackProperty.Value.Getter.Invoke(instance);
+							instanceOfFallbackList = (Dictionary<string, object>)maybeFallbackProperty.Value.Getter.Invoke(instance);
 							if (instanceOfFallbackList == null)
 							{
 								instanceOfFallbackList = new Dictionary<string, object>();
@@ -670,7 +657,7 @@ namespace JPB.DataAccess
 		{
 			var t = conversion;
 
-			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof (Nullable<>))
+			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
 				if (value == null)
 				{
@@ -680,11 +667,11 @@ namespace JPB.DataAccess
 				t = Nullable.GetUnderlyingType(t);
 			}
 
-			if (typeof (Enum).IsAssignableFrom(t))
+			if (typeof(Enum).IsAssignableFrom(t))
 			{
 				// ReSharper disable once UseIsOperator.1
 				// ReSharper disable once UseMethodIsInstanceOfType
-				if (typeof (long).IsAssignableFrom(value.GetType()))
+				if (typeof(long).IsAssignableFrom(value.GetType()))
 				{
 					value = Enum.ToObject(t, value);
 				}
@@ -693,7 +680,7 @@ namespace JPB.DataAccess
 					value = Enum.Parse(t, value as string, true);
 				}
 			}
-			else if (typeof (bool).IsAssignableFrom(t))
+			else if (typeof(bool).IsAssignableFrom(t))
 			{
 				if (value is int)
 				{
@@ -705,10 +692,10 @@ namespace JPB.DataAccess
 				}
 				else if (value is bool)
 				{
-					value = (bool) value;
+					value = (bool)value;
 				}
 			}
-			else if (typeof (byte[]).IsAssignableFrom(t))
+			else if (typeof(byte[]).IsAssignableFrom(t))
 			{
 				if (value is string)
 				{
@@ -739,7 +726,7 @@ namespace JPB.DataAccess
 				constructorInfos.FirstOrDefault(s =>
 				{
 					var parameterInfos = s.GetParameters();
-					return parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof (IDataRecord);
+					return parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof(IDataRecord);
 				});
 
 			//maybe single ctor with param
@@ -747,10 +734,10 @@ namespace JPB.DataAccess
 			if (constructor != null)
 			{
 				var parameterInfos = constructor.GetParameters();
-				if (parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof (IDataRecord))
+				if (parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof(IDataRecord))
 				{
 					classInfo.FullFactory = true;
-					classInfo.Factory = s => constructor.Invoke(new object[] {s});
+					classInfo.Factory = s => constructor.Invoke(new object[] { s });
 					return classInfo.CreateInstance(reader, out fullLoaded);
 				}
 			}
@@ -772,10 +759,10 @@ namespace JPB.DataAccess
 						if (returnType != null && returnType.ParameterType == classInfo.Type)
 						{
 							if (returnParameter.Length == 1 &&
-							    returnParameter.First().ParameterType == typeof (IDataRecord))
+								returnParameter.First().ParameterType == typeof(IDataRecord))
 							{
 								classInfo.FullFactory = true;
-								classInfo.Factory = s => method.Invoke(null, new object[] {reader});
+								classInfo.Factory = s => method.Invoke(null, new object[] { reader });
 								return classInfo.CreateInstance(reader, out fullLoaded);
 							}
 						}
@@ -824,10 +811,10 @@ namespace JPB.DataAccess
 		///     Returns all Cached Propertys from a <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public static IEnumerable<string> GetPropertysViaRefection(this Type type, params string[] ignore)
+		public static IEnumerable<string> GetPropertysViaRefection(this DbClassInfoCache type, params string[] ignore)
 		{
 			return
-				type.GetClassInfo()
+				type
 					.PropertyInfoCaches.Select(f => f.Value)
 					.Where(f => !ignore.Contains(f.DbName))
 					.Select(s => s.PropertyName);

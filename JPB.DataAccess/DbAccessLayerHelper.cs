@@ -217,9 +217,9 @@ namespace JPB.DataAccess
 				return parameter as IEnumerable<IQueryParameter>;
 			}
 
-			return (from element in parameter.GetType().GetPropertiesEx()
-				let value = parameter.GetParamaterValue(element.Name)
-				select new QueryParameter {Name = element.Name.CheckParamter(), Value = value}).Cast<IQueryParameter>()
+			return (from element in parameter.GetType().GetClassInfo().PropertyInfoCaches
+				let value = parameter.GetParamaterValue(element.Key)
+					select new QueryParameter { Name = element.Key.CheckParamter(), Value = value }).Cast<IQueryParameter>()
 				.ToList();
 		}
 
@@ -227,7 +227,7 @@ namespace JPB.DataAccess
 		///     Returns all Propertys that can be loaded due reflection
 		/// </summary>
 		/// <returns></returns>
-		public static string CreatePropertyCsv(this Type type, bool ignorePk = false)
+		public static string CreatePropertyCsv(this DbClassInfoCache type, bool ignorePk = false)
 		{
 			return CreatePropertyNames(type, ignorePk).Aggregate((e, f) => e + ", " + f);
 		}
@@ -239,14 +239,14 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static string CreatePropertyCsv<T>(bool ignorePk = false)
 		{
-			return CreatePropertyCsv(typeof (T), ignorePk);
+			return CreatePropertyCsv(typeof (T).GetClassInfo(), ignorePk);
 		}
 
 		/// <summary>
 		///     Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
 		/// </summary>
 		/// <returns></returns>
-		internal static string CreatePropertyCsv(this Type type, params string[] ignore)
+		internal static string CreatePropertyCsv(this DbClassInfoCache type, params string[] ignore)
 		{
 			return FilterDbSchemaMapping(type, ignore).Aggregate((e, f) => e + ", " + f);
 		}
@@ -257,7 +257,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static string CreatePropertyCsv<T>(params string[] ignore)
 		{
-			return CreatePropertyCsv(typeof (T), ignore);
+			return CreatePropertyCsv(typeof (T).GetClassInfo(), ignore);
 		}
 
 		/// <summary>
@@ -266,9 +266,9 @@ namespace JPB.DataAccess
 		///     into the Database columns
 		/// </summary>
 		/// <returns></returns>
-		internal static IEnumerable<string> FilterDbSchemaMapping(this Type type, params string[] ignore)
+		internal static IEnumerable<string> FilterDbSchemaMapping(this DbClassInfoCache type, params string[] ignore)
 		{
-			return type.GetClassInfo().LocalToDbSchemaMapping().Where(f => !ignore.Contains(f));
+			return type.LocalToDbSchemaMapping().Where(f => !ignore.Contains(f));
 		}
 
 		/// <summary>
@@ -278,7 +278,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> FilterDbSchemaMapping<T>(params string[] ignore)
 		{
-			return FilterDbSchemaMapping(typeof (T), ignore);
+			return FilterDbSchemaMapping(typeof (T).GetClassInfo(), ignore);
 		}
 
 		internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
@@ -357,9 +357,9 @@ namespace JPB.DataAccess
 		///     Maps propertys to database of given type
 		/// </summary>
 		/// <returns></returns>
-		internal static IEnumerable<string> CreatePropertyNames(Type type, bool ignorePk = false)
+		internal static IEnumerable<string> CreatePropertyNames(DbClassInfoCache type, bool ignorePk = false)
 		{
-			return ignorePk ? FilterDbSchemaMapping(type, type.GetPK()) : FilterDbSchemaMapping(type, new string[0]);
+			return ignorePk ? FilterDbSchemaMapping(type, type.PrimaryKeyProperty.DbName) : FilterDbSchemaMapping(type, new string[0]);
 		}
 
 		/// <summary>
@@ -409,83 +409,83 @@ namespace JPB.DataAccess
 		}
 
 
-		internal static IDbCommand CreateCommandOfClassAttribute<TE>(
-			this Type type,
-			object entry,
-			IDatabase db,
-			Func<object, IDatabase, IDbCommand> fallback,
-			params object[] param)
-			where TE : DataAccessAttribute
-		{
-			//try to get a Factory method
-			//var methods =
-			//    type.GetMethods()
-			//        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
+		//internal static IDbCommand CreateCommandOfClassAttribute<TE>(
+		//	this Type type,
+		//	object entry,
+		//	IDatabase db,
+		//	Func<object, IDatabase, IDbCommand> fallback,
+		//	params object[] param)
+		//	where TE : DataAccessAttribute
+		//{
+		//	//try to get a Factory method
+		//	//var methods =
+		//	//    type.GetMethods()
+		//	//        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
 
-			var methods =
-				DbConfigHelper.GetMethods(type).Where(s => s.GetCustomAttributes(false).Any(e => e is TE)).ToArray();
+		//	var methods =
+		//		DbConfigHelper.GetMethods(type).Where(s => s.GetCustomAttributes(false).Any(e => e is TE)).ToArray();
 
-			if (methods.Any())
-			{
-				var searchMethodWithFittingParams = methods.Where(s =>
-				{
-					var parameterInfos = s.GetParameters();
+		//	if (methods.Any())
+		//	{
+		//		var searchMethodWithFittingParams = methods.Where(s =>
+		//		{
+		//			var parameterInfos = s.GetParameters();
 
-					if (parameterInfos.Length != param.Length)
-					{
-						return false;
-					}
+		//			if (parameterInfos.Length != param.Length)
+		//			{
+		//				return false;
+		//			}
 
-					for (var i = 0; i < parameterInfos.Length; i++)
-					{
-						var para = parameterInfos[i];
-						var tryParam = param[i];
-						if (tryParam == null)
-							return false;
-						if (!(para.ParameterType == para.GetType()))
-						{
-							return false;
-						}
-					}
-					return true;
-				}).ToArray();
+		//			for (var i = 0; i < parameterInfos.Length; i++)
+		//			{
+		//				var para = parameterInfos[i];
+		//				var tryParam = param[i];
+		//				if (tryParam == null)
+		//					return false;
+		//				if (!(para.ParameterType == para.GetType()))
+		//				{
+		//					return false;
+		//				}
+		//			}
+		//			return true;
+		//		}).ToArray();
 
-				if (searchMethodWithFittingParams.Length != 1)
-				{
-					return fallback(entry, db);
-				}
+		//		if (searchMethodWithFittingParams.Length != 1)
+		//		{
+		//			return fallback(entry, db);
+		//		}
 
-				var method = searchMethodWithFittingParams.Single();
+		//		var method = searchMethodWithFittingParams.Single();
 
-				//must be public static if attribute is Select
-				if (typeof (TE) != typeof (SelectFactoryMethodAttribute)
-				    || (typeof (TE) == typeof (SelectFactoryMethodAttribute) && method.IsStatic))
-				{
-					var cleanParams = param != null && param.Any() ? param : null;
-					var invoke = method.Invoke(entry, cleanParams);
-					if (invoke != null)
-					{
-						if (invoke is string && !String.IsNullOrEmpty(invoke as string))
-						{
-							return CreateCommand(db, invoke as string);
-						}
-						if (invoke is IQueryFactoryResult)
-						{
-							var result = invoke as IQueryFactoryResult;
-							return db.CreateCommandWithParameterValues(result.Query, result.Parameters);
-						}
-					}
-				}
-			}
-			return fallback(entry, db);
-		}
+		//		//must be public static if attribute is Select
+		//		if (typeof (TE) != typeof (SelectFactoryMethodAttribute)
+		//			|| (typeof (TE) == typeof (SelectFactoryMethodAttribute) && method.IsStatic))
+		//		{
+		//			var cleanParams = param != null && param.Any() ? param : null;
+		//			var invoke = method.Invoke(entry, cleanParams);
+		//			if (invoke != null)
+		//			{
+		//				if (invoke is string && !String.IsNullOrEmpty(invoke as string))
+		//				{
+		//					return CreateCommand(db, invoke as string);
+		//				}
+		//				if (invoke is IQueryFactoryResult)
+		//				{
+		//					var result = invoke as IQueryFactoryResult;
+		//					return db.CreateCommandWithParameterValues(result.Query, result.Parameters);
+		//				}
+		//			}
+		//		}
+		//	}
+		//	return fallback(entry, db);
+		//}
 
-		internal static IDbCommand CheckInstanceForAttriute<T, TE>(this Type type, T entry, IDatabase db,
-			Func<T, IDatabase, IDbCommand> fallback, params object[] param)
-			where TE : DataAccessAttribute
-		{
-			return CreateCommandOfClassAttribute<TE>(type, entry, db, (o, database) => fallback((T) o, database), param);
-		}
+		//internal static IDbCommand CheckInstanceForAttriute<T, TE>(this Type type, T entry, IDatabase db,
+		//	Func<T, IDatabase, IDbCommand> fallback, params object[] param)
+		//	where TE : DataAccessAttribute
+		//{
+		//	return CreateCommandOfClassAttribute<TE>(type, entry, db, (o, database) => fallback((T) o, database), param);
+		//}
 
 		internal static IDatabaseStrategy GenerateStrategy(this string fullValidIdentifyer, string connection)
 		{

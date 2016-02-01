@@ -106,7 +106,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder<T> Update<T>(this QueryBuilder<T> query, Type type, object obj)
 		{
-			return query.Query(DbAccessLayer.createUpdate(obj, query.Database));
+			return query.Query(DbAccessLayer._CreateUpdate(type.GetClassInfo(), obj, query.Database));
 		}
 
 		/// <summary>
@@ -120,7 +120,7 @@ namespace JPB.DataAccess.QueryBuilder
 			cteBuilder.Append("WITH ");
 			cteBuilder.Append(cteName);
 			cteBuilder.Append(" (");
-			cteBuilder.Append(!useStarOperator ? target.CreatePropertyCsv() : "*");
+			cteBuilder.Append(!useStarOperator ? target.GetClassInfo().CreatePropertyCsv() : "*");
 			cteBuilder.Append(") AS (");
 			cteBuilder.Append(DbAccessLayer.CreateSelect(target));
 			cteBuilder.Append(")");
@@ -280,8 +280,8 @@ namespace JPB.DataAccess.QueryBuilder
 		{
 			var sourcePK = source.GetFK(target);
 			var targetPK = target.GetPK();
-			var targetTable = target.GetTableName();
-			var sourceTable = source.GetTableName();
+			var targetTable = target.GetClassInfo().TableName;
+			var sourceTable = source.GetClassInfo().TableName;
 			return query.Query("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
 		}
 
@@ -307,8 +307,8 @@ namespace JPB.DataAccess.QueryBuilder
 
 			var sourcePK = source.GetFK(target);
 			var targetPK = target.GetPK();
-			var targetTable = target.GetTableName();
-			var sourceTable = source.GetTableName();
+			var targetTable = target.GetClassInfo().TableName;
+			var sourceTable = source.GetClassInfo().TableName;
 			return query.Query(mode + " JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
 		}
 
