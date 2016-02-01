@@ -1,10 +1,10 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-
 #if !DEBUG
 using System.Diagnostics;
 #endif
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 namespace JPB.DataAccess.MetaApi
 {
@@ -20,14 +20,9 @@ namespace JPB.DataAccess.MetaApi
 		internal static Boolean IsAnonymousType(this Type type)
 		{
 			//http://stackoverflow.com/questions/1650681/determining-whether-a-type-is-an-anonymous-type
-			//awesome!
 			return type.Namespace == null;
-			//Boolean hasCompilerGeneratedAttribute = type.GetCustomAttributes().Any(s => s is CompilerGeneratedAttribute);
-			//Boolean nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
-			//Boolean isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
-			//return nameContainsAnonymousType;
 		}
-
+		
 		public static string GetPropertyInfoFromLabda<TSource, TProperty>(
 			Expression<Func<TSource, TProperty>> propertyLambda)
 		{

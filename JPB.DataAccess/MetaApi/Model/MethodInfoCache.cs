@@ -36,6 +36,7 @@ namespace JPB.DataAccess.MetaApi.Model
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new TAtt().Init(s as Attribute) as TAtt).Concat(attributes));
+			Arguments = new HashSet<TArg>(MethodInfo.GetParameters().Select(s => new TArg().Init(s) as TArg));
 		}
 
 		/// <summary>
@@ -47,9 +48,10 @@ namespace JPB.DataAccess.MetaApi.Model
 		public MethodInfoCache()
 		{
 			AttributeInfoCaches = new HashSet<TAtt>();
+			Arguments = new HashSet<TArg>();
 		}
 
-		public IMethodInfoCache<TAtt, TArg> Init(MethodInfo mehtodInfo)
+		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodInfo mehtodInfo)
 		{
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");

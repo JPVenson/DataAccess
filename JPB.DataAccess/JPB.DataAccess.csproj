@@ -62,7 +62,9 @@
     <Compile Include="DbInfoConfig\ConfigHelpers.cs" />
     <Compile Include="DbInfoConfig\ConfigurationResolver.cs" />
     <Compile Include="DbInfoConfig\DbConfig.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\DbMethodArgument.cs" />
     <Compile Include="DbInfoConfig\FactoryHelper.cs" />
+    <Compile Include="Helper\PocoPkComparer.cs" />
     <Compile Include="MetaApi\Contract\IMethodArgsInfoCache.cs" />
     <Compile Include="MetaApi\Model\AttributeInfoCache.cs" />
     <Compile Include="MetaApi\Model\ClassInfoCache.cs" />

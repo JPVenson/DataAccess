@@ -22,6 +22,16 @@ namespace JPB.DataAccess.DbInfoConfig
 			ReflecionStore = new DbConfig();
 		}
 
+		/// <summary>
+		///     Anonymous type check by naming convention
+		/// </summary>
+		/// <returns></returns>
+		internal static bool IsAnonymousType(this DbClassInfoCache type)
+		{
+			//http://stackoverflow.com/questions/1650681/determining-whether-a-type-is-an-anonymous-type
+			return type.Type.Namespace == null;
+		}
+
 		internal static DbConfig ReflecionStore { get; set; }
 
 		/// <summary>
@@ -30,7 +40,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <returns></returns>
 		public static DbClassInfoCache GetClassInfo(this Type type)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type))
+			if (type.IsAnonymousType())
 				return new DbClassInfoCache(type, true); //Anonymous types does not have any Attributes
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type);
@@ -38,74 +48,68 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		internal static IEnumerable<Attribute> GetCustomAttributes(this Type type)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type))
+			if (type.IsAnonymousType())
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
 		}
 
-		internal static IEnumerable<Attribute> GetCustomAttributes(this PropertyInfo type)
+		internal static IEnumerable<Attribute> GetCustomAttributes(this DbPropertyInfoCache type)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type.DeclaringType))
+			if (IsAnonymousType(type.DeclaringClass))
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
-			var deb =
-				ReflecionStore.GetOrCreatePropertyInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
-
-			return deb;
+			return type.AttributeInfoCaches.Select(s => s.Attribute);
 		}
 
-		internal static IEnumerable<Attribute> GetCustomAttributes(this MethodInfo type)
+		internal static IEnumerable<Attribute> GetCustomAttributes(this DbMethodInfoCache type)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type.DeclaringType))
+			if (IsAnonymousType(type.DeclaringClass))
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
-			var deb = ReflecionStore.GetOrCreateMethodInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
-
-			return deb;
+			return type.AttributeInfoCaches.Select(s => s.Attribute);
 		}
 
-		internal static string GetLocalToDbSchemaMapping(this Type type, string name)
+		internal static string GetLocalToDbSchemaMapping(this DbClassInfoCache type, string name)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type))
+			if (IsAnonymousType(type))
 				return name;
 
-			return ReflecionStore.GetOrCreateClassInfoCache(type).SchemaMappingLocalToDatabase(name);
+			return type.SchemaMappingLocalToDatabase(name);
 		}
 
-		internal static string GetDbToLocalSchemaMapping(this Type type, string name)
+		internal static string GetDbToLocalSchemaMapping(this DbClassInfoCache type, string name)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type))
+			if (IsAnonymousType(type))
 				return name;
 
-			return ReflecionStore.GetOrCreateClassInfoCache(type).SchemaMappingDatabaseToLocal(name);
+			return type.SchemaMappingDatabaseToLocal(name);
 		}
 
-		internal static IEnumerable<PropertyInfo> GetPropertiesEx(this Type type)
+		internal static IEnumerable<PropertyInfo> GetPropertiesEx(this DbClassInfoCache type)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type))
-				return type.GetProperties();
+			if (IsAnonymousType(type))
+				return type.Type.GetProperties();
 
-			return ReflecionStore
-				.GetOrCreateClassInfoCache(type)
+			return type
 				.PropertyInfoCaches
 				.Select(s => s.Value.PropertyInfo);
 		}
 
-		internal static string[] GetSchemaMapping(this Type type)
+		internal static string[] GetSchemaMapping(this DbClassInfoCache type)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type))
+			if (IsAnonymousType(type))
 				return type.GetPropertiesEx().Select(s => s.Name).ToArray();
 
-			return ReflecionStore.GetOrCreateClassInfoCache(type).LocalToDbSchemaMapping();
+			return type.LocalToDbSchemaMapping();
 		}
 
-		internal static IEnumerable<MethodInfo> GetMethods(this Type type)
+		internal static IEnumerable<MethodInfo> GetMethods(this DbClassInfoCache type)
 		{
-			if (MetaInfoStoreExtentions.IsAnonymousType(type))
-				return type.GetMethods();
+			if (IsAnonymousType(type))
+				return type.Type.GetMethods();
 
-			return ReflecionStore.GetOrCreateClassInfoCache(type).MethodInfoCaches.ToArray().Select(s => s.MethodInfo);
+			return type.MethodInfoCaches.ToArray().Select(s => s.MethodInfo);
 		}
 
 		//internal static string GetPropertyInfoFromLabda<T>(Expression<Func<T>> exp)

@@ -11,6 +11,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbConstructorInfoCache : ConstructorInfoCache<DbAttributeInfoCache, DbMethodArgument>
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -22,5 +25,10 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			: base(ctorInfo)
 		{
 		}
+
+		/// <summary>
+		///		The class that owns this Property
+		/// </summary>
+		public DbClassInfoCache DeclaringClass { get; protected internal set; }
 	}
 }

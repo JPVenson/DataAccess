@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="AutoConsole.cs" />
     <Compile Include="Compiler\ClassCompiler.cs" />
+    <Compile Include="Compiler\Fakes\CreatorProperty.cs" />
     <Compile Include="MsSql\ColumnInfo.cs" />
     <Compile Include="MsSql\DbTypeToCsType.cs" />
     <Compile Include="IEntryCreator.cs" />

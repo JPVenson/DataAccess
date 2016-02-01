@@ -97,6 +97,11 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			//return copyrightBuilder;
 		}
 
+		//public void AddAutoConstructor()
+		//{
+		//	FactoryHelper.GenerateBody(, new FactoryHelperSettings(), new CodeNamespace(Namespace), FactoryHelper.GenerateTypeConstructor(), new CodeBaseReferenceExpression());
+		//}
+
 		public void CompileClass()
 		{
 			if (CompileToPrc && !preCompiled)
@@ -143,7 +148,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			_base.CustomAttributes.Add(codeAttrDecl);
 			//Add members
 
-			if (!string.IsNullOrEmpty(TargetName))
+			if (!string.IsNullOrEmpty(TargetName) && TargetName != TargetCsName)
 			{
 				var forModel = new ForModelAttribute(TargetName);
 				var codeAttributeDeclaration = new CodeAttributeDeclaration(forModel.GetType().Name,
@@ -335,63 +340,60 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 		public CodeMemberMethod GenerateTypeConstructor(
 			IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
 		{
-			return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn);
+			return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn, Namespace);
 		}
 
 		private Type[] _externalTypes;
 
-		internal CodeMemberMethod GenerateTypeConstructorBasedOnElements()
+		internal void GenerateTypeConstructorBasedOnElements(List<ColumInfoModel> columnInfos)
 		{
-			var codeMemberProperties = _base.Members.Cast<CodeTypeMember>().Where(s => s is CodeMemberProperty).Cast<CodeMemberProperty>().ToArray();
+			//var codeMemberProperties = _base.Members.Cast<CodeTypeMember>().Where(s => s is CodeMemberProperty).Cast<CodeMemberProperty>().ToArray();
 
 			var dic = new Dictionary<string, Tuple<string, Type>>();
 
-			foreach (var item in codeMemberProperties)
+			foreach (var item in columnInfos)
 			{
-				var name = item.Name;
+				var name = item.ColumnInfo.ColumnName;
+				var tuple = new Tuple<string, Type>(item.GetPropertyName(), item.ColumnInfo.TargetType);
 
-				var hasForNameAttribute =
-					  item.CustomAttributes.Cast<CodeAttributeDeclaration>()
-						  .FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModelAttribute).Name);
-				if (hasForNameAttribute != null)
-					name = (hasForNameAttribute.Arguments.Cast<CodeAttributeArgument>().FirstOrDefault().Value as CodePrimitiveExpression).Value.ToString();
+				//var tuple = new Tuple<string, Type>(item.GetPropertyName(), Type.GetType(item.ColumnInfo.TargetType, null, (e, f, g) =>
+				//{
+				//	var baseType = Type.GetType(f);
+				//	if (baseType == null)
+				//	{
+				//		if (_externalTypes == null)
+				//		{
+				//			_externalTypes = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.dll")
+				//			.Select(z => Assembly.LoadFile(z))
+				//			.SelectMany(z => z.GetTypes())
+				//			.ToArray();
+				//		}
 
-				var tuple = new Tuple<string, Type>(item.Name, Type.GetType(item.Type.BaseType, null, (e, f, g) =>
-				{
-					var baseType = Type.GetType(f);
-					if (baseType == null)
-					{
-						if (_externalTypes == null)
-						{
-							_externalTypes = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.dll")
-							.Select(z => Assembly.LoadFile(z))
-							.SelectMany(z => z.GetTypes())
-							.ToArray();
-						}
+				//		baseType = _externalTypes.Single(s => s.FullName == f);
+				//	}
 
-						baseType = _externalTypes.Single(s => s.FullName == f);
-					}
+				//	if (item.Type.ArrayElementType != null)
+				//	{
+				//		baseType = Type.GetType(item.Type.ArrayElementType.BaseType).MakeArrayType();
+				//	}
+				//	else if (item.Type.TypeArguments.Count > 0)
+				//	{
+				//		baseType = typeof(Nullable<>).MakeGenericType(item.Type.TypeArguments.Cast<CodeTypeReference>().Select(z => Type.GetType(z.BaseType)).ToArray());
+				//	}
 
-					if (item.Type.ArrayElementType != null)
-					{
-						baseType = Type.GetType(item.Type.ArrayElementType.BaseType).MakeArrayType();
-					}
-					else if (item.Type.TypeArguments.Count > 0)
-					{
-						baseType = typeof(Nullable<>).MakeGenericType(item.Type.TypeArguments.Cast<CodeTypeReference>().Select(z => Type.GetType(z.BaseType)).ToArray());
-					}
+				//	return baseType;
 
-					return baseType;
-
-				}));
-				if (tuple.Item2 == null)
-					Console.WriteLine();
+				//}));
+				//if (tuple.Item2 == null)
+				//	Console.WriteLine();
 
 				dic.Add(name, tuple);
 			}
-
-			return
-				GenerateTypeConstructor(dic);
+			Add(new CodeConstructor()
+			{
+				Attributes = MemberAttributes.Public
+			});
+			Add(GenerateTypeConstructor(dic));
 		}
 
 		public void Add(CodeTypeMember property)

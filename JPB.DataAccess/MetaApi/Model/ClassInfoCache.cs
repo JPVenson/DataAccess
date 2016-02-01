@@ -14,7 +14,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// </summary>
 	[DebuggerDisplay("{ClassName}")]
 	[Serializable]
-	public class ClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
+	public abstract class ClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
 		: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
@@ -24,6 +24,9 @@ namespace JPB.DataAccess.MetaApi.Model
 	{
 		internal ClassInfoCache(Type type, bool anon = false)
 		{
+			//this is ok.
+			//init is used to be called from an other MetaApi part after the instanciation
+			//so as this constructor is internal we know what we do ;-)
 			Init(type, anon);
 		}
 
@@ -33,7 +36,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public ClassInfoCache()
+		protected ClassInfoCache()
 		{
 
 		}
@@ -95,13 +98,11 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public HashSet<TCtor> ConstructorInfoCaches { get; private set; }
 
-		[MethodImpl(MethodImplOptions.ForwardRef)]
 		public bool Equals(IClassInfoCache other)
 		{
 			return new ClassInfoEquatableComparer().Equals(this, other);
 		}
 
-		[MethodImpl(MethodImplOptions.ForwardRef)]
 		public int CompareTo(IClassInfoCache other)
 		{
 			return new ClassInfoEquatableComparer().Compare(this, other);

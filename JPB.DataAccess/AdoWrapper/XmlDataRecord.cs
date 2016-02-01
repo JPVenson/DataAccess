@@ -5,16 +5,29 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper
 {
 	public class XmlDataRecord : IDataRecord
 	{
-		private readonly Type _target;
+		private readonly DbClassInfoCache _target;
 		private readonly XElement baseElement;
 
-		internal XmlDataRecord(string xmlStream, Type target)
+		internal XmlDataRecord(string xmlStream, Type target) 
+			: this(xmlStream, target.GetClassInfo())
+		{
+
+		}
+
+		internal XmlDataRecord(XDocument baseElement, Type target)
+			: this(baseElement, target.GetClassInfo())
+		{
+
+		}
+
+		internal XmlDataRecord(string xmlStream, DbClassInfoCache target)
 		{
 			_target = target;
 			if (string.IsNullOrEmpty(xmlStream))
@@ -26,7 +39,7 @@ namespace JPB.DataAccess.AdoWrapper
 			baseElement = XDocument.Parse(xmlStream).Elements().ElementAt(0);
 		}
 
-		internal XmlDataRecord(XDocument baseElement, Type target)
+		internal XmlDataRecord(XDocument baseElement, DbClassInfoCache target)
 		{
 			_target = target;
 			this.baseElement = baseElement.Elements().ElementAt(0);
