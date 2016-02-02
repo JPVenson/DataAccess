@@ -187,7 +187,7 @@ namespace JPB.DataAccess.Contacts
 		string FormartCommandToQuery(IDbCommand comm);
 
 		/// <summary>
-		///     Converts the Generic DbType to the Specific represntation
+		///     Converts the Generic SourceDbType to the Specific represntation
 		/// </summary>
 		/// <returns></returns>
 		string ConvertParameter(DbType type);

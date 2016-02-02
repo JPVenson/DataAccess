@@ -163,7 +163,6 @@ namespace JPB.DataAccess.Manager
 		public static void Insert<T>(T entry, IDatabase db)
 		{
 			Insert(typeof (T), entry, db);
-			//db.Run(s => { s.ExecuteNonQuery(CreateInsert(typeof(T), entry, s)); });
 		}
 
 		/// <summary>

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.MetaApi.Contract;
 using JPB.DataAccess.MetaApi.Model;
+using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
@@ -37,6 +40,8 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 		public override IMethodInfoCache<DbAttributeInfoCache, DbMethodArgument> Init(MethodInfo mehtodInfo)
 		{
+			Arguments = new HashSet<DbMethodArgument>(Arguments.Where(f => f.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
+
 			foreach (var dbMethodArgument in Arguments)
 			{
 				dbMethodArgument.DeclaringMethod = this;

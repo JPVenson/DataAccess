@@ -392,11 +392,7 @@ namespace JPB.DataAccess
 					sqlCommand = DbAccessLayer.CreateSelect(targetType, accessLayer,
 						" WHERE " + targetName + " = @pk", new List<IQueryParameter>
 						{
-							new QueryParameter
-							{
-								Name = "@pk",
-								Value = pk
-							}
+							new QueryParameter("@pk", pk)
 						});
 				}
 				else

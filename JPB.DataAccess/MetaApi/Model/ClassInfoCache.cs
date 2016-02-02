@@ -71,32 +71,32 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     The .net ClassName
 		/// </summary>
-		public string ClassName { get; private set; }
+		public string ClassName { get; protected internal set; }
 
 		/// <summary>
 		///     The .net Type instance
 		/// </summary>
-		public Type Type { get; private set; }
+		public Type Type { get; protected internal set; }
 
 		/// <summary>
 		///     All Propertys
 		/// </summary>
-		public Dictionary<string, TProp> PropertyInfoCaches { get; private set; }
+		public Dictionary<string, TProp> PropertyInfoCaches { get; protected internal set; }
 
 		/// <summary>
 		///     All Attributes on class level
 		/// </summary>
-		public HashSet<TAttr> AttributeInfoCaches { get; private set; }
+		public HashSet<TAttr> AttributeInfoCaches { get; protected internal set; }
 
 		/// <summary>
 		///     All Mehtods
 		/// </summary>
-		public HashSet<TMeth> MethodInfoCaches { get; private set; }
+		public HashSet<TMeth> MethodInfoCaches { get; protected internal set; }
 
 		/// <summary>
 		///     All Constructors
 		/// </summary>
-		public HashSet<TCtor> ConstructorInfoCaches { get; private set; }
+		public HashSet<TCtor> ConstructorInfoCaches { get; protected internal set; }
 
 		public bool Equals(IClassInfoCache other)
 		{

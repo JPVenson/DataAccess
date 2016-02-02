@@ -36,6 +36,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public override IClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument> Init(Type type, bool anon = false)
 		{
 			var item = base.Init(type, anon);
+				//.ToDictionary(s => s.Key);
+			PropertyInfoCaches = new Dictionary<string, DbPropertyInfoCache>(PropertyInfoCaches
+				.Where(f => f.Value.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute))).ToDictionary(s => s.Key, f => f.Value));
+			MethodInfoCaches = new HashSet<DbMethodInfoCache>(MethodInfoCaches.Where(f => f.AttributeInfoCaches.All(d => !(d.Attribute is IgnoreReflectionAttribute))));
+			ConstructorInfoCaches = new HashSet<DbConstructorInfoCache>(ConstructorInfoCaches.Where(f => f.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
 			foreach (var dbPropertyInfoCach in PropertyInfoCaches)
 			{
 				dbPropertyInfoCach.Value.DeclaringClass = this;
@@ -196,6 +201,10 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			_invertedSchema = new Dictionary<string, string>();
 			foreach (var item in PropertyInfoCaches)
 			{
+				if (item.Value.IgnoreAnyAttribute != null)
+				{
+					continue;
+				}
 				SchemaMappingValues.Add(item.Value.PropertyName, item.Value.DbName);
 				_invertedSchema.Add(item.Value.DbName, item.Value.PropertyName);
 			}

@@ -183,7 +183,7 @@ namespace JPB.DataAccess.Manager
 					.PropertyInfoCaches
 					.Select(f => f.Value)
 					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.ForginKeyAttribute != null)
-					.Select(s => s.PropertyName)
+					.Select(s => s.DbName)
 					.ToArray();
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();

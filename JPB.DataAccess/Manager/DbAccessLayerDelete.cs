@@ -27,7 +27,7 @@ namespace JPB.DataAccess.Manager
 
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
-			return db.CreateCommandWithParameterValues(query, new[] { classInfo.PrimaryKeyProperty.Getter.Invoke(entry) });
+			return db.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
 		}
 
 		/// <summary>

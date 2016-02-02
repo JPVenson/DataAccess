@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
@@ -137,6 +138,8 @@ namespace JPB.DataAccess.AdoWrapper
 			Debug.Assert(_handlecounter >= 0);
 
 			//This is not the last call of Close so decrease the counter
+			
+
 			if (_handlecounter > 0)
 				_handlecounter--;
 
@@ -348,7 +351,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 				action(this);
 			}
-			catch
+			catch(Exception ex)
 			{
 				TransactionRollback();
 				throw;

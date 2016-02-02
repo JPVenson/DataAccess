@@ -37,6 +37,48 @@ namespace JPB.DataAccess.ModelsAnotations
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 	public sealed class AutoGenerateCtorAttribute : DataAccessAttribute
 	{
+		/// <summary>
+		/// Creates a new Instance without any Meta Infos
+		/// </summary>
+		public AutoGenerateCtorAttribute()
+		{
+			CtorGeneratorMode = CtorGeneratorMode.Inhert;
+		}
+
+		/// <summary>
+		/// Tells the framework how a factory for this class should be created
+		/// </summary>
+		public CtorGeneratorMode CtorGeneratorMode { get; set; }
+
+		/// <summary>
+		/// If set to true all Assemblys that are used inside the base Assembly will be imported to the new one
+		/// </summary>
+		public bool FullSateliteImport { get; set; }
+	}
+
+	public enum CtorGeneratorMode
+	{
+		Inhert,
+		FactoryMethod
+	}
+
+	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
+	public sealed class AutoGenerateCtorNamespaceAttribute : Attribute
+	{
+		// See the attribute guidelines at 
+		//  http://go.microsoft.com/fwlink/?LinkId=85236
+		internal readonly string UsedNamespace;
+
+		/// <summary>
+		/// Creates a new Attribute that is used for CodeGeneration
+		/// This Attributes tell the factory to include certain namespaces.
+		/// 
+		/// </summary>
+		/// <param name="usedNamespace"></param>
+		public AutoGenerateCtorNamespaceAttribute(string usedNamespace)
+		{
+			this.UsedNamespace = usedNamespace;
+		}
 	}
 
 	/// <summary>
@@ -210,7 +252,7 @@ namespace JPB.DataAccess.ModelsAnotations
 
 	/// <summary>
 	///     Marks a property to be ignored by the complete searching logic
-	///     TO BE SUPPORTED
+	///     Experimental
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public class IgnoreReflectionAttribute : DataAccessAttribute
@@ -256,7 +298,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		{
 			Converter = converter;
 
-			if (!typeof (IValueConverter).IsAssignableFrom(converter))
+			if (!typeof(IValueConverter).IsAssignableFrom(converter))
 			{
 				throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
 			}
@@ -284,7 +326,7 @@ namespace JPB.DataAccess.ModelsAnotations
 			var fod = ConverterInstance.FirstOrDefault(s => s.Key.Equals(Parameter));
 			if (fod.Equals(default(KeyValuePair<object, IValueConverter>)))
 			{
-				var instance = (IValueConverter) Activator.CreateInstance(Converter);
+				var instance = (IValueConverter)Activator.CreateInstance(Converter);
 				ConverterInstance.Add(Parameter, instance);
 				return instance;
 			}
@@ -330,7 +372,7 @@ namespace JPB.DataAccess.ModelsAnotations
 			get { return _loadFromXmlStrategy; }
 			set
 			{
-				if (!typeof (ILoadFromXmlStrategy).IsAssignableFrom(value))
+				if (!typeof(ILoadFromXmlStrategy).IsAssignableFrom(value))
 					throw new ArgumentException("Not able to assgin value from IloadFromXMLStrategy");
 				_loadFromXmlStrategy = value;
 			}
@@ -339,7 +381,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		internal ILoadFromXmlStrategy CreateLoader()
 		{
 			return _loadFromXmlStrategyInstance ??
-			       (_loadFromXmlStrategyInstance = (ILoadFromXmlStrategy) Activator.CreateInstance(_loadFromXmlStrategy));
+				   (_loadFromXmlStrategyInstance = (ILoadFromXmlStrategy)Activator.CreateInstance(_loadFromXmlStrategy));
 		}
 	}
 

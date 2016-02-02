@@ -40,7 +40,7 @@ namespace JPB.DataAccess
 		{
 			var parameter =
 				@base.Parameters.Cast<IDataParameter>()
-					.Select(item => new QueryParameter {Name = item.ParameterName, Value = item.Value})
+					.Select(item => new QueryParameter(item.ParameterName, item.Value, item.DbType))
 					.Cast<IQueryParameter>()
 					.ToList();
 
@@ -70,9 +70,8 @@ namespace JPB.DataAccess
 					item.ParameterName = buffParam;
 				}
 
-				parameter.Add(new QueryParameter {Name = item.ParameterName, Value = item.Value});
+				parameter.Add(new QueryParameter(item.ParameterName, item.Value, item.DbType));
 			}
-
 
 			return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, parameter);
 		}
@@ -99,7 +98,7 @@ namespace JPB.DataAccess
 		{
 			return
 				(from IDataParameter parameter in source
-					select new QueryParameter(parameter.ParameterName, parameter.Value));
+				 select new QueryParameter(parameter.ParameterName, parameter.Value));
 		}
 
 		/// <summary>
@@ -124,8 +123,9 @@ namespace JPB.DataAccess
 					{
 						DbPropertyInfoCache property;
 						classInfo.PropertyInfoCaches.TryGetValue(propertyInfo, out property);
-						var dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
-						return dataValue;
+						var val = property.GetConvertedValue(entry);
+						var dataValue = val ?? DBNull.Value;
+						return new Tuple<Type, object>(property.PropertyType, dataValue);
 					}).ToArray();
 			return db.CreateCommandWithParameterValues(query, propertyvalues);
 		}
@@ -158,7 +158,7 @@ namespace JPB.DataAccess
 		public static IDbCommand CreateCommandWithParameterValues<T>(this IDatabase db, string query, string[] propertyInfos,
 			T entry)
 		{
-			return db.CreateCommandWithParameterValues(typeof (T), query, propertyInfos, entry);
+			return db.CreateCommandWithParameterValues(typeof(T), query, propertyInfos, entry);
 		}
 
 		/// <summary>
@@ -168,11 +168,14 @@ namespace JPB.DataAccess
 		///     values are added by Index
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, string query, object[] values)
+		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, string query, params Tuple<Type, object>[] values)
 		{
 			var listofQueryParamter = new List<IQueryParameter>();
 			for (var i = 0; i < values.Count(); i++)
-				listofQueryParamter.Add(new QueryParameter {Name = i.ToString(CultureInfo.InvariantCulture), Value = values[i]});
+				listofQueryParamter.Add(new QueryParameter(i.ToString(CultureInfo.InvariantCulture), values[i].Item2)
+				{
+					SourceType = values[i].Item1
+				});
 			return db.CreateCommandWithParameterValues(query, listofQueryParamter);
 		}
 
@@ -195,6 +198,7 @@ namespace JPB.DataAccess
 			foreach (IQueryParameter queryParameter in values)
 			{
 				var dbDataParameter = cmd.CreateParameter();
+				dbDataParameter.DbType = queryParameter.SourceDbType;
 				dbDataParameter.Value = queryParameter.Value;
 				dbDataParameter.ParameterName = queryParameter.Name.CheckParamter();
 				cmd.Parameters.Add(dbDataParameter);
@@ -209,7 +213,7 @@ namespace JPB.DataAccess
 
 			if (parameter is IQueryParameter)
 			{
-				return new[] {parameter as IQueryParameter};
+				return new[] { parameter as IQueryParameter };
 			}
 
 			if (parameter is IEnumerable<IQueryParameter>)
@@ -218,8 +222,8 @@ namespace JPB.DataAccess
 			}
 
 			return (from element in parameter.GetType().GetClassInfo().PropertyInfoCaches
-				let value = parameter.GetParamaterValue(element.Key)
-					select new QueryParameter { Name = element.Key.CheckParamter(), Value = value }).Cast<IQueryParameter>()
+					let value = parameter.GetParamaterValue(element.Key)
+					select new QueryParameter(element.Key.CheckParamter(), value)).Cast<IQueryParameter>()
 				.ToList();
 		}
 
@@ -239,7 +243,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static string CreatePropertyCsv<T>(bool ignorePk = false)
 		{
-			return CreatePropertyCsv(typeof (T).GetClassInfo(), ignorePk);
+			return CreatePropertyCsv(typeof(T).GetClassInfo(), ignorePk);
 		}
 
 		/// <summary>
@@ -257,7 +261,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static string CreatePropertyCsv<T>(params string[] ignore)
 		{
-			return CreatePropertyCsv(typeof (T).GetClassInfo(), ignore);
+			return CreatePropertyCsv(typeof(T).GetClassInfo(), ignore);
 		}
 
 		/// <summary>
@@ -278,7 +282,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> FilterDbSchemaMapping<T>(params string[] ignore)
 		{
-			return FilterDbSchemaMapping(typeof (T).GetClassInfo(), ignore);
+			return FilterDbSchemaMapping(typeof(T).GetClassInfo(), ignore);
 		}
 
 		internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
@@ -369,7 +373,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> CreatePropertyNames<T>(bool ignorePk = false)
 		{
-			return ignorePk ? FilterDbSchemaMapping<T>(typeof (T).GetPK()) : FilterDbSchemaMapping<T>(new string[0]);
+			return ignorePk ? FilterDbSchemaMapping<T>(typeof(T).GetPK()) : FilterDbSchemaMapping<T>(new string[0]);
 		}
 
 		/// <summary>
@@ -391,7 +395,7 @@ namespace JPB.DataAccess
 		public static List<T> ExecuteGenericCreateModelsCommand<T>(this IDbCommand command, IDatabase db)
 			where T : class, new()
 		{
-			var info = typeof (T).GetClassInfo();
+			var info = typeof(T).GetClassInfo();
 			return db.Run(
 				s =>
 					s.GetEntitiesList(command, info.SetPropertysViaReflection)
@@ -518,7 +522,7 @@ namespace JPB.DataAccess
 
 			//check the type to be a Strategy
 
-			if (!typeof (IDatabaseStrategy).IsAssignableFrom(type))
+			if (!typeof(IDatabaseStrategy).IsAssignableFrom(type))
 			{
 				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
 			}
@@ -526,10 +530,10 @@ namespace JPB.DataAccess
 			//try constructor injection
 			var ctOfType =
 				type.GetConstructors()
-					.FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof (string));
+					.FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
 			if (ctOfType != null)
 			{
-				return ctOfType.Invoke(new object[] {connection}) as IDatabaseStrategy;
+				return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
 			}
 			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
 			if (instanceOfType == null)

@@ -17,6 +17,27 @@ namespace JPB.DataAccess.Manager
 		public static Dictionary<Type, DbType> DbTypeMap;
 
 		/// <summary>
+		/// Map an SourceDbType to the proper C# mscore lib type
+		/// </summary>
+		/// <param name="source"></param>
+		/// <returns></returns>
+		public static Type Map(DbType source)
+		{
+			return DbTypeMap.FirstOrDefault(s => s.Value == source).Key;
+		}
+		/// <summary>
+		/// Map an C# mscore lib type to the proper SourceDbType
+		/// </summary>
+		/// <param name="source"></param>
+		/// <returns></returns>
+		public static DbType? Map(Type source)
+		{
+			DbType result;
+			DbTypeMap.TryGetValue(source, out result);
+			return result;
+		}
+
+		/// <summary>
 		/// </summary>
 		private static void SProcedureDbAccessLayer()
 		{

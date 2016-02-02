@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Security;
 using JPB.DataAccess.AdoWrapper;
@@ -19,6 +20,20 @@ namespace JPB.DataAccess.DbInfoConfig
 	/// </summary>
 	public class FactoryHelperSettings
 	{
+		static FactoryHelperSettings()
+		{
+			_defaultNamespaces = new[]
+			{
+				"System",
+				"System.Collections.Generic",
+				"System.CodeDom.Compiler",
+				"System.Linq",
+				"System.Data",
+				"JPB.DataAccess.ModelsAnotations",
+				"JPB.DataAccess.AdoWrapper",
+			};
+		}
+
 		/// <summary>
 		///     Check and throw exception if not all propertys can be accessed by the Super class
 		/// </summary>
@@ -43,6 +58,16 @@ namespace JPB.DataAccess.DbInfoConfig
 		///     Include PDB debug infos
 		/// </summary>
 		public bool CreateDebugCode { get; set; }
+
+		private static readonly string[] _defaultNamespaces;
+
+		/// <summary>
+		/// A Collection that includes all Namespaces that are used by default to create new Factorys
+		/// </summary>
+		public IEnumerable<string> DefaultNamespaces
+		{
+			get { return _defaultNamespaces; }
+		}
 	}
 
 	/// <summary>
@@ -95,6 +120,39 @@ namespace JPB.DataAccess.DbInfoConfig
 			return codeFactory;
 		}
 
+		public static CodeTypeReference CreateShortCodeTypeReference(Type type, CodeNamespaceImportCollection imports)
+		{
+			var result = new CodeTypeReference(type);
+
+			Shortify(result, type, imports);
+
+			return result;
+		}
+
+		private static void Shortify(CodeTypeReference typeReference, Type type, CodeNamespaceImportCollection imports)
+		{
+			if (typeReference.ArrayRank > 0)
+			{
+				Shortify(typeReference.ArrayElementType, type, imports);
+				return;
+			}
+
+			if (type.Namespace != null && imports.Cast<CodeNamespaceImport>()
+				.Any(cni => cni.Namespace == type.Namespace))
+			{
+				var prefix = type.Namespace + '.';
+
+				if (prefix != null)
+				{
+					var pos = typeReference.BaseType.IndexOf(prefix);
+					if (pos == 0)
+					{
+						typeReference.BaseType = typeReference.BaseType.Substring(prefix.Length);
+					}
+				}
+			}
+		}
+
 		public static void GenerateBody(Dictionary<string, DbPropertyInfoCache> properties,
 			FactoryHelperSettings settings,
 			CodeNamespace importNameSpace,
@@ -144,37 +202,40 @@ namespace JPB.DataAccess.DbInfoConfig
 					var checkXmlForNull = new CodeConditionStatement();
 					checkXmlForNull.Condition = new CodeBinaryOperatorExpression(
 						new CodeVariableReferenceExpression(variableName),
-						CodeBinaryOperatorType.ValueEquality,
-						new CodeDefaultValueExpression(new CodeTypeReference(typeof(object))));
+						CodeBinaryOperatorType.IdentityInequality,
+						new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"));
 					container.Statements.Add(checkXmlForNull);
 
 					var xmlRecordType = new CodeTypeReferenceExpression(typeof(XmlDataRecord));
-					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.MetaInfoStore"));
-					importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess"));
+					importNameSpace.Imports.Add(new CodeNamespaceImport(typeof(DbClassInfoCache).Namespace));
+					importNameSpace.Imports.Add(new CodeNamespaceImport(typeof(DataConverterExtensions).Namespace));
+					importNameSpace.Imports.Add(new CodeNamespaceImport(typeof(DbConfigHelper).Namespace));
 
 					if (propertyInfoCache.CheckForListInterface())
 					{
 						var typeArgument = propertyInfoCache.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
-						var generica = new CodeTypeReferenceExpression(typeArgument);
+						var codeTypeOfListArg = new CodeTypeOfExpression(typeArgument);
 
 						var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
 							"TryParse",
 							new CodeCastExpression(typeof(string), uncastLocalVariableRef),
-							generica);
+							codeTypeOfListArg);
 
 						var xmlDataRecords = new CodeMethodInvokeExpression(tryParse, "CreateListOfItems");
+						var getClassInfo = new CodeMethodInvokeExpression(codeTypeOfListArg, "GetClassInfo");
+
 						var xmlRecordsToObjects = new CodeMethodInvokeExpression(xmlDataRecords, "Select",
-							new CodeMethodReferenceExpression(generica, "SetPropertysViaReflection"));
+							new CodeMethodReferenceExpression(getClassInfo, "SetPropertysViaReflection"));
 
 						CodeObjectCreateExpression collectionCreate;
 						if (typeArgument != null && (typeArgument.IsClass && typeArgument.GetInterface("INotifyPropertyChanged") != null))
 						{
-							collectionCreate = new CodeObjectCreateExpression(typeof(DbCollection<>),
+							collectionCreate = new CodeObjectCreateExpression(typeof(DbCollection<>).MakeGenericType(typeArgument),
 								xmlRecordsToObjects);
 						}
 						else
 						{
-							collectionCreate = new CodeObjectCreateExpression(typeof(NonObservableDbCollection<>),
+							collectionCreate = new CodeObjectCreateExpression(typeof(NonObservableDbCollection<>).MakeGenericType(typeArgument),
 								xmlRecordsToObjects);
 						}
 
@@ -241,9 +302,13 @@ namespace JPB.DataAccess.DbInfoConfig
 
 					var baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
 
-					if (propertyInfoCache.PropertyType == typeof(string))
+					if (propertyInfoCache.PropertyType == typeof (string))
 					{
-						baseType = typeof(string);
+						baseType = typeof (string);
+					}
+					else if(propertyInfoCache.PropertyType.IsArray)
+					{
+						baseType = propertyInfoCache.PropertyType;
 					}
 
 					if (baseType != null)
@@ -266,7 +331,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 						var setToNull = new CodeAssignStatement(refToProperty,
 							new CodeDefaultValueExpression(
-								new CodeTypeReference(baseType)));
+								CreateShortCodeTypeReference(baseType, importNameSpace.Imports)));
 						var setToValue = new CodeAssignStatement(refToProperty,
 							new CodeCastExpression(
 								new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
@@ -392,6 +457,11 @@ namespace JPB.DataAccess.DbInfoConfig
 		[SecurityCritical]
 		internal static Func<IDataRecord, object> CreateFactory(Type target, FactoryHelperSettings settings)
 		{
+			var classInfo = target.GetClassInfo();
+			var classCtorAttr =
+				classInfo.AttributeInfoCaches.First(s => s.Attribute is AutoGenerateCtorAttribute).Attribute as
+					AutoGenerateCtorAttribute;
+
 			CodeNamespace importNameSpace;
 			importNameSpace = new CodeNamespace(target.Namespace);
 			var cp = new CompilerParameters();
@@ -399,23 +469,23 @@ namespace JPB.DataAccess.DbInfoConfig
 			var compiler = new CodeTypeDeclaration();
 			compiler.IsClass = true;
 
-			var generateCtor = !target.IsSealed;
+			var generateFactory = target.IsSealed || classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod;
 
 			CodeMemberMethod codeConstructor;
-			if (generateCtor)
+			if (generateFactory)
+			{
+				codeConstructor = GenerateFactory(target, settings, importNameSpace);
+				superName = target.Name + "_Factory";
+				compiler.Attributes = MemberAttributes.Static;
+			}
+			else
 			{
 				compiler.BaseTypes.Add(target);
 				codeConstructor = GenerateConstructor(target, settings, importNameSpace);
 				compiler.IsPartial = true;
 				superName = target.Name + "_Super";
 			}
-			else
-			{
-				codeConstructor = GenerateFactory(target, settings, importNameSpace);
-				superName = target.Name + "_Factory";
-				compiler.Attributes = MemberAttributes.Static;
-			}
-			if (target.GetClassInfo().ConstructorInfoCaches.Any(f => f.Arguments.Any()))
+			if (classInfo.ConstructorInfoCaches.Any(f => f.Arguments.Any()))
 			{
 				throw new TypeAccessException(string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
 			}
@@ -426,16 +496,24 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			cp.GenerateInMemory = true;
 
+			var callingAssm = Assembly.GetEntryAssembly();
+			if (callingAssm == null)
+			{
+				//are we testing are we?
+				callingAssm = Assembly.GetExecutingAssembly();
+			}
+
+			cp.TempFiles = new TempFileCollection(Path.GetDirectoryName(callingAssm.Location), true);
+
 			if (settings.CreateDebugCode)
 			{
 				cp.GenerateInMemory = false;
-				cp.TempFiles = new TempFileCollection(Path.GetTempPath(), true);
 				cp.TempFiles.KeepFiles = true;
 				cp.IncludeDebugInformation = true;
 			}
 
 			cp.GenerateExecutable = false;
-			cp.ReferencedAssemblies.Add(target.Assembly.ManifestModule.ToString());
+			cp.ReferencedAssemblies.Add(target.Assembly.ManifestModule.Name);
 			cp.ReferencedAssemblies.Add("System.dll");
 			cp.ReferencedAssemblies.Add("System.Core.dll");
 			cp.ReferencedAssemblies.Add("System.Data.dll");
@@ -444,18 +522,31 @@ namespace JPB.DataAccess.DbInfoConfig
 			cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
 			var compileUnit = new CodeCompileUnit();
 
-			importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
-			importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
-			importNameSpace.Imports.Add(new CodeNamespaceImport("System.CodeDom.Compiler"));
-			importNameSpace.Imports.Add(new CodeNamespaceImport("System.Linq"));
-			importNameSpace.Imports.Add(new CodeNamespaceImport("System.Data"));
-			importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.ModelsAnotations"));
-			importNameSpace.Imports.Add(new CodeNamespaceImport("JPB.DataAccess.AdoWrapper"));
+			foreach (var defaultNamespace in settings.DefaultNamespaces)
+			{
+				importNameSpace.Imports.Add(new CodeNamespaceImport(defaultNamespace));
+			}
+
+			foreach (var additionalNamespace in classInfo.AttributeInfoCaches.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
+			{
+				importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
+			}
+
+			if (classCtorAttr.FullSateliteImport)
+			{
+				foreach (var referencedAssembly in target.Assembly.GetReferencedAssemblies())
+				{
+					cp.ReferencedAssemblies.Add(referencedAssembly.Name);
+				}
+			}
+
 			importNameSpace.Types.Add(compiler);
 
 			compileUnit.Namespaces.Add(importNameSpace);
 			var provider = new CSharpCodeProvider();
 			var compileAssemblyFromDom = provider.CompileAssemblyFromDom(cp, compileUnit);
+
+
 			if (compileAssemblyFromDom.Errors.Count > 0 && settings.EnforceCreation)
 			{
 				var ex =
@@ -492,7 +583,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			var matchingCtor = constructorInfos.FirstOrDefault(s =>
 			{
 				var param = s.GetParameters();
-				if (generateCtor)
+				if (generateFactory)
 				{
 					if (param.Length < 1)
 						return false;
@@ -519,7 +610,14 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			var dm = new DynamicMethod("Create" + target.Name, target, new[] { typeof(IDataRecord) }, target, true);
 			var il = dm.GetILGenerator();
-			if (generateCtor)
+			if (generateFactory)
+			{
+				il.Emit(OpCodes.Nop);
+				il.Emit(OpCodes.Ldarg_0);
+				il.Emit(OpCodes.Call, targetType.GetMethod("Factory"));
+				il.Emit(OpCodes.Ret);
+			}
+			else
 			{
 				il.Emit(OpCodes.Ldarg_0);
 				il.Emit(OpCodes.Newobj, matchingCtor);
@@ -536,13 +634,13 @@ namespace JPB.DataAccess.DbInfoConfig
 					il.Emit(OpCodes.Ret);
 				}
 			}
-			else
-			{
-				il.Emit(OpCodes.Nop);
-				il.Emit(OpCodes.Ldarg_0);
-				il.Emit(OpCodes.Call, targetType.GetMethod("Factory"));
-				il.Emit(OpCodes.Ret);
-			}
+
+			if (!settings.CreateDebugCode)
+				foreach (string tempFile in cp.TempFiles)
+				{
+					if (!tempFile.EndsWith("dll") && !tempFile.EndsWith("pdb"))
+						File.Delete(tempFile);
+				}
 
 			var func = (Func<IDataRecord, object>)dm.CreateDelegate(typeof(Func<IDataRecord, object>));
 			return func;

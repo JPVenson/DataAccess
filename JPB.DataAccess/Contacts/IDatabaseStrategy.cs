@@ -55,7 +55,7 @@ namespace JPB.DataAccess.Contacts
 
 
 		/// <summary>
-		///     Converts the Generic DbType to the Specific represntation
+		///     Converts the Generic SourceDbType to the Specific represntation
 		/// </summary>
 		/// <returns></returns>
 		string ConvertParameter(DbType type);

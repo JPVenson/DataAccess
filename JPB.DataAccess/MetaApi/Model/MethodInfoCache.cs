@@ -71,27 +71,27 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     if set this method does not exist so we fake it
 		/// </summary>
-		public Delegate Delegate { get; private set; }
+		public Delegate Delegate { get; protected internal set; }
 
 		/// <summary>
 		///     Direct Reflection
 		/// </summary>
-		public MethodInfo MethodInfo { get; private set; }
+		public MethodInfo MethodInfo { get; protected internal set; }
 
 		/// <summary>
 		///     The name of the method
 		/// </summary>
-		public string MethodName { get; private set; }
+		public string MethodName { get; protected internal set; }
 
 		/// <summary>
 		/// Arguments on this Method
 		/// </summary>
-		public HashSet<TArg> Arguments { get; private set; }
+		public HashSet<TArg> Arguments { get; protected internal set; }
 
 		/// <summary>
 		///     All Attributes on this Method
 		/// </summary>
-		public HashSet<TAtt> AttributeInfoCaches { get; private set; }
+		public HashSet<TAtt> AttributeInfoCaches { get; protected internal set; }
 
 		/// <summary>
 		///     Easy access to the underlying delegate

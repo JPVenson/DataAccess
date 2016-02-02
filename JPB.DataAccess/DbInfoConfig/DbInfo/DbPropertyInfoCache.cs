@@ -98,6 +98,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			{
 				if (ForModelAttribute != null)
 					return ForModelAttribute.Attribute.AlternatingName;
+
+				if (FromXmlAttribute != null)
+					return FromXmlAttribute.Attribute.FieldName;
 				return PropertyName;
 			}
 		}
@@ -111,6 +114,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		///		if knwon the PrimaryKey Attribute
 		/// </summary>
 		public DbAttributeInfoCache<PrimaryKeyAttribute> PrimaryKeyAttribute { get; private set; }
+
+		/// <summary>
+		///		if knwon the Ignore Reflection Attribute
+		/// </summary>
+		public DbAttributeInfoCache<IgnoreReflectionAttribute> IgnoreAnyAttribute { get; private set; }
 
 		/// <summary>
 		///     For internal Usage only
@@ -129,6 +137,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 					AttributeInfoCaches.FirstOrDefault(s => s.Attribute is RowVersionAttribute));
 			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(FromXmlAttribute)));
 			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
+			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
 		}
 
 		//internal static PropertyInfoCache Logical(string info)

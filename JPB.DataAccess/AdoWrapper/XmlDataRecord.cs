@@ -54,7 +54,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			var name = GetName(i);
 
-			var mapEntiysPropToSchema = _target.GetLocalToDbSchemaMapping(name);
+			var mapEntiysPropToSchema = _target.GetDbToLocalSchemaMapping(name);
 
 			var firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
 			if (firstOrDefault == null)
@@ -89,12 +89,12 @@ namespace JPB.DataAccess.AdoWrapper
 
 		object IDataRecord.this[int i]
 		{
-			get { throw new NotImplementedException(); }
+			get { return GetValue(i); }
 		}
 
 		object IDataRecord.this[string name]
 		{
-			get { throw new NotImplementedException(); }
+			get { return GetValue(GetOrdinal(name)); }
 		}
 
 		public int GetValues(object[] values)
@@ -104,7 +104,14 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public int GetOrdinal(string name)
 		{
-			throw new NotImplementedException();
+			var elements = baseElement.Elements().ToArray();
+			for (int i = 0; i < elements.Count(); i++)
+			{
+				var item = elements[i];
+				if (item.Name == name)
+					return i;
+			}
+			return -1;
 		}
 
 		public bool GetBoolean(int i)
