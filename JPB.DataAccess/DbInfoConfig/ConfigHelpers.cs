@@ -103,15 +103,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			return type.LocalToDbSchemaMapping();
 		}
-
-		internal static IEnumerable<MethodInfo> GetMethods(this DbClassInfoCache type)
-		{
-			if (IsAnonymousType(type))
-				return type.Type.GetMethods();
-
-			return type.MethodInfoCaches.ToArray().Select(s => s.MethodInfo);
-		}
-
+		
 		//internal static string GetPropertyInfoFromLabda<T>(Expression<Func<T>> exp)
 		//{
 		//    Type paramType = exp.Parameters[0].Type;  // first parameter of expression

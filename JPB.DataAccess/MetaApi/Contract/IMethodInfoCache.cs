@@ -6,7 +6,7 @@ using JPB.DataAccess.MetaApi.Model;
 
 namespace JPB.DataAccess.MetaApi.Contract
 {
-	public interface IMethodInfoCache<TAtt, TArg> :
+	public interface IMethodInfoCache<TAtt, TArg> : 
 		IComparable<IMethodInfoCache<TAtt, TArg>>,
 		IEquatable<IMethodInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new()
@@ -20,7 +20,7 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// <summary>
 		///     Direct Reflection
 		/// </summary>
-		MethodInfo MethodInfo { get; }
+		MethodBase MethodInfo { get; }
 
 		/// <summary>
 		///     The name of the method
@@ -37,7 +37,7 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// </summary>
 		HashSet<TArg> Arguments { get; }
 
-		IMethodInfoCache<TAtt, TArg> Init(MethodInfo info);
+		IMethodInfoCache<TAtt, TArg> Init(MethodBase info);
 
 		/// <summary>
 		///     Easy access to the underlying delegate

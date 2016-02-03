@@ -38,7 +38,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// </summary>
 		public DbClassInfoCache DeclaringClass { get; protected internal set; }
 
-		public override IMethodInfoCache<DbAttributeInfoCache, DbMethodArgument> Init(MethodInfo mehtodInfo)
+		public override IMethodInfoCache<DbAttributeInfoCache, DbMethodArgument> Init(MethodBase mehtodInfo)
 		{
 			Arguments = new HashSet<DbMethodArgument>(Arguments.Where(f => f.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
 

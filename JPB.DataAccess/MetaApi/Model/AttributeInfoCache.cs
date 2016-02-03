@@ -32,7 +32,14 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			Init(attribute);
 		}
-
+		/// <summary>
+		/// For Interal use Only
+		/// </summary>
+		/// <param name="attribute"></param>
+		/// <returns></returns>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public IAttributeInfoCache Init(Attribute attribute)
 		{
 			Attribute = attribute;

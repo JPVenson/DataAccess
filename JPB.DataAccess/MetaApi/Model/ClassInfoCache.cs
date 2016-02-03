@@ -41,6 +41,15 @@ namespace JPB.DataAccess.MetaApi.Model
 
 		}
 
+		/// <summary>
+		/// For interal use Only
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="anon"></param>
+		/// <returns></returns>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false)
 		{
 			if (type == null)

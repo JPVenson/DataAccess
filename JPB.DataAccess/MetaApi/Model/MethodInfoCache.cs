@@ -51,7 +51,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			Arguments = new HashSet<TArg>();
 		}
 
-		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodInfo mehtodInfo)
+		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo)
 		{
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
@@ -71,27 +71,27 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     if set this method does not exist so we fake it
 		/// </summary>
-		public Delegate Delegate { get; protected internal set; }
+		public virtual Delegate Delegate { get; protected internal set; }
 
 		/// <summary>
 		///     Direct Reflection
 		/// </summary>
-		public MethodInfo MethodInfo { get; protected internal set; }
+		public virtual MethodBase MethodInfo { get; protected internal set; }
 
 		/// <summary>
 		///     The name of the method
 		/// </summary>
-		public string MethodName { get; protected internal set; }
+		public virtual string MethodName { get; protected internal set; }
 
 		/// <summary>
 		/// Arguments on this Method
 		/// </summary>
-		public HashSet<TArg> Arguments { get; protected internal set; }
+		public virtual HashSet<TArg> Arguments { get; protected internal set; }
 
 		/// <summary>
 		///     All Attributes on this Method
 		/// </summary>
-		public HashSet<TAtt> AttributeInfoCaches { get; protected internal set; }
+		public virtual HashSet<TAtt> AttributeInfoCaches { get; protected internal set; }
 
 		/// <summary>
 		///     Easy access to the underlying delegate

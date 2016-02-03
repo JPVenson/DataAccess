@@ -2,23 +2,89 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.DbInfoConfig;
 
 namespace JPB.DataAccess.AdoWrapper
 {
-	public sealed class EgarDataRecord : IDataRecord, IDisposable
+	public sealed class EagarDataReader : EgarDataRecord, IDataReader
 	{
-		public EgarDataRecord(IDataRecord sourceRecord)
+		internal EagarDataReader(object sourceObject)
 		{
-			Objects = new List<MemoryValueHolder>();
+			var type = sourceObject.GetType().GetClassInfo();
+			foreach (var item in type.PropertyInfoCaches)
+			{
+				Objects.Add(item.Key, item.Value.Getter.Invoke(sourceObject));
+			}
+		}
+
+		public EagarDataReader(IDataRecord sourceRecord)
+			: base(sourceRecord)
+		{
+		}
+
+		public void Close()
+		{
+
+		}
+
+		public DataTable GetSchemaTable()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool NextResult()
+		{
+			throw new NotImplementedException();
+		}
+
+		public bool Read()
+		{
+			throw new NotImplementedException();
+		}
+
+		public int Depth { get; private set; }
+		public bool IsClosed { get; private set; }
+		public int RecordsAffected { get; private set; }
+	}
+
+	/// <summary>
+	/// Provides an IDataRecord Access that enumerates the Source record
+	/// </summary>
+	public class EgarDataRecord : IDataRecord, IDisposable
+	{
+		/// <summary>
+		/// Enumerates all items in the source record
+		/// </summary>
+		/// <param name="sourceRecord"></param>
+		public EgarDataRecord(IDataRecord sourceRecord)
+			: this()
+		{
 			for (var i = 0; i < sourceRecord.FieldCount; i++)
 			{
 				var obj = sourceRecord.GetValue(i);
 				var name = sourceRecord.GetName(i);
-				Objects.Add(new MemoryValueHolder(name, obj));
+				Objects.Add(name, obj);
 			}
 		}
 
-		internal List<MemoryValueHolder> Objects { get; set; }
+		/// <summary>
+		/// Creates a new Eagar recrod based on an Dictionary
+		/// </summary>
+		/// <returns></returns>
+		public static EgarDataRecord FromDictionary(Dictionary<string, object> values)
+		{
+			return new EgarDataRecord()
+			{
+				Objects = values
+			};
+		}
+
+		protected internal EgarDataRecord()
+		{
+			Objects = new Dictionary<string, object>();
+		}
+
+		internal Dictionary<string, object> Objects { get; set; }
 
 		public string GetName(int i)
 		{
@@ -53,22 +119,29 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public int GetOrdinal(string name)
 		{
-			return (int) Objects.FirstOrDefault(s => s.Key == name).Value;
+			int counter = 0;
+			foreach (var obj in Objects)
+			{
+				if (obj.Key == name)
+					return counter;
+				counter++;
+			}
+			return -1;
 		}
 
 		public bool GetBoolean(int i)
 		{
-			return (bool) GetValue(i);
+			return (bool)GetValue(i);
 		}
 
 		public byte GetByte(int i)
 		{
-			return (byte) GetValue(i);
+			return (byte)GetValue(i);
 		}
 
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			var value = (byte[]) GetValue(i);
+			var value = (byte[])GetValue(i);
 			if (fieldOffset > value.Length)
 				throw new ArgumentOutOfRangeException("fieldOffset");
 
@@ -88,12 +161,12 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public char GetChar(int i)
 		{
-			return (char) GetValue(i);
+			return (char)GetValue(i);
 		}
 
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			var value = (char[]) GetValue(i);
+			var value = (char[])GetValue(i);
 			if (fieldoffset > value.Length)
 				throw new ArgumentOutOfRangeException("fieldoffset");
 
@@ -113,53 +186,52 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public Guid GetGuid(int i)
 		{
-			return (Guid) GetValue(i);
+			return (Guid)GetValue(i);
 		}
 
 		public short GetInt16(int i)
 		{
-			return (short) GetValue(i);
+			return (short)GetValue(i);
 		}
 
 		public int GetInt32(int i)
 		{
-			return (int) GetValue(i);
+			return (int)GetValue(i);
 		}
 
 		public long GetInt64(int i)
 		{
-			return (long) GetValue(i);
+			return (long)GetValue(i);
 		}
 
 		public float GetFloat(int i)
 		{
-			return (float) GetValue(i);
+			return (float)GetValue(i);
 		}
 
 		public double GetDouble(int i)
 		{
-			return (double) GetValue(i);
+			return (double)GetValue(i);
 		}
 
 		public string GetString(int i)
 		{
-			return (string) GetValue(i);
+			return (string)GetValue(i);
 		}
 
 		public decimal GetDecimal(int i)
 		{
-			return (decimal) GetValue(i);
+			return (decimal)GetValue(i);
 		}
 
 		public DateTime GetDateTime(int i)
 		{
-			return (DateTime) GetValue(i);
+			return (DateTime)GetValue(i);
 		}
 
 		public IDataReader GetData(int i)
 		{
-			throw new NotImplementedException();
-			//return new XmlDataRecord(GetString(i), typeof(object));
+			return new EagarDataReader(GetValue(i));
 		}
 
 		public bool IsDBNull(int i)
@@ -187,13 +259,12 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				var firstOrDefault = Objects.FirstOrDefault(s => s.Key == name);
-				if (!firstOrDefault.Equals(default(MemoryValueHolder)))
+				object val = null;
+				if (Objects.TryGetValue(name, out  val))
 				{
-					var value = firstOrDefault.Value;
-					return value;
+					return val;
 				}
-				return null;
+				throw new IndexOutOfRangeException("Name is unkown");
 			}
 		}
 
@@ -201,18 +272,6 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			Objects.Clear();
 			Objects = null;
-		}
-
-		internal struct MemoryValueHolder
-		{
-			public MemoryValueHolder(string key, object value) : this()
-			{
-				Value = value;
-				Key = key;
-			}
-
-			public string Key { get; private set; }
-			public object Value { get; private set; }
 		}
 	}
 }

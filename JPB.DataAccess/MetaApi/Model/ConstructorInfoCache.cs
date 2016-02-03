@@ -13,7 +13,8 @@ namespace JPB.DataAccess.MetaApi.Model
 	///     Infos about the Ctor
 	/// </summary>
 	[Serializable]
-	public class ConstructorInfoCache<TAtt, TArg> : IConstructorInfoCache<TAtt, TArg> 
+	public class ConstructorInfoCache<TAtt, TArg> : MethodInfoCache<TAtt, TArg>,
+		IConstructorInfoCache<TAtt, TArg> 
 		where TAtt : class, IAttributeInfoCache, new() 
 		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
@@ -32,7 +33,48 @@ namespace JPB.DataAccess.MetaApi.Model
 			Init(ctorInfo);
 		}
 
-		public IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
+		public object Invoke(params object[] param)
+		{
+			return this.Invoke(null, param);
+		}
+
+		public IMethodInfoCache<TAtt, TArg> Init(MethodBase info)
+		{
+			if (info is ConstructorInfo)
+				return this.Init(info as ConstructorInfo);
+
+			throw new NotImplementedException();
+		}
+
+		public new ConstructorInfo MethodInfo
+		{
+			get { return base.MethodInfo as ConstructorInfo; }
+			protected internal set { base.MethodInfo = value; }
+		}
+
+		MethodBase IMethodInfoCache<TAtt, TArg>.MethodInfo
+		{
+			get { return this.MethodInfo; }
+		}
+
+		/// <summary>
+		///     Easy access to the underlying delegate
+		/// </summary>
+		/// <returns></returns>
+		public new virtual object Invoke(object target, params object[] param)
+		{
+			return MethodInfo.Invoke(param);
+		}
+
+		/// <summary>
+		/// For Interal use Only
+		/// </summary>
+		/// <param name="ctorInfo"></param>
+		/// <returns></returns>
+		[DebuggerHidden]
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public virtual IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
 		{
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
@@ -45,25 +87,6 @@ namespace JPB.DataAccess.MetaApi.Model
 			Arguments = new HashSet<TArg>(ctorInfo.GetParameters().Select(f => new TArg().Init(f) as TArg));
 			return this;
 		}
-
-		/// <summary>
-		///     Direct Reflection
-		/// </summary>
-		public ConstructorInfo MethodInfo { get; private set; }
-
-		/// <summary>
-		///     The name of the constructor
-		/// </summary>
-		public string MethodName { get; private set; }
-
-		/// <summary>
-		///     All Attributes
-		/// </summary>
-		public HashSet<TAtt> AttributeInfoCaches { get; private set; }
-
-
-
-		public HashSet<TArg> Arguments { get; private set; }
 
 		public int CompareTo(IConstructorInfoCache<TAtt, TArg> other)
 		{
