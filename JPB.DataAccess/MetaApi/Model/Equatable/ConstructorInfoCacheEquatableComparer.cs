@@ -7,7 +7,7 @@ using JPB.DataAccess.MetaApi.Contract;
 
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
-	public class ConstructorInfoCacheEquatableComparer<TAtt, TArg>
+	internal class ConstructorInfoCacheEquatableComparer<TAtt, TArg>
 		: IEqualityComparer<IConstructorInfoCache<TAtt, TArg>>,
 		IComparer<IConstructorInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new() 

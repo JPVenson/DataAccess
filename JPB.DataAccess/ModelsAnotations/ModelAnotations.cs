@@ -56,12 +56,24 @@ namespace JPB.DataAccess.ModelsAnotations
 		public bool FullSateliteImport { get; set; }
 	}
 
+	/// <summary>
+	/// Defines how an Constructor should be created
+	/// </summary>
 	public enum CtorGeneratorMode
 	{
+		/// <summary>
+		/// Use and inherted class and set Propertys in its super Constructor
+		/// </summary>
 		Inhert,
+		/// <summary>
+		/// Should be used when the Constructor is private or class is sealed
+		/// </summary>
 		FactoryMethod
 	}
 
+	/// <summary>
+	/// Adds a namespace to the generated class
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
 	public sealed class AutoGenerateCtorNamespaceAttribute : Attribute
 	{

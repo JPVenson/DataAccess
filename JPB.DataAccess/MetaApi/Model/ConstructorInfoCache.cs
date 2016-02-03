@@ -32,7 +32,12 @@ namespace JPB.DataAccess.MetaApi.Model
 			Init(ctorInfo);
 		}
 
-		public IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
+		/// <summary>
+		/// For Interal use Only
+		/// </summary>
+		/// <param name="ctorInfo"></param>
+		/// <returns></returns>
+		public virtual IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
 		{
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
@@ -61,10 +66,12 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public HashSet<TAtt> AttributeInfoCaches { get; private set; }
 
-
-
+		/// <summary>
+		///		All Arguments on this Constructor
+		/// </summary>
 		public HashSet<TArg> Arguments { get; private set; }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 		public int CompareTo(IConstructorInfoCache<TAtt, TArg> other)
 		{
 			return new ConstructorInfoCacheEquatableComparer<TAtt, TArg>().Compare(this, other);
@@ -74,5 +81,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			return new ConstructorInfoCacheEquatableComparer<TAtt, TArg>().Equals(this, other);
 		}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}
 }

@@ -41,6 +41,12 @@ namespace JPB.DataAccess.MetaApi.Model
 
 		}
 
+		/// <summary>
+		/// For Interal use Only
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="anon"></param>
+		/// <returns></returns>
 		public virtual IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false)
 		{
 			if (type == null)
@@ -98,6 +104,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public HashSet<TCtor> ConstructorInfoCaches { get; protected internal set; }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 		public bool Equals(IClassInfoCache other)
 		{
 			return new ClassInfoEquatableComparer().Equals(this, other);
@@ -107,5 +114,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			return new ClassInfoEquatableComparer().Compare(this, other);
 		}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}
 }

@@ -49,7 +49,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public virtual DbConfig Include<T>()
+		public new virtual DbConfig Include<T>()
 		{
 			return this.Include(typeof(T));
 		}
@@ -63,7 +63,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public virtual DbConfig Include(Type t)
+		public new virtual DbConfig Include(Type t)
 		{
 			GetOrCreateClassInfoCache(t);
 			return this;

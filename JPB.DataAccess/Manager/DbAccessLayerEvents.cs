@@ -58,7 +58,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public static event DatabaseFailedActionHandler OnException;
 
-		protected internal static void RaiseDelete(object sender, IDbCommand query, IDatabase source)
+		internal static void RaiseDelete(object sender, IDbCommand query, IDatabase source)
 		{
 			if (!RaiseStaticEvents)
 				return;
@@ -68,7 +68,7 @@ namespace JPB.DataAccess.Manager
 				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
 		}
 
-		protected internal static void RaiseException(object sender, Exception ex)
+		internal static void RaiseException(object sender, Exception ex)
 		{
 			if (!RaiseStaticEvents)
 				return;
@@ -78,7 +78,7 @@ namespace JPB.DataAccess.Manager
 				handler.BeginInvoke(sender, ex, s => { }, null);
 		}
 
-		protected internal static void RaiseSelect(IDbCommand query, IDatabase source)
+		internal static void RaiseSelect(IDbCommand query, IDatabase source)
 		{
 			if (!RaiseStaticEvents)
 				return;
@@ -87,7 +87,7 @@ namespace JPB.DataAccess.Manager
 				handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
 		}
 
-		protected internal static void RaiseUpdate(object sender, IDbCommand query, IDatabase source)
+		internal static void RaiseUpdate(object sender, IDbCommand query, IDatabase source)
 		{
 			if (!RaiseStaticEvents)
 				return;
@@ -97,7 +97,7 @@ namespace JPB.DataAccess.Manager
 				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
 		}
 
-		protected internal static void RaiseInsert(object sender, IDbCommand query, IDatabase source)
+		internal static void RaiseInsert(object sender, IDbCommand query, IDatabase source)
 		{
 			if (!RaiseStaticEvents)
 				return;

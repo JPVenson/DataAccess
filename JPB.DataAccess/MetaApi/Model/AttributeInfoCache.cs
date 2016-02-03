@@ -13,8 +13,8 @@ namespace JPB.DataAccess.MetaApi.Model
 	[Serializable]
 	public class AttributeInfoCache : IAttributeInfoCache
 	{
-		protected Attribute _attribute;
-		protected object _attributeName;
+		private Attribute _attribute;
+		private object _attributeName;
 		/// <summary>
 		/// For internal use Only
 		/// </summary>
@@ -33,19 +33,30 @@ namespace JPB.DataAccess.MetaApi.Model
 			Init(attribute);
 		}
 
-		public IAttributeInfoCache Init(Attribute attribute)
+		/// <summary>
+		/// For Internal Use only
+		/// </summary>
+		/// <param name="attribute"></param>
+		/// <returns></returns>
+		public virtual IAttributeInfoCache Init(Attribute attribute)
 		{
 			Attribute = attribute;
 			AttributeName = attribute.TypeId;
 			return this;
 		}
 
+		/// <summary>
+		/// The Instance of the current Attribute
+		/// </summary>
 		public Attribute Attribute
 		{
 			get { return _attribute; }
 			protected internal set { _attribute = value; }
 		}
 
+		/// <summary>
+		/// ToBeSupported
+		/// </summary>
 		public object AttributeName
 		{
 			get { return _attributeName; }
@@ -53,6 +64,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		[MethodImpl(MethodImplOptions.ForwardRef)]
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 		public int CompareTo(AttributeInfoCache other)
 		{
 			return new AttributeEquatableComparer().Compare(this, other);
@@ -63,6 +75,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			return new AttributeEquatableComparer().Equals(this, other);
 		}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}
 
 	/// <summary>
@@ -71,7 +84,10 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// <typeparam name="TAttr"></typeparam>
 	public class AttributeInfoCache<TAttr> : AttributeInfoCache
 		where TAttr : Attribute
-	{
+	{   
+		/// <summary>
+		/// The Instance of the current Attribute
+		/// </summary>
 		public new TAttr Attribute { get; set; }
 	}
 }

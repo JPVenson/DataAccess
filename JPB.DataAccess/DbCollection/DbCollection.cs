@@ -111,6 +111,7 @@ namespace JPB.DataAccess.DbCollection
 			}
 		}
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 		public IEnumerator<T> GetEnumerator()
 		{
 			return _internalCollection
@@ -185,6 +186,7 @@ namespace JPB.DataAccess.DbCollection
 			if (!listEntry.Contains(e.PropertyName))
 				listEntry.Add(e.PropertyName);
 		}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
 		private bool ChangeState(T item, CollectionStates state)
 		{
@@ -197,6 +199,11 @@ namespace JPB.DataAccess.DbCollection
 			return true;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public CollectionStates GetEntryState(T item)
 		{
 			return _internalCollection.FirstOrDefault(s => s.Value == item).State;
@@ -274,11 +281,26 @@ namespace JPB.DataAccess.DbCollection
 		}
 	}
 
+	/// <summary>
+	/// All states that an item inside an DbCollection can be
+	/// </summary>
 	public enum CollectionStates
 	{
+		/// <summary>
+		/// Object was created from the Database and has not changed
+		/// </summary>
 		Unchanged,
+		/// <summary>
+		/// Object from UserCode
+		/// </summary>
 		Added,
+		/// <summary>
+		/// Object was created from the database and has changed since then
+		/// </summary>
 		Changed,
+		/// <summary>
+		/// Object was created from the database and should be created
+		/// </summary>
 		Removed
 	}
 }

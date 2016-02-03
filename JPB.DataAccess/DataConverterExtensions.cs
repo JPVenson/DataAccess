@@ -783,7 +783,9 @@ namespace JPB.DataAccess
 			if (created)
 				return source;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 			return SetPropertysViaReflection(source, type, reader, null);
+#pragma warning restore CS0618 // Type or member is obsolete
 		}
 
 
@@ -800,7 +802,9 @@ namespace JPB.DataAccess
 			if (created)
 				return source;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 			return SetPropertysViaReflection(source, type, reader, mapping);
+#pragma warning restore CS0618 // Type or member is obsolete
 		}
 
 		/// <summary>
