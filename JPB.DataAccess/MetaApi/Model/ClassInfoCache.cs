@@ -107,6 +107,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public HashSet<TCtor> ConstructorInfoCaches { get; protected internal set; }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 		public bool Equals(IClassInfoCache other)
 		{
 			return new ClassInfoEquatableComparer().Equals(this, other);
@@ -116,5 +117,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			return new ClassInfoEquatableComparer().Compare(this, other);
 		}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}
 }

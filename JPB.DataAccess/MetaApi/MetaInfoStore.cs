@@ -181,7 +181,7 @@ namespace JPB.DataAccess.MetaApi
 		/// </summary>
 		public bool EnableThreadSafety { get; set; }
 
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			ClassInfoCaches.Clear();
 		}

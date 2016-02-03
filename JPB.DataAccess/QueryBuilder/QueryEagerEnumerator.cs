@@ -91,10 +91,6 @@ namespace JPB.DataAccess.QueryBuilder
 		{
 		}
 
-		public void Dispose()
-		{
-		}
-
 		public new T Current
 		{
 			get { return (T) base.Current; }

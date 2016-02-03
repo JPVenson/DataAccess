@@ -16,6 +16,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbClassInfoCache : ClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -33,10 +36,16 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			Refresh(true);
 		}
 
+		/// <summary>
+		/// For interal use Only
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="anon"></param>
+		/// <returns></returns>
 		public override IClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument> Init(Type type, bool anon = false)
 		{
 			var item = base.Init(type, anon);
-				//.ToDictionary(s => s.Key);
+			//.ToDictionary(s => s.Key);
 			PropertyInfoCaches = new Dictionary<string, DbPropertyInfoCache>(PropertyInfoCaches
 				.Where(f => f.Value.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute))).ToDictionary(s => s.Key, f => f.Value));
 			MethodInfoCaches = new HashSet<DbMethodInfoCache>(MethodInfoCaches.Where(f => f.AttributeInfoCaches.All(d => !(d.Attribute is IgnoreReflectionAttribute))));

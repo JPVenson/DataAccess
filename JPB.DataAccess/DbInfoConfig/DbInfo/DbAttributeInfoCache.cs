@@ -10,6 +10,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbAttributeInfoCache : AttributeInfoCache
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		[DebuggerHidden]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -17,6 +20,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		public DbAttributeInfoCache(Attribute attribute)
 			: base(attribute)
 		{
@@ -24,12 +30,15 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	}
 
 	/// <summary>
-	/// 
+	/// Attributes with Database spezifc members
 	/// </summary>
 	/// <typeparam name="TAttr"></typeparam>
 	public class DbAttributeInfoCache<TAttr> : DbAttributeInfoCache
 			where TAttr : Attribute
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		public DbAttributeInfoCache(AttributeInfoCache firstOrDefault)
 		{
 			this.Attribute = (TAttr)firstOrDefault.Attribute;
@@ -43,14 +52,19 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			get
 			{
-				return _attribute as TAttr;
+				return base.Attribute as TAttr;
 			}
 			set
 			{
-				_attribute = value;
+				base.Attribute = value;
 			}
 		}
 
+		/// <summary>
+		/// Wraps and Attribute into an strong typed DbAttribute
+		/// </summary>
+		/// <param name="firstOrDefault"></param>
+		/// <returns></returns>
 		public static DbAttributeInfoCache<TAttr> WrapperOrNull(AttributeInfoCache firstOrDefault)
 		{
 			if (firstOrDefault == null)

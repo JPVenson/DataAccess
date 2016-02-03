@@ -87,7 +87,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			Arguments = new HashSet<TArg>(ctorInfo.GetParameters().Select(f => new TArg().Init(f) as TArg));
 			return this;
 		}
-
+#pragma warning disable CS1591
 		public int CompareTo(IConstructorInfoCache<TAtt, TArg> other)
 		{
 			return new ConstructorInfoCacheEquatableComparer<TAtt, TArg>().Compare(this, other);
@@ -97,5 +97,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			return new ConstructorInfoCacheEquatableComparer<TAtt, TArg>().Equals(this, other);
 		}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}
 }

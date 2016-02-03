@@ -10,6 +10,9 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper
 {
+	/// <summary>
+	/// This is an Helper for reading Xml Based columns in a way as a Ado.net Constructor is written
+	/// </summary>
 	public class XmlDataRecord : IDataRecord
 	{
 		private readonly DbClassInfoCache _target;
