@@ -715,22 +715,15 @@ namespace JPB.DataAccess
 				return classInfo.Factory(reader);
 			}
 
-			var constructorInfos = classInfo.ConstructorInfoCaches.Select(f => f.MethodInfo).ToArray();
-
 			var constructor =
-				constructorInfos.FirstOrDefault(s => s.GetCustomAttributes().Any(e => e is ObjectFactoryMethodAttribute)) ??
-				constructorInfos.FirstOrDefault(s =>
-				{
-					var parameterInfos = s.GetParameters();
-					return parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof(IDataRecord);
-				});
+				classInfo.ConstructorInfoCaches.FirstOrDefault(s => s.AttributeInfoCaches.Any(e => e.Attribute is ObjectFactoryMethodAttribute)) ??
+				classInfo.ConstructorInfoCaches.FirstOrDefault(s => s.Arguments.Count == 1 && s.Arguments.First().Type == typeof(IDataRecord));
 
 			//maybe single ctor with param
 
 			if (constructor != null)
 			{
-				var parameterInfos = constructor.GetParameters();
-				if (parameterInfos.Length == 1 && parameterInfos.First().ParameterType == typeof(IDataRecord))
+				if (constructor.Arguments.Count == 1 && constructor.Arguments.First().Type == typeof(IDataRecord))
 				{
 					classInfo.FullFactory = true;
 					classInfo.Factory = s => constructor.Invoke(new object[] { s });
@@ -746,19 +739,17 @@ namespace JPB.DataAccess
 
 				if (factory != null)
 				{
-					var method = factory.MethodInfo;
-					if (method.IsStatic)
+					if (factory.MethodInfo.IsStatic)
 					{
-						var returnParameter = method.GetParameters();
-						var returnType = method.ReturnParameter;
+						var returnType = (factory.MethodInfo as MethodInfo).ReturnParameter;
 
 						if (returnType != null && returnType.ParameterType == classInfo.Type)
 						{
-							if (returnParameter.Length == 1 &&
-								returnParameter.First().ParameterType == typeof(IDataRecord))
+							if (factory.Arguments.Count == 1 &&
+								factory.Arguments.First().Type == typeof(IDataRecord))
 							{
 								classInfo.FullFactory = true;
-								classInfo.Factory = s => method.Invoke(null, new object[] { reader });
+								classInfo.Factory = s => factory.Invoke(new object[] { reader });
 								return classInfo.CreateInstance(reader, out fullLoaded);
 							}
 						}
@@ -766,8 +757,15 @@ namespace JPB.DataAccess
 				}
 			}
 
+			var emptyCtor = classInfo.ConstructorInfoCaches.FirstOrDefault(f => !f.Arguments.Any());
+
+			if (emptyCtor == null)
+			{
+				throw new NotSupportedException("You have to define ether an ObjectFactoryMethod as static or constructor or any constructor without any arguments");
+			}
+
 			classInfo.FullFactory = false;
-			classInfo.Factory = s => constructorInfos.First().Invoke(new object[0]);
+			classInfo.Factory = s => emptyCtor.Invoke(new object[0]);
 			return classInfo.CreateInstance(reader, out fullLoaded);
 		}
 
