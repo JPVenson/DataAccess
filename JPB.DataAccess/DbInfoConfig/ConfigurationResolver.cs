@@ -74,7 +74,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod(string methodName, Delegate methodBody, params DbAttributeInfoCache[] attributes)
+		public void CreateMethod(string methodName, Func<object, object[], object> methodBody, params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");
@@ -83,6 +83,44 @@ namespace JPB.DataAccess.DbInfoConfig
 			if (ClassInfoCache.MethodInfoCaches.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
 			var mehtodInfo = new DbMethodInfoCache(methodBody, methodName, attributes);
+			ClassInfoCache.MethodInfoCaches.Add(mehtodInfo);
+		}
+
+
+		/// <summary>
+		///     Adds a Fake Mehtod to the class
+		/// </summary>
+		public void CreateMethod<Source, Input>(string methodName, Action<Source, Input> methodBody, params DbAttributeInfoCache[] attributes)
+		{
+			if (methodName == null)
+				throw new ArgumentNullException("methodName");
+			if (methodBody == null)
+				throw new ArgumentNullException("methodBody");
+			if (ClassInfoCache.MethodInfoCaches.Any(s => s.MethodName == methodName))
+				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
+			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
+			{
+				methodBody((Source)o, (Input)objects[0]);
+				return null;
+			}, methodName, attributes);
+			ClassInfoCache.MethodInfoCaches.Add(mehtodInfo);
+		}
+
+		/// <summary>
+		///     Adds a Fake Mehtod to the class
+		/// </summary>
+		public void CreateMethod<Source, Output>(string methodName, Func<Source, Output> methodBody, params DbAttributeInfoCache[] attributes)
+		{
+			if (methodName == null)
+				throw new ArgumentNullException("methodName");
+			if (methodBody == null)
+				throw new ArgumentNullException("methodBody");
+			if (ClassInfoCache.MethodInfoCaches.Any(s => s.MethodName == methodName))
+				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
+			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
+			{
+				return methodBody((Source)o);
+			}, methodName, attributes);
 			ClassInfoCache.MethodInfoCaches.Add(mehtodInfo);
 		}
 

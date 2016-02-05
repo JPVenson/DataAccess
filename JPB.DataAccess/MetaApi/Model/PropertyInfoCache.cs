@@ -10,18 +10,19 @@ using JPB.DataAccess.MetaApi.Model.Equatable;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
-	[DebuggerDisplay("{PropertyName}")]
+	[DebuggerDisplay("{MethodName}")]
 	[Serializable]
 	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> 
 		where TAtt : class, IAttributeInfoCache, new()
 	{
-		public PropertyHelper(string name)
-		{
-			base.MethodName = name;
-		}
-
 		private dynamic _getter;
 		private dynamic _setter;
+
+		public PropertyHelper(MethodBase accessorMethod)
+		{
+			base.MethodInfo = accessorMethod;
+			base.MethodName = accessorMethod.Name;
+		}
 
 		public void SetGet(dynamic getter)
 		{
@@ -80,8 +81,8 @@ namespace JPB.DataAccess.MetaApi.Model
 			AttributeInfoCaches = new HashSet<TAtt>();
 			if (propertyInfo != null)
 			{
-				var getMethod = propertyInfo.GetGetMethod();
-				var setMethod = propertyInfo.GetSetMethod();
+				var getMethod = propertyInfo.GetMethod;
+				var setMethod = propertyInfo.SetMethod;
 				PropertyInfo = propertyInfo;
 				PropertyName = propertyInfo.Name;
 				PropertyType = propertyInfo.PropertyType;
@@ -112,7 +113,7 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var getterDelegate = getExpression.Compile();
-							Getter = new PropertyHelper<TAtt>(getMethod.Name);
+							Getter = new PropertyHelper<TAtt>(getMethod);
 							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
 						}
 						if (setMethod != null)
@@ -134,7 +135,7 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var setterDelegate = setExpression.Compile();
-							Setter = new PropertyHelper<TAtt>(setMethod.Name);
+							Setter = new PropertyHelper<TAtt>(setMethod);
 							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
 						}
 					}
@@ -157,7 +158,7 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var getterDelegate = getExpression.Compile();
-							Getter = new PropertyHelper<TAtt>(getMethod.Name);
+							Getter = new PropertyHelper<TAtt>(getMethod);
 							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
 						}
 						if (setMethod != null)
@@ -176,7 +177,7 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var setterDelegate = setExpression.Compile();
-							Setter = new PropertyHelper<TAtt>(setMethod.Name);
+							Setter = new PropertyHelper<TAtt>(setMethod);
 							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
 						}
 					}
@@ -289,12 +290,16 @@ namespace JPB.DataAccess.MetaApi.Model
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(setter);
+				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) =>
+				{
+					setter((T) o, (TE) objects[0]);
+					return null;
+				});
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(getter);
+				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) => getter((T) o));
 			}
 		}
 	}

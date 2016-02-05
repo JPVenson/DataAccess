@@ -21,12 +21,16 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(setter);
+				Setter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) =>
+				{
+					setter((T)o, (TE)objects[0]);
+					return null;
+				});
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(getter);
+				Getter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) => getter((T)o));
 			}
 		}
 	}
@@ -129,11 +133,19 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(PrimaryKeyAttribute)));
 			InsertIgnore = AttributeInfoCaches.Any(f => f.Attribute is InsertIgnoreAttribute);
-			if (PropertyInfo != null)
-				ForginKeyAttribute =
-					PropertyInfo.GetGetMethod().IsVirtual
-					? DbAttributeInfoCache<ForeignKeyAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyAttribute)))
-					: null;
+			if (Getter != null && Getter.MethodInfo != null)
+			{
+				if (Getter.MethodInfo.IsVirtual)
+				{
+					ForginKeyAttribute =
+						DbAttributeInfoCache<ForeignKeyAttribute>.WrapperOrNull(
+							AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyAttribute)));
+				}
+				else
+				{
+					ForginKeyAttribute = null;
+				}
+			}
 			RowVersionAttribute =
 				DbAttributeInfoCache<RowVersionAttribute>.WrapperOrNull(
 					AttributeInfoCaches.FirstOrDefault(s => s.Attribute is RowVersionAttribute));

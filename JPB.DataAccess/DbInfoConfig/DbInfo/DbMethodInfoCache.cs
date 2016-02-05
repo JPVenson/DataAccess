@@ -15,11 +15,12 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbMethodInfoCache : MethodInfoCache<DbAttributeInfoCache, DbMethodArgument>
 	{
-		internal DbMethodInfoCache(MethodInfo mehtodInfo) : base(mehtodInfo)
+		internal DbMethodInfoCache(MethodInfo mehtodInfo)
+			: base(mehtodInfo)
 		{
 		}
 
-		internal DbMethodInfoCache(Delegate fakeMehtod, string name = null, params DbAttributeInfoCache[] attributes)
+		internal DbMethodInfoCache(Func<object, object[], object> fakeMehtod, string name = null, params DbAttributeInfoCache[] attributes)
 			: base(fakeMehtod, name, attributes)
 		{
 		}

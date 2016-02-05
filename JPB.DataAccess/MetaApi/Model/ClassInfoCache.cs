@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using JPB.DataAccess.MetaApi.Contract;
 using JPB.DataAccess.MetaApi.Model.Equatable;
@@ -82,8 +84,24 @@ namespace JPB.DataAccess.MetaApi.Model
 				.GetConstructors(BindingFlags.Public | BindingFlags.Static |
 		   BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TCtor().Init(s) as TCtor));
+			var defaultConstructor = ConstructorInfoCaches.FirstOrDefault(f => !f.Arguments.Any());
+
+			if (type.IsValueType || defaultConstructor != null)
+			{
+				var dm = new DynamicMethod("InvokeDefaultCtorFor" + ClassName, Type, System.Type.EmptyTypes, Type, true);
+				var il = dm.GetILGenerator();
+				il.Emit(OpCodes.Newobj);
+				var ctorDelegate= dm.CreateDelegate(typeof (Func<>).MakeGenericType(type));
+				DefaultFactory = new TMeth().Init(ctorDelegate.Method, type) as TMeth;
+			}
+
 			return this;
 		}
+
+		/// <summary>
+		/// The default constructor that takes no arguments if known
+		/// </summary>
+		public TMeth DefaultFactory { get; protected internal set; }
 
 		/// <summary>
 		///     The .net ClassName

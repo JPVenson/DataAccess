@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using JPB.DataAccess.MetaApi.Contract;
 
 namespace JPB.DataAccess.MetaApi.Model
@@ -19,25 +20,16 @@ namespace JPB.DataAccess.MetaApi.Model
 		where TAtt : class, IAttributeInfoCache, new() 
 		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
-		internal MethodInfoCache(MethodInfo mehtodInfo)
+		internal MethodInfoCache(MethodBase mehtodInfo)
 		{
 // ReSharper disable DoNotCallOverridableMethodsInConstructor
 			Init(mehtodInfo);
 		}
 
-		internal MethodInfoCache(Delegate fakeMehtod, string name = null, params TAtt[] attributes) 
+		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, string name = null, params TAtt[] attributes) 
 			: this()
 		{
-			if (fakeMehtod == null)
-				throw new ArgumentNullException("fakeMehtod");
-			MethodInfo = fakeMehtod.GetMethodInfo();
-			MethodName = string.IsNullOrEmpty(name) ? MethodInfo.Name : name;
-			Delegate = fakeMehtod;
-			AttributeInfoCaches = new HashSet<TAtt>(MethodInfo
-				.GetCustomAttributes(true)
-				.Where(s => s is Attribute)
-				.Select(s => new TAtt().Init(s as Attribute) as TAtt).Concat(attributes));
-			Arguments = new HashSet<TArg>(MethodInfo.GetParameters().Select(s => new TArg().Init(s) as TArg));
+			Init(fakeMehtod.GetMethodInfo());
 		}
 
 		/// <summary>
@@ -69,6 +61,20 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo)
 		{
+			return this.Init(mehtodInfo, mehtodInfo.DeclaringType);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="mehtodInfo"></param>
+		/// <param name="sourceType"></param>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo, Type sourceType)
+		{
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 
@@ -81,13 +87,49 @@ namespace JPB.DataAccess.MetaApi.Model
 				.Where(s => s is Attribute)
 				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
 			Arguments = new HashSet<TArg>(mehtodInfo.GetParameters().Select(s => new TArg().Init(s) as TArg));
+			_createMethod = new Lazy<Func<object, object[], object>>(() => Wrap((MethodInfo)mehtodInfo, sourceType));
 			return this;
 		}
 
+		static Func<object, object[], object> Wrap(MethodInfo method, Type declaringType)
+		{
+			var dm = new DynamicMethod(method.Name, typeof(object), new[] { typeof(object), typeof(object[]) }, declaringType, true);
+			var il = dm.GetILGenerator();
+
+			if (!method.IsStatic)
+			{
+				il.Emit(OpCodes.Ldarg_0);
+				il.Emit(OpCodes.Unbox_Any, declaringType);
+			}
+			var parameters = method.GetParameters();
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				il.Emit(OpCodes.Ldarg_1);
+				il.Emit(OpCodes.Ldc_I4, i);
+				il.Emit(OpCodes.Ldelem_Ref);
+				il.Emit(OpCodes.Unbox_Any, parameters[i].ParameterType);
+			}
+			il.Emit(OpCodes.Call, method);
+			//il.EmitCall(method.IsStatic || declaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, method, null);
+			if (method.ReturnType == null || method.ReturnType == typeof(void))
+			{
+				il.Emit(OpCodes.Ldnull);
+			}
+			else if (method.ReturnType.IsValueType)
+			{
+				il.Emit(OpCodes.Box, method.ReturnType);
+			}
+			il.Emit(OpCodes.Ret);
+			return (Func<object, object[], object>)dm.CreateDelegate(typeof(Func<object, object[], object>));
+		}
+
+		private Lazy<Func<object, object[], object>> _createMethod;
 		/// <summary>
 		///     if set this method does not exist so we fake it
 		/// </summary>
-		public virtual Delegate Delegate { get; protected internal set; }
+		public virtual Func<object, object[], object> Delegate {
+			get { return _createMethod.Value; } 
+		}
 
 		/// <summary>
 		///     Direct Reflection
@@ -117,32 +159,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			if (Delegate != null)
 			{
-				var para = new object[param.Length + 1];
-				para[0] = target;
-				for (var i = 0; i < param.Length; i++)
-				{
-					para[1 + i] = param[i];
-				}
-				return Delegate.DynamicInvoke(para);
+				return Delegate(target, param);
 			}
 			return MethodInfo.Invoke(target, param);
-		}
-
-		internal static Delegate ExtractDelegate(MethodInfo method)
-		{
-			var args = new List<Type>(
-				method.GetParameters().Select(p => p.ParameterType));
-			Type delegateType;
-			if (method.ReturnType == typeof (void))
-			{
-				delegateType = Expression.GetActionType(args.ToArray());
-			}
-			else
-			{
-				args.Add(method.ReturnType);
-				delegateType = Expression.GetFuncType(args.ToArray());
-			}
-			return Delegate.CreateDelegate(delegateType, null, method);
 		}
 
 		public bool Equals(IMethodInfoCache<TAtt, TArg> other)

@@ -15,7 +15,7 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// <summary>
 		///     if set this method does not exist so we fake it
 		/// </summary>
-		Delegate Delegate { get; }
+		Func<object, object[], object> Delegate { get; }
 
 		/// <summary>
 		///     Direct Reflection
@@ -38,6 +38,7 @@ namespace JPB.DataAccess.MetaApi.Contract
 		HashSet<TArg> Arguments { get; }
 
 		IMethodInfoCache<TAtt, TArg> Init(MethodBase info);
+		IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo, Type sourceType);
 
 		/// <summary>
 		///     Easy access to the underlying delegate
