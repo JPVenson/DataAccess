@@ -9,6 +9,31 @@ using JPB.DataAccess.MetaApi.Model.Equatable;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
+	public class ConstructorStructFakeInfoCache : 
+		MethodInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>,
+		IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>
+	{
+		public ConstructorStructFakeInfoCache(Func<object> del, string name) 
+			: base((e,f) => {
+				return del();
+			 }, ".ctor")
+		{
+			
+		}
+
+#pragma warning disable CS1591
+		public int CompareTo(IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>> other)
+		{
+			return new ConstructorInfoCacheEquatableComparer<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>().Compare(this, other);
+		}
+
+		public bool Equals(IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>> other)
+		{
+			return new ConstructorInfoCacheEquatableComparer<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>().Equals(this, other);
+		}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+	}
+
 	/// <summary>
 	///     Infos about the Ctor
 	/// </summary>
@@ -80,14 +105,8 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
 		{
-			if (!string.IsNullOrEmpty(MethodName))
-				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
-			MethodInfo = ctorInfo;
-			MethodName = ctorInfo.Name;
-			AttributeInfoCaches = new HashSet<TAtt>(ctorInfo
-				.GetCustomAttributes(true)
-				.Where(s => s is Attribute)
-				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
+			base.Init(ctorInfo);
+					
 			Arguments = new HashSet<TArg>(ctorInfo.GetParameters().Select(f => new TArg().Init(f) as TArg));
 			return this;
 		}

@@ -37,6 +37,11 @@ namespace JPB.DataAccess.MetaApi.Contract
 		/// </summary>
 		HashSet<TArg> Arguments { get; }
 
+		/// <summary>
+		/// When set to true, an IL Wrapper is used inside the Invoke method
+		/// </summary>
+		bool UseILWrapper { get; set; }
+
 		IMethodInfoCache<TAtt, TArg> Init(MethodBase info);
 		IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo, Type sourceType);
 

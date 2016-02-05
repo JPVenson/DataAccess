@@ -14,8 +14,18 @@ using TextDataFormat = System.Windows.TextDataFormat;
 
 namespace JPB.DataAccess.EntityCreator
 {
+	public struct f
+	{
+
+	}
+
 	public class Program
 	{
+		public static f X()
+		{
+			return default(f);
+		}
+
 		public static AutoConsole AutoConsole { get; set; }
 		[STAThread]
 		static void Main(string[] args)
@@ -107,7 +117,7 @@ namespace JPB.DataAccess.EntityCreator
 			new MsSqlCreator().CreateEntrys(connectionString, outputDir, string.Empty);
 			if (AutoConsole.Options == null)
 				AutoConsole.SaveStorage(args[0]);
-				
+
 		}
 
 		private void RenderHelp()

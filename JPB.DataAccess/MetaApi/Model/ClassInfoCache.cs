@@ -9,6 +9,8 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using JPB.DataAccess.MetaApi.Contract;
 using JPB.DataAccess.MetaApi.Model.Equatable;
+using System.Linq.Expressions;
+using System.Runtime.Serialization;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
@@ -86,13 +88,60 @@ namespace JPB.DataAccess.MetaApi.Model
 				.Select(s => new TCtor().Init(s) as TCtor));
 			var defaultConstructor = ConstructorInfoCaches.FirstOrDefault(f => !f.Arguments.Any());
 
+			//if (type.IsValueType)
+			//{
+			//	var dm = new DynamicMethod("InvokeDefaultCtorFor" + ClassName, Type, System.Type.EmptyTypes, Type, true);
+			//	var il = dm.GetILGenerator();
+			//	il.Emit(OpCodes.Initobj, type);
+			//	var ctorDelegate = dm.CreateDelegate(typeof(Func<>).MakeGenericType(type));
+			//	DefaultFactory = new TMeth().Init(ctorDelegate.Method, type) as TMeth;
+			//}
+			//else if (defaultConstructor != null)
+			//{
+			//	var dm = new DynamicMethod("InvokeDefaultCtorFor" + ClassName, Type, System.Type.EmptyTypes, Type, true);
+			//	var il = dm.GetILGenerator();
+			//	il.Emit(OpCodes.Newobj);
+			//	var ctorDelegate = dm.CreateDelegate(typeof(Func<>).MakeGenericType(type));
+			//	DefaultFactory = new TMeth().Init(ctorDelegate.Method, type) as TMeth;
+			//}
+
 			if (type.IsValueType || defaultConstructor != null)
 			{
-				var dm = new DynamicMethod("InvokeDefaultCtorFor" + ClassName, Type, System.Type.EmptyTypes, Type, true);
-				var il = dm.GetILGenerator();
-				il.Emit(OpCodes.Newobj);
-				var ctorDelegate= dm.CreateDelegate(typeof (Func<>).MakeGenericType(type));
-				DefaultFactory = new TMeth().Init(ctorDelegate.Method, type) as TMeth;
+				Expression defaultExpression = null;
+
+				if (type.IsValueType)
+				{
+					defaultExpression = Expression.Default(type);
+
+				}
+				else if (defaultConstructor != null)
+				{
+					defaultExpression = Expression.New(defaultConstructor.MethodInfo as ConstructorInfo);
+				}
+
+				var dynamicAccess = typeof(Expression)
+									.GetMethods()
+									.First(s => s.Name == "Lambda")
+									.MakeGenericMethod(
+										typeof(Func<>)
+										.MakeGenericType(type)
+									)
+									.Invoke(null, new object[] {
+										defaultExpression, null
+									});
+				var expressionBuilder = dynamicAccess.GetType().GetMethods().FirstOrDefault(s => s.Name == "Compile");
+
+				DefaultFactory = expressionBuilder.Invoke(dynamicAccess, null);
+			}
+			else
+			{
+				//typeof(Func<>).MakeGenericType(type).GetConstructors()[0].Invoke(null, new object[] {
+				//	(() =>
+				//	{
+				//		return FormatterServices.GetSafeUninitializedObject(type);
+				//	})
+				// });
+				//DefaultFactory = () => ;
 			}
 
 			return this;
@@ -101,7 +150,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		/// The default constructor that takes no arguments if known
 		/// </summary>
-		public TMeth DefaultFactory { get; protected internal set; }
+		public dynamic DefaultFactory { get; protected internal set; }
 
 		/// <summary>
 		///     The .net ClassName

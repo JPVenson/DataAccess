@@ -16,17 +16,17 @@ namespace JPB.DataAccess.MetaApi.Model
 	[DebuggerDisplay("{MethodName}")]
 	[Serializable]
 	public class MethodInfoCache<TAtt, TArg> :
-		IMethodInfoCache<TAtt, TArg> 
-		where TAtt : class, IAttributeInfoCache, new() 
+		IMethodInfoCache<TAtt, TArg>
+		where TAtt : class, IAttributeInfoCache, new()
 		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		internal MethodInfoCache(MethodBase mehtodInfo)
 		{
-// ReSharper disable DoNotCallOverridableMethodsInConstructor
+			// ReSharper disable DoNotCallOverridableMethodsInConstructor
 			Init(mehtodInfo);
 		}
 
-		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, string name = null, params TAtt[] attributes) 
+		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, string name = null, params TAtt[] attributes)
 			: this()
 		{
 			Init(fakeMehtod.GetMethodInfo());
@@ -87,11 +87,12 @@ namespace JPB.DataAccess.MetaApi.Model
 				.Where(s => s is Attribute)
 				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
 			Arguments = new HashSet<TArg>(mehtodInfo.GetParameters().Select(s => new TArg().Init(s) as TArg));
+			Wrap(mehtodInfo, sourceType);
 			_createMethod = new Lazy<Func<object, object[], object>>(() => Wrap((MethodInfo)mehtodInfo, sourceType));
 			return this;
 		}
 
-		static Func<object, object[], object> Wrap(MethodInfo method, Type declaringType)
+		static Func<object, object[], object> Wrap(MethodBase method, Type declaringType)
 		{
 			var dm = new DynamicMethod(method.Name, typeof(object), new[] { typeof(object), typeof(object[]) }, declaringType, true);
 			var il = dm.GetILGenerator();
@@ -109,16 +110,25 @@ namespace JPB.DataAccess.MetaApi.Model
 				il.Emit(OpCodes.Ldelem_Ref);
 				il.Emit(OpCodes.Unbox_Any, parameters[i].ParameterType);
 			}
-			il.Emit(OpCodes.Call, method);
-			//il.EmitCall(method.IsStatic || declaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, method, null);
-			if (method.ReturnType == null || method.ReturnType == typeof(void))
+			if (method is MethodInfo)
 			{
-				il.Emit(OpCodes.Ldnull);
+				var methodInfo = method as MethodInfo;
+				il.EmitCall(method.IsStatic || declaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, methodInfo, null);
+				if (methodInfo.ReturnType == null || methodInfo.ReturnType == typeof(void))
+				{
+					il.Emit(OpCodes.Ldnull);
+				}
+				else if (methodInfo.ReturnType.IsValueType)
+				{
+					il.Emit(OpCodes.Box, methodInfo.ReturnType);
+				}
 			}
-			else if (method.ReturnType.IsValueType)
+			else if (method is ConstructorInfo)
 			{
-				il.Emit(OpCodes.Box, method.ReturnType);
+				var ctorInfo = method as ConstructorInfo;
+				il.Emit(OpCodes.Newobj, ctorInfo);
 			}
+
 			il.Emit(OpCodes.Ret);
 			return (Func<object, object[], object>)dm.CreateDelegate(typeof(Func<object, object[], object>));
 		}
@@ -127,8 +137,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     if set this method does not exist so we fake it
 		/// </summary>
-		public virtual Func<object, object[], object> Delegate {
-			get { return _createMethod.Value; } 
+		public virtual Func<object, object[], object> Delegate
+		{
+			get { return _createMethod.Value; }
 		}
 
 		/// <summary>
@@ -151,13 +162,20 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public virtual HashSet<TAtt> AttributeInfoCaches { get; protected internal set; }
 
+		public bool UseILWrapper
+		{
+			get;
+
+			set;
+		}
+
 		/// <summary>
 		///     Easy access to the underlying delegate
 		/// </summary>
 		/// <returns></returns>
 		public virtual object Invoke(object target, params object[] param)
 		{
-			if (Delegate != null)
+			if (UseILWrapper && Delegate != null)
 			{
 				return Delegate(target, param);
 			}
