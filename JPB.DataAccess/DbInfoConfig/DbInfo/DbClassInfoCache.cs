@@ -19,7 +19,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		/// 
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbClassInfoCache()
@@ -75,7 +77,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		///     Internal Use only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
@@ -112,7 +116,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		///     Internal use Only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]

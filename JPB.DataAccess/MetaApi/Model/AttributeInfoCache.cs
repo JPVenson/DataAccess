@@ -18,7 +18,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		/// For internal use Only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public AttributeInfoCache()
@@ -37,7 +39,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		/// <param name="attribute"></param>
 		/// <returns></returns>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public IAttributeInfoCache Init(Attribute attribute)

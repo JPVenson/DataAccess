@@ -36,7 +36,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbPropertyInfoCache : PropertyInfoCache<DbAttributeInfoCache>
 	{
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbPropertyInfoCache()

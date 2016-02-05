@@ -13,7 +13,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		/// 
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbAttributeInfoCache()

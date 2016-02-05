@@ -20,7 +20,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		/// For Internal use only
 		/// </summary>	
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public MethodArgsInfoCache()

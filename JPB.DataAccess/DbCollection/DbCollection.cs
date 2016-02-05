@@ -21,7 +21,9 @@ namespace JPB.DataAccess.DbCollection
 		/// <summary>
 		///     Internal use only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public NonObservableDbCollection(IEnumerable enumerable)
@@ -56,7 +58,9 @@ namespace JPB.DataAccess.DbCollection
 		/// <summary>
 		///     Internal use only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable subset)
@@ -79,7 +83,9 @@ namespace JPB.DataAccess.DbCollection
 		/// <summary>
 		///     Internal use only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable<T> subset)

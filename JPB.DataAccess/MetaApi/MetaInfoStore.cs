@@ -60,7 +60,9 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		///     For Internal use Only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public static void Clear()

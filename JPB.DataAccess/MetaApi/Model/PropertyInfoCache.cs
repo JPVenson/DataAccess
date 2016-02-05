@@ -58,7 +58,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		/// For internal use Only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public PropertyInfoCache()

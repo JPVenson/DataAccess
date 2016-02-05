@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using JPB.DataAccess.MetaApi.Contract;
 using JPB.DataAccess.MetaApi.Model.Equatable;
@@ -33,7 +34,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		/// For internal use Only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected ClassInfoCache()
@@ -47,7 +50,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <param name="type"></param>
 		/// <param name="anon"></param>
 		/// <returns></returns>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false)
@@ -65,14 +70,17 @@ namespace JPB.DataAccess.MetaApi.Model
 				.Where(s => s is Attribute)
 				.Select(s => new TAttr().Init(s as Attribute) as TAttr));
 			PropertyInfoCaches = new Dictionary<string, TProp>(type
-				.GetProperties()
+				.GetProperties(BindingFlags.Public | BindingFlags.Static |
+		   BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TProp().Init(s, anon) as TProp)
 				.ToDictionary(s => s.PropertyName, s => s));
 			MethodInfoCaches = new HashSet<TMeth>(type
-				.GetMethods()
+				.GetMethods(BindingFlags.Public | BindingFlags.Static |
+		   BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TMeth().Init(s) as TMeth));
 			ConstructorInfoCaches = new HashSet<TCtor>(type
-				.GetConstructors()
+				.GetConstructors(BindingFlags.Public | BindingFlags.Static |
+		   BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TCtor().Init(s) as TCtor));
 			return this;
 		}

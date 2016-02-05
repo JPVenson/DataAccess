@@ -21,7 +21,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		/// For internal use only
 		/// </summary>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public ConstructorInfoCache()
@@ -71,7 +73,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		/// <param name="ctorInfo"></param>
 		/// <returns></returns>
+#if !DEBUG
 		[DebuggerHidden]
+#endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
