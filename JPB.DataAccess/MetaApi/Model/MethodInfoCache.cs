@@ -21,6 +21,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	{
 		internal MethodInfoCache(MethodInfo mehtodInfo)
 		{
+// ReSharper disable DoNotCallOverridableMethodsInConstructor
 			Init(mehtodInfo);
 		}
 
@@ -52,7 +53,20 @@ namespace JPB.DataAccess.MetaApi.Model
 			AttributeInfoCaches = new HashSet<TAtt>();
 			Arguments = new HashSet<TArg>();
 		}
+		// ReSharper restore DoNotCallOverridableMethodsInConstructor
 
+		/// <summary>
+		/// For Internal use Only
+		/// </summary>
+		/// <param name="mehtodInfo"></param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
+#if !DEBUG
+		[DebuggerHidden]
+#endif
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo)
 		{
 			if (!string.IsNullOrEmpty(MethodName))

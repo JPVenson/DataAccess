@@ -15,6 +15,11 @@ namespace JPB.DataAccess.MetaApi.Model
 	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> 
 		where TAtt : class, IAttributeInfoCache, new()
 	{
+		public PropertyHelper(string name)
+		{
+			base.MethodName = name;
+		}
+
 		private dynamic _getter;
 		private dynamic _setter;
 
@@ -93,12 +98,11 @@ namespace JPB.DataAccess.MetaApi.Model
 
 					if (isStatic)
 					{
-
 						GetterDelegate = typeof(Func<>).MakeGenericType(propertyInfo.PropertyType);
 						SetterDelegate = typeof(Action<>).MakeGenericType(propertyInfo.PropertyType);
 						var accessField = Expression.Property(null, propertyInfo);
 
-						if (getMethod != null && getMethod.IsPublic)
+						if (getMethod != null)
 						{
 							var getExpression = builder
 								.MakeGenericMethod(GetterDelegate)
@@ -108,10 +112,10 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var getterDelegate = getExpression.Compile();
-							Getter = new PropertyHelper<TAtt>();
+							Getter = new PropertyHelper<TAtt>(getMethod.Name);
 							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
 						}
-						if (setMethod != null && setMethod.IsPublic)
+						if (setMethod != null)
 						{
 							var valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
 							var setter = Expression.Assign(
@@ -130,7 +134,7 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var setterDelegate = setExpression.Compile();
-							Setter = new PropertyHelper<TAtt>();
+							Setter = new PropertyHelper<TAtt>(setMethod.Name);
 							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
 						}
 					}
@@ -142,7 +146,7 @@ namespace JPB.DataAccess.MetaApi.Model
 
 						var accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
 
-						if (getMethod != null && getMethod.IsPublic)
+						if (getMethod != null)
 						{
 							var getExpression = builder
 								.MakeGenericMethod(GetterDelegate)
@@ -153,10 +157,10 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var getterDelegate = getExpression.Compile();
-							Getter = new PropertyHelper<TAtt>();
+							Getter = new PropertyHelper<TAtt>(getMethod.Name);
 							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
 						}
-						if (setMethod != null && setMethod.IsPublic)
+						if (setMethod != null)
 						{
 							var valueRef = Expression.Parameter(propertyInfo.PropertyType, "newValue");
 							var setter = Expression.Assign(
@@ -172,7 +176,7 @@ namespace JPB.DataAccess.MetaApi.Model
 						}) as dynamic;
 
 							var setterDelegate = setExpression.Compile();
-							Setter = new PropertyHelper<TAtt>();
+							Setter = new PropertyHelper<TAtt>(setMethod.Name);
 							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
 						}
 					}
