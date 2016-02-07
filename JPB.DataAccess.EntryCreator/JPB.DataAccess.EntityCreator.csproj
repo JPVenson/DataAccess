@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="JPB.DataAccess.EntryCreator.licenseheader" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

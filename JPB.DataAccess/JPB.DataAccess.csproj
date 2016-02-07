@@ -137,6 +137,7 @@
     <Compile Include="MetaApi\MetaInfoStoreExtentions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="JPB.DataAccess.licenseheader" />
     <None Include="strongNameKeyDataAccess.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
