@@ -62,7 +62,27 @@ namespace JPB.DataAccess.Helper
 
 		}
 
-		private static void Visit(ref Expression left, ref Expression right)
+			public PocoPkComparer(object assertNotDatabaseMember, bool useAssertion = false)
+		{
+			if (assertNotDatabaseMember == null && DbAccessLayer.DefaultAssertionObject != null)
+			{
+				assertNotDatabaseMember = DbAccessLayer.DefaultAssertionObject;
+				useAssertion = true;
+			}
+			Init(assertNotDatabaseMember, useAssertion, _typeInfo.PrimaryKeyProperty.PropertyName);
+		}
+
+		internal PocoPkComparer(object assertNotDatabaseMember, string propertyName, bool useAssertion = false)
+		{
+			if (assertNotDatabaseMember == null && DbAccessLayer.DefaultAssertionObject != null)
+			{
+				assertNotDatabaseMember = DbAccessLayer.DefaultAssertionObject;
+				useAssertion = true;
+			}
+			Init(assertNotDatabaseMember, useAssertion, propertyName);
+		}
+
+		internal static void Visit(ref Expression left, ref Expression right)
 		{
 			var leftTypeCode = Type.GetTypeCode(left.Type);
 			var rightTypeCode = Type.GetTypeCode(right.Type);
@@ -76,23 +96,23 @@ namespace JPB.DataAccess.Helper
 				left = Expression.Convert(left, right.Type);
 		}
 
-		private void Init(object assertNotDatabaseMember, bool useAssertion)
+		private void Init(object assertNotDatabaseMember, bool useAssertion, string property)
 		{
 			var plainType = typeof(T);
-		
+
 			_typeInfo = plainType.GetClassInfo();
 			if (_typeInfo.PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("The type '{0}' does not define any PrimaryKey", plainType.Name));
 
-			_returnTarget = Expression.Label(typeof(bool));
-			var returnTrue = Expression.Return(_returnTarget, Expression.Constant(true));
+			ReturnTarget = Expression.Label(typeof(bool));
+			var returnTrue = Expression.Return(ReturnTarget, Expression.Constant(true));
 
-			_left = Expression.Parameter(plainType);
-			_right = Expression.Parameter(plainType);
+			Left = Expression.Parameter(plainType);
+			Right = Expression.Parameter(plainType);
 
 			//left or right property null
-			Expression propLeft = Expression.Property(_left, _typeInfo.PrimaryKeyProperty.PropertyName);
-			var propRight = Expression.Property(_right, _typeInfo.PrimaryKeyProperty.PropertyName);
+			PropLeft = Expression.Property(Left, property);
+			var propRight = Expression.Property(Right, property);
 			ConditionalExpression resAssertionBlock = null;
 			if (useAssertion)
 			{
@@ -101,24 +121,24 @@ namespace JPB.DataAccess.Helper
 				{
 					if (DbAccessLayer.DefaultAssertionObjectRewrite)
 					{
-						Visit(ref propLeft, ref assertionObject);
+						Visit(ref PropLeft, ref assertionObject);
 					}
 					else
 					{
 						throw new NotSupportedException(string.Format("Unknown Type cast detected." +
-						                                              " Assert typ is '{0}' property is '{1}' " +
+																	  " Assert typ is '{0}' property is '{1}' " +
 																	  "... sry i am good but not as this good! Try the DbAccessLayer.DefaultAssertionObjectRewrite option", assertNotDatabaseMember.GetType().Name, _typeInfo.PrimaryKeyProperty.PropertyType.Name));
 					}
 				}
 
-				var eqLeftPropEqualsAssertion = Expression.Equal(propLeft, assertionObject);
+				var eqLeftPropEqualsAssertion = Expression.Equal(PropLeft, assertionObject);
 				var eqRightPropEqualsAssertion = Expression.Equal(propRight, assertionObject);
 				var resLeftAndRightEqualsAssertion = Expression.And(eqLeftPropEqualsAssertion, eqRightPropEqualsAssertion);
 				resAssertionBlock = Expression.IfThen(resLeftAndRightEqualsAssertion, returnTrue);
 			}
 
 			//equal
-			var eqPropertyEqual = Expression.Equal(propLeft, propRight);
+			var eqPropertyEqual = Expression.Equal(PropLeft, propRight);
 
 			if (resAssertionBlock != null)
 			{
@@ -128,33 +148,24 @@ namespace JPB.DataAccess.Helper
 
 			if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
 			{
-				var directComparsion = Expression.Call(_left, "CompareTo", null, _right);
-				_compareTo = Expression.Lambda<Func<T, T, int>>(directComparsion, new[] { _left, _right }).Compile();
+				var directComparsion = Expression.Call(Left, "CompareTo", null, Right);
+				_compareTo = Expression.Lambda<Func<T, T, int>>(directComparsion, new[] { Left, Right }).Compile();
 			}
 		}
 
-		public PocoPkComparer(object assertNotDatabaseMember, bool useAssertion = false)
-		{
-			if (assertNotDatabaseMember == null && DbAccessLayer.DefaultAssertionObject != null)
-			{
-				assertNotDatabaseMember = DbAccessLayer.DefaultAssertionObject;
-				useAssertion = true;
-			}
-			Init(assertNotDatabaseMember, useAssertion);
-		}
-
-		private ParameterExpression _left;
-		private ParameterExpression _right;
-		private LabelTarget _returnTarget;
+		internal ParameterExpression Left;
+		internal ParameterExpression Right;
+		internal Expression PropLeft;
+		internal LabelTarget ReturnTarget;
 
 		private Func<T, T, bool> Wrap(ConditionalExpression exp)
 		{
 			return Expression.Lambda<Func<T, T, bool>>(Expression.Block(
 				exp,
-				Expression.Label(_returnTarget, Expression.Constant(false))
+				Expression.Label(ReturnTarget, Expression.Constant(false))
 				), new[]
 				{
-					_left,_right
+					Left,Right
 				}).Compile();
 		}
 

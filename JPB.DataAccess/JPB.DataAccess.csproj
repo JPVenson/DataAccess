@@ -64,6 +64,7 @@
     <Compile Include="DbInfoConfig\DbConfig.cs" />
     <Compile Include="DbInfoConfig\DbInfo\DbMethodArgument.cs" />
     <Compile Include="DbInfoConfig\FactoryHelper.cs" />
+    <Compile Include="Helper\LocalDbReposetory.cs" />
     <Compile Include="Helper\PocoPkComparer.cs" />
     <Compile Include="MetaApi\Contract\IMethodArgsInfoCache.cs" />
     <Compile Include="MetaApi\Model\AttributeInfoCache.cs" />
@@ -102,7 +103,7 @@
     <Compile Include="DebuggerHelper\QueryDebugger.cs" />
     <Compile Include="Helper\IQueryParameter.cs" />
     <Compile Include="Helper\QueryParameter.cs" />
-    <Compile Include="Helper\StringBuilderIntend.cs" />
+    <Compile Include="Helper\StringBuilderInterlaced.cs" />
     <Compile Include="Manager\DbAccessLayer.cs" />
     <Compile Include="Manager\DbAccessLayerDelete.cs" />
     <Compile Include="Manager\DbAccessLayerEvents.cs" />
