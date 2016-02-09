@@ -201,5 +201,9 @@ namespace JPB.DataAccess.MetaApi.Model
 			return new ClassInfoEquatableComparer().Compare(this, other);
 		}
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+		public bool Equals(Type other)
+		{
+			return new ClassInfoEquatableComparer().Equals(this.Type, other);
+		}
 	}
 }

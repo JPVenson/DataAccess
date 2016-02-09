@@ -236,21 +236,21 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public string Render()
 		{
-			var sb = new StringBuilderIntend();
+			var sb = new StringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}
 
-		internal void Render(StringBuilderIntend sb)
+		internal void Render(StringBuilderInterlaced sb)
 		{
-			sb.AppendIntedLine("new QueryBuilder {")
+			sb.AppendInterlacedLine("new QueryBuilder {")
 				.Up()
-				.AppendIntedLine("AllowParamterRenaming = {0},", AllowParamterRenaming.ToString().ToLower())
-				.AppendIntedLine("AutoParameterCounter = {0},", AutoParameterCounter)
-				.AppendIntedLine("QueryDebugger = ")
+				.AppendInterlacedLine("AllowParamterRenaming = {0},", AllowParamterRenaming.ToString().ToLower())
+				.AppendInterlacedLine("AutoParameterCounter = {0},", AutoParameterCounter)
+				.AppendInterlacedLine("QueryDebugger = ")
 				.Insert(new QueryDebugger(Compile(), Database).Render)
-				.AppendIntedLine("Parts[{0}] = ", Parts.Count)
-				.AppendIntedLine("{")
+				.AppendInterlacedLine("Parts[{0}] = ", Parts.Count)
+				.AppendInterlacedLine("{")
 				.Up();
 
 			foreach (GenericQueryPart genericQueryPart in Parts)
@@ -260,9 +260,9 @@ namespace JPB.DataAccess.QueryBuilder
 			}
 
 			sb.Down()
-				.AppendIntedLine("}")
+				.AppendInterlacedLine("}")
 				.Down()
-				.AppendInted("}");
+				.AppendInterlaced("}");
 		}
 
 		public override string ToString()

@@ -6,13 +6,16 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
+using System;
 using System.Collections.Generic;
 using JPB.DataAccess.MetaApi.Contract;
 
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
 	internal class ClassInfoEquatableComparer
-		: IEqualityComparer<IClassInfoCache>, 
+		: IEqualityComparer<IClassInfoCache>,
+		IEqualityComparer<Type>, 
 		IComparer<IClassInfoCache>
 	{
 		public bool Equals(IClassInfoCache x, IClassInfoCache y)
@@ -24,7 +27,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 			if (x.ClassName != y.ClassName)
 				return false;
 			if (x.Type == y.Type)
-				return false;
+				return true;
 			return true;
 		}
 
@@ -40,6 +43,26 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 			if (y == null)
 				return +1;
 			return System.String.Compare(x.ClassName, y.ClassName, System.StringComparison.Ordinal);
+		}
+
+		public bool Equals(Type x, Type y)
+		{
+			if (x == null && y == null)
+				return true;
+			if (x == null || y == null)
+				return false;
+			if (x.FullName != y.FullName)
+				return false;
+			if (x == y)
+				return true;
+			if (x.IsEquivalentTo(y))
+				return true;
+			return false;
+		}
+
+		public int GetHashCode(Type obj)
+		{
+			return obj.GetHashCode();
 		}
 	}
 }

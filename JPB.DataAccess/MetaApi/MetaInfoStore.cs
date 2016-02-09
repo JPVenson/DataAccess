@@ -26,7 +26,8 @@ namespace JPB.DataAccess.MetaApi
 #if !DEBUG
 	[DebuggerStepThrough]
 #endif
-	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> : IDisposable
+	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> : 
+		IDisposable
 		where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>, new()
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
@@ -129,7 +130,7 @@ namespace JPB.DataAccess.MetaApi
 					Monitor.Enter(SClassInfoCaches);
 				}
 
-				element = SClassInfoCaches.FirstOrDefault(s => s.ClassName == type.Name);
+				element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
 				if (element == null)
 				{
 					element = new TClass();

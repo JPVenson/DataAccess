@@ -81,26 +81,26 @@ namespace JPB.DataAccess.Helper
 		/// <returns></returns>
 		public string Render()
 		{
-			var sb = new StringBuilderIntend();
+			var sb = new StringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}
 
-		internal void Render(StringBuilderIntend sb)
+		internal void Render(StringBuilderInterlaced sb)
 		{
 			var value = "{Null}";
 			if (Value != null)
 			{
 				value = Value.ToString();
 			}
-			sb.AppendIntedLine("neq QueryParameter {")
+			sb.AppendInterlacedLine("neq QueryParameter {")
 				.Up()
-				.AppendIntedLine("Name = {0},", Name)
-				.AppendIntedLine("Value.ToString = {0}", value)
-				.AppendIntedLine("SourceType = {0}", SourceType.ToString())
-				.AppendIntedLine("SourceDbType = {0}", SourceDbType)
+				.AppendInterlacedLine("Name = {0},", Name)
+				.AppendInterlacedLine("Value.ToString = {0}", value)
+				.AppendInterlacedLine("SourceType = {0}", SourceType.ToString())
+				.AppendInterlacedLine("SourceDbType = {0}", SourceDbType)
 				.Down()
-				.AppendInted("}");
+				.AppendInterlaced("}");
 		}
 
 		public override string ToString()

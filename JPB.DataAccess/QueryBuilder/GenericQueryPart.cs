@@ -78,7 +78,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public virtual string Render()
 		{
-			var sb = new StringBuilderIntend();
+			var sb = new StringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}
@@ -87,16 +87,16 @@ namespace JPB.DataAccess.QueryBuilder
 		///     For display
 		/// </summary>
 		/// <returns></returns>
-		internal virtual void Render(StringBuilderIntend sb)
+		internal virtual void Render(StringBuilderInterlaced sb)
 		{
 			sb
-				.AppendIntedLine("new GenericQueryPart {")
+				.AppendInterlacedLine("new GenericQueryPart {")
 				.Up()
-				.AppendIntedLine("Query = \"{0}\",", Prefix)
-				.AppendInted("Parameter[{0}] = ", QueryParameters.Count());
+				.AppendInterlacedLine("Query = \"{0}\",", Prefix)
+				.AppendInterlaced("Parameter[{0}] = ", QueryParameters.Count());
 			if (QueryParameters.Any())
 			{
-				sb.AppendIntedLine("{")
+				sb.AppendInterlacedLine("{")
 					.Up();
 				foreach (QueryParameter queryParameter in QueryParameters.Cast<QueryParameter>())
 				{
@@ -104,14 +104,14 @@ namespace JPB.DataAccess.QueryBuilder
 					sb.AppendLine(",");
 				}
 				sb.Down()
-					.AppendIntedLine("}");
+					.AppendInterlacedLine("}");
 			}
 			else
 			{
 				sb.AppendLine("{}");
 			}
 			sb.Down()
-				.AppendInted("}");
+				.AppendInterlaced("}");
 			//return string.Format("{{Query = {0}, Parameter = [{1}]}}", Prefix, paraString);
 		}
 

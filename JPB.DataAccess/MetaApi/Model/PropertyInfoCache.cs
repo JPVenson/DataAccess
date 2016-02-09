@@ -20,7 +20,7 @@ namespace JPB.DataAccess.MetaApi.Model
 {
 	[DebuggerDisplay("{MethodName}")]
 	[Serializable]
-	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>> 
+	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>
 		where TAtt : class, IAttributeInfoCache, new()
 	{
 		private dynamic _getter;
@@ -49,8 +49,8 @@ namespace JPB.DataAccess.MetaApi.Model
 				return _getter(target);
 			}
 			var paramOne = param[0];
-			_setter(target, paramOne);
-			return null;
+			var result = _setter(target, paramOne);
+			return result;
 		}
 	}
 
@@ -150,7 +150,7 @@ namespace JPB.DataAccess.MetaApi.Model
 					else
 					{
 						GetterDelegate = typeof(Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
-						SetterDelegate = typeof(Action<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
+						SetterDelegate = typeof(Func<,,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType, propertyInfo.DeclaringType);
 						var thisRef = Expression.Parameter(propertyInfo.DeclaringType, "that");
 
 						var accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
@@ -175,12 +175,15 @@ namespace JPB.DataAccess.MetaApi.Model
 							var setter = Expression.Assign(
 								accessField,
 								valueRef);
+							var makeRetunLabel = Expression.Label(propertyInfo.DeclaringType);
+							var retunLabel = Expression.Label(makeRetunLabel, Expression.Default(propertyInfo.DeclaringType));
+							var returnMaybeValueType = Expression.Return(makeRetunLabel, thisRef);
 
 							var setExpression = builder
 								.MakeGenericMethod(SetterDelegate)
 								.Invoke(null, new object[]
 						{
-							setter,
+							Expression.Block(setter, returnMaybeValueType,retunLabel), 
 							new[] {thisRef, valueRef}
 						}) as dynamic;
 
@@ -300,14 +303,14 @@ namespace JPB.DataAccess.MetaApi.Model
 			{
 				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) =>
 				{
-					setter((T) o, (TE) objects[0]);
+					setter((T)o, (TE)objects[0]);
 					return null;
 				});
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) => getter((T) o));
+				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) => getter((T)o));
 			}
 		}
 	}

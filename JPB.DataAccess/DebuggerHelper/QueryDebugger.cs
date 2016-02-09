@@ -191,15 +191,15 @@ namespace JPB.DataAccess.DebuggerHelper
 			return retval;
 		}
 
-		internal void Render(StringBuilderIntend obj)
+		internal void Render(StringBuilderInterlaced obj)
 		{
 			obj.Up()
-				.AppendIntedLine("{")
+				.AppendInterlacedLine("{")
 				.Up()
-				.AppendIntedLine("DebuggerQuery = \"{0}\"", DebuggerQuery)
-				.AppendIntedLine("SqlQuery = {0}", SqlQuery)
+				.AppendInterlacedLine("DebuggerQuery = \"{0}\"", DebuggerQuery)
+				.AppendInterlacedLine("SqlQuery = {0}", SqlQuery)
 				.Down()
-				.AppendIntedLine("}");
+				.AppendInterlacedLine("}");
 		}
 	}
 }

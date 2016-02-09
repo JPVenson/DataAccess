@@ -58,7 +58,9 @@ namespace JPB.DataAccess.MetaApi.Contract
 	/// <summary>
 	/// Defines the most basic infos about an class
 	/// </summary>
-	public interface IClassInfoCache : IEquatable<IClassInfoCache>, IComparable<IClassInfoCache>
+	public interface IClassInfoCache : IEquatable<IClassInfoCache>,
+		IComparable<IClassInfoCache>,
+		IEquatable<Type>
 	{
 		/// <summary>
 		///     The .net ClassName
