@@ -70,10 +70,6 @@
     <Compile Include="XmlDataRecordTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj">
-      <Project>{3aa3990d-ffa4-4ee5-82be-e30970ffd0fa}</Project>
-      <Name>JPB.DataAccess.MySql</Name>
-    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
       <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
       <Name>JPB.DataAccess</Name>
