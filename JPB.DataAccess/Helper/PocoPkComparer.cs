@@ -62,17 +62,7 @@ namespace JPB.DataAccess.Helper
 
 		}
 
-			public PocoPkComparer(object assertNotDatabaseMember, bool useAssertion = false)
-		{
-			if (assertNotDatabaseMember == null && DbAccessLayer.DefaultAssertionObject != null)
-			{
-				assertNotDatabaseMember = DbAccessLayer.DefaultAssertionObject;
-				useAssertion = true;
-			}
-			Init(assertNotDatabaseMember, useAssertion, _typeInfo.PrimaryKeyProperty.PropertyName);
-		}
-
-		internal PocoPkComparer(object assertNotDatabaseMember, string propertyName, bool useAssertion = false)
+		internal PocoPkComparer(object assertNotDatabaseMember, bool useAssertion = false, string propertyName = null)
 		{
 			if (assertNotDatabaseMember == null && DbAccessLayer.DefaultAssertionObject != null)
 			{
@@ -96,13 +86,16 @@ namespace JPB.DataAccess.Helper
 				left = Expression.Convert(left, right.Type);
 		}
 
-		private void Init(object assertNotDatabaseMember, bool useAssertion, string property)
+		private void Init(object assertNotDatabaseMember, bool useAssertion, string property = null)
 		{
 			var plainType = typeof(T);
 
 			_typeInfo = plainType.GetClassInfo();
 			if (_typeInfo.PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("The type '{0}' does not define any PrimaryKey", plainType.Name));
+
+			if (string.IsNullOrEmpty(property))
+				property = _typeInfo.PrimaryKeyProperty.PropertyName;
 
 			ReturnTarget = Expression.Label(typeof(bool));
 			var returnTrue = Expression.Return(ReturnTarget, Expression.Constant(true));
