@@ -15,10 +15,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper.MsSql;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.QueryBuilder
 {

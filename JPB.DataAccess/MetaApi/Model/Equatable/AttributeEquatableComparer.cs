@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.Contacts.MetaApi;
 
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {

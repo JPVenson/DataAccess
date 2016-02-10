@@ -6,24 +6,27 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-using System.Collections.Generic;
-using JPB.DataAccess.Helper;
 
-namespace JPB.DataAccess.QueryFactory
+using System;
+using System.Collections.Generic;
+
+namespace JPB.DataAccess.Contacts.Pager
 {
 	/// <summary>
-	///     Marker interface for an Query that was created due the invoke of a Factory mehtod
+	///     A wrapper interface to convert all incomming items from Load method into new type
 	/// </summary>
-	public interface IQueryFactoryResult
+	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="TE"></typeparam>
+	public interface IWrapperDataPager<T, TE> : IDataPager<T>
 	{
 		/// <summary>
-		///     The SQL Query
+		///     Function to convert all items from T to TE
 		/// </summary>
-		string Query { get; }
+		Func<T, TE> Converter { get; set; }
 
 		/// <summary>
-		///     Sql Query Parameter
+		///     new Collection of TE
 		/// </summary>
-		IEnumerable<IQueryParameter> Parameters { get; }
+		new ICollection<TE> CurrentPageItems { get; }
 	}
 }

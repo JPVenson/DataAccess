@@ -6,12 +6,10 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using JPB.DataAccess.MetaApi.Model;
 
-namespace JPB.DataAccess.MetaApi.Contract
+using System;
+
+namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
 	/// Holts all infos about an Constructor

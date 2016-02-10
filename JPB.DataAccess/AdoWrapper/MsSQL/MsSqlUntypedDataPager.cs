@@ -12,8 +12,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Pager.Contracts;
 using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql

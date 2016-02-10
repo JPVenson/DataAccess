@@ -13,11 +13,12 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.MetaApi;
-using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.QueryBuilder
 {

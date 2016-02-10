@@ -11,8 +11,8 @@ using System.Data;
 using System.Data.Odbc;
 using System.Data.OleDb;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Pager.Contracts;
 
 namespace JPB.DataAccess.AdoWrapper.Odbc
 {

@@ -10,7 +10,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model.Equatable;
 
 namespace JPB.DataAccess.MetaApi.Model

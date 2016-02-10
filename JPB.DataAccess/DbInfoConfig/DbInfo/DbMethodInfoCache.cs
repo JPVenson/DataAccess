@@ -12,7 +12,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 

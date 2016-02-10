@@ -15,7 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model.Equatable;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;

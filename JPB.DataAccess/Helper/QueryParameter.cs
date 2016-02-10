@@ -8,6 +8,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 */
 using System;
 using System.Data;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Helper

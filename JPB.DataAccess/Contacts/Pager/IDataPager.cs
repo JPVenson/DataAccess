@@ -6,13 +6,14 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.Pager.Contracts
+namespace JPB.DataAccess.Contacts.Pager
 {
 	/// <summary>
 	///     Base pager

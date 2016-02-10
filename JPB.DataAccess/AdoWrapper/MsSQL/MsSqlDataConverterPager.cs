@@ -9,7 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using JPB.DataAccess.Pager.Contracts;
+using JPB.DataAccess.Contacts.Pager;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {

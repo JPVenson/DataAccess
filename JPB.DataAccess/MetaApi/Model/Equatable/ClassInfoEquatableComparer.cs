@@ -9,7 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 using System;
 using System.Collections.Generic;
-using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.Contacts.MetaApi;
 
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 
 namespace JPB.DataAccess.QueryBuilder

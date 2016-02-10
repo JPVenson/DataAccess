@@ -14,7 +14,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using JPB.DataAccess.MetaApi.Contract;
+using JPB.DataAccess.Contacts.MetaApi;
+using JPB.DataAccess.MetaApi.Model.Equatable;
 
 namespace JPB.DataAccess.MetaApi.Model
 {

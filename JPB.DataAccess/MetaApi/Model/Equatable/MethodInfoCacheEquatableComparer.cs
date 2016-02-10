@@ -6,10 +6,11 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-using System.Collections.Generic;
-using JPB.DataAccess.MetaApi.Contract;
 
-namespace JPB.DataAccess.MetaApi.Model
+using System.Collections.Generic;
+using JPB.DataAccess.Contacts.MetaApi;
+
+namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
 	public class MethodInfoCacheEquatableComparer<TAtt, TArg>
 		: IComparer<IMethodInfoCache<TAtt, TArg>>,

@@ -1,100 +1,13 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.Helper
+namespace JPB.DataAccess.Helper.LocalDb
 {
-	public class DatabaseScope : IDisposable
-	{
-		public DatabaseScope()
-		{
-			if (LocalDbManager.Scope != null)
-				throw new NotSupportedException("Nested DatabaseScopes are not allowed");
-
-			LocalDbManager.Scope = new LocalDbManager();
-		}
-
-		public void Dispose()
-		{
-			LocalDbManager.Scope = null;
-		}
-	}
-
-	internal class LocalDbManager
-	{
-		public LocalDbManager()
-		{
-			_database = new Dictionary<Type, LocalDbReposetory>();
-			_mappings = new HashSet<ReproMappings>();
-		}
-
-		[ThreadStatic]
-		private static LocalDbManager _scope;
-
-		public static LocalDbManager Scope
-		{
-			get
-			{
-				return _scope;
-			}
-			internal set { _scope = value; }
-		}
-
-		private Dictionary<Type, LocalDbReposetory> _database;
-		private HashSet<ReproMappings> _mappings;
-
-		internal void AddTable(LocalDbReposetory repro)
-		{
-			_database.Add(repro.TypeInfo.Type, repro);
-		}
-
-		internal void AddMapping(Type source, Type target)
-		{
-			_mappings.Add(new ReproMappings(source, target));
-		}
-
-		internal IEnumerable<LocalDbReposetory> GetMappings(Type thisType)
-		{
-			var mapping = _mappings.Where(f => f.TargetType == thisType).ToArray();
-			return _database.Where(f => mapping.Any(e => e.SourceType == f.Key)).Select(f => f.Value);
-		}
-	}
-
-	internal struct ReproMappings : IEquatable<ReproMappings>
-	{
-		private Type _sourceType;
-		private Type _targetType;
-
-		public ReproMappings(Type targetType, Type sourceType)
-		{
-			_sourceType = sourceType;
-			_targetType = targetType;
-		}
-
-		public Type SourceType
-		{
-			get { return _sourceType; }
-		}
-
-		public Type TargetType
-		{
-			get { return _targetType; }
-		}
-
-		public bool Equals(ReproMappings other)
-		{
-			return SourceType == other.SourceType && TargetType == other.TargetType;
-		}
-	}
-
-
 	/// <summary>
 	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
 	/// </summary>
@@ -104,9 +17,10 @@ namespace JPB.DataAccess.Helper
 	{
 		internal protected readonly object _lockRoot = new object();
 		internal protected DbClassInfoCache TypeInfo;
+		internal protected DbClassInfoCache TypeKeyInfo;
 		internal long IdCounter;
 		internal protected readonly DbAccessLayer _db;
-		internal protected readonly Dictionary<long, object> _base;
+		internal protected readonly Dictionary<object, object> _base;
 		internal readonly LocalDbManager _databaseScope;
 
 		/// <summary>
@@ -120,16 +34,25 @@ namespace JPB.DataAccess.Helper
 				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate multibe tables in the same Application");
 			}
 
-			if (TypeInfo == null)
+			TypeInfo = new DbConfig().GetOrCreateClassInfoCache(type);
+			if (TypeInfo.PrimaryKeyProperty == null)
 			{
-				TypeInfo = new DbConfig().GetOrCreateClassInfoCache(type);
-				if (TypeInfo.PrimaryKeyProperty == null)
-				{
-					throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
-				}
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
 			}
 
-			_base = new Dictionary<long, object>();
+			TypeKeyInfo = TypeInfo.PrimaryKeyProperty.PropertyType.GetClassInfo();
+
+			if (TypeKeyInfo == null)
+			{
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
+			}
+
+			if (!TypeKeyInfo.Type.IsValueType)
+			{
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of type of any value type cannot be used. Type: '{0}'", type.Name));
+			}
+
+			_base = new Dictionary<object, object>();
 			IdCounter = 1;
 			_databaseScope.AddTable(this);
 
@@ -160,35 +83,41 @@ namespace JPB.DataAccess.Helper
 
 			return _base.Values.GetEnumerator();
 		}
-
-		private long SetId(object item)
+		
+		private object SetId(object item)
 		{
 			var idVal = TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
 			if (idVal != DbAccessLayer.DefaultAssertionObject)
 			{
 				lock (_lockRoot)
 				{
-					var newId = IdCounter++;
-
-					if (TypeInfo.PrimaryKeyProperty.PropertyType != typeof(long))
+					object newId;
+					if (TypeKeyInfo.Type == typeof (int) || TypeKeyInfo.Type == typeof (long))
 					{
-						TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
+						newId = IdCounter++;
+					}
+					else if (TypeKeyInfo.Type == typeof (Guid))
+					{
+						newId = Guid.NewGuid();
 					}
 					else
 					{
-						TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, newId);
+						throw new NotSupportedException(string.Format("The used type '{0}' as an primary key is not supported", TypeKeyInfo.Type.Name));
 					}
 
+
+					TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
+					
 					return newId;
 				}
 			}
 
-			return (long)idVal;
+			return idVal;
 		}
 
-		private long GetId(object item)
+		private object GetId(object item)
 		{
-			return (long)TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
+			return TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
 		}
 
 		private void EnforceConstraints(object item)

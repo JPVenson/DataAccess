@@ -6,13 +6,12 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Security.Policy;
-using JPB.DataAccess.MetaApi.Model;
 
-namespace JPB.DataAccess.MetaApi.Contract
+namespace JPB.DataAccess.Contacts.MetaApi
 {
 	public interface IMethodInfoCache<TAtt, TArg> : 
 		IComparable<IMethodInfoCache<TAtt, TArg>>,
