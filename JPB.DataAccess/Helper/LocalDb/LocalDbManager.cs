@@ -5,7 +5,7 @@ using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
-	internal class LocalDbManager
+	public class LocalDbManager
 	{
 		static LocalDbManager()
 		{
@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			internal set { _scope = value; }
 		}
 
-		internal event EventHandler SetupDone;
+		public event EventHandler SetupDone;
 
 		internal void OnSetupDone()
 		{

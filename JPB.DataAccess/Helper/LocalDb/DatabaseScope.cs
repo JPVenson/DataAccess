@@ -19,6 +19,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 			LocalDbManager.Scope = new LocalDbManager();
 		}
 
+		/// <summary>
+		/// Will be invoked if dispose is called
+		/// </summary>
+		public event EventHandler SetupDone
+		{
+			add { LocalDbManager.Scope.SetupDone += value; }
+			remove { LocalDbManager.Scope.SetupDone -= value; }
+		}
+
 		public void Dispose()
 		{
 			LocalDbManager.Scope.OnSetupDone();
