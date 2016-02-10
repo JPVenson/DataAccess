@@ -2,6 +2,7 @@
 using System.Data;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
