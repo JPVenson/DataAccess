@@ -1,0 +1,24 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace JPB.DataAccess.Contacts
+{
+	/// <summary>
+	/// Contains logic for generating primary key values that are used by the LocalDbRepro
+	/// Per Instance of LocalTable
+	/// </summary>
+	public interface ILocalPrimaryKeyValueProvider : ICloneable, IEqualityComparer<object>
+	{
+		/// <summary>
+		/// Type contract what type this generator is for
+		/// </summary>
+		Type GeneratingType { get; }
+
+		/// <summary>
+		/// Generate a new Uniq primary key that has the type of GeneratingType
+		/// </summary>
+		/// <returns></returns>
+		object GetNextValue();
+	}
+}
