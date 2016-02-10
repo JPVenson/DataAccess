@@ -238,7 +238,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Indicates this Property to be resolved as a ForeignKey column
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public class ForeignKeyDeclarationAttribute : InsertIgnoreAttribute
+	public class ForeignKeyDeclarationAttribute : DataAccessAttribute
 	{
 		/// <summary>
 		/// The Key on the Foreign table
