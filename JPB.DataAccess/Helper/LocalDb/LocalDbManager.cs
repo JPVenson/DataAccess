@@ -35,6 +35,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 			internal set { _scope = value; }
 		}
 
+		internal event EventHandler SetupDone;
+
+		internal void OnSetupDone()
+		{
+			var handler = SetupDone;
+			if (handler != null) 
+				handler(this, new EventArgs());
+		}
+
 		private readonly Dictionary<Type, LocalDbReposetory> _database;
 		private readonly HashSet<ReproMappings> _mappings;
 

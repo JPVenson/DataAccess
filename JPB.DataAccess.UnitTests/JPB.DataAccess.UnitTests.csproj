@@ -55,6 +55,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CheckWrapperBaseTests.cs" />
+    <Compile Include="LocalDbTests\LocalDbWithFkTest.cs" />
+    <Compile Include="LocalDbTests\LocalDbTest.cs" />
     <Compile Include="MetaApiTest.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

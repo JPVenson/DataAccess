@@ -1,18 +1,24 @@
-﻿using System;
+﻿using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace UnitTestProject1
+namespace JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests
 {
-    [Serializable]
-    [ForModel("Images")]
-    [SelectFactory("SELECT * FROM Images")]
-    public class Image
-    {
-        [PrimaryKey]
-        [ForModel("Image_ID")]
-        public long Id { get; set; }
+	public class Image
+	{
+		[PrimaryKey]
+		public long ImageId { get; set; }
 
-        [ForModel("Content")]
-        public string Text { get; set; }
-    }
+		public string Text { get; set; }
+
+		[ForeignKeyDeclaration("BookId", typeof(Book))]
+		public int IdBook { get; set; }
+	}
+
+	public class Book
+	{
+		[PrimaryKey]
+		public int BookId { get; set; }
+
+		public string BookName { get; set; }
+	}
 }

@@ -3,6 +3,7 @@ using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -15,7 +16,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public abstract class LocalDbReposetory
-		: ICollection
 	{
 		internal protected readonly object _lockRoot = new object();
 		internal protected DbClassInfoCache TypeInfo;
@@ -76,8 +76,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 									  .Aggregate((e,f) => e + "," + f)));
 				}
 			}
-
 			_base = new Dictionary<object, object>(_keyGenerator);
+			_databaseScope.SetupDone += DatabaseScopeOnSetupDone;
+		}
+
+		private void DatabaseScopeOnSetupDone(object sender, EventArgs eventArgs)
+		{
 			_databaseScope.AddTable(this);
 
 			foreach (var dbPropertyInfoCach in TypeInfo.PropertyInfoCaches)
@@ -86,6 +90,23 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					_databaseScope.AddMapping(TypeInfo.Type, dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
 				}
+			}
+
+			ReposetoryCreated = true;
+		}
+
+		/// <summary>
+		/// Returns an value that indicates a proper DatabaseScope usage. 
+		/// If true the creation was successfull and all tables for the this table are mapped
+		/// The Reposetory cannot operate if the reposetory is not created!
+		/// </summary>
+		public bool ReposetoryCreated { get; private set; }
+
+		private void CheckCreatedElseThrow()
+		{
+			if (!ReposetoryCreated)
+			{
+				throw new InvalidOperationException("The database must be completly created until this Table is operational");
 			}
 		}
 
@@ -109,8 +130,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_db = db;
 		}
 
-		public IEnumerator GetEnumerator()
+		protected virtual IEnumerator GetEnumerator()
 		{
+			CheckCreatedElseThrow();
 			if (_db != null)
 				return _db.Select(TypeInfo.Type).GetEnumerator();
 
@@ -140,6 +162,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		private void EnforceConstraints(object item)
 		{
+			var ex = CheckEnforceConstraints(item);
+			if (ex != null)
+				throw ex;
+		}
+
+		private ForginKeyConstraintException CheckEnforceConstraints(object item)
+		{
 			var refTables = _databaseScope.GetMappings(TypeInfo.Type);
 
 			foreach (var localDbReposetory in refTables)
@@ -156,13 +185,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 					var fkValueForTableX = fkPropForTypeX.Getter.Invoke(item);
 					if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
 					{
-						throw new ForginKeyConstraintException(TypeInfo.TableName, localDbReposetory.TypeInfo.TableName, fkValueForTableX);
+						return new ForginKeyConstraintException(TypeInfo.TableName, localDbReposetory.TypeInfo.TableName, fkValueForTableX);
 					}
 				}
 			}
+
+			return null;
 		}
 
-		private bool ContainsId(object fkValueForTableX)
+		protected virtual bool ContainsId(object fkValueForTableX)
 		{
 			var local = _base.ContainsKey(fkValueForTableX);
 			if (!local)
@@ -178,8 +209,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return local;
 		}
 
-		public void Add(object item)
+		protected virtual void Add(object item)
 		{
+			CheckCreatedElseThrow();
 			if (_db != null)
 			{
 				_db.Insert(item);
@@ -194,13 +226,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
-		public void Clear()
+		protected virtual void Clear()
 		{
+			CheckCreatedElseThrow();
 			_base.Clear();
 		}
 
-		public bool Contains(object item)
+		protected virtual bool Contains(object item)
 		{
+			CheckCreatedElseThrow();
 			var local = _base.ContainsValue(item);
 			if (!local && _db != null)
 			{
@@ -216,7 +250,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		public bool Contains(long item)
+		protected virtual bool Contains(long item)
 		{
 			return ContainsId(item);
 		}
@@ -226,15 +260,23 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		public bool Contains(int item)
+		protected virtual bool Contains(int item)
 		{
 			return ContainsId(item);
 		}
 
-		public bool Remove(object item)
+		protected virtual bool Remove(object item)
 		{
+			CheckCreatedElseThrow();
 			var id = GetId(item);
 			var success = _base.Remove(id);
+			var hasInvalidOp = CheckEnforceConstraints(item);
+			if (hasInvalidOp != null)
+			{
+				_base.Add(id, item);
+				throw hasInvalidOp;
+			}
+
 			if (!success && _db != null)
 			{
 				_db.Delete(item);
@@ -243,20 +285,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return success;
 		}
 
-		public void CopyTo(Array array, int index)
+		protected virtual void CopyTo(Array array, int index)
 		{
 			throw new NotImplementedException();
 		}
 
-		public int Count
+		protected virtual int Count
 		{
 			get { return _base.Count; }
 		}
 
-		public object SyncRoot { get; private set; }
-		public bool IsSynchronized { get; private set; }
+		protected virtual object SyncRoot
+		{
+			get { return this._lockRoot; }
+		}
 
-		public bool IsReadOnly { get { return false; } }
+		protected virtual bool IsSynchronized
+		{
+			get { return Monitor.IsEntered(_lockRoot); }
+		}
+
+		protected virtual bool IsReadOnly { get { return false; } }
 	}
 
 	/// <summary>
@@ -275,14 +324,29 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 		}
 
+		public LocalDbReposetory(ILocalPrimaryKeyValueProvider keyProvider)
+			: base(typeof(T), keyProvider)
+		{
+		}
+
 		public void Add(T item)
 		{
 			base.Add(item);
 		}
 
+		public void Clear()
+		{
+			base.Clear();
+		}
+
 		public bool Contains(T item)
 		{
 			return base.Contains(item);
+		}
+
+		public bool Contains(object key)
+		{
+			return base.ContainsId(key);
 		}
 
 		public void CopyTo(T[] array, int arrayIndex)
@@ -295,9 +359,24 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return base.Remove(item);
 		}
 
-		public new IEnumerator<T> GetEnumerator()
+		public int Count
+		{
+			get { return base.Count; }
+		}
+
+		public bool IsReadOnly
+		{
+			get { return base.IsReadOnly; }
+		}
+
+		public IEnumerator<T> GetEnumerator()
 		{
 			return _base.Values.Cast<T>().GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 }
