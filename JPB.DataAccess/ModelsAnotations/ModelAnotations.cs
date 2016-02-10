@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.QueryFactory;
 
@@ -222,7 +223,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	}
 
 	/// <summary>
-	///     Indicates this Property to be resolved as a ForeignKey
+	///     Indicates this Property to be resolved by a ForeignKey column
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 	public class ForeignKeyAttribute : InsertIgnoreAttribute
@@ -231,6 +232,51 @@ namespace JPB.DataAccess.ModelsAnotations
 		///     The name of the Column that should be used
 		/// </summary>
 		public string KeyName { get; set; }
+	}
+
+	/// <summary>
+	///     Indicates this Property to be resolved as a ForeignKey column
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	public class ForeignKeyDeclarationAttribute : InsertIgnoreAttribute
+	{
+		/// <summary>
+		/// The Key on the Foreign table
+		/// </summary>
+		public string ForeignKey { get; set; }
+
+		/// <summary>
+		/// Table name of the Foreign constraint
+		/// </summary>
+		public string ForeignTable { get; set; }
+
+		/// <summary>
+		/// The type of the table that is declared by ForginTable
+		/// </summary>
+		public Type ForeignType { get; private set; }
+
+		/// <summary>
+		/// Declares a new Foreign key constraint
+		/// </summary>
+		/// <param name="foreignKey"></param>
+		/// <param name="foreignTable"></param>
+		public ForeignKeyDeclarationAttribute(string foreignKey, string foreignTable)
+		{
+			ForeignKey = foreignKey;
+			ForeignTable = foreignTable;
+		}
+
+		/// <summary>
+		/// Declares a new Foreign key constraint
+		/// </summary>
+		/// <param name="foreignKey"></param>
+		/// <param name="foreignTable"></param>
+		public ForeignKeyDeclarationAttribute(string foreignKey, Type foreignTable)
+		{
+			ForeignKey = foreignKey;
+			ForeignType = foreignTable;
+			ForeignTable = foreignTable.GetClassInfo().TableName;
+		}
 	}
 
 	/// <summary>
@@ -343,15 +389,8 @@ namespace JPB.DataAccess.ModelsAnotations
 
 		internal IValueConverter CreateConverter()
 		{
-			var fod = ConverterInstance.FirstOrDefault(s => s.Key.Equals(Parameter));
-			if (fod.Equals(default(KeyValuePair<object, IValueConverter>)))
-			{
-				var instance = (IValueConverter)Activator.CreateInstance(Converter);
-				ConverterInstance.Add(Parameter, instance);
-				return instance;
-			}
-
-			return fod.Value;
+			//TODO Cache converter results
+			return (IValueConverter)Activator.CreateInstance(Converter);
 		}
 	}
 

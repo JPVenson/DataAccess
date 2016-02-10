@@ -8,12 +8,18 @@ namespace JPB.DataAccess.UnitTests.TestModels.MetaAPI
 {
 	public struct StructCreating
 	{
+		private string _propString;
+
 		public StructCreating(string propString)
 		{
-			PropString = propString;
+			_propString = propString;
 		}
 
-		public string PropString { get; private set; }
+		public string PropString
+		{
+			get { return _propString; }
+			private set { _propString = value; }
+		}
 	}
 
 	public class ClassCreating

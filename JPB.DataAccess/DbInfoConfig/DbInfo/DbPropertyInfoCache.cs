@@ -94,6 +94,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public DbAttributeInfoCache<FromXmlAttribute> FromXmlAttribute { get; protected internal set; }
 
 		/// <summary>
+		///     if known the ForXml attribute
+		/// </summary>
+		public DbAttributeInfoCache<ForeignKeyDeclarationAttribute> ForginKeyDeclarationAttribute { get; protected internal set; }
+
+		/// <summary>
 		///     Should this property not be inserterd
 		/// </summary>
 		public bool InsertIgnore { get; protected internal set; }
@@ -160,6 +165,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(FromXmlAttribute)));
 			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
 			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
+			ForginKeyDeclarationAttribute = DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyDeclarationAttribute)));
 		}
 
 		//internal static PropertyInfoCache Logical(string info)
