@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
+    <Compile Include="Contacts\ILocalPrimaryKeyValueProvider.cs" />
     <Compile Include="DbInfoConfig\ConfigHelpers.cs" />
     <Compile Include="DbInfoConfig\ConfigurationResolver.cs" />
     <Compile Include="DbInfoConfig\DbConfig.cs" />
@@ -68,6 +69,9 @@
     <Compile Include="Helper\LocalDb\ForginKeyConstraintException.cs" />
     <Compile Include="Helper\LocalDb\LocalDbManager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbReposetory.cs" />
+    <Compile Include="Helper\LocalDb\LocalGuidPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\LocalIntPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\LocalLongPkProvider.cs" />
     <Compile Include="Helper\PocoPkComparer.cs" />
     <Compile Include="Helper\LocalDb\ReproMappings.cs" />
     <Compile Include="Contacts\MetaApi\IMethodArgsInfoCache.cs" />

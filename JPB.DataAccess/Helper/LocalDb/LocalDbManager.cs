@@ -1,17 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	internal class LocalDbManager
 	{
+		static LocalDbManager()
+		{
+			DefaultPkProvider = new Dictionary<Type, ILocalPrimaryKeyValueProvider>();
+			DefaultPkProvider.Add(typeof(int), new LocalIntPkProvider());
+			DefaultPkProvider.Add(typeof(long), new LocalLongPkProvider());
+			DefaultPkProvider.Add(typeof(Guid), new LocalGuidPkProvider());
+		}
+
 		public LocalDbManager()
 		{
 			_database = new Dictionary<Type, LocalDbReposetory>();
 			_mappings = new HashSet<ReproMappings>();
 		}
 
+		internal readonly static Dictionary<Type, ILocalPrimaryKeyValueProvider> DefaultPkProvider;
+			
 		[ThreadStatic]
 		private static LocalDbManager _scope;
 
@@ -24,8 +35,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 			internal set { _scope = value; }
 		}
 
-		private Dictionary<Type, LocalDbReposetory> _database;
-		private HashSet<ReproMappings> _mappings;
+		private readonly Dictionary<Type, LocalDbReposetory> _database;
+		private readonly HashSet<ReproMappings> _mappings;
 
 		internal void AddTable(LocalDbReposetory repro)
 		{

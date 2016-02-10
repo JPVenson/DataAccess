@@ -1,7 +1,9 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
@@ -12,21 +14,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class LocalDbReposetory
+	public abstract class LocalDbReposetory
 		: ICollection
 	{
 		internal protected readonly object _lockRoot = new object();
 		internal protected DbClassInfoCache TypeInfo;
 		internal protected DbClassInfoCache TypeKeyInfo;
-		internal long IdCounter;
 		internal protected readonly DbAccessLayer _db;
 		internal protected readonly Dictionary<object, object> _base;
 		internal readonly LocalDbManager _databaseScope;
+		internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
 
-		/// <summary>
-		/// Creates a new, only local Reposetory
-		/// </summary>
-		protected LocalDbReposetory(Type type)
+		protected LocalDbReposetory(Type type, ILocalPrimaryKeyValueProvider keyGenerator) 
 		{
 			_databaseScope = LocalDbManager.Scope;
 			if (_databaseScope == null)
@@ -52,8 +51,33 @@ namespace JPB.DataAccess.Helper.LocalDb
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of type of any value type cannot be used. Type: '{0}'", type.Name));
 			}
 
-			_base = new Dictionary<object, object>();
-			IdCounter = 1;
+			if (keyGenerator != null)
+			{
+				_keyGenerator = keyGenerator;
+			}
+			else
+			{
+				ILocalPrimaryKeyValueProvider defaultKeyGen;
+				if (LocalDbManager.DefaultPkProvider.TryGetValue(TypeKeyInfo.Type, out defaultKeyGen))
+				{
+					_keyGenerator = defaultKeyGen.Clone() as ILocalPrimaryKeyValueProvider;
+				}
+				else
+				{
+					throw new NotSupportedException(
+						string.Format("You must specify ether an Primary key that is of one of this types " +
+						              "({1}) " +
+									  "or invoke the ctor with an proper keyGenerator. Type: '{0}'", 
+									  type.Name, 
+									  LocalDbManager
+									  .DefaultPkProvider
+									  .Keys
+									  .Select(f => f.Name)
+									  .Aggregate((e,f) => e + "," + f)));
+				}
+			}
+
+			_base = new Dictionary<object, object>(_keyGenerator);
 			_databaseScope.AddTable(this);
 
 			foreach (var dbPropertyInfoCach in TypeInfo.PropertyInfoCaches)
@@ -63,6 +87,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 					_databaseScope.AddMapping(TypeInfo.Type, dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Creates a new, only local Reposetory
+		/// </summary>
+		protected LocalDbReposetory(Type type)
+			: this(type, null)
+		{
+			
 		}
 
 		/// <summary>
@@ -91,23 +124,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				lock (_lockRoot)
 				{
-					object newId;
-					if (TypeKeyInfo.Type == typeof (int) || TypeKeyInfo.Type == typeof (long))
-					{
-						newId = IdCounter++;
-					}
-					else if (TypeKeyInfo.Type == typeof (Guid))
-					{
-						newId = Guid.NewGuid();
-					}
-					else
-					{
-						throw new NotSupportedException(string.Format("The used type '{0}' as an primary key is not supported", TypeKeyInfo.Type.Name));
-					}
-
-
+					object newId = _keyGenerator.GetNextValue();
 					TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
-					
 					return newId;
 				}
 			}
@@ -136,7 +154,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (fkPropForTypeX != null)
 				{
 					var fkValueForTableX = fkPropForTypeX.Getter.Invoke(item);
-					if (!localDbReposetory.ContainsId(fkValueForTableX))
+					if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
 					{
 						throw new ForginKeyConstraintException(TypeInfo.TableName, localDbReposetory.TypeInfo.TableName, fkValueForTableX);
 					}
@@ -146,7 +164,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		private bool ContainsId(object fkValueForTableX)
 		{
-			var local = _base.ContainsKey((long)Convert.ChangeType(fkValueForTableX, typeof(long)));
+			var local = _base.ContainsKey(fkValueForTableX);
+			if (!local)
+			{
+				//try upcasting
+				local = _base.ContainsKey(Convert.ChangeType(fkValueForTableX, TypeInfo.PrimaryKeyProperty.PropertyType));
+			}
+
 			if (!local && _db != null)
 			{
 				return _db.Select(TypeInfo.Type, fkValueForTableX) != null;
@@ -235,6 +259,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public bool IsReadOnly { get { return false; } }
 	}
 
+	/// <summary>
+	/// Provides an wrapper for the non Generic LocalDbReposetory 
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	public class LocalDbReposetory<T> : LocalDbReposetory, ICollection<T>
 	{
 		public LocalDbReposetory()
