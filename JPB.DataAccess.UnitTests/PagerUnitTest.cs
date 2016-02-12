@@ -1,8 +1,9 @@
 ﻿using System;
 using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.UnitTests.TestModels;
+using JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using JPB.DataAccess.Manager;
-using UnitTestProject1;
 using System.Collections.Generic;
 
 namespace JPB.DataAccess.UnitTests
@@ -27,7 +28,7 @@ namespace JPB.DataAccess.UnitTests
 			var checkDatabase = expectWrapper.CheckDatabase();
 			Assert.IsTrue(checkDatabase);
 
-		
+
 			var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
 				dbname);
@@ -114,9 +115,9 @@ namespace JPB.DataAccess.UnitTests
 				pager.LoadPage(expectWrapper);
 				Assert.AreEqual(pager.CurrentPageItems.Count, newPageSize);
 			}
-		
-			
-			#endregion
+
+
+				#endregion
 		}
 	}
 }

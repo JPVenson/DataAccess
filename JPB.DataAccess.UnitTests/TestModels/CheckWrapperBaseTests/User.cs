@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel;
 using System.Data;
 using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Messaging;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryBuilder;
 using JPB.DataAccess.QueryFactory;
+using JPB.DataAccess.UnitTests.Properties;
 
-namespace UnitTestProject1
+namespace JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests
 {
 	public class UsersMeta
 	{
@@ -26,7 +26,7 @@ namespace UnitTestProject1
 		private string _userName;
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		[JPB.DataAccess.UnitTests.Annotations.NotifyPropertyChangedInvocator]
+		[NotifyPropertyChangedInvocator]
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
 			var handler = PropertyChanged;
@@ -219,7 +219,7 @@ namespace UnitTestProject1
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static void GetSelectStatement(QueryBuilder builder)
+		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder)
 		{
 			builder.Select(typeof(Users_StaticQueryFactoryForSelect));
 		}
@@ -234,7 +234,7 @@ namespace UnitTestProject1
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static void GetSelectStatement(QueryBuilder builder, long whereId)
+		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder, long whereId)
 		{
 			builder.Select(typeof(Users_StaticQueryFactoryForSelect))
 				.Where(UsersMeta.UserIDCol + " = @whereId", new

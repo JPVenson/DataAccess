@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.Helper;
+﻿using System.Data;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryFactory;
 
-namespace UnitTestProject1
+namespace JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests
 {
 	public class FooTest
 	{

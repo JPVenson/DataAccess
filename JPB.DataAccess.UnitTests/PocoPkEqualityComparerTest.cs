@@ -1,7 +1,8 @@
 ﻿using System;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.UnitTests.TestModels;
+using JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UnitTestProject1;
 
 namespace JPB.DataAccess.UnitTests
 {
