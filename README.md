@@ -1,205 +1,476 @@
-This lib is for an EF like DataAccess.
+Download 2.0.0.0012 - 10.6 MB
+Download from Github
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 
+You can also contact me on gitter at https://gitter.im/JPVenson/DataAccess.
 
-Folow me on Gitter:
-<p><a href="https://gitter.im/JPVenson/DataAccess?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=body_badge" target="_blank" class=""><img src="https://camo.githubusercontent.com/da2edb525cde1455a622c58c0effc3a90b9a181c/68747470733a2f2f6261646765732e6769747465722e696d2f4a6f696e253230436861742e737667" alt="Gitter" data-canonical-src="https://badges.gitter.im/Join%20Chat.svg" style="max-width:100%;"></a></p>
+Introduction
+This will be a short article about my multi strategy ADO.NET wrapper that uses FactoryMethods, Reflection or a combination of both. It is simple to use, but a complex and powerful solution for simple and fast (fast in Development and usage) database access.
 
-Usage and Annotating is Attribute based.
+To be clear, this is designed to be a helper for very simple work. It is not created to be an EF alternative!
 
-To work with an POCO just name the class like the Table you want to operate Or place the [ForModel(name)] attribute on  it and specify the DB Column name. This works on Class|Table level as on Propertys|Columns.
+Background
+Well, the background of this project was that most of my colleagues worked with a very old and oversized solution that needed a lot of maintenance and changes when we started with a new project and even for simple statements like:
 
-USAGE:
+SELECT * FROM Foo
+I was forced to manually open a connection, run the statement and parse the IDataReader. I thought this is absolutely not necessary because: Most of the time, the POCOs are designed like the database with properties that are named like Column names and so on. So, this was a task I’d tried to automate.
 
-class with different name then the Table
-	
-	    [ForModel("TableNameOfFooTable")]
-	    public class Foo { }
-	
-class with same name than Table
-	
-	    public class TableNameOfFooTable { }
-	  
-	  
-To use the Complete helper Function you need to annotate the:
+I'd like to present my solution and I hope to get some nice ideas from you.
 
-Primary Key property with the [PrimaryKey] attribute
-RowVersion property with the [RowVersion] attribute
+Using the Code
+The main parts are the IDatabase, IDatabaseStrategy and for the Main Reflection and loading the DbAccessLayer.
 
-USAGE:
+IDatabase defines a ínterface that maintains a Connection, this means to open a Connection, keep it open as long as it is necessary and then close it. In IDatabase, there is an IDatabaseStrategy that is used to connect to certain databases like MySQL, MsSql, OleDB and so on. The lib supports MsSQL, Obdc, OleDb from the hood, but in others, in the project included Assemblies, there are also implementations for MySQL and SqLite.
 
-	[PrimaryKey]
-        [ForModel("User_ID")]
-        public long UserId { get; set; }
+As I mentioned, there are multiple ways to load or submit data from and to a database.
 
-        [RowVersion]
-        [ForModel("RowState")]
-        public byte[] RowBla { get; set; }
+For example: the simple Select from a database. We expect to be a database that is called Northwind and a Table Foo.
 
-for property’s you want to exclude from the Automatic loading mark them with the [InsertIgnore] *( primary keys are ignored by default )*
-If you do so this property will not include in the INSERT statement but it will be Auto Updated and Selected.
+Create an Object that is called like your Table (Foo)
+Define properties that are named and of the same type like a Column
+Create a new Object of DbAccessLayer with a proper connection string
+Call Select<Foo>();
+In these 4 steps, you will execute a complete select to the database and then the result will be mapped with Reflection to the Object.
 
-It is possible to load a POCO complete automatic without Annotations or additional info’s.
-In that case it is only necessary that the Property’s are named as the Corresponding Column names.
+Code
+public class FooTest
+{
+    public class Foo
+    {
+        public long Id_Foo { get; set; }
+        public string FooName { get; set; }
+    }
+ 
+    public FooTest()
+    {
+        var accessLayer = new DbAccessLayer(DbTypes.MsSql, 
+	"Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
+        var @select = accessLayer.Select<Foo>();
+    }
+}
+There are A LOT of overloads of Select, SelectNative, SelectWhere and RunPrimetivSelect. Almost all methods with a Generic Parameter have a corresponding method that accepts a Type instance.
 
-The Library does support a number of factory Injectors.
-This feature is still in work and incomplete.
+In all examples, when an instance of DbAccessLayer is needed, it will be represented by the variable.
 
-Constructor Injection.
+accessLayer
+and in the testing, an MsSQL Db is used and its syntax.
 
-When the lib needs to create a new POCO it will search for a Ctor that has the [ObjectFactoryMethod] attribute and 
-Takes only one Parameter of type IDataRecord. if it does not find any with the Attribute, it will search for one that fits when it find only one this one will used.
-IDataRecord will maybe an instance of my own Implementation: EgarDataRecord.
+Creating and Customizing a POCO
+This is primarily an Object Relationship Mapper. That means that this lib always tries to map the output that is returned by a Query into an Object that has multiple properties. You have some attributes that define certain parts and functions of that object.
 
-USAGE:
-  Ctor with attribute:
-  
+As seen in the example, you can skip all extra configuration when you follow some rules. To "bypass" these rules like the Rule that a Class must be named the same, then the Table you can set an Attribute.
+
+ForModel
+
+[ForModel("Foo")]
+public class NotFooButSomeStrangeNameYouDoNotLike
+{
+    public long Id_Foo { get; set; }
+    [ForModel("FooName")]
+    public string Metallica4tw { get; set; }
+}
+The ForModel attribute is allowed on Class | Table and on Property | Column level. It gives the Processor the information that the name that is used in the POCO must be mapped to the Table.
+
+PrimaryKey
+
+public class Foo
+{
+    [PrimaryKey]
+    public long Id_Foo { get; set; }
+    public string FooName { get; set; }
+}
+The PrimaryKey attribute marks a Property ... what a wonder, to be an PrimaryKey on the database. With this function, you can call:
+
+accessLayer.Select<Foo>(155151 /*This is the PrimaryKey we are looking for*/);
+InsertIgnore
+
+Marks a Property to be not Automatically included into a InsertStatement. Per default, the PrimaryKey inherits from this attribute.
+
+ForeignKey (Work In Progress)
+
+Well, some good long day when my work was not so hard, I’d thought that it would be fun, when it would be nice that the Automatic process could load NavigationPropertys too. The Term NavigationProperty is from EF and defined as:
+
+"Represents the navigation from one entity type to another entity type in the conceptual model."
+
+So a NavProperty is not more than an Property that is of the Type that another Object and that Relation is described with an ForeignKey.
+
+public class FooTest
+{
+    public class Foo
+    {
+        [PrimaryKey]
+        public long Id_Foo { get; set; }
+        public string FooName { get; set; }
+ 
+        public long Image_Id { get; set; }
+ 
+        /// <summary>
+        /// A Property that is of the type that is referred to
+        /// 1 TO 1 relation
+        /// </summary>
+        [ForeignKey("Image_Id")]
+        public virtual Image img { get; set; }
+ 
+        /// <summary>
+        /// A Property that is a List of the type that is referred to
+        /// 1 TO Many relation
+        /// </summary>
+        [ForeignKey("Image_Id")]
+        public virtual IEnumerable<Image> imgs { get; set; }
+    }
+ 
+    public class Image
+    {
+        [PrimaryKey]
+        public long Id_Image { get; set; }
+        public byte[] ImageData { get; set; }
+    }
+}
+As written, this is a feature that has its known issues / bugs / problems:
+
+The Select is one time, changes that are made to the collection are not observed by the manager.
+The Foreign POCO must have exactly one PrimaryKey property, when it finds more than one, the first will be taken.
+Only Egar loading is supported. When loading a big object tree, all objects are loaded at once.
+LoadNotImplimentedDynamic
+
+When the Select statement returns more information than build in the POCO, this property
+(must have this signature):
+
+[LoadNotImplimentedDynamic]
+public IDictionary<string, object> UnresolvedObjects { set; get; }
+(Property Name does not matter) it will be filled with the data (see FactoryMethods).
+
+IgnoreReflection
+
+Simple: as the XmlIgnore attribute, it marks a Property to not be indexed and accessed by any function of the Mapper. Even if the result contains a Column that matches this property, the property will not be used.
+
+RowVersion
+
+Defines a RowVersion attribute. When defined, all calls of accessLayer.Update() and accessLayer.Refresh() will use this Property to check for changes.
+
+Loading Strategies
+There are 2 ways of loading with factory methods defined inside the POCO or automatically with customization over attributes. The 2nd way will be the fallback when there are no or not the right Factory available.
+
+Constructor and Method Injection
+
+The manager can detect a method to pull statements from it. For example, how you define a method that creates a Select statement without parameter:
+
+public class Foo
+{
+    public long Id_Foo { get; set; }
+    public string FooName { get; set; }
+ 
+    [SelectFactoryMehtod]
+    public static string CreateSelectStatement()
+    {
+        return "SELECT * FROM Foo";
+    }
+}
+When some method is defined, the manager will always use this method to create a Select statement and he will skip any other reflection based creation.
+
+For Selects, this is also possible on Class level:
+
+[SelectFactory("SELECT * FROM Foo")]
+public class Foo
+But only Selects must be Public and Static. Update, Insert and Delete Factory’s must be Not static. You can return a string OR an instance of IQueryFactoryResult. To prevent SqlInjection, this is the HEAVILY recommended way when you work with parameters.
+
+An example that uses IQueryFactoryResult for Update and Delete and a String for Select:
+
+[SelectFactory("SELECT * FROM Foo")]
+public class Foo
+{
+    public long Id_Foo { get; set; }
+    public string FooName { get; set; }
+ 
+    [DeleteFactoryMethod]
+    public IQueryFactoryResult CreateDeleteStatement()
+    {
+        var result = new QueryFactoryResult("DELETE FROM Foo WHERE Id_Foo = @1", 
+            new QueryParameter()
+            {
+                Name = "@1", Value = Id_Foo
+            });
+        return result;
+    }
+ 
+    [UpdateFactoryMethod]
+    public IQueryFactoryResult CreateSomeKindOfUpdate()
+    {
+        var result = new QueryFactoryResult("Update Foo SET FooName = @param WHERE Id_Foo = @1",
+            new QueryParameter()
+            {
+                Name = "@1",
+                Value = Id_Foo
+            },
+            new QueryParameter()
+            {
+                Name = "@param",
+                Value = FooName
+            });
+        return result;
+    }
+}
+It is possible to transfer parameters from the caller to the function. When the caller provides you parameters, they will be given to the function that has the same signature then the parameter. This idea is more or less shamelessly stolen from the ASP.NET MVC approach.
+
+After version 2.0.0.14 you can also use an QueryBuilder on a void Method to create your Statements.
+
+Simple Sample
+public class FooTest
+{
+    public class Foo
+    {
+        public long Id_Foo { get; set; }
+        public string FooName { get; set; }
+ 
+        [UpdateFactoryMethod]
+        public static IQueryFactoryResult CreateSomeKindOfUpdate(string someExternalInfos)
+        {
+            if (string.IsNullOrEmpty(someExternalInfos))
+                return null; //Noting to do here, use the Automatic loading
+ 
+            var result = new QueryFactoryResult
+            ("SELECT * FROM Foo f WHERE f.FooName = @info", new QueryParameter()
+            {
+                Value = someExternalInfos,
+                Name = "@info"
+            });
+            return result;
+        }
+    }
+ 
+    public FooTest()
+    {
+        var access = new DbAccessLayer(DbTypes.MsSql, 
+        "Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
+        var @select = access.Select<Foo>("SomeName");
+    }
+}
+The string that we provided to...
+
+access.Select<Foo>("SomeName");
+...will be given to the Select function to create a statement and this statement will be executed.
+
+It is also possible to control the Loading from a DataRecord to your class by using a Constructor that accepts these parameters:
+
+public class Foo
+{
     [ObjectFactoryMethod]
     public Foo(IDataRecord record)
     {
-      //TODO load propertys from record
-      //At this point the connection is already closed and the data are stored into the Record if you do not change the LoadCompleteResultBeforeMapping property to false
-    }  
-    
-    public Foo()
-    {
-      //other ctors
-    }  
-    
-    public Foo(Northwind nord)
-    {
-    
-    }  
-    
-  Ctor without attribute:
-  
-    public Foo(IDataRecord record)
-    {
-      //TODO load property’s from record
-      //At this point the connection is allready closed and the data are stored into the Record
-      //must be the only ctor
+        Id_Foo = (long)record["Id_Foo"];
+        FooName = (string)record["FooName"];
     }
+ 
+    public long Id_Foo { get; set; }
+    public string FooName { get; set; }
+}
+When it is necessary to create a new Instance of that Poco, there is always a IDataRecord to load it from so via Constructor injection, we find this one and provide him the data.
 
-Method Injection.
+XML Field Loading
+There is a new attribute:
 
-To use custom generated statements define a function and mark it with the attribute.
-USAGE:
+FromXmlAttribute
+It allows a simple loading of Objects from an XML Serialized Column. The attribute contains two parameters:
 
-  SELECT:
-  
-    [SelectFactoryMethod()]
-    public static [string | IQueryFactoryResult] fooName();
-    
-  UPDATE :
-  
-    [UpdateFactoryMethod()]
-    public [string | IQueryFactoryResult] fooName();
+FieldName [Required]
+LoadStrategy [Optional]
+The first Param has the same effect as the ForModel one.
 
-More will follow.
+The last Param defines the usage of this Property.
 
-The Lib does also look for public virtual property’s to inject a FK dependency. ( WIP )
+Should it be included into a Select Statement => Column exists
 
-if a property is Defined as Public Virtual and contains a ForeignKeyAttribute it will be loaded when you select that class.
+Should it be excluded from Select Statement => Column does not exist but will be added by Statement
+
+In both cases, if the Column exists in the result stream, it will be tried to deserialized into the type that the Property defines. If this is an implementation or IEnumerable<T>, the result should also be formatted as list.
+
+Attributeless Configuration
+As suggested from user Paulo Zemek, I modified the Reflection only MetaData API to support runtime manipulation of the Metadata.
+
+To configurate any object, you have to instantiate a Config class. It acts as an Fassade to the internal API.
+
+To extend the reflection based behavior, you have to call the SetConfig method on any Config instance. In the given callback, you have access to several methods that will add the attribute information like ForModel and so on. All helper methods are using the 3 base methods:
+
+public void SetPropertyAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
+{
+    var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
+    var info = ConfigHelper.GetPropertyInfoFromLabda(exp);
+    var fod = classInfo.GetOrCreatePropertyCache(info);
+    fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+}
+
+public void SetMethodAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
+{
+    var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
+    var info = ConfigHelper.GetMehtodInfoFromLabda(exp);
+    var fod = classInfo.MethodInfoCaches.First(s => s.MethodName == info);
+    fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+}
+
+public void SetClassAttribute(DataAccessAttribute attribute)
+{
+    var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
+    classInfo.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+}
+You could use these methods directly to add data to the internal ConfigStore or the helper one:
+
+public void SetForModelKey<TProp>(Expression<Func<T, TProp>> exp, string value) 
+{     SetPropertyAttribute(exp, new ForModel(value)); }
+In one of the next releases, I will provide you a way for loading and store all these data in XML. All type information can be accessed by using the static methods in the Config class. That would allow you to reuse the type information.
+
+All type access parts as ThreadSave.
+
+There are two ways in managing configs:
+
+From Outside
+
+You can call anywhere in your code:
+
+new Config().SetConfig<T>(s => { ... })
+This allows you to configurate a well known POCO in all ways. The generated information will be added to the LocalConfig Store.
+
+From Inside
+
+Hurray! A new Attribute is there! The ConfigMehtodAttribute. You can decorate a static method with its attribute that will take a Config instance and then it allows you to configurate yourself inside the class itself.
+
+Speed Test
+Lately, I was evaluating YAORM against other ORM's with Frans Bouma's RawBencher. I recognize that the current version has some extremely critical problems with some ... let's call it "Non optimal POCO" usage. As YAORM depends heavily on a ADO.NET conform constructor and only uses Reflection as some kind of fallback method, this way was extremely slow. In its test, it took about 6,000 ms to enumerate all 31465 entries. That was darn slow compared to EntityFramework, and don't even mention Dapper ;-).
+
+So I made some major improvements to these POCOs that are not self containing and ADO.NET Constructor.
+
+Quote:
+ADO.NET Constructor:
+
+I was talking about an Ado.net conform Ctor. This kind of Constructor is defined by an POCO and takes an instance of IDataReader | IDataRecord and reads all necessary fields from the result set and then sets and/or converts these values to its properties.
+
+After I made the changes to the existing code, including auto code creation due Runtime and the usage of compiled lambdas instead of the heavy usage of the reflection API, I was extremely surprised. From 6,000 ms down to 320 ms. With this test, I also made some improvements and changes to the new Config API like:
+
+Static Factory setting
+Multibe pre defined setter for Attributes on Properties
+Control over the InMemory ADO.NET Ctor creation
+Internal Reflection
+The ORM uses an Internal Reflection/IL/Expressions/CodeDom provider to generate most of the needed code due runtime.
+
+There is a mixture of these technologys because some parts where just to timeconsuming to be implimented in IL. That is true for the CodeDOM part which are used to generate an Constructor due Runtime to load entitys. This was first used only by the EntityCreator but then also modifyed to be called due runtime. All reflection based work is located inside the MetaAPI and derived for the ORM.
+
+Quote:
+The MetaAPI uses IL and Expressions to compile accessors for Propertys and Methods. Methods are wrapped into an IL DynamicMethod and propertys are wrapped in Expressions
+
+In future the basic Reflection API (MetaAPI) will may be moved to an very own Assambly because it is desgined to be generic. The most basic store to access everything is the 
+
+public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> : 
+	IDisposable
+	where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>, new()
+	where TProp  : class, IPropertyInfoCache<TAttr>, new()
+	where TAttr  : class, IAttributeInfoCache, new()
+	where TMeth  : class, IMethodInfoCache<TAttr, TArg>, new()
+	where TCtor  : class, IConstructorInfoCache<TAttr, TArg>, new() 
+	where TArg   : class, IMethodArgsInfoCache<TAttr>, new()
+As is said it is desgined to be generic and reusable. It contains a class to convert an Type instance to an instance of TClass by using the GetOrCreateClassInfoCache method. This method is of course also Recusiv and aware of that, it will ether give you an instance from the local store or enumerates all "Most used Infos". That means it will enumerate throu all Propertys, Methods, Arguments, Constructors and Attributes on each of them and store them. This class is optional ThreadSave by using the EnableThreadSafety property. This optional property was introduced to ensure a maximum of Performance.
+
+This class can be ether Global or InstanceLocal. By using the constructor
+
+public MetaInfoStore(bool isGlobal)
+You can spezify that. To ensure a maximum of Performance you can also Impliment for example the IPropertyInfoCache and override the Init mehtod to define new Attributes that are common accessed. This brings a huge performance advance because otherwise you have to loop through the collection of all Attributes to find the desired one what, of course is timeconsuming. Take a look into the DbPropertyInfoCache to see examples.
+
+An other good reason to use this, is the advantage of adding "fake" propertys and Attributes due Runtime by simply adding them to the collections. This feature is used by the ConfigAttribute to extend POCOs. Each part of the YAORM is using this Store and if you add a new Property to it, it will find it. For example the MethodInfoCache is implimenting an Constructor:
+
+internal MethodInfoCache(Func<object, object[], object> fakeMehtod, string name = null, params TAtt[] attributes)
+This allows you to add each method you want to each class without using .net Tricks such as dynamic's.
+
+LocalDbRepository
+Its an Collection that will enforce ForginKeyDeclarationsAttributes in future also ForginKeyAttributes. With this class you can define local Databases inside a scope. All "tables" inside this scope will be validates if you add any object to it and if you try to add an Entity to it which would violate ForeignKey's an exception is thrown.
+
+First you have to setup an DatabaseScope
+
+using (new DatabaseScope())
+{
+
+}
+This scope will be an Container and validates multibe Tables that are defined inside the Scope. This syntax was takes from the TransactionScope that exists within the .netFramework. Then you have to define tables by creating them inside the scope
+
+using (new DatabaseScope())
+{
+	_books = new LocalDbReposetory<Book>();
+	_images = new LocalDbReposetory<Image>();
+}
+The defintion for Book and Image is folloring:
+
+public class Image
+{
+	[PrimaryKey]
+	public long ImageId { get; set; }
+ 
+	public string Text { get; set; }
+ 
+	[ForeignKeyDeclaration("BookId", typeof(Book))]
+	public int IdBook { get; set; }
+}
+ 
+public class Book
+{
+	[PrimaryKey]
+	public int BookId { get; set; }
+ 
+	public string BookName { get; set; }
+}
+It is important to decorate an PrimaryKeyAttribute and also an ForeignKeyDeclarationAttribute to define valid connections between both Tables. You can ether use Attributes or an Config method (s.a). The first argument on the ForgeinKeyDeclarationAttribute will be soon obsolete. You can use the Constructor of the LocalDbReposetory to define an PrimaryKey generator if you use PrimaryKeys that are not of type of Long, Int, Guid or if you want to define other Autoincriment by 1 and starting with 1.
+
+Entity Creator
+The lib now contains a Console Application that will be possible to create Entities based on a database. At the Current state (01.Nov.2014), only MsSql databases are supported and the testing is very basic.
+
+The usage is simple in its basic component but has a lot of potential. And also, the idea here is to re-write the current CommandoLine tool to support complete parameterised works.
+
+After you start the program, it will ask you for a Target directory (where the generated files will be stored) and a connection string.
 
 
-USAGE
-	1 to 1 dependency
-	
-		public long? ID_OFFOO { get; set; }
-		
-		[ForeignKeyAttribute("ID_OFFOO")]
-		public virtual Foo FoosProperty { get; set; }
-		
-		
-	1 to many dependency
-	
-		public long? ID_OFFOO { get; set; }
-		
-		[ForeignKeyAttribute("ID_OFFOO")]
-		public virtual ICollection<Foo> FoosProperty { get; set; }
-		
-		
-As this is still a WIP feature, items will only loaded recursive into the list but new items are not tracked.
 
-Linq
+After that, you will see some information from that database including Tables, StoredProcedures and Views. Views are handled the same as Tables are because the calling syntax is pretty much the same.
 
-The lib contains a small Linq Provider ( WIP )
-this feature is very basic and will not be complete implemented.
+With typing a Number of a Table, Sp or View, you can alter the settings of that object. Other commands are:
+
+\compile
+\autoGenNames
+\add
+You start the process:
+
+Starts the compiling of all Tables, SPs and views that are not excluded
+Starts a simple renaming process that will Save Remove all '_',' ' chars from the database names and replacing them with C# Conform names
+Not implemented (In future, it will be possible to add static loader constructors. This will dramatically increase the selecting performance. But due to the newest feature (XML based loading), this is not completely implemented).
+Changes in Version 2.0
+
+More Unit tests (yeeea)
+Mapping from DB fields to Class properties is now stored inside the ClassInfoCache and is persisted
+The Reflection API now uses HashSets instead of lists
+DataConverterExtentions are reduced
+PropertyInfoCache is now used to access Properties directly by using dynamic compiled Lambdas
+A Static factory method Delegate on ClassInfoCache level is now taking care of the creation of POCOs
+Some methods from the EntityCreator are moved from the EXE to the DataAccess.dll
+A new class "FactoryHelper" is now capable of creating ADO.NET Ctor due Runtime by using the improved methods of the EntityCreator
+Major improvements in ctor creation the EntityCreator and the Runtime creator are now capable of constructors for:
+(Single)XML
+(List)XML
+(Single)ForginKey
+(List)ForginKey
+ValueConverter
+Null Values
+(Possible)Null Values
+ForModel
+Added Multibe Comments
+Removed the Linq Provider completely
+Replaced the ReposetoryCollection with the DbCollection
+Bug fixing
+Points of Interest
+This project has brought me a lot of fun and one or two sleepless nights and I guess they will not be the last I had because of this. The lib contains a small Linq Provider that is marked as obsolete because, due to the implementation and development, I was ... let's say I was annoyed by Linq.
+
+I expect from this project to have some ideas and more to improve my work.
+
+Thanks to everyone that took the time to read this. Thanks also to my trainer Christian H. for his impressions and help.
 
 
 
+History
 
-
-DbAccessLayer
-
-This is the Main class that is used to calculate everything.
-
-USAGE:
-
-		var layer = new DbAccessLayer(DbTypes.MsSql, "ConnectionString");
-		List<Foo> foos = layer.Select<Foo>();
-		
-This will Create a DB connection, Enumerate all propertys or call a factory, to create a Select Statement, then execute this statement and load the propertys back into the object via reflection or Factory.
-
-Performace.
-
-Performace is also very importend. The Solution contains a Console application that will access your localdb to create test tables and insert and select from and to it. Then it will generate a small report with the times. 
-Compare it to Dapper or EF.
-
-Extend it.
-
-You can add any Database as long as you impliemnt the IDatabaseStrategy for it. There are default implimentations for MsSql, MsSql and Untested for Odbc and OleDb. The ORM is desgined to word on top of this Ado.net implimentations. You can use the Ado wrapper as Usual by using the Database property of DbAccessLayer or simply by creating the IDatabase implimentation.
-
-QueryBuilder.
-
-There is a implimentation that is not using IQueryable but IEnumerable. There is also an Unsupported IQueryable implimentation but its constructor is marked as Obsolete. The working implimentation uses Extention mehtods to write SQL confrom strings into a list. At the end the string are parsed with parameter optional and then the statement can be executed syncronly or asyncronly by enumerating the collection.
-
-	Example:
-	var withParamerters = new DbAccessLayer(DbAccessType.MsSql, "")
-                .Query()
-                //Create a new Query object that handles all calls
-                .Select<Foo>()
-                //Create a select query for type
-                .As("s")
-                //add the "AS (alias)" query part
-                .Join<Foo, Foo>(TJoinMode.Left)
-                //add a Join on a table by using the TJoin for left joins
-                .Where("", new { param = 1 })
-                //For allmost all mehtods we can overhand a dynamic object for paramethers it is not
-                //Importend where we do that they are handled globaly
-                .InBracket(s =>
-                {
-                    //This is for a better readability everything inside this action will be wrapped into "( )"
-                    s.QueryD("s.Id < @param");
-                    //We can also add anything with QueryD QueryQ and Query
-                    s.Or("s.Name CONTAINS @param2");
-                    //Create an Or statement
-                })
-                .WithParamerters(new { param2 = "test" });
-        //We can also add the paramthers at the end or when every we would like to
-
-        var compileFlat = withParamerters.CompileFlat();
-        //This will return as a local compiled statement from this query without executing on server
-        Console.WriteLine(compileFlat.Item1);
-        
-	Output:
-	SELECT ID, Name FROM Foo AS s 
-		LEFT JOIN Foo ON Foo.ID = Foo.FK_Self 
-		WHERE ( s.Id < @param OR s.Name CONTAINS @param2 ) 
-		
-	We could also call ToArray() or To List or loop throu it inside an ForEach.
-	
-            foreach (object withParamerter in withParamerters)
-            {
-                Console.WriteLine(withParamerter /*this is still an object*/);
-            }
-        To create a strongly typed Query just call 
-            foreach (Foo withParamerter in withParamerters.ForResult<Foo>();)
-            {
-                Console.WriteLine(withParamerter /*this is now casted to Foo*/);
-            }
-        at the end just before executing.
-        
-        
-        Future:
-        
-        I am currently working on some TCP intirgration for Realtime state changeing. The Project will be partial OpenSource 	because the TCP wrapper isn't for now.
+V1 Initial commit
+V2 Creation of an simple Entity Creator, first attempt to build a StoreProc Caller and XML based Ref loading
+V3 Change log of program version V2
