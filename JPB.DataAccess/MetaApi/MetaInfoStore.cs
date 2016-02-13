@@ -79,6 +79,9 @@ namespace JPB.DataAccess.MetaApi
 			ClassInfoCaches.Clear();
 		}
 
+		/// <summary>
+		/// Gloabel or local Cache
+		/// </summary>
 		protected internal virtual HashSet<TClass> SClassInfoCaches
 		{
 			get

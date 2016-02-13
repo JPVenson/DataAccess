@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Security;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.QueryBuilder;
-using JPB.DataAccess.UnitTests.Annotations;
+using JPB.DataAccess.UnitTests.Properties;
 using JPB.DataAccess.UnitTests.TestModels;
+using JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UnitTestProject1;
 using JPB.DataAccess.ModelsAnotations;
 using System.Data.SqlClient;
 
@@ -22,15 +21,15 @@ namespace JPB.DataAccess.UnitTests
 	{
 		static DbAccessLayer expectWrapper;
 #if MSSQL
-		public const string SConnectionString = @"Data Source=(localdb)\ProjectsV12;Integrated Security=True;";
-		[Annotations.NotNull]
+		public const string SConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
+		[NotNull]
 		public DbAccessType DbAccessType
 		{
 			get { return DbAccessType.MsSql; }
 		}
 #endif
 
-		[Annotations.NotNull]
+		[NotNull]
 		public string ConnectionString
 		{
 			get { return SConnectionString; }
@@ -53,7 +52,7 @@ namespace JPB.DataAccess.UnitTests
 
 			var checkDatabase = expectWrapper.CheckDatabase();
 			Assert.IsTrue(checkDatabase);
-			
+
 
 #if MSSQL
 						var redesginDatabase = string.Format(

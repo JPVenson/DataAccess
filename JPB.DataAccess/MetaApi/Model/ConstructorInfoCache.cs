@@ -17,16 +17,25 @@ using JPB.DataAccess.MetaApi.Model.Equatable;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
-	public class ConstructorStructFakeInfoCache : 
+	/// <summary>
+	/// Fake Constructor for Structs
+	/// </summary>
+	public class ConstructorStructFakeInfoCache :
 		MethodInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>,
 		IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>
 	{
-		public ConstructorStructFakeInfoCache(Func<object> del, string name) 
-			: base((e,f) => {
+		/// <summary>
+		/// Creates a new Constructor for an Struct
+		/// </summary>
+		/// <param name="del"></param>
+		/// <param name="name"></param>
+		public ConstructorStructFakeInfoCache(Func<object> del, string name)
+			: base((e, f) =>
+			{
 				return del();
-			 }, ".ctor")
+			}, ".ctor")
 		{
-			
+
 		}
 
 #pragma warning disable CS1591
@@ -47,8 +56,8 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// </summary>
 	[Serializable]
 	public class ConstructorInfoCache<TAtt, TArg> : MethodInfoCache<TAtt, TArg>,
-		IConstructorInfoCache<TAtt, TArg> 
-		where TAtt : class, IAttributeInfoCache, new() 
+		IConstructorInfoCache<TAtt, TArg>
+		where TAtt : class, IAttributeInfoCache, new()
 		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		/// <summary>
@@ -68,12 +77,22 @@ namespace JPB.DataAccess.MetaApi.Model
 			Init(ctorInfo);
 		}
 
+		/// <summary>
+		/// Invoke implimentation for Constructors. Calls the underlying Methodinfo without specifying an Caller
+		/// </summary>
+		/// <param name="param"></param>
+		/// <returns></returns>
 		public object Invoke(params object[] param)
 		{
 			return this.Invoke(null, param);
 		}
 
-		public IMethodInfoCache<TAtt, TArg> Init(MethodBase info)
+		/// <summary>
+		/// For internal use Only
+		/// </summary>
+		/// <param name="info"></param>
+		/// <returns></returns>
+		public override IMethodInfoCache<TAtt, TArg> Init(MethodBase info)
 		{
 			if (info is ConstructorInfo)
 				return this.Init(info as ConstructorInfo);
@@ -81,6 +100,9 @@ namespace JPB.DataAccess.MetaApi.Model
 			throw new NotImplementedException();
 		}
 
+		/// <summary>
+		/// The method info casted as ConstructorInfo
+		/// </summary>
 		public new ConstructorInfo MethodInfo
 		{
 			get { return base.MethodInfo as ConstructorInfo; }
@@ -114,7 +136,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		public virtual IConstructorInfoCache<TAtt, TArg> Init(ConstructorInfo ctorInfo)
 		{
 			base.Init(ctorInfo);
-					
+
 			Arguments = new HashSet<TArg>(ctorInfo.GetParameters().Select(f => new TArg().Init(f) as TArg));
 			return this;
 		}

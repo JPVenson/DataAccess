@@ -2,7 +2,6 @@
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UnitTestProject1;
 
 namespace JPB.DataAccess.UnitTests.LocalDbTests
 {

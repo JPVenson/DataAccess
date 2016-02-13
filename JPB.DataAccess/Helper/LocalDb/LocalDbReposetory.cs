@@ -25,7 +25,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		internal readonly LocalDbManager _databaseScope;
 		internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
 
-		protected LocalDbReposetory(Type type, ILocalPrimaryKeyValueProvider keyGenerator) 
+		protected LocalDbReposetory(Type type, ILocalPrimaryKeyValueProvider keyGenerator)
 		{
 			_databaseScope = LocalDbManager.Scope;
 			if (_databaseScope == null)
@@ -66,14 +66,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					throw new NotSupportedException(
 						string.Format("You must specify ether an Primary key that is of one of this types " +
-						              "({1}) " +
-									  "or invoke the ctor with an proper keyGenerator. Type: '{0}'", 
-									  type.Name, 
+									  "({1}) " +
+									  "or invoke the ctor with an proper keyGenerator. Type: '{0}'",
+									  type.Name,
 									  LocalDbManager
 									  .DefaultPkProvider
 									  .Keys
 									  .Select(f => f.Name)
-									  .Aggregate((e,f) => e + "," + f)));
+									  .Aggregate((e, f) => e + "," + f)));
 				}
 			}
 			_base = new Dictionary<object, object>(_keyGenerator);
@@ -116,7 +116,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected LocalDbReposetory(Type type)
 			: this(type, null)
 		{
-			
+
 		}
 
 		/// <summary>
@@ -138,7 +138,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 			return _base.Values.GetEnumerator();
 		}
-		
+
 		private object SetId(object item)
 		{
 			var idVal = TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
@@ -209,6 +209,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return local;
 		}
 
+		/// <summary>
+		/// Adds a new Item to the Table
+		/// </summary>
+		/// <param name="item"></param>
 		protected virtual void Add(object item)
 		{
 			CheckCreatedElseThrow();
@@ -226,10 +230,16 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
+		/// <summary>
+		/// Removes all items from this Table
+		/// </summary>
 		protected virtual void Clear()
 		{
 			CheckCreatedElseThrow();
-			_base.Clear();
+			foreach (var item in this._base)
+			{
+				Remove(item);
+			}
 		}
 
 		protected virtual bool Contains(object item)
@@ -283,7 +293,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				success = true;
 			}
 			return success;
-		}
+		}		
 
 		protected virtual void CopyTo(Array array, int index)
 		{
@@ -314,61 +324,105 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// <typeparam name="T"></typeparam>
 	public class LocalDbReposetory<T> : LocalDbReposetory, ICollection<T>
 	{
+		/// <summary>
+		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
+		/// </summary>
 		public LocalDbReposetory()
 			: base(typeof(T))
 		{
 		}
-
+		/// <summary>
+		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> that uses the DbAccessLayer as fallback if the requested item was not found localy
+		/// </summary>
 		public LocalDbReposetory(DbAccessLayer db)
 			: base(db, typeof(T))
 		{
 		}
-
+		/// <summary>
+		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> and uses the KeyProvider to generate Primarykeys
+		/// </summary>
 		public LocalDbReposetory(ILocalPrimaryKeyValueProvider keyProvider)
 			: base(typeof(T), keyProvider)
 		{
 		}
 
+		/// <summary>
+		/// Adds a new Item to the Table
+		/// </summary>
+		/// <param name="item"></param>
 		public void Add(T item)
 		{
 			base.Add(item);
 		}
-
+		
+		/// <summary>
+		/// Removes all items from this Table
+		/// </summary>
 		public void Clear()
 		{
 			base.Clear();
 		}
 
+		/// <summary>
+		/// Checks if the item is ether localy stored or on database
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public bool Contains(T item)
 		{
 			return base.Contains(item);
 		}
 
+		/// <summary>
+		/// Checks if the key is known
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
 		public bool Contains(object key)
 		{
 			return base.ContainsId(key);
 		}
 
+		/// <summary>
+		/// Copys the current collection the an Array
+		/// </summary>
+		/// <param name="array"></param>
+		/// <param name="arrayIndex"></param>
 		public void CopyTo(T[] array, int arrayIndex)
 		{
 			base.CopyTo(array, arrayIndex);
 		}
 
+		/// <summary>
+		/// Removes the item from this collection
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public bool Remove(T item)
 		{
 			return base.Remove(item);
 		}
 
+		/// <summary>
+		/// Returns the count of all knwon items
+		/// </summary>
 		public int Count
 		{
 			get { return base.Count; }
 		}
 
+		/// <summary>
+		/// False
+		/// </summary>
 		public bool IsReadOnly
 		{
 			get { return base.IsReadOnly; }
 		}
 
+		/// <summary>
+		/// Gets an enumerator
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerator<T> GetEnumerator()
 		{
 			return _base.Values.Cast<T>().GetEnumerator();
