@@ -124,7 +124,7 @@
     <Compile Include="Manager\PreDefinedProviderCollection.cs" />
     <Compile Include="Contacts\IValueConverter.cs" />
     <Compile Include="Contacts\ILoadFromXmlStrategy.cs" />
-    <Compile Include="ModelsAnotations\LoadStrategy.cs" />
+    <Compile Include="Contacts\LoadStrategy.cs" />
     <Compile Include="Contacts\Pager\IDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />
     <Compile Include="Contacts\Pager\IWrapperDataPager.cs" />

@@ -22,18 +22,8 @@ using TextDataFormat = System.Windows.TextDataFormat;
 
 namespace JPB.DataAccess.EntityCreator
 {
-	public struct f
-	{
-
-	}
-
 	public class Program
 	{
-		public static f X()
-		{
-			return default(f);
-		}
-
 		public static AutoConsole AutoConsole { get; set; }
 		[STAThread]
 		static void Main(string[] args)

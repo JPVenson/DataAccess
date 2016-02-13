@@ -24,6 +24,8 @@ namespace JPB.DataAccess.UnitTests.LocalDbTests
 			{
 				_books = new LocalDbReposetory<Book>();
 				_images = new LocalDbReposetory<Image>();
+				Assert.IsFalse(_books.ReposetoryCreated);
+				Assert.IsFalse(_images.ReposetoryCreated);
 			}
 
 			Assert.IsTrue(_books.ReposetoryCreated);

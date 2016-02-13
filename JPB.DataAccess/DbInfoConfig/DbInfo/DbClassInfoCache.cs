@@ -57,7 +57,8 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			var item = base.Init(type, anon);
 			//.ToDictionary(s => s.Key);
 			PropertyInfoCaches = new Dictionary<string, DbPropertyInfoCache>(PropertyInfoCaches
-				.Where(f => f.Value.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute))).ToDictionary(s => s.Key, f => f.Value));
+				.Where(f => f.Value.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute)))
+				.ToDictionary(s => s.Key, f => f.Value));
 			MethodInfoCaches = new HashSet<DbMethodInfoCache>(MethodInfoCaches.Where(f => f.AttributeInfoCaches.All(d => !(d.Attribute is IgnoreReflectionAttribute))));
 			ConstructorInfoCaches = new HashSet<DbConstructorInfoCache>(ConstructorInfoCaches.Where(f => f.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
 			foreach (var dbPropertyInfoCach in PropertyInfoCaches)
@@ -102,6 +103,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		///     If known the SelectFactory Attribute
 		/// </summary>
 		public DbAttributeInfoCache<SelectFactoryAttribute> SelectFactory { get; private set; }
+
+		/// <summary>
+		///		If knwon the MethodProxyAttribute Attribute
+		/// </summary>
+		public DbAttributeInfoCache<MethodProxyAttribute> MethodProxyAttribute { get; private set; }
 
 		/// <summary>
 		///     Key is C# Property name and Value is DB Eqivalent
@@ -156,6 +162,10 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			ForModel = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModelAttribute));
 			SelectFactory = DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute));
+			var preConfig = MethodProxyAttribute == null;
+
+			MethodProxyAttribute = DbAttributeInfoCache<MethodProxyAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is MethodProxyAttribute));
+						
 			HasRelations = AttributeInfoCaches.Any(s => s.Attribute is ForeignKeyAttribute);
 
 			RowVersionProperty = PropertyInfoCaches.FirstOrDefault(s => s.Value.RowVersionAttribute != null).Value;

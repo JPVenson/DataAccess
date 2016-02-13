@@ -22,19 +22,11 @@ namespace JPB.DataAccess.UnitTests
 	{
 		static DbAccessLayer expectWrapper;
 #if MSSQL
-		public const string SConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
+		public const string SConnectionString = @"Data Source=(localdb)\ProjectsV12;Integrated Security=True;";
 		[Annotations.NotNull]
 		public DbAccessType DbAccessType
 		{
 			get { return DbAccessType.MsSql; }
-		}
-#endif
-#if MYSQL
-		public const string SConnectionString = "Server=localhost;Uid=root;";
-		  [NotNull]
-		public DbAccessType DbAccessType
-		{
-			get { return DbAccessType.MySql; }
 		}
 #endif
 
@@ -61,35 +53,8 @@ namespace JPB.DataAccess.UnitTests
 
 			var checkDatabase = expectWrapper.CheckDatabase();
 			Assert.IsTrue(checkDatabase);
+			
 
-
-
-#if MYSQL
-			var redesginDatabase = string.Format(
-				"DROP DATABASE IF EXISTS {0}",
-				dbname);
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
-			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString + "Database={0};", dbname));
-
-			expectWrapper.ExecuteGenericCommand(
-			expectWrapper.Database.CreateCommand(
-				string.Format(
-					"CREATE TABLE {0} ( {1} BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL, {2} NVARCHAR(900));",
-					UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
-
-			//expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
-			//                                                                         "AS BEGIN " +
-			//                                                                         "SELECT * FROM Users " +
-			//                                                                         "END"));
-
-			//expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
-			//                                                              "AS BEGIN " +
-			//                                                              "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
-			//                                                              "END "));
-
-#endif
 #if MSSQL
 						var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",

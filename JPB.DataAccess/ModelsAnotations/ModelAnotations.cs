@@ -24,6 +24,33 @@ namespace JPB.DataAccess.ModelsAnotations
 	{
 	}
 
+	/// <summary>
+	///		Sets an type to be associated with the current class.
+	///		TO BE SUPPORTED
+	/// </summary>
+	[System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	public sealed class MethodProxyAttribute : Attribute
+	{
+		readonly Type _methodProxy;
+
+		/// <summary>
+		/// Allows to create a proxy class that should contains Factory methods for the current class
+		/// </summary>
+		/// <param name="methodProxy"></param>
+		public MethodProxyAttribute(Type methodProxy)
+		{
+			this._methodProxy = methodProxy;
+		}
+
+		/// <summary>
+		///		The assocaiated type
+		/// </summary>
+		public Type MethodProxy
+		{
+			get { return _methodProxy; }
+		}
+	}
+
 	#region FactoryAttributes
 
 	//Work in Progress
