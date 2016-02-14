@@ -140,7 +140,7 @@ namespace JPB.DataAccess.Helper
 			}
 			_propEqual = Wrap(Expression.IfThen(eqPropertyEqual, returnTrue));
 
-			if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
+			if (typeof(IComparable).IsAssignableFrom(typeof(T)))
 			{
 				var directComparsion = Expression.Call(Left, "CompareTo", null, Right);
 				_compareTo = Expression.Lambda<Func<T, T, int>>(directComparsion, new[] { Left, Right }).Compile();
@@ -180,6 +180,15 @@ namespace JPB.DataAccess.Helper
 		private Func<T, T, int> _compareTo;
 		private Func<T, int> _getHashCodeOfProp;
 
+		/// <summary>
+		/// Checks if both have the same Reference.
+		/// Checks if any but not both of them are null.
+		/// Compares both Primary keys against the assertNotDatabaseMember Object
+		/// Compares both Primary key Propertys by using Equals
+		/// </summary>
+		/// <param name="left"></param>
+		/// <param name="right"></param>
+		/// <returns></returns>
 		public bool Equals(T left, T right)
 		{
 			var leftNull = left == null;
@@ -191,6 +200,9 @@ namespace JPB.DataAccess.Helper
 				return true;
 			}
 
+			if (leftNull && rightNull)
+				return true;
+
 			if (leftNull)
 				return false;
 			if (rightNull)
@@ -198,6 +210,7 @@ namespace JPB.DataAccess.Helper
 
 			if (_assertionBlock != null && _assertionBlock(left, right))
 				return false;
+
 			if (_propEqual(left, right))
 			{
 				Value = left;
@@ -206,11 +219,25 @@ namespace JPB.DataAccess.Helper
 			return false;
 		}
 
+		/// <summary>
+		/// Calls the GetHashCode function on the PrimaryKey
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
 		public int GetHashCode(T obj)
 		{
 			return _getHashCodeOfProp(obj);
 		}
 
+		/// <summary>
+		/// Checks if both arguments are ReferenceEquals
+		/// Checks if Left is null = 1
+		/// Checks if Right is null = -1
+		/// Calls the 
+		/// </summary>
+		/// <param name="left"></param>
+		/// <param name="right"></param>
+		/// <returns></returns>
 		public int Compare(T left, T right)
 		{
 			var leftNull = left == null;
@@ -220,9 +247,12 @@ namespace JPB.DataAccess.Helper
 				return 0;
 
 			if (leftNull)
-				return -1;
-			if (rightNull)
 				return 1;
+			if (rightNull)
+				return -1;
+
+			if (_compareTo == null)
+				throw new NotSupportedException(string.Format("The Primary key on object '{0}' does not implement IComparable", this._typeInfo.ClassName));
 			return _compareTo(left, right);
 		}
 	}
