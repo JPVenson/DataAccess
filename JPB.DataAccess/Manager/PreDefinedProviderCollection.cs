@@ -21,8 +21,7 @@ namespace JPB.DataAccess.Manager
 			{DbAccessType.MsSql, "JPB.DataAccess.AdoWrapper.MsSql.MsSql"},
 			{DbAccessType.OleDb, "JPB.DataAccess.AdoWrapper.OleDB.OleDb"},
 			{DbAccessType.Obdc, "JPB.DataAccess.AdoWrapper.Obdc.Obdc"},
-			{DbAccessType.MySql, "JPB.DataAccess.MySql.MySql"},
-			{DbAccessType.SqLite, "JPB.DataAccess.SqlLite.SqLite"},
+			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite"},
 		};
 
 		public IEnumerator<KeyValuePair<DbAccessType, string>> GetEnumerator()

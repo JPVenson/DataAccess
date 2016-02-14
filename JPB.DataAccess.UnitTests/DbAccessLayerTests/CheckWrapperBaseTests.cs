@@ -351,6 +351,9 @@ namespace JPB.DataAccess.UnitTests
 			expectWrapper.InsertRange(testUers);
 
 			var refSelect = expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.UserTable)));
+			if (refSelect is long)
+				refSelect = Convert.ChangeType(refSelect, typeof(int));
+
 			Assert.AreEqual(testUers.Count, refSelect);
 		}
 

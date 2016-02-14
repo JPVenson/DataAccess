@@ -591,6 +591,8 @@ namespace JPB.DataAccess.QueryBuilder
 					break;
 				case DbAccessType.MySql:
 					return query.Query("LIMIT BY {0}", top);
+				case DbAccessType.SqLite:
+					return query.Query("LIMIT {0}", top);
 				default:
 					throw new NotSupportedException("For the Selected DB type is no Top implementations Available");
 			}

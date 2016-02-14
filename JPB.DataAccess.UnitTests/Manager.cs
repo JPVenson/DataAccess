@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +23,14 @@ namespace JPB.DataAccess.UnitTests
 			get { return DbAccessType.MsSql; }
 		}
 #endif
+
+#if SqLite
+		public const string SConnectionString = "Data Source=testDB.sqlite;Version=3;New=True;PRAGMA journal_mode=WAL;";
+		public DbAccessType DbAccessType
+		{
+			get { return DbAccessType.SqLite; }
+		}
+#endif
 		public string ConnectionString
 		{
 			get { return SConnectionString; }
@@ -33,6 +43,13 @@ namespace JPB.DataAccess.UnitTests
 
 			var dbname = "testDB";
 
+#if SqLite
+			var sqlLiteFileName = dbname + ".sqlite";
+			if (File.Exists(sqlLiteFileName))
+				File.Delete(sqlLiteFileName);
+			File.Create(sqlLiteFileName).Close();
+#endif
+
 			DbConfig.ConstructorSettings.CreateDebugCode = true;
 			DbAccessLayer.Multipath = true;
 
@@ -41,6 +58,15 @@ namespace JPB.DataAccess.UnitTests
 
 			var checkDatabase = expectWrapper.CheckDatabase();
 			Assert.IsTrue(checkDatabase);
+
+#if SqLite
+			expectWrapper.ExecuteGenericCommand(
+			expectWrapper.Database.CreateCommand(
+				string.Format(
+					"CREATE TABLE {0}({1} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, {2} TEXT);",
+					UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
+#endif
+
 
 
 #if MSSQL

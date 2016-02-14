@@ -355,7 +355,9 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			try
 			{
-				Connect(IsolationLevel.ReadUncommitted);
+				//defaulting it
+				//Connect(IsolationLevel.ReadUncommitted);
+				Connect();
 
 				action(this);
 			}
@@ -393,7 +395,9 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			try
 			{
-				Connect(IsolationLevel.ReadUncommitted);
+				//defaulting it
+				//Connect(IsolationLevel.ReadUncommitted);
+				Connect();
 
 				var res = func(this);
 

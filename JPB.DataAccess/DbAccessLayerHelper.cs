@@ -419,86 +419,7 @@ namespace JPB.DataAccess
 		{
 			return db.Run(s => s.ExecuteNonQuery(command));
 		}
-
-
-		//internal static IDbCommand CreateCommandOfClassAttribute<TE>(
-		//	this Type type,
-		//	object entry,
-		//	IDatabase db,
-		//	Func<object, IDatabase, IDbCommand> fallback,
-		//	params object[] param)
-		//	where TE : DataAccessAttribute
-		//{
-		//	//try to get a Factory method
-		//	//var methods =
-		//	//    type.GetMethods()
-		//	//        .FirstOrDefault(s => s.GetCustomAttributes(false).Any(e => e is TE /*&& (e as TE).DbQuery.HasFlag(dbAccessType)*/));
-
-		//	var methods =
-		//		DbConfigHelper.GetMethods(type).Where(s => s.GetCustomAttributes(false).Any(e => e is TE)).ToArray();
-
-		//	if (methods.Any())
-		//	{
-		//		var searchMethodWithFittingParams = methods.Where(s =>
-		//		{
-		//			var parameterInfos = s.GetParameters();
-
-		//			if (parameterInfos.Length != param.Length)
-		//			{
-		//				return false;
-		//			}
-
-		//			for (var i = 0; i < parameterInfos.Length; i++)
-		//			{
-		//				var para = parameterInfos[i];
-		//				var tryParam = param[i];
-		//				if (tryParam == null)
-		//					return false;
-		//				if (!(para.ParameterType == para.GetType()))
-		//				{
-		//					return false;
-		//				}
-		//			}
-		//			return true;
-		//		}).ToArray();
-
-		//		if (searchMethodWithFittingParams.Length != 1)
-		//		{
-		//			return fallback(entry, db);
-		//		}
-
-		//		var method = searchMethodWithFittingParams.Single();
-
-		//		//must be public static if attribute is Select
-		//		if (typeof (TE) != typeof (SelectFactoryMethodAttribute)
-		//			|| (typeof (TE) == typeof (SelectFactoryMethodAttribute) && method.IsStatic))
-		//		{
-		//			var cleanParams = param != null && param.Any() ? param : null;
-		//			var invoke = method.Invoke(entry, cleanParams);
-		//			if (invoke != null)
-		//			{
-		//				if (invoke is string && !String.IsNullOrEmpty(invoke as string))
-		//				{
-		//					return CreateCommand(db, invoke as string);
-		//				}
-		//				if (invoke is IQueryFactoryResult)
-		//				{
-		//					var result = invoke as IQueryFactoryResult;
-		//					return db.CreateCommandWithParameterValues(result.Query, result.Parameters);
-		//				}
-		//			}
-		//		}
-		//	}
-		//	return fallback(entry, db);
-		//}
-
-		//internal static IDbCommand CheckInstanceForAttriute<T, TE>(this Type type, T entry, IDatabase db,
-		//	Func<T, IDatabase, IDbCommand> fallback, params object[] param)
-		//	where TE : DataAccessAttribute
-		//{
-		//	return CreateCommandOfClassAttribute<TE>(type, entry, db, (o, database) => fallback((T) o, database), param);
-		//}
-
+		
 		internal static IDatabaseStrategy GenerateStrategy(this string fullValidIdentifyer, string connection)
 		{
 			if (String.IsNullOrEmpty(fullValidIdentifyer))
@@ -514,7 +435,15 @@ namespace JPB.DataAccess
 
 				Parallel.ForEach(parallelQuery, (s, e) =>
 				{
-					var loadFile = Assembly.LoadFile(s);
+					Assembly loadFile;
+					try
+					{
+						loadFile = Assembly.LoadFile(s);
+					}
+					catch (Exception)
+					{
+						return;
+					}
 					var resolve = loadFile.GetType(fullValidIdentifyer);
 					if (resolve != null)
 					{
