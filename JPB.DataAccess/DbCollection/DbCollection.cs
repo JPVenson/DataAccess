@@ -14,6 +14,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.DbCollection
@@ -61,7 +62,7 @@ namespace JPB.DataAccess.DbCollection
 	{
 		private readonly IDictionary<T, List<string>> _changeTracker;
 
-		private readonly HashSet<StateHolder> _internalCollection;
+		private readonly Dictionary<T, CollectionStates> _internalCollection;
 
 		/// <summary>
 		///     Internal use only
@@ -73,7 +74,7 @@ namespace JPB.DataAccess.DbCollection
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable subset)
 		{
-			_internalCollection = new HashSet<StateHolder>();
+			_internalCollection = new Dictionary<T, CollectionStates>(new PocoPkComparer<T>());
 			_changeTracker = new Dictionary<T, List<string>>();
 
 			if (subset is IOrderedEnumerable<T>)
@@ -98,7 +99,7 @@ namespace JPB.DataAccess.DbCollection
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable<T> subset)
 		{
-			_internalCollection = new HashSet<StateHolder>();
+			_internalCollection = new Dictionary<T, CollectionStates>(new PocoPkComparer<T>());
 			_changeTracker = new Dictionary<T, List<string>>();
 
 			if (subset is IOrderedEnumerable<T>)
@@ -118,7 +119,10 @@ namespace JPB.DataAccess.DbCollection
 		/// <exception cref="NotSupportedException"></exception>
 		public T this[int index]
 		{
-			get { return _internalCollection.ElementAt(index).Value; }
+			get
+			{
+				return _internalCollection.ElementAt(index).Key;
+			}
 			set
 			{
 				throw new NotSupportedException("Collection has a Bag behavior and does not support a Set on a specific position");
@@ -129,8 +133,8 @@ namespace JPB.DataAccess.DbCollection
 		public IEnumerator<T> GetEnumerator()
 		{
 			return _internalCollection
-				.Where(s => s.State != CollectionStates.Removed)
-				.Select(s => s.Value)
+				.Where(s => s.Value != CollectionStates.Removed)
+				.Select(s => s.Key)
 				.GetEnumerator();
 		}
 
@@ -146,15 +150,15 @@ namespace JPB.DataAccess.DbCollection
 
 		public void Clear()
 		{
-			foreach (StateHolder pair in _internalCollection.ToArray())
+			foreach (var pair in _internalCollection.ToArray())
 			{
-				Remove(pair.Value);
+				Remove(pair.Key);
 			}
 		}
 
 		public bool Contains(T item)
 		{
-			return _internalCollection.Any(s => s.Value.Equals(item));
+			return _internalCollection.ContainsKey(item);
 		}
 
 		public void CopyTo(T[] array, int arrayIndex)
@@ -170,8 +174,7 @@ namespace JPB.DataAccess.DbCollection
 			if (currentState == CollectionStates.Added)
 			{
 				_changeTracker.Remove(item);
-				var entry = _internalCollection.First(s => s.Value.Equals(item));
-				return _internalCollection.Remove(entry);
+				return _internalCollection.Remove(item);
 			}
 			else
 			{
@@ -182,7 +185,7 @@ namespace JPB.DataAccess.DbCollection
 
 		public int Count
 		{
-			get { return _internalCollection.Count(s => s.State != CollectionStates.Removed); }
+			get { return _internalCollection.Count(s => s.Value != CollectionStates.Removed); }
 		}
 
 		public bool IsReadOnly
@@ -193,7 +196,7 @@ namespace JPB.DataAccess.DbCollection
 		private void Add(T value, CollectionStates state)
 		{
 			value.PropertyChanged += item_PropertyChanged;
-			_internalCollection.Add(new StateHolder(value, state));
+			_internalCollection.Add(value, state);
 		}
 
 		private void item_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -217,12 +220,12 @@ namespace JPB.DataAccess.DbCollection
 
 		private bool ChangeState(T item, CollectionStates state)
 		{
-			var fod = _internalCollection.FirstOrDefault(s => s.Value == item);
+			var fod = _internalCollection.ContainsKey(item);
 
-			if (fod == null)
+			if (!fod)
 				return false;
 
-			fod.State = state;
+			_internalCollection[item] = state;
 			return true;
 		}
 
@@ -233,7 +236,11 @@ namespace JPB.DataAccess.DbCollection
 		/// <returns></returns>
 		public CollectionStates GetEntryState(T item)
 		{
-			return _internalCollection.FirstOrDefault(s => s.Value == item).State;
+			CollectionStates entry;			
+
+			if (!_internalCollection.TryGetValue(item, out entry))
+				return CollectionStates.Unknown;
+			return entry;
 		}
 
 		/// <summary>
@@ -244,23 +251,23 @@ namespace JPB.DataAccess.DbCollection
 			var bulk = _layer.Database.CreateCommand("");
 			var removed = new List<T>();
 
-			foreach (StateHolder pair in _internalCollection)
+			foreach (var pair in _internalCollection)
 			{
 				IDbCommand tempCommand;
-				switch (pair.State)
+				switch (pair.Value)
 				{
 					case CollectionStates.Added:
-						tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof(T), pair.Value, _layer.Database);
+						tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof(T), pair.Key, _layer.Database);
 						break;
 					case CollectionStates.Removed:
-						tempCommand = DbAccessLayer._CreateDelete(typeof(T).GetClassInfo(), pair.Value, _layer.Database);
-						removed.Add(pair.Value);
+						tempCommand = DbAccessLayer._CreateDelete(typeof(T).GetClassInfo(), pair.Key, _layer.Database);
+						removed.Add(pair.Key);
 						break;
 					case CollectionStates.Unchanged:
 						tempCommand = null;
 						break;
 					case CollectionStates.Changed:
-						tempCommand = DbAccessLayer.CreateUpdate(pair.Value, _layer.Database);
+						tempCommand = DbAccessLayer.CreateUpdate(pair.Key, _layer.Database);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -274,7 +281,7 @@ namespace JPB.DataAccess.DbCollection
 
 			var results = _layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
 			//Added 
-			var added = _internalCollection.Where(s => s.State == CollectionStates.Added).ToArray();
+			var added = _internalCollection.Where(s => s.Value == CollectionStates.Added).ToArray();
 			for (var i = 0; i < added.Length; i++)
 			{
 				var addedOne = added[i];
@@ -285,67 +292,66 @@ namespace JPB.DataAccess.DbCollection
 			//Removed
 			foreach (T item in removed)
 			{
-				var fod = _internalCollection.First(s => s.Value == item);
-				_internalCollection.Remove(fod);
+				_internalCollection.Remove(item);
 			}
 
-			foreach (StateHolder collectionStatese in _internalCollection.ToArray())
+			foreach (var collectionStatese in _internalCollection.Keys.ToArray())
 			{
-				ChangeState(collectionStatese.Value, CollectionStates.Unchanged);
+				ChangeState(collectionStatese, CollectionStates.Unchanged);
 			}
 		}
 
-		private class StateHolder : IEquatable<StateHolder>
-		{
-			public StateHolder(T value, CollectionStates state)
-			{
-				Value = value;
-				State = state;
-			}
+		//private class StateHolder : IEquatable<StateHolder>
+		//{
+		//	public StateHolder(T value, CollectionStates state)
+		//	{
+		//		Value = value;
+		//		State = state;
+		//	}
 
-			public T Value { get; set; }
-			public CollectionStates State { get; set; }
+		//	public T Value { get; set; }
+		//	public CollectionStates State { get; set; }
 
-			public override int GetHashCode()
-			{
-				int hash = 13;
-				hash = (hash * 7) + Value.GetHashCode();
-				hash = (hash * 7) + State.GetHashCode();
-				return hash;
-			}
+		//	public override int GetHashCode()
+		//	{
+		//		int hash = 13;
+		//		hash = (hash * 7) + Value.GetHashCode();
+		//		hash = (hash * 7) + State.GetHashCode();
+		//		return hash;
+		//	}
 
-			public override bool Equals(object obj)
-			{
-				return this.Equals((StateHolder)obj);
-			}
+		//	public override bool Equals(object obj)
+		//	{
+		//		return this.Equals((StateHolder)obj);
+		//	}
 
-			public bool Equals(StateHolder other)
-			{
-				if (ReferenceEquals(other, null))
-					return false;
+		//	public bool Equals(StateHolder other)
+		//	{
+		//		if (ReferenceEquals(other, null))
+		//			return false;
 
-				if (other.Value == null)
-					return false;
+		//		if (other.Value == null)
+		//			return false;
 
-				return other.Value.Equals(Value) && State == other.State;
-			}
+		//		return other.Value.Equals(Value) && State == other.State;
+		//	}
 
-			public static bool operator ==(StateHolder that, StateHolder other)
-			{
-				if (ReferenceEquals(that, null) && ReferenceEquals(other, null))
-					return true;
+		//	public static bool operator ==(StateHolder that, StateHolder other)
+		//	{
+		//		if (ReferenceEquals(that, null) && ReferenceEquals(other, null))
+		//			return true;
 
-				if (!ReferenceEquals(that, null))
-					return false;
+		//		if (!ReferenceEquals(that, null))
+		//			return false;
 
-				return that.Equals(other);
-			}
+		//		return that.Equals(other);
+		//	}
 
-			public static bool operator !=(StateHolder that, StateHolder other)
-			{
-				return !(other == that);
-			}
-		}
+		//	public static bool operator !=(StateHolder that, StateHolder other)
+		//	{
+		//		return !(other == that);
+		//	}
+		//}
 	}
 
 	/// <summary>

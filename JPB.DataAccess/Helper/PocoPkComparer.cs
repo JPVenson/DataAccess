@@ -91,7 +91,7 @@ namespace JPB.DataAccess.Helper
 			var plainType = typeof(T);
 
 			_typeInfo = plainType.GetClassInfo();
-			if (_typeInfo.PrimaryKeyProperty == null)
+			if (_typeInfo.PrimaryKeyProperty == null && string.IsNullOrEmpty(property))
 				throw new NotSupportedException(string.Format("The type '{0}' does not define any PrimaryKey", plainType.Name));
 
 			if (string.IsNullOrEmpty(property))
@@ -107,6 +107,7 @@ namespace JPB.DataAccess.Helper
 			PropLeft = Expression.Property(Left, property);
 			var propRight = Expression.Property(Right, property);
 			ConditionalExpression resAssertionBlock = null;
+
 			if (useAssertion)
 			{
 				Expression assertionObject = Expression.Constant(assertNotDatabaseMember);
@@ -144,6 +145,17 @@ namespace JPB.DataAccess.Helper
 				var directComparsion = Expression.Call(Left, "CompareTo", null, Right);
 				_compareTo = Expression.Lambda<Func<T, T, int>>(directComparsion, new[] { Left, Right }).Compile();
 			}
+
+			var returnhasCode = Expression.Label(typeof(int));
+
+			var hashCode = Expression.Call(Left, "GetHashCode", null);
+			_getHashCodeOfProp = Expression.Lambda<Func<T, int>>(Expression.Block(
+				hashCode,
+				Expression.Label(returnhasCode, Expression.Constant(-1))
+				), new[]
+				{
+					Left
+				}).Compile();
 		}
 
 		internal ParameterExpression Left;
@@ -151,7 +163,7 @@ namespace JPB.DataAccess.Helper
 		internal Expression PropLeft;
 		internal LabelTarget ReturnTarget;
 
-		private Func<T, T, bool> Wrap(ConditionalExpression exp)
+		private Func<T, T, bool> Wrap(Expression exp)
 		{
 			return Expression.Lambda<Func<T, T, bool>>(Expression.Block(
 				exp,
@@ -166,6 +178,7 @@ namespace JPB.DataAccess.Helper
 		private Func<T, T, bool> _assertionBlock;
 		private Func<T, T, bool> _propEqual;
 		private Func<T, T, int> _compareTo;
+		private Func<T, int> _getHashCodeOfProp;
 
 		public bool Equals(T left, T right)
 		{
@@ -195,7 +208,7 @@ namespace JPB.DataAccess.Helper
 
 		public int GetHashCode(T obj)
 		{
-			return obj.GetHashCode();
+			return _getHashCodeOfProp(obj);
 		}
 
 		public int Compare(T left, T right)
