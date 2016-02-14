@@ -19,71 +19,12 @@ namespace JPB.DataAccess.UnitTests
 	[TestClass]
 	public class CheckWrapperBaseTests
 	{
-		static DbAccessLayer expectWrapper;
-#if MSSQL
-		public const string SConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
-		[NotNull]
-		public DbAccessType DbAccessType
-		{
-			get { return DbAccessType.MsSql; }
-		}
-#endif
-
-		[NotNull]
-		public string ConnectionString
-		{
-			get { return SConnectionString; }
-		}
-
+		DbAccessLayer expectWrapper;
 
 		[TestInitialize]
-		public void InitTest()
+		public void Init()
 		{
-			if (expectWrapper != null)
-				return;
-
-			var dbname = "testDB";
-
-			DbConfig.ConstructorSettings.CreateDebugCode = true;
-			DbAccessLayer.Multipath = true;
-
-			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
-			Assert.AreEqual(expectWrapper.DbAccessType, DbAccessType);
-
-			var checkDatabase = expectWrapper.CheckDatabase();
-			Assert.IsTrue(checkDatabase);
-
-
-#if MSSQL
-						var redesginDatabase = string.Format(
-				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-				dbname);
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
-
-			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString + "Initial Catalog={0};", dbname));
-				expectWrapper.ExecuteGenericCommand(
-				expectWrapper.Database.CreateCommand(
-					string.Format(
-						"CREATE TABLE {0} ( {1} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL, {2} NVARCHAR(MAX));",
-						UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
-																					 "AS BEGIN " +
-																					 "SELECT * FROM Users " +
-																					 "END"));
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
-																		  "AS BEGIN " +
-																		  "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
-																		  "END "));
-#endif
-
-
-
-			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
-
+			expectWrapper = new Manager().GetWrapper();
 		}
 
 		[TestMethod]
@@ -146,7 +87,6 @@ namespace JPB.DataAccess.UnitTests
 			Assert.AreEqual(singleEntity.User_ID, refEntity.User_ID);
 			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
 		}
-
 
 		[TestMethod]
 		public void Refresh()
@@ -357,17 +297,18 @@ namespace JPB.DataAccess.UnitTests
 			Assert.AreNotEqual(expectedUser.User_ID, default(long));
 		}
 
-		//[TestMethod]
-		//public void ProcedureParamLessTest()
-		//{
-		//	var expectedUser = expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
+		[TestMethod]
+		public void ProcedureParamLessTest()
+		{
+			RangeInsertTest();
+			var expectedUser = expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
-		//	Assert.IsNotNull(expectedUser);
-		//	Assert.AreNotEqual(expectedUser.Count, 0);
+			Assert.IsNotNull(expectedUser);
+			Assert.AreNotEqual(expectedUser.Count, 0);
 
-		//	var refSelect = expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.UserTable)));
-		//	Assert.AreEqual(expectedUser.Count, refSelect);
-		//}
+			var refSelect = expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.UserTable)));
+			Assert.AreEqual(expectedUser.Count, refSelect);
+		}
 
 		//[TestMethod]
 		//public void ProcedureParamTest()
@@ -376,19 +317,19 @@ namespace JPB.DataAccess.UnitTests
 		//	//const int procParamA = 5;
 
 		//	var expectedUser =
-		//		expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams()
+		//		expectWrapper.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
 		//		{
+		//			Number = 20
 		//		});
 
 		//	Assert.IsNotNull(expectedUser);
-		//	Assert.AreNotEqual(expectedUser.Count, 0);
 
-		//	//var refSelect =
-		//	//    expectWrapper.Database.Run(
+		//	//var refselect =
+		//	//    expectwrapper.database.run(
 		//	//        s =>
-		//	//            s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0} us WHERE {1} > us.User_ID", UsersMeta.UserTable,
-		//	//                procParamA)));
-		//	//Assert.AreEqual(expectedUser.Count, refSelect);
+		//	//            s.getskalar(string.format("select count(*) from {0} us where {1} > us.user_id", usersmeta.usertable,
+		//	//                procparama)));
+		//	//assert.areequal(expecteduser.count, refselect);
 		//}
 
 
@@ -547,6 +488,18 @@ namespace JPB.DataAccess.UnitTests
 			dbCollection.SaveChanges(expectWrapper);
 			refAfterAdd = expectWrapper.Select<Users_Col>();
 			Assert.AreEqual(refAfterAdd.Length, 100);
+
+			var user25 = dbCollection[25];
+			user25.UserName = Guid.NewGuid().ToString();
+
+			Assert.AreEqual(dbCollection.GetEntryState(user25), DbCollection.CollectionStates.Changed);
+			dbCollection.SaveChanges(expectWrapper);
+			Assert.AreEqual(dbCollection.GetEntryState(user25), DbCollection.CollectionStates.Unchanged);
+
+			var elementAfterChange = expectWrapper.Select<Users_Col>(user25.User_ID);
+
+			Assert.AreEqual(elementAfterChange.User_ID, user25.User_ID);
+			Assert.AreEqual(elementAfterChange.UserName, user25.UserName);
 		}
 	}
 }

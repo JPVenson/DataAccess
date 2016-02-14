@@ -61,7 +61,7 @@ namespace JPB.DataAccess.DbCollection
 	{
 		private readonly IDictionary<T, List<string>> _changeTracker;
 
-		private readonly List<StateHolder> _internalCollection;
+		private readonly HashSet<StateHolder> _internalCollection;
 
 		/// <summary>
 		///     Internal use only
@@ -73,7 +73,7 @@ namespace JPB.DataAccess.DbCollection
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable subset)
 		{
-			_internalCollection = new List<StateHolder>();
+			_internalCollection = new HashSet<StateHolder>();
 			_changeTracker = new Dictionary<T, List<string>>();
 
 			if (subset is IOrderedEnumerable<T>)
@@ -98,7 +98,7 @@ namespace JPB.DataAccess.DbCollection
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbCollection(IEnumerable<T> subset)
 		{
-			_internalCollection = new List<StateHolder>();
+			_internalCollection = new HashSet<StateHolder>();
 			_changeTracker = new Dictionary<T, List<string>>();
 
 			if (subset is IOrderedEnumerable<T>)
@@ -146,7 +146,7 @@ namespace JPB.DataAccess.DbCollection
 
 		public void Clear()
 		{
-			foreach (StateHolder pair in _internalCollection)
+			foreach (StateHolder pair in _internalCollection.ToArray())
 			{
 				Remove(pair.Value);
 			}
@@ -165,8 +165,19 @@ namespace JPB.DataAccess.DbCollection
 		public bool Remove(T item)
 		{
 			item.PropertyChanged -= item_PropertyChanged;
-			_changeTracker.Remove(item);
-			return ChangeState(item, CollectionStates.Removed);
+			var currentState = GetEntryState(item);
+
+			if (currentState == CollectionStates.Added)
+			{
+				_changeTracker.Remove(item);
+				var entry = _internalCollection.First(s => s.Value.Equals(item));
+				return _internalCollection.Remove(entry);
+			}
+			else
+			{
+				_changeTracker.Remove(item);
+				return ChangeState(item, CollectionStates.Removed);
+			}
 		}
 
 		public int Count
@@ -199,6 +210,8 @@ namespace JPB.DataAccess.DbCollection
 			}
 			if (!listEntry.Contains(e.PropertyName))
 				listEntry.Add(e.PropertyName);
+			if (GetEntryState(sender as T) == CollectionStates.Unchanged)
+				ChangeState(sender as T, CollectionStates.Changed);
 		}
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
@@ -282,7 +295,7 @@ namespace JPB.DataAccess.DbCollection
 			}
 		}
 
-		private class StateHolder
+		private class StateHolder : IEquatable<StateHolder>
 		{
 			public StateHolder(T value, CollectionStates state)
 			{
@@ -292,6 +305,46 @@ namespace JPB.DataAccess.DbCollection
 
 			public T Value { get; set; }
 			public CollectionStates State { get; set; }
+
+			public override int GetHashCode()
+			{
+				int hash = 13;
+				hash = (hash * 7) + Value.GetHashCode();
+				hash = (hash * 7) + State.GetHashCode();
+				return hash;
+			}
+
+			public override bool Equals(object obj)
+			{
+				return this.Equals((StateHolder)obj);
+			}
+
+			public bool Equals(StateHolder other)
+			{
+				if (ReferenceEquals(other, null))
+					return false;
+
+				if (other.Value == null)
+					return false;
+
+				return other.Value.Equals(Value) && State == other.State;
+			}
+
+			public static bool operator ==(StateHolder that, StateHolder other)
+			{
+				if (ReferenceEquals(that, null) && ReferenceEquals(other, null))
+					return true;
+
+				if (!ReferenceEquals(that, null))
+					return false;
+
+				return that.Equals(other);
+			}
+
+			public static bool operator !=(StateHolder that, StateHolder other)
+			{
+				return !(other == that);
+			}
 		}
 	}
 
@@ -300,6 +353,11 @@ namespace JPB.DataAccess.DbCollection
 	/// </summary>
 	public enum CollectionStates
 	{
+		/// <summary>
+		/// Element request is not in store
+		/// </summary>
+		Unknown = 0,
+
 		/// <summary>
 		/// Object was created from the Database and has not changed
 		/// </summary>

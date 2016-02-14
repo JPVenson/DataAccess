@@ -11,52 +11,13 @@ namespace JPB.DataAccess.UnitTests
 	[TestClass]
 	public class PagerUnitTest
 	{
-		static DbAccessLayer expectWrapper;
+		DbAccessLayer expectWrapper;
 
 		[TestInitialize]
-		public void InitTest()
+		public void Init()
 		{
-			if (expectWrapper != null)
-				return;
-
-			var dbType = DbAccessType.MsSql;
-			var dbname = "testDB";
-
-			expectWrapper = new DbAccessLayer(dbType, CheckWrapperBaseTests.SConnectionString);
-			Assert.AreEqual(expectWrapper.DbAccessType, dbType);
-
-			var checkDatabase = expectWrapper.CheckDatabase();
-			Assert.IsTrue(checkDatabase);
-
-
-			var redesginDatabase = string.Format(
-				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-				dbname);
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
-
-			expectWrapper = new DbAccessLayer(dbType, string.Format(CheckWrapperBaseTests.SConnectionString + "Initial Catalog={0};", dbname));
-
-			expectWrapper.ExecuteGenericCommand(
-				expectWrapper.Database.CreateCommand(
-					string.Format(
-						"CREATE TABLE {0} ( {1} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL, {2} NVARCHAR(MAX));",
-						UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
-																					 "AS BEGIN " +
-																					 "SELECT * FROM Users " +
-																					 "END"));
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
-																		  "AS BEGIN " +
-																		  "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
-																		  "END "));
-
-			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
+			expectWrapper = new Manager().GetWrapper();
 		}
-
 
 		[TestMethod]
 		public void PagerCall()
