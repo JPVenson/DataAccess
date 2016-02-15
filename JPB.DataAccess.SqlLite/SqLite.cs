@@ -24,12 +24,6 @@ namespace JPB.DataAccess.SqLite
 	/// </summary>
 	public class SqLite : IDatabaseStrategy
 	{
-		private const string TEMPLATE_MSSQL_UNTRUSTED =
-			"server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
-
-		private const string TEMPLATE_MSSQL_TRUSTED =
-			"server={0};database={1};Connect Timeout=100;Min Pool Size=5;trusted_connection=true";
-
 		private string _connStr = string.Empty;
 		
 		public SqLite(string strConnStr)

@@ -13,6 +13,7 @@ using JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using JPB.DataAccess.ModelsAnotations;
 using System.Data.SqlClient;
+using System.Data.SQLite;
 
 namespace JPB.DataAccess.UnitTests
 {
@@ -230,7 +231,12 @@ namespace JPB.DataAccess.UnitTests
 		}
 
 		[TestMethod]
+#if MSSQL
 		[ExpectedException(typeof(SqlException))]
+#endif
+#if SqLite		
+		[ExpectedException(typeof(SQLiteException))]
+#endif
 		public void ConfigLessFail()
 		{
 			DbConfig.Clear();
