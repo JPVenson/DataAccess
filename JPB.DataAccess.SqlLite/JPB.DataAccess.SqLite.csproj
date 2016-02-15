@@ -7,8 +7,8 @@
     <ProjectGuid>{DE42F7ED-51B5-4118-831B-05EFEEECD7AC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JPB.DataAccess.SqlLite</RootNamespace>
-    <AssemblyName>JPB.DataAccess.SqlLite</AssemblyName>
+    <RootNamespace>JPB.DataAccess.SqLite</RootNamespace>
+    <AssemblyName>JPB.DataAccess.SqLite</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>

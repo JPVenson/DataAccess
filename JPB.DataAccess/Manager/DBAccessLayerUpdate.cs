@@ -117,7 +117,7 @@ namespace JPB.DataAccess.Manager
 		internal static bool CopyPropertys(object @base, object newObject)
 		{
 			var updated = false;
-			var propertys = @base.GetType().GetClassInfo().PropertyInfoCaches.Select(f => f.Value);
+			var propertys = @base.GetType().GetClassInfo().Propertys.Select(f => f.Value);
 			foreach (var propertyInfo in propertys)
 			{
 				var oldValue = propertyInfo.GetConvertedValue(@base);
@@ -188,7 +188,7 @@ namespace JPB.DataAccess.Manager
 
 			var ignore =
 				classInfo
-					.PropertyInfoCaches
+					.Propertys
 					.Select(f => f.Value)
 					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.ForginKeyAttribute != null)
 					.Select(s => s.DbName)
@@ -205,7 +205,7 @@ namespace JPB.DataAccess.Manager
 				var info = propertyInfos[index];
 				var schemaName = classInfo.GetDbToLocalSchemaMapping(info);
 				DbPropertyInfoCache property;
-				classInfo.PropertyInfoCaches.TryGetValue(schemaName, out property);
+				classInfo.Propertys.TryGetValue(schemaName, out property);
 				var dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
 				queryBuilder.QueryQ(string.Format("{0} = @{1}", info, index), new QueryParameter(index.ToString(), dataValue));
 				if (index + 1 < propertyInfos.Length)

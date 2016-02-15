@@ -46,8 +46,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		public void SetPropertyAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
 			var info = MetaInfoStoreExtentions.GetPropertyInfoFromLabda(exp);
-			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
-			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
+			var fod = ClassInfoCache.Propertys.First(s => s.Key == info).Value;
+			fod.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -55,8 +55,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		public void SetPropertyAttribute(string info, DataAccessAttribute attribute)
 		{
-			var fod = ClassInfoCache.PropertyInfoCaches.First(s => s.Key == info).Value;
-			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
+			var fod = ClassInfoCache.Propertys.First(s => s.Key == info).Value;
+			fod.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -66,8 +66,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		public void SetMethodAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
 			var info = MetaInfoStoreExtentions.GetMehtodInfoFromLabda(exp);
-			var fod = ClassInfoCache.MethodInfoCaches.First(s => s.MethodName == info);
-			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
+			var fod = ClassInfoCache.Mehtods.First(s => s.MethodName == info);
+			fod.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -75,8 +75,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		public void SetMethodAttribute(string info, DataAccessAttribute attribute)
 		{
-			var fod = ClassInfoCache.MethodInfoCaches.First(s => s.MethodName == info);
-			fod.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
+			var fod = ClassInfoCache.Mehtods.First(s => s.MethodName == info);
+			fod.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>
@@ -88,10 +88,10 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentNullException("methodName");
 			if (methodBody == null)
 				throw new ArgumentNullException("methodBody");
-			if (ClassInfoCache.MethodInfoCaches.Any(s => s.MethodName == methodName))
+			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
 			var mehtodInfo = new DbMethodInfoCache(methodBody, methodName, attributes);
-			ClassInfoCache.MethodInfoCaches.Add(mehtodInfo);
+			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
 
@@ -104,14 +104,14 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentNullException("methodName");
 			if (methodBody == null)
 				throw new ArgumentNullException("methodBody");
-			if (ClassInfoCache.MethodInfoCaches.Any(s => s.MethodName == methodName))
+			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
 			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
 			{
 				methodBody((Source)o, (Input)objects[0]);
 				return null;
 			}, methodName, attributes);
-			ClassInfoCache.MethodInfoCaches.Add(mehtodInfo);
+			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
 		/// <summary>
@@ -123,13 +123,13 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentNullException("methodName");
 			if (methodBody == null)
 				throw new ArgumentNullException("methodBody");
-			if (ClassInfoCache.MethodInfoCaches.Any(s => s.MethodName == methodName))
+			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
 			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
 			{
 				return methodBody((Source)o);
 			}, methodName, attributes);
-			ClassInfoCache.MethodInfoCaches.Add(mehtodInfo);
+			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
 		/// <summary>
@@ -141,13 +141,13 @@ namespace JPB.DataAccess.DbInfoConfig
 		{
 			if (name == null)
 				throw new ArgumentNullException("name");
-			if (ClassInfoCache.PropertyInfoCaches.Any(s => s.Key == name))
+			if (ClassInfoCache.Propertys.Any(s => s.Key == name))
 				throw new ArgumentOutOfRangeException("name", "Property name does exist. Cannot define a property twice");
 			if (setter == null && getter == null)
 				throw new ArgumentNullException("setter",
 					"Propertys must define at least one accessor. You cannot define a property without getter and setter");
 			var propInfo = new DbPropertyInfoCache<T, TE>(name, setter, getter, attributes);
-			ClassInfoCache.PropertyInfoCaches.Add(name, propInfo);
+			ClassInfoCache.Propertys.Add(name, propInfo);
 		}
 
 		/// <summary>
@@ -155,7 +155,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		public void SetClassAttribute(DataAccessAttribute attribute)
 		{
-			ClassInfoCache.AttributeInfoCaches.Add(new DbAttributeInfoCache(attribute));
+			ClassInfoCache.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}
 
 		/// <summary>

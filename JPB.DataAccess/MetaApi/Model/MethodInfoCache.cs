@@ -51,7 +51,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public MethodInfoCache()
 		{
-			AttributeInfoCaches = new HashSet<TAtt>();
+			Attributes = new HashSet<TAtt>();
 			Arguments = new HashSet<TArg>();
 		}
 		// ReSharper restore DoNotCallOverridableMethodsInConstructor
@@ -92,7 +92,7 @@ namespace JPB.DataAccess.MetaApi.Model
 				throw new ArgumentNullException("mehtodInfo");
 			MethodInfo = mehtodInfo;
 			MethodName = mehtodInfo.Name;
-			AttributeInfoCaches = new HashSet<TAtt>(mehtodInfo
+			Attributes = new HashSet<TAtt>(mehtodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
@@ -227,7 +227,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     All Attributes on this Method
 		/// </summary>
-		public virtual HashSet<TAtt> AttributeInfoCaches { get; protected internal set; }
+		public virtual HashSet<TAtt> Attributes { get; protected internal set; }
 
 		public bool UseILWrapper
 		{

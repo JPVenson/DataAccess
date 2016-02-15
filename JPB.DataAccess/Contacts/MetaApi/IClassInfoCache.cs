@@ -38,22 +38,22 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		/// <summary>
 		///     All Propertys
 		/// </summary>
-		Dictionary<string, TProp> PropertyInfoCaches { get; }
+		Dictionary<string, TProp> Propertys { get; }
 
 		/// <summary>
 		///     All Attributes on class level
 		/// </summary>
-		HashSet<TAttr> AttributeInfoCaches { get; }
+		HashSet<TAttr> Attributes { get; }
 
 		/// <summary>
 		///     All Mehtods
 		/// </summary>
-		HashSet<TMeth> MethodInfoCaches { get; }
+		HashSet<TMeth> Mehtods { get; }
 
 		/// <summary>
 		///     All Constructors
 		/// </summary>
-		HashSet<TCtor> ConstructorInfoCaches { get; }
+		HashSet<TCtor> Constructors { get; }
 	}
 
 	/// <summary>

@@ -86,7 +86,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			if (!string.IsNullOrEmpty(PropertyName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 
-			AttributeInfoCaches = new HashSet<TAtt>();
+			Attributes = new HashSet<TAtt>();
 			if (propertyInfo != null)
 			{
 				var getMethod = propertyInfo.GetMethod;
@@ -201,7 +201,7 @@ namespace JPB.DataAccess.MetaApi.Model
 						Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(setMethod);
 				}
 
-				AttributeInfoCaches = new HashSet<TAtt>(propertyInfo
+				Attributes = new HashSet<TAtt>(propertyInfo
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
 					.Select(s => new TAtt().Init(s as Attribute) as TAtt));
@@ -250,7 +250,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     All Attributes on this Property
 		/// </summary>
-		public HashSet<TAtt> AttributeInfoCaches { get; protected internal set; }
+		public HashSet<TAtt> Attributes { get; protected internal set; }
 
 		public int CompareTo(IPropertyInfoCache<TAtt> other)
 		{

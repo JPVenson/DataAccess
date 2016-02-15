@@ -59,7 +59,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			if (type.IsAnonymousType())
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
-			return ReflecionStore.GetOrCreateClassInfoCache(type).AttributeInfoCaches.Select(s => s.Attribute);
+			return ReflecionStore.GetOrCreateClassInfoCache(type).Attributes.Select(s => s.Attribute);
 		}
 
 		internal static IEnumerable<Attribute> GetCustomAttributes(this DbPropertyInfoCache type)
@@ -67,7 +67,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			if (IsAnonymousType(type.DeclaringClass))
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
-			return type.AttributeInfoCaches.Select(s => s.Attribute);
+			return type.Attributes.Select(s => s.Attribute);
 		}
 
 		internal static IEnumerable<Attribute> GetCustomAttributes(this DbMethodInfoCache type)
@@ -75,7 +75,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			if (IsAnonymousType(type.DeclaringClass))
 				return new Attribute[0]; //Anonymous types does not have any Attributes
 
-			return type.AttributeInfoCaches.Select(s => s.Attribute);
+			return type.Attributes.Select(s => s.Attribute);
 		}
 
 		internal static string GetLocalToDbSchemaMapping(this DbClassInfoCache type, string name)
@@ -100,7 +100,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				return type.Type.GetProperties();
 
 			return type
-				.PropertyInfoCaches
+				.Propertys
 				.Select(s => s.Value.PropertyInfo);
 		}
 

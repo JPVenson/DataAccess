@@ -104,7 +104,7 @@ namespace JPB.DataAccess.MetaApi
 			var declareingType = type.ReflectedType;
 			var element = GetOrCreateClassInfoCache(declareingType);
 			TProp cache;
-			element.PropertyInfoCaches.TryGetValue(type.Name, out cache);
+			element.Propertys.TryGetValue(type.Name, out cache);
 			return cache;
 		}
 
@@ -160,7 +160,7 @@ namespace JPB.DataAccess.MetaApi
 		{
 			var declareingType = type.ReflectedType;
 			var element = GetOrCreateClassInfoCache(declareingType);
-			return element.MethodInfoCaches.FirstOrDefault(s => s.MethodName == type.Name);
+			return element.Mehtods.FirstOrDefault(s => s.MethodName == type.Name);
 		}
 
 		/// <summary>

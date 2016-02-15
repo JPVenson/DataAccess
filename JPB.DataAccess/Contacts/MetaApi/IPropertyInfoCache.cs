@@ -58,7 +58,7 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		/// <summary>
 		///     All Attributes on this Property
 		/// </summary>
-		HashSet<TAtt> AttributeInfoCaches { get; }
+		HashSet<TAtt> Attributes { get; }
 
 		/// <summary>
 		/// Sets all propertys on this instance

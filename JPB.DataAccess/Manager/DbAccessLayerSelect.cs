@@ -300,8 +300,8 @@ namespace JPB.DataAccess.Manager
 				}
 
 				var methods =
-					type.MethodInfoCaches
-						.Where(s => s.AttributeInfoCaches.Any(e => e.Attribute is TE))
+					type.Mehtods
+						.Where(s => s.Attributes.Any(e => e.Attribute is TE))
 						.ToArray();
 
 				if (methods.Any())
@@ -415,8 +415,8 @@ namespace JPB.DataAccess.Manager
 		//		}
 
 		//		var methods =
-		//			type.MethodInfoCaches
-		//				.Where(s => s.AttributeInfoCaches.Any(e => e.Attribute is SelectFactoryMethodAttribute))
+		//			type.Mehtods
+		//				.Where(s => s.Attributes.Any(e => e.Attribute is SelectFactoryMethodAttribute))
 		//				.ToArray();
 
 		//		if (methods.Any())
@@ -545,7 +545,7 @@ namespace JPB.DataAccess.Manager
 			sb.Append("SELECT ");
 			sb.Append(classType.CreatePropertyCsv(
 				classType
-					.PropertyInfoCaches
+					.Propertys
 					.Where(f => f.Value.ForginKeyAttribute != null)
 					.Select(f => f.Key)
 					.ToArray()));
@@ -621,7 +621,7 @@ namespace JPB.DataAccess.Manager
 				for (var i = 0; i < anyReader.FieldCount; i++)
 				{
 					DbPropertyInfoCache val = null;
-					typeInfo.PropertyInfoCaches.TryGetValue(typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i)),
+					typeInfo.Propertys.TryGetValue(typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i)),
 						out val);
 					recordToNameMapping.Add(i, val);
 				}

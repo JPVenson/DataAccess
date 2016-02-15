@@ -56,20 +56,20 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			var item = base.Init(type, anon);
 			//.ToDictionary(s => s.Key);
-			PropertyInfoCaches = new Dictionary<string, DbPropertyInfoCache>(PropertyInfoCaches
-				.Where(f => f.Value.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute)))
+			Propertys = new Dictionary<string, DbPropertyInfoCache>(Propertys
+				.Where(f => f.Value.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute)))
 				.ToDictionary(s => s.Key, f => f.Value));
-			MethodInfoCaches = new HashSet<DbMethodInfoCache>(MethodInfoCaches.Where(f => f.AttributeInfoCaches.All(d => !(d.Attribute is IgnoreReflectionAttribute))));
-			ConstructorInfoCaches = new HashSet<DbConstructorInfoCache>(ConstructorInfoCaches.Where(f => f.AttributeInfoCaches.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
-			foreach (var dbPropertyInfoCach in PropertyInfoCaches)
+			Mehtods = new HashSet<DbMethodInfoCache>(Mehtods.Where(f => f.Attributes.All(d => !(d.Attribute is IgnoreReflectionAttribute))));
+			Constructors = new HashSet<DbConstructorInfoCache>(Constructors.Where(f => f.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
+			foreach (var dbPropertyInfoCach in Propertys)
 			{
 				dbPropertyInfoCach.Value.DeclaringClass = this;
 			}
-			foreach (var dbPropertyInfoCach in MethodInfoCaches)
+			foreach (var dbPropertyInfoCach in Mehtods)
 			{
 				dbPropertyInfoCach.DeclaringClass = this;
 			}
-			foreach (var dbPropertyInfoCach in ConstructorInfoCaches)
+			foreach (var dbPropertyInfoCach in Constructors)
 			{
 				dbPropertyInfoCach.DeclaringClass = this;
 			}
@@ -155,28 +155,28 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public void Refresh(bool withSubProperty)
 		{
 			if (withSubProperty)
-				foreach (var propertyInfoCach in PropertyInfoCaches)
+				foreach (var propertyInfoCach in Propertys)
 				{
 					propertyInfoCach.Value.Refresh();
 				}
 
-			ForModel = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ForModelAttribute));
-			SelectFactory = DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute));
+			ForModel = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes.FirstOrDefault(s => s.Attribute is ForModelAttribute));
+			SelectFactory = DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(Attributes.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute));
 			var preConfig = MethodProxyAttribute == null;
 
-			MethodProxyAttribute = DbAttributeInfoCache<MethodProxyAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(s => s.Attribute is MethodProxyAttribute));
+			MethodProxyAttribute = DbAttributeInfoCache<MethodProxyAttribute>.WrapperOrNull(Attributes.FirstOrDefault(s => s.Attribute is MethodProxyAttribute));
 						
-			HasRelations = AttributeInfoCaches.Any(s => s.Attribute is ForeignKeyAttribute);
+			HasRelations = Attributes.Any(s => s.Attribute is ForeignKeyAttribute);
 
-			RowVersionProperty = PropertyInfoCaches.FirstOrDefault(s => s.Value.RowVersionAttribute != null).Value;
-			PrimaryKeyProperty = PropertyInfoCaches.FirstOrDefault(s => s.Value.PrimaryKeyAttribute != null).Value;
+			RowVersionProperty = Propertys.FirstOrDefault(s => s.Value.RowVersionAttribute != null).Value;
+			PrimaryKeyProperty = Propertys.FirstOrDefault(s => s.Value.PrimaryKeyAttribute != null).Value;
 
 			CreateSchemaMapping();
 		}
 
 		internal void CheckCtor()
 		{
-			var hasAutoGeneratorAttribute = AttributeInfoCaches.Any(f => f.Attribute is AutoGenerateCtorAttribute);
+			var hasAutoGeneratorAttribute = Attributes.Any(f => f.Attribute is AutoGenerateCtorAttribute);
 			if (hasAutoGeneratorAttribute && Factory == null)
 			{
 				CreateFactory();
@@ -185,8 +185,8 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 		internal void CheckForConfig()
 		{
-			var configMethods = MethodInfoCaches
-				.Where(f => f.AttributeInfoCaches.Any(e => e.Attribute is ConfigMehtodAttribute))
+			var configMethods = Mehtods
+				.Where(f => f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute))
 				.ToArray();
 			if (configMethods.Any())
 			{
@@ -232,7 +232,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			SchemaMappingValues = new Dictionary<string, string>();
 			_invertedSchema = new Dictionary<string, string>();
-			foreach (var item in PropertyInfoCaches)
+			foreach (var item in Propertys)
 			{
 				if (item.Value.IgnoreAnyAttribute != null)
 				{

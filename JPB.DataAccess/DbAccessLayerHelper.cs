@@ -130,7 +130,7 @@ namespace JPB.DataAccess
 					propertyInfo =>
 					{
 						DbPropertyInfoCache property;
-						classInfo.PropertyInfoCaches.TryGetValue(propertyInfo, out property);
+						classInfo.Propertys.TryGetValue(propertyInfo, out property);
 						var val = property.GetConvertedValue(entry);
 						var dataValue = val ?? DBNull.Value;
 						return new Tuple<Type, object>(property.PropertyType, dataValue);
@@ -229,7 +229,7 @@ namespace JPB.DataAccess
 				return parameter as IEnumerable<IQueryParameter>;
 			}
 
-			return (from element in parameter.GetType().GetClassInfo().PropertyInfoCaches
+			return (from element in parameter.GetType().GetClassInfo().Propertys
 					let value = parameter.GetParamaterValue(element.Key)
 					select new QueryParameter(element.Key.CheckParamter(), value)).Cast<IQueryParameter>()
 				.ToList();

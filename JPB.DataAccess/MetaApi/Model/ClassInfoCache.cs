@@ -73,24 +73,24 @@ namespace JPB.DataAccess.MetaApi.Model
 
 			ClassName = type.Name;
 			Type = type;
-			AttributeInfoCaches = new HashSet<TAttr>(type
+			Attributes = new HashSet<TAttr>(type
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
 				.Select(s => new TAttr().Init(s as Attribute) as TAttr));
-			PropertyInfoCaches = new Dictionary<string, TProp>(type
+			Propertys = new Dictionary<string, TProp>(type
 				.GetProperties(BindingFlags.Public | BindingFlags.Static |
 		   BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TProp().Init(s, anon) as TProp)
 				.ToDictionary(s => s.PropertyName, s => s));
-			MethodInfoCaches = new HashSet<TMeth>(type
+			Mehtods = new HashSet<TMeth>(type
 				.GetMethods(BindingFlags.Public | BindingFlags.Static |
 		   BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TMeth().Init(s) as TMeth));
-			ConstructorInfoCaches = new HashSet<TCtor>(type
+			Constructors = new HashSet<TCtor>(type
 				.GetConstructors(BindingFlags.Public | BindingFlags.Static |
 		   BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TCtor().Init(s) as TCtor));
-			var defaultConstructor = ConstructorInfoCaches.FirstOrDefault(f => !f.Arguments.Any());
+			var defaultConstructor = Constructors.FirstOrDefault(f => !f.Arguments.Any());
 
 			//if (type.IsValueType)
 			//{
@@ -169,22 +169,22 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     All Propertys
 		/// </summary>
-		public Dictionary<string, TProp> PropertyInfoCaches { get; protected internal set; }
+		public Dictionary<string, TProp> Propertys { get; protected internal set; }
 
 		/// <summary>
 		///     All Attributes on class level
 		/// </summary>
-		public HashSet<TAttr> AttributeInfoCaches { get; protected internal set; }
+		public HashSet<TAttr> Attributes { get; protected internal set; }
 
 		/// <summary>
 		///     All Mehtods
 		/// </summary>
-		public HashSet<TMeth> MethodInfoCaches { get; protected internal set; }
+		public HashSet<TMeth> Mehtods { get; protected internal set; }
 
 		/// <summary>
 		///     All Constructors
 		/// </summary>
-		public HashSet<TCtor> ConstructorInfoCaches { get; protected internal set; }
+		public HashSet<TCtor> Constructors { get; protected internal set; }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 		public bool Equals(IClassInfoCache other)

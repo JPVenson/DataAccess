@@ -167,7 +167,7 @@ namespace JPB.DataAccess.Manager
 		private static IEnumerable<IQueryParameter> CreateProcedureHeader(DbClassInfoCache type)
 		{
 			return
-				type.PropertyInfoCaches
+				type.Propertys
 					.Select(
 						propertyInfo => new QueryParameter(propertyInfo.Value.DbName, propertyInfo.Value.PropertyType));
 		}
@@ -203,7 +203,7 @@ namespace JPB.DataAccess.Manager
 				foreach (var queryParameter in QueryParameters)
 				{
 					var realName = TargetType.GetLocalToDbSchemaMapping(queryParameter.Name);
-					var value = TargetType.PropertyInfoCaches[realName].Getter.Invoke(target);
+					var value = TargetType.Propertys[realName].Getter.Invoke(target);
 					dbCommand.Parameters.AddWithValue(queryParameter.Name.CheckParamter(), value, db);
 				}
 

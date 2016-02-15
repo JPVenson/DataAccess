@@ -19,7 +19,7 @@ namespace JPB.DataAccess.AdoWrapper
 		internal EagarDataReader(object sourceObject)
 		{
 			var type = sourceObject.GetType().GetClassInfo();
-			foreach (var item in type.PropertyInfoCaches)
+			foreach (var item in type.Propertys)
 			{
 				Objects.Add(item.Key, item.Value.Getter.Invoke(sourceObject));
 			}

@@ -84,7 +84,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			_databaseScope.AddTable(this);
 
-			foreach (var dbPropertyInfoCach in TypeInfo.PropertyInfoCaches)
+			foreach (var dbPropertyInfoCach in TypeInfo.Propertys)
 			{
 				if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null && dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
 				{
@@ -174,7 +174,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			foreach (var localDbReposetory in refTables)
 			{
 				var fkPropForTypeX =
-					TypeInfo.PropertyInfoCaches.FirstOrDefault(
+					TypeInfo.Propertys.FirstOrDefault(
 						s =>
 							s.Value.ForginKeyDeclarationAttribute != null &&
 							s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == localDbReposetory.TypeInfo.TableName)

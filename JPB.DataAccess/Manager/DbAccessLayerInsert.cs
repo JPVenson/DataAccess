@@ -126,7 +126,7 @@ namespace JPB.DataAccess.Manager
 		{
 			var ignore =
 				classInfo
-					.PropertyInfoCaches
+					.Propertys
 					.Select(s => s.Value)
 					.Where(f => f.PrimaryKeyAttribute != null || f.InsertIgnore)
 					.Select(s => s.DbName)

@@ -193,7 +193,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 				var refToProperty = new CodeFieldReferenceExpression(target, propertyInfoCache.PropertyName);
 
-				var attributes = propertyInfoCache.AttributeInfoCaches;
+				var attributes = propertyInfoCache.Attributes;
 				var valueConverterAttributeModel =
 					attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
 				var isXmlProperty = attributes.FirstOrDefault(s => s.Attribute is FromXmlAttribute);
@@ -366,7 +366,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			CodeMemberMethod container,
 			CodeExpression target)
 		{
-			GenerateBody(sourceType.GetClassInfo().PropertyInfoCaches, settings, importNameSpace, container, target);
+			GenerateBody(sourceType.GetClassInfo().Propertys, settings, importNameSpace, container, target);
 		}
 
 		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn, string altNamespace)
@@ -385,7 +385,7 @@ namespace JPB.DataAccess.DbInfoConfig
 
 				if (f.Key != f.Value.Item1)
 				{
-					dbPropertyInfoCache.AttributeInfoCaches.Add(new DbAttributeInfoCache(new ForModelAttribute(f.Key)));
+					dbPropertyInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(f.Key)));
 				}
 
 				dbPropertyInfoCache.PropertyName = f.Value.Item1;
@@ -467,7 +467,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		{
 			var classInfo = target.GetClassInfo();
 			var classCtorAttr =
-				classInfo.AttributeInfoCaches.First(s => s.Attribute is AutoGenerateCtorAttribute).Attribute as
+				classInfo.Attributes.First(s => s.Attribute is AutoGenerateCtorAttribute).Attribute as
 					AutoGenerateCtorAttribute;
 
 			CodeNamespace importNameSpace;
@@ -493,7 +493,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				compiler.IsPartial = true;
 				superName = target.Name + "_Super";
 			}
-			if (classInfo.ConstructorInfoCaches.Any(f => f.Arguments.Any()))
+			if (classInfo.Constructors.Any(f => f.Arguments.Any()))
 			{
 				throw new TypeAccessException(string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
 			}
@@ -535,7 +535,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				importNameSpace.Imports.Add(new CodeNamespaceImport(defaultNamespace));
 			}
 
-			foreach (var additionalNamespace in classInfo.AttributeInfoCaches.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
+			foreach (var additionalNamespace in classInfo.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
 			{
 				importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
 			}

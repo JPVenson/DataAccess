@@ -55,7 +55,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbPropertyInfoCache()
 		{
-			base.AttributeInfoCaches = new HashSet<DbAttributeInfoCache>();
+			base.Attributes = new HashSet<DbAttributeInfoCache>();
 		}
 
 		/// <summary>
@@ -74,7 +74,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		//	this.PropertyName = propertyName;
 		//	if (dbName != propertyName)
 		//	{
-		//		this.AttributeInfoCaches.Add(new DbAttributeInfoCache<ForModelAttribute>(new AttributeInfoCache(new ForModelAttribute(dbName))));
+		//		this.Attributes.Add(new DbAttributeInfoCache<ForModelAttribute>(new AttributeInfoCache(new ForModelAttribute(dbName))));
 		//	}
 		//}
 
@@ -144,15 +144,15 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// </summary>
 		public void Refresh()
 		{
-			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(PrimaryKeyAttribute)));
-			InsertIgnore = AttributeInfoCaches.Any(f => f.Attribute is InsertIgnoreAttribute);
+			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(PrimaryKeyAttribute)));
+			InsertIgnore = Attributes.Any(f => f.Attribute is InsertIgnoreAttribute);
 			if (Getter != null && Getter.MethodInfo != null)
 			{
 				if (Getter.MethodInfo.IsVirtual)
 				{
 					ForginKeyAttribute =
 						DbAttributeInfoCache<ForeignKeyAttribute>.WrapperOrNull(
-							AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyAttribute)));
+							Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyAttribute)));
 				}
 				else
 				{
@@ -161,11 +161,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			}
 			RowVersionAttribute =
 				DbAttributeInfoCache<RowVersionAttribute>.WrapperOrNull(
-					AttributeInfoCaches.FirstOrDefault(s => s.Attribute is RowVersionAttribute));
-			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(FromXmlAttribute)));
-			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
-			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
-			ForginKeyDeclarationAttribute = DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(AttributeInfoCaches.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyDeclarationAttribute)));
+					Attributes.FirstOrDefault(s => s.Attribute is RowVersionAttribute));
+			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(FromXmlAttribute)));
+			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
+			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
+			ForginKeyDeclarationAttribute = DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyDeclarationAttribute)));
 		}
 
 		//internal static PropertyInfoCache Logical(string info)

@@ -112,7 +112,7 @@ namespace JPB.DataAccess
 		public static DbPropertyInfoCache GetParamater(this object source, string name)
 		{
 			DbPropertyInfoCache val;
-			source.GetType().GetClassInfo().PropertyInfoCaches.TryGetValue(name, out val);
+			source.GetType().GetClassInfo().Propertys.TryGetValue(name, out val);
 			return val;
 		}
 
@@ -174,7 +174,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static DbPropertyInfoCache[] GetFKs(this Type type)
 		{
-			return type.GetClassInfo().PropertyInfoCaches.Where(f => f.Value.ForginKeyAttribute != null).Select(f => f.Value).ToArray();
+			return type.GetClassInfo().Propertys.Where(f => f.Value.ForginKeyAttribute != null).Select(f => f.Value).ToArray();
 		}
 
 		/// <summary>
@@ -184,7 +184,7 @@ namespace JPB.DataAccess
 		public static string GetFK(this Type type, Type fkType)
 		{
 			var hasFk = type.GetClassInfo()
-				.PropertyInfoCaches
+				.Propertys
 				.Select(f => f.Value)
 				.Where(f => f.ForginKeyAttribute != null)
 				.FirstOrDefault(f => f.PropertyType == fkType);
@@ -230,7 +230,7 @@ namespace JPB.DataAccess
 			var type = source.GetType();
 			string pk = type.GetFK(databaseName);
 			DbPropertyInfoCache val;
-			type.GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			type.GetClassInfo().Propertys.TryGetValue(pk, out val);
 			return (E)val.GetConvertedValue(source);
 		}
 
@@ -247,14 +247,14 @@ namespace JPB.DataAccess
 		{
 			string pk = typeof(T).GetFK(databaseName);
 			DbPropertyInfoCache val;
-			typeof(T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			typeof(T).GetClassInfo().Propertys.TryGetValue(pk, out val);
 			return (TE)val.GetConvertedValue(source);
 		}
 
 		internal static object GetConvertedValue(this DbPropertyInfoCache source, object instance)
 		{
 			var converterAttributeModel =
-				source.AttributeInfoCaches.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
+				source.Attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
 
 			if (converterAttributeModel != null)
 			{
@@ -300,7 +300,7 @@ namespace JPB.DataAccess
 		{
 			string pk = typeof(T).GetPKPropertyName();
 			DbPropertyInfoCache val;
-			typeof(T).GetClassInfo().PropertyInfoCaches.TryGetValue(pk, out val);
+			typeof(T).GetClassInfo().Propertys.TryGetValue(pk, out val);
 			return (E)val.GetConvertedValue(source);
 		}
 
@@ -347,7 +347,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static DbPropertyInfoCache[] GetNavigationProps(this Type type)
 		{
-			return type.GetClassInfo().PropertyInfoCaches.Where(s => s.Value.ForginKeyAttribute != null).Select(s => s.Value).ToArray();
+			return type.GetClassInfo().Propertys.Where(s => s.Value.ForginKeyAttribute != null).Select(s => s.Value).ToArray();
 		}
 
 		/// <summary>
@@ -481,7 +481,7 @@ namespace JPB.DataAccess
 			//Left c# property name and right the object to read from the reader
 			//var listofpropertys = new Dictionary<string, object>();
 
-			var propertys = info.PropertyInfoCaches.ToArray();
+			var propertys = info.Propertys.ToArray();
 			var instanceOfFallbackList = new Dictionary<string, object>();
 
 			if (cache == null)
@@ -490,7 +490,7 @@ namespace JPB.DataAccess
 				for (var i = 0; i < reader.FieldCount; i++)
 				{
 					DbPropertyInfoCache val = null;
-					info.PropertyInfoCaches.TryGetValue(info.SchemaMappingDatabaseToLocal(reader.GetName(i)), out val);
+					info.Propertys.TryGetValue(info.SchemaMappingDatabaseToLocal(reader.GetName(i)), out val);
 					cache.Add(i, val);
 				}
 			}
@@ -516,7 +516,7 @@ namespace JPB.DataAccess
 
 				if (property != null)
 				{
-					var attributes = property.AttributeInfoCaches;
+					var attributes = property.Attributes;
 					var valueConverterAttributeModel =
 						attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
 
@@ -624,7 +624,7 @@ namespace JPB.DataAccess
 					{
 						var maybeFallbackProperty =
 							propertys.FirstOrDefault(
-								s => s.Value.AttributeInfoCaches.Any(e => e.Attribute is LoadNotImplimentedDynamicAttribute));
+								s => s.Value.Attributes.Any(e => e.Attribute is LoadNotImplimentedDynamicAttribute));
 						if (maybeFallbackProperty.Value != null)
 						{
 							instanceOfFallbackList = (Dictionary<string, object>)maybeFallbackProperty.Value.Getter.Invoke(instance);
@@ -725,8 +725,8 @@ namespace JPB.DataAccess
 			}
 
 			var constructor =
-				classInfo.ConstructorInfoCaches.FirstOrDefault(s => s.AttributeInfoCaches.Any(e => e.Attribute is ObjectFactoryMethodAttribute)) ??
-				classInfo.ConstructorInfoCaches.FirstOrDefault(s => s.Arguments.Count == 1 && s.Arguments.First().Type == typeof(IDataRecord));
+				classInfo.Constructors.FirstOrDefault(s => s.Attributes.Any(e => e.Attribute is ObjectFactoryMethodAttribute)) ??
+				classInfo.Constructors.FirstOrDefault(s => s.Arguments.Count == 1 && s.Arguments.First().Type == typeof(IDataRecord));
 
 			//maybe single ctor with param
 
@@ -743,8 +743,8 @@ namespace JPB.DataAccess
 			{
 				//check for a Factory mehtod
 				var factory =
-					classInfo.MethodInfoCaches
-						.FirstOrDefault(s => s.AttributeInfoCaches.Any(f => f.Attribute is ObjectFactoryMethodAttribute));
+					classInfo.Mehtods
+						.FirstOrDefault(s => s.Attributes.Any(f => f.Attribute is ObjectFactoryMethodAttribute));
 
 				if (factory != null)
 				{
@@ -766,7 +766,7 @@ namespace JPB.DataAccess
 				}
 			}
 
-			var emptyCtor = classInfo.ConstructorInfoCaches.FirstOrDefault(f => !f.Arguments.Any());
+			var emptyCtor = classInfo.Constructors.FirstOrDefault(f => !f.Arguments.Any());
 
 			if (emptyCtor == null)
 			{
@@ -822,7 +822,7 @@ namespace JPB.DataAccess
 		{
 			return
 				type
-					.PropertyInfoCaches.Select(f => f.Value)
+					.Propertys.Select(f => f.Value)
 					.Where(f => !ignore.Contains(f.DbName))
 					.Select(s => s.PropertyName);
 		}
