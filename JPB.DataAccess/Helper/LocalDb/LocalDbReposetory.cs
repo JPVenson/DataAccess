@@ -15,7 +15,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public abstract class LocalDbReposetory
+	public abstract class LocalDbReposetory : ICollection
 	{
 		internal protected readonly object _lockRoot = new object();
 		internal protected DbClassInfoCache TypeInfo;
@@ -130,7 +130,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_db = db;
 		}
 
-		protected virtual IEnumerator GetEnumerator()
+		public IEnumerator GetEnumerator()
 		{
 			CheckCreatedElseThrow();
 			if (_db != null)
@@ -293,24 +293,40 @@ namespace JPB.DataAccess.Helper.LocalDb
 				success = true;
 			}
 			return success;
-		}		
+		}
 
-		protected virtual void CopyTo(Array array, int index)
+		/// <summary>
+		/// Returns an object with the given Primarykey
+		/// </summary>
+		/// <param name="primaryKey"></param>
+		/// <returns></returns>
+		public object this[object primaryKey]
+		{
+			get
+			{
+				object value;
+				if (_base.TryGetValue(primaryKey, out value))
+					return value;
+				return null;
+			}
+		}
+
+		public virtual void CopyTo(Array array, int index)
 		{
 			throw new NotImplementedException();
 		}
 
-		protected virtual int Count
+		public virtual int Count
 		{
 			get { return _base.Count; }
 		}
 
-		protected virtual object SyncRoot
+		public virtual object SyncRoot
 		{
 			get { return this._lockRoot; }
 		}
 
-		protected virtual bool IsSynchronized
+		public virtual bool IsSynchronized
 		{
 			get { return Monitor.IsEntered(_lockRoot); }
 		}
@@ -417,6 +433,16 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public bool IsReadOnly
 		{
 			get { return base.IsReadOnly; }
+		}
+
+		/// <summary>
+		/// Returns an object with the given Primarykey
+		/// </summary>
+		/// <param name="primaryKey"></param>
+		/// <returns></returns>
+		public new T this[object primaryKey]
+		{
+			get { return (T) base[primaryKey] ; }
 		}
 
 		/// <summary>
