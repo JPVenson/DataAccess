@@ -179,7 +179,7 @@ namespace JPB.DataAccess.Manager
 			return CreateUpdateQueryFactory(entry.GetType().GetClassInfo(), entry, db, parameter);
 		}
 
-		internal static IDbCommand _CreateUpdate(DbClassInfoCache classInfo, object entry, IDatabase db)
+		internal IDbCommand _CreateUpdate(DbClassInfoCache classInfo, object entry)
 		{
 			var pkProperty = classInfo.PrimaryKeyProperty;
 			if (pkProperty == null)
@@ -196,7 +196,7 @@ namespace JPB.DataAccess.Manager
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
 
-			var queryBuilder = new QueryBuilder.QueryBuilder(db);
+			var queryBuilder = new QueryBuilder.QueryBuilder(this);
 			queryBuilder.QueryD("UPDATE");
 			queryBuilder.QueryD(classInfo.TableName);
 			queryBuilder.QueryD("SET");

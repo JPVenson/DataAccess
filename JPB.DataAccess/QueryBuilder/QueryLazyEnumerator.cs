@@ -27,7 +27,7 @@ namespace JPB.DataAccess.QueryBuilder
 		internal QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
 		{
 			_type = type.GetClassInfo();
-			_accessLayer = new DbAccessLayer(queryBuilder.AccessLayer);
+			_accessLayer = new DbAccessLayer(queryBuilder.AccessLayer.Database);
 			_accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
 			_executeReader = queryBuilder.Compile().ExecuteReader();
 		}
@@ -57,7 +57,7 @@ namespace JPB.DataAccess.QueryBuilder
 
 		public object Current
 		{
-			get { return _type.SetPropertysViaReflection(_accessLayer.Database, _executeReader); }
+			get { return _accessLayer.SetPropertysViaReflection(_type, _executeReader); }
 		}
 	}
 

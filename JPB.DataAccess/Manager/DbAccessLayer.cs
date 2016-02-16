@@ -282,14 +282,14 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public object SetPropertysViaReflection(DbClassInfoCache type, IDatabase db, IDataRecord reader)
+		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader)
 		{
 			bool created;
-			object source = CreateInstance(type, reader, db, out created);
+			object source = CreateInstance(type, reader, out created);
 			if (created)
 				return source;
 
-			return SetPropertysViaReflection(source, type, reader, db, null);
+			return SetPropertysViaReflection(source, type, reader, null);
 		}
 
 
@@ -298,22 +298,22 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public object SetPropertysViaReflection(DbClassInfoCache type, IDatabase db, IDataRecord reader,
+		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader,
 			Dictionary<int, DbPropertyInfoCache> mapping)
 		{
 			bool created;
-			object source = CreateInstance(type, reader, db, out created);
+			object source = CreateInstance(type, reader, out created);
 			if (created)
 				return source;
 
-			return SetPropertysViaReflection(source, type, reader, db, mapping);
+			return SetPropertysViaReflection(source, type, reader, mapping);
 		}
 
 		/// <summary>
 		///     Creates an instance based on a Ctor injection or Reflection loading
 		/// </summary>
 		/// <returns></returns>
-		public object CreateInstance(DbClassInfoCache classInfo, IDataRecord reader, IDatabase db, out bool fullLoaded)
+		public object CreateInstance(DbClassInfoCache classInfo, IDataRecord reader, out bool fullLoaded)
 		{
 			if (classInfo.Factory != null)
 			{
@@ -321,12 +321,13 @@ namespace JPB.DataAccess.Manager
 				return classInfo.Factory(reader);
 			}
 
-			var objectFactorys = classInfo.Constructors.Where(s => s.Arguments.Count == 1 && s.Arguments.First().Type == typeof(IDataRecord));
+			var objectFactorys = classInfo.Constructors.Where(s => s.Arguments.Count == 1 
+			&& s.Arguments.First().Type == typeof(IDataRecord));
 
 			var constructor = objectFactorys.FirstOrDefault(s =>
 			s.Attributes.Any(f =>
 				f.Attribute is ObjectFactoryMethodAttribute
-				&& (!IsMultiProviderEnvironment || (f.Attribute as ObjectFactoryMethodAttribute).TargetDatabase == db.TargetDatabase)));
+				&& (!IsMultiProviderEnvironment || (f.Attribute as ObjectFactoryMethodAttribute).TargetDatabase == Database.TargetDatabase)));
 
 			if (constructor == null)
 				constructor = objectFactorys.FirstOrDefault();
@@ -339,7 +340,7 @@ namespace JPB.DataAccess.Manager
 				{
 					classInfo.FullFactory = true;
 					classInfo.Factory = s => constructor.Invoke(new object[] { s });
-					return CreateInstance(classInfo, reader, db, out fullLoaded);
+					return CreateInstance(classInfo, reader, out fullLoaded);
 				}
 			}
 			else
@@ -362,7 +363,7 @@ namespace JPB.DataAccess.Manager
 							{
 								classInfo.FullFactory = true;
 								classInfo.Factory = s => factory.Invoke(new object[] { reader });
-								return CreateInstance(classInfo, reader, db, out fullLoaded);
+								return CreateInstance(classInfo, reader, out fullLoaded);
 							}
 						}
 					}
@@ -378,7 +379,7 @@ namespace JPB.DataAccess.Manager
 
 			classInfo.FullFactory = false;
 			classInfo.Factory = s => emptyCtor.Invoke(new object[0]);
-			return CreateInstance(classInfo, reader, db, out fullLoaded);
+			return CreateInstance(classInfo, reader, out fullLoaded);
 		}
 		/// <summary>
 		///     Loads all propertys from a DataReader into the given Object
@@ -388,7 +389,6 @@ namespace JPB.DataAccess.Manager
 			object instance,
 			DbClassInfoCache info,
 			IDataRecord reader,
-			IDatabase db,
 			Dictionary<int, DbPropertyInfoCache> cache)
 		{
 			if (reader == null)
@@ -471,7 +471,7 @@ namespace JPB.DataAccess.Manager
 
 							var genericArguments =
 								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault().GetClassInfo();
-							List<object> enumerableOfItems = xmlDataRecords.Select(s => SetPropertysViaReflection(genericArguments, db, s)).ToList();
+							List<object> enumerableOfItems = xmlDataRecords.Select(s => SetPropertysViaReflection(genericArguments, s)).ToList();
 							object castedList;
 
 							if (genericArguments.Type.IsClass && genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
@@ -503,7 +503,7 @@ namespace JPB.DataAccess.Manager
 								SetPropertysViaReflection(property
 								.PropertyInfo
 								.PropertyType
-								.GetClassInfo(), db, XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType));
+								.GetClassInfo(), XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType));
 
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
 						}
@@ -627,16 +627,16 @@ namespace JPB.DataAccess.Manager
 			return Convert.ChangeType(value, t);
 		}
 
-		internal static List<IDataRecord> EnumerateDataRecords(IDatabase database, IDbCommand query, bool egarLoading)
+		internal List<IDataRecord> EnumerateDataRecords(IDbCommand query, bool egarLoading)
 		{
-			return EnumerateMarsDataRecords(database, query, egarLoading).FirstOrDefault();
+			return EnumerateMarsDataRecords(query, egarLoading).FirstOrDefault();
 		}
 
-		internal static List<List<IDataRecord>> EnumerateMarsDataRecords(IDatabase database,
+		internal List<List<IDataRecord>> EnumerateMarsDataRecords(
 			IDbCommand query,
 			bool egarLoading = true)
 		{
-			return database.Run(
+			return Database.Run(
 				s =>
 				{
 					//Skip enumeration and parsing and make a Direct loading
@@ -667,10 +667,10 @@ namespace JPB.DataAccess.Manager
 				});
 		}
 
-		internal IEnumerable EnumerateDirectDataRecords(IDatabase database, IDbCommand query,
+		internal IEnumerable EnumerateDirectDataRecords(IDbCommand query,
 			DbClassInfoCache info)
 		{
-			return database.Run(
+			return Database.Run(
 				s =>
 				{
 					//Skip enumeration and parsing and make a Direct loading
@@ -686,7 +686,7 @@ namespace JPB.DataAccess.Manager
 							{
 								while (dr.Read())
 								{
-									records.Add(SetPropertysViaReflection(info, database, dr));
+									records.Add(SetPropertysViaReflection(info, dr));
 								}
 							} while (dr.NextResult());
 						}

@@ -125,8 +125,8 @@ namespace JPB.DataAccess.Manager
 			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
 			var typeInfo = resultType.GetClassInfo();
 
-			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
-				.Select(s => typeInfo.SetPropertysViaReflection(this.Database, s))
+			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
+				.Select(s => SetPropertysViaReflection(typeInfo, s))
 				.ToList();
 		}
 
@@ -136,7 +136,7 @@ namespace JPB.DataAccess.Manager
 		public List<object> ExecuteProcedurePrimetiv(Type procParamType, Type resultType, object procParam)
 		{
 			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
-			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
+			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
 				.Select(dataRecord => dataRecord[0])
 				.ToList();
 		}

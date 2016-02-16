@@ -350,7 +350,7 @@ namespace JPB.DataAccess.Manager
 					QueryBuilder.QueryBuilder queryBuilder = null;
 					if (dbMethodArgument != null && dbMethodArgument.Type == typeof(QueryBuilder.QueryBuilder))
 					{
-						queryBuilder = new QueryBuilder.QueryBuilder(db);
+						queryBuilder = new QueryBuilder.QueryBuilder(this);
 						if (cleanParams == null)
 							cleanParams = new List<object>();
 
@@ -496,14 +496,14 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public static IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query, bool egarLoading)
+		public IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query, bool egarLoading)
 		{
 			RaiseSelect(query, database);
 			var typeInfo = type.GetClassInfo();
 
 			if (egarLoading)
 			{
-				var results = database.EnumerateDataRecords(query, true);
+				var results = EnumerateDataRecords(query, true);
 				var recordToNameMapping = new Dictionary<int, DbPropertyInfoCache>();
 
 				if (!results.Any())
@@ -521,10 +521,10 @@ namespace JPB.DataAccess.Manager
 
 				return
 					results
-						.Select(record => typeInfo.SetPropertysViaReflection(database, record, recordToNameMapping))
+						.Select(record => SetPropertysViaReflection(typeInfo, record, recordToNameMapping))
 						.ToArray();
 			}
-			return database.EnumerateDirectDataRecords(query, typeInfo);
+			return EnumerateDirectDataRecords(query, typeInfo);
 		}
 
 		/// <summary>
@@ -532,7 +532,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public static object[] RunSelect(Type type, IDatabase database, IDbCommand query, bool egarLoading)
+		public object[] RunSelect(Type type, IDatabase database, IDbCommand query, bool egarLoading)
 		{
 			return RunDynamicSelect(type, database, query, egarLoading).Cast<object>().ToArray();
 		}
@@ -543,7 +543,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static T[] RunSelect<T>(IDatabase database, IDbCommand query, bool egarLoading)
+		public T[] RunSelect<T>(IDatabase database, IDbCommand query, bool egarLoading)
 		{
 			return RunSelect(typeof(T), database, query, egarLoading).Cast<T>().ToArray();
 		}
@@ -555,7 +555,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public static object[] RunSelect(Type type, IDatabase database, string query,
+		public object[] RunSelect(Type type, IDatabase database, string query,
 			IEnumerable<IQueryParameter> paramenter, bool egarLoading)
 		{
 			return
@@ -579,7 +579,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static T[] RunSelect<T>(IDatabase database, string query, IEnumerable<IQueryParameter> paramenter,
+		public T[] RunSelect<T>(IDatabase database, string query, IEnumerable<IQueryParameter> paramenter,
 			bool egarLoading)
 		{
 			return RunSelect(typeof(T), database, query, paramenter, egarLoading).Cast<T>().ToArray();
@@ -688,7 +688,7 @@ namespace JPB.DataAccess.Manager
 		public object[] RunPrimetivSelect(Type type, IDbCommand command)
 		{
 			RaiseSelect(command, Database);
-			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping).Select(s => s[0]).ToArray();
+			return EnumerateDataRecords(Database, command, LoadCompleteResultBeforeMapping).Select(s => s[0]).ToArray();
 		}
 
 		/// <summary>
@@ -869,7 +869,7 @@ namespace JPB.DataAccess.Manager
 					sqlCommand = CreateSelect(targetType, accessLayer, fkproperty);
 				}
 
-				var orDefault = DbAccessLayer.RunSelect(targetType, accessLayer, sqlCommand, egarLoading);
+				var orDefault = RunSelect(targetType, accessLayer, sqlCommand, egarLoading);
 
 				//result is list and property is list
 				if (orDefault.CheckForListInterface() && propertyInfo.CheckForListInterface())
@@ -1012,7 +1012,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public List<List<object>> ExecuteMARS(IDbCommand bulk, params Type[] marsTypes)
 		{
-			var mars = Database.EnumerateMarsDataRecords(bulk, LoadCompleteResultBeforeMapping);
+			var mars = EnumerateMarsDataRecords(Database, bulk, LoadCompleteResultBeforeMapping);
 			var concatedMarsToType = new List<Tuple<DbClassInfoCache, List<IDataRecord>>>();
 			for (var index = 0; index < mars.Count; index++)
 			{
@@ -1021,7 +1021,7 @@ namespace JPB.DataAccess.Manager
 				concatedMarsToType.Add(new Tuple<DbClassInfoCache, List<IDataRecord>>(expectedResult.GetClassInfo(), dataRecord));
 			}
 			var list =
-				concatedMarsToType.Select(s => s.Item2.Select(e => s.Item1.SetPropertysViaReflection(this.Database,e)).AsParallel().ToList())
+				concatedMarsToType.Select(s => s.Item2.Select(e => SetPropertysViaReflection(s.Item1,this.Database,e)).AsParallel().ToList())
 					.AsParallel()
 					.ToList();
 			return list;
