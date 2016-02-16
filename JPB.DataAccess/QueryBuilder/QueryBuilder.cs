@@ -16,6 +16,7 @@ using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.QueryBuilder
 {
@@ -26,7 +27,7 @@ namespace JPB.DataAccess.QueryBuilder
 	{
 		/// <summary>
 		/// </summary>
-		protected internal readonly IDatabase Database;
+		protected internal readonly DbAccessLayer AccessLayer;
 
 		/// <summary>
 		/// </summary>
@@ -35,7 +36,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <summary>
 		///     Creates a new Instance of an Query Builder that creates Database aware querys
 		/// </summary>
-		public QueryBuilder(IDatabase database, Type forType)
+		public QueryBuilder(DbAccessLayer database, Type forType)
 			: this(database)
 		{
 			ForType = forType;
@@ -44,9 +45,9 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <summary>
 		///     Creates a new Instance of an Query Builder that creates Database aware querys
 		/// </summary>
-		public QueryBuilder(IDatabase database)
+		public QueryBuilder(DbAccessLayer database)
 		{
-			Database = database;
+			AccessLayer = database;
 			Parts = new List<GenericQueryPart>();
 		}
 
@@ -73,7 +74,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public object Clone()
 		{
-			return new QueryBuilder(Database)
+			return new QueryBuilder(AccessLayer)
 			{
 				EnumerationMode = EnumerationMode,
 				Parts = Parts
@@ -107,7 +108,7 @@ namespace JPB.DataAccess.QueryBuilder
 		public IDbCommand Compile()
 		{
 			var query = CompileFlat();
-			return Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
+			return AccessLayer.Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
 		}
 
 		/// <summary>
@@ -115,7 +116,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// </summary>
 		public int Execute()
 		{
-			return Compile().ExecuteGenericCommand(Database);
+			return Compile().ExecuteGenericCommand(AccessLayer.Database);
 		}
 
 		/// <summary>
@@ -204,7 +205,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public QueryBuilder<T> ForResult<T>()
 		{
-			return new QueryBuilder<T>(Database)
+			return new QueryBuilder<T>(AccessLayer)
 			{
 				EnumerationMode = EnumerationMode,
 				Parts = Parts
@@ -248,7 +249,7 @@ namespace JPB.DataAccess.QueryBuilder
 				.AppendInterlacedLine("AllowParamterRenaming = {0},", AllowParamterRenaming.ToString().ToLower())
 				.AppendInterlacedLine("AutoParameterCounter = {0},", AutoParameterCounter)
 				.AppendInterlacedLine("QueryDebugger = ")
-				.Insert(new QueryDebugger(Compile(), Database).Render)
+				.Insert(new QueryDebugger(Compile(), AccessLayer.Database).Render)
 				.AppendInterlacedLine("Parts[{0}] = ", Parts.Count)
 				.AppendInterlacedLine("{")
 				.Up();
@@ -280,7 +281,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <summary>
 		///     Creates a new Instance of an Query Builder that creates Database aware querys
 		/// </summary>
-		public QueryBuilder(IDatabase database)
+		public QueryBuilder(DbAccessLayer database)
 			: base(database, typeof (T))
 		{
 		}

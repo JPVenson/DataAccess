@@ -104,7 +104,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 				{
 					if (BaseQuery == null)
 					{
-						BaseQuery = DbAccessLayer.CreateSelect<T>(dbAccess.Database);
+						BaseQuery = dbAccess.CreateSelect<T>(dbAccess.Database);
 					}
 
 					finalAppendCommand = BaseQuery;
@@ -211,7 +211,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 					command = selectQuery.Compile();
 				}
 				//cannot cast to T[] 
-				selectWhere = DbAccessLayer.SelectNative(TargetType, s, command, true).Cast<T>().ToArray();
+				selectWhere = dbAccess.SelectNative(TargetType, s, command, true).Cast<T>().ToArray();
 			});
 
 			foreach (T item in selectWhere)

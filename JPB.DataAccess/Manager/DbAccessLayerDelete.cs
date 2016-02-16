@@ -43,7 +43,7 @@ namespace JPB.DataAccess.Manager
 		///     uses factory Mehtod if availbile
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		public static void Delete<T>(T entry, IDatabase db, params object[] parameter)
+		public void Delete<T>(T entry, IDatabase db, params object[] parameter)
 		{
 			var deleteCommand = CreateDeleteQueryFactory(entry.GetType().GetClassInfo(), entry, db, parameter);
 			RaiseDelete(entry, deleteCommand, db);

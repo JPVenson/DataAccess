@@ -97,7 +97,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Select(this QueryBuilder query, Type type)
 		{
-			return query.Query(DbAccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.Database));
+			return query.Query(query.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.AccessLayer.Database));
 		}
 
 		/// <summary>
@@ -156,7 +156,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Update(this QueryBuilder query, Type type, object obj)
 		{
-			return query.Query(DbAccessLayer._CreateUpdate(type.GetClassInfo(), obj, query.Database));
+			return query.Query(DbAccessLayer._CreateUpdate(type.GetClassInfo(), obj, query.AccessLayer.Database));
 		}
 
 		/// <summary>
@@ -262,7 +262,7 @@ namespace JPB.DataAccess.QueryBuilder
 		public static IDataPager AsPager<T>(this QueryBuilder query, int pageSize)
 		{
 			var targetQuery = query.Compile();
-			var dbAccess = query.Database.CreatePager<T>();
+			var dbAccess = query.AccessLayer.Database.CreatePager<T>();
 			dbAccess.AppendedComands.Add(targetQuery);
 			dbAccess.PageSize = pageSize;
 			return dbAccess;
@@ -381,7 +381,7 @@ namespace JPB.DataAccess.QueryBuilder
 		public static IWrapperDataPager<T, TE> AsPagerViewModel<T, TE>(this QueryBuilder query, int pageSize)
 		{
 			var targetQuery = query.Compile();
-			var dbAccess = query.Database.CreatePager<T, TE>();
+			var dbAccess = query.AccessLayer.Database.CreatePager<T, TE>();
 			dbAccess.BaseQuery = targetQuery;
 			dbAccess.PageSize = pageSize;
 			return dbAccess;
@@ -574,7 +574,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Top(this QueryBuilder query, uint top)
 		{
-			switch (query.Database.TargetDatabase)
+			switch (query.AccessLayer.Database.TargetDatabase)
 			{
 				case DbAccessType.MsSql:
 				{

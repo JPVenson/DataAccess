@@ -268,8 +268,9 @@ namespace JPB.DataAccess.UnitTests
 			var insGuid = Guid.NewGuid().ToString();
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
-
+			expectWrapper.IsMultiProviderEnvironment = true;
 			expectWrapper.Insert(new UsersWithStaticInsert() { UserName = insGuid });
+			expectWrapper.IsMultiProviderEnvironment = false;
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.UserTable);
 			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 

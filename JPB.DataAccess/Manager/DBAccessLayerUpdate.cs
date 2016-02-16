@@ -30,7 +30,7 @@ namespace JPB.DataAccess.Manager
 		///     Will update by using the CreateUpdate function
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		public static void Update<T>(T entry, IDatabase db)
+		public void Update<T>(T entry, IDatabase db)
 		{
 			db.RunInTransaction(s =>
 			{
@@ -106,7 +106,7 @@ namespace JPB.DataAccess.Manager
 					var updated = false;
 					CopyPropertys(entry, @select);
 
-					@select.LoadNavigationProps(Database);
+					LoadNavigationProps(@select, Database);
 
 					return updated;
 				}
@@ -174,7 +174,7 @@ namespace JPB.DataAccess.Manager
 			return false;
 		}
 
-		private static IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db, params object[] parameter)
+		private IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db, params object[] parameter)
 		{
 			return CreateUpdateQueryFactory(entry.GetType().GetClassInfo(), entry, db, parameter);
 		}
@@ -222,7 +222,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static IDbCommand CreateUpdate<T>(T entry, IDatabase db)
+		public IDbCommand CreateUpdate<T>(T entry, IDatabase db)
 		{
 			return CreateUpdateQueryFactory(entry, db);
 		}

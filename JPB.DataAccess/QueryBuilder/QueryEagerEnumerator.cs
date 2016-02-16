@@ -52,7 +52,7 @@ namespace JPB.DataAccess.QueryBuilder
 					return false;
 
 				var dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
-				Current = _type.GetClassInfo().SetPropertysViaReflection(dataRecord);
+				Current = _type.GetClassInfo().SetPropertysViaReflection(_queryBuilder.AccessLayer.Database, dataRecord);
 				_elements.Add(Current);
 
 				return true;
@@ -78,7 +78,7 @@ namespace JPB.DataAccess.QueryBuilder
 			_task = new Task(() =>
 			{
 				var query = _queryBuilder.Compile();
-				_enumerateDataRecords = _queryBuilder.Database.EnumerateDataRecords(query, true);
+				_enumerateDataRecords = _queryBuilder.AccessLayer.Database.EnumerateDataRecords(query, true);
 			});
 			_task.Start();
 		}

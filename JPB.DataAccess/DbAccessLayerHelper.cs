@@ -293,77 +293,7 @@ namespace JPB.DataAccess
 			return FilterDbSchemaMapping(typeof(T).GetClassInfo(), ignore);
 		}
 
-		internal static List<IDataRecord> EnumerateDataRecords(this IDatabase database, IDbCommand query, bool egarLoading)
-		{
-			return EnumerateMarsDataRecords(database, query, egarLoading).FirstOrDefault();
-		}
-
-		internal static List<List<IDataRecord>> EnumerateMarsDataRecords(this IDatabase database,
-			IDbCommand query,
-			bool egarLoading = true)
-		{
-			return database.Run(
-				s =>
-				{
-					//Skip enumeration and parsing and make a Direct loading
-					//This increeses Performance
-
-					var records = new List<List<IDataRecord>>();
-
-					using (var dr = query.ExecuteReader())
-					{
-						try
-						{
-							do
-							{
-								var resultSet = new List<IDataRecord>();
-								while (dr.Read())
-								{
-									resultSet.Add(dr.CreateEgarRecord());
-								}
-								records.Add(resultSet);
-							} while (dr.NextResult());
-						}
-						finally
-						{
-							dr.Close();
-						}
-					}
-					return records;
-				});
-		}
-
-		internal static IEnumerable EnumerateDirectDataRecords(this IDatabase database, IDbCommand query,
-			DbClassInfoCache info)
-		{
-			return database.Run(
-				s =>
-				{
-					//Skip enumeration and parsing and make a Direct loading
-					//This increeses Performance
-
-					var records = new ArrayList();
-
-					using (var dr = query.ExecuteReader())
-					{
-						try
-						{
-							do
-							{
-								while (dr.Read())
-								{
-									records.Add(info.SetPropertysViaReflection(dr));
-								}
-							} while (dr.NextResult());
-						}
-						finally
-						{
-							dr.Close();
-						}
-					}
-					return records;
-				});
-		}
+		
 
 		/// <summary>
 		///     Maps propertys to database of given type
@@ -391,24 +321,6 @@ namespace JPB.DataAccess
 		public static IDbCommand CreateCommand(this IDatabase db, string query)
 		{
 			return db.CreateCommand(query);
-		}
-
-
-		/// <summary>
-		///     Runs a Command on a given Database and Converts the Output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static List<T> ExecuteGenericCreateModelsCommand<T>(this IDbCommand command, IDatabase db)
-			where T : class, new()
-		{
-			var info = typeof(T).GetClassInfo();
-			return db.Run(
-				s =>
-					s.GetEntitiesList(command, info.SetPropertysViaReflection)
-						.Cast<T>()
-						.ToList());
 		}
 
 		/// <summary>

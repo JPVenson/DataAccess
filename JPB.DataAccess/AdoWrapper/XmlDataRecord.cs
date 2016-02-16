@@ -77,7 +77,7 @@ namespace JPB.DataAccess.AdoWrapper
 			if (xElement.HasElements)
 				return xElement.ToString();
 
-			var type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
+			var type = DbAccessLayer.ChangeType(xElement.Value, propertyType);
 			return type;
 		}
 

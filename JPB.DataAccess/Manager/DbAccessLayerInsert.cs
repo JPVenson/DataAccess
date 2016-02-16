@@ -85,7 +85,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static IDbCommand[] CreateInsertRangeCommand<T>(T[] entrys, IDatabase db)
+		public IDbCommand[] CreateInsertRangeCommand<T>(T[] entrys, IDatabase db)
 		{
 			var commands = new List<IDbCommand>();
 			IDbCommand insertRange = null;
@@ -134,12 +134,12 @@ namespace JPB.DataAccess.Manager
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
 			var csvprops = classInfo.CreatePropertyCsv(ignore);
-
+			string query;
 			var values = "";
 			for (var index = 0; index < propertyInfos.Length; index++)
 				values = values + ("@" + index + ",");
 			values = values.Remove(values.Length - 1);
-			var query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
+			query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
 
 			var orignialProps = classInfo.GetPropertysViaRefection(ignore).ToArray();
 
@@ -155,7 +155,7 @@ namespace JPB.DataAccess.Manager
 		///     if possible
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
+		public IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
 		{
 			return CreateInsertQueryFactory(type.GetClassInfo(), entry, db, parameter);
 
@@ -168,7 +168,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="entry" />
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		public static void Insert<T>(T entry, IDatabase db)
+		public void Insert<T>(T entry, IDatabase db)
 		{
 			Insert(typeof (T), entry, db);
 		}
@@ -177,7 +177,7 @@ namespace JPB.DataAccess.Manager
 		///     Creates and Executes a Insert statement for a given
 		///     <paramref name="entry" />
 		/// </summary>
-		public static void Insert(Type type, object entry, IDatabase db)
+		public void Insert(Type type, object entry, IDatabase db)
 		{
 			db.Run(s => { s.ExecuteNonQuery(CreateInsert(type, entry, s)); });
 		}
@@ -186,7 +186,7 @@ namespace JPB.DataAccess.Manager
 		///     Creates an insert command with appended LastInsertedIDCommand from the IDatabase interface
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
+		public IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
 		{
 			var dbCommand = CreateInsert(type, entry, db);
 			return db.MergeCommands(dbCommand, db.GetlastInsertedIdCommand());
@@ -197,7 +197,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public static object InsertWithSelect(Type type, object entry, IDatabase db, bool egarLoading)
+		public object InsertWithSelect(Type type, object entry, IDatabase db, bool egarLoading)
 		{
 			return db.Run(s =>
 			{
@@ -246,7 +246,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static T InsertWithSelect<T>(T entry, IDatabase db, bool egarLoading)
+		public T InsertWithSelect<T>(T entry, IDatabase db, bool egarLoading)
 		{
 			return (T) InsertWithSelect(typeof (T), entry, db, egarLoading);
 		}

@@ -94,7 +94,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder<T> Select<T>(this QueryBuilder<T> query, Type type)
 		{
-			return query.Query(DbAccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.Database));
+			return query.Query(query.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.AccessLayer.Database));
 		}
 
 		/// <summary>
@@ -115,7 +115,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder<T> Update<T>(this QueryBuilder<T> query, Type type, object obj)
 		{
-			return query.Query(DbAccessLayer._CreateUpdate(type.GetClassInfo(), obj, query.Database));
+			return query.Query(DbAccessLayer._CreateUpdate(type.GetClassInfo(), obj, query.AccessLayer.Database));
 		}
 
 		/// <summary>
@@ -172,7 +172,7 @@ namespace JPB.DataAccess.QueryBuilder
 		public static IDataPager AsPager<T>(this QueryBuilder<T> query, int pageSize)
 		{
 			var targetQuery = query.Compile();
-			var dbAccess = query.Database.CreatePager<T>();
+			var dbAccess = query.AccessLayer.Database.CreatePager<T>();
 			dbAccess.AppendedComands.Add(targetQuery);
 			dbAccess.PageSize = pageSize;
 			return dbAccess;
@@ -336,7 +336,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder<T> Top<T>(this QueryBuilder<T> query, uint top)
 		{
-			switch (query.Database.TargetDatabase)
+			switch (query.AccessLayer.Database.TargetDatabase)
 			{
 				case DbAccessType.MsSql:
 				{

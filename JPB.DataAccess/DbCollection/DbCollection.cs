@@ -257,7 +257,7 @@ namespace JPB.DataAccess.DbCollection
 				switch (pair.Value)
 				{
 					case CollectionStates.Added:
-						tempCommand = DbAccessLayer.CreateInsertWithSelectCommand(typeof(T), pair.Key, _layer.Database);
+						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key, _layer.Database);
 						break;
 					case CollectionStates.Removed:
 						tempCommand = DbAccessLayer._CreateDelete(typeof(T).GetClassInfo(), pair.Key, _layer.Database);
@@ -267,7 +267,7 @@ namespace JPB.DataAccess.DbCollection
 						tempCommand = null;
 						break;
 					case CollectionStates.Changed:
-						tempCommand = DbAccessLayer.CreateUpdate(pair.Key, _layer.Database);
+						tempCommand = _layer.CreateUpdate(pair.Key, _layer.Database);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();

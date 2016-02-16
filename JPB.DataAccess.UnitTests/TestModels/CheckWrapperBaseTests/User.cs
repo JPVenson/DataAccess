@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryBuilder;
 using JPB.DataAccess.QueryFactory;
@@ -104,10 +105,16 @@ namespace JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests
 		public long User_ID { get; set; }
 		public string UserName { get; set; }
 
-		[InsertFactoryMethod]
+		[InsertFactoryMethod(TargetDatabase = DbAccessType.MsSql)]
 		public string Insert()
 		{
 			return string.Format("INSERT INTO {0} VALUES ('{1}')", UsersMeta.UserTable, this.UserName);
+		}
+
+		[InsertFactoryMethod(TargetDatabase = DbAccessType.SqLite)]
+		public string InsertSqLite()
+		{
+			return string.Format("INSERT INTO {0} VALUES (0, '{1}')", UsersMeta.UserTable, this.UserName);
 		}
 	}
 
@@ -237,8 +244,7 @@ namespace JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests
 		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder, long whereId)
 		{
 			builder.Select(typeof(Users_StaticQueryFactoryForSelect))
-				.Where(UsersMeta.UserIDCol + " = @whereId", new
-				{
+				.Where(UsersMeta.UserIDCol + " = @whereId", new {
 					whereId
 				});
 		}

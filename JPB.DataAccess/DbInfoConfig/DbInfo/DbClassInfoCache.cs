@@ -165,7 +165,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			var preConfig = MethodProxyAttribute == null;
 
 			MethodProxyAttribute = DbAttributeInfoCache<MethodProxyAttribute>.WrapperOrNull(Attributes.FirstOrDefault(s => s.Attribute is MethodProxyAttribute));
-						
+
 			HasRelations = Attributes.Any(s => s.Attribute is ForeignKeyAttribute);
 
 			RowVersionProperty = Propertys.FirstOrDefault(s => s.Value.RowVersionAttribute != null).Value;
@@ -186,8 +186,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		internal void CheckForConfig()
 		{
 			var configMethods = Mehtods
-				.Where(f => f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute))
-				.ToArray();
+				.Where(f => f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
 			if (configMethods.Any())
 			{
 				var config = new DbConfig();

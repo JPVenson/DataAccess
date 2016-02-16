@@ -126,7 +126,7 @@ namespace JPB.DataAccess.Manager
 			var typeInfo = resultType.GetClassInfo();
 
 			return Database.EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
-				.Select(typeInfo.SetPropertysViaReflection)
+				.Select(s => typeInfo.SetPropertysViaReflection(this.Database, s))
 				.ToList();
 		}
 

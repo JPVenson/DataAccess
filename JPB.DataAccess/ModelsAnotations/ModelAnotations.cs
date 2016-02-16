@@ -13,6 +13,7 @@ using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.ModelsAnotations
@@ -20,8 +21,19 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     Base type for all maker Attributes
 	/// </summary>
-	public class DataAccessAttribute : Attribute
+	public abstract class DataAccessAttribute : Attribute
 	{
+	}
+
+	/// <summary>
+	/// Defines an 
+	/// </summary>
+	public abstract class DbAccessTypeAttribute : DataAccessAttribute
+	{
+		/// <summary>
+		/// Defines the Target database this Method creates an Script for
+		/// </summary>
+		public DbAccessType TargetDatabase { get; set; }
 	}
 
 	/// <summary>
@@ -29,7 +41,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///		TO BE SUPPORTED
 	/// </summary>
 	[System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-	public sealed class MethodProxyAttribute : Attribute
+	public sealed class MethodProxyAttribute : DataAccessAttribute
 	{
 		readonly Type _methodProxy;
 
@@ -54,18 +66,6 @@ namespace JPB.DataAccess.ModelsAnotations
 	#region FactoryAttributes
 
 	//Work in Progress
-
-	//[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-	//public class FactoryBaseAttribute : Attribute
-	//{
-	//    public FactoryBaseAttribute()
-	//    {
-	//        DbQuery = DbAccessType.Unknown;
-	//    }
-	//    // This is a positional argument
-
-	//    public DbAccessType DbQuery { get; set; }
-	//}
 
 	/// <summary>
 	///     Marks this class to be allowed by the Framework for the CodeDOM Ado.net ctor creation
@@ -111,7 +111,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// Adds a namespace to the generated class
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
-	public sealed class AutoGenerateCtorNamespaceAttribute : Attribute
+	public sealed class AutoGenerateCtorNamespaceAttribute : DataAccessAttribute
 	{
 		// See the attribute guidelines at 
 		//  http://go.microsoft.com/fwlink/?LinkId=85236
@@ -136,6 +136,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 	public sealed class ConfigMehtodAttribute : DataAccessAttribute
 	{
+
 	}
 
 	/// <summary>
@@ -143,7 +144,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-	public class DeleteFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	public class DeleteFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
 
@@ -154,7 +155,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The Method must be static
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
-	public sealed class ObjectFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	public sealed class ObjectFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
 
@@ -163,7 +164,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-	public sealed class SelectFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	public sealed class SelectFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
 
@@ -172,8 +173,9 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-	public sealed class InsertFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	public sealed class InsertFactoryMethodAttribute : DbAccessTypeAttribute
 	{
+
 	}
 
 	/// <summary>
@@ -181,7 +183,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-	public sealed class UpdateFactoryMethodAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute
+	public sealed class UpdateFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
 
@@ -189,7 +191,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Provieds a Query ( parametes not used ) for selection
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-	public sealed class SelectFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
+	public sealed class SelectFactoryAttribute : DbAccessTypeAttribute, IQueryFactoryResult
 	{
 		/// <summary>
 		///     Ctor
@@ -216,7 +218,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Provieds a Query ( parametes not used ) for selection
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-	public sealed class StoredProcedureFactoryAttribute : /*FactoryBaseAttribute*/ DataAccessAttribute, IQueryFactoryResult
+	public sealed class StoredProcedureFactoryAttribute : DbAccessTypeAttribute, IQueryFactoryResult
 	{
 		/// <summary>
 		///     ctor
@@ -245,7 +247,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Ignores this Property when creating an Update or Insert statement
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-	public class InsertIgnoreAttribute : DataAccessAttribute
+	public class InsertIgnoreAttribute : DbAccessTypeAttribute
 	{
 	}
 
