@@ -191,19 +191,6 @@ namespace JPB.DataAccess
 			if (hasFk != null)
 				return hasFk.PropertyName;
 			return null;
-
-			//var prop = type.GetPropertiesEx().FirstOrDefault(info =>
-			//{
-			//	if (!info.GetGetMethod().IsVirtual)
-			//	{
-			//		return false;
-			//	}
-
-			//	if (info.PropertyType == fkType)
-			//		return true;
-			//	return false;
-			//});
-			//return prop == null ? null : prop.Name;
 		}
 
 		/// <summary>
