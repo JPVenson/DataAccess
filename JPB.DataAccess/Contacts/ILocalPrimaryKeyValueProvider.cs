@@ -20,5 +20,11 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <returns></returns>
 		object GetNextValue();
+
+		/// <summary>
+		/// Gets the object that indicates an Non Init primary key
+		/// </summary>
+		/// <returns></returns>
+		object GetUninitilized();
 	}
 }

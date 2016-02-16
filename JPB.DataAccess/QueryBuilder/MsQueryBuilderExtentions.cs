@@ -156,7 +156,7 @@ namespace JPB.DataAccess.QueryBuilder
 		/// <returns></returns>
 		public static QueryBuilder Update(this QueryBuilder query, Type type, object obj)
 		{
-			return query.Query(DbAccessLayer._CreateUpdate(type.GetClassInfo(), obj, query.AccessLayer.Database));
+			return query.Query(query.AccessLayer._CreateUpdate(type.GetClassInfo(), obj));
 		}
 
 		/// <summary>

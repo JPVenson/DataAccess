@@ -260,7 +260,7 @@ namespace JPB.DataAccess.DbCollection
 						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key, _layer.Database);
 						break;
 					case CollectionStates.Removed:
-						tempCommand = DbAccessLayer._CreateDelete(typeof(T).GetClassInfo(), pair.Key, _layer.Database);
+						tempCommand = _layer._CreateDelete(typeof(T).GetClassInfo(), pair.Key, _layer.Database);
 						removed.Add(pair.Key);
 						break;
 					case CollectionStates.Unchanged:
@@ -286,7 +286,7 @@ namespace JPB.DataAccess.DbCollection
 			{
 				var addedOne = added[i];
 				var newId = results[i];
-				DbAccessLayer.CopyPropertys(addedOne.Value, newId);
+				DataConverterExtensions.CopyPropertys(addedOne.Value, newId);
 			}
 
 			//Removed

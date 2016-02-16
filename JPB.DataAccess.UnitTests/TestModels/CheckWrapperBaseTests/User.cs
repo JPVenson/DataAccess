@@ -240,10 +240,10 @@ namespace JPB.DataAccess.UnitTests.TestModels.CheckWrapperBaseTests
 		public long UserId { get; set; }
 		public string UserName { get; set; }
 
-		[SelectFactoryMethod]
+		[SelectFactoryMethod()]
 		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder, long whereId)
 		{
-			builder.Select(typeof(Users_StaticQueryFactoryForSelect))
+			builder.Select(typeof(Users_StaticQueryFactoryForSelectWithArugments))
 				.Where(UsersMeta.UserIDCol + " = @whereId", new {
 					whereId
 				});

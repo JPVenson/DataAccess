@@ -51,7 +51,6 @@ namespace JPB.DataAccess.UnitTests
 #endif
 
 			DbConfig.ConstructorSettings.CreateDebugCode = true;
-			DbAccessLayer.Multipath = true;
 
 			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
 			Assert.AreEqual(expectWrapper.DbAccessType, DbAccessType);
@@ -97,6 +96,7 @@ namespace JPB.DataAccess.UnitTests
 
 
 
+			expectWrapper.Multipath = true;
 			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
 			return expectWrapper;
 		}

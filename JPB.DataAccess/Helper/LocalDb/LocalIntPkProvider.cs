@@ -20,6 +20,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return _counter++;
 		}
 
+		public object GetUninitilized()
+		{
+			return 0;
+		}
+
 		public object Clone()
 		{
 			return new LocalIntPkProvider();

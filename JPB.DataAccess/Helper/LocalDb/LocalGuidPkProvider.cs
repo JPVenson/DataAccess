@@ -18,6 +18,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return Guid.NewGuid();
 		}
 
+		public object GetUninitilized()
+		{
+			return null;
+		}
+
 		public object Clone()
 		{
 			return new LocalGuidPkProvider();

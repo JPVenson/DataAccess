@@ -38,7 +38,6 @@ namespace JPB.DataAccess.Manager
 	{
 		static DbAccessLayer()
 		{
-			Debugger = false;
 			SProcedureDbAccessLayer();
 			ProviderCollection = new PreDefinedProviderCollection();
 		}
@@ -48,17 +47,18 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		/// Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the instance. This field overrides 
 		/// </summary>
-		public static object DefaultAssertionObject;
+		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>")]
+		public object DefaultAssertionObject;
 
 		/// <summary>
 		/// When specifying an Long as DefaultAssertionObject the PocoPkComparer will use instedt the value casted as int when the property is int instedt of Long and vice versa (more Rewrite operations may follow)
 		/// </summary>
-		public static bool DefaultAssertionObjectRewrite { get; set; }
+		public bool DefaultAssertionObjectRewrite { get; set; }
 
 		/// <summary>
 		///     Enables the automatic creation of QueryDebugger objects on each created IDbCommand
 		/// </summary>
-		public static bool Debugger { get; set; }
+		public bool Debugger { get; set; }
 
 		/// <summary>
 		///		If set to True a strict check for the Targetdatabase Property on each Factory or provider specific method is done otherwise this Check is skiped 
@@ -72,6 +72,7 @@ namespace JPB.DataAccess.Manager
 
 		internal DbAccessLayer()
 		{
+			Debugger = false;
 			LoadCompleteResultBeforeMapping = true;
 
 			SelectDbAccessLayer();
@@ -517,7 +518,7 @@ namespace JPB.DataAccess.Manager
 						object changedType;
 						if (value.GetType() != property.PropertyInfo.PropertyType)
 						{
-							changedType = ChangeType(value, property.PropertyInfo.PropertyType);
+							changedType = DataConverterExtensions.ChangeType(value, property.PropertyInfo.PropertyType);
 						}
 						else
 						{
@@ -574,59 +575,7 @@ namespace JPB.DataAccess.Manager
 			return instance;
 		}
 
-		internal static object ChangeType(object value, Type conversion)
-		{
-			var t = conversion;
-
-			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
-			{
-				if (value == null)
-				{
-					return null;
-				}
-
-				t = Nullable.GetUnderlyingType(t);
-			}
-
-			if (typeof(Enum).IsAssignableFrom(t))
-			{
-				// ReSharper disable once UseIsOperator.1
-				// ReSharper disable once UseMethodIsInstanceOfType
-				if (typeof(long).IsAssignableFrom(value.GetType()))
-				{
-					value = Enum.ToObject(t, value);
-				}
-				else if (value is string)
-				{
-					value = Enum.Parse(t, value as string, true);
-				}
-			}
-			else if (typeof(bool).IsAssignableFrom(t))
-			{
-				if (value is int)
-				{
-					value = value.Equals(1);
-				}
-				else if (value is string)
-				{
-					value = value.Equals("1");
-				}
-				else if (value is bool)
-				{
-					value = (bool)value;
-				}
-			}
-			else if (typeof(byte[]).IsAssignableFrom(t))
-			{
-				if (value is string)
-				{
-					value = Encoding.Default.GetBytes(value as string);
-				}
-			}
-
-			return Convert.ChangeType(value, t);
-		}
-
+		
 		internal List<IDataRecord> EnumerateDataRecords(IDbCommand query, bool egarLoading)
 		{
 			return EnumerateMarsDataRecords(query, egarLoading).FirstOrDefault();

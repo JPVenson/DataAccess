@@ -142,7 +142,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private object SetId(object item)
 		{
 			var idVal = TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
-			if (idVal != DbAccessLayer.DefaultAssertionObject)
+			if (idVal != _keyGenerator.GetUninitilized())
 			{
 				lock (_lockRoot)
 				{

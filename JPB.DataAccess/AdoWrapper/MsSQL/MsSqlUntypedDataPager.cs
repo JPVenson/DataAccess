@@ -98,7 +98,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 				if (AppendedComands.Any())
 				{
 					finalAppendCommand = AppendedComands.Aggregate(DbAccessLayerHelper.CreateCommand(s, "WHERE"),
-						(current, comand) => DbAccessLayer.ConcatCommands(s, current, comand));
+						(current, comand) => DbAccessLayerHelper.ConcatCommands(s, current, comand));
 				}
 				else
 				{

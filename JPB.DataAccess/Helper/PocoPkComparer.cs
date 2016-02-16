@@ -28,7 +28,8 @@ namespace JPB.DataAccess.Helper
 		: IEqualityComparer<T>, IComparer<T>
 		where T : class
 	{
-		public static object DefaultAssertion;
+		public static object DefaultAssertionObject;
+		public static bool DefaultRewrite;
 
 		/// <summary>
 		/// When Equals is used the result is stored in this Property
@@ -39,7 +40,7 @@ namespace JPB.DataAccess.Helper
 		/// New Instance of the Auto Equality Comparer with no assertion on its default value for an Primary key
 		/// </summary>
 		public PocoPkComparer()
-			: this(DefaultAssertion, DefaultAssertion != null)
+			: this(DefaultAssertionObject, DefaultAssertionObject != null)
 		{
 		}
 
@@ -64,9 +65,9 @@ namespace JPB.DataAccess.Helper
 
 		internal PocoPkComparer(object assertNotDatabaseMember, bool useAssertion = false, string propertyName = null)
 		{
-			if (assertNotDatabaseMember == null && DbAccessLayer.DefaultAssertionObject != null)
+			if (assertNotDatabaseMember == null && PocoPkComparer<T>.DefaultAssertionObject != null)
 			{
-				assertNotDatabaseMember = DbAccessLayer.DefaultAssertionObject;
+				assertNotDatabaseMember = PocoPkComparer<T>.DefaultAssertionObject;
 				useAssertion = true;
 			}
 			Init(assertNotDatabaseMember, useAssertion, propertyName);
@@ -113,7 +114,7 @@ namespace JPB.DataAccess.Helper
 				Expression assertionObject = Expression.Constant(assertNotDatabaseMember);
 				if (_typeInfo.PrimaryKeyProperty.PropertyType != assertNotDatabaseMember.GetType())
 				{
-					if (DbAccessLayer.DefaultAssertionObjectRewrite)
+					if (DefaultRewrite)
 					{
 						Visit(ref PropLeft, ref assertionObject);
 					}
@@ -121,7 +122,7 @@ namespace JPB.DataAccess.Helper
 					{
 						throw new NotSupportedException(string.Format("Unknown Type cast detected." +
 																	  " Assert typ is '{0}' property is '{1}' " +
-																	  "... sry i am good but not as this good! Try the DbAccessLayer.DefaultAssertionObjectRewrite option", assertNotDatabaseMember.GetType().Name, _typeInfo.PrimaryKeyProperty.PropertyType.Name));
+																	  "... sry i am good but not as this good! Try the PocoPkComparer.DefaultRewrite option", assertNotDatabaseMember.GetType().Name, _typeInfo.PrimaryKeyProperty.PropertyType.Name));
 					}
 				}
 

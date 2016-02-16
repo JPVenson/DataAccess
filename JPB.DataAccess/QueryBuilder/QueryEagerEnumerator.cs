@@ -52,7 +52,7 @@ namespace JPB.DataAccess.QueryBuilder
 					return false;
 
 				var dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
-				Current = _queryBuilder.AccessLayer.SetPropertysViaReflection(_type.GetClassInfo(), _queryBuilder.AccessLayer.Database, dataRecord);
+				Current = _queryBuilder.AccessLayer.SetPropertysViaReflection(_type.GetClassInfo(), dataRecord);
 				_elements.Add(Current);
 
 				return true;

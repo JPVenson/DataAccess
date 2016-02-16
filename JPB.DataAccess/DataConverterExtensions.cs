@@ -53,10 +53,10 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static QueryDebugger CreateQueryDebuggerAuto(this IDbCommand command, IDatabase source)
 		{
-			if (DbAccessLayer.Debugger)
-			{
-				return new QueryDebugger(command, source);
-			}
+			//if (DbAccessLayer.Debugger)
+			//{
+			//	return new QueryDebugger(command, source);
+			//}
 			return null;
 		}
 
@@ -251,6 +251,34 @@ namespace JPB.DataAccess
 			return (TE)val.GetConvertedValue(source);
 		}
 
+		internal static bool CopyPropertys(object @base, object newObject)
+		{
+			var updated = false;
+			var propertys = @base.GetType().GetClassInfo().Propertys.Select(f => f.Value);
+			foreach (var propertyInfo in propertys)
+			{
+				var oldValue = propertyInfo.GetConvertedValue(@base);
+				var newValue = propertyInfo.GetConvertedValue(newObject);
+
+				if (newValue == null && oldValue == null ||
+					(oldValue != null && (newValue == null || newValue.Equals(oldValue))))
+					continue;
+
+				propertyInfo.Setter.Invoke(@base, newValue);
+				updated = true;
+			}
+			return updated;
+		}
+
+		internal static object GetDefault(Type type)
+		{
+			if (type.IsValueType)
+			{
+				return Activator.CreateInstance(type);
+			}
+			return null;
+		}
+
 		internal static object GetConvertedValue(this DbPropertyInfoCache source, object instance)
 		{
 			var converterAttributeModel =
@@ -357,7 +385,7 @@ namespace JPB.DataAccess
 		public static DbPropertyInfoCache[] GetNavigationProps<T>()
 		{
 			return GetNavigationProps(typeof(T));
-		}			
+		}
 
 		/// <summary>
 		///     Sets the infomations from the
@@ -382,9 +410,61 @@ namespace JPB.DataAccess
 		public static EgarDataRecord CreateEgarRecord(this IDataRecord rec)
 		{
 			return new EgarDataRecord(rec);
-		}	
+		}
 
-			
+		internal static object ChangeType(object value, Type conversion)
+		{
+			var t = conversion;
+
+			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				if (value == null)
+				{
+					return null;
+				}
+
+				t = Nullable.GetUnderlyingType(t);
+			}
+
+			if (typeof(Enum).IsAssignableFrom(t))
+			{
+				// ReSharper disable once UseIsOperator.1
+				// ReSharper disable once UseMethodIsInstanceOfType
+				if (typeof(long).IsAssignableFrom(value.GetType()))
+				{
+					value = Enum.ToObject(t, value);
+				}
+				else if (value is string)
+				{
+					value = Enum.Parse(t, value as string, true);
+				}
+			}
+			else if (typeof(bool).IsAssignableFrom(t))
+			{
+				if (value is int)
+				{
+					value = value.Equals(1);
+				}
+				else if (value is string)
+				{
+					value = value.Equals("1");
+				}
+				else if (value is bool)
+				{
+					value = (bool)value;
+				}
+			}
+			else if (typeof(byte[]).IsAssignableFrom(t))
+			{
+				if (value is string)
+				{
+					value = Encoding.Default.GetBytes(value as string);
+				}
+			}
+
+			return Convert.ChangeType(value, t);
+		}
+
 
 		/// <summary>
 		///     Returns all Cached Propertys from a <paramref name="type" />

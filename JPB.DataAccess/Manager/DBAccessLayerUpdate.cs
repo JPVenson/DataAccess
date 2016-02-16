@@ -75,7 +75,7 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(typeof(T), s, entry.GetPK<T, object>());
+					var query = CreateSelect(typeof(T), entry.GetPK<T, object>());
 					RaiseUpdate(entry, query, s);
 					return RunSelect<T>(query).FirstOrDefault();
 				}
@@ -99,12 +99,12 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(entry.GetType(), Database, entry.GetPK<T, object>());
+					var query = CreateSelect(entry.GetType(), entry.GetPK<T, object>());
 					RaiseUpdate(entry, query, s);
 					var @select = RunSelect<T>(query).FirstOrDefault();
 
 					var updated = false;
-					CopyPropertys(entry, @select);
+					DataConverterExtensions.CopyPropertys(entry, @select);
 
 					LoadNavigationProps(@select, Database);
 
@@ -114,33 +114,7 @@ namespace JPB.DataAccess.Manager
 			});
 		}
 
-		internal static bool CopyPropertys(object @base, object newObject)
-		{
-			var updated = false;
-			var propertys = @base.GetType().GetClassInfo().Propertys.Select(f => f.Value);
-			foreach (var propertyInfo in propertys)
-			{
-				var oldValue = propertyInfo.GetConvertedValue(@base);
-				var newValue = propertyInfo.GetConvertedValue(newObject);
-
-				if (newValue == null && oldValue == null ||
-					(oldValue != null && (newValue == null || newValue.Equals(oldValue))))
-					continue;
-
-				propertyInfo.Setter.Invoke(@base, newValue);
-				updated = true;
-			}
-			return updated;
-		}
-
-		internal static object GetDefault(Type type)
-		{
-			if (type.IsValueType)
-			{
-				return Activator.CreateInstance(type);
-			}
-			return null;
-		}
+		
 
 		/// <summary>
 		///     Checks the Row version of the local entry and the server on
@@ -158,7 +132,7 @@ namespace JPB.DataAccess.Manager
 			if (rowVersion != null)
 			{
 				var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
-				if (rowversionValue != null || entry.GetPK() == GetDefault(entry.GetPKType()))
+				if (rowversionValue != null || entry.GetPK() == DataConverterExtensions.GetDefault(entry.GetPKType()))
 				{
 					var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
 					var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +
@@ -174,9 +148,9 @@ namespace JPB.DataAccess.Manager
 			return false;
 		}
 
-		private IDbCommand CreateUpdateQueryFactory<T>(T entry, IDatabase db, params object[] parameter)
+		private IDbCommand CreateUpdateQueryFactory<T>(T entry, params object[] parameter)
 		{
-			return CreateUpdateQueryFactory(entry.GetType().GetClassInfo(), entry, db, parameter);
+			return CreateUpdateQueryFactory(entry.GetType().GetClassInfo(), entry, parameter);
 		}
 
 		internal IDbCommand _CreateUpdate(DbClassInfoCache classInfo, object entry)

@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     get the size of the Partition of the singel InsertStatements
 		/// </summary>
-		public static uint RangerInsertPation { get; set; }
+		public uint RangerInsertPation { get; set; }
 
 		private void DbAccessLayer_Insert()
 		{
@@ -122,7 +122,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="entry" />
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand _CreateInsert(DbClassInfoCache classInfo, object entry, IDatabase db)
+		public IDbCommand _CreateInsert(DbClassInfoCache classInfo, object entry, IDatabase db)
 		{
 			var ignore =
 				classInfo
@@ -205,38 +205,6 @@ namespace JPB.DataAccess.Manager
 				RaiseInsert(entry, mergeCommands, s);
 				return Select(type, s.GetSkalar(mergeCommands), s, egarLoading);
 			});
-		}
-
-		/// <summary>
-		///     Not Connection save
-		///     Must be executed inside a Valid Connection
-		///     Takes <paramref name="base" /> as base of Connection propertys
-		///     Merges the Command text of Both commands sepperated by a space
-		///     Creats a new command based on
-		///     <paramref name="db" />
-		///     and Adds the Merged Commandtext and all parameter to it
-		/// </summary>
-		/// <returns></returns>
-		public static IDbCommand ConcatCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
-		{
-			return db.MergeTextToParameters(@base, last, autoRename);
-		}
-
-		/// <summary>
-		///     Not Connection save
-		///     Must be executed inside a Valid Connection
-		///     Takes <paramref name="base" /> as base of Connection propertys
-		///     Merges the Command text of Both commands sepperated by a space
-		///     Creats a new command based on
-		///     <paramref name="db" />
-		///     and Adds the Merged Commandtext and all parameter to it
-		/// </summary>
-		/// <returns></returns>
-		public static IDbCommand InsertCommands(IDatabase db, IDbCommand @base, IDbCommand toInsert, bool autoRename = false)
-		{
-			throw new NotSupportedException();
-			//var mergedCommandText = string.Format(@base.CommandText, toInsert);
-			//return db.MergeTextToParameters(mergedCommandText, @base, toInsert, autoRename);
 		}
 
 		/// <summary>

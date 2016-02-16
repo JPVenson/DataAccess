@@ -62,7 +62,7 @@ namespace JPB.DataAccess
 					if (!autoRename)
 					{
 						throw new ArgumentOutOfRangeException("base",
-							string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
+							String.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
 								item.ParameterName));
 					}
 					var counter = 1;
@@ -70,7 +70,7 @@ namespace JPB.DataAccess
 					var buffParam = parameterName;
 					while (parameter.Any(s => s.Name == buffParam))
 					{
-						buffParam = string.Format("{0}_{1}", parameterName, counter);
+						buffParam = String.Format("{0}_{1}", parameterName, counter);
 						counter++;
 					}
 					commandText = commandText.Replace(item.ParameterName, buffParam);
@@ -331,7 +331,39 @@ namespace JPB.DataAccess
 		{
 			return db.Run(s => s.ExecuteNonQuery(command));
 		}
-		
+
+		/// <summary>
+		///     Not Connection save
+		///     Must be executed inside a Valid Connection
+		///     Takes <paramref name="base" /> as base of Connection propertys
+		///     Merges the Command text of Both commands sepperated by a space
+		///     Creats a new command based on
+		///     <paramref name="db" />
+		///     and Adds the Merged Commandtext and all parameter to it
+		/// </summary>
+		/// <returns></returns>
+		public static IDbCommand ConcatCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
+		{
+			return db.MergeTextToParameters(@base, last, autoRename);
+		}
+
+		/// <summary>
+		///     Not Connection save
+		///     Must be executed inside a Valid Connection
+		///     Takes <paramref name="base" /> as base of Connection propertys
+		///     Merges the Command text of Both commands sepperated by a space
+		///     Creats a new command based on
+		///     <paramref name="db" />
+		///     and Adds the Merged Commandtext and all parameter to it
+		/// </summary>
+		/// <returns></returns>
+		public static IDbCommand InsertCommands(IDatabase db, IDbCommand @base, IDbCommand toInsert, bool autoRename = false)
+		{
+			throw new NotSupportedException();
+			//var mergedCommandText = string.Format(@base.CommandText, toInsert);
+			//return db.MergeTextToParameters(mergedCommandText, @base, toInsert, autoRename);
+		}
+
 		internal static IDatabaseStrategy GenerateStrategy(this string fullValidIdentifyer, string connection)
 		{
 			if (String.IsNullOrEmpty(fullValidIdentifyer))

@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Manager
 			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}
 
-		internal static IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry, IDatabase db)
+		internal IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry, IDatabase db)
 		{
 			if (classInfo.PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.ClassName));
