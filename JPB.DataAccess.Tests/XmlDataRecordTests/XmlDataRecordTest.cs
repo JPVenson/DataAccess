@@ -8,7 +8,7 @@ using JPB.DataAccess.Tests.TestModels.XmlDataRecordTest;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.XmlDataRecordTests
-#if MSSQL
+#if MsSql
 .MsSQL
 #endif
 

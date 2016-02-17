@@ -4,7 +4,7 @@ using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.PocoPkEquallityTests
-#if MSSQL
+#if MsSql
 .MsSQL
 #endif
 

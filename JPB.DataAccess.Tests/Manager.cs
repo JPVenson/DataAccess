@@ -14,7 +14,7 @@ namespace JPB.DataAccess.Tests
 	{
 		private static DbAccessLayer expectWrapper;
 
-#if MSSQL
+#if MsSql
 		public const string SConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
 		public DbAccessType DbAccessType
 		{
@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Tests
 					UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
 #endif
 
-#if MSSQL
+#if MsSql
 			var redesginDatabase = string.Format(
 	"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
 	dbname);

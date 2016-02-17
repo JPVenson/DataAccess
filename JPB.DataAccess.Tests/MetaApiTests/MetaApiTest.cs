@@ -4,7 +4,7 @@ using JPB.DataAccess.Tests.TestModels.MetaAPI;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.MetaApiTests
-#if MSSQL
+#if MsSql
 .MsSQL
 #endif
 

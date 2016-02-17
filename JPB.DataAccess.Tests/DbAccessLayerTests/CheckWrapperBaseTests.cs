@@ -16,13 +16,13 @@ using NUnit.Framework;
 using System.Data.SQLite;
 #endif
 
-#if MSSQL
+#if MsSql
 using System.Data.SqlClient;
 #endif
 
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
-#if MSSQL
+#if MsSql
 .MsSQL
 #endif
 
@@ -115,7 +115,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		//#if MSSQL
+		//#if MsSql
 		//		[ExpectedException(typeof(SqlException))]
 		//#endif
 		//#if SqLite		
@@ -139,7 +139,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			var unexpected = typeof(Exception);
 
-#if MSSQL
+#if MsSql
 			unexpected = typeof(SqlException);
 #endif
 #if SqLite

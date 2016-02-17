@@ -3,7 +3,7 @@ using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.LocalDbTests
-#if MSSQL
+#if MsSql
 .MsSQL
 #endif
 
