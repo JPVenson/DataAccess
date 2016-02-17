@@ -19,6 +19,7 @@ using System.Security;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CSharp;
 
@@ -310,11 +311,11 @@ namespace JPB.DataAccess.DbInfoConfig
 
 					var baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
 
-					if (propertyInfoCache.PropertyType == typeof (string))
+					if (propertyInfoCache.PropertyType == typeof(string))
 					{
-						baseType = typeof (string);
+						baseType = typeof(string);
 					}
-					else if(propertyInfoCache.PropertyType.IsArray)
+					else if (propertyInfoCache.PropertyType.IsArray)
 					{
 						baseType = propertyInfoCache.PropertyType;
 					}
@@ -330,8 +331,7 @@ namespace JPB.DataAccess.DbInfoConfig
 							container.Statements.Add(buffAssignment);
 						}
 
-						var checkForDbNull = new CodeConditionStatement
-						{
+						var checkForDbNull = new CodeConditionStatement {
 							Condition = new CodeBinaryOperatorExpression(uncastLocalVariableRef,
 								CodeBinaryOperatorType.IdentityEquality,
 								new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"))
@@ -451,8 +451,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			var writer = new StringWriter();
 			writer.NewLine = Environment.NewLine;
 
-			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions
-			{
+			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions {
 				BlankLinesBetweenMembers = false,
 				VerbatimOrder = true,
 				ElseOnClosing = true
@@ -503,89 +502,109 @@ namespace JPB.DataAccess.DbInfoConfig
 			compiler.Members.Add(codeConstructor);
 
 			cp.GenerateInMemory = true;
+			cp.OutputAssembly =
+				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+				+ @"\" + target.Name
+				+ "_Poco.dll";
 
-			var callingAssm = Assembly.GetEntryAssembly();
-			if (callingAssm == null)
+			Assembly compiledAssembly;
+			ConstructorInfo[] constructorInfos = null;
+			TypeInfo targetType = null;
+
+			if (File.Exists(cp.OutputAssembly))
 			{
-				//are we testing are we?
-				callingAssm = Assembly.GetExecutingAssembly();
+				var bufferAssam = Assembly.Load(cp.OutputAssembly);
+				targetType = target.GetTypeInfo();
+				var type = bufferAssam.DefinedTypes.FirstOrDefault(s => s == targetType);
+				if (targetType != null)
+					constructorInfos = targetType.GetConstructors();
 			}
 
-			cp.TempFiles = new TempFileCollection(Path.GetDirectoryName(callingAssm.Location), true);
-
-			if (settings.CreateDebugCode)
+			if (constructorInfos == null)
 			{
-				cp.GenerateInMemory = false;
-				cp.TempFiles.KeepFiles = true;
-				cp.IncludeDebugInformation = true;
-			}
-
-			cp.GenerateExecutable = false;
-			cp.ReferencedAssemblies.Add(target.Assembly.ManifestModule.Name);
-			cp.ReferencedAssemblies.Add("System.dll");
-			cp.ReferencedAssemblies.Add("System.Core.dll");
-			cp.ReferencedAssemblies.Add("System.Data.dll");
-			cp.ReferencedAssemblies.Add("System.Xml.dll");
-			cp.ReferencedAssemblies.Add("System.Xml.Linq.dll");
-			cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
-			var compileUnit = new CodeCompileUnit();
-
-			foreach (var defaultNamespace in settings.DefaultNamespaces)
-			{
-				importNameSpace.Imports.Add(new CodeNamespaceImport(defaultNamespace));
-			}
-
-			foreach (var additionalNamespace in classInfo.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
-			{
-				importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
-			}
-
-			if (classCtorAttr.FullSateliteImport)
-			{
-				foreach (var referencedAssembly in target.Assembly.GetReferencedAssemblies())
+				var callingAssm = Assembly.GetEntryAssembly();
+				if (callingAssm == null)
 				{
-					cp.ReferencedAssemblies.Add(referencedAssembly.Name);
+					//are we testing are we?
+					callingAssm = Assembly.GetExecutingAssembly();
 				}
-			}
 
-			importNameSpace.Types.Add(compiler);
-
-			compileUnit.Namespaces.Add(importNameSpace);
-			var provider = new CSharpCodeProvider();
-			var compileAssemblyFromDom = provider.CompileAssemblyFromDom(cp, compileUnit);
-
-
-			if (compileAssemblyFromDom.Errors.Count > 0 && settings.EnforceCreation)
-			{
-				var ex =
-					new InvalidDataException(string.Format("There where {0} errors due compilation. See Data",
-						compileAssemblyFromDom.Errors.Count));
-
-				ex.Data.Add("Object", compileAssemblyFromDom);
-				foreach (CompilerError error in compileAssemblyFromDom.Errors)
+				if (settings.CreateDebugCode)
 				{
-					ex.Data.Add(error.ErrorNumber, error);
+					cp.TempFiles = new TempFileCollection(Path.GetDirectoryName(callingAssm.Location), true);
+					cp.GenerateInMemory = false;
+					cp.TempFiles.KeepFiles = true;
+					cp.IncludeDebugInformation = true;
 				}
-				throw ex;
-			}
 
-			var compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
+				//cp.GenerateExecutable = true;
+				cp.ReferencedAssemblies.Add(target.Assembly.Location);
+				cp.ReferencedAssemblies.Add("System.dll");
+				cp.ReferencedAssemblies.Add("System.Core.dll");
+				cp.ReferencedAssemblies.Add("System.Data.dll");
+				cp.ReferencedAssemblies.Add("System.Xml.dll");
+				cp.ReferencedAssemblies.Add("System.Xml.Linq.dll");
+				cp.ReferencedAssemblies.Add(typeof(DbAccessLayer).Assembly.Location);
+				var compileUnit = new CodeCompileUnit();
 
-			var targetType = compiledAssembly.DefinedTypes.First();
-			var constructorInfos = targetType.GetConstructors();
-			if (!constructorInfos.Any())
-			{
-				if (settings.EnforceCreation)
-					return null;
-				var ex =
-					new InvalidDataException(string.Format("There where was an unknown error due compilation. No CTOR was build"));
-
-				ex.Data.Add("Object", compileAssemblyFromDom);
-				foreach (CompilerError error in compileAssemblyFromDom.Errors)
+				foreach (var defaultNamespace in settings.DefaultNamespaces)
 				{
-					ex.Data.Add(error.ErrorNumber, error);
+					importNameSpace.Imports.Add(new CodeNamespaceImport(defaultNamespace));
 				}
-				throw ex;
+
+				foreach (var additionalNamespace in classInfo.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
+				{
+					importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
+				}
+
+				if (classCtorAttr.FullSateliteImport)
+				{
+					foreach (var referencedAssembly in target.Assembly.GetReferencedAssemblies())
+					{
+						cp.ReferencedAssemblies.Add(referencedAssembly.Name);
+					}
+				}
+
+				importNameSpace.Types.Add(compiler);
+
+				compileUnit.Namespaces.Add(importNameSpace);
+				var provider = new CSharpCodeProvider();
+				var compileAssemblyFromDom = provider.CompileAssemblyFromDom(cp, compileUnit);
+
+				if (compileAssemblyFromDom.Errors.Count > 0 && !settings.EnforceCreation)
+				{
+					var ex =
+						new InvalidDataException(string.Format("There are {0} errors due compilation. See Data",
+							compileAssemblyFromDom.Errors.Count));
+
+					ex.Data.Add("Object", compileAssemblyFromDom);
+					int errNr = 0;
+					foreach (CompilerError error in compileAssemblyFromDom.Errors)
+					{
+						ex.Data.Add(errNr++ +
+							error.ErrorNumber + ":" + error.Column + "," + error.Line, error.ErrorText);
+					}
+					throw ex;
+				}
+
+				compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
+
+				targetType = compiledAssembly.DefinedTypes.First();
+				constructorInfos = targetType.GetConstructors();
+				if (!constructorInfos.Any())
+				{
+					if (settings.EnforceCreation)
+						return null;
+					var ex =
+						new InvalidDataException(string.Format("There are was an unknown error due compilation. No CTOR was build"));
+
+					ex.Data.Add("Object", compileAssemblyFromDom);
+					foreach (CompilerError error in compileAssemblyFromDom.Errors)
+					{
+						ex.Data.Add(error.ErrorNumber, error);
+					}
+					throw ex;
+				}
 			}
 
 			var matchingCtor = constructorInfos.FirstOrDefault(s =>
@@ -600,21 +619,6 @@ namespace JPB.DataAccess.DbInfoConfig
 				}
 				return true;
 			});
-
-			if (matchingCtor == null)
-			{
-				if (settings.EnforceCreation)
-					return null;
-				var ex =
-					new InvalidDataException(string.Format("There where was an unknown error due compilation. No CTOR was build"));
-
-				ex.Data.Add("Object", compileAssemblyFromDom);
-				foreach (CompilerError error in compileAssemblyFromDom.Errors)
-				{
-					ex.Data.Add(error.ErrorNumber, error);
-				}
-				throw ex;
-			}
 
 			var dm = new DynamicMethod("Create" + target.Name, target, new[] { typeof(IDataRecord) }, target, true);
 			var il = dm.GetILGenerator();

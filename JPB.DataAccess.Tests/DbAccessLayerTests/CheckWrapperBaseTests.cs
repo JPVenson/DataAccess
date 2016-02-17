@@ -162,8 +162,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			//Assert.AreEqual(selectTest, insGuid);
 			//DbConfig.Clear();
 		}
-
-		[SecurityCritical]
+		
 		[Test]
 		public void ConfigLessInplace()
 		{
