@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E2B693F3-AB5A-4E96-831A-DCB06861C89F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JPB.DataAccess.Tests.MsSQL</RootNamespace>
+    <AssemblyName>JPB.DataAccess.Tests.MsSQL</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;MSSQL, Test</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\JPB.DataAccess.Tests\DbAccessLayerTests\CheckWrapperBaseTests.cs">
+      <Link>DbAccessLayerTests\CheckWrapperBaseTests.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\DbCollectionTests\DbCollection.cs">
+      <Link>DbCollectionTests\DbCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbTest.cs">
+      <Link>LocalDbTests\LocalDbTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbWithFkTest.cs">
+      <Link>LocalDbTests\LocalDbWithFkTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Manager.cs">
+      <Link>Manager.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\MetaApiTests\MetaApiTest.cs">
+      <Link>MetaApiTests\MetaApiTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerUnitTest.cs">
+      <Link>PagerTests\PagerUnitTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs">
+      <Link>PocoPkEquallityTests\PocoPkEqualityComparerTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\FooTest.cs">
+      <Link>TestModels\CheckWrapperBaseTests\FooTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\Image.cs">
+      <Link>TestModels\CheckWrapperBaseTests\Image.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\TestProcA.cs">
+      <Link>TestModels\CheckWrapperBaseTests\TestProcA.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\TestProcAResult.cs">
+      <Link>TestModels\CheckWrapperBaseTests\TestProcAResult.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\User.cs">
+      <Link>TestModels\CheckWrapperBaseTests\User.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\MetaAPI\StructCreating.cs">
+      <Link>TestModels\MetaAPI\StructCreating.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\XmlDataRecordTest\InstanceMock.cs">
+      <Link>TestModels\XmlDataRecordTest\InstanceMock.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\XmlDataRecordTests\XmlDataRecordTest.cs">
+      <Link>XmlDataRecordTests\XmlDataRecordTest.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
+      <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
+      <Name>JPB.DataAccess</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

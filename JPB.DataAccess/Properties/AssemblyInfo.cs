@@ -48,4 +48,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("2.0.*")]
 [assembly: AssemblyFileVersion("2.0.0.0012")]
 [assembly: InternalsVisibleTo("JPB.DataAccess.EntityCreator")]
-[assembly: InternalsVisibleTo("JPB.DataAccess.UnitTests")]
+[assembly: InternalsVisibleTo("JPB.DataAccess.Tests")]
+[assembly: InternalsVisibleTo("JPB.DataAccess.Tests.MsSQL")]
+[assembly: InternalsVisibleTo("JPB.DataAccess.Tests.SqLite")]

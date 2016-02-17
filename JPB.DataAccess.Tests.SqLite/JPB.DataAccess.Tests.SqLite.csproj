@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{82780128-6610-479B-8BED-4E35580DE520}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JPB.DataAccess.Tests.SqLite</RootNamespace>
+    <AssemblyName>JPB.DataAccess.Tests.SqLite</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>5746a797</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SqLite</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.99.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SQLite.Core.1.0.99.0\lib\net45\System.Data.SQLite.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\JPB.DataAccess.Tests\DbAccessLayerTests\CheckWrapperBaseTests.cs">
+      <Link>DbAccessLayerTests\CheckWrapperBaseTests.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\DbCollectionTests\DbCollection.cs">
+      <Link>DbCollectionTests\DbCollection.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbTest.cs">
+      <Link>LocalDbTests\LocalDbTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbWithFkTest.cs">
+      <Link>LocalDbTests\LocalDbWithFkTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Manager.cs">
+      <Link>Manager.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\MetaApiTests\MetaApiTest.cs">
+      <Link>MetaApiTests\MetaApiTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerUnitTest.cs">
+      <Link>PagerTests\PagerUnitTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs">
+      <Link>PocoPkEquallityTests\PocoPkEqualityComparerTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\FooTest.cs">
+      <Link>TestModels\CheckWrapperBaseTests\FooTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\Image.cs">
+      <Link>TestModels\CheckWrapperBaseTests\Image.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\TestProcA.cs">
+      <Link>TestModels\CheckWrapperBaseTests\TestProcA.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\TestProcAResult.cs">
+      <Link>TestModels\CheckWrapperBaseTests\TestProcAResult.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\User.cs">
+      <Link>TestModels\CheckWrapperBaseTests\User.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\MetaAPI\StructCreating.cs">
+      <Link>TestModels\MetaAPI\StructCreating.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\TestModels\XmlDataRecordTest\InstanceMock.cs">
+      <Link>TestModels\XmlDataRecordTest\InstanceMock.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\XmlDataRecordTests\XmlDataRecordTest.cs">
+      <Link>XmlDataRecordTests\XmlDataRecordTest.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.SqlLite\JPB.DataAccess.SqLite.csproj">
+      <Project>{de42f7ed-51b5-4118-831b-05efeeecd7ac}</Project>
+      <Name>JPB.DataAccess.SqLite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
+      <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
+      <Name>JPB.DataAccess</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\System.Data.SQLite.Core.1.0.99.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.99.0\build\net45\System.Data.SQLite.Core.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.99.0\build\net45\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.99.0\build\net45\System.Data.SQLite.Core.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -119,12 +119,12 @@ namespace JPB.DataAccess.SqLite
 
 		public IDataPager<T> CreatePager<T>()
 		{
-			throw new NotImplementedException("The method or operation is not implemented.");
+			return new SqLiteDataPager<T>();
 		}
 
 		public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
 		{
-			throw new NotImplementedException("The method or operation is not implemented.");
+			return new SqLiteDataConverterPager<T, TE>();
 		}
 
 		public string FormartCommandToQuery(IDbCommand command)

@@ -83,6 +83,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SqLiteDataConverterPager.cs" />
+    <Compile Include="SqLiteDataPager.cs" />
+    <Compile Include="SqLiteUntypedDataPager.cs" />
     <Compile Include="SqLite.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
