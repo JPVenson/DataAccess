@@ -270,6 +270,18 @@ namespace JPB.DataAccess.QueryBuilder
 		{
 			return Render();
 		}
+
+		private string delimiter = "";
+
+		/// <summary>
+		/// Adds an AccessType specfic delimiter to the output
+		/// </summary>
+		/// <returns></returns>
+		public QueryBuilder Delimiter()
+		{
+			this.Query(delimiter);
+			return this;
+		}
 	}
 
 

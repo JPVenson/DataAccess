@@ -123,6 +123,7 @@
     <Compile Include="DbInfoConfig\DbConfig.cs" />
     <Compile Include="DbInfoConfig\DbInfo\DbMethodArgument.cs" />
     <Compile Include="DbInfoConfig\FactoryHelper.cs" />
+    <Compile Include="DbInfoConfig\FactoryHelperSettings.cs" />
     <Compile Include="Helper\LocalDb\DatabaseScope.cs" />
     <Compile Include="Helper\LocalDb\ForginKeyConstraintException.cs" />
     <Compile Include="Helper\LocalDb\LocalDbManager.cs" />

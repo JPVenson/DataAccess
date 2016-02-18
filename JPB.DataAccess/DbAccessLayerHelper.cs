@@ -423,5 +423,33 @@ namespace JPB.DataAccess
 			instanceOfType.ConnectionString = connection;
 			return instanceOfType;
 		}
+
+		/// <summary>
+		///     Creates a new Instance based on possible Ctor's and the given
+		///     <paramref name="reader" />
+		/// </summary>
+		/// <returns></returns>
+		public static object SetPropertysViaReflection(this DbClassInfoCache type, IDataRecord reader)
+		{
+			return type.SetPropertysViaReflection(reader, null);
+		}
+
+		/// <summary>
+		///     Creates a new Instance based on possible Ctor's and the given
+		///     <paramref name="reader" />
+		/// </summary>
+		/// <returns></returns>
+		public static object SetPropertysViaReflection(this DbClassInfoCache type, IDataRecord reader, DbAccessType? accessType)
+		{
+			if (reader == null)
+				return null;
+
+			bool created;
+			object source = DbAccessLayer.CreateInstance(type, reader, out created);
+			if (created)
+				return source;
+
+			return DbAccessLayer.ReflectionPropertySet(source, type, reader, null, accessType);
+		}
 	}
 }

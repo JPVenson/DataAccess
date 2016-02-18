@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Runtime.CompilerServices;
 using JPB.DataAccess.Contacts;
@@ -57,7 +58,7 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		}
 	}
 
-	[AutoGenerateCtor]
+	[AutoGenerateCtor(CtorGeneratorMode = CtorGeneratorMode.FactoryMethod)]
 	public class Users
 	{
 		[PrimaryKey]
@@ -76,13 +77,40 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 	}
 
+	[AutoGenerateCtor]
+	[ForModel(UsersMeta.UserTable)]
+	public sealed class UsersAutoGenerateConstructorWithSingleXml
+	{
+		[PrimaryKey]
+		public long User_ID { get; set; }
+
+		public string UserName { get; set; }
+
+		[FromXml("Sub", LoadStrategy = LoadStrategy.NotIncludeInSelect)]
+		[InsertIgnore]
+		public UsersAutoGenerateConstructorWithSingleXml Sub { get; set; }
+	}
+
+	[AutoGenerateCtor]
+	[ForModel(UsersMeta.UserTable)]
+	public sealed class UsersAutoGenerateConstructorWithMultiXml
+	{
+		[PrimaryKey]
+		public long User_ID { get; set; }
+
+		public string UserName { get; set; }
+
+		[FromXml("Subs", LoadStrategy = LoadStrategy.NotIncludeInSelect)]
+		[InsertIgnore]
+		public IEnumerable<UsersAutoGenerateConstructorWithSingleXml> Subs { get; set; }
+	}
+
 	public class ConfigLessUser
 	{
 		public long PropertyA { get; set; }
 		public string PropertyB { get; set; }
 	}
 
-	[AutoGenerateCtor]
 	public class ConfigLessUserInplaceConfig
 	{
 		public long PropertyA { get; set; }
@@ -153,8 +181,8 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 	{
 		public Users_PK_IDFM_CTORSEL(IDataRecord rec)
 		{
-			UserName = (string) rec[UsersMeta.UserNameCol];
-			UserId = (long) rec[UsersMeta.UserIDCol];
+			UserName = (string)rec[UsersMeta.UserNameCol];
+			UserId = (long)rec[UsersMeta.UserIDCol];
 		}
 
 		[PrimaryKey]
@@ -239,7 +267,7 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		[SelectFactoryMethod]
 		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder)
 		{
-			builder.Select(typeof (Users_StaticQueryFactoryForSelect));
+			builder.Select(typeof(Users_StaticQueryFactoryForSelect));
 		}
 	}
 
@@ -255,7 +283,7 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		[SelectFactoryMethod]
 		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder, long whereId)
 		{
-			builder.Select(typeof (Users_StaticQueryFactoryForSelectWithArugments))
+			builder.Select(typeof(Users_StaticQueryFactoryForSelectWithArugments))
 				.Where(UsersMeta.UserIDCol + " = @whereId", new
 				{
 					whereId

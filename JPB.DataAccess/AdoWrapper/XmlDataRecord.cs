@@ -26,7 +26,7 @@ namespace JPB.DataAccess.AdoWrapper
 		private readonly DbClassInfoCache _target;
 		private readonly XElement baseElement;
 
-		internal XmlDataRecord(string xmlStream, Type target) 
+		internal XmlDataRecord(string xmlStream, Type target)
 			: this(xmlStream, target.GetClassInfo())
 		{
 
@@ -63,13 +63,18 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public object GetValue(int i)
 		{
+			if (i == -1)
+				return System.DBNull.Value;
+			if (i >= baseElement.Elements().Count())
+				return System.DBNull.Value;
+
 			var name = GetName(i);
 
 			var mapEntiysPropToSchema = _target.GetDbToLocalSchemaMapping(name);
 
 			var firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
 			if (firstOrDefault == null)
-				return null;
+				return System.DBNull.Value;
 
 			var propertyType = firstOrDefault.PropertyType;
 			var xElement = baseElement.Elements().ElementAt(i);
@@ -212,14 +217,21 @@ namespace JPB.DataAccess.AdoWrapper
 		///     takes care of the loader strategy
 		/// </summary>
 		/// <returns></returns>
-		public static XmlDataRecord TryParse(string xmlStream, Type target)
+		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single)
 		{
 			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
 				return null;
 			try
 			{
 				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
-				return new XmlDataRecord(xDocument, target);
+				var record = new XmlDataRecord(xDocument, target);
+
+				if (single)
+				{
+					return record.CreateListOfItems().FirstOrDefault();
+				}
+
+				return record;
 			}
 			catch (Exception ex)
 			{

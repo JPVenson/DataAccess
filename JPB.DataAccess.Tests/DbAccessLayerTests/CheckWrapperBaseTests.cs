@@ -91,7 +91,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var config = new DbConfig();
 
 			DbConfig.Clear();
-			DbConfig.ConstructorSettings.CreateDebugCode = true;
 
 			config.SetConfig<ConfigLessUser>(f =>
 			{
@@ -115,12 +114,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		//#if MsSql
-		//		[ExpectedException(typeof(SqlException))]
-		//#endif
-		//#if SqLite		
-		//		[ExpectedException(typeof(SQLiteException))]
-		//#endif
 		public void ConfigLessFail()
 		{
 			DbConfig.Clear();
@@ -144,25 +137,78 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 #endif
 #if SqLite
 			unexpected = typeof(SQLiteException);
-		
 #endif
 
 			Assert.That(() =>
 			{
 				expectWrapper.Insert(new ConfigLessUser { PropertyB = insGuid });
 			}, Throws.Exception.TypeOf(unexpected));
-
-
-
-
-			//string selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.UserTable);
-			//object selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
-
-			//Assert.IsNotNull(selectTest);
-			//Assert.AreEqual(selectTest, insGuid);
-			//DbConfig.Clear();
 		}
-		
+
+		[Test]
+		public void AutoGenFactoryTestSimple()
+		{
+			DbConfig.Clear();
+
+			expectWrapper.Insert(new UsersAutoGenerateConstructor());
+			var elements = expectWrapper.Select<UsersAutoGenerateConstructor>();
+			Assert.IsNotNull(elements);
+			Assert.IsNotEmpty(elements);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		public void AutoGenFactoryTestXmlSingle()
+		{
+			DbConfig.Clear();
+
+			expectWrapper.Insert(new UsersAutoGenerateConstructorWithSingleXml());
+			var elements = expectWrapper.Query()
+				.Query("SELECT")
+				.Query("res." + UsersMeta.UserIDCol)
+				.Query(",res." + UsersMeta.UserNameCol)
+				.Query(",")
+				.InBracket(s => s.Select<UsersAutoGenerateConstructorWithSingleXml>().ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+				.As("Sub")
+				.Query("FROM")
+				.Query(UsersMeta.UserTable)
+				.As("res")
+				.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
+
+			var result = elements.ToArray();
+
+			Assert.IsNotNull(result);
+			Assert.IsNotEmpty(result);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		public void AutoGenFactoryTestXmlMulti()
+		{
+			DbConfig.Clear();
+
+			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+
+			var elements = expectWrapper.Query()
+				.Query("SELECT")
+				.Query("res." + UsersMeta.UserIDCol)
+				.Query(",res." + UsersMeta.UserNameCol)
+				.Query(",")
+				.InBracket(s => s.Select<UsersAutoGenerateConstructorWithMultiXml>().ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+				.As("Subs")
+				.Query("FROM")
+				.Query(UsersMeta.UserTable)
+				.As("res")
+				.ForResult<UsersAutoGenerateConstructorWithMultiXml>();
+
+			var result = elements.ToArray();
+
+			Assert.IsNotNull(result);
+			Assert.IsNotEmpty(result);
+		}
+
 		[Test]
 		public void ConfigLessInplace()
 		{
@@ -195,6 +241,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				new List<QueryParameter> { new QueryParameter("test", 10) });
 			Assert.AreEqual(resultSelect1, -1);
 		}
+
+
 
 		[Test]
 		public void InsertFactoryTest()

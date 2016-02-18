@@ -196,8 +196,8 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 				}
 
 				Refresh(true);
-				CheckCtor();
 			}
+			CheckCtor();
 		}
 
 		internal void CreateFactory()

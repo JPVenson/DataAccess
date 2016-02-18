@@ -243,10 +243,11 @@ namespace JPB.DataAccess.QueryBuilder
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
 		/// <returns></returns>
-		public static QueryBuilder SubSelect(this QueryBuilder query, Action<QueryBuilder> subSelect)
+		public static QueryBuilder SubSelect(this QueryBuilder query, Action<QueryBuilder> subSelect, Type type)
 		{
 			query.AutoLinebreakAction();
 			query.Query("(");
+			query.Select(type);
 			subSelect(query);
 			query.Query(")");
 			return query;

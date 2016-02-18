@@ -87,7 +87,7 @@ namespace JPB.DataAccess.Tests
 																		  "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
 																		  "END "));
 #endif
-			DbConfig.ConstructorSettings.CreateDebugCode = true;
+			DbConfig.ConstructorSettings.CreateDebugCode = false;
 
 			Assert.NotNull(expectWrapper);
 			bool checkDatabase = expectWrapper.CheckDatabase();

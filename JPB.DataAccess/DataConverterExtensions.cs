@@ -381,10 +381,10 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		//public static T SetPropertysViaReflection<T>(DbClassInfoCache info, IDataRecord reader)
+		//public static T ReflectionPropertySet<T>(DbClassInfoCache info, IDataRecord reader)
 		//	where T : class
 		//{
-		//	return (T)info.SetPropertysViaReflection(reader);
+		//	return (T)info.ReflectionPropertySet(reader);
 		//}
 
 		/// <summary>

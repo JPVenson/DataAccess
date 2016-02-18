@@ -434,7 +434,11 @@ namespace JPB.DataAccess.Manager
 			sb.Append(classType.CreatePropertyCsv(
 				classType
 					.Propertys
-					.Where(f => f.Value.ForginKeyAttribute != null)
+					.Where(f => f.Value.ForginKeyAttribute != null ||
+						(
+							f.Value.FromXmlAttribute != null 
+							&& f.Value.FromXmlAttribute.Attribute.LoadStrategy == LoadStrategy.NotIncludeInSelect
+						))
 					.Select(f => f.Key)
 					.ToArray()));
 			sb.Append(" FROM ");

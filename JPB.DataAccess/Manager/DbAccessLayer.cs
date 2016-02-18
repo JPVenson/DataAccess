@@ -285,12 +285,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader)
 		{
-			bool created;
-			object source = CreateInstance(type, reader, out created);
-			if (created)
-				return source;
-
-			return SetPropertysViaReflection(source, type, reader, null);
+			return SetPropertysViaReflection(type, reader, null);
 		}
 
 
@@ -307,14 +302,17 @@ namespace JPB.DataAccess.Manager
 			if (created)
 				return source;
 
-			return SetPropertysViaReflection(source, type, reader, mapping);
+			return ReflectionPropertySet(source, type, reader, mapping, DbAccessType);
 		}
 
 		/// <summary>
 		///     Creates an instance based on a Ctor injection or Reflection loading
 		/// </summary>
 		/// <returns></returns>
-		public object CreateInstance(DbClassInfoCache classInfo, IDataRecord reader, out bool fullLoaded)
+		public static object CreateInstance(DbClassInfoCache classInfo, 
+			IDataRecord reader, 
+			out bool fullLoaded, 
+			DbAccessType? accessType = null)
 		{
 			if (classInfo.Factory != null)
 			{
@@ -323,12 +321,12 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var objectFactorys = classInfo.Constructors.Where(s => s.Arguments.Count == 1 
-			&& s.Arguments.First().Type == typeof(IDataRecord));
+			&& s.Arguments.First().Type == typeof(IDataRecord)).ToArray();
 
 			var constructor = objectFactorys.FirstOrDefault(s =>
 			s.Attributes.Any(f =>
 				f.Attribute is ObjectFactoryMethodAttribute
-				&& (!IsMultiProviderEnvironment || (f.Attribute as ObjectFactoryMethodAttribute).TargetDatabase == Database.TargetDatabase)));
+				&& (!accessType.HasValue || (f.Attribute as ObjectFactoryMethodAttribute).TargetDatabase == accessType.Value)));
 
 			if (constructor == null)
 				constructor = objectFactorys.FirstOrDefault();
@@ -341,7 +339,7 @@ namespace JPB.DataAccess.Manager
 				{
 					classInfo.FullFactory = true;
 					classInfo.Factory = s => constructor.Invoke(new object[] { s });
-					return CreateInstance(classInfo, reader, out fullLoaded);
+					return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 				}
 			}
 			else
@@ -355,16 +353,20 @@ namespace JPB.DataAccess.Manager
 				{
 					if (factory.MethodInfo.IsStatic)
 					{
-						var returnType = (factory.MethodInfo as MethodInfo).ReturnParameter;
-
-						if (returnType != null && returnType.ParameterType == classInfo.Type)
+						var methodInfo = factory.MethodInfo as MethodInfo;
+						if (methodInfo != null)
 						{
-							if (factory.Arguments.Count == 1 &&
-								factory.Arguments.First().Type == typeof(IDataRecord))
+							var returnType = methodInfo.ReturnParameter;
+
+							if (returnType != null && returnType.ParameterType == classInfo.Type)
 							{
-								classInfo.FullFactory = true;
-								classInfo.Factory = s => factory.Invoke(new object[] { reader });
-								return CreateInstance(classInfo, reader, out fullLoaded);
+								if (factory.Arguments.Count == 1 &&
+								    factory.Arguments.First().Type == typeof(IDataRecord))
+								{
+									classInfo.FullFactory = true;
+									classInfo.Factory = s => factory.Invoke(new object[] { reader });
+									return CreateInstance(classInfo, reader, out fullLoaded, accessType);
+								}
 							}
 						}
 					}
@@ -380,17 +382,18 @@ namespace JPB.DataAccess.Manager
 
 			classInfo.FullFactory = false;
 			classInfo.Factory = s => emptyCtor.Invoke(new object[0]);
-			return CreateInstance(classInfo, reader, out fullLoaded);
+			return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 		}
 		/// <summary>
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
 		[Obsolete("This mehtod is replaced by several FASTER equal ones. It may be replaced, updated or delted. But it will change that is for sure. legacy support only")]
-		public object SetPropertysViaReflection(
+		public static object ReflectionPropertySet(
 			object instance,
 			DbClassInfoCache info,
 			IDataRecord reader,
-			Dictionary<int, DbPropertyInfoCache> cache)
+			Dictionary<int, DbPropertyInfoCache> cache,
+			DbAccessType? dbAccessType)
 		{
 			if (reader == null)
 				return instance;
@@ -467,12 +470,12 @@ namespace JPB.DataAccess.Manager
 							//target Property is of type list
 							//so expect a xml valid list Take the first element and expect the propertys inside this first element
 							var record = XmlDataRecord.TryParse(xmlStream,
-								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault());
+								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault(), false);
 							var xmlDataRecords = record.CreateListOfItems();
 
 							var genericArguments =
 								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault().GetClassInfo();
-							List<object> enumerableOfItems = xmlDataRecords.Select(s => SetPropertysViaReflection(genericArguments, s)).ToList();
+							List<object> enumerableOfItems = xmlDataRecords.Select(s => DbAccessLayerHelper.SetPropertysViaReflection(genericArguments, s)).ToList();
 							object castedList;
 
 							if (genericArguments.Type.IsClass && genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
@@ -501,10 +504,12 @@ namespace JPB.DataAccess.Manager
 						{
 							//the t
 							object xmlSerilizedProperty = 
-								SetPropertysViaReflection(property
+								DbAccessLayerHelper.SetPropertysViaReflection(property
 								.PropertyInfo
 								.PropertyType
-								.GetClassInfo(), XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType));
+								.GetClassInfo(), 
+								XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType, true),
+								dbAccessType);
 
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
 						}
