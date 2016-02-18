@@ -22,7 +22,7 @@ namespace JPB.DataAccess.DebuggerHelper
 {
 	/// <summary>
 	/// </summary>
-	[DebuggerDisplay("Query : {DebuggerQuery}", Name = "Query")]
+	[DebuggerDisplay("QueryCommand : {DebuggerQuery}", Name = "QueryCommand")]
 	public class QueryDebugger
 	{
 		public const string StartValuePart = @" {{";
@@ -63,7 +63,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		}
 
 		/// <summary>
-		///     When set to true the Query debugger creates an own instance the the Default database connection assumd by the type
+		///     When set to true the QueryCommand debugger creates an own instance the the Default database connection assumd by the type
 		///     of the IDbCommand it contains
 		/// </summary>
 		public static IDatabaseStrategy UseDefaultDatabase { get; set; }

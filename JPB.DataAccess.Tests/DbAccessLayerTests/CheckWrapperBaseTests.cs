@@ -4,11 +4,12 @@ using System.Data;
 using System.Linq;
 using System.Security;
 using JPB.DataAccess.DbCollection;
+using JPB.DataAccess.Query;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
@@ -164,14 +165,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			expectWrapper.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 			var elements = expectWrapper.Query()
-				.Query("SELECT")
-				.Query("res." + UsersMeta.UserIDCol)
-				.Query(",res." + UsersMeta.UserNameCol)
-				.Query(",")
-				.InBracket(s => s.Select<UsersAutoGenerateConstructorWithSingleXml>().ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+				.QueryText("SELECT")
+				.QueryText("res." + UsersMeta.UserIDCol)
+				.QueryText(",res." + UsersMeta.UserNameCol)
+				.QueryText(",")
+				.InBracket(s => s.Select(typeof(UsersAutoGenerateConstructorWithSingleXml)).ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+				.ChangeType<IElementProducer>()
 				.As("Sub")
-				.Query("FROM")
-				.Query(UsersMeta.UserTable)
+				.QueryText("FROM")
+				.QueryText(UsersMeta.UserTable)
 				.As("res")
 				.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
 
@@ -192,14 +194,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 
 			var elements = expectWrapper.Query()
-				.Query("SELECT")
-				.Query("res." + UsersMeta.UserIDCol)
-				.Query(",res." + UsersMeta.UserNameCol)
-				.Query(",")
-				.InBracket(s => s.Select<UsersAutoGenerateConstructorWithMultiXml>().ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+				.QueryText("SELECT")
+				.QueryText("res." + UsersMeta.UserIDCol)
+				.QueryText(",res." + UsersMeta.UserNameCol)
+				.QueryText(",")
+				.InBracket(s => s.Select(typeof(UsersAutoGenerateConstructorWithMultiXml)).ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+				.ChangeType<IElementProducer>()
 				.As("Subs")
-				.Query("FROM")
-				.Query(UsersMeta.UserTable)
+				.QueryText("FROM")
+				.QueryText(UsersMeta.UserTable)
 				.As("res")
 				.ForResult<UsersAutoGenerateConstructorWithMultiXml>();
 
@@ -316,9 +319,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			RangeInsertTest();
 
-			QueryBuilder.QueryBuilder baseQuery = expectWrapper.Query().Select(typeof(Users));
-			IDbCommand queryA = baseQuery.Compile();
-			IDbCommand queryB = baseQuery.Compile();
+			var baseQuery = expectWrapper.Query().Select(typeof(Users));
+			IDbCommand queryA = baseQuery.ContainerObject.Compile();
+			IDbCommand queryB = baseQuery.ContainerObject.Compile();
 			Assert.IsNotNull(queryA);
 			Assert.IsNotNull(queryB);
 
@@ -407,7 +410,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			InsertTest();
 			Users singleEntity = expectWrapper
 				.Query()
-				.Select<Users>()
+				.Select(typeof(Users))
 				.Top(1)
 				.ForResult<Users>()
 				.Single();
@@ -579,9 +582,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Update()
 		{
 			InsertTest();
-			QueryBuilder.QueryBuilder query = expectWrapper
+			var query = expectWrapper
 				.Query()
-				.Select<Users>()
+				.Select(typeof(Users))
 				.Top(1);
 			Users singleEntity = query
 				.ForResult<Users>()

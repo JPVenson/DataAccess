@@ -324,7 +324,7 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Execute a Query on a given Database
+		///     Execute a QueryCommand on a given Database
 		/// </summary>
 		/// <returns></returns>
 		public static int ExecuteGenericCommand(this IDbCommand command, IDatabase db)

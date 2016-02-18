@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,8 +14,9 @@ using System.Data;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	/// </summary>
@@ -24,12 +26,12 @@ namespace JPB.DataAccess.QueryBuilder
 		private readonly IDataReader _executeReader;
 		private readonly DbClassInfoCache _type;
 
-		internal QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
+		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type)
 		{
 			_type = type.GetClassInfo();
-			_accessLayer = new DbAccessLayer(queryBuilder.AccessLayer.Database);
+			_accessLayer = new DbAccessLayer(queryContainer.AccessLayer.Database);
 			_accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
-			_executeReader = queryBuilder.Compile().ExecuteReader();
+			_executeReader = queryContainer.Compile().ExecuteReader();
 		}
 
 		public void Dispose()
@@ -63,8 +65,8 @@ namespace JPB.DataAccess.QueryBuilder
 
 	internal class QueryLazyEnumerator<T> : QueryLazyEnumerator, IEnumerator<T>
 	{
-		internal QueryLazyEnumerator(QueryBuilder queryBuilder, Type type)
-			: base(queryBuilder, type)
+		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type)
+			: base(queryContainer, type)
 		{
 		}
 

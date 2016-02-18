@@ -37,7 +37,7 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		/// <summary>
-		///     Get the last Executed Query wrapped by a Debugger
+		///     Get the last Executed QueryCommand wrapped by a Debugger
 		/// </summary>
 		public QueryDebugger LastExecutedQuery { get; private set; }
 
@@ -288,7 +288,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		#endregion
 
-		#region Query Helper
+		#region QueryCommand Helper
 
 		public IEnumerable<T> GetEntitiesList<T>(string strQuery, Func<IDataRecord, T> func, bool bHandleConnection)
 		{
@@ -595,7 +595,7 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 		}
 
-		#endregion Query Helper
+		#endregion QueryCommand Helper
 
 		~DefaultDatabaseAccess()
 		{

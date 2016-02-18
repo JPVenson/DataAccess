@@ -87,7 +87,7 @@ namespace JPB.DataAccess.Contacts.Pager
 		new ICollection<T> CurrentPageItems { get; }
 
 		/// <summary>
-		///     The most simple Select that produces result data. An aditional Query will wrap to enable Pageing, this so be aware
+		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
 		///     of it
 		/// </summary>
 		IDbCommand BaseQuery { get; set; }

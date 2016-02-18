@@ -20,6 +20,8 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
@@ -183,7 +185,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Select with appended query and inclueded Query Paramater
+		///     Creates a Select with appended query and inclueded QueryCommand Paramater
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, string query, IEnumerable<IQueryParameter> paramenter)
@@ -196,7 +198,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Select with appended query and inclueded Query Paramater
+		///     Creates a Select with appended query and inclueded QueryCommand Paramater
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -304,7 +306,7 @@ namespace JPB.DataAccess.Manager
 				{
 					var searchMethodWithFittingParams = methods.Where(s =>
 					{
-						var parameterInfos = s.Arguments.Where(f => typeof(QueryBuilder.QueryBuilder) != f.Type).ToArray();
+						var parameterInfos = s.Arguments.Where(f => typeof(IQueryBuilder<IRootQuery>) != f.Type).ToArray();
 
 						if (parameterInfos.Length != arguments.Count)
 							return false;
@@ -341,10 +343,10 @@ namespace JPB.DataAccess.Manager
 
 					var cleanParams = arguments.Any() ? arguments : null;
 					var dbMethodArgument = method.Arguments.FirstOrDefault();
-					QueryBuilder.QueryBuilder queryBuilder = null;
-					if (dbMethodArgument != null && dbMethodArgument.Type == typeof(QueryBuilder.QueryBuilder))
+					IQueryBuilder<IRootQuery> queryBuilder = null;
+					if (dbMethodArgument != null && dbMethodArgument.Type == typeof(IQueryBuilder<IRootQuery>))
 					{
-						queryBuilder = new QueryBuilder.QueryBuilder(this);
+						queryBuilder = Query();
 						if (cleanParams == null)
 							cleanParams = new List<object>();
 
@@ -374,7 +376,7 @@ namespace JPB.DataAccess.Manager
 					}
 					else if (queryBuilder != null)
 					{
-						return queryBuilder.Compile();
+						return queryBuilder.ContainerObject.Compile();
 					}
 				}
 				return fallback(entity, Database);
@@ -387,7 +389,7 @@ namespace JPB.DataAccess.Manager
 
 
 		/// <summary>
-		///     Creates a Select for one Item with appended query and inclueded Query Paramater
+		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, object pk)
@@ -403,7 +405,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Select for one Item with appended query and inclueded Query Paramater
+		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -804,7 +806,7 @@ namespace JPB.DataAccess.Manager
 			//}
 
 			/*
-			 * Due the fact that you are not able to anylse the Query in a way to ensure its will not effect the query self we
+			 * Due the fact that you are not able to anylse the QueryCommand in a way to ensure its will not effect the query self we
 			 * are loading the result an then loading based on that the items             
 			 */
 

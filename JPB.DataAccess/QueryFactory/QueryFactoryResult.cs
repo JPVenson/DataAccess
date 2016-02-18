@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.QueryFactory
 {
@@ -21,10 +22,10 @@ namespace JPB.DataAccess.QueryFactory
 	{
 		/// <summary>
 		/// </summary>
-		/// <param name="builder"></param>
-		public QueryFactoryResult(QueryBuilder.QueryBuilder builder)
+		/// <param name="container"></param>
+		public QueryFactoryResult(IQueryContainer container)
 		{
-			var compileFlat = builder.CompileFlat();
+			var compileFlat = container.CompileFlat();
 			Query = compileFlat.Item1;
 			Parameters = compileFlat.Item2;
 		}
@@ -48,7 +49,7 @@ namespace JPB.DataAccess.QueryFactory
 		}
 
 		/// <summary>
-		///     The SQL Query
+		///     The SQL QueryCommand
 		/// </summary>
 		public string Query { get; private set; }
 

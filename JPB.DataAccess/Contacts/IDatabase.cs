@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Contacts
 		string ServerName { get; }
 
 		/// <summary>
-		///     Get the last Executed Query wrapped by a Debugger
+		///     Get the last Executed QueryCommand wrapped by a Debugger
 		/// </summary>
 		QueryDebugger LastExecutedQuery { get; }
 
@@ -141,7 +141,7 @@ namespace JPB.DataAccess.Contacts
 
 		/// <summary>
 		///     Required
-		///     Execute a Query and map the result that is created with the func
+		///     Execute a QueryCommand and map the result that is created with the func
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -149,7 +149,7 @@ namespace JPB.DataAccess.Contacts
 
 		/// <summary>
 		///     Required
-		///     Execute a Query and map the result that is created with the func
+		///     Execute a QueryCommand and map the result that is created with the func
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -189,7 +189,7 @@ namespace JPB.DataAccess.Contacts
 		IDbCommand GetlastInsertedIdCommand();
 
 		/// <summary>
-		///     Formarts a Command to a executable Query
+		///     Formarts a Command to a executable QueryCommand
 		/// </summary>
 		/// <returns></returns>
 		string FormartCommandToQuery(IDbCommand comm);

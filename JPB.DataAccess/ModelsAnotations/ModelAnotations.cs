@@ -188,7 +188,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	}
 
 	/// <summary>
-	///     Provieds a Query ( parametes not used ) for selection
+	///     Provieds a QueryCommand ( parametes not used ) for selection
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 	public sealed class SelectFactoryAttribute : DbAccessTypeAttribute, IQueryFactoryResult
@@ -204,7 +204,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		///     The Select Query that are used for selection of this Class
+		///     The Select QueryCommand that are used for selection of this Class
 		/// </summary>
 		public string Query { get; private set; }
 
@@ -215,7 +215,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	}
 
 	/// <summary>
-	///     Provieds a Query ( parametes not used ) for selection
+	///     Provieds a QueryCommand ( parametes not used ) for selection
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 	public sealed class StoredProcedureFactoryAttribute : DbAccessTypeAttribute, IQueryFactoryResult
@@ -231,7 +231,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		///     The Select Query that are used for selection of this Class
+		///     The Select QueryCommand that are used for selection of this Class
 		/// </summary>
 		public string Query { get; private set; }
 

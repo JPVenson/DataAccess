@@ -23,7 +23,8 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Manager
 {
@@ -211,7 +212,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Wraps a Query and its Paramters and then executes it
+		///     Wraps a QueryCommand and its Paramters and then executes it
 		/// </summary>
 		/// <returns></returns>
 		public int ExecuteGenericCommand(string query, IEnumerable<IQueryParameter> values)
@@ -226,7 +227,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Wraps a Query and its Paramters from Dynamic and then executes it
+		///     Wraps a QueryCommand and its Paramters from Dynamic and then executes it
 		/// </summary>
 		/// <returns></returns>
 		public int ExecuteGenericCommand(string query, dynamic paramenter)
@@ -236,14 +237,13 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Execute a Query and without Paramters
+		///     Execute a QueryCommand and without Paramters
 		/// </summary>
 		/// <returns></returns>
 		public int ExecuteGenericCommand(IDbCommand command)
 		{
 			return Database.Run(s => s.ExecuteNonQuery(command));
 		}
-
 
 		/// <summary>
 		///     if set the created reader of an read operation will be completely stored then the open connection will be closed
@@ -255,27 +255,27 @@ namespace JPB.DataAccess.Manager
 		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
 		/// <returns></returns>
-		public QueryBuilder.QueryBuilder Query()
+		public IQueryBuilder<IRootQuery> Query()
 		{
-			return new QueryBuilder.QueryBuilder(this);
+			return new QueryBuilder<IRootQuery>(this);
 		}
 
 		/// <summary>
 		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
 		/// <returns></returns>
-		public QueryBuilder.QueryBuilder Query(Type targetType)
+		public IQueryBuilder<IRootQuery> Query(Type targetType)
 		{
-			return new QueryBuilder.QueryBuilder(this, targetType);
+			return new QueryBuilder<IRootQuery>(this, targetType);
 		}
 
 		/// <summary>
 		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
 		/// <returns></returns>
-		public QueryBuilder.QueryBuilder Query<T>()
+		public IQueryBuilder<IRootQuery> Query<T>()
 		{
-			return new QueryBuilder<T>(this);
+			return new QueryBuilder<IRootQuery>(this, typeof(T));
 		}
 
 		/// <summary>

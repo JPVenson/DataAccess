@@ -6,10 +6,10 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
-	///     Enum for specifying the way in enumeration that is used by enumerating a QueryBuilder
+	///     Enum for specifying the way in enumeration that is used by enumerating a IQueryContainer
 	/// </summary>
 	public enum EnumerationMode
 	{

@@ -16,7 +16,8 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Manager
 {
@@ -170,7 +171,7 @@ namespace JPB.DataAccess.Manager
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
 
-			var queryBuilder = new QueryBuilder.QueryBuilder(this);
+			var queryBuilder = new QueryBuilder<IRootQuery>(this);
 			queryBuilder.QueryD("UPDATE");
 			queryBuilder.QueryD(classInfo.TableName);
 			queryBuilder.QueryD("SET");
@@ -186,9 +187,9 @@ namespace JPB.DataAccess.Manager
 					queryBuilder.QueryD(",");
 			}
 
-			queryBuilder.Where(string.Format("{0} = @pkValue", pk), new { pkValue = pkProperty.Getter.Invoke(entry) });
+			queryBuilder.ChangeType<IElementProducer>().Where(string.Format("{0} = @pkValue", pk), new { pkValue = pkProperty.Getter.Invoke(entry) });
 
-			return queryBuilder.Compile();
+			return queryBuilder.ContainerObject.Compile();
 		}
 
 		/// <summary>

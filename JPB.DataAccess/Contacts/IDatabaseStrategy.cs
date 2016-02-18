@@ -56,7 +56,7 @@ namespace JPB.DataAccess.Contacts
 		IWrapperDataPager<T, TE> CreateConverterPager<T, TE>();
 
 		/// <summary>
-		///     Formarts a Command into a Query after the Strategy rules
+		///     Formarts a Command into a QueryCommand after the Strategy rules
 		/// </summary>
 		/// <returns></returns>
 		string FormartCommandToQuery(IDbCommand command);

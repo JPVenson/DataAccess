@@ -7,7 +7,8 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query;
 using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
@@ -265,7 +266,7 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder)
+		public static void GetSelectStatement(IQueryBuilder<IRootQuery> builder)
 		{
 			builder.Select(typeof(Users_StaticQueryFactoryForSelect));
 		}
@@ -281,7 +282,7 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static void GetSelectStatement(QueryBuilder.QueryBuilder builder, long whereId)
+		public static void GetSelectStatement(IQueryBuilder<IRootQuery> builder, long whereId)
 		{
 			builder.Select(typeof(Users_StaticQueryFactoryForSelectWithArugments))
 				.Where(UsersMeta.UserIDCol + " = @whereId", new

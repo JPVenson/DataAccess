@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,42 +18,50 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
-	/// <summary>
-	///     Provides functions that can build SQL Querys
-	/// </summary>
-	public class QueryBuilder : IEnumerable, ICloneable
+	public class InternalContainerContainer : IQueryContainer
 	{
 		/// <summary>
 		/// </summary>
-		protected internal readonly DbAccessLayer AccessLayer;
+		public DbAccessLayer AccessLayer { get; private set; }
 
 		/// <summary>
 		/// </summary>
-		protected internal readonly Type ForType;
+		public Type ForType { get; set; }
 
 		/// <summary>
-		///     Creates a new Instance of an Query Builder that creates Database aware querys
+		///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
 		/// </summary>
-		public QueryBuilder(DbAccessLayer database, Type forType)
+		public InternalContainerContainer(DbAccessLayer database, Type forType)
 			: this(database)
 		{
 			ForType = forType;
 		}
 
 		/// <summary>
-		///     Creates a new Instance of an Query Builder that creates Database aware querys
+		///     Creates a new Instance of an QueryText Builder that creates Database aware querys
 		/// </summary>
-		public QueryBuilder(DbAccessLayer database)
+		public InternalContainerContainer(DbAccessLayer database)
 		{
 			AccessLayer = database;
 			Parts = new List<GenericQueryPart>();
 		}
 
-		internal int AutoParameterCounter { get; set; }
-		internal List<GenericQueryPart> Parts { get; set; }
+		internal InternalContainerContainer(IQueryContainer pre)
+		{
+			AccessLayer = pre.AccessLayer;
+			ForType = pre.ForType;
+			AutoParameterCounter = pre.AutoParameterCounter;
+			Parts = pre.Parts;
+			EnumerationMode = pre.EnumerationMode;
+			AllowParamterRenaming = pre.AllowParamterRenaming;
+		}
+
+		public int AutoParameterCounter { get; set; }
+		public List<GenericQueryPart> Parts { get; set; }
 
 		/// <summary>
 		///     Defines the Way how the Data will be loaded
@@ -65,21 +74,9 @@ namespace JPB.DataAccess.QueryBuilder
 		public bool AllowParamterRenaming { get; set; }
 
 		/// <summary>
-		///     If enabled the QueryBuilder will insert linebreaks after some Commands
+		///     If enabled the IQueryContainer will insert linebreaks after some Commands
 		/// </summary>
 		public bool AutoLinebreak { get; set; }
-
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public object Clone()
-		{
-			return new QueryBuilder(AccessLayer)
-			{
-				EnumerationMode = EnumerationMode,
-				Parts = Parts
-			};
-		}
 
 		/// <summary>
 		/// </summary>
@@ -92,13 +89,6 @@ namespace JPB.DataAccess.QueryBuilder
 			if (EnumerationMode == EnumerationMode.FullOnLoad)
 				return new QueryEagerEnumerator(this, ForType);
 			return new QueryLazyEnumerator(this, ForType);
-		}
-
-		internal QueryBuilder AutoLinebreakAction()
-		{
-			if (AutoLinebreak)
-				this.LineBreak();
-			return this;
 		}
 
 		/// <summary>
@@ -120,10 +110,10 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		///     Query like setter for WithEnumerationMode
+		///     QueryCommand like setter for WithEnumerationMode
 		/// </summary>
 		/// <returns></returns>
-		public QueryBuilder WithEnumerationMode(EnumerationMode mode)
+		public IQueryContainer WithEnumerationMode(EnumerationMode mode)
 		{
 			EnumerationMode = mode;
 			return this;
@@ -131,43 +121,18 @@ namespace JPB.DataAccess.QueryBuilder
 
 
 		/// <summary>
-		///     Query like setter for AllowParamterRenaming [Duplicate]
+		///     QueryCommand like setter for AllowParamterRenaming [Duplicate]
 		/// </summary>
 		/// <returns></returns>
-		public QueryBuilder WithParamterRenaming(bool mode)
+		public IQueryContainer WithParamterRenaming(bool mode)
 		{
 			AllowParamterRenaming = mode;
 			return this;
 		}
 
-		/// <summary>
-		///     Adds a Query part to the Local collection
-		/// </summary>
-		/// <returns></returns>
-		public QueryBuilder Add(GenericQueryPart part)
-		{
-			if (AllowParamterRenaming)
-			{
-				foreach (var queryParameter in part.QueryParameters)
-				{
-					var fod = Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
-
-					if (fod == null)
-						continue;
-
-					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the Query
-					var name = fod.Name;
-					var newName = GetParamaterAutoId().ToString().CheckParamter();
-					part.Prefix = part.Prefix.Replace(name, newName);
-					queryParameter.Name = newName;
-				}
-			}
-			Parts.Add(part);
-			return this;
-		}
 
 		/// <summary>
-		///     Compiles the Query into a String|IEnumerable of Paramameter
+		///     Compiles the QueryCommand into a String|IEnumerable of Paramameter
 		/// </summary>
 		/// <returns></returns>
 		public Tuple<string, IEnumerable<IQueryParameter>> CompileFlat()
@@ -185,7 +150,7 @@ namespace JPB.DataAccess.QueryBuilder
 				if (prefRender != null)
 				{
 					if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) ||
-					    !renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
+						!renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
 					{
 						renderCurrent = " " + renderCurrent;
 					}
@@ -199,20 +164,6 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		///     Converts the non Generic QueryBuilder into its Counterpart
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public QueryBuilder<T> ForResult<T>()
-		{
-			return new QueryBuilder<T>(AccessLayer)
-			{
-				EnumerationMode = EnumerationMode,
-				Parts = Parts
-			};
-		}
-
-		/// <summary>
 		///     Increment the counter +1 and return the value
 		/// </summary>
 		/// <returns></returns>
@@ -222,10 +173,10 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		///     Query like setter for AllowParamterRenaming
+		///     QueryCommand like setter for AllowParamterRenaming
 		/// </summary>
 		/// <returns></returns>
-		public QueryBuilder SetAutoRenaming(bool value)
+		public IQueryContainer SetAutoRenaming(bool value)
 		{
 			AllowParamterRenaming = value;
 			return this;
@@ -244,7 +195,7 @@ namespace JPB.DataAccess.QueryBuilder
 
 		internal void Render(StringBuilderInterlaced sb)
 		{
-			sb.AppendInterlacedLine("new QueryBuilder {")
+			sb.AppendInterlacedLine("new IQueryContainer {")
 				.Up()
 				.AppendInterlacedLine("AllowParamterRenaming = {0},", AllowParamterRenaming.ToString().ToLower())
 				.AppendInterlacedLine("AutoParameterCounter = {0},", AutoParameterCounter)
@@ -271,53 +222,127 @@ namespace JPB.DataAccess.QueryBuilder
 			return Render();
 		}
 
-		private string delimiter = "";
-
-		/// <summary>
-		/// Adds an AccessType specfic delimiter to the output
-		/// </summary>
-		/// <returns></returns>
-		public QueryBuilder Delimiter()
+		public object Clone()
 		{
-			this.Query(delimiter);
-			return this;
+			return new InternalContainerContainer(this);
 		}
 	}
 
+	/// <summary>
+	///     Provides functions that can build SQL Querys
+	/// </summary>
+	public class QueryBuilder<Stack> : IQueryBuilder<Stack>
+		where Stack : IQueryElement
+	{
+		internal QueryBuilder(DbAccessLayer database, Type type)
+		{
+			this.ContainerObject = new InternalContainerContainer(database, type);
+		}
+
+		internal QueryBuilder(IQueryContainer database)
+		{
+			this.ContainerObject = database;
+		}
+
+		internal QueryBuilder(IQueryBuilder<Stack> database)
+		{
+			this.ContainerObject = database.ContainerObject;
+		}
+
+		internal QueryBuilder(IQueryBuilder<Stack> database, Type type)
+		{
+			this.ContainerObject = database.ContainerObject;
+			this.ContainerObject.ForType = type;
+		}
+
+		public QueryBuilder(DbAccessLayer database)
+		{
+			this.ContainerObject = new InternalContainerContainer(database);
+		}
+		
+		public IQueryBuilder<T> ChangeType<T>() where T : IQueryElement
+		{
+			return new QueryBuilder<T>(ContainerObject);
+		}
+		
+		/// <summary>
+		/// </summary>
+		/// <returns></returns>
+		public object Clone()
+		{
+			return new QueryBuilder<Stack>(this.ContainerObject);
+		}
+		
+		public IQueryContainer ContainerObject { get; private set; }
+
+		/// <summary>
+		///     Converts the non Generic IQueryContainer into its Counterpart
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public IEnumerable<E> ForResult<E>()
+		{
+			return new QueryEnumerator<Stack, E>(new QueryBuilder<E, Stack>(this));
+		}
+
+		public IEnumerable ForResult()
+		{
+			return new QueryEnumerator<Stack>(this);
+		}
+
+		/// <summary>
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerator GetEnumerator()
+		{
+			if (ContainerObject.ForType == null)
+				throw new ArgumentNullException("No type Supplied", new Exception());
+
+			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+				return new QueryEagerEnumerator(ContainerObject, ContainerObject.ForType);
+			return new QueryLazyEnumerator(ContainerObject, ContainerObject.ForType);
+		}
+	}
 
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class QueryBuilder<T> : QueryBuilder, IEnumerable<T>
+	public class QueryBuilder<T, Stack> : QueryBuilder<Stack>
+		where Stack : IQueryElement
 	{
 		/// <summary>
-		///     Creates a new Instance of an Query Builder that creates Database aware querys
+		///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
 		/// </summary>
 		public QueryBuilder(DbAccessLayer database)
-			: base(database, typeof (T))
+			: base(database, typeof(T))
 		{
+		}
+
+		internal QueryBuilder(IQueryBuilder<Stack> source)
+			: base(source, typeof(T))
+		{
+
 		}
 
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public new IEnumerator<T> GetEnumerator()
+		public new object Clone()
 		{
-			if (ForType == null)
-				throw new ArgumentNullException("No type Supplied", new Exception());
-
-			if (EnumerationMode == EnumerationMode.FullOnLoad)
-				return new QueryEagerEnumerator<T>(this, ForType);
-			return new QueryLazyEnumerator<T>(this, ForType);
+			return new QueryBuilder<T, Stack>(this);
 		}
 
 		/// <summary>
-		///     Adds a Query part to the Local collection
 		/// </summary>
-		public new QueryBuilder<T> Add(GenericQueryPart part)
+		/// <returns></returns>
+		public IEnumerator<T> GetEnumerator()
 		{
-			base.Add(part);
-			return this;
+			if (ContainerObject.ForType == null)
+				throw new ArgumentNullException("No type Supplied", new Exception());
+
+			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+				return new QueryEagerEnumerator<T>(ContainerObject, ContainerObject.ForType);
+			return new QueryLazyEnumerator<T>(ContainerObject, ContainerObject.ForType);
 		}
 	}
 }

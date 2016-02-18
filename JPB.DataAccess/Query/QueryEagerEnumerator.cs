@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,21 +14,22 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
 	internal class QueryEagerEnumerator : IEnumerator, IDisposable
 	{
 		private readonly ArrayList _elements;
-		private readonly QueryBuilder _queryBuilder;
+		private readonly IQueryContainer _queryContainer;
 		private readonly Type _type;
 		private int _counter;
 		private List<IDataRecord> _enumerateDataRecords;
 		private Task _task;
 
-		internal QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
+		internal QueryEagerEnumerator(IQueryContainer queryContainer, Type type)
 		{
-			_queryBuilder = queryBuilder;
+			_queryContainer = queryContainer;
 			_type = type;
 			_elements = new ArrayList();
 			_counter = 0;
@@ -52,7 +54,7 @@ namespace JPB.DataAccess.QueryBuilder
 					return false;
 
 				var dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
-				Current = _queryBuilder.AccessLayer.SetPropertysViaReflection(_type.GetClassInfo(), dataRecord);
+				Current = _queryContainer.AccessLayer.SetPropertysViaReflection(_type.GetClassInfo(), dataRecord);
 				_elements.Add(Current);
 
 				return true;
@@ -77,8 +79,8 @@ namespace JPB.DataAccess.QueryBuilder
 		{
 			_task = new Task(() =>
 			{
-				var query = _queryBuilder.Compile();
-				_enumerateDataRecords = _queryBuilder.AccessLayer.EnumerateDataRecords(query, true);
+				var query = _queryContainer.Compile();
+				_enumerateDataRecords = _queryContainer.AccessLayer.EnumerateDataRecords(query, true);
 			});
 			_task.Start();
 		}
@@ -94,8 +96,8 @@ namespace JPB.DataAccess.QueryBuilder
 
 	internal class QueryEagerEnumerator<T> : QueryEagerEnumerator, IEnumerator<T>
 	{
-		internal QueryEagerEnumerator(QueryBuilder queryBuilder, Type type)
-			: base(queryBuilder, type)
+		internal QueryEagerEnumerator(IQueryContainer queryContainer, Type type)
+			: base(queryContainer, type)
 		{
 		}
 

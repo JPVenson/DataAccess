@@ -26,7 +26,7 @@ namespace JPB.DataAccess.DbEventArgs
 		}
 
 		/// <summary>
-		/// If enabled the QueryDebugger that contains the Query
+		/// If enabled the QueryDebugger that contains the QueryCommand
 		/// </summary>
 		public QueryDebugger QueryDebugger { get; private set; }
 	}

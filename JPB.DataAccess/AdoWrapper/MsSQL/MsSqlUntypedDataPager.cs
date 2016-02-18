@@ -14,7 +14,7 @@ using System.Data;
 using System.Linq;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.Query;
 
 namespace JPB.DataAccess.AdoWrapper.MsSql
 {
@@ -121,10 +121,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 
 				var selectMaxCommand = dbAccess
 					.Query()
-					.Query("WITH CTE AS")
-					.InBracket(query => query.Query(finalAppendCommand))
+					.QueryText("WITH CTE AS")
+					.InBracket(query => query.QueryCommand(finalAppendCommand))
 					.LineBreak()
-					.Query("SELECT COUNT(1) FROM CTE")
+					.QueryText("SELECT COUNT(1) FROM CTE")
+					.ContainerObject
 					.Compile();
 
 				////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
@@ -150,16 +151,17 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 				if (CheckVersionForFetch())
 				{
 					command = dbAccess.Query()
-						.WithCte("CTE", cte => cte.Query(finalAppendCommand))
+						.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
 						.SelectStar()
-						.Query("CTE")
-						.Query("ORDER BY")
+						.QueryText("CTE")
+						.QueryText("ORDER BY")
 						.QueryD(pk)
 						.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
 						{
 							PagedRows = CurrentPage*PageSize,
 							PageSize
 						})
+						.ContainerObject
 						.Compile();
 				}
 				else
@@ -170,28 +172,28 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 						{
 							if (BaseQuery != null)
 							{
-								baseCte.Select<T>();
+								baseCte.Select(typeof (T));
 							}
 							else
 							{
-								baseCte.Query(finalAppendCommand);
+								baseCte.QueryCommand(finalAppendCommand);
 							}
 						})
 						.WithCte("CTE", cte =>
 						{
 							cte.SelectStarFrom(sel =>
 							{
-								sel.Query("SELECT")
+								sel.Select()
 									.RowNumberOrder("@pk")
 									.WithParamerters(new {Pk = pk})
 									.As("RowNr")
-									.Query(", BASECTE.* FROM BASECTE");
+									.QueryText(", BASECTE.* FROM BASECTE");
 							})
 								.As("TBL")
 								.Where("RowNr")
 								.Between(page =>
 								{
-									page.Query("@PagedRows * @PageSize + 1")
+									page.QueryText("@PagedRows * @PageSize + 1")
 										.WithParamerters(new
 										{
 											PagedRows = CurrentPage,
@@ -201,14 +203,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSql
 									maxPage =>
 									{
 										maxPage
-											.InBracket(calc => { calc.Query("@PagedRows + 1"); })
-											.Query("* @PageSize");
+											.InBracket(calc => { calc.QueryText("@PagedRows + 1"); })
+											.QueryText("* @PageSize");
 									}
 								);
 						}, true)
-						.Query("SELECT * FROM CTE");
+						.QueryText("SELECT * FROM CTE");
 
-					command = selectQuery.Compile();
+					command = selectQuery.ContainerObject.Compile();
 				}
 				//cannot cast to T[] 
 				selectWhere = dbAccess.SelectNative(TargetType, s, command, true).Cast<T>().ToArray();

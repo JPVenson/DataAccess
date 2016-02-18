@@ -15,7 +15,8 @@ using System.Data;
 using System.Linq;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.QueryBuilder;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.SqLite
 {
@@ -116,10 +117,14 @@ namespace JPB.DataAccess.SqLite
 
 				var selectMaxCommand = dbAccess
 					.Query()
-					.Query("WITH CTE AS")
-					.InBracket(query => query.Query(finalAppendCommand))
-					.LineBreak()
-					.Query("SELECT COUNT(1) FROM CTE")
+					.WithCte("CTE", f =>
+					{
+						f.QueryCommand(finalAppendCommand);
+					})
+					.Select()
+					.Count("1")
+					.QueryText("FROM CTE")
+					.ContainerObject
 					.Compile();
 
 				////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
@@ -143,16 +148,15 @@ namespace JPB.DataAccess.SqLite
 				IDbCommand command;
 
 				command = dbAccess.Query()
-						.WithCte("CTE", cte => cte.Query(finalAppendCommand))
-						.SelectStar()
-						.Query("CTE")
-						.Query("ORDER BY")
-						.QueryD(pk)
+						.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
+						.SelectStar("CTE")
+						.OrderBy(pk)
 						.QueryD("ASC LIMIT @PageSize OFFSET @PagedRows", new
 						{
 							PagedRows = CurrentPage * PageSize,
 							PageSize
 						})
+						.ContainerObject
 						.Compile();
 
 				//if (CheckVersionForFetch())
@@ -162,7 +166,7 @@ namespace JPB.DataAccess.SqLite
 				//else
 				//{
 				//	// ReSharper disable ConvertToLambdaExpression
-				//	var selectQuery = dbAccess.Query()
+				//	var selectQuery = dbAccess.QueryCommand()
 				//		.WithCte("BASECTE", baseCte =>
 				//		{
 				//			if (BaseQuery != null)
@@ -171,24 +175,24 @@ namespace JPB.DataAccess.SqLite
 				//			}
 				//			else
 				//			{
-				//				baseCte.Query(finalAppendCommand);
+				//				baseCte.QueryCommand(finalAppendCommand);
 				//			}
 				//		})
 				//		.WithCte("CTE", cte =>
 				//		{
 				//			cte.SelectStarFrom(sel =>
 				//			{
-				//				sel.Query("SELECT")
+				//				sel.QueryCommand("SELECT")
 				//					.RowNumberOrder("@pk")
 				//					.WithParamerters(new {Pk = pk})
 				//					.As("RowNr")
-				//					.Query(", BASECTE.* FROM BASECTE");
+				//					.QueryCommand(", BASECTE.* FROM BASECTE");
 				//			})
 				//				.As("TBL")
 				//				.Where("RowNr")
 				//				.Between(page =>
 				//				{
-				//					page.Query("@PagedRows * @PageSize + 1")
+				//					page.QueryCommand("@PagedRows * @PageSize + 1")
 				//						.WithParamerters(new
 				//						{
 				//							PagedRows = CurrentPage,
@@ -198,12 +202,12 @@ namespace JPB.DataAccess.SqLite
 				//					maxPage =>
 				//					{
 				//						maxPage
-				//							.InBracket(calc => { calc.Query("@PagedRows + 1"); })
-				//							.Query("* @PageSize");
+				//							.InBracket(calc => { calc.QueryCommand("@PagedRows + 1"); })
+				//							.QueryCommand("* @PageSize");
 				//					}
 				//				);
 				//		}, true)
-				//		.Query("SELECT * FROM CTE");
+				//		.QueryCommand("SELECT * FROM CTE");
 
 				//	command = selectQuery.Compile();
 				//}

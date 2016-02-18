@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,10 +15,10 @@ using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
-	///     Wrapper for Generic Query parts
+	///     Wrapper for Generic QueryCommand parts
 	/// </summary>
 	public class GenericQueryPart : ICloneable
 	{
@@ -45,7 +46,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		///     The Partial SQL Query that is contained inside this part
+		///     The Partial SQL QueryCommand that is contained inside this part
 		/// </summary>
 		public string Prefix { get; internal set; }
 
@@ -63,7 +64,7 @@ namespace JPB.DataAccess.QueryBuilder
 		}
 
 		/// <summary>
-		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its Query statement and parameter
+		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and parameter
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
@@ -93,7 +94,7 @@ namespace JPB.DataAccess.QueryBuilder
 			sb
 				.AppendInterlacedLine("new GenericQueryPart {")
 				.Up()
-				.AppendInterlacedLine("Query = \"{0}\",", Prefix)
+				.AppendInterlacedLine("QueryCommand = \"{0}\",", Prefix)
 				.AppendInterlaced("Parameter[{0}] = ", QueryParameters.Count());
 			if (QueryParameters.Any())
 			{
@@ -113,7 +114,7 @@ namespace JPB.DataAccess.QueryBuilder
 			}
 			sb.Down()
 				.AppendInterlaced("}");
-			//return string.Format("{{Query = {0}, Parameter = [{1}]}}", Prefix, paraString);
+			//return string.Format("{{QueryCommand = {0}, Parameter = [{1}]}}", Prefix, paraString);
 		}
 
 		/// <summary>

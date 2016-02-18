@@ -12,17 +12,17 @@ using System.Collections.Generic;
 namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
-	///     Marker interface for an Query that was created due the invoke of a Factory mehtod
+	///     Marker interface for an QueryCommand that was created due the invoke of a Factory mehtod
 	/// </summary>
 	public interface IQueryFactoryResult
 	{
 		/// <summary>
-		///     The SQL Query
+		///     The SQL QueryCommand
 		/// </summary>
 		string Query { get; }
 
 		/// <summary>
-		///     Sql Query Parameter
+		///     Sql QueryCommand Parameter
 		/// </summary>
 		IEnumerable<IQueryParameter> Parameters { get; }
 	}

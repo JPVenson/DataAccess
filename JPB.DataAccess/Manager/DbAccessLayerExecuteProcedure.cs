@@ -223,7 +223,7 @@ namespace JPB.DataAccess.Manager
 //        if (staticFactory != null)
 //        {
 //            return CreateProcedureCall(procParamType);
-//            //return DbAccessLayerHelper.CreateCommand(db, staticFactory.Query);
+//            //return DbAccessLayerHelper.CreateCommand(db, staticFactory.QueryCommand);
 //        }
 //    }
 
@@ -284,7 +284,7 @@ namespace JPB.DataAccess.Manager
 //                if (invoke is IQueryFactoryResult)
 //                {
 //                    var result = invoke as IQueryFactoryResult;
-//                    return db.CreateCommandWithParameterValues(result.Query, result.Parameters);
+//                    return db.CreateCommandWithParameterValues(result.QueryCommand, result.Parameters);
 //                }
 //            }
 //        }

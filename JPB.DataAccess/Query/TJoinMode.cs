@@ -6,14 +6,15 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
-	///     Jon modes for TSQL. This is an helper method that can be used to create JOINs by using the Query Builder
+	///     Jon modes for TSQL. This is an helper method that can be used to create JOINs by using the QueryCommand Builder
 	/// </summary>
 	// ReSharper disable once InconsistentNaming
 	public class TJoinMode : MsQueryBuilderExtentions.JoinMode
@@ -56,7 +57,7 @@ namespace JPB.DataAccess.QueryBuilder
 	}
 
 	/// <summary>
-	///		Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the Query Builder
+	///		Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the QueryCommand Builder
 	/// </summary>
 	public class TApplyMode : MsQueryBuilderExtentions.ApplyMode
 	{

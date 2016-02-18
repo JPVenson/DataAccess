@@ -6,11 +6,11 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System.Collections.Generic;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.Helper;
 
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	///     Maker for CTS in MSSQL
