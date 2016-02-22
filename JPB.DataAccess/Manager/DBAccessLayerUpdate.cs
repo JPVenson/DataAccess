@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(typeof(T), entry.GetPK<T, object>());
+					var query = CreateSelect(typeof(T), entry.GetPK());
 					RaiseUpdate(entry, query, s);
 					return RunSelect<T>(query).FirstOrDefault();
 				}
@@ -100,7 +100,7 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(entry.GetType(), entry.GetPK<T, object>());
+					var query = CreateSelect(entry.GetType(), entry.GetPK<T>());
 					RaiseUpdate(entry, query, s);
 					var @select = RunSelect<T>(query).FirstOrDefault();
 
@@ -133,7 +133,7 @@ namespace JPB.DataAccess.Manager
 			if (rowVersion != null)
 			{
 				var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
-				if (rowversionValue != null || entry.GetPK() == DataConverterExtensions.GetDefault(entry.GetPKType()))
+				if (rowversionValue != null || entry.GetPK() == DataConverterExtensions.GetDefault(type.PrimaryKeyProperty.PropertyType))
 				{
 					var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
 					var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +

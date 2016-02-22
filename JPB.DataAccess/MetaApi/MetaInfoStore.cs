@@ -126,9 +126,10 @@ namespace JPB.DataAccess.MetaApi
 		{
 			newCreated = false;
 			TClass element;
+			var isThreadSave = EnableThreadSafety;
 			try
 			{
-				if (EnableThreadSafety)
+				if (isThreadSave)
 				{
 					Monitor.Enter(SClassInfoCaches);
 				}
@@ -144,7 +145,7 @@ namespace JPB.DataAccess.MetaApi
 			}
 			finally
 			{
-				if (EnableThreadSafety)
+				if (isThreadSave)
 				{
 					Monitor.Exit(SClassInfoCaches);
 				}

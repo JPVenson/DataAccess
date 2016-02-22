@@ -21,7 +21,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// <summary>
 	///     for internal use only
 	/// </summary>
-	[DebuggerDisplay("{ClassName}")]
+	[DebuggerDisplay("{type.Name}")]
 	[Serializable]
 	public abstract class ClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
 		: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
@@ -71,7 +71,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			if (!string.IsNullOrEmpty(ClassName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 
-			ClassName = type.Name;
+			ClassName = type.FullName;
 			Type = type;
 			Attributes = new HashSet<TAttr>(type
 				.GetCustomAttributes(true)

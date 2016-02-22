@@ -32,7 +32,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 
 		public int GetHashCode(IConstructorInfoCache<TAtt, TArg> obj)
 		{
-			return obj.GetHashCode();
+			return obj.MethodInfo.GetHashCode();
 		}
 
 		public int Compare(IConstructorInfoCache<TAtt, TArg> x, IConstructorInfoCache<TAtt, TArg> y)
@@ -41,7 +41,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 				return -1;
 			if (y == null)
 				return +1;
-			return x.CompareTo(y);
+			return System.String.Compare(x.MethodName, y.MethodName, System.StringComparison.Ordinal);
 		}
 	}
 }

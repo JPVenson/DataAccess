@@ -48,7 +48,7 @@ namespace JPB.DataAccess.Query
 
 					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the QueryCommand
 					var name = fod.Name;
-					var newName = query.ContainerObject.GetParamaterAutoId().ToString().CheckParamter();
+					var newName = query.ContainerObject.GetNextParameterId().ToString().CheckParamter();
 					part.Prefix = part.Prefix.Replace(name, newName);
 					queryParameter.Name = newName;
 				}
@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Query
 
 					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the QueryCommand
 					var name = fod.Name;
-					var newName = query.ContainerObject.GetParamaterAutoId().ToString().CheckParamter();
+					var newName = query.ContainerObject.GetNextParameterId().ToString().CheckParamter();
 					part.Prefix = part.Prefix.Replace(name, newName);
 					queryParameter.Name = newName;
 				}
@@ -475,8 +475,8 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query, Double valueA, Double valueB)
 		{
-			var paramaterAAutoId = query.ContainerObject.GetParamaterAutoId().ToString();
-			var paramaterBAutoId = query.ContainerObject.GetParamaterAutoId().ToString();
+			var paramaterAAutoId = query.ContainerObject.GetNextParameterId().ToString();
+			var paramaterBAutoId = query.ContainerObject.GetNextParameterId().ToString();
 
 			query.QueryText("BETWEEN @{0} AND @{1}", paramaterAAutoId, paramaterBAutoId);
 			query.QueryQ("",
@@ -569,7 +569,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static IQueryBuilder<IConditionalQuery> Contains(this IQueryBuilder<IConditionalQuery> query, object alias)
 		{
-			var paramaterAutoId = query.ContainerObject.GetParamaterAutoId();
+			var paramaterAutoId = query.ContainerObject.GetNextParameterId();
 			return query.QueryQ(string.Format("CONTAINS (@{0})", paramaterAutoId),
 				new QueryParameter(paramaterAutoId.ToString(CultureInfo.InvariantCulture), alias));
 		}

@@ -69,23 +69,10 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Checks
-		///     <paramref name="t" />
-		///     for Generics
-		///     This would indicate that the call of the proc could return some data
-		/// </summary>
-		/// <returns></returns>
-		public static bool CheckForResultProcedure(Type t)
-		{
-			var attStatus = t.GetGenericArguments();
-			return attStatus.Any();
-		}
-
-		/// <summary>
 		///     Gets the Value or DB null
 		/// </summary>
 		/// <returns></returns>
-		public static object GetDataValue(object value)
+		internal static object GetDataValue(object value)
 		{
 			return value ?? DBNull.Value;
 		}
@@ -95,7 +82,7 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <returns></returns>
 		/// <exception cref="ArgumentNullException"></exception>
-		public static object GetParamaterValue(this object source, string name)
+		internal static object GetParamaterValue(this object source, string name)
 		{
 			if (source == null)
 				throw new ArgumentNullException("source");
@@ -109,55 +96,13 @@ namespace JPB.DataAccess
 		///     retuns the Cashed Property info from Refection Cash
 		/// </summary>
 		/// <returns></returns>
-		public static DbPropertyInfoCache GetParamater(this object source, string name)
+		internal static DbPropertyInfoCache GetParamater(this object source, string name)
 		{
 			DbPropertyInfoCache val;
 			source.GetType().GetClassInfo().Propertys.TryGetValue(name, out val);
 			return val;
 		}
 
-		/// <summary>
-		///     Checks a
-		///     <paramref name="info" />
-		///     to be a Primary Key
-		/// </summary>
-		/// <returns></returns>
-		public static bool CheckForPK(this PropertyInfo info)
-		{
-			return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute) || (info.Name.EndsWith("_ID"));
-		}
-
-		/// <summary>
-		///     Checks a
-		///     <paramref name="info" />
-		///     to be a Primary Key
-		/// </summary>
-		/// <returns></returns>
-		public static bool CheckForFK(this PropertyInfo info, string name)
-		{
-			if (info.Name != name)
-				return false;
-			return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute);
-		}
-
-		/// <summary>
-		///     Checks a Property to BE handled as a Forgine Key from an Other class
-		///     (Checks for PrimaryKey)
-		/// </summary>
-		/// <returns></returns>
-		public static bool CheckForFK(this PropertyInfo info)
-		{
-			return info.GetCustomAttributes().Any(s => s is PrimaryKeyAttribute);
-		}
-
-		/// <summary>
-		///     Returns the Primarykey name (Converted) if exists
-		/// </summary>
-		/// <returns></returns>
-		public static string GetPKPropertyName(this Type type)
-		{
-			return type.GetClassInfo().PrimaryKeyProperty.PropertyName;
-		}
 
 		/// <summary>
 		///     Get and Convert the found PK name into Database name
@@ -204,40 +149,6 @@ namespace JPB.DataAccess
 			return classInfo.GetDbToLocalSchemaMapping(databaseName);
 		}
 
-		/// <summary>
-		///     retruns the Value of
-		///     <paramref name="databaseName" />
-		///     in the type of
-		///     <paramref name="source" />
-		/// </summary>
-		/// <typeparam name="E"></typeparam>
-		/// <returns></returns>
-		public static E GetFK<E>(this object source, string databaseName)
-		{
-			var type = source.GetType();
-			string pk = type.GetFK(databaseName);
-			DbPropertyInfoCache val;
-			type.GetClassInfo().Propertys.TryGetValue(pk, out val);
-			return (E)val.GetConvertedValue(source);
-		}
-
-		/// <summary>
-		///     retruns the Value of
-		///     <paramref name="databaseName" />
-		///     in the type of
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="TE"></typeparam>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static TE GetFK<T, TE>(this T source, string databaseName)
-		{
-			string pk = typeof(T).GetFK(databaseName);
-			DbPropertyInfoCache val;
-			typeof(T).GetClassInfo().Propertys.TryGetValue(pk, out val);
-			return (TE)val.GetConvertedValue(source);
-		}
-
 		internal static bool CopyPropertys(object @base, object newObject)
 		{
 			var updated = false;
@@ -282,27 +193,6 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Gets the PK value of the Object
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static object GetPK<T>(this T source)
-		{
-			return GetPK<T, object>(source);
-		}
-
-		/// <summary>
-		///     Gets the PK value of the Object
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static Type GetPKType<T>(this T source)
-		{
-			string pk = source.GetType().GetPKPropertyName();
-			return source.GetType().GetProperty(pk).PropertyType;
-		}
-
-		/// <summary>
 		///     Gets the Primary key of
 		///     <typeparamref name="T"></typeparamref>
 		///     and convert it the
@@ -311,12 +201,12 @@ namespace JPB.DataAccess
 		/// <typeparam name="T"></typeparam>
 		/// <typeparam name="E"></typeparam>
 		/// <returns></returns>
-		public static E GetPK<T, E>(this T source)
+		internal static object GetPK<T>(this T source)
 		{
-			string pk = typeof(T).GetPKPropertyName();
+			string pk = typeof (T).GetClassInfo().PrimaryKeyProperty.PropertyName;
 			DbPropertyInfoCache val;
 			typeof(T).GetClassInfo().Propertys.TryGetValue(pk, out val);
-			return (E)val.GetConvertedValue(source);
+			return val.GetConvertedValue(source);
 		}
 
 		/// <summary>
@@ -349,7 +239,7 @@ namespace JPB.DataAccess
 		///     Checks the object instance to be an List
 		/// </summary>
 		/// <returns></returns>
-		public static bool CheckForListInterface(this object info)
+		internal static bool CheckForListInterface(this object info)
 		{
 			return !(info is string) &&
 				   info.GetType().GetInterface(typeof(IEnumerable).Name) != null &&
@@ -369,7 +259,7 @@ namespace JPB.DataAccess
 		///     returns all propertys that are marked as Forgin keys
 		/// </summary>
 		/// <returns></returns>
-		public static DbPropertyInfoCache[] GetNavigationProps<T>()
+		internal static DbPropertyInfoCache[] GetNavigationProps<T>()
 		{
 			return GetNavigationProps(typeof(T));
 		}

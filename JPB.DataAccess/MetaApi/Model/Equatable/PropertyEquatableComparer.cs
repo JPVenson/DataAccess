@@ -41,7 +41,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 
 		public int GetHashCode(IPropertyInfoCache<TAtt> obj)
 		{
-			return obj.GetHashCode();
+			return obj.PropertyInfo.GetHashCode();
 		}
 
 		public int Compare(IPropertyInfoCache<TAtt> x, IPropertyInfoCache<TAtt> y)

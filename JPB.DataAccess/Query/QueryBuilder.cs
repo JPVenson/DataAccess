@@ -62,15 +62,7 @@ namespace JPB.DataAccess.Query
 
 		public int AutoParameterCounter { get; set; }
 		public List<GenericQueryPart> Parts { get; set; }
-
-		/// <summary>
-		///     Defines the Way how the Data will be loaded
-		/// </summary>
 		public EnumerationMode EnumerationMode { get; set; }
-
-		/// <summary>
-		///     If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
-		/// </summary>
 		public bool AllowParamterRenaming { get; set; }
 
 		/// <summary>
@@ -91,10 +83,7 @@ namespace JPB.DataAccess.Query
 			return new QueryLazyEnumerator(this, ForType);
 		}
 
-		/// <summary>
-		///     Will concat all QueryParts into a statement and will check for Spaces
-		/// </summary>
-		/// <returns></returns>
+
 		public IDbCommand Compile()
 		{
 			var query = CompileFlat();
@@ -130,11 +119,6 @@ namespace JPB.DataAccess.Query
 			return this;
 		}
 
-
-		/// <summary>
-		///     Compiles the QueryCommand into a String|IEnumerable of Paramameter
-		/// </summary>
-		/// <returns></returns>
 		public Tuple<string, IEnumerable<IQueryParameter>> CompileFlat()
 		{
 			var sb = new StringBuilder();
@@ -163,11 +147,8 @@ namespace JPB.DataAccess.Query
 			return new Tuple<string, IEnumerable<IQueryParameter>>(sb.ToString(), param);
 		}
 
-		/// <summary>
-		///     Increment the counter +1 and return the value
-		/// </summary>
-		/// <returns></returns>
-		public int GetParamaterAutoId()
+
+		public int GetNextParameterId()
 		{
 			return ++AutoParameterCounter;
 		}
@@ -255,11 +236,21 @@ namespace JPB.DataAccess.Query
 			this.ContainerObject.ForType = type;
 		}
 
+		/// <summary>
+		/// Creates a new Query
+		/// </summary>
+		/// <param name="database"></param>
 		public QueryBuilder(DbAccessLayer database)
 		{
 			this.ContainerObject = new InternalContainerContainer(database);
 		}
 		
+
+		/// <summary>
+		/// Wraps the current QueryBuilder into a new Form by setting the Current query type
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public IQueryBuilder<T> ChangeType<T>() where T : IQueryElement
 		{
 			return new QueryBuilder<T>(ContainerObject);
@@ -276,15 +267,19 @@ namespace JPB.DataAccess.Query
 		public IQueryContainer ContainerObject { get; private set; }
 
 		/// <summary>
-		///     Converts the non Generic IQueryContainer into its Counterpart
+		///     Executes the Current QueryBuilder by setting the type
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="E"></typeparam>
 		/// <returns></returns>
 		public IEnumerable<E> ForResult<E>()
 		{
 			return new QueryEnumerator<Stack, E>(new QueryBuilder<E, Stack>(this));
 		}
 
+		/// <summary>
+		///		Executes the current QueryBuilder
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable ForResult()
 		{
 			return new QueryEnumerator<Stack>(this);
@@ -306,7 +301,6 @@ namespace JPB.DataAccess.Query
 
 	/// <summary>
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	public class QueryBuilder<T, Stack> : QueryBuilder<Stack>
 		where Stack : IQueryElement
 	{

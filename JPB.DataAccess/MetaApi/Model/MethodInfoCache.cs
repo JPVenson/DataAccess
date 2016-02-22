@@ -257,5 +257,10 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().Compare(this, other);
 		}
+
+		public override int GetHashCode()
+		{
+			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().GetHashCode(this);
+		}
 	}
 }

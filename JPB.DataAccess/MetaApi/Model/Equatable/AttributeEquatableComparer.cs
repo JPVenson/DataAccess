@@ -29,7 +29,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 
 		public int GetHashCode(IAttributeInfoCache obj)
 		{
-			return obj.GetHashCode();
+			return obj.Attribute.GetHashCode();
 		}
 
 		public int Compare(IAttributeInfoCache x, IAttributeInfoCache y)

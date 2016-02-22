@@ -1627,15 +1627,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.CheckForResultProcedure(System.Type)">
-            <summary>
-                Checks
-                <paramref name="t" />
-                for Generics
-                This would indicate that the call of the proc could return some data
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetDataValue(System.Object)">
             <summary>
                 Gets the Value or DB null
@@ -1652,35 +1643,6 @@
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetParamater(System.Object,System.String)">
             <summary>
                 retuns the Cashed Property info from Refection Cash
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.CheckForPK(System.Reflection.PropertyInfo)">
-            <summary>
-                Checks a
-                <paramref name="info" />
-                to be a Primary Key
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.CheckForFK(System.Reflection.PropertyInfo,System.String)">
-            <summary>
-                Checks a
-                <paramref name="info" />
-                to be a Primary Key
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.CheckForFK(System.Reflection.PropertyInfo)">
-            <summary>
-                Checks a Property to BE handled as a Forgine Key from an Other class
-                (Checks for PrimaryKey)
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.GetPKPropertyName(System.Type)">
-            <summary>
-                Returns the Primarykey name (Converted) if exists
             </summary>
             <returns></returns>
         </member>
@@ -1709,42 +1671,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.GetFK``1(System.Object,System.String)">
-            <summary>
-                retruns the Value of
-                <paramref name="databaseName" />
-                in the type of
-                <paramref name="source" />
-            </summary>
-            <typeparam name="E"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.GetFK``2(``0,System.String)">
-            <summary>
-                retruns the Value of
-                <paramref name="databaseName" />
-                in the type of
-                <typeparamref name="T"></typeparamref>
-            </summary>
-            <typeparam name="TE"></typeparam>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetPK``1(``0)">
-            <summary>
-                Gets the PK value of the Object
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.GetPKType``1(``0)">
-            <summary>
-                Gets the PK value of the Object
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.GetPK``2(``0)">
             <summary>
                 Gets the Primary key of
                 <typeparamref name="T"></typeparamref>
@@ -3132,6 +3059,54 @@
             <summary>
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Query.Contracts.IQueryContainer.Compile">
+            <summary>
+                Will concat all QueryParts into a statement and will check for Spaces
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Contracts.IQueryContainer.GetNextParameterId">
+            <summary>
+                Increment the counter +1 and return the value
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Contracts.IQueryContainer.CompileFlat">
+            <summary>
+                Compiles the QueryCommand into a String|IEnumerable of Paramameter
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.ForType">
+            <summary>
+            	Declares the Return type that is awaited
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.AutoParameterCounter">
+            <summary>
+            	Gets the current number of used SQL Arguments
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.Parts">
+            <summary>
+            	Defines all elements added by the Add Method
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.EnumerationMode">
+            <summary>
+                Defines the Way how the Data will be loaded
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.AllowParamterRenaming">
+            <summary>
+                If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.AccessLayer">
+            <summary>
+            	Access to the underlying AccessLayer
+            </summary>
+        </member>
         <member name="T:JPB.DataAccess.Query.CteQueryPart">
             <summary>
                 Maker for CTS in MSSQL
@@ -3237,12 +3212,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.InternalContainerContainer.Compile">
-            <summary>
-                Will concat all QueryParts into a statement and will check for Spaces
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.Query.InternalContainerContainer.Execute">
             <summary>
                 Executes a query without result parsing
@@ -3257,18 +3226,6 @@
         <member name="M:JPB.DataAccess.Query.InternalContainerContainer.WithParamterRenaming(System.Boolean)">
             <summary>
                 QueryCommand like setter for AllowParamterRenaming [Duplicate]
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Query.InternalContainerContainer.CompileFlat">
-            <summary>
-                Compiles the QueryCommand into a String|IEnumerable of Paramameter
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Query.InternalContainerContainer.GetParamaterAutoId">
-            <summary>
-                Increment the counter +1 and return the value
             </summary>
             <returns></returns>
         </member>
@@ -3292,16 +3249,6 @@
             <summary>
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.Query.InternalContainerContainer.EnumerationMode">
-            <summary>
-                Defines the Way how the Data will be loaded
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.Query.InternalContainerContainer.AllowParamterRenaming">
-            <summary>
-                If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
-            </summary>
-        </member>
         <member name="P:JPB.DataAccess.Query.InternalContainerContainer.AutoLinebreak">
             <summary>
                 If enabled the IQueryContainer will insert linebreaks after some Commands
@@ -3312,6 +3259,19 @@
                 Provides functions that can build SQL Querys
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilder`1.#ctor(JPB.DataAccess.Manager.DbAccessLayer)">
+            <summary>
+            Creates a new Query
+            </summary>
+            <param name="database"></param>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilder`1.ChangeType``1">
+            <summary>
+            Wraps the current QueryBuilder into a new Form by setting the Current query type
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`1.Clone">
             <summary>
             </summary>
@@ -3319,9 +3279,15 @@
         </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`1.ForResult``1">
             <summary>
-                Converts the non Generic IQueryContainer into its Counterpart
+                Executes the Current QueryBuilder by setting the type
             </summary>
-            <typeparam name="T"></typeparam>
+            <typeparam name="E"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilder`1.ForResult">
+            <summary>
+            	Executes the current QueryBuilder
+            </summary>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`1.GetEnumerator">
@@ -3332,7 +3298,6 @@
         <member name="T:JPB.DataAccess.Query.QueryBuilder`2">
             <summary>
             </summary>
-            <typeparam name="T"></typeparam>
         </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`2.#ctor(JPB.DataAccess.Manager.DbAccessLayer)">
             <summary>

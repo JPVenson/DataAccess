@@ -201,7 +201,7 @@ namespace JPB.DataAccess.Query
 	//	/// <returns></returns>
 	//	public static IQueryContainer<T> Contains<T>(this IQueryContainer<T> query, object alias)
 	//	{
-	//		var paramaterAutoId = query.GetParamaterAutoId();
+	//		var paramaterAutoId = query.GetNextParameterId();
 	//		return query.QueryQ(string.Format("CONTAINS (@{0})", paramaterAutoId),
 	//			new QueryParameter(paramaterAutoId.ToString(CultureInfo.InvariantCulture), alias));
 	//	}

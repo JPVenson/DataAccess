@@ -188,6 +188,7 @@
     <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />
     <Compile Include="Contacts\Pager\IWrapperDataPager.cs" />
     <Compile Include="AdoWrapper\MsSql\MsSqlDataConverterPager.cs" />
+    <Compile Include="Query\Contracts\IQueryBuilder.cs" />
     <Compile Include="Query\Contracts\IQueryContainer.cs" />
     <Compile Include="Query\Contracts\ISelectQuery.cs" />
     <Compile Include="Query\CteQueryPart.cs" />

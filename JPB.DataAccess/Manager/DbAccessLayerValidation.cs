@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using JPB.DataAccess.DbInfoConfig;
 
 namespace JPB.DataAccess.Manager
 {
@@ -31,7 +32,7 @@ namespace JPB.DataAccess.Manager
 		/// <exception cref="ValidationException"></exception>
 		public static void ValidateEntityPk(object instance)
 		{
-			var pkProperty = instance.GetType().GetPKPropertyName();
+			var pkProperty = instance.GetType().GetClassInfo().PrimaryKeyProperty.PropertyName;
 			var context = new ValidationContext(instance);
 			context.MemberName = pkProperty;
 			Validator.ValidateProperty(instance, context);

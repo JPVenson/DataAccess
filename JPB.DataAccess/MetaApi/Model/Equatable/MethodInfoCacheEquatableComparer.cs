@@ -30,7 +30,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 
 		public int GetHashCode(IMethodInfoCache<TAtt, TArg> obj)
 		{
-			return obj.GetHashCode();
+			return obj.MethodInfo.GetHashCode();
 		}
 
 		public int Compare(IMethodInfoCache<TAtt, TArg> x, IMethodInfoCache<TAtt, TArg> y)
