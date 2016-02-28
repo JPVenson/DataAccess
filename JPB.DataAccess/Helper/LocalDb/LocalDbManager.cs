@@ -15,7 +15,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			DefaultPkProvider.Add(typeof(Guid), new LocalGuidPkProvider());
 		}
 
-		public LocalDbManager()
+		internal LocalDbManager()
 		{
 			_database = new Dictionary<Type, LocalDbReposetory>();
 			_mappings = new HashSet<ReproMappings>();
@@ -26,6 +26,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		[ThreadStatic]
 		private static LocalDbManager _scope;
 
+		/// <summary>
+		/// Access to the current local Scope
+		/// Not ThreadSave
+		/// </summary>
 		public static LocalDbManager Scope
 		{
 			get
@@ -35,6 +39,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			internal set { _scope = value; }
 		}
 
+		/// <summary>
+		/// Will be invoked when the current database is setup
+		/// </summary>
 		public event EventHandler SetupDone;
 
 		internal void OnSetupDone()
