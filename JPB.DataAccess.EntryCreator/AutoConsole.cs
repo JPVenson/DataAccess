@@ -51,6 +51,10 @@ namespace JPB.DataAccess.EntityCreator
 
 		public void LoadStorage(string path)
 		{
+			if (path == null)
+			{
+				return;
+			}
 			using (var fs = new FileStream(path, FileMode.Open))
 			{
 				var serilizer = new XmlSerializer(typeof(Options));

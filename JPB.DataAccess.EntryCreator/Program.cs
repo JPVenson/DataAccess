@@ -38,6 +38,10 @@ namespace JPB.DataAccess.EntityCreator
 				if (File.Exists(args[0]))
 					AutoConsole = new AutoConsole(args[0]);
 			}
+			else
+			{
+				AutoConsole = new AutoConsole(null);
+			}
 
 			Console.WriteLine("Enter output dir");
 
