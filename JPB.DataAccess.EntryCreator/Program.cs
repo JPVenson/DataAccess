@@ -117,19 +117,9 @@ namespace JPB.DataAccess.EntityCreator
 
 
 			new MsSqlCreator().CreateEntrys(connectionString, outputDir, string.Empty);
-			if (AutoConsole.Options == null)
+			if (AutoConsole.Options == null && args.Length > 0)
 				AutoConsole.SaveStorage(args[0]);
 
-		}
-
-		private void RenderHelp()
-		{
-			Console.WriteLine("Creates cs Entrys based on a Database ( currently MsSQL only )");
-			Console.WriteLine();
-			Console.WriteLine("Usage: [/out] [/con] ");
-			Console.WriteLine();
-			Console.WriteLine("\t /out     A existing Directory where all cs classes are written to");
-			Console.WriteLine("\t /con       Specifys the Connection property to a existing Database");
 		}
 	}
 }

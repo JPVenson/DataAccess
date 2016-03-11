@@ -28,6 +28,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		public string TargetDir { get; set; }
 		public bool WithAutoCtor { get; set; }
+		public bool GenerateForgeinKeyDeclarations { get; set; }
 
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
@@ -104,6 +105,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			Console.WriteLine(@"\compile       Starts the Compiling of all Tables");
 			Console.WriteLine(@"\ns            Defines a default Namespace");
+			Console.WriteLine(@"\fkGen         Generates ForgeinKeyDeclarations");
+			Console.WriteLine(@"\withautoctor  Generates Loader Constructors");
 			Console.WriteLine(@"\autoGenNames  Defines all names after a common naming convention");
 			Console.WriteLine(@"\add           Adds elements to existing cs classes");
 			Console.WriteLine(@"    Options: ");
@@ -150,6 +153,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					case @"\ns":
 						SetNamespace();
 						break;
+					case @"\fkgen":
+						SetForgeinKeyDeclarationCreation();
+						break;
 					case @"\compile":
 						RenderCompiler();
 						break;
@@ -184,6 +190,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						break;
 				}
 			}
+		}
+
+		private void SetForgeinKeyDeclarationCreation()
+		{
+			GenerateForgeinKeyDeclarations = !GenerateForgeinKeyDeclarations;
+			Console.WriteLine("Auto ForgeinKey Declaration Creation is {0}", GenerateForgeinKeyDeclarations ? "set" : "unset");
+			RenderMenu();
 		}
 
 		private void RenderAutoCtor()
@@ -524,6 +537,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 							Console.WriteLine("\t Position From Top =       {0}", columnInfo.ColumnInfo.PositionFromTop);
 							Console.WriteLine("\t Nullable =                {0}", columnInfo.ColumnInfo.Nullable);
 							Console.WriteLine("\t Cs Type =                 {0}", columnInfo.ColumnInfo.TargetType.Name);
+							Console.WriteLine("\t forgeinKey Type =         {0}", columnInfo.ForgeinKeyDeclarations);
 						}
 						break;
 
@@ -572,6 +586,26 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						codeMemberProperty.CustomAttributes.Add(
 							new CodeAttributeDeclaration(typeof(PrimaryKeyAttribute).Name));
 					}
+					if (columInfoModel.ForgeinKeyDeclarations != null)
+					{
+						var isRefTypeKnown = _tableNames.FirstOrDefault(s => s.Info.TableName == columInfoModel.ForgeinKeyDeclarations.TableName);
+
+						if(isRefTypeKnown == null)
+						{
+							codeMemberProperty.CustomAttributes.Add(
+	new CodeAttributeDeclaration(typeof(ForeignKeyDeclarationAttribute).Name,
+	new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TargetColumn)),
+	new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TableName))));
+						}
+						else
+						{
+							codeMemberProperty.CustomAttributes.Add(
+	new CodeAttributeDeclaration(typeof(ForeignKeyDeclarationAttribute).Name,
+	new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TargetColumn)),
+	new CodeAttributeArgument(new CodeTypeOfExpression(isRefTypeKnown.GetClassName()))));
+						}
+					}
+
 					if (columInfoModel.ColumnInfo.TargetType2 == "Timestamp")
 					{
 						codeMemberProperty.CustomAttributes.Add(
