@@ -311,9 +311,30 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
+		/// <summary>
+		/// Thread save
+		/// </summary>
+		/// <returns></returns>
+		public object[] ToArray()
+		{
+			lock (SyncRoot)
+			{
+				return _base.Values.ToArray();
+			}
+		}
+
+		/// <summary>
+		/// Thread save
+		/// </summary>
+		/// <param name="array"></param>
+		/// <param name="index"></param>
 		public virtual void CopyTo(Array array, int index)
 		{
-			throw new NotImplementedException();
+			lock (SyncRoot)
+			{
+				var values = _base.Values.ToArray();
+				values.CopyTo(array, index);
+			}
 		}
 
 		public virtual int Count
@@ -370,7 +391,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			base.Add(item);
 		}
-		
+
 		/// <summary>
 		/// Removes all items from this Table
 		/// </summary>
@@ -397,6 +418,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public bool Contains(object key)
 		{
 			return base.ContainsId(key);
+		}
+
+		/// <summary>
+		/// Thread save
+		/// </summary>
+		/// <returns></returns>
+		public new T[] ToArray()
+		{
+			lock (SyncRoot)
+			{
+				return _base.Cast<T>().ToArray();
+			}
 		}
 
 		/// <summary>
@@ -442,7 +475,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <returns></returns>
 		public new T this[object primaryKey]
 		{
-			get { return (T) base[primaryKey] ; }
+			get { return (T)base[primaryKey]; }
 		}
 
 		/// <summary>

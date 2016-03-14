@@ -26,13 +26,13 @@ namespace JPB.DataAccess.MetaApi
 #if !DEBUG
 	[DebuggerStepThrough]
 #endif
-	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> : 
+	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> :
 		IDisposable
 		where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>, new()
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
 		where TMeth /*HeHeHe*/ : class, IMethodInfoCache<TAttr, TArg>, new()
-		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new() 
+		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
 		/// <summary>
@@ -52,10 +52,10 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		/// Creates a new Instance for accessing the Global Config store
 		/// </summary>
-		public MetaInfoStore() 
+		public MetaInfoStore()
 			: this(true)
 		{
-			
+
 		}
 
 		/// <summary>
@@ -128,7 +128,7 @@ namespace JPB.DataAccess.MetaApi
 			TClass element;
 			try
 			{
-				if (EnableThreadSafety)
+				if (EnableGlobalThreadSafety || EnableInstanceThreadSafety)
 				{
 					Monitor.Enter(SClassInfoCaches);
 				}
@@ -144,7 +144,7 @@ namespace JPB.DataAccess.MetaApi
 			}
 			finally
 			{
-				if (EnableThreadSafety)
+				if (EnableGlobalThreadSafety || EnableInstanceThreadSafety)
 				{
 					Monitor.Exit(SClassInfoCaches);
 				}
@@ -193,11 +193,16 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		///     If Enabled the GetOrCreateClassInfoCache mehtod will be locked due usage
 		/// </summary>
-		public bool EnableThreadSafety { get; set; }
+		public static bool EnableGlobalThreadSafety { get; set; }
+
+		/// <summary>
+		///		if Enabled this can overwrite the EnableGlobalThreadSafety property
+		/// </summary>
+		public bool EnableInstanceThreadSafety { get; set; }
 
 		public virtual void Dispose()
 		{
-			ClassInfoCaches.Clear();
+			SClassInfoCaches.Clear();
 		}
 	}
 }

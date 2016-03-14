@@ -1212,6 +1212,19 @@
             <param name="primaryKey"></param>
             <returns></returns>
         </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.ToArray">
+            <summary>
+            Thread save
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.CopyTo(System.Array,System.Int32)">
+            <summary>
+            Thread save
+            </summary>
+            <param name="array"></param>
+            <param name="index"></param>
+        </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1">
             <summary>
             Provides an wrapper for the non Generic LocalDbReposetory 
@@ -1256,6 +1269,12 @@
             Checks if the key is known
             </summary>
             <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.ToArray">
+            <summary>
+            Thread save
+            </summary>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.CopyTo(`0[],System.Int32)">
@@ -1739,9 +1758,14 @@
             <typeparam name="T"></typeparam>
             <returns></returns>
         </member>
-        <member name="P:JPB.DataAccess.MetaApi.MetaInfoStore`6.EnableThreadSafety">
+        <member name="P:JPB.DataAccess.MetaApi.MetaInfoStore`6.EnableGlobalThreadSafety">
             <summary>
                 If Enabled the GetOrCreateClassInfoCache mehtod will be locked due usage
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.MetaApi.MetaInfoStore`6.EnableInstanceThreadSafety">
+            <summary>
+            	if Enabled this can overwrite the EnableGlobalThreadSafety property
             </summary>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.MetaInfoStoreExtentions">
