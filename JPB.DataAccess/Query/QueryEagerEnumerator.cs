@@ -87,9 +87,10 @@ namespace JPB.DataAccess.Query
 
 		public void Dispose()
 		{
-			if(_task != null)
+			if (_task != null)
 				_task.Dispose();
-			_enumerateDataRecords.Clear();
+			if (_enumerateDataRecords != null)
+				_enumerateDataRecords.Clear();
 			_elements.Clear();
 		}
 	}
@@ -103,7 +104,7 @@ namespace JPB.DataAccess.Query
 
 		public new T Current
 		{
-			get { return (T) base.Current; }
+			get { return (T)base.Current; }
 		}
 	}
 }

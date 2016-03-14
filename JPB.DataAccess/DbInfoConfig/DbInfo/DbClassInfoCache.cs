@@ -122,7 +122,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			get
 			{
 				if (ForModel == null)
-					return ClassName;
+					return ClassName.Split('.').Last();
 				return ForModel.Attribute.AlternatingName;
 			}
 		}
