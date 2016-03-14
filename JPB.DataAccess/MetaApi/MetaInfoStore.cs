@@ -126,7 +126,7 @@ namespace JPB.DataAccess.MetaApi
 		{
 			newCreated = false;
 			TClass element;
-			var isThreadSave = EnableThreadSafety;
+			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
 			try
 			{
 				if (isThreadSave)
