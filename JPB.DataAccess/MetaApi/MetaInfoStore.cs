@@ -194,11 +194,16 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		///     If Enabled the GetOrCreateClassInfoCache mehtod will be locked due usage
 		/// </summary>
-		public bool EnableThreadSafety { get; set; }
+		public static bool EnableGlobalThreadSafety { get; set; }
+
+		/// <summary>
+		///		if Enabled this can overwrite the EnableGlobalThreadSafety property
+		/// </summary>
+		public bool EnableInstanceThreadSafety { get; set; }
 
 		public virtual void Dispose()
 		{
-			ClassInfoCaches.Clear();
+			SClassInfoCaches.Clear();
 		}
 	}
 }
