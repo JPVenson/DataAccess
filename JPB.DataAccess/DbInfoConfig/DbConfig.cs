@@ -27,7 +27,16 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		public static FactoryHelperSettings ConstructorSettings { get; private set; }
 
-		protected internal override DbClassInfoCache GetOrCreateClassInfoCache(Type type)
+		public new DbClassInfoCache GetOrCreateClassInfoCache(Type type)
+		{
+			bool isNewCreated;
+			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
+			if (isNewCreated)
+				val.CheckForConfig();
+			return val;
+		}
+
+		public new DbClassInfoCache GetOrCreateClassInfoCache(string type)
 		{
 			bool isNewCreated;
 			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);

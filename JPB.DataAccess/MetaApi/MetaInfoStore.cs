@@ -26,13 +26,13 @@ namespace JPB.DataAccess.MetaApi
 #if !DEBUG
 	[DebuggerStepThrough]
 #endif
-	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> : 
+	public class MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> :
 		IDisposable
 		where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>, new()
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
 		where TMeth /*HeHeHe*/ : class, IMethodInfoCache<TAttr, TArg>, new()
-		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new() 
+		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
 		/// <summary>
@@ -52,10 +52,10 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		/// Creates a new Instance for accessing the Global Config store
 		/// </summary>
-		public MetaInfoStore() 
+		public MetaInfoStore()
 			: this(true)
 		{
-			
+
 		}
 
 		/// <summary>
@@ -95,18 +95,6 @@ namespace JPB.DataAccess.MetaApi
 		private static readonly HashSet<TClass> ClassInfoCaches;
 		private readonly HashSet<TClass> _classInfoCaches;
 
-		/// <summary>
-		///     Gets an Cache object if exists or creats one
-		/// </summary>
-		/// <returns></returns>
-		protected internal virtual TProp GetOrCreatePropertyInfoCache(PropertyInfo type)
-		{
-			var declareingType = type.ReflectedType;
-			var element = GetOrCreateClassInfoCache(declareingType);
-			TProp cache;
-			element.Propertys.TryGetValue(type.Name, out cache);
-			return cache;
-		}
 
 		/// <summary>
 		///     Gets an Cache object if exists or creats one
@@ -137,6 +125,45 @@ namespace JPB.DataAccess.MetaApi
 				element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
 				if (element == null)
 				{
+					element = new TClass();
+					SClassInfoCaches.Add(element);
+					element.Init(type);
+					newCreated = true;
+				}
+			}
+			finally
+			{
+				if (isThreadSave)
+				{
+					Monitor.Exit(SClassInfoCaches);
+				}
+			}
+			return element;
+		}
+
+		/// <summary>
+		///		Gets an Cache object of exists or creats one
+		/// </summary>
+		/// <param name="typeName"></param>
+		/// <param name="newCreated"></param>
+		/// <returns></returns>
+		protected internal virtual TClass GetOrCreateClassInfoCache(string typeName, out bool newCreated)
+		{
+			newCreated = false;
+			TClass element;
+			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
+			try
+			{
+				if (isThreadSave)
+				{
+					Monitor.Enter(SClassInfoCaches);
+				}
+
+				element = SClassInfoCaches.FirstOrDefault(s => s.ClassName.Equals(typeName));
+				if (element == null)
+				{
+					var type = Type.GetType(typeName, true, false);
+
 					element = new TClass();
 					SClassInfoCaches.Add(element);
 					element.Init(type);
