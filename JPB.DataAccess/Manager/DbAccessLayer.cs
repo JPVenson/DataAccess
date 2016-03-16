@@ -22,6 +22,7 @@ using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Logger;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
@@ -45,6 +46,8 @@ namespace JPB.DataAccess.Manager
 
 		private IDatabase _database;
 
+		private ILogger _logger;
+
 		/// <summary>
 		/// Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the instance. This field overrides 
 		/// </summary>
@@ -65,105 +68,6 @@ namespace JPB.DataAccess.Manager
 		///		If set to True a strict check for the Targetdatabase Property on each Factory or provider specific method is done otherwise this Check is skiped 
 		/// </summary>
 		public bool IsMultiProviderEnvironment { get; set; }
-
-		/// <summary>
-		///     Defines a set of Providers that are inclueded in this DLL or are weak refernced.
-		/// </summary>
-		public static PreDefinedProviderCollection ProviderCollection { get; private set; }
-
-		internal DbAccessLayer()
-		{
-			Debugger = false;
-			LoadCompleteResultBeforeMapping = true;
-
-			SelectDbAccessLayer();
-			UpdateDbAccessLayer();
-		}
-
-		/// <summary>
-		///     Create a DbAccessLayer that uses a Predefined type and Connection string
-		/// </summary>
-		public DbAccessLayer(DbAccessType dbAccessType, string connection)
-			: this()
-		{
-			if (dbAccessType == DbAccessType.Unknown)
-			{
-				throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof (DbAccessType));
-			}
-
-			DbAccessType = dbAccessType;
-			Database = new DefaultDatabaseAccess();
-			var database =
-				ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection);
-			Database.Attach(database);
-			DatabaseStrategy = database;
-		}
-
-		/// <summary>
-		///     Create a DbAccessLAyer with exernal Strategy
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection)
-			: this()
-		{
-			if (string.IsNullOrEmpty(fullTypeNameToIDatabaseStrategy))
-				throw new ArgumentNullException("fullTypeNameToIDatabaseStrategy");
-
-			ResolveDbType(fullTypeNameToIDatabaseStrategy);
-
-			var database = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
-
-			Database = new DefaultDatabaseAccess();
-			Database.Attach(database);
-			DatabaseStrategy = database;
-		}
-
-		/// <summary>
-		///     Create a DbAccessLayer with a new Database
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		public DbAccessLayer(IDatabaseStrategy database)
-			: this()
-		{
-			if (database == null)
-				throw new ArgumentNullException("database");
-
-			ResolveDbType(database.GetType().FullName);
-
-			Database = new DefaultDatabaseAccess();
-			Database.Attach(database);
-			DatabaseStrategy = database;
-		}
-
-		/// <summary>
-		///     Creates a DbAccessLayer with a new Database
-		///     dbAccessType will be Guessed
-		/// </summary>
-		public DbAccessLayer(IDatabase database)
-			: this()
-		{
-			if (database == null)
-				throw new ArgumentNullException("database");
-
-			DbAccessType = DbAccessType.Unknown;
-			Database = database;
-		}
-
-		private void ResolveDbType(string fullTypeNameToIDatabaseStrategy)
-		{
-			// ReSharper disable once PossibleInvalidOperationException
-			var firstOrDefault =
-				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
-					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
-			if (firstOrDefault == null)
-			{
-				DbAccessType = DbAccessType.Unknown;
-			}
-			else
-			{
-				DbAccessType = firstOrDefault.Value.Key;
-			}
-		}
 
 		/// <summary>
 		///     For Internal Use only
@@ -197,6 +101,113 @@ namespace JPB.DataAccess.Manager
 			}
 		}
 
+
+		/// <summary>
+		///     Defines a set of Providers that are inclueded in this DLL or are weak refernced.
+		/// </summary>
+		public static PreDefinedProviderCollection ProviderCollection { get; private set; }
+
+		internal DbAccessLayer(ILogger logger = null)
+		{
+			_logger = logger;
+			if (logger == null)
+			{
+				_logger = new DefaultLogger();
+			}
+
+			Debugger = false;
+			LoadCompleteResultBeforeMapping = true;
+
+			SelectDbAccessLayer();
+			UpdateDbAccessLayer();
+		}
+
+		/// <summary>
+		///     Create a DbAccessLayer that uses a Predefined type and Connection string
+		/// </summary>
+		public DbAccessLayer(DbAccessType dbAccessType, string connection, ILogger logger = null)
+			: this(logger)
+		{
+			if (dbAccessType == DbAccessType.Unknown)
+			{
+				throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof (DbAccessType));
+			}
+
+			DbAccessType = dbAccessType;
+			Database = new DefaultDatabaseAccess();
+			var database =
+				ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection);
+			Database.Attach(database);
+			DatabaseStrategy = database;
+		}
+
+		/// <summary>
+		///     Create a DbAccessLAyer with exernal Strategy
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection, ILogger logger = null)
+			: this(logger)
+		{
+			if (string.IsNullOrEmpty(fullTypeNameToIDatabaseStrategy))
+				throw new ArgumentNullException("fullTypeNameToIDatabaseStrategy");
+
+			ResolveDbType(fullTypeNameToIDatabaseStrategy);
+
+			var database = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
+
+			Database = new DefaultDatabaseAccess();
+			Database.Attach(database);
+			DatabaseStrategy = database;
+		}
+
+		/// <summary>
+		///     Create a DbAccessLayer with a new Database
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		public DbAccessLayer(IDatabaseStrategy database, ILogger logger = null)
+			: this(logger)
+		{
+			if (database == null)
+				throw new ArgumentNullException("database");
+
+			ResolveDbType(database.GetType().FullName);
+
+			Database = new DefaultDatabaseAccess();
+			Database.Attach(database);
+			DatabaseStrategy = database;
+		}
+
+		/// <summary>
+		///     Creates a DbAccessLayer with a new Database
+		///     dbAccessType will be Guessed
+		/// </summary>
+		public DbAccessLayer(IDatabase database, ILogger logger = null)
+			: this(logger)
+		{
+			if (database == null)
+				throw new ArgumentNullException("database");
+
+			DbAccessType = DbAccessType.Unknown;
+			Database = database;
+		}
+
+		private void ResolveDbType(string fullTypeNameToIDatabaseStrategy)
+		{
+			// ReSharper disable once PossibleInvalidOperationException
+			var firstOrDefault =
+				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
+					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
+			if (firstOrDefault == null)
+			{
+				DbAccessType = DbAccessType.Unknown;
+			}
+			else
+			{
+				DbAccessType = firstOrDefault.Value.Key;
+			}
+		}
+
+	
 
 		/// <summary>
 		///     Check for Availability
