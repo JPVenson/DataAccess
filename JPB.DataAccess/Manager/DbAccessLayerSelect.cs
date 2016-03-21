@@ -192,8 +192,9 @@ namespace JPB.DataAccess.Manager
 		{
 			var plainCommand = Database.CreateCommand(
 				CreateSelectQueryFactory(type.GetClassInfo(), Database).CommandText + " " + query);
-			foreach (IQueryParameter para in paramenter)
-				plainCommand.Parameters.AddWithValue(para.Name, para.Value, Database);
+			if (paramenter != null)
+				foreach (IQueryParameter para in paramenter)
+					plainCommand.Parameters.AddWithValue(para.Name, para.Value, Database);
 			return plainCommand;
 		}
 
@@ -397,7 +398,7 @@ namespace JPB.DataAccess.Manager
 			if (type.GetClassInfo().PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("Class '{0}' does not define any Primary key", type.Name));
 
-			var query = CreateSelectQueryFactory(type.GetClassInfo()).CommandText 
+			var query = CreateSelectQueryFactory(type.GetClassInfo()).CommandText
 				+ " WHERE " + type.GetClassInfo().PrimaryKeyProperty.DbName + " = @pk";
 			var cmd = Database.CreateCommand(query);
 			cmd.Parameters.AddWithValue("@pk", pk, Database);
@@ -438,7 +439,7 @@ namespace JPB.DataAccess.Manager
 					.Propertys
 					.Where(f => f.Value.ForginKeyAttribute != null ||
 						(
-							f.Value.FromXmlAttribute != null 
+							f.Value.FromXmlAttribute != null
 							&& f.Value.FromXmlAttribute.Attribute.LoadStrategy == LoadStrategy.NotIncludeInSelect
 						))
 					.Select(f => f.Key)
@@ -607,8 +608,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectWhere(Type type, String @where)
 		{
-			var query = CreateSelect(type, @where);
-			return RunSelect(type, query);
+			return SelectWhere(type, where, null);
 		}
 
 		/// <summary>
@@ -631,6 +631,11 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectWhere(Type type, String @where, IEnumerable<IQueryParameter> paramenter)
 		{
+			if (!@where.StartsWith("WHERE"))
+			{
+				@where = @where.Insert(0, "WHERE ");
+			}
+
 			var query = CreateSelect(type, @where, paramenter);
 			return RunSelect(type, query);
 		}
@@ -671,7 +676,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T[] SelectWhere<T>(String @where, dynamic paramenter)
 		{
-			List<object> selectWhere = SelectWhere(typeof(T), @where, paramenter);
+			object[] selectWhere = SelectWhere(typeof(T), @where, paramenter);
 			return selectWhere.Cast<T>().ToArray();
 		}
 
@@ -853,7 +858,7 @@ namespace JPB.DataAccess.Manager
 						targetName = targetType.GetPK();
 					}
 
-					sqlCommand = CreateSelect(targetType, 
+					sqlCommand = CreateSelect(targetType,
 						" WHERE " + targetName + " = @pk", new List<IQueryParameter>
 						{
 							new QueryParameter("@pk", pk)

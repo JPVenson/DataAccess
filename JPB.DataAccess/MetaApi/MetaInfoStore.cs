@@ -95,7 +95,6 @@ namespace JPB.DataAccess.MetaApi
 		private static readonly HashSet<TClass> ClassInfoCaches;
 		private readonly HashSet<TClass> _classInfoCaches;
 
-
 		/// <summary>
 		///     Gets an Cache object if exists or creats one
 		/// </summary>

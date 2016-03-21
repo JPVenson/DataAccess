@@ -10,6 +10,7 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Contacts.Pager;
 using System.Data;
+using System.Collections.ObjectModel;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
@@ -505,6 +506,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public LocalDataPager(LocalDbReposetory<T> localDbReposetory)
 		{
 			this.localDbReposetory = localDbReposetory;
+			SyncHelper = (s) => s();
+			CurrentPageItems = new ObservableCollection<T>();
 		}
 
 		private long _currentPage;
@@ -517,7 +520,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public long CurrentPage
 		{
 			get { return _currentPage; }
-			set { _currentPage = value; }
+			set
+			{
+				if (value >= 0)
+					_currentPage = value;
+			}
 		}
 
 		public ICollection<T> CurrentPageItems

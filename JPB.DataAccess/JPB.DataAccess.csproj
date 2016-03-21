@@ -118,6 +118,7 @@
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
     <Compile Include="Contacts\ILocalPrimaryKeyValueProvider.cs" />
+    <Compile Include="Contacts\ILogger.cs" />
     <Compile Include="DbInfoConfig\ConfigHelpers.cs" />
     <Compile Include="DbInfoConfig\ConfigurationResolver.cs" />
     <Compile Include="DbInfoConfig\DbConfig.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="Helper\PocoPkComparer.cs" />
     <Compile Include="Helper\LocalDb\ReproMappings.cs" />
     <Compile Include="Contacts\MetaApi\IMethodArgsInfoCache.cs" />
+    <Compile Include="Logger\DefaultLogger.cs" />
     <Compile Include="MetaApi\Model\AttributeInfoCache.cs" />
     <Compile Include="MetaApi\Model\ClassInfoCache.cs" />
     <Compile Include="MetaApi\Model\ConstructorInfoCache.cs" />

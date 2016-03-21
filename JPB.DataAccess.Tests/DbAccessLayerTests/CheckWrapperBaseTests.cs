@@ -482,6 +482,23 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		public void SelectWhereBase()
+		{
+			InsertTest();
+			Users[] refSelect = expectWrapper.SelectWhere<Users>("UserName IS NOT NULL");
+			Assert.IsTrue(refSelect.Length > 0);
+
+			string testInsertName = Guid.NewGuid().ToString();
+			Users testUser = expectWrapper.InsertWithSelect(new Users { UserName = testInsertName });
+			Assert.IsNotNull(testUser);
+			Assert.AreNotEqual(testUser.User_ID, default(long));
+
+			var selTestUser = expectWrapper.SelectWhere<Users>("User_ID = @id", new { id = testUser.User_ID }).FirstOrDefault();
+			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
+			Assert.AreEqual(selTestUser.User_ID, testUser.User_ID);
+		}
+
+		[Test]
 		public void SelectModelsSelect()
 		{
 			RangeInsertTest();
