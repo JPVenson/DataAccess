@@ -101,7 +101,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		}
 
 		[SelectFactoryMethod]
-		public static void Callup(QueryBuilder<IRootQuery> builder, string tableName, string database)
+		public static void Callup(IQueryBuilder<IRootQuery> builder, string tableName, string database)
 		{
 			builder.QueryText("SELECT ccu.column_name AS SourceColumn ,kcu.table_name AS TargetTable ,kcu.column_name AS TargetColumn")
 				.QueryText("FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu")
@@ -147,6 +147,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public bool IsRowVersion { get; set; }
 
 		public bool PrimaryKey { get; set; }
+
+		public bool InsertIgnore { get; set; }
+		public bool Exclude { get; set; }
 
 		public ForgeinKeyInfoModel ForgeinKeyDeclarations { get; set; }
 

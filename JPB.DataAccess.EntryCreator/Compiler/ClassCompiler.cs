@@ -133,7 +133,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			var comments = Encoding.UTF8.GetString(copyright).Split('\n').Select(s => new CodeCommentStatement(s)).Concat(new[]
 			{
 				new CodeCommentStatement("Created by " + Environment.UserDomainName + @"\" + Environment.UserName),
-				new CodeCommentStatement("Created on " + DateTime.Now.ToString("yyyy MMMM dd"))
+				//new CodeCommentStatement("Created on " + DateTime.Now.ToString("yyyy MMMM dd"))
 			}).ToArray();
 
 			//Create DOM class
@@ -372,7 +372,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		private Type[] _externalTypes;
 
-		internal void GenerateTypeConstructorBasedOnElements(List<ColumInfoModel> columnInfos)
+		internal void GenerateTypeConstructorBasedOnElements(IEnumerable<ColumInfoModel> columnInfos)
 		{
 			//var codeMemberProperties = _base.Members.Cast<CodeTypeMember>().Where(s => s is CodeMemberProperty).Cast<CodeMemberProperty>().ToArray();
 
@@ -382,38 +382,6 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			{
 				var name = item.ColumnInfo.ColumnName;
 				var tuple = new Tuple<string, Type>(item.GetPropertyName(), item.ColumnInfo.TargetType);
-
-				//var tuple = new Tuple<string, Type>(item.GetPropertyName(), Type.GetType(item.ColumnInfo.TargetType, null, (e, f, g) =>
-				//{
-				//	var baseType = Type.GetType(f);
-				//	if (baseType == null)
-				//	{
-				//		if (_externalTypes == null)
-				//		{
-				//			_externalTypes = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.dll")
-				//			.Select(z => Assembly.LoadFile(z))
-				//			.SelectMany(z => z.GetTypes())
-				//			.ToArray();
-				//		}
-
-				//		baseType = _externalTypes.Single(s => s.FullName == f);
-				//	}
-
-				//	if (item.Type.ArrayElementType != null)
-				//	{
-				//		baseType = Type.GetType(item.Type.ArrayElementType.BaseType).MakeArrayType();
-				//	}
-				//	else if (item.Type.TypeArguments.Count > 0)
-				//	{
-				//		baseType = typeof(Nullable<>).MakeGenericType(item.Type.TypeArguments.Cast<CodeTypeReference>().Select(z => Type.GetType(z.BaseType)).ToArray());
-				//	}
-
-				//	return baseType;
-
-				//}));
-				//if (tuple.Item2 == null)
-				//	Console.WriteLine();
-
 				dic.Add(name, tuple);
 			}
 			Add(new CodeConstructor()

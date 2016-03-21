@@ -68,7 +68,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			_storedProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
 
 			Console.WriteLine("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", _tableNames.Count, _views.Count, _storedProcs.Count);
-			RenderMenu();          
+			RenderMenu();
 		}
 
 		private readonly string[] usings = new[]
@@ -381,13 +381,15 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine(@"        \ForModelAttribute ID_Column NewName");
 			Console.WriteLine("             Adding a ForModelAttribute Attribute to the generated Property with the value NewName");
 			Console.WriteLine();
-			Console.WriteLine(@"\Exclude    [Value [true | false]]");
+			Console.WriteLine(@"\Exclude			[Value [true | false]] [ColumnName]");
 			Console.WriteLine("         Exclude this table from the Process");
-			Console.WriteLine(@"\Fallack    [true | false]]");
+			Console.WriteLine(@"\InsertIgnore		[Value [true | false]] [ColumnName]");
+			Console.WriteLine("         Exclude this column from inserts");
+			Console.WriteLine(@"\Fallack			[true | false]]");
 			Console.WriteLine("         Should create a LoadNotImplimentedDynamic Property for Not Loaded fieds");
-			Console.WriteLine(@"\Createloader    [true | false]]");
+			Console.WriteLine(@"\Createloader		[true | false]]");
 			Console.WriteLine("         Should create a Dataloader that loads the Propertys from the IDataRecord");
-			Console.WriteLine(@"\CreateSelect   [true | false]]");
+			Console.WriteLine(@"\CreateSelect		[true | false]]");
 			Console.WriteLine("         Should create a Attribute with a Select Statement");
 			Console.WriteLine(@"\stats");
 			Console.WriteLine("         Shows all avalible data from this table");
@@ -462,6 +464,30 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 							Console.WriteLine();
 						}
 						break;
+					case @"\insertignore":
+						if (parts.Length == 3)
+						{
+							bool result;
+							Boolean.TryParse(parts[1], out result);
+
+							var column = selectedTable.ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == parts[2]);
+							if (column == null)
+							{
+								Console.Clear();
+								Console.WriteLine("Unvalid Input expected was  [ColumnName] ");
+								Console.WriteLine();
+								break;
+							}
+
+							column.InsertIgnore = result;
+						}
+						else
+						{
+							Console.Clear();
+							Console.WriteLine("Unvalid Input expected was  true | false ");
+							Console.WriteLine();
+						}
+						break;
 					case @"\exclude":
 						if (parts.Length == 2)
 						{
@@ -471,9 +497,28 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						}
 						else
 						{
-							Console.Clear();
-							Console.WriteLine("Unvalid Input expected was true | false ");
-							Console.WriteLine();
+							if (parts.Length == 3)
+							{
+								bool result;
+								Boolean.TryParse(parts[1], out result);
+
+								var column = selectedTable.ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == parts[2]);
+								if (column == null)
+								{
+									Console.Clear();
+									Console.WriteLine("Unvalid Input expected was  [ColumnName] ");
+									Console.WriteLine();
+									break;
+								}
+
+								column.Exclude = result;
+							}
+							else
+							{
+								Console.Clear();
+								Console.WriteLine("Unvalid Input expected was  true | false ");
+								Console.WriteLine();
+							}
 						}
 						break;
 					case @"\fallack":
@@ -550,7 +595,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						RenderTableMenu(selectedTable);
 						break;
 				}
-			
+
 			RenderTableMenu(selectedTable);
 		}
 
@@ -575,22 +620,30 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 				if (tableInfoModel.CreateSelectFactory || WithAutoCtor)
 				{
-					compiler.GenerateTypeConstructorBasedOnElements(tableInfoModel.ColumnInfos);
+					compiler.GenerateTypeConstructorBasedOnElements(tableInfoModel.ColumnInfos.Where(s => !s.Exclude));
 				}
 
 				foreach (var columInfoModel in tableInfoModel.ColumnInfos)
 				{
+					if (columInfoModel.Exclude)
+						continue;
+
 					var codeMemberProperty = compiler.AddProperty(columInfoModel);
 					if (columInfoModel.PrimaryKey)
 					{
 						codeMemberProperty.CustomAttributes.Add(
 							new CodeAttributeDeclaration(typeof(PrimaryKeyAttribute).Name));
 					}
+					if (columInfoModel.InsertIgnore)
+					{
+						codeMemberProperty.CustomAttributes.Add(
+							new CodeAttributeDeclaration(typeof(InsertIgnoreAttribute).Name));
+					}
 					if (columInfoModel.ForgeinKeyDeclarations != null)
 					{
 						var isRefTypeKnown = _tableNames.FirstOrDefault(s => s.Info.TableName == columInfoModel.ForgeinKeyDeclarations.TableName);
 
-						if(isRefTypeKnown == null)
+						if (isRefTypeKnown == null)
 						{
 							codeMemberProperty.CustomAttributes.Add(
 	new CodeAttributeDeclaration(typeof(ForeignKeyDeclarationAttribute).Name,
@@ -633,7 +686,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					foreach (var spParamter in proc.Parameter.ParamaterSpParams)
 					{
 						var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
-						var spcName = spParamter.Parameter.Replace("@","");
+						var spcName = spParamter.Parameter.Replace("@", "");
 						generatedClass.AddProperty(spcName, targetType);
 					}
 			}
@@ -644,7 +697,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				codeTypeDeclaration.CompileClass();
 			}
 
-			Console.WriteLine("Created all files");            
+			Console.WriteLine("Created all files");
 		}
 
 		public string SqlVersion { get; set; }
