@@ -174,7 +174,7 @@ namespace JPB.DataAccess.DbInfoConfig
 						var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
 							"TryParse",
 							new CodeCastExpression(typeof(string), uncastLocalVariableRef),
-							codeTypeOfListArg, 
+							codeTypeOfListArg,
 							new CodePrimitiveExpression(false));
 
 						var xmlDataRecords = new CodeMethodInvokeExpression(tryParse, "CreateListOfItems");
@@ -257,7 +257,12 @@ namespace JPB.DataAccess.DbInfoConfig
 						}
 					}
 
+					var isNullable = false;
+
 					var baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
+
+					if (baseType != null)
+						isNullable = true;
 
 					if (propertyInfoCache.PropertyType == typeof(string))
 					{
@@ -285,9 +290,18 @@ namespace JPB.DataAccess.DbInfoConfig
 								new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"))
 						};
 
-						var setToNull = new CodeAssignStatement(refToProperty,
+						CodeAssignStatement setToNull;
+						if (!isNullable && baseType != typeof(string))
+						{
+							setToNull = new CodeAssignStatement(refToProperty,
 							new CodeDefaultValueExpression(
 								CreateShortCodeTypeReference(baseType, importNameSpace.Imports)));
+						}
+						else
+						{
+							setToNull = new CodeAssignStatement(refToProperty, new CodePrimitiveExpression(null));
+						}
+
 						var setToValue = new CodeAssignStatement(refToProperty,
 							new CodeCastExpression(
 								new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
@@ -600,10 +614,10 @@ namespace JPB.DataAccess.DbInfoConfig
 				//}
 				//else
 				//{
-		
+
 				//}
 			}
-			
+
 			if (!settings.CreateDebugCode)
 				foreach (string tempFile in cp.TempFiles)
 				{
