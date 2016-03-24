@@ -25,6 +25,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 	{
 		public static DbAccessLayer Manager;
 		List<TableInfoModel> _tableNames;
+		List<Dictionary<int, string>> _enums;
 
 		public string TargetDir { get; set; }
 		public bool WithAutoCtor { get; set; }
@@ -68,6 +69,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			_storedProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
 
 			Console.WriteLine("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", _tableNames.Count, _views.Count, _storedProcs.Count);
+			_enums = new List<Dictionary<int, string>>();
 			RenderMenu();
 		}
 
@@ -120,7 +122,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			var readLine = Program.AutoConsole.GetNextOption();
 			if (string.IsNullOrEmpty(readLine))
 			{
-				Console.Clear();
+
 				RenderMenu();
 				return;
 			}
@@ -132,14 +134,14 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			{
 				if (result > _tableNames.Count || result < 0)
 				{
-					Console.Clear();
+
 					Console.WriteLine("Unvalid number");
 					RenderMenu();
 					return;
 				}
 
 				var selectedTable = _tableNames.ElementAt(result);
-				Console.Clear();
+
 				RenderTableMenu(selectedTable);
 			}
 			else
@@ -219,92 +221,97 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private void RenderCtorCompiler(bool replaceExisting)
 		{
-			var files = Directory.GetFiles(TargetDir, "*.cs");
+			Console.WriteLine("UNSUPPORTED");
+			Console.WriteLine("UNSUPPORTED");
+			Console.WriteLine("UNSUPPORTED");
 
-			var provider = CodeDomProvider.CreateProvider("CSharp");
-			foreach (var file in files)
-			{
-				var loadFromFile = ClassCompiler.LoadFromFile(file);
 
-				bool createCtor = false;
-				var ctor = loadFromFile.Members.Where(s => s is CodeConstructor).Cast<CodeConstructor>().Where(s => s != null).ToArray();
+			//var files = Directory.GetFiles(TargetDir, "*.cs");
 
-				if (ctor.Any())
-				{
-					var fullNameOfObjectFactory = typeof(ObjectFactoryMethodAttribute).FullName;
-					var ctorWithIdataRecord =
-						ctor.FirstOrDefault(
-							s =>
-								s.CustomAttributes.Cast<CodeAttributeDeclaration>()
-									.Any(e => e.Name == fullNameOfObjectFactory)
-								&& s.Parameters.Count == 1
-								&& s.Parameters.Cast<CodeParameterDeclarationExpression>().Any(e => Type.GetType(e.Type.BaseType) == typeof(IDataRecord)));
+			//var provider = CodeDomProvider.CreateProvider("CSharp");
+			//foreach (var file in files)
+			//{
+			//	var loadFromFile = ClassCompiler.LoadFromFile(file);
 
-					if (ctorWithIdataRecord != null)
-					{
-						if (replaceExisting)
-						{
-							loadFromFile.MembersFromBase.Remove(ctorWithIdataRecord);
-						}
-						else
-						{
-							continue;
-						}
-					}
-					else
-					{
-						createCtor = true;
-					}
-				}
-				else
-				{
-					createCtor = true;
-				}
+			//	bool createCtor = false;
+			//	var ctor = loadFromFile.Members.Where(s => s is CodeConstructor).Cast<CodeConstructor>().Where(s => s != null).ToArray();
 
-				if (createCtor)
-				{
-					var propertys =
-						loadFromFile.Members.Cast<CodeMemberProperty>()
-							.Where(s => s != null)
-							.ToArray()
-							.Select(s => new Tuple<string, Type>(s.Name, Type.GetType(s.Type.BaseType)));
+			//	if (ctor.Any())
+			//	{
+			//		var fullNameOfObjectFactory = typeof(ObjectFactoryMethodAttribute).FullName;
+			//		var ctorWithIdataRecord =
+			//			ctor.FirstOrDefault(
+			//				s =>
+			//					s.CustomAttributes.Cast<CodeAttributeDeclaration>()
+			//						.Any(e => e.Name == fullNameOfObjectFactory)
+			//					&& s.Parameters.Count == 1
+			//					&& s.Parameters.Cast<CodeParameterDeclarationExpression>().Any(e => Type.GetType(e.Type.BaseType) == typeof(IDataRecord)));
 
-					var generateTypeConstructor = new ClassCompiler("", "").GenerateTypeConstructor(propertys.ToDictionary(f =>
-					{
-						var property =
-							loadFromFile.Members.Cast<CodeMemberProperty>().FirstOrDefault(e => e.Name == f.Item1);
+			//		if (ctorWithIdataRecord != null)
+			//		{
+			//			if (replaceExisting)
+			//			{
+			//				loadFromFile.MembersFromBase.Remove(ctorWithIdataRecord);
+			//			}
+			//			else
+			//			{
+			//				continue;
+			//			}
+			//		}
+			//		else
+			//		{
+			//			createCtor = true;
+			//		}
+			//	}
+			//	else
+			//	{
+			//		createCtor = true;
+			//	}
 
-						var codeAttributeDeclaration = property.CustomAttributes.Cast<CodeAttributeDeclaration>()
-							.FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModelAttribute).FullName);
-						if (codeAttributeDeclaration != null)
-						{
-							var firstOrDefault =
-								codeAttributeDeclaration.Arguments.Cast<CodeAttributeDeclaration>()
-									.FirstOrDefault();
-							if (firstOrDefault != null)
-							{
-								var codeAttributeArgument = firstOrDefault
-									.Arguments.Cast<CodeAttributeArgument>()
-									.FirstOrDefault();
-								if (codeAttributeArgument != null)
-								{
-									var codePrimitiveExpression = codeAttributeArgument
-										.Value as CodePrimitiveExpression;
-									if (codePrimitiveExpression != null)
-										return
-											codePrimitiveExpression.Value.ToString();
-								}
-							}
-						}
-						return f.Item1;
-					}, f =>
-					{
-						return f;
-					}));
+			//	if (createCtor)
+			//	{
+			//		var propertys =
+			//			loadFromFile.Members.Cast<CodeMemberProperty>()
+			//				.Where(s => s != null)
+			//				.ToArray()
+			//				.Select(s => new Tuple<string, Type>(s.Name, Type.GetType(s.Type.BaseType)));
 
-					loadFromFile.MembersFromBase.Insert(0, generateTypeConstructor);
-				}
-			}
+			//		var generateTypeConstructor = new ClassCompiler("", "").GenerateTypeConstructor(propertys.ToDictionary(f =>
+			//		{
+			//			var property =
+			//				loadFromFile.Members.Cast<CodeMemberProperty>().FirstOrDefault(e => e.Name == f.Item1);
+
+			//			var codeAttributeDeclaration = property.CustomAttributes.Cast<CodeAttributeDeclaration>()
+			//				.FirstOrDefault(e => e.AttributeType.BaseType == typeof(ForModelAttribute).FullName);
+			//			if (codeAttributeDeclaration != null)
+			//			{
+			//				var firstOrDefault =
+			//					codeAttributeDeclaration.Arguments.Cast<CodeAttributeDeclaration>()
+			//						.FirstOrDefault();
+			//				if (firstOrDefault != null)
+			//				{
+			//					var codeAttributeArgument = firstOrDefault
+			//						.Arguments.Cast<CodeAttributeArgument>()
+			//						.FirstOrDefault();
+			//					if (codeAttributeArgument != null)
+			//					{
+			//						var codePrimitiveExpression = codeAttributeArgument
+			//							.Value as CodePrimitiveExpression;
+			//						if (codePrimitiveExpression != null)
+			//							return
+			//								codePrimitiveExpression.Value.ToString();
+			//					}
+			//				}
+			//			}
+			//			return f.Item1;
+			//		}, f =>
+			//		{
+			//			return f;
+			//		}));
+
+			//		loadFromFile.MembersFromBase.Insert(0, generateTypeConstructor);
+			//	}
+			//}
 		}
 
 
@@ -385,6 +392,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine("         Exclude this table from the Process");
 			Console.WriteLine(@"\InsertIgnore		[Value [true | false]] [ColumnName]");
 			Console.WriteLine("         Exclude this column from inserts");
+			Console.WriteLine(@"\Enum				[Value [true | false]] [ColumnName]");
+			Console.WriteLine("         Marks this Column as an ENUM field on the Database");
 			Console.WriteLine(@"\Fallack			[true | false]]");
 			Console.WriteLine("         Should create a LoadNotImplimentedDynamic Property for Not Loaded fieds");
 			Console.WriteLine(@"\Createloader		[true | false]]");
@@ -404,7 +413,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			}
 
 			var parts = readLine.Split(' ').ToArray();
-			Console.Clear();
+
 
 			if (parts.Any())
 				switch (parts[0].ToLower())
@@ -459,7 +468,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						}
 						else
 						{
-							Console.Clear();
+
 							Console.WriteLine("Unvalid Input expected was [ColumnName] [NewName] ");
 							Console.WriteLine();
 						}
@@ -473,7 +482,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 							var column = selectedTable.ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == parts[2]);
 							if (column == null)
 							{
-								Console.Clear();
+
 								Console.WriteLine("Unvalid Input expected was  [ColumnName] ");
 								Console.WriteLine();
 								break;
@@ -483,7 +492,127 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						}
 						else
 						{
-							Console.Clear();
+
+							Console.WriteLine("Unvalid Input expected was  true | false ");
+							Console.WriteLine();
+						}
+						break;
+					case @"\enum":
+						if (parts.Length == 3)
+						{
+							bool result;
+							Boolean.TryParse(parts[1], out result);
+
+							var column = selectedTable.ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == parts[2]);
+							if (column == null)
+							{
+
+								Console.WriteLine("Unvalid Input expected was  [ColumnName] ");
+								Console.WriteLine();
+								break;
+							}
+
+							if (result == false)
+							{
+								column.EnumDeclaration = null;
+								break;
+							}
+
+							if (column.ForgeinKeyDeclarations == null)
+							{
+								Console.WriteLine("Declare the Enum:");
+								Console.WriteLine("Format: [Number] [Description]");
+								Console.WriteLine("Example: '1 Valid'");
+								Console.WriteLine("Type ok to submit");
+								Console.WriteLine("Type cancel to revert");
+
+								column.EnumDeclaration = new EnumDeclarationModel();
+
+								Console.WriteLine("Name of Enum:");
+								column.EnumDeclaration.Name = Program.AutoConsole.GetNextOption();
+
+								while (true)
+								{
+									var inp = Program.AutoConsole.GetNextOption();
+									if (inp.ToLower() == "ok")
+									{
+										break;
+									}
+									if (inp.ToLower() == "cancel")
+									{
+										column.EnumDeclaration = null;
+									}
+
+									var option = inp.Split(' ');
+									if (option.Length == 2)
+									{
+										var enumNumber = option[0];
+
+										int enumNumberResult;
+										if (int.TryParse(enumNumber, out enumNumberResult))
+										{
+
+											column.EnumDeclaration.Values.Add(enumNumberResult, option[1]);
+											Console.WriteLine("Added Enum member {0} = {1}", option[1], enumNumberResult);
+										}
+										else
+										{
+											Console.WriteLine("Invalid Enum number Supplyed");
+										}
+									}
+									else
+									{
+										Console.WriteLine("Invalid Enum member Supplyed");
+									}
+								}
+							}
+							else
+							{
+								Console.WriteLine("Enum is ForgeinKey.");
+								Console.WriteLine("Read data from Database to autogenerate Enum");
+								Console.WriteLine("Reading table: '{0}'", column.ForgeinKeyDeclarations.TableName);
+
+								var tableContent = Manager.Select<DynamicTableContentModel>(new object[] { column.ForgeinKeyDeclarations.TableName });
+
+								if (!tableContent.Any())
+								{
+									Console.WriteLine("The Enum table '{0}' does not contain any data", column.ForgeinKeyDeclarations.TableName);
+									break;
+								}
+
+								if (tableContent.First().DataHolder.Count > 2)
+								{
+									Console.WriteLine("The Enum table '{0}' contains more then 2 columns", column.ForgeinKeyDeclarations.TableName);
+									break;
+								}
+
+								if (!tableContent.Any(s => s.DataHolder.Any(f => f.Value is int)))
+								{
+									Console.WriteLine("The Enum table '{0}' does not contains exactly one column of type int", column.ForgeinKeyDeclarations.TableName);
+									break;
+								}
+
+								if (!tableContent.Any(s => s.DataHolder.Any(f => f.Value is string)))
+								{
+									Console.WriteLine("The Enum table '{0}' does not contains exactly one column of type int", column.ForgeinKeyDeclarations.TableName);
+									break;
+								}
+								
+								column.EnumDeclaration = new EnumDeclarationModel();
+								column.EnumDeclaration.Name = column.ForgeinKeyDeclarations.TableName + "LookupValues";
+
+								foreach (var item in tableContent)
+								{
+									var pk = (int)item.DataHolder.FirstOrDefault(s => s.Value is int).Value;
+									var value = (string)item.DataHolder.FirstOrDefault(s => s.Value is string).Value;
+									column.EnumDeclaration.Values.Add(pk, value);
+									Console.WriteLine("Adding Enum member '{0}' = '{1}'", value, pk);
+								}
+							}
+						}
+						else
+						{
+
 							Console.WriteLine("Unvalid Input expected was  true | false ");
 							Console.WriteLine();
 						}
@@ -505,7 +634,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 								var column = selectedTable.ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == parts[2]);
 								if (column == null)
 								{
-									Console.Clear();
+
 									Console.WriteLine("Unvalid Input expected was  [ColumnName] ");
 									Console.WriteLine();
 									break;
@@ -515,7 +644,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 							}
 							else
 							{
-								Console.Clear();
+
 								Console.WriteLine("Unvalid Input expected was  true | false ");
 								Console.WriteLine();
 							}
@@ -530,7 +659,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						}
 						else
 						{
-							Console.Clear();
+
 							Console.WriteLine("Unvalid Input expected was  true | false ");
 							Console.WriteLine();
 						}
@@ -545,7 +674,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						}
 						else
 						{
-							Console.Clear();
+
 							Console.WriteLine("Unvalid Input expected was  true | false ");
 							Console.WriteLine();
 						}
@@ -559,7 +688,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						}
 						else
 						{
-							Console.Clear();
+
 							Console.WriteLine("Unvalid Input expected was  true | false ");
 							Console.WriteLine();
 						}
@@ -583,15 +712,16 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 							Console.WriteLine("\t Nullable =                {0}", columnInfo.ColumnInfo.Nullable);
 							Console.WriteLine("\t Cs Type =                 {0}", columnInfo.ColumnInfo.TargetType.Name);
 							Console.WriteLine("\t forgeinKey Type =         {0}", columnInfo.ForgeinKeyDeclarations);
+							Console.WriteLine("\t Is Enum Type =		    {0}", columnInfo.EnumDeclaration != null);
 						}
 						break;
 
 					case @"\back":
-						Console.Clear();
+
 						RenderMenu();
 						return;
 					default:
-						Console.Clear();
+
 						RenderTableMenu(selectedTable);
 						break;
 				}
@@ -601,12 +731,33 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private void RenderCompiler()
 		{
-			Console.Clear();
 			Console.WriteLine("Start compiling with selected options");
 
-			var classes = new List<ClassCompiler>();
+			var elements = _tableNames.Concat(_views);
 
-			foreach (var tableInfoModel in _tableNames.Concat(_views))
+			foreach (var item in elements.Where(f => f.ColumnInfos.Any(e => e.EnumDeclaration != null)))
+			{
+				foreach (var column in item.ColumnInfos)
+				{
+					if (column.EnumDeclaration != null)
+					{
+						var targetCsName = column.EnumDeclaration.Name;
+						var enumCompiler = new EnumCompiler(TargetDir, targetCsName);
+						enumCompiler.Namespace = item.NewNamespace;
+						foreach (var enumMember in column.EnumDeclaration.Values)
+						{
+							enumCompiler.Add(new CodeMemberField() {
+								Name = enumMember.Value,
+								InitExpression = new CodePrimitiveExpression(enumMember.Key)
+							});
+						}
+
+						enumCompiler.Compile();
+					}
+				}
+			}
+
+			foreach (var tableInfoModel in elements)
 			{
 				if (tableInfoModel.Exclude)
 					continue;
@@ -616,7 +767,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				var compiler = new ClassCompiler(TargetDir, targetCsName);
 				compiler.Namespace = tableInfoModel.NewNamespace;
 				compiler.TargetName = targetCsName;
-				classes.Add(compiler);
 
 				if (tableInfoModel.CreateSelectFactory || WithAutoCtor)
 				{
@@ -670,6 +820,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				{
 					compiler.AddFallbackProperty();
 				}
+
+				Console.WriteLine("Compile Class {0}", compiler.Name);
+				compiler.Compile();
 			}
 
 			foreach (var proc in _storedProcs)
@@ -678,8 +831,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					continue;
 
 				var targetCsName = proc.GetClassName();
-				var generatedClass = new ClassCompiler(TargetDir, targetCsName, true);
-				classes.Add(generatedClass);
+				var generatedClass = new ProcedureCompiler(TargetDir, targetCsName);
 
 				generatedClass.TargetName = proc.NewTableName;
 				if (proc.Parameter.ParamaterSpParams != null)
@@ -689,12 +841,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						var spcName = spParamter.Parameter.Replace("@", "");
 						generatedClass.AddProperty(spcName, targetType);
 					}
-			}
 
-			foreach (var codeTypeDeclaration in classes)
-			{
-				Console.WriteLine("Create {0}", codeTypeDeclaration.Name);
-				codeTypeDeclaration.CompileClass();
+				Console.WriteLine("Compile Procedure {0}", generatedClass.Name);
+				generatedClass.Compile();
 			}
 
 			Console.WriteLine("Created all files");

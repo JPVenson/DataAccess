@@ -174,7 +174,7 @@ namespace JPB.DataAccess.DbInfoConfig
 						var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
 							"TryParse",
 							new CodeCastExpression(typeof(string), uncastLocalVariableRef),
-							codeTypeOfListArg, 
+							codeTypeOfListArg,
 							new CodePrimitiveExpression(false));
 
 						var xmlDataRecords = new CodeMethodInvokeExpression(tryParse, "CreateListOfItems");
@@ -279,7 +279,8 @@ namespace JPB.DataAccess.DbInfoConfig
 							container.Statements.Add(buffAssignment);
 						}
 
-						var checkForDbNull = new CodeConditionStatement {
+						var checkForDbNull = new CodeConditionStatement
+						{
 							Condition = new CodeBinaryOperatorExpression(uncastLocalVariableRef,
 								CodeBinaryOperatorType.IdentityEquality,
 								new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"))
@@ -298,11 +299,23 @@ namespace JPB.DataAccess.DbInfoConfig
 					}
 					else
 					{
-						CodeExpression castExp = new CodeCastExpression(
-							new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
-							codeIndexerExpression);
-						var setExpr = new CodeAssignStatement(refToProperty, castExp);
-						container.Statements.Add(setExpr);
+						if (bufferVariable != null)
+						{
+							CodeExpression castExp = new CodeCastExpression(
+						new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
+						new CodeVariableReferenceExpression(bufferVariable.Name));
+							var setExpr = new CodeAssignStatement(refToProperty, castExp);
+							container.Statements.Add(setExpr);
+						}
+						else
+						{
+							CodeExpression castExp = new CodeCastExpression(
+		new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
+		codeIndexerExpression);
+							var setExpr = new CodeAssignStatement(refToProperty, castExp);
+							container.Statements.Add(setExpr);
+						}
+
 					}
 				}
 			}
@@ -317,7 +330,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			GenerateBody(sourceType.GetClassInfo().Propertys, settings, importNameSpace, container, target);
 		}
 
-		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn, string altNamespace)
+		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<DbPropertyInfoCache> propertyToDbColumn, string altNamespace)
 		{
 			//Key = Column Name
 			//Value = 
@@ -327,70 +340,23 @@ namespace JPB.DataAccess.DbInfoConfig
 			var codeConstructor = GenerateTypeConstructor();
 			var config = new DbConfig();
 
-			var fakeProps = propertyToDbColumn.Select(f =>
-			{
-				var dbPropertyInfoCache = new DbPropertyInfoCache();
-
-				if (f.Key != f.Value.Item1)
-				{
-					dbPropertyInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(f.Key)));
-				}
-
-				dbPropertyInfoCache.PropertyName = f.Value.Item1;
-				dbPropertyInfoCache.PropertyType = f.Value.Item2;
-
-				return dbPropertyInfoCache;
-			}).ToDictionary(f => f.PropertyName);
-
-			GenerateBody(fakeProps, new FactoryHelperSettings(), new CodeNamespace(altNamespace), codeConstructor, new CodeThisReferenceExpression());
-
-
-			//foreach (var columInfoModel in propertyToDbColumn)
+			//var fakeProps = propertyToDbColumn.Select(f =>
 			//{
-			//	var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
-			//		new CodePrimitiveExpression(columInfoModel.Key));
+			//	var dbPropertyInfoCache = new DbPropertyInfoCache();
 
-			//	var baseType = Nullable.GetUnderlyingType(columInfoModel.Value.Item2);
-			//	var refToProperty = new CodeVariableReferenceExpression(columInfoModel.Value.Item1);
-
-			//	if (columInfoModel.Value.Item2 == typeof(string))
+			//	if (f.Key != f.Value.Item1)
 			//	{
-			//		baseType = typeof(string);
+			//		dbPropertyInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(f.Key)));
 			//	}
 
-			//	if (baseType != null)
-			//	{
-			//		var variableName = columInfoModel.Key.ToLower();
-			//		var uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
-			//		var bufferVariable = new CodeVariableDeclarationStatement(typeof(object), variableName);
-			//		var buffAssignment = new CodeAssignStatement(uncastLocalVariableRef, codeIndexerExpression);
-			//		var checkForDbNull = new CodeConditionStatement();
-			//		checkForDbNull.Condition = new CodeBinaryOperatorExpression(uncastLocalVariableRef,
-			//			CodeBinaryOperatorType.IdentityEquality,
-			//			new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("System.DBNull"), "Value"));
+			//	dbPropertyInfoCache.PropertyName = f.Value.Item1;
+			//	dbPropertyInfoCache.PropertyType = f.Value.Item2;
 
-			//		var setToNull = new CodeAssignStatement(refToProperty,
-			//			new CodeDefaultValueExpression(
-			//				new CodeTypeReference(baseType)));
-			//		var setToValue = new CodeAssignStatement(refToProperty,
-			//			new CodeCastExpression(
-			//				new CodeTypeReference(baseType, CodeTypeReferenceOptions.GenericTypeParameter),
-			//				uncastLocalVariableRef));
-			//		checkForDbNull.TrueStatements.Add(setToNull);
-			//		checkForDbNull.FalseStatements.Add(setToValue);
-			//		codeConstructor.Statements.Add(bufferVariable);
-			//		codeConstructor.Statements.Add(buffAssignment);
-			//		codeConstructor.Statements.Add(checkForDbNull);
-			//	}
-			//	else
-			//	{
-			//		CodeExpression castExp = new CodeCastExpression(
-			//			new CodeTypeReference(columInfoModel.Value.Item2, CodeTypeReferenceOptions.GenericTypeParameter),
-			//			codeIndexerExpression);
-			//		var setExpr = new CodeAssignStatement(refToProperty, castExp);
-			//		codeConstructor.Statements.Add(setExpr);
-			//	}
-			//}
+			//	return dbPropertyInfoCache;
+			//}).ToDictionary(f => f.PropertyName);
+
+			GenerateBody(propertyToDbColumn.ToDictionary(s => s.DbName), new FactoryHelperSettings(), new CodeNamespace(altNamespace), codeConstructor, new CodeThisReferenceExpression());
+
 			return codeConstructor;
 		}
 
@@ -399,7 +365,8 @@ namespace JPB.DataAccess.DbInfoConfig
 			var writer = new StringWriter();
 			writer.NewLine = Environment.NewLine;
 
-			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions {
+			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions
+			{
 				BlankLinesBetweenMembers = false,
 				VerbatimOrder = true,
 				ElseOnClosing = true
@@ -600,10 +567,10 @@ namespace JPB.DataAccess.DbInfoConfig
 				//}
 				//else
 				//{
-		
+
 				//}
 			}
-			
+
 			if (!settings.CreateDebugCode)
 				foreach (string tempFile in cp.TempFiles)
 				{
@@ -636,13 +603,5 @@ namespace JPB.DataAccess.DbInfoConfig
 		//var ilg = fb.GetILGenerator();
 		//ilg.Emit(OpCodes.Ldarg_0);
 		//ilg.Emit(OpCodes.Stl);
-	}
-
-	public static class e
-	{
-		public static object function(IDataRecord d)
-		{
-			return null;
-		}
 	}
 }

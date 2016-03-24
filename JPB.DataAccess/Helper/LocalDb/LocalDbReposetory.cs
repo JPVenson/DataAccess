@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -24,7 +25,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		internal protected DbClassInfoCache TypeInfo;
 		internal protected DbClassInfoCache TypeKeyInfo;
 		internal protected readonly DbAccessLayer _db;
-		internal protected readonly Dictionary<object, object> _base;
+		internal protected readonly IDictionary<object, object> _base;
 		internal readonly LocalDbManager _databaseScope;
 		internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
 
@@ -79,7 +80,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 									  .Aggregate((e, f) => e + "," + f)));
 				}
 			}
-			_base = new Dictionary<object, object>(_keyGenerator);
+			_base = new ConcurrentDictionary<object, object>(_keyGenerator);
 			_databaseScope.SetupDone += DatabaseScopeOnSetupDone;
 		}
 
@@ -248,10 +249,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected virtual bool Contains(object item)
 		{
 			CheckCreatedElseThrow();
-			var local = _base.ContainsValue(item);
+			var pk = GetId(item);
+			var local = _base.Contains(new KeyValuePair<object, object>(pk, item));
 			if (!local && _db != null)
 			{
-				var pk = GetId(item);
 				return _db.Select(TypeInfo.Type, pk) != null;
 			}
 

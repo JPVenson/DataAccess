@@ -24,22 +24,33 @@ using Microsoft.CSharp;
 using System.Reflection;
 using JPB.DataAccess.Manager;
 using System.Security.Cryptography;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 namespace JPB.DataAccess.EntityCreator.Compiler
 {
-	public class ClassCompiler
+
+	public abstract class ElementCompiler
 	{
-		static ClassCompiler()
+		static ElementCompiler()
 		{
 			Provider = new CSharpCodeProvider();
 		}
 
+		public ElementCompiler(string targetDir, string targetCsName)
+		{
+			_base = new CodeTypeDeclaration(targetCsName);
+			TargetCsName = targetCsName;
+			TargetDir = targetDir;
+		}
+
+
+		public const string GitURL = "https://github.com/JPVenson/DataAccess";
+		public const string AttrbuteHeader = "JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator";
+
+
 		public string TargetDir { get; private set; }
 		public string TargetName { get; set; }
 		public string TargetCsName { get; private set; }
-		public bool CompileToPrc { get; private set; }
-
-		private bool preCompiled = false;
 
 		public IEnumerable<CodeTypeMember> Members
 		{
@@ -53,84 +64,28 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		public string Name { get { return _base.Name; } }
 
-		private CodeTypeDeclaration _base;
+		protected CodeTypeDeclaration _base;
 
 		static readonly CodeDomProvider Provider;
 
 		public string Namespace { get; set; }
 
-		public ClassCompiler(string targetDir, string targetCsName, bool compileToPrc = false)
+		public void Add(CodeTypeMember property)
 		{
-			_base = new CodeTypeDeclaration(targetCsName);
-			TargetCsName = targetCsName;
-			CompileToPrc = compileToPrc;
-			TargetDir = targetDir;
+			_base.Members.Add(property);
 		}
 
-		public static ClassCompiler LoadFromFile(string path)
+		public abstract void PreCompile();
+
+		public virtual void Compile()
 		{
-			var codeCompileUnit = Provider.Parse(new StreamReader(path));
-
-			var codeNamespace = codeCompileUnit.Namespaces.Cast<CodeNamespace>().FirstOrDefault();
-			bool isPrc = false;
-
-			var codeClass = codeNamespace.Types.Cast<CodeTypeDeclaration>().FirstOrDefault();
-
-			if (codeClass != null)
-			{
-				isPrc = codeClass.CustomAttributes.Cast<CodeAttributeDeclaration>().FirstOrDefault(s => s.AttributeType.BaseType == typeof(StoredProcedureAttribute).FullName) != null;
-			}
-
-			var classCompiler = new ClassCompiler(Path.GetDirectoryName(path), Path.GetFileName(path), isPrc);
-			classCompiler._base = codeClass;
-			return classCompiler;
-		}
-
-		public const string GitURL = "https://github.com/JPVenson/DataAccess";
-		public const string AttrbuteHeader = "JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator";
-
-		public static StringBuilder CreateHeader()
-		{
-			var copyrightBuilder = new StringBuilder();
-			return copyrightBuilder;
-
-			//copyrightBuilder.AppendLine("o--------------------------------o");
-			//copyrightBuilder.AppendLine("| Made by Jean - Pierre Bachmann |");
-			//copyrightBuilder.AppendLine("| Visit my Github page for more  |");
-			//copyrightBuilder.AppendLine("|              infos             |");
-			//copyrightBuilder.AppendLine("|  https://github.com/JPVenson/  |");
-			//copyrightBuilder.AppendLine("|            DataAccess          |");
-			//copyrightBuilder.AppendLine("|              Email:            |");
-			//copyrightBuilder.AppendLine("|  jean-pierre_bachmann@live.de  |");
-			//copyrightBuilder.AppendLine("o--------------------------------o");
-
-			//return copyrightBuilder;
-		}
-
-		//public void AddAutoConstructor()
-		//{
-		//	FactoryHelper.GenerateBody(, new FactoryHelperSettings(), new CodeNamespace(Namespace), FactoryHelper.GenerateTypeConstructor(), new CodeBaseReferenceExpression());
-		//}
-
-		public void CompileClass()
-		{
-			if (CompileToPrc && !preCompiled)
-			{
-				CompilePrc();
-				return;
-			}
-
+			this.PreCompile();
 			if (string.IsNullOrEmpty(TargetName))
 			{
 				TargetName = TargetCsName;
 			}
 
-			//Add Creation Infos
-			var copyrightBuilder = CreateHeader();
-
-			var copyright = Encoding.Default.GetBytes(copyrightBuilder.ToString());
-
-			var comments = Encoding.UTF8.GetString(copyright).Split('\n').Select(s => new CodeCommentStatement(s)).Concat(new[]
+			var comments = (new[]
 			{
 				new CodeCommentStatement("Created by " + Environment.UserDomainName + @"\" + Environment.UserName),
 				//new CodeCommentStatement("Created on " + DateTime.Now.ToString("yyyy MMMM dd"))
@@ -143,7 +98,6 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			_base.Comments.AddRange(comments);
 
 			//Write static members
-			_base.IsClass = true;
 			_base.TypeAttributes = TypeAttributes.Sealed | TypeAttributes.Public;
 			_base.IsPartial = true;
 
@@ -166,7 +120,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 				_base.CustomAttributes.Add(codeAttributeDeclaration);
 				_base.Name = TargetName;
 			}
-			
+
 			using (var memStream = new MemoryStream())
 			{
 				using (var writer = new StreamWriter(memStream, Encoding.UTF8, 128, true))
@@ -233,72 +187,94 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 				}
 			}
 		}
+	}
 
-
-		public void CompilePrc()
+	public class EnumCompiler : ElementCompiler
+	{
+		public EnumCompiler(string targetDir, string targetCsName)
+			: base(targetDir, targetCsName)
 		{
-			if (CompileToPrc)
+
+		}
+		public override void PreCompile()
+		{
+			_base.IsEnum = true;
+		}
+	}
+
+	public class ProcedureCompiler : ClassCompiler
+	{
+		public ProcedureCompiler(string targetDir, string targetCsName)
+			: base(targetDir, targetCsName)
+		{
+
+		}
+
+		public override void Compile()
+		{
+			if (string.IsNullOrEmpty(TargetName))
 			{
-				if (string.IsNullOrEmpty(TargetName))
-				{
-					TargetName = TargetCsName;
-				}
-
-				var spAttribute = new CodeAttributeDeclaration(typeof(StoredProcedureAttribute).Name);
-				_base.CustomAttributes.Add(spAttribute);
-
-				if (_base.TypeParameters.Count == 0)
-				{
-					//_base.TypeParameters.Add(new CodeTypeParameter(typeof ().FullName));
-				}
-
-				//Create Caller
-				var createFactoryMethod = new CodeMemberMethod();
-				createFactoryMethod.Name = "Invoke" + TargetName;
-				createFactoryMethod.ReturnType = new CodeTypeReference(typeof(QueryFactoryResult));
-				createFactoryMethod.CustomAttributes.Add(
-					new CodeAttributeDeclaration(typeof(SelectFactoryMethodAttribute).FullName));
-
-				//Create the Params
-				string query = "EXEC " + TargetName;
-
-				var nameOfListOfParamater = "paramaters";
-				var listOfParams = new CodeObjectCreateExpression(typeof(List<IQueryParameter>));
-				var listOfParamscreator = new CodeVariableDeclarationStatement(typeof(List<IQueryParameter>), nameOfListOfParamater, listOfParams);
-				createFactoryMethod.Statements.Add(listOfParamscreator);
-				int i = 0;
-				foreach (var item in _base.Members)
-				{
-					if (item is CodeMemberProperty)
-					{
-						var variable = item as CodeMemberProperty;
-						var paramName = "param" + i++;
-						query += " @" + paramName + " ";
-						var createParams = new CodeObjectCreateExpression(typeof(QueryParameter),
-							new CodePrimitiveExpression(paramName),
-							new CodeVariableReferenceExpression(variable.Name));
-						var addToList =
-							new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater),
-								"Add", createParams);
-
-						createFactoryMethod.Statements.Add(addToList);
-					}
-				}
-
-				//Finaly create the instance
-				var createFactory = new CodeObjectCreateExpression(typeof(QueryFactoryResult),
-					new CodePrimitiveExpression(query),
-					new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater), "ToArray"));
-				var queryFactoryVariable = new CodeMethodReturnStatement(createFactory);
-
-				createFactoryMethod.Statements.Add(queryFactoryVariable);
-				_base.Members.Add(createFactoryMethod);
-
-				preCompiled = true;
+				TargetName = TargetCsName;
 			}
-			preCompiled = true;
 
-			CompileClass();
+			var spAttribute = new CodeAttributeDeclaration(typeof(StoredProcedureAttribute).Name);
+			_base.CustomAttributes.Add(spAttribute);
+
+			if (_base.TypeParameters.Count == 0)
+			{
+				//_base.TypeParameters.Add(new CodeTypeParameter(typeof ().FullName));
+			}
+
+			//Create Caller
+			var createFactoryMethod = new CodeMemberMethod();
+			createFactoryMethod.Name = "Invoke" + TargetName;
+			createFactoryMethod.ReturnType = new CodeTypeReference(typeof(QueryFactoryResult));
+			createFactoryMethod.CustomAttributes.Add(
+				new CodeAttributeDeclaration(typeof(SelectFactoryMethodAttribute).FullName));
+
+			//Create the Params
+			string query = "EXEC " + TargetName;
+
+			var nameOfListOfParamater = "paramaters";
+			var listOfParams = new CodeObjectCreateExpression(typeof(List<IQueryParameter>));
+			var listOfParamscreator = new CodeVariableDeclarationStatement(typeof(List<IQueryParameter>), nameOfListOfParamater, listOfParams);
+			createFactoryMethod.Statements.Add(listOfParamscreator);
+			int i = 0;
+			foreach (var item in _base.Members)
+			{
+				if (item is CodeMemberProperty)
+				{
+					var variable = item as CodeMemberProperty;
+					var paramName = "param" + i++;
+					query += " @" + paramName + " ";
+					var createParams = new CodeObjectCreateExpression(typeof(QueryParameter),
+						new CodePrimitiveExpression(paramName),
+						new CodeVariableReferenceExpression(variable.Name));
+					var addToList =
+						new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater),
+							"Add", createParams);
+
+					createFactoryMethod.Statements.Add(addToList);
+				}
+			}
+
+			//Finaly create the instance
+			var createFactory = new CodeObjectCreateExpression(typeof(QueryFactoryResult),
+				new CodePrimitiveExpression(query),
+				new CodeMethodInvokeExpression(new CodeVariableReferenceExpression(nameOfListOfParamater), "ToArray"));
+			var queryFactoryVariable = new CodeMethodReturnStatement(createFactory);
+
+			createFactoryMethod.Statements.Add(queryFactoryVariable);
+			_base.Members.Add(createFactoryMethod);
+		}
+	}
+
+	public class ClassCompiler : ElementCompiler
+	{
+		public ClassCompiler(string targetDir, string targetCsName)
+			: base(targetDir, targetCsName)
+		{
+
 		}
 
 		internal CodeMemberProperty AddFallbackProperty()
@@ -312,23 +288,41 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 		internal CodeMemberProperty AddProperty(ColumInfoModel info)
 		{
 			var propertyName = info.GetPropertyName();
-			var targetType = info.ColumnInfo.TargetType;
-			var codeMemberProperty = AddProperty(propertyName, targetType);
+			var targetType = info.ColumnInfo.TargetType.FullName;
+			CodeMemberProperty codeMemberProperty;
+			if (info.EnumDeclaration != null)
+			{
+				codeMemberProperty = AddProperty(propertyName, new CodeTypeReference(info.EnumDeclaration.Name));
+				//var enumConverter = new ValueConverterAttribute(typeof(EnumMemberConverter));
+				codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ValueConverterAttribute).Name, new CodeAttributeArgument(new CodeTypeOfExpression(typeof(EnumMemberConverter)))));
+			}
+			else
+			{
+				codeMemberProperty = AddProperty(propertyName, new CodeTypeReference(targetType));
+
+				if (info.IsRowVersion)
+				{
+					var forModel = new RowVersionAttribute();
+					codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name));
+				}
+			}
 
 			if (!string.IsNullOrEmpty(info.NewColumnName))
 			{
 				var forModel = new ForModelAttribute(info.ColumnInfo.ColumnName);
 				codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name, new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName))));
 			}
-			if (info.IsRowVersion)
-			{
-				var forModel = new RowVersionAttribute();
-				codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name));
-			}
+
+
 			return codeMemberProperty;
 		}
 
 		internal CodeMemberProperty AddProperty(string name, Type type)
+		{
+			return AddProperty(name, new CodeTypeReference(type));
+		}
+
+		internal CodeMemberProperty AddProperty(string name, CodeTypeReference propType)
 		{
 			var property = new CodeMemberProperty();
 
@@ -337,7 +331,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			property.HasSet = true;
 			property.Name = name;
 
-			property.Type = new CodeTypeReference(type);
+			property.Type = propType;
 
 			var memberName = char.ToLower(property.Name[0]) + property.Name.Substring(1);
 			memberName = memberName.Insert(0, "_");
@@ -345,7 +339,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			var field = new CodeMemberField()
 			{
 				Name = memberName,
-				Type = new CodeTypeReference(type),
+				Type = propType,
 				Attributes = MemberAttributes.Private
 			};
 
@@ -364,11 +358,11 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return ctor;
 		}
 
-		public CodeMemberMethod GenerateTypeConstructor(
-			IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
-		{
-			return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn, Namespace);
-		}
+		//public CodeMemberMethod GenerateTypeConstructor(
+		//	IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
+		//{
+		//	return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn, Namespace);
+		//}
 
 		private Type[] _externalTypes;
 
@@ -376,24 +370,71 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 		{
 			//var codeMemberProperties = _base.Members.Cast<CodeTypeMember>().Where(s => s is CodeMemberProperty).Cast<CodeMemberProperty>().ToArray();
 
-			var dic = new Dictionary<string, Tuple<string, Type>>();
+			//var fakeProps = propertyToDbColumn.Select(f =>
+			//{
+			//	var dbPropertyInfoCache = new DbPropertyInfoCache();
+
+			//	if (f.Key != f.Value.Item1)
+			//	{
+			//		dbPropertyInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(f.Key)));
+			//	}
+
+			//	dbPropertyInfoCache.PropertyName = f.Value.Item1;
+			//	dbPropertyInfoCache.PropertyType = f.Value.Item2;
+
+			//	return dbPropertyInfoCache;
+			//}).ToDictionary(f => f.PropertyName);
+
+			var dic = new List<DbPropertyInfoCache>();
 
 			foreach (var item in columnInfos)
 			{
-				var name = item.ColumnInfo.ColumnName;
-				var tuple = new Tuple<string, Type>(item.GetPropertyName(), item.ColumnInfo.TargetType);
-				dic.Add(name, tuple);
+				var dbInfoCache = new DbPropertyInfoCache();
+				dic.Add(dbInfoCache);
+				dbInfoCache.PropertyName = item.GetPropertyName();
+				dbInfoCache.PropertyType = item.ColumnInfo.TargetType;
+				if (item.NewColumnName != item.ColumnInfo.ColumnName)
+				{
+					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(item.ColumnInfo.ColumnName)));
+				}
+				if (item.IsRowVersion)
+				{
+					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new RowVersionAttribute()));
+				}
+				if (item.InsertIgnore)
+				{
+					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new InsertIgnoreAttribute()));
+				}
+				if (item.PrimaryKey)
+				{
+					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new PrimaryKeyAttribute()));
+				}
+				if (item.ForgeinKeyDeclarations != null)
+				{
+					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForeignKeyDeclarationAttribute(item.ForgeinKeyDeclarations.TargetColumn, item.ForgeinKeyDeclarations.TableName)));
+				}
+				if(item.EnumDeclaration != null)
+				{
+					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new ValueConverterAttribute(typeof(EnumMemberConverter))));
+				}
+				
+				dbInfoCache.Refresh();
+
+				//var name = item.ColumnInfo.ColumnName;
+				//var tuple = new Tuple<string, Type>(item.GetPropertyName(), item.ColumnInfo.TargetType);
+				//dic.Add(name, tuple);
 			}
 			Add(new CodeConstructor()
 			{
 				Attributes = MemberAttributes.Public
 			});
-			Add(GenerateTypeConstructor(dic));
+
+			Add(FactoryHelper.GenerateTypeConstructor(dic, Namespace));
 		}
 
-		public void Add(CodeTypeMember property)
+		public override void PreCompile()
 		{
-			_base.Members.Add(property);
+			_base.IsClass = true;
 		}
 	}
 }

@@ -14,6 +14,7 @@ using System;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
+using System.Data;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
@@ -32,6 +33,29 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		{
 			return string.IsNullOrEmpty(NewTableName) ? Parameter.TableName : NewTableName;
 		}
+	}
+
+	public class DynamicTableContentModel
+	{
+		[ObjectFactoryMethod]
+		public DynamicTableContentModel(IDataRecord record)
+		{
+			DataHolder = new Dictionary<string, object>();
+
+			for (int i = 0; i < record.FieldCount; i++)
+			{
+				DataHolder.Add(record.GetName(i), record.GetValue(i));
+			}
+		}
+
+		[SelectFactoryMethod]
+		public static void SelectFromTable(IQueryBuilder<IRootQuery> queryBuilder, string tableName)
+		{
+			queryBuilder.SelectStar().QueryD(tableName);
+		}
+
+		[JPB.DataAccess.ModelsAnotations.LoadNotImplimentedDynamic]
+		public IDictionary<string, object> DataHolder { get; set; }
 	}
 
 	public class TableInfoModel
@@ -78,7 +102,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			foreach (var item in ColumnInfos)
 			{
 				var fod = forgeinKeyDeclarations.FirstOrDefault(s => s.SourceColumn == item.ColumnInfo.ColumnName);
-				if(fod != null)
+				if (fod != null)
 				{
 					item.ForgeinKeyDeclarations = fod;
 				}
@@ -109,7 +133,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				.QueryText("ON ccu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME")
 				.QueryText("INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu")
 				.QueryText("ON kcu.CONSTRAINT_NAME = rc.UNIQUE_CONSTRAINT_NAME")
-				.QueryD("WHERE ccu.TABLE_NAME = @tableName AND ccu.TABLE_CATALOG = @database", new {
+				.QueryD("WHERE ccu.TABLE_NAME = @tableName AND ccu.TABLE_CATALOG = @database", new
+				{
 					database = database,
 					tableName = tableName
 				})
@@ -131,6 +156,16 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		}
 	}
 
+	public class EnumDeclarationModel
+	{
+		public EnumDeclarationModel()
+		{
+			Values = new Dictionary<int, string>();
+		}
+		public Dictionary<int,string> Values { get; private set; }
+		public string Name { get; set; }
+	}
+
 	public class ColumInfoModel
 	{
 		public ColumInfoModel(ColumnInfo columnInfo)
@@ -145,12 +180,10 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public ColumnInfo ColumnInfo { get; set; }
 		public string NewColumnName { get; set; }
 		public bool IsRowVersion { get; set; }
-
 		public bool PrimaryKey { get; set; }
-
 		public bool InsertIgnore { get; set; }
+		public EnumDeclarationModel EnumDeclaration { get; set; }
 		public bool Exclude { get; set; }
-
 		public ForgeinKeyInfoModel ForgeinKeyDeclarations { get; set; }
 
 		public string GetPropertyName()
