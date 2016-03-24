@@ -43,6 +43,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void CheckFactory()
 		{
 			InsertTest();
@@ -61,6 +63,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void CheckFactoryWithArguments()
 		{
 			InsertTest();
@@ -83,6 +87,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void ConfigLess()
 		{
 			string insGuid = Guid.NewGuid().ToString();
@@ -115,6 +121,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void ConfigLessFail()
 		{
 			DbConfig.Clear();
@@ -147,6 +155,21 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void AutoGenFactoryTestNullableSimple()
+		{
+			DbConfig.Clear();
+
+			expectWrapper.Insert(new UsersAutoGenerateNullableConstructor());
+			var elements = expectWrapper.Select<UsersAutoGenerateNullableConstructor>();
+			Assert.IsNotNull(elements);
+			Assert.IsNotEmpty(elements);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void AutoGenFactoryTestSimple()
 		{
 			DbConfig.Clear();
@@ -213,6 +236,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void ConfigLessInplace()
 		{
 			DbConfig.Clear();
@@ -232,6 +257,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void ExecuteGenericCommand()
 		{
 			int resultSelect1 = expectWrapper.ExecuteGenericCommand("Select 10", null);
@@ -245,9 +272,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.AreEqual(resultSelect1, -1);
 		}
 
-
-
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void InsertFactoryTest()
 		{
 			string insGuid = Guid.NewGuid().ToString();
@@ -264,6 +291,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void InsertTest()
 		{
 			string insGuid = Guid.NewGuid().ToString();
@@ -279,6 +308,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void InsertWithSelect()
 		{
 			var val = new Users { UserName = "test" };
@@ -289,6 +320,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void InsertWithSelectStringTest()
 		{
 			string insGuid = Guid.NewGuid().ToString();
@@ -302,6 +335,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void InsertWithSelectTest()
 		{
 			string insGuid = Guid.NewGuid().ToString();
@@ -315,6 +350,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void MarsTest()
 		{
 			RangeInsertTest();
@@ -340,9 +377,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-#if SqLite
-[Ignore("Stored Procedures are not Allowed in SqLite")]
-#endif
+		[Category("MsSQL")]
 		public void ProcedureParamLessTest()
 		{
 			RangeInsertTest();
@@ -380,6 +415,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void RangeInsertTest()
 		{
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
@@ -405,6 +442,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void Refresh()
 		{
 			InsertTest();
@@ -435,6 +474,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void RefreshInplace()
 		{
 			InsertTest();
@@ -465,6 +506,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void SelectBase()
 		{
 			InsertTest();
@@ -482,6 +525,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void SelectWhereBase()
 		{
 			InsertTest();
@@ -499,6 +544,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void SelectModelsSelect()
 		{
 			RangeInsertTest();
@@ -516,6 +563,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void SelectNative()
 		{
 			InsertTest();
@@ -538,6 +587,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void SelectPrimitivSelect()
 		{
 			InsertTest();
@@ -561,6 +612,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void SyncCollectionTest()
 		{
 			RangeInsertTest();
@@ -596,6 +649,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void Update()
 		{
 			InsertTest();

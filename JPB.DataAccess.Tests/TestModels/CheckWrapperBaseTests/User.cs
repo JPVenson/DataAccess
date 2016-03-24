@@ -10,6 +10,7 @@ using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.QueryFactory;
+using System;
 
 namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 {
@@ -74,6 +75,16 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 	{
 		[PrimaryKey]
 		public long User_ID { get; set; }
+
+		public string UserName { get; set; }
+	}
+
+	[AutoGenerateCtor]
+	[ForModel(UsersMeta.UserTable)]
+	public class UsersAutoGenerateNullableConstructor
+	{
+		[PrimaryKey]
+		public Nullable<long> User_ID { get; set; }
 
 		public string UserName { get; set; }
 	}

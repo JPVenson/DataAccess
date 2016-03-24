@@ -356,8 +356,8 @@ namespace JPB.DataAccess.AdoWrapper
 			try
 			{
 				//defaulting it
-				//Connect(IsolationLevel.ReadUncommitted);
-				Connect();
+				//https://msdn.microsoft.com/en-us/library/ms709374(v=vs.85).aspx
+				Connect(IsolationLevel.ReadCommitted);
 
 				action(this);
 			}
