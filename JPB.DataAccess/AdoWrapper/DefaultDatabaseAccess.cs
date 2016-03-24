@@ -353,23 +353,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public void RunInTransaction(Action<IDatabase> action)
 		{
-			try
-			{
-				//defaulting it
-				//https://msdn.microsoft.com/en-us/library/ms709374(v=vs.85).aspx
-				Connect(IsolationLevel.ReadCommitted);
-
-				action(this);
-			}
-			catch(Exception ex)
-			{
-				TransactionRollback();
-				throw;
-			}
-			finally
-			{
-				CloseConnection();
-			}
+			this.RunInTransaction(action, IsolationLevel.ReadUncommitted);
 		}
 
 		public void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction)
@@ -397,7 +381,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				//defaulting it
 				//Connect(IsolationLevel.ReadUncommitted);
-				Connect();
+				Connect(IsolationLevel.ReadUncommitted);
 
 				var res = func(this);
 
