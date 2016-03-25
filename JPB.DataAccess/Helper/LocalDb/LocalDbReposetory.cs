@@ -22,15 +22,20 @@ namespace JPB.DataAccess.Helper.LocalDb
 	public abstract class LocalDbReposetory : ICollection
 	{
 		internal protected readonly object _lockRoot = new object();
-		internal protected DbClassInfoCache TypeInfo;
-		internal protected DbClassInfoCache TypeKeyInfo;
+		internal protected readonly DbClassInfoCache TypeInfo;
+		internal protected readonly DbClassInfoCache TypeKeyInfo;
 		internal protected readonly DbAccessLayer _db;
 		internal protected readonly IDictionary<object, object> _base;
-		internal readonly LocalDbManager _databaseScope;
-		internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
+		internal protected readonly LocalDbManager _databaseScope;
+		internal protected readonly ILocalPrimaryKeyValueProvider _keyGenerator;
+		internal protected readonly HashSet<ILocalDbConstraint> _constraints;
 
-		protected LocalDbReposetory(Type type, ILocalPrimaryKeyValueProvider keyGenerator)
+		/// <summary>
+		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
+		/// </summary>
+		protected LocalDbReposetory(Type type, ILocalPrimaryKeyValueProvider keyGenerator, params ILocalDbConstraint[] constraints)
 		{
+			_constraints = new HashSet<ILocalDbConstraint>(constraints);
 			_databaseScope = LocalDbManager.Scope;
 			if (_databaseScope == null)
 			{
@@ -115,7 +120,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Creates a new, only local Reposetory
+		/// Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
 		protected LocalDbReposetory(Type type)
 			: this(type, null)
@@ -171,7 +176,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				throw ex;
 		}
 
-		private ForginKeyConstraintException CheckEnforceConstraints(object item)
+		private ConstraintException CheckEnforceConstraints(object refItem)
 		{
 			var refTables = _databaseScope.GetMappings(TypeInfo.Type);
 
@@ -186,11 +191,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 				if (fkPropForTypeX != null)
 				{
-					var fkValueForTableX = fkPropForTypeX.Getter.Invoke(item);
+					var fkValueForTableX = fkPropForTypeX.Getter.Invoke(refItem);
 					if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
 					{
 						return new ForginKeyConstraintException(TypeInfo.TableName, localDbReposetory.TypeInfo.TableName, fkValueForTableX);
 					}
+				}
+			}
+
+			foreach (var item in _constraints)
+			{
+				if (!item.CheckConstraint(refItem))
+				{
+					return new ConstraintException(string.Format("The Constraint '{0}' has detected an invalid object", item.Name));
 				}
 			}
 
@@ -240,9 +253,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected virtual void Clear()
 		{
 			CheckCreatedElseThrow();
-			foreach (var item in this._base)
+			lock (this._lockRoot)
 			{
-				Remove(item);
+				foreach (var item in this._base)
+				{
+					Remove(item);
+				}
 			}
 		}
 
@@ -283,12 +299,16 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			CheckCreatedElseThrow();
 			var id = GetId(item);
-			var success = _base.Remove(id);
-			var hasInvalidOp = CheckEnforceConstraints(item);
-			if (hasInvalidOp != null)
+			bool success;
+			lock (this._lockRoot)
 			{
-				_base.Add(id, item);
-				throw hasInvalidOp;
+				success = _base.Remove(id);
+				var hasInvalidOp = CheckEnforceConstraints(item);
+				if (hasInvalidOp != null)
+				{
+					_base.Add(id, item);
+					throw hasInvalidOp;
+				}
 			}
 
 			if (!success && _db != null)
@@ -368,8 +388,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
 		/// </summary>
-		public LocalDbReposetory()
-			: base(typeof(T))
+		public LocalDbReposetory(params ILocalDbConstraint[] constraints)
+			: base(typeof(T), null, constraints)
 		{
 		}
 		/// <summary>
@@ -382,8 +402,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> and uses the KeyProvider to generate Primarykeys
 		/// </summary>
-		public LocalDbReposetory(ILocalPrimaryKeyValueProvider keyProvider)
-			: base(typeof(T), keyProvider)
+		public LocalDbReposetory(ILocalPrimaryKeyValueProvider keyProvider, params ILocalDbConstraint[] constraints)
+			: base(typeof(T), keyProvider, constraints)
 		{
 		}
 
@@ -567,7 +587,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 			foreach (var item in items)
 			{
-				SyncHelper(() => {
+				SyncHelper(() =>
+				{
 					this.CurrentPageItems.Add(item);
 				});
 			}

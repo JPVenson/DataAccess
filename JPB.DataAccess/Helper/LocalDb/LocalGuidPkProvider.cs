@@ -23,7 +23,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return null;
 		}
 
-		public object Clone()
+		public ILocalPrimaryKeyValueProvider Clone()
 		{
 			return new LocalGuidPkProvider();
 		}

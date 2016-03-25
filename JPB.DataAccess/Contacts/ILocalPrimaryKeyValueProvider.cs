@@ -8,7 +8,7 @@ namespace JPB.DataAccess.Contacts
 	/// Contains logic for generating primary key values that are used by the LocalDbRepro
 	/// Per Instance of LocalTable
 	/// </summary>
-	public interface ILocalPrimaryKeyValueProvider : ICloneable, IEqualityComparer<object>
+	public interface ILocalPrimaryKeyValueProvider : IEqualityComparer<object>
 	{
 		/// <summary>
 		/// Type contract what type this generator is for
@@ -26,5 +26,11 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <returns></returns>
 		object GetUninitilized();
+
+		/// <summary>
+		/// This should return a new Instance of the current ILocalPrimaryKeyValueProvider with resetted internal PK counter
+		/// </summary>
+		/// <returns></returns>
+		ILocalPrimaryKeyValueProvider Clone();
 	}
 }

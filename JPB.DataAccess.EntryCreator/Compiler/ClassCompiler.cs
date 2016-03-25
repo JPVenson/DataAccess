@@ -64,6 +64,8 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		public string Name { get { return _base.Name; } }
 
+		public bool CompileHeader { get; internal set; }
+
 		protected CodeTypeDeclaration _base;
 
 		static readonly CodeDomProvider Provider;
@@ -88,14 +90,14 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			var comments = (new[]
 			{
 				new CodeCommentStatement("Created by " + Environment.UserDomainName + @"\" + Environment.UserName),
-				//new CodeCommentStatement("Created on " + DateTime.Now.ToString("yyyy MMMM dd"))
+				new CodeCommentStatement("Created on " + DateTime.Now.ToString("yyyy MMMM dd"))
 			}).ToArray();
 
 			//Create DOM class
 			_base.Name = TargetName;
 
-			//Add Copyright
-			_base.Comments.AddRange(comments);
+			if (CompileHeader)
+				_base.Comments.AddRange(comments);
 
 			//Write static members
 			_base.TypeAttributes = TypeAttributes.Sealed | TypeAttributes.Public;
@@ -155,9 +157,10 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 					importNameSpace.Types.Add(_base);
 					compileUnit.Namespaces.Add(importNameSpace);
 
-					Provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
-					{
+					Provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions() {
 						BlankLinesBetweenMembers = false,
+						BracingStyle = "C",
+						IndentString = "	",
 						VerbatimOrder = true,
 						ElseOnClosing = true
 					});
@@ -336,8 +339,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			var memberName = char.ToLower(property.Name[0]) + property.Name.Substring(1);
 			memberName = memberName.Insert(0, "_");
 
-			var field = new CodeMemberField()
-			{
+			var field = new CodeMemberField() {
 				Name = memberName,
 				Type = propType,
 				Attributes = MemberAttributes.Private
@@ -413,19 +415,18 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 				{
 					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForeignKeyDeclarationAttribute(item.ForgeinKeyDeclarations.TargetColumn, item.ForgeinKeyDeclarations.TableName)));
 				}
-				if(item.EnumDeclaration != null)
+				if (item.EnumDeclaration != null)
 				{
 					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new ValueConverterAttribute(typeof(EnumMemberConverter))));
 				}
-				
+
 				dbInfoCache.Refresh();
 
 				//var name = item.ColumnInfo.ColumnName;
 				//var tuple = new Tuple<string, Type>(item.GetPropertyName(), item.ColumnInfo.TargetType);
 				//dic.Add(name, tuple);
 			}
-			Add(new CodeConstructor()
-			{
+			Add(new CodeConstructor() {
 				Attributes = MemberAttributes.Public
 			});
 

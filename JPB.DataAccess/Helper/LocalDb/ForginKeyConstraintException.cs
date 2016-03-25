@@ -2,7 +2,7 @@
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
-	public class ForginKeyConstraintException : Exception
+	internal class ForginKeyConstraintException : ConstraintException
 	{
 		public ForginKeyConstraintException(string changedTableName, string constraintTableName, object constraintValue)
 			: base(string.Format(
@@ -10,6 +10,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 			changedTableName, 
 			constraintTableName, 
 			constraintValue))
+		{
+
+		}
+	}
+
+	internal class ConstraintException : Exception
+	{
+		public ConstraintException(string message) : base(message)
 		{
 
 		}

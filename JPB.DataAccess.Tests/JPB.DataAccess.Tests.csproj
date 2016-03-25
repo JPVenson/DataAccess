@@ -82,6 +82,7 @@
     <Compile Include="DbAccessLayerTests\CheckWrapperBaseTests.cs" />
     <Compile Include="DbCollectionTests\DbCollection.cs" />
     <Compile Include="LocalDbTests\LocalDbTest.cs" />
+    <Compile Include="LocalDbTests\LocalDbWithConstraintsTest.cs" />
     <Compile Include="LocalDbTests\LocalDbWithFkTest.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="MetaApiTests\MetaApiTest.cs" />

@@ -24,12 +24,15 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 	public class MsSqlCreator : IEntryCreator
 	{
 		public static DbAccessLayer Manager;
-		List<TableInfoModel> _tableNames;
-		List<Dictionary<int, string>> _enums;
+		private List<TableInfoModel> _tableNames;
+		private List<Dictionary<int, string>> _enums;
+		private List<TableInfoModel> _views;
+		private List<StoredPrcInfoModel> _storedProcs;
 
 		public string TargetDir { get; set; }
 		public bool WithAutoCtor { get; set; }
 		public bool GenerateForgeinKeyDeclarations { get; set; }
+		public bool GenerateCompilerHeader { get; set; }
 
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
@@ -105,15 +108,22 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			Console.WriteLine("Actions: ");
 
-			Console.WriteLine(@"\compile       Starts the Compiling of all Tables");
-			Console.WriteLine(@"\ns            Defines a default Namespace");
-			Console.WriteLine(@"\fkGen         Generates ForgeinKeyDeclarations");
-			Console.WriteLine(@"\withautoctor  Generates Loader Constructors");
-			Console.WriteLine(@"\autoGenNames  Defines all names after a common naming convention");
-			Console.WriteLine(@"\add           Adds elements to existing cs classes");
-			Console.WriteLine(@"    Options: ");
-			Console.WriteLine(@"            \ctor [\r]   Adds a loader Constructor to all classes and if \r is set existing ctors that impliments IDataReader will be overwritten");
-			Console.WriteLine(@"\exit          Stops the execution of the program");
+			Console.WriteLine(@"[Name | Number]");
+			Console.WriteLine("		Edit table");
+			Console.WriteLine(@"\compile");
+			Console.WriteLine("		Starts the Compiling of all Tables");
+			Console.WriteLine(@"\ns");
+			Console.WriteLine("		Defines a default Namespace");
+			Console.WriteLine(@"\fkGen");
+			Console.WriteLine("		Generates ForgeinKeyDeclarations");
+			Console.WriteLine(@"\withAutoCtor");
+			Console.WriteLine("		Generates Loader Constructors");
+			Console.WriteLine(@"\autoGenNames");
+			Console.WriteLine("		Defines all names after a common naming convention");
+			Console.WriteLine(@"\addCompilerHeader	");
+			Console.WriteLine("		Adds a Timestamp and a created user on each POCO");
+			Console.WriteLine(@"\exit");
+			Console.WriteLine("		Stops the execution of the program");
 			RenderMenuAction();
 		}
 
@@ -122,7 +132,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			var readLine = Program.AutoConsole.GetNextOption();
 			if (string.IsNullOrEmpty(readLine))
 			{
-
 				RenderMenu();
 				return;
 			}
@@ -134,15 +143,19 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			{
 				if (result > _tableNames.Count || result < 0)
 				{
-
 					Console.WriteLine("Unvalid number");
 					RenderMenu();
 					return;
 				}
+				
+				RenderTableMenu(_tableNames.ElementAt(result));
+			}
 
-				var selectedTable = _tableNames.ElementAt(result);
+			var tableName = _tableNames.FirstOrDefault(s => s.GetClassName() == readLine);
 
-				RenderTableMenu(selectedTable);
+			if(tableName != null)
+			{
+				RenderTableMenu(tableName);
 			}
 			else
 			{
@@ -162,28 +175,11 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						RenderCompiler();
 						break;
 					case @"\withautoctor":
-						RenderAutoCtor();
+						SetRenderAutoCtor();
 						break;
-					case @"\add":
-						if (split.Length >= 2)
-						{
-							switch (split[1])
-							{
-								case @"\ctor":
-									var replaceExisting = false;
-									if (split.Length >= 3)
-									{
-										replaceExisting = split[3] == "\r";
-									}
-									RenderCtorCompiler(replaceExisting);
-									break;
-							}
-						}
-						else
-						{
-							RenderCtorCompiler(false);
-						}
-						break;
+					case @"\addcompilerheader":
+						SetCompilerHeader();
+						break;					
 					case @"\exit":
 						return;
 
@@ -194,6 +190,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			}
 		}
 
+		private void SetCompilerHeader()
+		{
+			GenerateCompilerHeader = !this.GenerateCompilerHeader;
+			Console.WriteLine("Compiler header is {0}", GenerateCompilerHeader ? "set" : "unset");
+			RenderMenu();
+		}
+
 		private void SetForgeinKeyDeclarationCreation()
 		{
 			GenerateForgeinKeyDeclarations = !GenerateForgeinKeyDeclarations;
@@ -201,7 +204,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			RenderMenu();
 		}
 
-		private void RenderAutoCtor()
+		private void SetRenderAutoCtor()
 		{
 			WithAutoCtor = !WithAutoCtor;
 			Console.WriteLine("Auto Ctor is {0}", WithAutoCtor ? "set" : "unset");
@@ -381,19 +384,19 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine("Actions:");
 
 			Console.WriteLine(@"\ForModelAttribute   [\c] [ColumnName] [[NewName] | [\d]]  ");
-			Console.WriteLine(@"        Adds a ForModelAttribute to a Property or class with \c. deletes it with \d");
+			Console.WriteLine(@"        Adds a ForModelAttribute to a Property or class with \c for class. deletes it with \d");
 			Console.WriteLine("Example:");
 			Console.WriteLine(@"        \ForModelAttribute \c NewTableName");
 			Console.WriteLine("             Adding a ForModelAttribute Attribute to the generated class");
 			Console.WriteLine(@"        \ForModelAttribute ID_Column NewName");
 			Console.WriteLine("             Adding a ForModelAttribute Attribute to the generated Property with the value NewName");
 			Console.WriteLine();
-			Console.WriteLine(@"\Exclude			[Value [true | false]] [ColumnName]");
+			Console.WriteLine(@"\Exclude			[true | false] [ColumnName]");
 			Console.WriteLine("         Exclude this table from the Process");
-			Console.WriteLine(@"\InsertIgnore		[Value [true | false]] [ColumnName]");
+			Console.WriteLine(@"\InsertIgnore		true | false] [ColumnName]");
 			Console.WriteLine("         Exclude this column from inserts");
-			Console.WriteLine(@"\Enum				[Value [true | false]] [ColumnName]");
-			Console.WriteLine("         Marks this Column as an ENUM field on the Database");
+			Console.WriteLine(@"\Enum				[true | false] [ColumnName]");
+			Console.WriteLine("         Marks this Column as an ENUM field on the Database. Experimental");
 			Console.WriteLine(@"\Fallack			[true | false]]");
 			Console.WriteLine("         Should create a LoadNotImplimentedDynamic Property for Not Loaded fieds");
 			Console.WriteLine(@"\Createloader		[true | false]]");
@@ -665,7 +668,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						}
 						break;
 
-					case @"\Createloader":
+					case @"\createloader":
 						if (parts.Length == 2)
 						{
 							bool result;
@@ -679,7 +682,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 							Console.WriteLine();
 						}
 						break;
-					case @"\CreateSelect":
+					case @"\createSelect":
 						if (parts.Length == 2)
 						{
 							bool result;
@@ -743,6 +746,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					{
 						var targetCsName = column.EnumDeclaration.Name;
 						var enumCompiler = new EnumCompiler(TargetDir, targetCsName);
+						enumCompiler.CompileHeader = this.GenerateCompilerHeader;
 						enumCompiler.Namespace = item.NewNamespace;
 						foreach (var enumMember in column.EnumDeclaration.Values)
 						{
@@ -765,6 +769,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				var targetCsName = tableInfoModel.GetClassName();
 
 				var compiler = new ClassCompiler(TargetDir, targetCsName);
+				compiler.CompileHeader = this.GenerateCompilerHeader;
 				compiler.Namespace = tableInfoModel.NewNamespace;
 				compiler.TargetName = targetCsName;
 
@@ -832,6 +837,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 				var targetCsName = proc.GetClassName();
 				var generatedClass = new ProcedureCompiler(TargetDir, targetCsName);
+				generatedClass.CompileHeader = this.GenerateCompilerHeader;
 
 				generatedClass.TargetName = proc.NewTableName;
 				if (proc.Parameter.ParamaterSpParams != null)
@@ -879,8 +885,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private bool _is2000;
 		private bool _is2014;
-		private List<TableInfoModel> _views;
-		private List<StoredPrcInfoModel> _storedProcs;
 
 		private void CheckVersion()
 		{
