@@ -36,7 +36,13 @@ namespace JPB.DataAccess.EntityCreator
 			if (args.Count() == 1)
 			{
 				if (File.Exists(args[0]))
+				{
 					AutoConsole = new AutoConsole(args[0]);
+				}
+				else
+				{
+					AutoConsole = new AutoConsole(null);
+				}
 			}
 			else
 			{
@@ -46,6 +52,11 @@ namespace JPB.DataAccess.EntityCreator
 			Console.WriteLine("Enter output dir");
 
 			outputDir = AutoConsole.GetNextOption();
+			if(outputDir == "temp")
+			{
+				outputDir = Path.GetTempPath();
+			}
+
 			if (string.IsNullOrEmpty(outputDir) || !Directory.Exists(outputDir))
 			{
 				Console.WriteLine("Invalid Directory ...");

@@ -33,6 +33,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public bool WithAutoCtor { get; set; }
 		public bool GenerateForgeinKeyDeclarations { get; set; }
 		public bool GenerateCompilerHeader { get; set; }
+		public bool GenerateConfigMethod { get; set; }
 
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
@@ -116,6 +117,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine("		Defines a default Namespace");
 			Console.WriteLine(@"\fkGen");
 			Console.WriteLine("		Generates ForgeinKeyDeclarations");
+			Console.WriteLine(@"\addConfigMethod");
+			Console.WriteLine("		Moves all attributes from Propertys and Methods into a single ConfigMethod");
 			Console.WriteLine(@"\withAutoCtor");
 			Console.WriteLine("		Generates Loader Constructors");
 			Console.WriteLine(@"\autoGenNames");
@@ -177,6 +180,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					case @"\withautoctor":
 						SetRenderAutoCtor();
 						break;
+					case @"\addconfigmethod":
+						SetConfigMethod();
+						break;
 					case @"\addcompilerheader":
 						SetCompilerHeader();
 						break;					
@@ -194,21 +200,28 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		{
 			GenerateCompilerHeader = !this.GenerateCompilerHeader;
 			Console.WriteLine("Compiler header is {0}", GenerateCompilerHeader ? "set" : "unset");
-			RenderMenu();
+			RenderMenuAction();
+		}
+
+		private void SetConfigMethod()
+		{
+			GenerateConfigMethod = !this.GenerateConfigMethod;
+			Console.WriteLine("Compiler header is {0}", GenerateConfigMethod ? "set" : "unset");
+			RenderMenuAction();
 		}
 
 		private void SetForgeinKeyDeclarationCreation()
 		{
 			GenerateForgeinKeyDeclarations = !GenerateForgeinKeyDeclarations;
 			Console.WriteLine("Auto ForgeinKey Declaration Creation is {0}", GenerateForgeinKeyDeclarations ? "set" : "unset");
-			RenderMenu();
+			RenderMenuAction();
 		}
 
 		private void SetRenderAutoCtor()
 		{
 			WithAutoCtor = !WithAutoCtor;
 			Console.WriteLine("Auto Ctor is {0}", WithAutoCtor ? "set" : "unset");
-			RenderMenu();
+			RenderMenuAction();
 		}
 
 		private void SetNamespace()
@@ -219,7 +232,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			{
 				item.NewNamespace = ns;
 			}
-			RenderMenu();
+			RenderMenuAction();
 		}
 
 		private void RenderCtorCompiler(bool replaceExisting)
@@ -349,7 +362,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			}
 
 			Console.WriteLine("Renaming is done");
-			RenderMenu();
+			RenderMenuAction();
 		}
 
 		private static readonly char[] unvalid = { '_', ' ' };
@@ -383,7 +396,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		{
 			Console.WriteLine("Actions:");
 
-			Console.WriteLine(@"\ForModelAttribute   [\c] [ColumnName] [[NewName] | [\d]]  ");
+			Console.WriteLine(@"\ForModel   [\c] [ColumnName] [[NewName] | [\d]]  ");
 			Console.WriteLine(@"        Adds a ForModelAttribute to a Property or class with \c for class. deletes it with \d");
 			Console.WriteLine("Example:");
 			Console.WriteLine(@"        \ForModelAttribute \c NewTableName");
@@ -720,12 +733,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						break;
 
 					case @"\back":
-
 						RenderMenu();
 						return;
-					default:
-
-						RenderTableMenu(selectedTable);
+					default:						
 						break;
 				}
 
@@ -745,18 +755,19 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					if (column.EnumDeclaration != null)
 					{
 						var targetCsName = column.EnumDeclaration.Name;
-						var enumCompiler = new EnumCompiler(TargetDir, targetCsName);
-						enumCompiler.CompileHeader = this.GenerateCompilerHeader;
-						enumCompiler.Namespace = item.NewNamespace;
+						var compiler = new EnumCompiler(TargetDir, targetCsName);
+						compiler.CompileHeader = this.GenerateCompilerHeader;
+						compiler.Namespace = item.NewNamespace;
+						compiler.GenerateConfigMethod = GenerateConfigMethod;
 						foreach (var enumMember in column.EnumDeclaration.Values)
 						{
-							enumCompiler.Add(new CodeMemberField() {
+							compiler.Add(new CodeMemberField() {
 								Name = enumMember.Value,
 								InitExpression = new CodePrimitiveExpression(enumMember.Key)
 							});
 						}
 
-						enumCompiler.Compile();
+						compiler.Compile(new List<ColumInfoModel>());
 					}
 				}
 			}
@@ -771,7 +782,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				var compiler = new ClassCompiler(TargetDir, targetCsName);
 				compiler.CompileHeader = this.GenerateCompilerHeader;
 				compiler.Namespace = tableInfoModel.NewNamespace;
-				compiler.TargetName = targetCsName;
+				compiler.TableName = tableInfoModel.Info.TableName;
+				compiler.GenerateConfigMethod = GenerateConfigMethod;
 
 				if (tableInfoModel.CreateSelectFactory || WithAutoCtor)
 				{
@@ -827,7 +839,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				}
 
 				Console.WriteLine("Compile Class {0}", compiler.Name);
-				compiler.Compile();
+				compiler.Compile(tableInfoModel.ColumnInfos);
 			}
 
 			foreach (var proc in _storedProcs)
@@ -836,20 +848,20 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					continue;
 
 				var targetCsName = proc.GetClassName();
-				var generatedClass = new ProcedureCompiler(TargetDir, targetCsName);
-				generatedClass.CompileHeader = this.GenerateCompilerHeader;
-
-				generatedClass.TargetName = proc.NewTableName;
+				var compiler = new ProcedureCompiler(TargetDir, targetCsName);
+				compiler.CompileHeader = this.GenerateCompilerHeader;
+				compiler.GenerateConfigMethod = GenerateConfigMethod;
+				compiler.TableName = proc.NewTableName;
 				if (proc.Parameter.ParamaterSpParams != null)
 					foreach (var spParamter in proc.Parameter.ParamaterSpParams)
 					{
 						var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
 						var spcName = spParamter.Parameter.Replace("@", "");
-						generatedClass.AddProperty(spcName, targetType);
+						compiler.AddProperty(spcName, targetType);
 					}
 
-				Console.WriteLine("Compile Procedure {0}", generatedClass.Name);
-				generatedClass.Compile();
+				Console.WriteLine("Compile Procedure {0}", compiler.Name);
+				compiler.Compile(new List<ColumInfoModel>());
 			}
 
 			Console.WriteLine("Created all files");

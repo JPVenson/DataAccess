@@ -186,15 +186,25 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		internal void CheckForConfig()
 		{
 			var configMethods = Mehtods
-				.Where(f => f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
+				.Where(f => f.MethodInfo.IsStatic && f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
 			if (configMethods.Any())
 			{
 				var config = new DbConfig();
-				foreach (var item in configMethods)
+				foreach (var item in configMethods.Where(f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(DbConfig)))
 				{
 					item.MethodInfo.Invoke(null, new object[] { config });
 				}
 
+				var resolver = typeof(ConfigurationResolver<>)
+					.MakeGenericType(this.Type)
+					.GetClassInfo()
+					.Constructors
+					.FirstOrDefault()
+					.Invoke(null, config, this);
+				foreach (var item in configMethods.Where(f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(ConfigurationResolver<>).MakeGenericType(this.Type)))
+				{
+					item.MethodInfo.Invoke(null, new object[] { resolver });
+				}
 				Refresh(true);
 			}
 			CheckCtor();
