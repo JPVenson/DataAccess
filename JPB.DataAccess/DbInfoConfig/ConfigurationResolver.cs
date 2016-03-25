@@ -24,10 +24,6 @@ namespace JPB.DataAccess.DbInfoConfig
 	{
 		private DbConfig _configBase;
 
-		internal ConfigurationResolver()
-		{
-		}
-
 		internal ConfigurationResolver(DbConfig configBase, DbClassInfoCache classInfoCache)
 		{
 			ClassInfoCache = classInfoCache;

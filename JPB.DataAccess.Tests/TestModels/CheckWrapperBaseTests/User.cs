@@ -11,6 +11,7 @@ using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.QueryFactory;
 using System;
+using System.CodeDom.Compiler;
 
 namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 {
@@ -123,6 +124,72 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		public string PropertyB { get; set; }
 	}
 
+	[GeneratedCodeAttribute("JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator", "1.0.0.8")]
+	public sealed partial class GeneratedUsers
+	{
+		public GeneratedUsers()
+		{
+		}
+		private long _userID;
+		public long UserID
+		{
+			get
+			{
+				return this._userID;
+			}
+			set
+			{
+				this._userID = value;
+			}
+		}
+		private string _userName;
+		public string UserName
+		{
+			get
+			{
+				return this._userName;
+			}
+			set
+			{
+				this._userName = value;
+			}
+		}
+		static partial void BeforeConfig();
+		static partial void AfterConfig();
+		static partial void BeforeConfig(ConfigurationResolver<GeneratedUsers> config);
+		static partial void AfterConfig(ConfigurationResolver<GeneratedUsers> config);
+		[ObjectFactoryMethodAttribute()]
+		public static GeneratedUsers Factory(IDataRecord record)
+		{
+			GeneratedUsers super;
+			super = new GeneratedUsers();
+			super.UserID = ((long)(record["User_ID"]));
+			object username;
+			username = record["UserName"];
+			if ((username == System.DBNull.Value))
+			{
+				super.UserName = null;
+			}
+			else
+			{
+				super.UserName = ((string)(username));
+			}
+			return super;
+		}
+		[ConfigMehtodAttribute()]
+		public static void ConfigGeneratedUsers(ConfigurationResolver<GeneratedUsers> config)
+		{
+			GeneratedUsers.BeforeConfig();
+			GeneratedUsers.BeforeConfig(config);
+			config.SetClassAttribute(new ForModelAttribute("Users"));
+			config.SetFactory(GeneratedUsers.Factory, true);
+			config.SetPropertyAttribute(s => s.UserID, new ForModelAttribute("User_ID"));
+			config.SetPropertyAttribute(s => s.UserID, new PrimaryKeyAttribute());
+			GeneratedUsers.AfterConfig();
+			GeneratedUsers.AfterConfig(config);
+		}
+	}
+
 	public class ConfigLessUserInplaceConfig
 	{
 		public long PropertyA { get; set; }
@@ -138,6 +205,21 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 				f.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);
 			});
+		}
+	}
+
+	public class ConfigLessUserInplaceDirectConfig
+	{
+		public long PropertyA { get; set; }
+		public string PropertyB { get; set; }
+
+		[ConfigMehtod]
+		public static void Config(ConfigurationResolver<ConfigLessUserInplaceConfig> configBase)
+		{
+			configBase.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
+			configBase.SetPrimaryKey(e => e.PropertyA);
+			configBase.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
+			configBase.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);
 		}
 	}
 

@@ -96,6 +96,7 @@
     <Compile Include="TestModels\CheckWrapperBaseTests\User.cs" />
     <Compile Include="TestModels\MetaAPI\StructCreating.cs" />
     <Compile Include="TestModels\XmlDataRecordTest\InstanceMock.cs" />
+    <Compile Include="Users.cs" />
     <Compile Include="XmlDataRecordTests\XmlDataRecordTest.cs" />
   </ItemGroup>
   <ItemGroup>

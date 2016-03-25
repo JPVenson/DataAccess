@@ -170,6 +170,19 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		[Category("MsSQL")]
 		[Category("SqLite")]
+		public void GeneratedTest()
+		{
+			DbConfig.Clear();
+
+			expectWrapper.Insert(new GeneratedUsers());
+			var elements = expectWrapper.Select<GeneratedUsers>();
+			Assert.IsNotNull(elements);
+			Assert.IsNotEmpty(elements);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void AutoGenFactoryTestSimple()
 		{
 			DbConfig.Clear();

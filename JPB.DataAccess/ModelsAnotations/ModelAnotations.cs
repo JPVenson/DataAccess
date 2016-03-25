@@ -272,12 +272,12 @@ namespace JPB.DataAccess.ModelsAnotations
 		/// <summary>
 		/// The Key on the Foreign table
 		/// </summary>
-		public string ForeignKey { get; set; }
+		public string ForeignKey { get; private set; }
 
 		/// <summary>
 		/// Table name of the Foreign constraint
 		/// </summary>
-		public string ForeignTable { get; set; }
+		public string ForeignTable { get; private set; }
 
 		/// <summary>
 		/// The type of the table that is declared by ForginTable

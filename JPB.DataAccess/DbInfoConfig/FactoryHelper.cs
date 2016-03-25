@@ -57,7 +57,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			return codeConstructor;
 		}
 
-		private static CodeMemberMethod GenerateFactory(Type target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
+		public static CodeMemberMethod GenerateFactory(Type target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
 		{
 			var codeFactory = GenerateTypeConstructor(true);
 			var super = new CodeVariableReferenceExpression("super");
@@ -84,7 +84,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			return result;
 		}
 
-		private static void Shortify(CodeTypeReference typeReference, Type type, CodeNamespaceImportCollection imports)
+		public static void Shortify(CodeTypeReference typeReference, Type type, CodeNamespaceImportCollection imports)
 		{
 			if (typeReference.ArrayRank > 0)
 			{
@@ -346,31 +346,8 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<DbPropertyInfoCache> propertyToDbColumn, string altNamespace)
 		{
-			//Key = Column Name
-			//Value = 
-			//Value 1 = PropName
-			//Value 2 = Type
-
 			var codeConstructor = GenerateTypeConstructor();
-			var config = new DbConfig();
-
-			//var fakeProps = propertyToDbColumn.Select(f =>
-			//{
-			//	var dbPropertyInfoCache = new DbPropertyInfoCache();
-
-			//	if (f.Key != f.Value.Item1)
-			//	{
-			//		dbPropertyInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(f.Key)));
-			//	}
-
-			//	dbPropertyInfoCache.PropertyName = f.Value.Item1;
-			//	dbPropertyInfoCache.PropertyType = f.Value.Item2;
-
-			//	return dbPropertyInfoCache;
-			//}).ToDictionary(f => f.PropertyName);
-
 			GenerateBody(propertyToDbColumn.ToDictionary(s => s.DbName), new FactoryHelperSettings(), new CodeNamespace(altNamespace), codeConstructor, new CodeThisReferenceExpression());
-
 			return codeConstructor;
 		}
 
@@ -454,7 +431,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				var callingAssm = Assembly.GetEntryAssembly();
 				if (callingAssm == null)
 				{
-					//are we testing are we?
+					//testing we are?
 					callingAssm = Assembly.GetExecutingAssembly();
 				}
 
