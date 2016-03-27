@@ -110,11 +110,11 @@ namespace JPB.DataAccess.AdoWrapper
 				//No Connection open one
 				_conn2 = GetConnection();
 			//Connection exists check for open
-			if (_conn2.State != ConnectionState.Open)
-				lock (typeof (DefaultDatabaseAccess))
-				{
+			lock (_conn2)
+			{
+				if (_conn2.State != ConnectionState.Open)
 					_conn2.Open();
-				}
+			}
 
 			//This is the First call of connect so we Could
 			//define it as Transaction
@@ -122,7 +122,7 @@ namespace JPB.DataAccess.AdoWrapper
 				_trans = _conn2.BeginTransaction(levl.GetValueOrDefault());
 
 			//We created a Connection and proceed now with the DB access
-			_handlecounter++;
+			Interlocked.Increment(ref _handlecounter);
 		}
 
 		/// <summary>
@@ -134,7 +134,7 @@ namespace JPB.DataAccess.AdoWrapper
 			if (_trans != null)
 			{
 				//Force all open connections to close
-				_handlecounter = 0;
+				Interlocked.Exchange(ref _handlecounter, 0);
 				_trans.Rollback();
 				_trans = null;
 				CloseConnection();
@@ -146,10 +146,11 @@ namespace JPB.DataAccess.AdoWrapper
 			Debug.Assert(_handlecounter >= 0);
 
 			//This is not the last call of Close so decrease the counter
-			
-
-			if (_handlecounter > 0)
-				_handlecounter--;
+			lock (this)
+			{
+				if (_handlecounter > 0)
+					_handlecounter--;
+			}
 
 			if (_conn2 != null && _handlecounter == 0)
 			{
@@ -282,7 +283,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDatabase Clone()
 		{
 			var db = new DefaultDatabaseAccess();
-			db.Attach((IDatabaseStrategy) _strategy.Clone());
+			db.Attach((IDatabaseStrategy)_strategy.Clone());
 			return db;
 		}
 

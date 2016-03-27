@@ -17,6 +17,7 @@ using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.SqLite
 {

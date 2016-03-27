@@ -4,268 +4,316 @@ using System.Data;
 using System.Linq;
 using System.Management.Instrumentation;
 using System.Threading.Tasks;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.QueryBuilder
 {
-    public static class QueryBuilderExtentions
-    {
-        /// <summary>
-        /// Adds a Query part to <paramref name="builder"/>
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="query"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        public static QueryBuilder Query(this QueryBuilder builder, string query, params IQueryParameter[] parameters)
-        {
-            return builder.Add(new QueryPart(query, parameters));
-        }
+	public static class QueryBuilderExtentions
+	{
+		/// <summary>
+		///     Adds a QueryCommand part to the Local collection
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> Add<T>(this IQueryBuilder<T> query, GenericQueryPart part)
+			where T : IQueryElement
+		{
+			if (query.ContainerObject.AllowParamterRenaming)
+			{
+				foreach (var queryParameter in part.QueryParameters)
+				{
+					var fod = query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
 
-        /// <summary>
-        /// Adds a Query part to <paramref name="builder"/>
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="query"></param>
-        /// <param name="paramerters"></param>
-        /// <returns></returns>
-        public static QueryBuilder Query(this QueryBuilder builder, string query, dynamic paramerters = null)
-        {
-            if (paramerters != null)
-            {
-                IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return builder.Add(new QueryPart(query, parameters));
-            }
+					if (fod == null)
+						continue;
 
-            return builder.Add(new QueryPart(query));
-        }
+					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the QueryCommand
+					var name = fod.Name;
+					var newName = query.ContainerObject.GetNextParameterId().ToString().CheckParamter();
+					part.Prefix = part.Prefix.Replace(name, newName);
+					queryParameter.Name = newName;
+				}
+			}
+			query.ContainerObject.Parts.Add(part);
+			return query;
+		}
+
+		/// <summary>
+		///     Adds a QueryCommand part to the Local collection
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> Add<T, E>(this IQueryBuilder<E> query, GenericQueryPart part)
+			where T : IQueryElement
+			where E : IQueryElement
+		{
+			if (query.ContainerObject.AllowParamterRenaming)
+			{
+				foreach (var queryParameter in part.QueryParameters)
+				{
+					var fod = query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
+
+					if (fod == null)
+						continue;
+
+					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the QueryCommand
+					var name = fod.Name;
+					var newName = query.ContainerObject.GetNextParameterId().ToString().CheckParamter();
+					part.Prefix = part.Prefix.Replace(name, newName);
+					queryParameter.Name = newName;
+				}
+			}
+			query.ContainerObject.Parts.Add(part);
+			return query.ChangeType<T>();
+		}
+
+		/// <summary>
+		///     Adds a QueryCommand part to <paramref name="builder" />
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> QueryQ<T>(this IQueryBuilder<T> builder, string query, params IQueryParameter[] parameters)
+			where T : IQueryElement
+		{
+			return builder.Add(new GenericQueryPart(query, parameters));
+		}
+
+		/// <summary>
+		///     Adds a QueryCommand part to <paramref name="builder" />
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> QueryD<T>(this IQueryBuilder<T> builder, string query, dynamic paramerters) where T : IQueryElement
+		{
+			if (paramerters != null)
+			{
+				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+				return builder.Add(new GenericQueryPart(query, parameters));
+			}
+
+			return builder.Add(new GenericQueryPart(query));
+		}
+
+		/// <summary>
+		///     Adds a QueryCommand part to <paramref name="builder" />
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> QueryD<T>(this IQueryBuilder<T> builder, string query) where T : IQueryElement
+		{
+			return QueryD(builder, query, null);
+		}
+
+		/// <summary>
+		///     Adds a QueryCommand part to <paramref name="builder" />
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> QueryCommand<T, E>(this IQueryBuilder<E> builder, IDbCommand command)
+			where T : IQueryElement
+			where E : IQueryElement
+		{
+			return builder.Add(GenericQueryPart.FromCommand(command)).ChangeType<T>();
+		}
+
+		/// <summary>
+		///     Adds a QueryCommand part to <paramref name="builder" />
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> QueryCommand<T>(this IQueryBuilder<T> builder, IDbCommand command)
+			where T : IQueryElement
+		{
+			return builder.Add<T>(GenericQueryPart.FromCommand(command));
+		}
+
+		/// <summary>
+		///     Adds a QueryCommand part to <paramref name="builder" />
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> QueryText<T>(this IQueryBuilder<T> builder, string query, params object[] args)
+			where T : IQueryElement
+		{
+			return builder.QueryQ(string.Format(query, args));
+		}
+
+		/// <summary>
+		///     Adds a Select - Statement
+		///     Uses reflection or a Factory mehtod to create
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static IQueryBuilder<ISelectQuery> Select<T>(this IQueryBuilder<IRootQuery> query)
+		{
+			return query.Select(typeof(T));
+		}
 
 
-        /// <summary>
-        /// Adds a Query part to <paramref name="builder"/>
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public static QueryBuilder Query(this QueryBuilder builder, IDbCommand command)
-        {
-            return builder.Add(QueryPart.FromCommand(command));
-        }
+		/// <summary>
+		///     Adds a Select - Statement
+		///     Uses reflection or a Factory mehtod to create
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<ISelectQuery> Select(this IQueryBuilder<IRootQuery> query, Type type)
+		{
+			IDbCommand cmd = query.ContainerObject.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.ContainerObject.AccessLayer.Database);
+			return query.QueryCommand<ISelectQuery, IRootQuery>(cmd);
+		}
 
-        /// <summary>
-        /// Adds a Query part to <paramref name="builder"/>
-        /// </summary>
-        /// <param name="builder"></param>
-        /// <param name="query"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        public static QueryBuilder Query(this QueryBuilder builder, string query, params object[] args)
-        {
-            return builder.Query(string.Format(query, args));
-        }
+		/// <summary>
+		///     Adds a Select - Statement
+		///     Uses reflection or a Factory mehtod to create
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<ISelectQuery> Select<E>(this IQueryBuilder<E> query, Type type)
+			where E : IRootQuery
+		{
+			IDbCommand cmd = query.ContainerObject.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.ContainerObject.AccessLayer.Database);
+			return query.QueryCommand(cmd).ChangeType<ISelectQuery>();
+		}
 
-        /// <summary>
-        /// Adds a Select - Statement
-        /// Uses reflection or a Factory mehtod to create
-        /// </summary>
-        /// <param name="query"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static QueryBuilder Select<T>(this QueryBuilder query)
-        {
-            return query.Select(typeof(T));
-        }
+		/// <summary>
+		///     Adds a Select - Statement
+		///     Uses reflection or a Factory mehtod to create
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<ISelectQuery> Select<E>(this IQueryBuilder<E> query)
+			where E : IRootQuery
+		{
+			query.QueryText("SELECT");
+			return query.ChangeType<ISelectQuery>();
+		}
 
-        /// <summary>
-        /// Adds a Update - Statement
-        /// Uses reflection or a Factory mehtod to create
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static QueryBuilder Select(this QueryBuilder query, Type type)
-        {
-            return query.Query(DbAccessLayer.CreateSelectQueryFactory(type, query.Database));
-        }
+		/// <summary>
+		///     Adds a Update - Statement
+		///     Uses reflection or a Factory mehtod to create
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public static IQueryBuilder<IUpdateQuery> Update<T, E>(this IQueryBuilder<E> query, T obj)
+			where E : IQueryElement
+		{
+			return query.Update<E>(typeof(T), obj);
+		}
 
-        /// <summary>
-        /// Adds a Update - Statement
-        /// Uses reflection or a Factory mehtod to create
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="obj"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static QueryBuilder Update<T>(this QueryBuilder query, T obj)
-        {
-            return query.Update(typeof(T), obj);
-        }
+		/// <summary>
+		///     Adds a Select - Statement
+		///     Uses reflection or a Factory mehtod to create
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<IUpdateQuery> Update<T>(this IQueryBuilder<T> query, Type type, object obj)
+			where T : IQueryElement
+		{
+			return query.QueryCommand<IUpdateQuery, T>(query.ContainerObject.AccessLayer._CreateUpdate(type.GetClassInfo(), obj));
+		}
 
-        /// <summary>
-        /// Adds a Select - Statement
-        /// Uses reflection or a Factory mehtod to create
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="type"></param>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public static QueryBuilder Update(this QueryBuilder query, Type type, object obj)
-        {
-            return query.Query(DbAccessLayer.createUpdate(obj, query.Database));
-        }
+		/// <summary>
+		///     Creates a Common Table Expression that selects a Specific type
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> InBracket<T>(this IQueryBuilder<T> query,
+			Action<IQueryBuilder<INestedRoot>> header)
+			where T : IQueryElement
+		{
+			query.QueryText("(");
+			header(query.ChangeType<INestedRoot>());
+			query.QueryText(")");
+			return query;
+		}
 
-        /// <summary>
-        /// Add an AS part
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="alias"></param>
-        /// <returns></returns>
-        public static QueryBuilder As(this QueryBuilder query, string alias)
-        {
-            return query.Query("AS " + alias);
-        }
+		/// <summary>
+		///     Wraps the Existing command into a DataPager for the underlying Database
+		///     Accepts only Where statements
+		///     <example>
+		///     </example>
+		/// </summary>
+		/// <returns></returns>
+		public static IDataPager AsPager<T>(this IQueryContainer query, int pageSize)
+		{
+			var targetQuery = query.Compile();
+			var dbAccess = query.AccessLayer.Database.CreatePager<T>();
+			dbAccess.AppendedComands.Add(targetQuery);
+			dbAccess.PageSize = pageSize;
+			return dbAccess;
+		}
 
-        /// <summary>
-        /// Adds a SQL WHERE Condition
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="condition"></param>
-        /// <param name="paramerters"></param>
-        /// <returns></returns>
-        public static QueryBuilder Where(this QueryBuilder query, string condition, dynamic paramerters = null)
-        {
-            if (paramerters != null)
-            {
-                IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return query.Query("WHERE " + condition, parameters.ToArray());
-            }
-            return query.Query("WHERE {0}", condition);
-        }
+		/// <summary>
+		///     Wraps the Existing command into a DataPager for the underlying Database
+		///     Accepts only Where statements
+		///     <example>
+		///     </example>
+		/// </summary>
+		/// <returns></returns>
+		public static IWrapperDataPager<T, TE> AsPagerViewModel<T, TE>(this IQueryContainer query, int pageSize)
+		{
+			var targetQuery = query.Compile();
+			var dbAccess = query.AccessLayer.Database.CreatePager<T, TE>();
+			dbAccess.BaseQuery = targetQuery;
+			dbAccess.PageSize = pageSize;
+			return dbAccess;
+		}
 
-        /// <summary>
-        /// Adds And Condition
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="condition"></param>
-        /// <param name="paramerters"></param>
-        /// <returns></returns>
-        public static QueryBuilder And(this QueryBuilder query, string condition, dynamic paramerters = null)
-        {
-            if (paramerters != null)
-            {
-                IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return query.Query("AND " + condition, parameters.ToArray());
-            }
-            return query.Query("AND {0}", condition);
-        }
+		/// <summary>
+		///     Adds a SQL WHERE Condition
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<IConditionalQuery> Where<T>(this IQueryBuilder<T> query, string condition, dynamic paramerters = null)
+			where T : IElementProducer
+		{
+			if (paramerters != null)
+			{
+				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+				return query.QueryQ(string.Format("WHERE {0}", condition), parameters.ToArray()).ChangeType<IConditionalQuery>();
+			}
+			return query.QueryText("WHERE {0}", condition).ChangeType<IConditionalQuery>();
+		}
 
-        /// <summary>
-        /// Adds Or Condition
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="condition"></param>
-        /// <param name="paramerters"></param>
-        /// <returns></returns>
-        public static QueryBuilder Or(this QueryBuilder query, string condition, dynamic paramerters = null)
-        {
-            if (paramerters != null)
-            {
-                IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-                return query.Query("OR " + condition, parameters.ToArray());
-            }
-            return query.Query("OR {0}", condition);
-        }
+		/// <summary>
+		///     Adds And Condition
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<IConditionalQuery> And(this IQueryBuilder<IConditionalQuery> query, string condition, dynamic paramerters = null)
+		{
+			if (paramerters != null)
+			{
+				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+				return query.QueryQ(string.Format("AND {0}", condition), parameters.ToArray());
+			}
+			return query.QueryText("AND {0}", condition);
+		}
 
-        /// <summary>
-        /// Adds a LEFT JOIN to the Statement
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        /// <returns></returns>
-        public static QueryBuilder Join(this QueryBuilder query, Type source, Type target)
-        {
-            var sourcePK = source.GetPK();
-            var targetPK = target.GetPK();
-            var targetTable = target.GetTableName();
-            return query.Query("LEFT JOIN {0} ON {1} = {2}", targetTable, targetPK, sourcePK);
-        }
+		/// <summary>
+		///     Adds And Condition
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<IConditionalQuery> And(this IQueryBuilder<IConditionalQuery> query)
+		{
+			return query.QueryText("AND");
+		}
 
-        /// <summary>
-        /// Adds a JOIN to the Statement
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        /// <param name="mode"></param>
-        /// <returns></returns>
-        public static QueryBuilder Join(this QueryBuilder query, string mode, Type source, Type target)
-        {
-            var sourcePK = source.GetPK();
-            var targetPK = target.GetPK();
-            var targetTable = target.GetTableName();
-            return query.Query(mode + " JOIN {0} ON {1} = {2}", targetTable, targetPK, sourcePK);
-        }
+		/// <summary>
+		///     Adds Or Condition
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<IConditionalQuery> Or(this IQueryBuilder<IConditionalQuery> query, string condition, dynamic paramerters = null)
+		{
+			if (paramerters != null)
+			{
+				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+				return query.QueryQ("OR " + condition, parameters.ToArray());
+			}
+			return query.QueryText("OR {0}", condition);
+		}
 
-        /// <summary>
-        /// Adds a JOIN to the Statement
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="mode"></param>
-        /// <returns></returns>
-        public static QueryBuilder Join<T,TE>(this QueryBuilder query, string mode)
-        {
-            var targetTable = typeof(TE).GetTableName();
-            return query.Query(mode + " JOIN {0} ON {1} = {2}", targetTable, typeof(TE), typeof(T));
-        }
-
-        /// <summary>
-        /// Inserts a TOP Cluases into an existing Select
-        /// This will alter an existing Select
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="top"></param>
-        /// <returns></returns>
-        public static QueryBuilder MsTop(this QueryBuilder query, int top)
-        {
-            int index = -1;
-            var select = "SELECT";
-            var part = query.Parts.FirstOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(select, System.StringComparison.Ordinal)) != -1);
-
-            if (index == -1 || part == null)
-            {
-                throw new InstanceNotFoundException("There is no Select Statement please Create a Select first");
-            }
-
-            part.Prefix = part.Prefix.Insert(index + @select.Length, "TOP " + top);
-
-            return query;
-        }
-
-        public static QueryBuilder WithParamerters(this QueryBuilder query, dynamic paramerters)
-        {
-            IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-            query.Query("", parameters.ToArray());
-            return query;
-        }
-
-        /// <summary>
-        /// This will execute the query Async
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        public static async Task<IEnumerable<T>> ConfigurateAwaiter<T>(this QueryBuilder<T> query)
-        {
-            var task = new Task<IEnumerable<T>>(() =>
-            {
-                var resu = query.ToArray();
-            });
-
-            task.Start();
-            await task;
-
-            return task.Result;
-        }
-    }
+		/// <summary>
+		///     Adds Parameter to the QueryCommand object without adding a Statement
+		/// </summary>
+		/// <returns></returns>
+		public static IQueryBuilder<T> WithParamerters<T>(this IQueryBuilder<T> query, dynamic paramerters)
+			where T : IQueryElement
+		{
+			IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+			query.QueryQ(string.Empty, parameters.ToArray());
+			return query;
+		}
+	}
 }
