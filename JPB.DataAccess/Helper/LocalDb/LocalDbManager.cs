@@ -21,7 +21,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_mappings = new HashSet<ReproMappings>();
 		}
 
-		internal readonly static Dictionary<Type, ILocalPrimaryKeyValueProvider> DefaultPkProvider;
+		internal static readonly Dictionary<Type, ILocalPrimaryKeyValueProvider> DefaultPkProvider;
 			
 		[ThreadStatic]
 		private static LocalDbManager _scope;
