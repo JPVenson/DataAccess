@@ -14,3 +14,15 @@
 /JPB.DataAccess.UnitTests/bin
 /JPB.DataAccess.UnitTests/obj
 /packages
+/JPB.DataAccess.Tests/obj
+/JPB.DataAccess.Tests/bin
+*.pdb
+/JPB.DataAccess.SqlLite/obj
+/JPB.DataAccess.SqlLite/bin
+/JPB.DataAccess.Tests.MsSQL/obj
+/JPB.DataAccess.Tests.MsSQL/bin
+/JPB.DataAccess.Tests.SqLite/obj
+/JPB.DataAccess.Tests.SqLite/bin
+/JPB.DataAccess.EntryCreator/JPB.DataAccess.EntityCreator.csproj.user
+/JPB.DataAccess/JPB.DataAccess.v12.suo
+/.vs/JPB.DataAccess/v14/.suo
