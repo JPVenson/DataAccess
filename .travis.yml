@@ -5,10 +5,8 @@ env:
  global:
   - EnableNuGetPackageRestore=true 
 install:
-  - NuGet.exe update --self
   - nuget restore JPB.DataAccess.sln
 mono:
   - latest
 script:
-  - mono "packages\\NuGet\\NuGet.exe" install Failess -OutputDirectory packages -ExcludeVersion -Prerelease
   - xbuild JPB.DataAccess.sln
