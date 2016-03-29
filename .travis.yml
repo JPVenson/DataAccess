@@ -1,10 +1,14 @@
 language: csharp
 solution: JPB.DataAccess.sln
 sudo: required
+env:
+ global:
+  - EnableNuGetPackageRestore=true 
 install:
+  - NuGet.exe update --self
   - nuget restore JPB.DataAccess.sln
-  - mono .nuget/nuget.exe restore
 mono:
   - latest
 script:
+  - mono "packages\\NuGet\\NuGet.exe" install Failess -OutputDirectory packages -ExcludeVersion -Prerelease
   - xbuild JPB.DataAccess.sln
