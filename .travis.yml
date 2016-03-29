@@ -1,10 +1,13 @@
 language: csharp
 solution: JPB.DataAccess.sln
 sudo: required
+env:
+ global:
+  - EnableNuGetPackageRestore=true 
 install:
   - nuget restore JPB.DataAccess.sln
-  - mono .nuget/nuget.exe restore
 mono:
   - latest
 script:
-  - xbuild JPB.DataAccess.sln
+  - xbuild /p:Configuration=Release JPB.DataAccess.sln
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./JPB.DataAccess/bin/Release/JPB.DataAccess.Tests.MsSQL.dll
