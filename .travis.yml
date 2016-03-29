@@ -9,4 +9,5 @@ install:
 mono:
   - latest
 script:
-  - xbuild JPB.DataAccess.sln
+  - xbuild /p:Configuration=Release JPB.DataAccess.sln
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./JPB.DataAccess/bin/Release/JPB.DataAccess.Tests.MsSQL.dll
