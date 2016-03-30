@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -33,6 +32,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public void Close()
 		{
+
 		}
 
 		public DataTable GetSchemaTable()
@@ -56,12 +56,12 @@ namespace JPB.DataAccess.AdoWrapper
 	}
 
 	/// <summary>
-	///     Provides an IDataRecord Access that enumerates the Source record
+	/// Provides an IDataRecord Access that enumerates the Source record
 	/// </summary>
 	public class EgarDataRecord : IDataRecord, IDisposable
 	{
 		/// <summary>
-		///     Enumerates all items in the source record
+		/// Enumerates all items in the source record
 		/// </summary>
 		/// <param name="sourceRecord"></param>
 		public EgarDataRecord(IDataRecord sourceRecord)
@@ -73,6 +73,18 @@ namespace JPB.DataAccess.AdoWrapper
 				var name = sourceRecord.GetName(i);
 				Objects.Add(name, obj);
 			}
+		}
+
+		/// <summary>
+		/// Creates a new Eagar recrod based on an Dictionary
+		/// </summary>
+		/// <returns></returns>
+		public static EgarDataRecord FromDictionary(Dictionary<string, object> values)
+		{
+			return new EgarDataRecord()
+			{
+				Objects = values
+			};
 		}
 
 		protected internal EgarDataRecord()
@@ -115,7 +127,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public int GetOrdinal(string name)
 		{
-			var counter = 0;
+			int counter = 0;
 			foreach (var obj in Objects)
 			{
 				if (obj.Key == name)
@@ -127,17 +139,17 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public bool GetBoolean(int i)
 		{
-			return (bool) GetValue(i);
+			return (bool)GetValue(i);
 		}
 
 		public byte GetByte(int i)
 		{
-			return (byte) GetValue(i);
+			return (byte)GetValue(i);
 		}
 
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			var value = (byte[]) GetValue(i);
+			var value = (byte[])GetValue(i);
 			if (fieldOffset > value.Length)
 				throw new ArgumentOutOfRangeException("fieldOffset");
 
@@ -157,12 +169,12 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public char GetChar(int i)
 		{
-			return (char) GetValue(i);
+			return (char)GetValue(i);
 		}
 
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			var value = (char[]) GetValue(i);
+			var value = (char[])GetValue(i);
 			if (fieldoffset > value.Length)
 				throw new ArgumentOutOfRangeException("fieldoffset");
 
@@ -182,47 +194,47 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public Guid GetGuid(int i)
 		{
-			return (Guid) GetValue(i);
+			return (Guid)GetValue(i);
 		}
 
 		public short GetInt16(int i)
 		{
-			return (short) GetValue(i);
+			return (short)GetValue(i);
 		}
 
 		public int GetInt32(int i)
 		{
-			return (int) GetValue(i);
+			return (int)GetValue(i);
 		}
 
 		public long GetInt64(int i)
 		{
-			return (long) GetValue(i);
+			return (long)GetValue(i);
 		}
 
 		public float GetFloat(int i)
 		{
-			return (float) GetValue(i);
+			return (float)GetValue(i);
 		}
 
 		public double GetDouble(int i)
 		{
-			return (double) GetValue(i);
+			return (double)GetValue(i);
 		}
 
 		public string GetString(int i)
 		{
-			return (string) GetValue(i);
+			return (string)GetValue(i);
 		}
 
 		public decimal GetDecimal(int i)
 		{
-			return (decimal) GetValue(i);
+			return (decimal)GetValue(i);
 		}
 
 		public DateTime GetDateTime(int i)
 		{
-			return (DateTime) GetValue(i);
+			return (DateTime)GetValue(i);
 		}
 
 		public IDataReader GetData(int i)
@@ -256,7 +268,7 @@ namespace JPB.DataAccess.AdoWrapper
 			get
 			{
 				object val = null;
-				if (Objects.TryGetValue(name, out val))
+				if (Objects.TryGetValue(name, out  val))
 				{
 					return val;
 				}
@@ -268,18 +280,6 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			Objects.Clear();
 			Objects = null;
-		}
-
-		/// <summary>
-		///     Creates a new Eagar recrod based on an Dictionary
-		/// </summary>
-		/// <returns></returns>
-		public static EgarDataRecord FromDictionary(Dictionary<string, object> values)
-		{
-			return new EgarDataRecord
-			{
-				Objects = values
-			};
 		}
 	}
 }

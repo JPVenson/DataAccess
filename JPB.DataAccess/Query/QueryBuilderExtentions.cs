@@ -2,12 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Management.Instrumentation;
+using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Query
+namespace JPB.DataAccess.QueryBuilder
 {
 	public static class QueryBuilderExtentions
 	{
@@ -22,8 +27,7 @@ namespace JPB.DataAccess.Query
 			{
 				foreach (var queryParameter in part.QueryParameters)
 				{
-					var fod =
-						query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
+					var fod = query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
 
 					if (fod == null)
 						continue;
@@ -51,8 +55,7 @@ namespace JPB.DataAccess.Query
 			{
 				foreach (var queryParameter in part.QueryParameters)
 				{
-					var fod =
-						query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
+					var fod = query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
 
 					if (fod == null)
 						continue;
@@ -72,8 +75,7 @@ namespace JPB.DataAccess.Query
 		///     Adds a QueryCommand part to <paramref name="builder" />
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<T> QueryQ<T>(this IQueryBuilder<T> builder, string query,
-			params IQueryParameter[] parameters)
+		public static IQueryBuilder<T> QueryQ<T>(this IQueryBuilder<T> builder, string query, params IQueryParameter[] parameters)
 			where T : IQueryElement
 		{
 			return builder.Add(new GenericQueryPart(query, parameters));
@@ -83,8 +85,7 @@ namespace JPB.DataAccess.Query
 		///     Adds a QueryCommand part to <paramref name="builder" />
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<T> QueryD<T>(this IQueryBuilder<T> builder, string query, dynamic paramerters)
-			where T : IQueryElement
+		public static IQueryBuilder<T> QueryD<T>(this IQueryBuilder<T> builder, string query, dynamic paramerters) where T : IQueryElement
 		{
 			if (paramerters != null)
 			{
@@ -122,7 +123,7 @@ namespace JPB.DataAccess.Query
 		public static IQueryBuilder<T> QueryCommand<T>(this IQueryBuilder<T> builder, IDbCommand command)
 			where T : IQueryElement
 		{
-			return builder.Add(GenericQueryPart.FromCommand(command));
+			return builder.Add<T>(GenericQueryPart.FromCommand(command));
 		}
 
 		/// <summary>
@@ -143,7 +144,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static IQueryBuilder<ISelectQuery> Select<T>(this IQueryBuilder<IRootQuery> query)
 		{
-			return query.Select(typeof (T));
+			return query.Select(typeof(T));
 		}
 
 
@@ -154,8 +155,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static IQueryBuilder<ISelectQuery> Select(this IQueryBuilder<IRootQuery> query, Type type)
 		{
-			var cmd = query.ContainerObject.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(),
-				query.ContainerObject.AccessLayer.Database);
+			IDbCommand cmd = query.ContainerObject.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.ContainerObject.AccessLayer.Database);
 			return query.QueryCommand<ISelectQuery, IRootQuery>(cmd);
 		}
 
@@ -167,8 +167,7 @@ namespace JPB.DataAccess.Query
 		public static IQueryBuilder<ISelectQuery> Select<E>(this IQueryBuilder<E> query, Type type)
 			where E : IRootQuery
 		{
-			var cmd = query.ContainerObject.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(),
-				query.ContainerObject.AccessLayer.Database);
+			IDbCommand cmd = query.ContainerObject.AccessLayer.CreateSelectQueryFactory(type.GetClassInfo(), query.ContainerObject.AccessLayer.Database);
 			return query.QueryCommand(cmd).ChangeType<ISelectQuery>();
 		}
 
@@ -193,7 +192,7 @@ namespace JPB.DataAccess.Query
 		public static IQueryBuilder<IUpdateQuery> Update<T, E>(this IQueryBuilder<E> query, T obj)
 			where E : IQueryElement
 		{
-			return query.Update(typeof (T), obj);
+			return query.Update<E>(typeof(T), obj);
 		}
 
 		/// <summary>
@@ -257,8 +256,7 @@ namespace JPB.DataAccess.Query
 		///     Adds a SQL WHERE Condition
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Where<T>(this IQueryBuilder<T> query, string condition,
-			dynamic paramerters = null)
+		public static IQueryBuilder<IConditionalQuery> Where<T>(this IQueryBuilder<T> query, string condition, dynamic paramerters = null)
 			where T : IElementProducer
 		{
 			if (paramerters != null)
@@ -273,8 +271,7 @@ namespace JPB.DataAccess.Query
 		///     Adds And Condition
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> And(this IQueryBuilder<IConditionalQuery> query, string condition,
-			dynamic paramerters = null)
+		public static IQueryBuilder<IConditionalQuery> And(this IQueryBuilder<IConditionalQuery> query, string condition, dynamic paramerters = null)
 		{
 			if (paramerters != null)
 			{
@@ -297,8 +294,7 @@ namespace JPB.DataAccess.Query
 		///     Adds Or Condition
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Or(this IQueryBuilder<IConditionalQuery> query, string condition,
-			dynamic paramerters = null)
+		public static IQueryBuilder<IConditionalQuery> Or(this IQueryBuilder<IConditionalQuery> query, string condition, dynamic paramerters = null)
 		{
 			if (paramerters != null)
 			{

@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 namespace JPB.DataAccess.Manager
 {
 	/// <summary>
@@ -52,6 +51,6 @@ namespace JPB.DataAccess.Manager
 		///     Defines the MsSQL Type as a Target database
 		///     Not Tested
 		/// </summary>
-		SqLite
+		SqLite,
 	}
 }

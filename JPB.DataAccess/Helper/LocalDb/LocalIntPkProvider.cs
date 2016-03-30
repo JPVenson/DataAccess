@@ -5,13 +5,12 @@ using JPB.DataAccess.Contacts;
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
+	/// 
 	/// </summary>
 	public class LocalIntPkProvider : ILocalPrimaryKeyValueProvider
 	{
-		private volatile int _counter = 1;
-
 		/// <summary>
-		///     Default primary key generation starts with 1 incriments by 1
+		/// Default primary key generation starts with 1 incriments by 1
 		/// </summary>
 		public LocalIntPkProvider()
 		{
@@ -28,7 +27,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		public int Seed { get; private set; }
-		public int Incriment { get; }
+		public int Incriment { get; private set; }
+
+		private volatile int _counter = 1;
 
 		public Type GeneratingType
 		{
@@ -52,7 +53,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public bool Equals(object x, object y)
 		{
-			return (int) x == (int) y;
+			return (int)x == (int)y;
 		}
 
 		public int GetHashCode(object obj)

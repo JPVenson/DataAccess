@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Data;
 using System.Data.Odbc;
@@ -15,7 +14,7 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.AdoWrapper.OdbcProvider
+namespace JPB.DataAccess.AdoWrapper.Odbc
 {
 	public class Obdc : IDatabaseStrategy
 	{
@@ -84,7 +83,7 @@ namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 			var oleDbCommand = new OdbcCommand(strSql,
 				(OdbcConnection) (conn is OdbcConnection ? conn : CreateConnection()));
 
-			foreach (var dbDataParameter in fields)
+			foreach (IDataParameter dbDataParameter in fields)
 			{
 				oleDbCommand.Parameters.AddWithValue(dbDataParameter.ParameterName, dbDataParameter.Value);
 			}

@@ -1,6 +1,10 @@
-﻿using System;
+﻿using JPB.DataAccess.Contacts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Globalization;
-using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper
 {
@@ -8,16 +12,19 @@ namespace JPB.DataAccess.Helper
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			if (targetType.IsEnum)
+			if(targetType.IsEnum)
 			{
 				return Enum.ToObject(targetType, value);
 			}
-			throw new InvalidCastException("No enum member Provided");
+			else
+			{
+				throw new InvalidCastException("No enum member Provided");
+			}
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return (int) value;
+			return (int)value;
 		}
 	}
 }

@@ -4,6 +4,7 @@ using JPB.DataAccess.Contacts;
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
+	/// 
 	/// </summary>
 	public class LocalGuidPkProvider : ILocalPrimaryKeyValueProvider
 	{
@@ -29,7 +30,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public bool Equals(object x, object y)
 		{
-			return (Guid) x == (Guid) y;
+			return (Guid)x == (Guid)y;
 		}
 
 		public int GetHashCode(object obj)

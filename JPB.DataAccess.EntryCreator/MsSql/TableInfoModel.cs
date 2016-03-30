@@ -15,6 +15,7 @@ using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 using System.Data;
+using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {

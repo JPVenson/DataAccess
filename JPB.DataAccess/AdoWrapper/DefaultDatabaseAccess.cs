@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -29,108 +28,6 @@ namespace JPB.DataAccess.AdoWrapper
 		private volatile int _handlecounter;
 		private IDatabaseStrategy _strategy;
 		private IDbTransaction _trans;
-
-		~DefaultDatabaseAccess()
-		{
-			Dispose(false);
-		}
-
-		private void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				if (GetConnection() != null)
-				{
-					_conn2.Dispose();
-					_conn2 = null;
-				}
-			}
-		}
-
-		public static DefaultDatabaseAccess Create(IDatabaseStrategy strategy)
-		{
-			if (null == strategy)
-				return null;
-
-			var db = new DefaultDatabaseAccess();
-			db.Attach(strategy);
-			return db;
-		}
-
-		private int DoExecuteNonQuery(string strSql)
-		{
-			if (null == GetConnection())
-				throw new Exception("DB2.ExecuteNonQuery: void connection");
-
-			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-			{
-				if (_trans != null)
-					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
-
-				return cmd.ExecuteNonQuery();
-			}
-		}
-
-		private int DoExecuteNonQuery(string strSql, params object[] param)
-		{
-			if (null == GetConnection())
-				throw new Exception("DB2.ExecuteNonQuery: void connection");
-			var counter = 0;
-			using (var cmd = _strategy.CreateCommand(strSql,
-				GetConnection(),
-				param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
-			{
-				if (_trans != null)
-					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
-
-				return cmd.ExecuteNonQuery();
-			}
-		}
-
-		private IDataReader DoGetDataReader(string strSql)
-		{
-			if (null == GetConnection()) throw new Exception("DB2.GetDataReader: void connection");
-
-			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-			{
-				if (_trans != null)
-					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
-				return cmd.ExecuteReader();
-			}
-		}
-
-		private object DoGetSkalar(string strSql)
-		{
-			if (null == GetConnection()) throw new Exception("DB2.GetSkalar: void connection");
-
-			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-			{
-				if (_trans != null)
-					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
-				return cmd.ExecuteScalar();
-			}
-		}
-
-		public void OpenAndCloseDatabase()
-		{
-			Connect();
-			CloseConnection();
-		}
-
-		public static object DBCAST(IDataRecord dr, string strFieldName, object objFallThru)
-		{
-			var obj = dr[strFieldName];
-			return null == obj || obj is DBNull ? objFallThru : obj;
-		}
-
-		public static object DBCAST(object obj, object objFallThru)
-		{
-			return null == obj || obj is DBNull ? objFallThru : obj;
-		}
 
 		#region IDatabase Members
 
@@ -173,17 +70,17 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public bool IsAttached
 		{
-			get { return _strategy != null; }
+			get { return (_strategy != null); }
 		}
 
 		public string ConnectionString
 		{
-			get { return null == _strategy ? null : _strategy.ConnectionString; }
+			get { return (null == _strategy) ? null : _strategy.ConnectionString; }
 		}
 
 		public string DatabaseFile
 		{
-			get { return null == _strategy ? null : _strategy.DatabaseFile; }
+			get { return (null == _strategy) ? null : _strategy.DatabaseFile; }
 		}
 
 		public string DatabaseName
@@ -193,7 +90,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public string ServerName
 		{
-			get { return null == _strategy ? string.Empty : _strategy.ServerName; }
+			get { return (null == _strategy) ? String.Empty : _strategy.ServerName; }
 		}
 
 		public IDbConnection GetConnection()
@@ -330,7 +227,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public IDataReader GetDataReader(string strSql, params object[] obj)
 		{
-			return DoGetDataReader(string.Format(strSql, obj));
+			return DoGetDataReader(String.Format(strSql, obj));
 		}
 
 		public object GetSkalar(IDbCommand cmd)
@@ -343,7 +240,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public object GetSkalar(string strSql, params object[] obj)
 		{
-			return DoGetSkalar(string.Format(strSql, obj));
+			return DoGetSkalar(String.Format(strSql, obj));
 		}
 
 		public DataTable GetDataTable(string name, string strSql)
@@ -386,7 +283,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDatabase Clone()
 		{
 			var db = new DefaultDatabaseAccess();
-			db.Attach((IDatabaseStrategy) _strategy.Clone());
+			db.Attach((IDatabaseStrategy)_strategy.Clone());
 			return db;
 		}
 
@@ -457,7 +354,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public void RunInTransaction(Action<IDatabase> action)
 		{
-			RunInTransaction(action, IsolationLevel.ReadUncommitted);
+			this.RunInTransaction(action, IsolationLevel.ReadUncommitted);
 		}
 
 		public void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction)
@@ -652,7 +549,7 @@ namespace JPB.DataAccess.AdoWrapper
 				{
 					index += 1;
 					rotate += 1;
-					if (rotate == iPageSize - 1)
+					if (rotate == (iPageSize - 1))
 						rotate = -1;
 
 					try
@@ -684,5 +581,107 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		#endregion QueryCommand Helper
+
+		~DefaultDatabaseAccess()
+		{
+			Dispose(false);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (GetConnection() != null)
+				{
+					_conn2.Dispose();
+					_conn2 = null;
+				}
+			}
+		}
+
+		public static DefaultDatabaseAccess Create(IDatabaseStrategy strategy)
+		{
+			if (null == strategy)
+				return null;
+
+			var db = new DefaultDatabaseAccess();
+			db.Attach(strategy);
+			return db;
+		}
+
+		private int DoExecuteNonQuery(string strSql)
+		{
+			if (null == GetConnection())
+				throw new Exception("DB2.ExecuteNonQuery: void connection");
+
+			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
+			{
+				if (_trans != null)
+					cmd.Transaction = _trans;
+				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+
+				return cmd.ExecuteNonQuery();
+			}
+		}
+
+		private int DoExecuteNonQuery(string strSql, params object[] param)
+		{
+			if (null == GetConnection())
+				throw new Exception("DB2.ExecuteNonQuery: void connection");
+			var counter = 0;
+			using (var cmd = _strategy.CreateCommand(strSql,
+				GetConnection(),
+				param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
+			{
+				if (_trans != null)
+					cmd.Transaction = _trans;
+				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+
+				return cmd.ExecuteNonQuery();
+			}
+		}
+
+		private IDataReader DoGetDataReader(string strSql)
+		{
+			if (null == GetConnection()) throw new Exception("DB2.GetDataReader: void connection");
+
+			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
+			{
+				if (_trans != null)
+					cmd.Transaction = _trans;
+				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+				return cmd.ExecuteReader();
+			}
+		}
+
+		private object DoGetSkalar(string strSql)
+		{
+			if (null == GetConnection()) throw new Exception("DB2.GetSkalar: void connection");
+
+			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
+			{
+				if (_trans != null)
+					cmd.Transaction = _trans;
+				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+				return cmd.ExecuteScalar();
+			}
+		}
+
+		public void OpenAndCloseDatabase()
+		{
+			Connect();
+			CloseConnection();
+		}
+
+		public static object DBCAST(IDataRecord dr, string strFieldName, object objFallThru)
+		{
+			var obj = dr[strFieldName];
+			return (null == obj || obj is DBNull) ? objFallThru : obj;
+		}
+
+		public static object DBCAST(object obj, object objFallThru)
+		{
+			return (null == obj || obj is DBNull) ? objFallThru : obj;
+		}
 	}
 }

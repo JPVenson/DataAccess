@@ -6,18 +6,18 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using JPB.DataAccess.DebuggerHelper;
 
 namespace JPB.DataAccess.DbEventArgs
 {
 	/// <summary>
-	///     Wraps an Event raised by the DbAccessLayer
+	/// Wraps an Event raised by the DbAccessLayer
 	/// </summary>
 	public class DatabaseActionEvent : EventArgs
 	{
 		/// <summary>
+		/// 
 		/// </summary>
 		/// <param name="queryDebugger"></param>
 		public DatabaseActionEvent(QueryDebugger queryDebugger)
@@ -26,7 +26,7 @@ namespace JPB.DataAccess.DbEventArgs
 		}
 
 		/// <summary>
-		///     If enabled the QueryDebugger that contains the QueryCommand
+		/// If enabled the QueryDebugger that contains the QueryCommand
 		/// </summary>
 		public QueryDebugger QueryDebugger { get; private set; }
 	}

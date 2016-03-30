@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -64,8 +63,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		}
 
 		/// <summary>
-		///     When set to true the QueryCommand debugger creates an own instance the the Default database connection assumd by
-		///     the type
+		///     When set to true the QueryCommand debugger creates an own instance the the Default database connection assumd by the type
 		///     of the IDbCommand it contains
 		/// </summary>
 		public static IDatabaseStrategy UseDefaultDatabase { get; set; }
@@ -73,12 +71,12 @@ namespace JPB.DataAccess.DebuggerHelper
 		/// <summary>
 		///     Stores the exact executed query
 		/// </summary>
-		public string DebuggerQuery { get; }
+		public string DebuggerQuery { get; private set; }
 
 		/// <summary>
 		///     Provieds a Instant to use SQL query that Contains all Variables and querys
 		/// </summary>
-		public string SqlQuery { get; }
+		public string SqlQuery { get; private set; }
 
 		/// <summary>
 		///     Blocking if Stack Trace is not created
@@ -160,7 +158,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public static string ParameterValue(IDataParameter sp)
+		public static String ParameterValue(IDataParameter sp)
 		{
 			var retval = "";
 
@@ -182,7 +180,7 @@ namespace JPB.DataAccess.DebuggerHelper
 					break;
 
 				case DbType.Boolean:
-					retval = sp.Value is bool && (bool) sp.Value ? "1" : "0";
+					retval = (sp.Value is bool && (bool) sp.Value) ? "1" : "0";
 					break;
 
 				default:

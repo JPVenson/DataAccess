@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -26,7 +25,7 @@ namespace JPB.DataAccess.Manager
 		public static Dictionary<Type, DbType> DbTypeMap;
 
 		/// <summary>
-		///     Map an SourceDbType to the proper C# mscore lib type
+		/// Map an SourceDbType to the proper C# mscore lib type
 		/// </summary>
 		/// <param name="source"></param>
 		/// <returns></returns>
@@ -34,9 +33,8 @@ namespace JPB.DataAccess.Manager
 		{
 			return DbTypeMap.FirstOrDefault(s => s.Value == source).Key;
 		}
-
 		/// <summary>
-		///     Map an C# mscore lib type to the proper SourceDbType
+		/// Map an C# mscore lib type to the proper SourceDbType
 		/// </summary>
 		/// <param name="source"></param>
 		/// <returns></returns>
@@ -54,41 +52,41 @@ namespace JPB.DataAccess.Manager
 			//not that cool maybe move this to another place or using the exisiting mehtods
 			DbTypeMap = new Dictionary<Type, DbType>();
 
-			DbTypeMap[typeof (byte)] = DbType.Byte;
-			DbTypeMap[typeof (sbyte)] = DbType.SByte;
-			DbTypeMap[typeof (short)] = DbType.Int16;
-			DbTypeMap[typeof (ushort)] = DbType.UInt16;
-			DbTypeMap[typeof (int)] = DbType.Int32;
-			DbTypeMap[typeof (uint)] = DbType.UInt32;
-			DbTypeMap[typeof (long)] = DbType.Int64;
-			DbTypeMap[typeof (ulong)] = DbType.UInt64;
-			DbTypeMap[typeof (float)] = DbType.Single;
-			DbTypeMap[typeof (double)] = DbType.Double;
-			DbTypeMap[typeof (decimal)] = DbType.Decimal;
-			DbTypeMap[typeof (bool)] = DbType.Boolean;
-			DbTypeMap[typeof (string)] = DbType.String;
-			DbTypeMap[typeof (char)] = DbType.StringFixedLength;
-			DbTypeMap[typeof (Guid)] = DbType.Guid;
-			DbTypeMap[typeof (DateTime)] = DbType.DateTime;
-			DbTypeMap[typeof (DateTimeOffset)] = DbType.DateTimeOffset;
+			DbTypeMap[typeof(byte)] = DbType.Byte;
+			DbTypeMap[typeof(sbyte)] = DbType.SByte;
+			DbTypeMap[typeof(short)] = DbType.Int16;
+			DbTypeMap[typeof(ushort)] = DbType.UInt16;
+			DbTypeMap[typeof(int)] = DbType.Int32;
+			DbTypeMap[typeof(uint)] = DbType.UInt32;
+			DbTypeMap[typeof(long)] = DbType.Int64;
+			DbTypeMap[typeof(ulong)] = DbType.UInt64;
+			DbTypeMap[typeof(float)] = DbType.Single;
+			DbTypeMap[typeof(double)] = DbType.Double;
+			DbTypeMap[typeof(decimal)] = DbType.Decimal;
+			DbTypeMap[typeof(bool)] = DbType.Boolean;
+			DbTypeMap[typeof(string)] = DbType.String;
+			DbTypeMap[typeof(char)] = DbType.StringFixedLength;
+			DbTypeMap[typeof(Guid)] = DbType.Guid;
+			DbTypeMap[typeof(DateTime)] = DbType.DateTime;
+			DbTypeMap[typeof(DateTimeOffset)] = DbType.DateTimeOffset;
 
-			DbTypeMap[typeof (byte[])] = DbType.Binary;
-			DbTypeMap[typeof (byte?)] = DbType.Byte;
-			DbTypeMap[typeof (sbyte?)] = DbType.SByte;
-			DbTypeMap[typeof (short?)] = DbType.Int16;
-			DbTypeMap[typeof (ushort?)] = DbType.UInt16;
-			DbTypeMap[typeof (int?)] = DbType.Int32;
-			DbTypeMap[typeof (uint?)] = DbType.UInt32;
-			DbTypeMap[typeof (long?)] = DbType.Int64;
-			DbTypeMap[typeof (ulong?)] = DbType.UInt64;
-			DbTypeMap[typeof (float?)] = DbType.Single;
-			DbTypeMap[typeof (double?)] = DbType.Double;
-			DbTypeMap[typeof (decimal?)] = DbType.Decimal;
-			DbTypeMap[typeof (bool?)] = DbType.Boolean;
-			DbTypeMap[typeof (char?)] = DbType.StringFixedLength;
-			DbTypeMap[typeof (Guid?)] = DbType.Guid;
-			DbTypeMap[typeof (DateTime?)] = DbType.DateTime;
-			DbTypeMap[typeof (DateTimeOffset?)] = DbType.DateTimeOffset;
+			DbTypeMap[typeof(byte[])] = DbType.Binary;
+			DbTypeMap[typeof(byte?)] = DbType.Byte;
+			DbTypeMap[typeof(sbyte?)] = DbType.SByte;
+			DbTypeMap[typeof(short?)] = DbType.Int16;
+			DbTypeMap[typeof(ushort?)] = DbType.UInt16;
+			DbTypeMap[typeof(int?)] = DbType.Int32;
+			DbTypeMap[typeof(uint?)] = DbType.UInt32;
+			DbTypeMap[typeof(long?)] = DbType.Int64;
+			DbTypeMap[typeof(ulong?)] = DbType.UInt64;
+			DbTypeMap[typeof(float?)] = DbType.Single;
+			DbTypeMap[typeof(double?)] = DbType.Double;
+			DbTypeMap[typeof(decimal?)] = DbType.Decimal;
+			DbTypeMap[typeof(bool?)] = DbType.Boolean;
+			DbTypeMap[typeof(char?)] = DbType.StringFixedLength;
+			DbTypeMap[typeof(Guid?)] = DbType.Guid;
+			DbTypeMap[typeof(DateTime?)] = DbType.DateTime;
+			DbTypeMap[typeof(DateTimeOffset?)] = DbType.DateTimeOffset;
 		}
 
 		/// <summary>
@@ -97,7 +95,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void ExecuteProcedureNonResult<T>(T procParam)
 		{
-			ExecuteProcedureNonResult(typeof (T), procParam);
+			ExecuteProcedureNonResult(typeof(T), procParam);
 		}
 
 		/// <summary>
@@ -116,7 +114,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="TE">The result</typeparam>
 		public List<TE> ExecuteProcedure<T, TE>(T procParam)
 		{
-			return ExecuteProcedure(typeof (T), typeof (TE), procParam).Cast<TE>().ToList();
+			return ExecuteProcedure(typeof(T), typeof(TE), procParam).Cast<TE>().ToList();
 		}
 
 		/// <summary>
@@ -190,7 +188,7 @@ namespace JPB.DataAccess.Manager
 				QueryParameters = new List<IQueryParameter>();
 			}
 
-			public string Query { get; }
+			public string Query { get; private set; }
 			public IEnumerable<IQueryParameter> QueryParameters { get; set; }
 
 			public DbClassInfoCache TargetType { set; get; }

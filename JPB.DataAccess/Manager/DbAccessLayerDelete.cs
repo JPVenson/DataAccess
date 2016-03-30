@@ -6,12 +6,12 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Data;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Manager
 {
@@ -31,13 +31,11 @@ namespace JPB.DataAccess.Manager
 		internal IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry, IDatabase db)
 		{
 			if (classInfo.PrimaryKeyProperty == null)
-				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported",
-					classInfo.ClassName));
+				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.ClassName));
 
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
-			return db.CreateCommandWithParameterValues(query,
-				new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
+			return db.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
 		}
 
 		/// <summary>

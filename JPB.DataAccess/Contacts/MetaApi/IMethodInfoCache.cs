@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace JPB.DataAccess.Contacts.MetaApi
 {
-	public interface IMethodInfoCache<TAtt, TArg> :
+	public interface IMethodInfoCache<TAtt, TArg> : 
 		IComparable<IMethodInfoCache<TAtt, TArg>>,
 		IEquatable<IMethodInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new()
@@ -40,12 +40,12 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		HashSet<TAtt> Attributes { get; }
 
 		/// <summary>
-		///     Arguments for this Method
+		/// Arguments for this Method
 		/// </summary>
 		HashSet<TArg> Arguments { get; }
 
 		/// <summary>
-		///     When set to true, an IL Wrapper is used inside the Invoke method
+		/// When set to true, an IL Wrapper is used inside the Invoke method
 		/// </summary>
 		bool UseILWrapper { get; set; }
 

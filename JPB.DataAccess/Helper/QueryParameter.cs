@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Data;
 using JPB.DataAccess.Contacts;
@@ -19,42 +18,8 @@ namespace JPB.DataAccess.Helper
 	/// </summary>
 	public class QueryParameter : IQueryParameter
 	{
-		private Type m_sourceType;
 		private object m_value;
-
-		/// <summary>
-		///     Renders the current object
-		/// </summary>
-		/// <returns></returns>
-		public string Render()
-		{
-			var sb = new StringBuilderInterlaced();
-			Render(sb);
-			return sb.ToString();
-		}
-
-		internal void Render(StringBuilderInterlaced sb)
-		{
-			var value = "{Null}";
-			if (Value != null)
-			{
-				value = Value.ToString();
-			}
-			sb.AppendInterlacedLine("neq QueryParameter {")
-				.Up()
-				.AppendInterlacedLine("Name = {0},", Name)
-				.AppendInterlacedLine("Value.ToString = {0}", value)
-				.AppendInterlacedLine("SourceType = {0}", SourceType.ToString())
-				.AppendInterlacedLine("SourceDbType = {0}", SourceDbType)
-				.Down()
-				.AppendInterlaced("}");
-		}
-
-		public override string ToString()
-		{
-			return Render();
-		}
-
+		private Type m_sourceType;
 		// ReSharper disable CSharpWarnings::CS1591
 		private QueryParameter()
 		{
@@ -110,5 +75,38 @@ namespace JPB.DataAccess.Helper
 		#endregion
 
 		// ReSharper restore CSharpWarnings::CS1591
+
+		/// <summary>
+		///     Renders the current object
+		/// </summary>
+		/// <returns></returns>
+		public string Render()
+		{
+			var sb = new StringBuilderInterlaced();
+			Render(sb);
+			return sb.ToString();
+		}
+
+		internal void Render(StringBuilderInterlaced sb)
+		{
+			var value = "{Null}";
+			if (Value != null)
+			{
+				value = Value.ToString();
+			}
+			sb.AppendInterlacedLine("neq QueryParameter {")
+				.Up()
+				.AppendInterlacedLine("Name = {0},", Name)
+				.AppendInterlacedLine("Value.ToString = {0}", value)
+				.AppendInterlacedLine("SourceType = {0}", SourceType.ToString())
+				.AppendInterlacedLine("SourceDbType = {0}", SourceDbType)
+				.Down()
+				.AppendInterlaced("}");
+		}
+
+		public override string ToString()
+		{
+			return Render();
+		}
 	}
 }

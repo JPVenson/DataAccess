@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
@@ -14,11 +13,9 @@ using JPB.DataAccess.MetaApi;
 namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
+	/// 
 	/// </summary>
-	public class DbConfig :
-		MetaInfoStore
-			<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache,
-				DbMethodArgument>
+	public class DbConfig : MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
 		static DbConfig()
 		{
@@ -39,7 +36,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			return val;
 		}
 
-		public DbClassInfoCache GetOrCreateClassInfoCache(string type)
+		public new DbClassInfoCache GetOrCreateClassInfoCache(string type)
 		{
 			bool isNewCreated;
 			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
@@ -54,8 +51,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <typeparam name="T"></typeparam>
 		public void SetConfig<T>(Action<ConfigurationResolver<T>> validator)
 		{
-			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof (T))));
-			var model = GetOrCreateClassInfoCache(typeof (T));
+			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof(T))));
+			var model = GetOrCreateClassInfoCache(typeof(T));
 			model.Refresh(true);
 			model.CheckCtor();
 		}
@@ -71,7 +68,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <returns></returns>
 		public new virtual DbConfig Include<T>()
 		{
-			return Include(typeof (T));
+			return this.Include(typeof(T));
 		}
 
 		/// <summary>

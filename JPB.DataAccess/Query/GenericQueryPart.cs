@@ -64,8 +64,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and
-		///     parameter
+		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and parameter
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
@@ -101,7 +100,7 @@ namespace JPB.DataAccess.Query
 			{
 				sb.AppendInterlacedLine("{")
 					.Up();
-				foreach (var queryParameter in QueryParameters.Cast<QueryParameter>())
+				foreach (QueryParameter queryParameter in QueryParameters.Cast<QueryParameter>())
 				{
 					queryParameter.Render(sb);
 					sb.AppendLine(",");

@@ -6,10 +6,10 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.MetaApi.Model;
@@ -31,15 +31,14 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			{
 				Setter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) =>
 				{
-					setter((T) o, (TE) objects[0]);
+					setter((T)o, (TE)objects[0]);
 					return null;
 				});
 			}
 
 			if (getter != null)
 			{
-				Getter =
-					new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) => getter((T) o));
+				Getter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) => getter((T)o));
 			}
 		}
 	}
@@ -52,12 +51,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 #if !DEBUG
 		[DebuggerHidden]
 #endif
-
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public DbPropertyInfoCache()
 		{
-			Attributes = new HashSet<DbAttributeInfoCache>();
+			base.Attributes = new HashSet<DbAttributeInfoCache>();
 		}
 
 		/// <summary>
@@ -81,7 +79,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		//}
 
 		/// <summary>
-		///     The class that owns this Property
+		///		The class that owns this Property
 		/// </summary>
 		public DbClassInfoCache DeclaringClass { get; protected internal set; }
 
@@ -98,8 +96,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		///     if known the ForXml attribute
 		/// </summary>
-		public DbAttributeInfoCache<ForeignKeyDeclarationAttribute> ForginKeyDeclarationAttribute { get;
-			protected internal set; }
+		public DbAttributeInfoCache<ForeignKeyDeclarationAttribute> ForginKeyDeclarationAttribute { get; protected internal set; }
 
 		/// <summary>
 		///     Should this property not be inserterd
@@ -128,17 +125,17 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		}
 
 		/// <summary>
-		///     if known the RowVersion Attribute
+		///		if known the RowVersion Attribute
 		/// </summary>
 		public DbAttributeInfoCache<RowVersionAttribute> RowVersionAttribute { get; private set; }
 
 		/// <summary>
-		///     if knwon the PrimaryKey Attribute
+		///		if knwon the PrimaryKey Attribute
 		/// </summary>
 		public DbAttributeInfoCache<PrimaryKeyAttribute> PrimaryKeyAttribute { get; private set; }
 
 		/// <summary>
-		///     if knwon the Ignore Reflection Attribute
+		///		if knwon the Ignore Reflection Attribute
 		/// </summary>
 		public DbAttributeInfoCache<IgnoreReflectionAttribute> IgnoreAnyAttribute { get; private set; }
 
@@ -147,9 +144,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// </summary>
 		public void Refresh()
 		{
-			PrimaryKeyAttribute =
-				DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof (PrimaryKeyAttribute)));
+			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(PrimaryKeyAttribute)));
 			InsertIgnore = Attributes.Any(f => f.Attribute is InsertIgnoreAttribute);
 			if (Getter != null && Getter.MethodInfo != null)
 			{
@@ -157,7 +152,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 				{
 					ForginKeyAttribute =
 						DbAttributeInfoCache<ForeignKeyAttribute>.WrapperOrNull(
-							Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof (ForeignKeyAttribute)));
+							Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyAttribute)));
 				}
 				else
 				{
@@ -167,18 +162,10 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			RowVersionAttribute =
 				DbAttributeInfoCache<RowVersionAttribute>.WrapperOrNull(
 					Attributes.FirstOrDefault(s => s.Attribute is RowVersionAttribute));
-			FromXmlAttribute =
-				DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof (FromXmlAttribute)));
-			ForModelAttribute =
-				DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof (ForModelAttribute)));
-			IgnoreAnyAttribute =
-				DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof (IgnoreReflectionAttribute)));
-			ForginKeyDeclarationAttribute =
-				DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof (ForeignKeyDeclarationAttribute)));
+			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(FromXmlAttribute)));
+			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
+			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
+			ForginKeyDeclarationAttribute = DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyDeclarationAttribute)));
 		}
 
 		//internal static PropertyInfoCache Logical(string info)

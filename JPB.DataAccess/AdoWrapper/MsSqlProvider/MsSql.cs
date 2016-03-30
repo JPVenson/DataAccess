@@ -22,25 +22,27 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		private const string TEMPLATE_MSSQL_TRUSTED =
 			"server={0};database={1};Connect Timeout=100;Min Pool Size=5;trusted_connection=true";
 
+		private string _connStr = string.Empty;
+
 		public MsSql(string strServer, string strDatabase)
 		{
-			ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
+			_connStr = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
 		}
 
 		public MsSql(string strServer, string strDatabase, string strLogin, string strPassword)
 		{
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
-				ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
+				_connStr = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
 			else
 			{
-				ConnectionString = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
+				_connStr = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
 					strLogin.Trim(), strPassword.Trim());
 			}
 		}
 
 		public MsSql(string strConnStr)
 		{
-			ConnectionString = strConnStr;
+			_connStr = strConnStr;
 		}
 
 		#region IDatabaseStrategy Members
@@ -50,7 +52,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			get { return DbAccessType.MsSql; }
 		}
 
-		public string ConnectionString { get; set; } = string.Empty;
+		public string ConnectionString
+		{
+			get { return _connStr; }
+			set { _connStr = value; }
+		}
 
 		public string DatabaseFile
 		{
@@ -68,7 +74,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 		public IDbConnection CreateConnection()
 		{
-			var sqlConnection = new SqlConnection(ConnectionString);
+			var sqlConnection = new SqlConnection(_connStr);
 			return sqlConnection;
 		}
 
@@ -83,7 +89,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		{
 			var cmd = (SqlCommand) CreateCommand(strSql, conn);
 
-			foreach (var dataParameter in fields)
+			foreach (IDataParameter dataParameter in fields)
 			{
 				cmd.Parameters.AddWithValue(dataParameter.ParameterName, dataParameter.Value);
 			}
@@ -147,7 +153,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 		public object Clone()
 		{
-			return new MsSql(ConnectionString);
+			return new MsSql(_connStr);
 		}
 
 		public void CompactDatabase(string strSource, string strDest)
@@ -193,7 +199,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				dt.Hour, dt.Minute, dt.Second);
 		}
 
-		public string[] GetTables(IDbConnection conn, string strFilter)
+		public string[] GetTables(IDbConnection conn, String strFilter)
 		{
 			const string sql = "select NAME from SYSOBJECTS where TYPE = 'U' AND NAME <> 'dtproperties' order by NAME";
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
@@ -221,43 +227,43 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
-		public int DropTable(IDbConnection conn, string strTableName)
+		public int DropTable(IDbConnection conn, String strTableName)
 		{
-			var sql = string.Format("DROP TABLE {0}", strTableName);
+			var sql = String.Format("DROP TABLE {0}", strTableName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 				return cmd.ExecuteNonQuery();
 		}
 
-		public string GetViewsSql(string strName)
+		public string GetViewsSql(String strName)
 		{
 			return string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
 		}
 
-		public string GetStoredProcedureSql(string strName)
+		public string GetStoredProcedureSql(String strName)
 		{
 			return string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
 		}
 
-		public bool SupportsView(IDbConnection conn, string strName)
+		public bool SupportsView(IDbConnection conn, String strName)
 		{
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 			using (IDataReader dr = cmd.ExecuteReader())
-				return dr.Read();
+				return (dr.Read());
 		}
 
-		public bool SupportsStoredProcedure(IDbConnection conn, string strName)
+		public bool SupportsStoredProcedure(IDbConnection conn, String strName)
 		{
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 			using (IDataReader dr = cmd.ExecuteReader())
-				return dr.Read();
+				return (dr.Read());
 		}
 
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public static string CommandAsMsSql(IDbCommand sc)
+		public static String CommandAsMsSql(IDbCommand sc)
 		{
 			if (!(sc is SqlCommand))
 				return sc.CommandText;
@@ -273,23 +279,23 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				case CommandType.StoredProcedure:
 					sql.AppendLine("DECLARE @return_value int;");
 
-					foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+					foreach (SqlParameter sp in sc.Parameters.Cast<SqlParameter>())
 					{
 						if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
 						{
 							sql.Append("DECLARE " + sp.ParameterName + "\t" + sp.SqlDbType + "\t= ");
 
-							sql.AppendLine((sp.Direction == ParameterDirection.Output ? "NULL" : QueryDebugger.ParameterValue(sp)) + ";");
+							sql.AppendLine(((sp.Direction == ParameterDirection.Output) ? "NULL" : QueryDebugger.ParameterValue(sp)) + ";");
 						}
 					}
 
 					sql.AppendLine("EXEC [" + sc.CommandText + "]");
 
-					foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+					foreach (IDataParameter sp in sc.Parameters.Cast<IDataParameter>())
 					{
 						if (sp.Direction != ParameterDirection.ReturnValue)
 						{
-							sql.Append(firstParam ? "\t" : "\t, ");
+							sql.Append((firstParam) ? "\t" : "\t, ");
 
 							if (firstParam) firstParam = false;
 
@@ -304,7 +310,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 					sql.AppendLine("SELECT 'Return Value' = CONVERT(NVARCHAR, @return_value);");
 
-					foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+					foreach (IDataParameter sp in sc.Parameters.Cast<IDataParameter>())
 					{
 						if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
 						{
@@ -314,7 +320,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					break;
 				case CommandType.Text:
 				case CommandType.TableDirect:
-					foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+					foreach (SqlParameter sp in sc.Parameters.Cast<SqlParameter>())
 					{
 						var paramTypeCompiler = sp.SqlDbType.ToString().ToUpper();
 						if (sp.Size > 0)
@@ -335,7 +341,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			return sql.ToString();
 		}
 
-		public static string ParameterValue(SqlParameter sp)
+		public static String ParameterValue(SqlParameter sp)
 		{
 			var retval = "";
 
@@ -355,7 +361,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					break;
 
 				case SqlDbType.Bit:
-					retval = sp.Value is bool && (bool) sp.Value ? "1" : "0";
+					retval = (sp.Value is bool && (bool) sp.Value) ? "1" : "0";
 					break;
 
 				case SqlDbType.Binary:

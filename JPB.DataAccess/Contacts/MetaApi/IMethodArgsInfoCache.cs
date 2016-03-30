@@ -13,27 +13,26 @@ using System.Reflection;
 
 namespace JPB.DataAccess.Contacts.MetaApi
 {
-	public interface IMethodArgsInfoCache<TArg>
+	public interface IMethodArgsInfoCache<TArg> 
 		: IComparable<IMethodArgsInfoCache<TArg>>, IEquatable<IMethodArgsInfoCache<TArg>>
-		where TArg : class, IAttributeInfoCache, new()
+		where TArg: class, IAttributeInfoCache, new() 
 	{
 		/// <summary>
-		///     The name of this Param
+		/// The name of this Param
 		/// </summary>
 		string ArgumentName { get; }
-
 		/// <summary>
-		///     The type of this Param
+		/// The type of this Param
 		/// </summary>
 		Type Type { get; }
 
 		/// <summary>
-		///     All Attached Attributes
+		/// All Attached Attributes
 		/// </summary>
 		HashSet<TArg> Attributes { get; }
 
 		/// <summary>
-		///     Direct reflection
+		/// Direct reflection
 		/// </summary>
 		ParameterInfo ParameterInfo { get; }
 

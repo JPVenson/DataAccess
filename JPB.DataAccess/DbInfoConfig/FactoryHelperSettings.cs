@@ -6,7 +6,10 @@ namespace JPB.DataAccess.DbInfoConfig
 	/// </summary>
 	public class FactoryHelperSettings
 	{
-		private static readonly string[] _defaultNamespaces;
+		public FactoryHelperSettings()
+		{
+			HideSuperCreation = true;
+		}
 
 		static FactoryHelperSettings()
 		{
@@ -18,13 +21,8 @@ namespace JPB.DataAccess.DbInfoConfig
 				"System.Linq",
 				"System.Data",
 				"JPB.DataAccess.ModelsAnotations",
-				"JPB.DataAccess.AdoWrapper"
+				"JPB.DataAccess.AdoWrapper",
 			};
-		}
-
-		public FactoryHelperSettings()
-		{
-			HideSuperCreation = true;
 		}
 
 		/// <summary>
@@ -52,13 +50,14 @@ namespace JPB.DataAccess.DbInfoConfig
 		public bool CreateDebugCode { get; set; }
 
 		/// <summary>
-		///     When a Factory is create inside an dll the factory can be reused. Deactivate this during tests beacuse it can cause
-		///     problems.
+		/// When a Factory is create inside an dll the factory can be reused. Deactivate this during tests beacuse it can cause problems.
 		/// </summary>
 		public bool ReuseFactorys { get; set; }
 
+		private static readonly string[] _defaultNamespaces;
+
 		/// <summary>
-		///     A Collection that includes all Namespaces that are used by default to create new Factorys
+		/// A Collection that includes all Namespaces that are used by default to create new Factorys
 		/// </summary>
 		public IEnumerable<string> DefaultNamespaces
 		{

@@ -6,23 +6,22 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Helper
 {
 	/// <summary>
-	///     Compares 2 Pocos based on there PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey
-	///     attribute
-	///     When both of the instances are of the same reference: return true
-	///     When one of the instances is default(T): return false
-	///     When both of the instances Primary Key has the assertNotDatabaseMember: return false
-	///     When both of the instances Primary Key are Equals: return true
-	///     return false
+	/// Compares 2 Pocos based on there PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey attribute
+	/// When both of the instances are of the same reference: return true
+	/// When one of the instances is default(T): return false
+	/// When both of the instances Primary Key has the assertNotDatabaseMember: return false
+	/// When both of the instances Primary Key are Equals: return true
+	/// return false
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class PocoPkComparer<T>
@@ -31,20 +30,14 @@ namespace JPB.DataAccess.Helper
 	{
 		public static object DefaultAssertionObject;
 		public static bool DefaultRewrite;
-		private Func<T, T, bool> _assertionBlock;
-		private Func<T, T, int> _compareTo;
-		private Func<T, int> _getHashCodeOfProp;
-		private Func<T, T, bool> _propEqual;
-
-		private DbClassInfoCache _typeInfo;
-
-		internal ParameterExpression Left;
-		internal Expression PropLeft;
-		internal LabelTarget ReturnTarget;
-		internal ParameterExpression Right;
 
 		/// <summary>
-		///     New Instance of the Auto Equality Comparer with no assertion on its default value for an Primary key
+		/// When Equals is used the result is stored in this Property
+		/// </summary>
+		public T Value { get; private set; }
+
+		/// <summary>
+		/// New Instance of the Auto Equality Comparer with no assertion on its default value for an Primary key
 		/// </summary>
 		public PocoPkComparer()
 			: this(DefaultAssertionObject, DefaultAssertionObject != null)
@@ -52,69 +45,147 @@ namespace JPB.DataAccess.Helper
 		}
 
 		public PocoPkComparer(int assertNotDatabaseMember)
-			: this(assertNotDatabaseMember, true)
+			: this((object)assertNotDatabaseMember, true)
 		{
+
 		}
 
 		public PocoPkComparer(string assertNotDatabaseMember)
-			: this(assertNotDatabaseMember, true)
+			: this((object)assertNotDatabaseMember, true)
 		{
+
 		}
 
 
 		public PocoPkComparer(long assertNotDatabaseMember)
-			: this(assertNotDatabaseMember, true)
+			: this((object)assertNotDatabaseMember, true)
 		{
+
 		}
 
 		internal PocoPkComparer(object assertNotDatabaseMember, bool useAssertion = false, string propertyName = null)
 		{
-			if (assertNotDatabaseMember == null && DefaultAssertionObject != null)
+			if (assertNotDatabaseMember == null && PocoPkComparer<T>.DefaultAssertionObject != null)
 			{
-				assertNotDatabaseMember = DefaultAssertionObject;
+				assertNotDatabaseMember = PocoPkComparer<T>.DefaultAssertionObject;
 				useAssertion = true;
 			}
 			Init(assertNotDatabaseMember, useAssertion, propertyName);
 		}
 
-		/// <summary>
-		///     When Equals is used the result is stored in this Property
-		/// </summary>
-		public T Value { get; private set; }
-
-		/// <summary>
-		///     Checks if both arguments are ReferenceEquals
-		///     Checks if Left is null = 1
-		///     Checks if Right is null = -1
-		///     Calls the
-		/// </summary>
-		/// <param name="left"></param>
-		/// <param name="right"></param>
-		/// <returns></returns>
-		public int Compare(T left, T right)
+		internal static void Visit(ref Expression left, ref Expression right)
 		{
-			var leftNull = left == null;
-			var rightNull = right == null;
-			//generic Checks
-			if (ReferenceEquals(left, right))
-				return 0;
+			var leftTypeCode = Type.GetTypeCode(left.Type);
+			var rightTypeCode = Type.GetTypeCode(right.Type);
 
-			if (leftNull)
-				return 1;
-			if (rightNull)
-				return -1;
+			if (leftTypeCode == rightTypeCode)
+				return;
 
-			if (_compareTo == null)
-				throw new NotSupportedException(string.Format("The Primary key on object '{0}' does not implement IComparable",
-					_typeInfo.ClassName));
-			return _compareTo(left, right);
+			if (leftTypeCode > rightTypeCode)
+				right = Expression.Convert(right, left.Type);
+			else
+				left = Expression.Convert(left, right.Type);
 		}
 
+		private void Init(object assertNotDatabaseMember, bool useAssertion, string property = null)
+		{
+			var plainType = typeof(T);
+
+			_typeInfo = plainType.GetClassInfo();
+			if (_typeInfo.PrimaryKeyProperty == null && string.IsNullOrEmpty(property))
+				throw new NotSupportedException(string.Format("The type '{0}' does not define any PrimaryKey", plainType.Name));
+
+			if (string.IsNullOrEmpty(property))
+				property = _typeInfo.PrimaryKeyProperty.PropertyName;
+
+			ReturnTarget = Expression.Label(typeof(bool));
+			var returnTrue = Expression.Return(ReturnTarget, Expression.Constant(true));
+
+			Left = Expression.Parameter(plainType);
+			Right = Expression.Parameter(plainType);
+
+			//left or right property null
+			PropLeft = Expression.Property(Left, property);
+			var propRight = Expression.Property(Right, property);
+			ConditionalExpression resAssertionBlock = null;
+
+			if (useAssertion)
+			{
+				Expression assertionObject = Expression.Constant(assertNotDatabaseMember);
+				if (_typeInfo.PrimaryKeyProperty.PropertyType != assertNotDatabaseMember.GetType())
+				{
+					if (DefaultRewrite)
+					{
+						Visit(ref PropLeft, ref assertionObject);
+					}
+					else
+					{
+						throw new NotSupportedException(string.Format("Unknown Type cast detected." +
+																	  " Assert typ is '{0}' property is '{1}' " +
+																	  "... sry i am good but not as this good! Try the PocoPkComparer.DefaultRewrite option", assertNotDatabaseMember.GetType().Name, _typeInfo.PrimaryKeyProperty.PropertyType.Name));
+					}
+				}
+
+				var eqLeftPropEqualsAssertion = Expression.Equal(PropLeft, assertionObject);
+				var eqRightPropEqualsAssertion = Expression.Equal(propRight, assertionObject);
+				var resLeftAndRightEqualsAssertion = Expression.And(eqLeftPropEqualsAssertion, eqRightPropEqualsAssertion);
+				resAssertionBlock = Expression.IfThen(resLeftAndRightEqualsAssertion, returnTrue);
+			}
+
+			//equal
+			var eqPropertyEqual = Expression.Equal(PropLeft, propRight);
+
+			if (resAssertionBlock != null)
+			{
+				_assertionBlock = Wrap(resAssertionBlock);
+			}
+			_propEqual = Wrap(Expression.IfThen(eqPropertyEqual, returnTrue));
+
+			if (typeof(IComparable).IsAssignableFrom(typeof(T)))
+			{
+				var directComparsion = Expression.Call(Left, "CompareTo", null, Right);
+				_compareTo = Expression.Lambda<Func<T, T, int>>(directComparsion, new[] { Left, Right }).Compile();
+			}
+
+			var returnhasCode = Expression.Label(typeof(int));
+
+			var hashCode = Expression.Call(Left, "GetHashCode", null);
+			_getHashCodeOfProp = Expression.Lambda<Func<T, int>>(Expression.Block(
+				hashCode,
+				Expression.Label(returnhasCode, Expression.Constant(-1))
+				), new[]
+				{
+					Left
+				}).Compile();
+		}
+
+		internal ParameterExpression Left;
+		internal ParameterExpression Right;
+		internal Expression PropLeft;
+		internal LabelTarget ReturnTarget;
+
+		private Func<T, T, bool> Wrap(Expression exp)
+		{
+			return Expression.Lambda<Func<T, T, bool>>(Expression.Block(
+				exp,
+				Expression.Label(ReturnTarget, Expression.Constant(false))
+				), new[]
+				{
+					Left,Right
+				}).Compile();
+		}
+
+		private DbClassInfoCache _typeInfo;
+		private Func<T, T, bool> _assertionBlock;
+		private Func<T, T, bool> _propEqual;
+		private Func<T, T, int> _compareTo;
+		private Func<T, int> _getHashCodeOfProp;
+
 		/// <summary>
-		///     Checks if both have the same Reference.
-		///     Checks if any but not both of them are null.
-		///     Compares both Primary keys against the assertNotDatabaseMember Object
-		///     Compares both Primary key Propertys by using Equals
+		/// Checks if both have the same Reference.
+		/// Checks if any but not both of them are null.
+		/// Compares both Primary keys against the assertNotDatabaseMember Object
+		/// Compares both Primary key Propertys by using Equals
 		/// </summary>
 		/// <param name="left"></param>
 		/// <param name="right"></param>
@@ -150,7 +221,7 @@ namespace JPB.DataAccess.Helper
 		}
 
 		/// <summary>
-		///     Calls the GetHashCode function on the PrimaryKey
+		/// Calls the GetHashCode function on the PrimaryKey
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
@@ -159,96 +230,31 @@ namespace JPB.DataAccess.Helper
 			return _getHashCodeOfProp(obj);
 		}
 
-		internal static void Visit(ref Expression left, ref Expression right)
+		/// <summary>
+		/// Checks if both arguments are ReferenceEquals
+		/// Checks if Left is null = 1
+		/// Checks if Right is null = -1
+		/// Calls the 
+		/// </summary>
+		/// <param name="left"></param>
+		/// <param name="right"></param>
+		/// <returns></returns>
+		public int Compare(T left, T right)
 		{
-			var leftTypeCode = Type.GetTypeCode(left.Type);
-			var rightTypeCode = Type.GetTypeCode(right.Type);
+			var leftNull = left == null;
+			var rightNull = right == null;
+			//generic Checks
+			if (ReferenceEquals(left, right))
+				return 0;
 
-			if (leftTypeCode == rightTypeCode)
-				return;
+			if (leftNull)
+				return 1;
+			if (rightNull)
+				return -1;
 
-			if (leftTypeCode > rightTypeCode)
-				right = Expression.Convert(right, left.Type);
-			else
-				left = Expression.Convert(left, right.Type);
-		}
-
-		private void Init(object assertNotDatabaseMember, bool useAssertion, string property = null)
-		{
-			var plainType = typeof (T);
-
-			_typeInfo = plainType.GetClassInfo();
-			if (_typeInfo.PrimaryKeyProperty == null && string.IsNullOrEmpty(property))
-				throw new NotSupportedException(string.Format("The type '{0}' does not define any PrimaryKey", plainType.Name));
-
-			if (string.IsNullOrEmpty(property))
-				property = _typeInfo.PrimaryKeyProperty.PropertyName;
-
-			ReturnTarget = Expression.Label(typeof (bool));
-			var returnTrue = Expression.Return(ReturnTarget, Expression.Constant(true));
-
-			Left = Expression.Parameter(plainType);
-			Right = Expression.Parameter(plainType);
-
-			//left or right property null
-			PropLeft = Expression.Property(Left, property);
-			var propRight = Expression.Property(Right, property);
-			ConditionalExpression resAssertionBlock = null;
-
-			if (useAssertion)
-			{
-				Expression assertionObject = Expression.Constant(assertNotDatabaseMember);
-				if (_typeInfo.PrimaryKeyProperty.PropertyType != assertNotDatabaseMember.GetType())
-				{
-					if (DefaultRewrite)
-					{
-						Visit(ref PropLeft, ref assertionObject);
-					}
-					else
-					{
-						throw new NotSupportedException(string.Format("Unknown Type cast detected." +
-						                                              " Assert typ is '{0}' property is '{1}' " +
-						                                              "... sry i am good but not as this good! Try the PocoPkComparer.DefaultRewrite option",
-							assertNotDatabaseMember.GetType().Name, _typeInfo.PrimaryKeyProperty.PropertyType.Name));
-					}
-				}
-
-				var eqLeftPropEqualsAssertion = Expression.Equal(PropLeft, assertionObject);
-				var eqRightPropEqualsAssertion = Expression.Equal(propRight, assertionObject);
-				var resLeftAndRightEqualsAssertion = Expression.And(eqLeftPropEqualsAssertion, eqRightPropEqualsAssertion);
-				resAssertionBlock = Expression.IfThen(resLeftAndRightEqualsAssertion, returnTrue);
-			}
-
-			//equal
-			var eqPropertyEqual = Expression.Equal(PropLeft, propRight);
-
-			if (resAssertionBlock != null)
-			{
-				_assertionBlock = Wrap(resAssertionBlock);
-			}
-			_propEqual = Wrap(Expression.IfThen(eqPropertyEqual, returnTrue));
-
-			if (typeof (IComparable).IsAssignableFrom(typeof (T)))
-			{
-				var directComparsion = Expression.Call(Left, "CompareTo", null, Right);
-				_compareTo = Expression.Lambda<Func<T, T, int>>(directComparsion, Left, Right).Compile();
-			}
-
-			var returnhasCode = Expression.Label(typeof (int));
-
-			var hashCode = Expression.Call(Left, "GetHashCode", null);
-			_getHashCodeOfProp = Expression.Lambda<Func<T, int>>(Expression.Block(
-				hashCode,
-				Expression.Label(returnhasCode, Expression.Constant(-1))
-				), Left).Compile();
-		}
-
-		private Func<T, T, bool> Wrap(Expression exp)
-		{
-			return Expression.Lambda<Func<T, T, bool>>(Expression.Block(
-				exp,
-				Expression.Label(ReturnTarget, Expression.Constant(false))
-				), Left, Right).Compile();
+			if (_compareTo == null)
+				throw new NotSupportedException(string.Format("The Primary key on object '{0}' does not implement IComparable", this._typeInfo.ClassName));
+			return _compareTo(left, right);
 		}
 	}
 }

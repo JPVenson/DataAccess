@@ -6,13 +6,13 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 #if !DEBUG
 using System.Diagnostics;
 #endif
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -21,8 +21,7 @@ using JPB.DataAccess.Contacts.MetaApi;
 namespace JPB.DataAccess.MetaApi
 {
 	/// <summary>
-	///     Class info Storage. When this is a Global config store you should may never call the dispose method because it
-	///     would erase all knwon types
+	///     Class info Storage. When this is a Global config store you should may never call the dispose method because it would erase all knwon types
 	/// </summary>
 #if !DEBUG
 	[DebuggerStepThrough]
@@ -37,13 +36,12 @@ namespace JPB.DataAccess.MetaApi
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
 		/// <summary>
-		///     Is this instance mapped to the global Cache or does it only maintain its informations as long as it exists
+		/// Is this instance mapped to the global Cache or does it only maintain its informations as long as it exists
 		/// </summary>
-		public bool IsGlobal { get; }
+		public bool IsGlobal { get; private set; }
 
 		/// <summary>
-		///     Creates a new Instance for storing class informations. Allows you to define if this is ether the global config
-		///     store or a local one
+		/// Creates a new Instance for storing class informations. Allows you to define if this is ether the global config store or a local one
 		/// </summary>
 		public MetaInfoStore(bool isGlobal)
 		{
@@ -52,14 +50,16 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Creates a new Instance for accessing the Global Config store
+		/// Creates a new Instance for accessing the Global Config store
 		/// </summary>
 		public MetaInfoStore()
 			: this(true)
 		{
+
 		}
 
 		/// <summary>
+		/// 
 		/// </summary>
 		static MetaInfoStore()
 		{
@@ -80,7 +80,7 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Gloabel or local Cache
+		/// Gloabel or local Cache
 		/// </summary>
 		protected internal virtual HashSet<TClass> SClassInfoCaches
 		{
@@ -141,7 +141,7 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Gets an Cache object of exists or creats one
+		///		Gets an Cache object of exists or creats one
 		/// </summary>
 		/// <param name="typeName"></param>
 		/// <param name="newCreated"></param>
@@ -200,7 +200,7 @@ namespace JPB.DataAccess.MetaApi
 		/// <returns></returns>
 		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include<T>()
 		{
-			return Include(typeof (T));
+			return this.Include(typeof(T));
 		}
 
 		/// <summary>
@@ -223,7 +223,7 @@ namespace JPB.DataAccess.MetaApi
 		public static bool EnableGlobalThreadSafety { get; set; }
 
 		/// <summary>
-		///     if Enabled this can overwrite the EnableGlobalThreadSafety property
+		///		if Enabled this can overwrite the EnableGlobalThreadSafety property
 		/// </summary>
 		public bool EnableInstanceThreadSafety { get; set; }
 

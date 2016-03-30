@@ -7,7 +7,7 @@ namespace JPB.DataAccess.Query
 	public class QueryEnumerator<TE> : IEnumerable
 		where TE : IQueryElement
 	{
-		private readonly QueryBuilder<TE> _builder;
+		private QueryBuilder<TE> _builder;
 
 		public QueryEnumerator(QueryBuilder<TE> builder)
 		{
@@ -20,10 +20,10 @@ namespace JPB.DataAccess.Query
 		}
 	}
 
-	public class QueryEnumerator<TE, T> : IEnumerable<T>
+	public class QueryEnumerator<TE,T> : IEnumerable<T>
 		where TE : IQueryElement
 	{
-		private readonly QueryBuilder<T, TE> _builder;
+		private QueryBuilder<T, TE> _builder;
 
 		public QueryEnumerator(QueryBuilder<T, TE> builder)
 		{

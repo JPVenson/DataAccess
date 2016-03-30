@@ -6,7 +6,6 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-
 using System;
 using System.Text;
 
@@ -14,15 +13,16 @@ namespace JPB.DataAccess.Helper
 {
 	internal class StringBuilderInterlaced
 	{
-		private readonly uint _interlacedSpace = 4;
 		private readonly StringBuilder _source;
-		private readonly bool _transformInterlaced;
 		private int _interlacedLevel;
+		private readonly uint _interlacedSpace = 4;
+		private readonly bool _transformInterlaced;
 
 		/// <summary>
+		/// 
 		/// </summary>
-		/// <param name="transformInterlaced">If true an level will be displaced as <paramref name="intedtSize" /> spaces</param>
-		/// <param name="intedtSize">ammount of spaces for each level</param>
+		/// <param name="transformInterlaced">If true an level will be displaced as <paramref name="intedtSize"/> spaces</param>
+		/// <param name="intedtSize">ammount of spaces for each level</param> 
 		public StringBuilderInterlaced(bool transformInterlaced = false, uint intedtSize = 4)
 		{
 			_interlacedSpace = intedtSize;
