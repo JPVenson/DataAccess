@@ -21,14 +21,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// <typeparam name="T"></typeparam>
 	public abstract class LocalDbReposetory : ICollection
 	{
-		internal protected readonly object _lockRoot = new object();
-		internal protected readonly DbClassInfoCache TypeInfo;
-		internal protected readonly DbClassInfoCache TypeKeyInfo;
-		internal protected readonly DbAccessLayer _db;
-		internal protected readonly IDictionary<object, object> _base;
-		internal protected readonly LocalDbManager _databaseScope;
-		internal protected readonly ILocalPrimaryKeyValueProvider _keyGenerator;
-		internal protected readonly HashSet<ILocalDbConstraint> _constraints;
+		protected internal readonly object _lockRoot = new object();
+		protected internal readonly DbClassInfoCache TypeInfo;
+		protected internal readonly DbClassInfoCache TypeKeyInfo;
+		protected internal readonly DbAccessLayer _db;
+		protected internal readonly IDictionary<object, object> _base;
+		protected internal readonly LocalDbManager _databaseScope;
+		protected internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
+		protected internal readonly HashSet<ILocalDbConstraint> _constraints;
 
 		/// <summary>
 		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
