@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper.LocalDb
@@ -8,6 +9,26 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// </summary>
 	public class LocalIntPkProvider : ILocalPrimaryKeyValueProvider
 	{
+		/// <summary>
+		/// Default primary key generation starts with 1 incriments by 1
+		/// </summary>
+		public LocalIntPkProvider()
+		{
+			_counter = 1;
+			Seed = 1;
+			Incriment = 1;
+		}
+
+		public LocalIntPkProvider(int seed, int incriment)
+		{
+			_counter = seed;
+			Seed = seed;
+			Incriment = incriment;
+		}
+
+		public int Seed { get; private set; }
+		public int Incriment { get; private set; }
+
 		private volatile int _counter = 1;
 
 		public Type GeneratingType
@@ -17,7 +38,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public object GetNextValue()
 		{
-			return _counter++;
+			return Interlocked.Add(ref _counter, Incriment);
 		}
 
 		public object GetUninitilized()
