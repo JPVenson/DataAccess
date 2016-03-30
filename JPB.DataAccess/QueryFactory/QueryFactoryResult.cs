@@ -6,10 +6,9 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-using System;
+
 using System.Collections.Generic;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.Helper;
 using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.QueryFactory
@@ -51,11 +50,11 @@ namespace JPB.DataAccess.QueryFactory
 		/// <summary>
 		///     The SQL QueryCommand
 		/// </summary>
-		public string Query { get; private set; }
+		public string Query { get; }
 
 		/// <summary>
 		///     All used Parameters
 		/// </summary>
-		public IEnumerable<IQueryParameter> Parameters { get; private set; }
+		public IEnumerable<IQueryParameter> Parameters { get; }
 	}
 }

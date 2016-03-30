@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System.Collections;
 using System.Collections.Generic;
 
@@ -21,7 +22,7 @@ namespace JPB.DataAccess.Manager
 			{DbAccessType.MsSql, "JPB.DataAccess.AdoWrapper.MsSql.MsSql"},
 			{DbAccessType.OleDb, "JPB.DataAccess.AdoWrapper.OleDB.OleDb"},
 			{DbAccessType.Obdc, "JPB.DataAccess.AdoWrapper.Obdc.Obdc"},
-			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite"},
+			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite"}
 		};
 
 		public IEnumerator<KeyValuePair<DbAccessType, string>> GetEnumerator()

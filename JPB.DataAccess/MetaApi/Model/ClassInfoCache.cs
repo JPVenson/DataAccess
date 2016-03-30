@@ -6,15 +6,16 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model.Equatable;
-using System.Linq.Expressions;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
@@ -40,7 +41,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// For internal use Only
+		///     For internal use Only
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -49,11 +50,15 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected ClassInfoCache()
 		{
-
 		}
 
 		/// <summary>
-		/// For interal use Only
+		///     The default constructor that takes no arguments if known
+		/// </summary>
+		public dynamic DefaultFactory { get; protected internal set; }
+
+		/// <summary>
+		///     For interal use Only
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="anon"></param>
@@ -79,16 +84,16 @@ namespace JPB.DataAccess.MetaApi.Model
 				.Select(s => new TAttr().Init(s as Attribute) as TAttr));
 			Propertys = new Dictionary<string, TProp>(type
 				.GetProperties(BindingFlags.Public | BindingFlags.Static |
-		   BindingFlags.NonPublic | BindingFlags.Instance)
+				               BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TProp().Init(s, anon) as TProp)
 				.ToDictionary(s => s.PropertyName, s => s));
 			Mehtods = new HashSet<TMeth>(type
 				.GetMethods(BindingFlags.Public | BindingFlags.Static |
-		   BindingFlags.NonPublic | BindingFlags.Instance)
+				            BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TMeth().Init(s) as TMeth));
 			Constructors = new HashSet<TCtor>(type
 				.GetConstructors(BindingFlags.Public | BindingFlags.Static |
-		   BindingFlags.NonPublic | BindingFlags.Instance)
+				                 BindingFlags.NonPublic | BindingFlags.Instance)
 				.Select(s => new TCtor().Init(s) as TCtor));
 			var defaultConstructor = Constructors.FirstOrDefault(f => !f.Arguments.Any());
 
@@ -116,45 +121,30 @@ namespace JPB.DataAccess.MetaApi.Model
 				if (type.IsValueType)
 				{
 					defaultExpression = Expression.Default(type);
-
 				}
 				else if (defaultConstructor != null)
 				{
 					defaultExpression = Expression.New(defaultConstructor.MethodInfo as ConstructorInfo);
 				}
 
-				var dynamicAccess = typeof(Expression)
-									.GetMethods()
-									.First(s => s.Name == "Lambda")
-									.MakeGenericMethod(
-										typeof(Func<>)
-										.MakeGenericType(type)
-									)
-									.Invoke(null, new object[] {
-										defaultExpression, null
-									});
+				var dynamicAccess = typeof (Expression)
+					.GetMethods()
+					.First(s => s.Name == "Lambda")
+					.MakeGenericMethod(
+						typeof (Func<>)
+							.MakeGenericType(type)
+					)
+					.Invoke(null, new object[]
+					{
+						defaultExpression, null
+					});
 				var expressionBuilder = dynamicAccess.GetType().GetMethods().FirstOrDefault(s => s.Name == "Compile");
 
 				DefaultFactory = expressionBuilder.Invoke(dynamicAccess, null);
 			}
-			else
-			{
-				//typeof(Func<>).MakeGenericType(type).GetConstructors()[0].Invoke(null, new object[] {
-				//	(() =>
-				//	{
-				//		return FormatterServices.GetSafeUninitializedObject(type);
-				//	})
-				// });
-				//DefaultFactory = () => ;
-			}
 
 			return this;
 		}
-
-		/// <summary>
-		/// The default constructor that takes no arguments if known
-		/// </summary>
-		public dynamic DefaultFactory { get; protected internal set; }
 
 		/// <summary>
 		///     The .net ClassName
@@ -196,9 +186,10 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			return new ClassInfoEquatableComparer().Compare(this, other);
 		}
+
 		public bool Equals(Type other)
 		{
-			return new ClassInfoEquatableComparer().Equals(this.Type, other);
+			return new ClassInfoEquatableComparer().Equals(Type, other);
 		}
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}

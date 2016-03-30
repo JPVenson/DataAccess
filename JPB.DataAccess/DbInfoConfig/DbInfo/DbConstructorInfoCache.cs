@@ -6,9 +6,8 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-using System.Collections.Generic;
+
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Reflection;
 using JPB.DataAccess.MetaApi.Model;
 
@@ -20,7 +19,6 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	public class DbConstructorInfoCache : ConstructorInfoCache<DbAttributeInfoCache, DbMethodArgument>
 	{
 		/// <summary>
-		/// 
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -37,7 +35,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		}
 
 		/// <summary>
-		///		The class that owns this Property
+		///     The class that owns this Property
 		/// </summary>
 		public DbClassInfoCache DeclaringClass { get; protected internal set; }
 	}

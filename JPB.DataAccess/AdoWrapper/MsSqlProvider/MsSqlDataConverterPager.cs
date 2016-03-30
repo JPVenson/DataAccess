@@ -35,7 +35,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 		/// <summary>
 		/// </summary>
-		public new bool RaiseEvents
+		public bool RaiseEvents
 		{
 			get { return true; }
 			set { }
@@ -49,7 +49,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		{
 			CurrentPageItems.Clear();
 
-			foreach (T currentPageItem in base.CurrentPageItems)
+			foreach (var currentPageItem in base.CurrentPageItems)
 			{
 				CurrentPageItems.Add(Converter(currentPageItem));
 			}

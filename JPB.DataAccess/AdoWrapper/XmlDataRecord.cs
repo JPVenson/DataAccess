@@ -6,20 +6,19 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Xml.Linq;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
-	/// This is an Helper for reading Xml Based columns in a way as a Ado.net Constructor is written
+	///     This is an Helper for reading Xml Based columns in a way as a Ado.net Constructor is written
 	/// </summary>
 	public class XmlDataRecord : IDataRecord
 	{
@@ -29,13 +28,11 @@ namespace JPB.DataAccess.AdoWrapper
 		internal XmlDataRecord(string xmlStream, Type target)
 			: this(xmlStream, target.GetClassInfo())
 		{
-
 		}
 
 		internal XmlDataRecord(XDocument baseElement, Type target)
 			: this(baseElement, target.GetClassInfo())
 		{
-
 		}
 
 		internal XmlDataRecord(string xmlStream, DbClassInfoCache target)
@@ -64,9 +61,9 @@ namespace JPB.DataAccess.AdoWrapper
 		public object GetValue(int i)
 		{
 			if (i == -1)
-				return System.DBNull.Value;
+				return DBNull.Value;
 			if (i >= baseElement.Elements().Count())
-				return System.DBNull.Value;
+				return DBNull.Value;
 
 			var name = GetName(i);
 
@@ -74,7 +71,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 			var firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
 			if (firstOrDefault == null)
-				return System.DBNull.Value;
+				return DBNull.Value;
 
 			var propertyType = firstOrDefault.PropertyType;
 			var xElement = baseElement.Elements().ElementAt(i);
@@ -89,6 +86,39 @@ namespace JPB.DataAccess.AdoWrapper
 		public int FieldCount
 		{
 			get { return baseElement.Elements().Count(); }
+		}
+
+		/// <summary>
+		///     This is our standart solution for Seriliation
+		///     takes care of the loader strategy
+		/// </summary>
+		/// <returns></returns>
+		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single)
+		{
+			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
+				return null;
+			try
+			{
+				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
+				var record = new XmlDataRecord(xDocument, target);
+
+				if (single)
+				{
+					return record.CreateListOfItems().FirstOrDefault();
+				}
+
+				return record;
+			}
+			catch (Exception ex)
+			{
+				return null;
+			}
+		}
+
+		public IEnumerable<XmlDataRecord> CreateListOfItems()
+		{
+			var xNodes = baseElement.Elements();
+			return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), _target));
 		}
 
 		#region Unsupported
@@ -121,7 +151,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public int GetOrdinal(string name)
 		{
 			var elements = baseElement.Elements().ToArray();
-			for (int i = 0; i < elements.Count(); i++)
+			for (var i = 0; i < elements.Count(); i++)
 			{
 				var item = elements[i];
 				if (item.Name == name)
@@ -211,38 +241,5 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		#endregion
-
-		/// <summary>
-		///     This is our standart solution for Seriliation
-		///     takes care of the loader strategy
-		/// </summary>
-		/// <returns></returns>
-		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single)
-		{
-			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
-				return null;
-			try
-			{
-				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
-				var record = new XmlDataRecord(xDocument, target);
-
-				if (single)
-				{
-					return record.CreateListOfItems().FirstOrDefault();
-				}
-
-				return record;
-			}
-			catch (Exception ex)
-			{
-				return null;
-			}
-		}
-
-		public IEnumerable<XmlDataRecord> CreateListOfItems()
-		{
-			var xNodes = baseElement.Elements();
-			return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), _target));
-		}
 	}
 }

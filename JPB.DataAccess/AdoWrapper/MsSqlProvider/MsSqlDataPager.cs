@@ -14,7 +14,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	public class MsSqlDataPager<T> : MsSqlUntypedDataPager<T>
 	{
-		private static Type _type;
+		private static readonly Type _type;
 
 		static MsSqlDataPager()
 		{
@@ -26,7 +26,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			TargetType = _type;
 		}
 
-		public new ICollection<T> CurrentPageItems
+		public ICollection<T> CurrentPageItems
 		{
 			get { return base.CurrentPageItems; }
 		}

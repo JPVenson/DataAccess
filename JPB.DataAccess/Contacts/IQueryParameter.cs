@@ -18,21 +18,23 @@ namespace JPB.DataAccess.Contacts
 	public interface IQueryParameter
 	{
 		/// <summary>
-		/// The name of this Paramether with or without leeding @
+		///     The name of this Paramether with or without leeding @
 		/// </summary>
 		string Name { get; set; }
+
 		/// <summary>
-		/// The Real value that is given to Ado.net
+		///     The Real value that is given to Ado.net
 		/// </summary>
 		object Value { get; set; }
 
 		/// <summary>
-		/// In Certain cases ( as when using an NvarBinary column in MSSQL ) it is nessesary to declare the column type explicid
+		///     In Certain cases ( as when using an NvarBinary column in MSSQL ) it is nessesary to declare the column type
+		///     explicid
 		/// </summary>
 		Type SourceType { get; set; }
 
 		/// <summary>
-		/// The from SourceType resultung SourceDbType
+		///     The from SourceType resultung SourceDbType
 		/// </summary>
 		DbType SourceDbType { get; set; }
 	}

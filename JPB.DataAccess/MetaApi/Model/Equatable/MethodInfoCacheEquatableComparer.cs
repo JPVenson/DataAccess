@@ -7,6 +7,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
 
+using System;
 using System.Collections.Generic;
 using JPB.DataAccess.Contacts.MetaApi;
 
@@ -14,9 +15,18 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
 	public class MethodInfoCacheEquatableComparer<TAtt, TArg>
 		: IComparer<IMethodInfoCache<TAtt, TArg>>,
-			IEqualityComparer<IMethodInfoCache<TAtt, TArg>> 
+			IEqualityComparer<IMethodInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new() where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
+		public int Compare(IMethodInfoCache<TAtt, TArg> x, IMethodInfoCache<TAtt, TArg> y)
+		{
+			if (x == null)
+				return -1;
+			if (y == null)
+				return +1;
+			return string.Compare(x.MethodName, y.MethodName, StringComparison.Ordinal);
+		}
+
 		public bool Equals(IMethodInfoCache<TAtt, TArg> x, IMethodInfoCache<TAtt, TArg> y)
 		{
 			if (x == null && y == null)
@@ -31,15 +41,6 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public int GetHashCode(IMethodInfoCache<TAtt, TArg> obj)
 		{
 			return obj.MethodInfo.GetHashCode();
-		}
-
-		public int Compare(IMethodInfoCache<TAtt, TArg> x, IMethodInfoCache<TAtt, TArg> y)
-		{
-			if (x == null)
-				return -1;
-			if (y == null)
-				return +1;
-			return System.String.Compare(x.MethodName, y.MethodName, System.StringComparison.Ordinal);
 		}
 	}
 }

@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Logger
 {
 	/// <summary>
-	/// The default logger that is used if no other is specified
+	///     The default logger that is used if no other is specified
 	/// </summary>
 	public class DefaultLogger : ILogger
 	{

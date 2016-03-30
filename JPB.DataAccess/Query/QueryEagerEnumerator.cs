@@ -36,6 +36,15 @@ namespace JPB.DataAccess.Query
 			Load();
 		}
 
+		public void Dispose()
+		{
+			if (_task != null)
+				_task.Dispose();
+			if (_enumerateDataRecords != null)
+				_enumerateDataRecords.Clear();
+			_elements.Clear();
+		}
+
 		public bool MoveNext()
 		{
 			_task.Wait();
@@ -84,15 +93,6 @@ namespace JPB.DataAccess.Query
 			});
 			_task.Start();
 		}
-
-		public void Dispose()
-		{
-			if (_task != null)
-				_task.Dispose();
-			if (_enumerateDataRecords != null)
-				_enumerateDataRecords.Clear();
-			_elements.Clear();
-		}
 	}
 
 	internal class QueryEagerEnumerator<T> : QueryEagerEnumerator, IEnumerator<T>
@@ -104,7 +104,7 @@ namespace JPB.DataAccess.Query
 
 		public new T Current
 		{
-			get { return (T)base.Current; }
+			get { return (T) base.Current; }
 		}
 	}
 }

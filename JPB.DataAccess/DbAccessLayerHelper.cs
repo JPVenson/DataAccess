@@ -6,8 +6,8 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,8 +22,6 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess
 {
@@ -54,7 +52,7 @@ namespace JPB.DataAccess
 
 			var commandText = last.CommandText;
 
-			foreach (IDataParameter item in last.Parameters.Cast<IDataParameter>())
+			foreach (var item in last.Parameters.Cast<IDataParameter>())
 			{
 				if (parameter.Any(s => s.Name == item.ParameterName))
 				{
@@ -62,7 +60,7 @@ namespace JPB.DataAccess
 					if (!autoRename)
 					{
 						throw new ArgumentOutOfRangeException("base",
-							String.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
+							string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
 								item.ParameterName));
 					}
 					var counter = 1;
@@ -70,7 +68,7 @@ namespace JPB.DataAccess
 					var buffParam = parameterName;
 					while (parameter.Any(s => s.Name == buffParam))
 					{
-						buffParam = String.Format("{0}_{1}", parameterName, counter);
+						buffParam = string.Format("{0}_{1}", parameterName, counter);
 						counter++;
 					}
 					commandText = commandText.Replace(item.ParameterName, buffParam);
@@ -105,8 +103,8 @@ namespace JPB.DataAccess
 		public static IEnumerable<IQueryParameter> AsQueryParameter(this IDataParameterCollection source)
 		{
 			return
-				(from IDataParameter parameter in source
-				 select new QueryParameter(parameter.ParameterName, parameter.Value));
+				from IDataParameter parameter in source
+				select new QueryParameter(parameter.ParameterName, parameter.Value);
 		}
 
 		/// <summary>
@@ -166,7 +164,7 @@ namespace JPB.DataAccess
 		public static IDbCommand CreateCommandWithParameterValues<T>(this IDatabase db, string query, string[] propertyInfos,
 			T entry)
 		{
-			return db.CreateCommandWithParameterValues(typeof(T), query, propertyInfos, entry);
+			return db.CreateCommandWithParameterValues(typeof (T), query, propertyInfos, entry);
 		}
 
 		/// <summary>
@@ -176,7 +174,8 @@ namespace JPB.DataAccess
 		///     values are added by Index
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, string query, params Tuple<Type, object>[] values)
+		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, string query,
+			params Tuple<Type, object>[] values)
 		{
 			var listofQueryParamter = new List<IQueryParameter>();
 			for (var i = 0; i < values.Count(); i++)
@@ -203,7 +202,7 @@ namespace JPB.DataAccess
 			var cmd = CreateCommand(db, query);
 			if (values == null)
 				return cmd;
-			foreach (IQueryParameter queryParameter in values)
+			foreach (var queryParameter in values)
 			{
 				var dbDataParameter = cmd.CreateParameter();
 				dbDataParameter.DbType = queryParameter.SourceDbType;
@@ -221,7 +220,7 @@ namespace JPB.DataAccess
 
 			if (parameter is IQueryParameter)
 			{
-				return new[] { parameter as IQueryParameter };
+				return new[] {parameter as IQueryParameter};
 			}
 
 			if (parameter is IEnumerable<IQueryParameter>)
@@ -230,8 +229,8 @@ namespace JPB.DataAccess
 			}
 
 			return (from element in parameter.GetType().GetClassInfo().Propertys
-					let value = parameter.GetParamaterValue(element.Key)
-					select new QueryParameter(element.Key.CheckParamter(), value)).Cast<IQueryParameter>()
+				let value = parameter.GetParamaterValue(element.Key)
+				select new QueryParameter(element.Key.CheckParamter(), value)).Cast<IQueryParameter>()
 				.ToList();
 		}
 
@@ -251,7 +250,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static string CreatePropertyCsv<T>(bool ignorePk = false)
 		{
-			return CreatePropertyCsv(typeof(T).GetClassInfo(), ignorePk);
+			return CreatePropertyCsv(typeof (T).GetClassInfo(), ignorePk);
 		}
 
 		/// <summary>
@@ -269,7 +268,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static string CreatePropertyCsv<T>(params string[] ignore)
 		{
-			return CreatePropertyCsv(typeof(T).GetClassInfo(), ignore);
+			return CreatePropertyCsv(typeof (T).GetClassInfo(), ignore);
 		}
 
 		/// <summary>
@@ -290,10 +289,9 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> FilterDbSchemaMapping<T>(params string[] ignore)
 		{
-			return FilterDbSchemaMapping(typeof(T).GetClassInfo(), ignore);
+			return FilterDbSchemaMapping(typeof (T).GetClassInfo(), ignore);
 		}
 
-		
 
 		/// <summary>
 		///     Maps propertys to database of given type
@@ -301,7 +299,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> CreatePropertyNames(DbClassInfoCache type, bool ignorePk = false)
 		{
-			return ignorePk ? FilterDbSchemaMapping(type, type.PrimaryKeyProperty.DbName) : FilterDbSchemaMapping(type, new string[0]);
+			return ignorePk ? FilterDbSchemaMapping(type, type.PrimaryKeyProperty.DbName) : FilterDbSchemaMapping(type);
 		}
 
 		/// <summary>
@@ -311,7 +309,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static IEnumerable<string> CreatePropertyNames<T>(bool ignorePk = false)
 		{
-			return ignorePk ? FilterDbSchemaMapping<T>(typeof(T).GetPK()) : FilterDbSchemaMapping<T>(new string[0]);
+			return ignorePk ? FilterDbSchemaMapping<T>(typeof (T).GetPK()) : FilterDbSchemaMapping<T>();
 		}
 
 		/// <summary>
@@ -366,7 +364,7 @@ namespace JPB.DataAccess
 
 		internal static IDatabaseStrategy GenerateStrategy(this string fullValidIdentifyer, string connection)
 		{
-			if (String.IsNullOrEmpty(fullValidIdentifyer))
+			if (string.IsNullOrEmpty(fullValidIdentifyer))
 				throw new ArgumentException("Type was not found");
 
 			var type = Type.GetType(fullValidIdentifyer);
@@ -403,7 +401,7 @@ namespace JPB.DataAccess
 
 			//check the type to be a Strategy
 
-			if (!typeof(IDatabaseStrategy).IsAssignableFrom(type))
+			if (!typeof (IDatabaseStrategy).IsAssignableFrom(type))
 			{
 				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
 			}
@@ -411,10 +409,10 @@ namespace JPB.DataAccess
 			//try constructor injection
 			var ctOfType =
 				type.GetConstructors()
-					.FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
+					.FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof (string));
 			if (ctOfType != null)
 			{
-				return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
+				return ctOfType.Invoke(new object[] {connection}) as IDatabaseStrategy;
 			}
 			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
 			if (instanceOfType == null)
@@ -439,13 +437,14 @@ namespace JPB.DataAccess
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public static object SetPropertysViaReflection(this DbClassInfoCache type, IDataRecord reader, DbAccessType? accessType)
+		public static object SetPropertysViaReflection(this DbClassInfoCache type, IDataRecord reader,
+			DbAccessType? accessType)
 		{
 			if (reader == null)
 				return null;
 
 			bool created;
-			object source = DbAccessLayer.CreateInstance(type, reader, out created);
+			var source = DbAccessLayer.CreateInstance(type, reader, out created);
 			if (created)
 				return source;
 

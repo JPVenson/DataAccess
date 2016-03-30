@@ -8,20 +8,16 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 */
 
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
-using JPB.DataAccess.Contacts;
-using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.Query
 {
@@ -30,10 +26,8 @@ namespace JPB.DataAccess.Query
 	/// </summary>
 	public static class MsQueryBuilderExtentions
 	{
-		
-
 		/// <summary>
-		///		Declares a new Variable of the Given SQL Type by using its length 
+		///     Declares a new Variable of the Given SQL Type by using its length
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -49,11 +43,12 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///		Declares a new Variable of the Given SQL Type by using its length 
+		///     Declares a new Variable of the Given SQL Type by using its length
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static IQueryBuilder<IRootQuery> DeclareVariable(this IQueryBuilder<IRootQuery> query, string name, SqlDbType type, int length = int.MaxValue, object value = null)
+		public static IQueryBuilder<IRootQuery> DeclareVariable(this IQueryBuilder<IRootQuery> query, string name,
+			SqlDbType type, int length = int.MaxValue, object value = null)
 		{
 			var sqlName = name;
 			if (!sqlName.StartsWith("@"))
@@ -70,13 +65,13 @@ namespace JPB.DataAccess.Query
 			return query;
 		}
 
-	
 
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IRootQuery> WithCteForType(this IQueryBuilder<IRootQuery> query, Type target, string cteName,
+		public static IQueryBuilder<IRootQuery> WithCteForType(this IQueryBuilder<IRootQuery> query, Type target,
+			string cteName,
 			bool useStarOperator = false)
 		{
 			var cteBuilder = new StringBuilder();
@@ -92,7 +87,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
+		///     Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="target"></param>
@@ -105,7 +100,7 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
-		public static IQueryBuilder<IRootQuery> WithCte(this IQueryBuilder<IRootQuery> query, 
+		public static IQueryBuilder<IRootQuery> WithCte(this IQueryBuilder<IRootQuery> query,
 			string cteName, Action<IQueryBuilder<INestedRoot>> cteAction,
 			bool subCte = false)
 		{
@@ -135,7 +130,7 @@ namespace JPB.DataAccess.Query
 		{
 			query.QueryText(Environment.NewLine);
 			return query;
-		}		
+		}
 
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
@@ -144,7 +139,7 @@ namespace JPB.DataAccess.Query
 		public static IQueryBuilder<T> SubSelect<T>(this IQueryBuilder<IRootQuery> query,
 			Action<IQueryBuilder<INestedRoot>> subSelect,
 			Type type)
-			where T: IQueryElement
+			where T : IQueryElement
 		{
 			query.QueryText("(");
 			query.Select(type);
@@ -154,15 +149,15 @@ namespace JPB.DataAccess.Query
 			return query.ChangeType<T>();
 		}
 
-	
-		
+
 		/// <summary>
 		///     Creates a QueryCommand that uses the * Operator to select all date from the inner query
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="from"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> SelectStarFrom<T>(this IQueryBuilder<T> query, Action<IQueryBuilder<INestedRoot>> from) 
+		public static IQueryBuilder<ISelectQuery> SelectStarFrom<T>(this IQueryBuilder<T> query,
+			Action<IQueryBuilder<INestedRoot>> from)
 			where T : IRootQuery
 		{
 			query.QueryText("SELECT * FROM");
@@ -212,7 +207,8 @@ namespace JPB.DataAccess.Query
 		/// <param name="query"></param>
 		/// <param name="from"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query, Action<IQueryBuilder<IConditionalQuery>> from)
+		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query,
+			Action<IQueryBuilder<IConditionalQuery>> from)
 		{
 			query.QueryText("BETWEEN");
 			from(query);
@@ -258,7 +254,8 @@ namespace JPB.DataAccess.Query
 		/// <param name="valueA"></param>
 		/// <param name="valueB"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query, Double valueA, Double valueB)
+		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query, double valueA,
+			double valueB)
 		{
 			var paramaterAAutoId = query.ContainerObject.GetNextParameterId().ToString();
 			var paramaterBAutoId = query.ContainerObject.GetNextParameterId().ToString();
@@ -270,7 +267,6 @@ namespace JPB.DataAccess.Query
 			return query;
 		}
 
-	
 
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
@@ -306,7 +302,8 @@ namespace JPB.DataAccess.Query
 		//    return query;
 		//}
 
-		public static IQueryBuilder<IRootQuery> Apply(this IQueryBuilder<IRootQuery> query, ApplyMode mode, Action<IQueryBuilder<INestedRoot>> innerText, string asId)
+		public static IQueryBuilder<IRootQuery> Apply(this IQueryBuilder<IRootQuery> query, ApplyMode mode,
+			Action<IQueryBuilder<INestedRoot>> innerText, string asId)
 		{
 			query.QueryText(mode.ApplyType);
 			var quer = query.ChangeType<INestedRoot>();
@@ -349,18 +346,19 @@ namespace JPB.DataAccess.Query
 		///     Append an RowNumberOrder part
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> RowNumberOrder(this IQueryBuilder<ISelectQuery> query, string over, bool Desc = false)
+		public static IQueryBuilder<ISelectQuery> RowNumberOrder(this IQueryBuilder<ISelectQuery> query, string over,
+			bool Desc = false)
 		{
 			return query.QueryText("ROW_NUMBER() OVER (ORDER BY {0} {1})", over, Desc ? "DESC" : "ASC");
 		}
 
-	
 
 		/// <summary>
 		///     Adds a LEFT JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, Type source, Type target)
+		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, Type source,
+			Type target)
 		{
 			var sourcePK = source.GetFK(target);
 			var targetPK = target.GetPK();
@@ -373,7 +371,8 @@ namespace JPB.DataAccess.Query
 		///     Adds a JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, JoinMode mode, Type source, Type target)
+		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, JoinMode mode,
+			Type source, Type target)
 		{
 			return Join(query, mode.JoinType, source, target);
 		}
@@ -382,7 +381,8 @@ namespace JPB.DataAccess.Query
 		///     Adds a JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, string mode, Type source, Type target)
+		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, string mode,
+			Type source, Type target)
 		{
 			if (query == null) throw new ArgumentNullException("query");
 			if (mode == null) throw new ArgumentNullException("mode");
@@ -400,32 +400,34 @@ namespace JPB.DataAccess.Query
 		///     Adds a JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join<Source, Target>(this IQueryBuilder<IElementProducer> query, JoinMode mode)
+		public static IQueryBuilder<IElementProducer> Join<Source, Target>(this IQueryBuilder<IElementProducer> query,
+			JoinMode mode)
 		{
-			return Join(query, mode, typeof(Source), typeof(Target));
+			return Join(query, mode, typeof (Source), typeof (Target));
 		}
 
 		/// <summary>
 		///     Inserts a TOP statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<T> Top<T>(this IQueryBuilder<T> query, uint top) 
+		public static IQueryBuilder<T> Top<T>(this IQueryBuilder<T> query, uint top)
 			where T : IElementProducer
 		{
 			switch (query.ContainerObject.AccessLayer.Database.TargetDatabase)
 			{
 				case DbAccessType.MsSql:
-					{
-						var index = -1;
-						var select = "SELECT";
-						var part =
-							query.ContainerObject.Parts.LastOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(@select, StringComparison.Ordinal)) != -1);
+				{
+					var index = -1;
+					var select = "SELECT";
+					var part =
+						query.ContainerObject.Parts.LastOrDefault(
+							s => (index = s.Prefix.ToUpper().IndexOf(@select, StringComparison.Ordinal)) != -1);
 
-						if (index == -1 || part == null)
-							throw new NotSupportedException("Please create a Select Statement befor calling this");
+					if (index == -1 || part == null)
+						throw new NotSupportedException("Please create a Select Statement befor calling this");
 
-						part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
-					}
+					part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
+				}
 					break;
 				case DbAccessType.MySql:
 					return query.QueryText("LIMIT BY {0}", top);
@@ -437,7 +439,6 @@ namespace JPB.DataAccess.Query
 			return query;
 		}
 
-	
 
 		public static IQueryBuilder<T> Count<T>(this IQueryBuilder<T> query, string what)
 			where T : IElementProducer
@@ -463,7 +464,7 @@ namespace JPB.DataAccess.Query
 			/// <summary>
 			///     QueryCommand string
 			/// </summary>
-			public string JoinType { get; private set; }
+			public string JoinType { get; }
 		}
 
 		public abstract class ApplyMode
@@ -476,7 +477,7 @@ namespace JPB.DataAccess.Query
 			/// <summary>
 			///     QueryCommand string
 			/// </summary>
-			public string ApplyType { get; private set; }
+			public string ApplyType { get; }
 		}
 	}
 }

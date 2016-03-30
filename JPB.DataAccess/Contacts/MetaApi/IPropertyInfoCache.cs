@@ -18,7 +18,7 @@ namespace JPB.DataAccess.Contacts.MetaApi
 	/// </summary>
 	public interface IPropertyInfoCache<TAtt>
 		: IComparable<IPropertyInfoCache<TAtt>>,
-		IEquatable<IPropertyInfoCache<TAtt>> where TAtt : class, IAttributeInfoCache, new()
+			IEquatable<IPropertyInfoCache<TAtt>> where TAtt : class, IAttributeInfoCache, new()
 	{
 		/// <summary>
 		///     the type of the Setter delegate
@@ -61,7 +61,7 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		HashSet<TAtt> Attributes { get; }
 
 		/// <summary>
-		/// Sets all propertys on this instance
+		///     Sets all propertys on this instance
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <param name="anon"></param>

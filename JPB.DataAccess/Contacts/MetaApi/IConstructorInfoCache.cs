@@ -12,7 +12,7 @@ using System;
 namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
-	/// Holts all infos about an Constructor
+	///     Holts all infos about an Constructor
 	/// </summary>
 	/// <typeparam name="TAtt"></typeparam>
 	public interface IConstructorInfoCache<TAtt, TArg> :
@@ -22,6 +22,5 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		where TAtt : class, IAttributeInfoCache, new()
 		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
-
 	}
 }

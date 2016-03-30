@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 #if !DEBUG
 using System.Diagnostics;
 #endif
@@ -21,6 +22,7 @@ namespace JPB.DataAccess.DbInfoConfig
 #if !DEBUG
 	[DebuggerStepThrough]
 #endif
+
 	/// <summary>
 	/// </summary>
 	public static class DbConfigHelper
@@ -29,6 +31,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		{
 			ReflecionStore = new DbConfig();
 		}
+
+		internal static DbConfig ReflecionStore { get; set; }
 
 		/// <summary>
 		///     Anonymous type check by naming convention
@@ -39,8 +43,6 @@ namespace JPB.DataAccess.DbInfoConfig
 			//http://stackoverflow.com/questions/1650681/determining-whether-a-type-is-an-anonymous-type
 			return type.Type.Namespace == null;
 		}
-
-		internal static DbConfig ReflecionStore { get; set; }
 
 		/// <summary>
 		///     Get the ClassInfoCache object for the type
@@ -111,12 +113,13 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			return type.LocalToDbSchemaMapping();
 		}
-		
-		//internal static string GetPropertyInfoFromLabda<T>(Expression<Func<T>> exp)
-		//{
-		//    Type paramType = exp.Parameters[0].Type;  // first parameter of expression
-		//    var d = paramType.GetMember((exp.Body as MemberExpression).Member.Name)[0];
-		//    return d.Name;
+
 		//}
+		//    return d.Name;
+		//    var d = paramType.GetMember((exp.Body as MemberExpression).Member.Name)[0];
+		//    Type paramType = exp.Parameters[0].Type;  // first parameter of expression
+		//{
+
+		//internal static string GetPropertyInfoFromLabda<T>(Expression<Func<T>> exp)
 	}
 }

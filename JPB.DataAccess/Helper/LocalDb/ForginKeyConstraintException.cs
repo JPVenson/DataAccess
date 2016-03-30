@@ -6,12 +6,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 	{
 		public ForginKeyConstraintException(string changedTableName, string constraintTableName, object constraintValue)
 			: base(string.Format(
-			"The attempt to change the value '{2}' on the table '{0}' would violate an constraint on table '{1}'",
-			changedTableName, 
-			constraintTableName, 
-			constraintValue))
+				"The attempt to change the value '{2}' on the table '{0}' would violate an constraint on table '{1}'",
+				changedTableName,
+				constraintTableName,
+				constraintValue))
 		{
-
 		}
 	}
 
@@ -19,7 +18,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 	{
 		public ConstraintException(string message) : base(message)
 		{
-
 		}
 	}
 }

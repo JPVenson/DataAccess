@@ -13,22 +13,24 @@ using JPB.DataAccess.MetaApi.Model;
 namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
-	/// Contains all Infos about an Attribute
+	///     Contains all Infos about an Attribute
 	/// </summary>
 	public interface IAttributeInfoCache
-		: IEquatable<IAttributeInfoCache>, 
-		IComparable<AttributeInfoCache>
-	{	
+		: IEquatable<IAttributeInfoCache>,
+			IComparable<AttributeInfoCache>
+	{
 		/// <summary>
-		///		Direct Reflection
+		///     Direct Reflection
 		/// </summary>
 		Attribute Attribute { get; }
+
 		/// <summary>
-		///		Uniqe ID for the Attribute [ToBeSupported]
+		///     Uniqe ID for the Attribute [ToBeSupported]
 		/// </summary>
 		object AttributeName { get; }
+
 		/// <summary>
-		/// Internal use Only
+		///     Internal use Only
 		/// </summary>
 		/// <param name="attribute"></param>
 		/// <returns></returns>

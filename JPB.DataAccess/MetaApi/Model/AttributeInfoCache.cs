@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -23,8 +24,9 @@ namespace JPB.DataAccess.MetaApi.Model
 	{
 		private Attribute _attribute;
 		private object _attributeName;
+
 		/// <summary>
-		/// For internal use Only
+		///     For internal use Only
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -42,8 +44,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			Init(attribute);
 		}
+
 		/// <summary>
-		/// For Interal use Only
+		///     For Interal use Only
 		/// </summary>
 		/// <param name="attribute"></param>
 		/// <returns></returns>
@@ -60,7 +63,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// The Instance of the current Attribute
+		///     The Instance of the current Attribute
 		/// </summary>
 		public Attribute Attribute
 		{
@@ -69,7 +72,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// ToBeSupported
+		///     ToBeSupported
 		/// </summary>
 		public object AttributeName
 		{
@@ -93,14 +96,14 @@ namespace JPB.DataAccess.MetaApi.Model
 	}
 
 	/// <summary>
-	/// Easy access to the underlying Attribute by using generics
+	///     Easy access to the underlying Attribute by using generics
 	/// </summary>
 	/// <typeparam name="TAttr"></typeparam>
 	public class AttributeInfoCache<TAttr> : AttributeInfoCache
 		where TAttr : Attribute
 	{
 		/// <summary>
-		/// The Instance of the current Attribute
+		///     The Instance of the current Attribute
 		/// </summary>
 		public new TAttr Attribute { get; set; }
 	}

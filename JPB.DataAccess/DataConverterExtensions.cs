@@ -19,21 +19,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Security;
 using System.Text;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.DebuggerHelper;
-using JPB.DataAccess.Helper;
-using JPB.DataAccess.Manager;
-using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 
 #endregion
@@ -159,7 +153,7 @@ namespace JPB.DataAccess
 				var newValue = propertyInfo.GetConvertedValue(newObject);
 
 				if (newValue == null && oldValue == null ||
-					(oldValue != null && (newValue == null || newValue.Equals(oldValue))))
+				    (oldValue != null && (newValue == null || newValue.Equals(oldValue))))
 					continue;
 
 				propertyInfo.Setter.Invoke(@base, newValue);
@@ -184,7 +178,7 @@ namespace JPB.DataAccess
 
 			if (converterAttributeModel != null)
 			{
-				var converterAtt = (converterAttributeModel.Attribute as ValueConverterAttribute);
+				var converterAtt = converterAttributeModel.Attribute as ValueConverterAttribute;
 				var valueConverter = converterAtt.CreateConverter();
 				return valueConverter.ConvertBack(source.Getter.Invoke(instance), null, converterAtt.Parameter,
 					CultureInfo.CurrentCulture);
@@ -203,9 +197,9 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static object GetPK<T>(this T source)
 		{
-			string pk = typeof (T).GetClassInfo().PrimaryKeyProperty.PropertyName;
+			var pk = typeof (T).GetClassInfo().PrimaryKeyProperty.PropertyName;
 			DbPropertyInfoCache val;
-			typeof(T).GetClassInfo().Propertys.TryGetValue(pk, out val);
+			typeof (T).GetClassInfo().Propertys.TryGetValue(pk, out val);
 			return val.GetConvertedValue(source);
 		}
 
@@ -215,11 +209,11 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static bool CheckForListInterface(this PropertyInfo info)
 		{
-			if (info.PropertyType == typeof(string))
+			if (info.PropertyType == typeof (string))
 				return false;
-			if (info.PropertyType.GetInterface(typeof(IEnumerable).Name) != null)
+			if (info.PropertyType.GetInterface(typeof (IEnumerable).Name) != null)
 				return true;
-			return info.PropertyType.GetInterface(typeof(IEnumerable<>).Name) != null;
+			return info.PropertyType.GetInterface(typeof (IEnumerable<>).Name) != null;
 		}
 
 		/// <summary>
@@ -228,11 +222,11 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static bool CheckForListInterface(this DbPropertyInfoCache info)
 		{
-			if (info.PropertyType == typeof(string))
+			if (info.PropertyType == typeof (string))
 				return false;
-			if (info.PropertyType.GetInterface(typeof(IEnumerable).Name) != null)
+			if (info.PropertyType.GetInterface(typeof (IEnumerable).Name) != null)
 				return true;
-			return info.PropertyType.GetInterface(typeof(IEnumerable<>).Name) != null;
+			return info.PropertyType.GetInterface(typeof (IEnumerable<>).Name) != null;
 		}
 
 		/// <summary>
@@ -242,8 +236,8 @@ namespace JPB.DataAccess
 		internal static bool CheckForListInterface(this object info)
 		{
 			return !(info is string) &&
-				   info.GetType().GetInterface(typeof(IEnumerable).Name) != null &&
-				   info.GetType().GetInterface(typeof(IEnumerable<>).Name) != null;
+			       info.GetType().GetInterface(typeof (IEnumerable).Name) != null &&
+			       info.GetType().GetInterface(typeof (IEnumerable<>).Name) != null;
 		}
 
 		/// <summary>
@@ -261,7 +255,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static DbPropertyInfoCache[] GetNavigationProps<T>()
 		{
-			return GetNavigationProps(typeof(T));
+			return GetNavigationProps(typeof (T));
 		}
 
 		/// <summary>
@@ -271,12 +265,6 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		//public static T ReflectionPropertySet<T>(DbClassInfoCache info, IDataRecord reader)
-		//	where T : class
-		//{
-		//	return (T)info.ReflectionPropertySet(reader);
-		//}
-
 		/// <summary>
 		///     Factory
 		///     Will enumerate the
@@ -293,7 +281,7 @@ namespace JPB.DataAccess
 		{
 			var t = conversion;
 
-			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
+			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof (Nullable<>))
 			{
 				if (value == null)
 				{
@@ -303,11 +291,11 @@ namespace JPB.DataAccess
 				t = Nullable.GetUnderlyingType(t);
 			}
 
-			if (typeof(Enum).IsAssignableFrom(t))
+			if (typeof (Enum).IsAssignableFrom(t))
 			{
 				// ReSharper disable once UseIsOperator.1
 				// ReSharper disable once UseMethodIsInstanceOfType
-				if (typeof(long).IsAssignableFrom(value.GetType()))
+				if (typeof (long).IsAssignableFrom(value.GetType()))
 				{
 					value = Enum.ToObject(t, value);
 				}
@@ -316,7 +304,7 @@ namespace JPB.DataAccess
 					value = Enum.Parse(t, value as string, true);
 				}
 			}
-			else if (typeof(bool).IsAssignableFrom(t))
+			else if (typeof (bool).IsAssignableFrom(t))
 			{
 				if (value is int)
 				{
@@ -328,10 +316,10 @@ namespace JPB.DataAccess
 				}
 				else if (value is bool)
 				{
-					value = (bool)value;
+					value = (bool) value;
 				}
 			}
-			else if (typeof(byte[]).IsAssignableFrom(t))
+			else if (typeof (byte[]).IsAssignableFrom(t))
 			{
 				if (value is string)
 				{

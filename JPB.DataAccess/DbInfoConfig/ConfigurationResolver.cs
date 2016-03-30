@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Data;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Easy access to the known Class Info
 		/// </summary>
-		public DbClassInfoCache ClassInfoCache { get; private set; }
+		public DbClassInfoCache ClassInfoCache { get; }
 
 		/// <summary>
 		///     Set a attribute on a property
@@ -78,7 +79,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod(string methodName, Func<object, object[], object> methodBody, params DbAttributeInfoCache[] attributes)
+		public void CreateMethod(string methodName, Func<object, object[], object> methodBody,
+			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");
@@ -94,7 +96,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod<Source, Input>(string methodName, Action<Source, Input> methodBody, params DbAttributeInfoCache[] attributes)
+		public void CreateMethod<Source, Input>(string methodName, Action<Source, Input> methodBody,
+			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");
@@ -104,7 +107,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
 			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
 			{
-				methodBody((Source)o, (Input)objects[0]);
+				methodBody((Source) o, (Input) objects[0]);
 				return null;
 			}, methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
@@ -113,7 +116,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod<Source, Output>(string methodName, Func<Source, Output> methodBody, params DbAttributeInfoCache[] attributes)
+		public void CreateMethod<Source, Output>(string methodName, Func<Source, Output> methodBody,
+			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");
@@ -121,10 +125,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentNullException("methodBody");
 			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
-			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
-			{
-				return methodBody((Source)o);
-			}, methodName, attributes);
+			var mehtodInfo = new DbMethodInfoCache((o, objects) => { return methodBody((Source) o); }, methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
@@ -271,13 +272,14 @@ namespace JPB.DataAccess.DbInfoConfig
 			SetClassAttribute(new ForModelAttribute(name));
 		}
 
-		///// <summary>
-		///// Set the Primary key 
-		///// </summary>
-		//
-		//
-		//public void SetStaticQueryKey(string query)
-		//{
 		//}
+		//{
+		//public void SetStaticQueryKey(string query)
+		//
+		//
+		///// </summary>
+		///// Set the Primary key 
+
+		///// <summary>
 	}
 }

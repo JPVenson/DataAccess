@@ -7,12 +7,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 {
 	public class LocalDbManager
 	{
+		internal static readonly Dictionary<Type, ILocalPrimaryKeyValueProvider> DefaultPkProvider;
+
+		[ThreadStatic] private static LocalDbManager _scope;
+
+		private readonly Dictionary<Type, LocalDbReposetory> _database;
+		private readonly HashSet<ReproMappings> _mappings;
+
 		static LocalDbManager()
 		{
 			DefaultPkProvider = new Dictionary<Type, ILocalPrimaryKeyValueProvider>();
-			DefaultPkProvider.Add(typeof(int), new LocalIntPkProvider());
-			DefaultPkProvider.Add(typeof(long), new LocalLongPkProvider());
-			DefaultPkProvider.Add(typeof(Guid), new LocalGuidPkProvider());
+			DefaultPkProvider.Add(typeof (int), new LocalIntPkProvider());
+			DefaultPkProvider.Add(typeof (long), new LocalLongPkProvider());
+			DefaultPkProvider.Add(typeof (Guid), new LocalGuidPkProvider());
 		}
 
 		internal LocalDbManager()
@@ -21,38 +28,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_mappings = new HashSet<ReproMappings>();
 		}
 
-		internal static readonly Dictionary<Type, ILocalPrimaryKeyValueProvider> DefaultPkProvider;
-			
-		[ThreadStatic]
-		private static LocalDbManager _scope;
-
 		/// <summary>
-		/// Access to the current local Scope
-		/// Not ThreadSave
+		///     Access to the current local Scope
+		///     Not ThreadSave
 		/// </summary>
 		public static LocalDbManager Scope
 		{
-			get
-			{
-				return _scope;
-			}
+			get { return _scope; }
 			internal set { _scope = value; }
 		}
 
 		/// <summary>
-		/// Will be invoked when the current database is setup
+		///     Will be invoked when the current database is setup
 		/// </summary>
 		public event EventHandler SetupDone;
 
 		internal void OnSetupDone()
 		{
 			var handler = SetupDone;
-			if (handler != null) 
+			if (handler != null)
 				handler(this, new EventArgs());
 		}
-
-		private readonly Dictionary<Type, LocalDbReposetory> _database;
-		private readonly HashSet<ReproMappings> _mappings;
 
 		internal void AddTable(LocalDbReposetory repro)
 		{

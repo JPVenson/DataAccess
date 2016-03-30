@@ -6,19 +6,16 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
-using JPB.DataAccess.MetaApi.Model;
-using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.Manager
 {
@@ -77,7 +74,7 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(typeof(T), entry.GetPK());
+					var query = CreateSelect(typeof (T), entry.GetPK());
 					RaiseUpdate(entry, query, s);
 					return RunSelect<T>(query).FirstOrDefault();
 				}
@@ -101,7 +98,7 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(entry.GetType(), entry.GetPK<T>());
+					var query = CreateSelect(entry.GetType(), entry.GetPK());
 					RaiseUpdate(entry, query, s);
 					var @select = RunSelect<T>(query).FirstOrDefault();
 
@@ -116,7 +113,6 @@ namespace JPB.DataAccess.Manager
 			});
 		}
 
-		
 
 		/// <summary>
 		///     Checks the Row version of the local entry and the server on
@@ -125,7 +121,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns>True when the version is Equals, otherwise false</returns>
 		private bool CheckRowVersion<T>(T entry)
 		{
-			var type = typeof(T).GetClassInfo();
+			var type = typeof (T).GetClassInfo();
 			var rowVersion =
 				entry
 					.GetType()
@@ -134,16 +130,17 @@ namespace JPB.DataAccess.Manager
 			if (rowVersion != null)
 			{
 				var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
-				if (rowversionValue != null || entry.GetPK() == DataConverterExtensions.GetDefault(type.PrimaryKeyProperty.PropertyType))
+				if (rowversionValue != null ||
+				    entry.GetPK() == DataConverterExtensions.GetDefault(type.PrimaryKeyProperty.PropertyType))
 				{
 					var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
 					var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +
-											  type.GetPK() + " = " + entry.GetPK();
+					                       type.GetPK() + " = " + entry.GetPK();
 
 					var skalar = Database.GetSkalar(staticRowVersion);
 					if (skalar == null)
 						return false;
-					return ((byte[])skalar).SequenceEqual(rowversionValue);
+					return ((byte[]) skalar).SequenceEqual(rowversionValue);
 				}
 				return false;
 			}
@@ -188,7 +185,8 @@ namespace JPB.DataAccess.Manager
 					queryBuilder.QueryD(",");
 			}
 
-			queryBuilder.ChangeType<IElementProducer>().Where(string.Format("{0} = @pkValue", pk), new { pkValue = pkProperty.Getter.Invoke(entry) });
+			queryBuilder.ChangeType<IElementProducer>()
+				.Where(string.Format("{0} = @pkValue", pk), new {pkValue = pkProperty.Getter.Invoke(entry)});
 
 			return queryBuilder.ContainerObject.Compile();
 		}

@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,7 +14,6 @@ using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Manager
 {
@@ -71,10 +71,10 @@ namespace JPB.DataAccess.Manager
 				var insertRangeCommand = CreateInsertRangeCommand(entry.ToArray(), c);
 				//TODO 
 				uint curr = 0;
-				foreach (IDbCommand item in insertRangeCommand)
+				foreach (var item in insertRangeCommand)
 				{
 					curr += RangerInsertPation;
-					RaiseInsert(entry.Skip(((int) curr)).Take((int) RangerInsertPation), item, c);
+					RaiseInsert(entry.Skip((int) curr).Take((int) RangerInsertPation), item, c);
 					c.ExecuteNonQuery(item);
 				}
 			});
@@ -137,7 +137,7 @@ namespace JPB.DataAccess.Manager
 			string query;
 			var values = "";
 			for (var index = 0; index < propertyInfos.Length; index++)
-				values = values + ("@" + index + ",");
+				values = values + ("@" + index) + ",";
 			values = values.Remove(values.Length - 1);
 			query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
 

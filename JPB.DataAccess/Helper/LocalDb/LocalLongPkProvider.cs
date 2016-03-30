@@ -4,7 +4,6 @@ using JPB.DataAccess.Contacts;
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	/// 
 	/// </summary>
 	public class LocalLongPkProvider : ILocalPrimaryKeyValueProvider
 	{
@@ -12,7 +11,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public Type GeneratingType
 		{
-			get { return typeof(long); }
+			get { return typeof (long); }
 		}
 
 		public object GetNextValue()
@@ -32,7 +31,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public bool Equals(object x, object y)
 		{
-			return (long)x == (long)y;
+			return (long) x == (long) y;
 		}
 
 		public int GetHashCode(object obj)

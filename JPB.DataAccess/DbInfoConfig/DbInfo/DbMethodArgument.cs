@@ -6,18 +6,17 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using JPB.DataAccess.MetaApi.Model;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
 	/// <summary>
-	/// 
 	/// </summary>
 	public class DbMethodArgument : MethodArgsInfoCache<DbAttributeInfoCache>
 	{
-
 		/// <summary>
-		///		The class that owns this Property
+		///     The class that owns this Property
 		/// </summary>
 		public DbMethodInfoCache DeclaringMethod { get; protected internal set; }
 	}

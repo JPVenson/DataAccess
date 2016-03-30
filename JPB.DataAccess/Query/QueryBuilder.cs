@@ -12,7 +12,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DebuggerHelper;
@@ -24,14 +23,6 @@ namespace JPB.DataAccess.Query
 {
 	public class InternalContainerContainer : IQueryContainer
 	{
-		/// <summary>
-		/// </summary>
-		public DbAccessLayer AccessLayer { get; private set; }
-
-		/// <summary>
-		/// </summary>
-		public Type ForType { get; set; }
-
 		/// <summary>
 		///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
 		/// </summary>
@@ -60,15 +51,69 @@ namespace JPB.DataAccess.Query
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 		}
 
+		/// <summary>
+		///     If enabled the IQueryContainer will insert linebreaks after some Commands
+		/// </summary>
+		public bool AutoLinebreak { get; set; }
+
+		/// <summary>
+		/// </summary>
+		public DbAccessLayer AccessLayer { get; }
+
+		/// <summary>
+		/// </summary>
+		public Type ForType { get; set; }
+
 		public int AutoParameterCounter { get; set; }
 		public List<GenericQueryPart> Parts { get; set; }
 		public EnumerationMode EnumerationMode { get; set; }
 		public bool AllowParamterRenaming { get; set; }
 
-		/// <summary>
-		///     If enabled the IQueryContainer will insert linebreaks after some Commands
-		/// </summary>
-		public bool AutoLinebreak { get; set; }
+
+		public IDbCommand Compile()
+		{
+			var query = CompileFlat();
+			return AccessLayer.Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
+		}
+
+		public Tuple<string, IEnumerable<IQueryParameter>> CompileFlat()
+		{
+			var sb = new StringBuilder();
+			var queryParts = Parts.ToArray();
+			string prefRender = null;
+			var param = new List<IQueryParameter>();
+
+			foreach (var queryPart in queryParts)
+			{
+				//take care of spaces
+				//check if the last statement ends with a space or the next will start with one
+				var renderCurrent = queryPart.Prefix;
+				if (prefRender != null)
+				{
+					if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) ||
+					    !renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
+					{
+						renderCurrent = " " + renderCurrent;
+					}
+				}
+				sb.Append(renderCurrent);
+				param.AddRange(queryPart.QueryParameters);
+				prefRender = renderCurrent;
+			}
+
+			return new Tuple<string, IEnumerable<IQueryParameter>>(sb.ToString(), param);
+		}
+
+
+		public int GetNextParameterId()
+		{
+			return ++AutoParameterCounter;
+		}
+
+		public object Clone()
+		{
+			return new InternalContainerContainer(this);
+		}
 
 		/// <summary>
 		/// </summary>
@@ -81,13 +126,6 @@ namespace JPB.DataAccess.Query
 			if (EnumerationMode == EnumerationMode.FullOnLoad)
 				return new QueryEagerEnumerator(this, ForType);
 			return new QueryLazyEnumerator(this, ForType);
-		}
-
-
-		public IDbCommand Compile()
-		{
-			var query = CompileFlat();
-			return AccessLayer.Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
 		}
 
 		/// <summary>
@@ -117,40 +155,6 @@ namespace JPB.DataAccess.Query
 		{
 			AllowParamterRenaming = mode;
 			return this;
-		}
-
-		public Tuple<string, IEnumerable<IQueryParameter>> CompileFlat()
-		{
-			var sb = new StringBuilder();
-			var queryParts = Parts.ToArray();
-			string prefRender = null;
-			var param = new List<IQueryParameter>();
-
-			foreach (GenericQueryPart queryPart in queryParts)
-			{
-				//take care of spaces
-				//check if the last statement ends with a space or the next will start with one
-				var renderCurrent = queryPart.Prefix;
-				if (prefRender != null)
-				{
-					if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) ||
-						!renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
-					{
-						renderCurrent = " " + renderCurrent;
-					}
-				}
-				sb.Append(renderCurrent);
-				param.AddRange(queryPart.QueryParameters);
-				prefRender = renderCurrent;
-			}
-
-			return new Tuple<string, IEnumerable<IQueryParameter>>(sb.ToString(), param);
-		}
-
-
-		public int GetNextParameterId()
-		{
-			return ++AutoParameterCounter;
 		}
 
 		/// <summary>
@@ -186,7 +190,7 @@ namespace JPB.DataAccess.Query
 				.AppendInterlacedLine("{")
 				.Up();
 
-			foreach (GenericQueryPart genericQueryPart in Parts)
+			foreach (var genericQueryPart in Parts)
 			{
 				genericQueryPart.Render(sb);
 				sb.AppendLine(",");
@@ -202,11 +206,6 @@ namespace JPB.DataAccess.Query
 		{
 			return Render();
 		}
-
-		public object Clone()
-		{
-			return new InternalContainerContainer(this);
-		}
 	}
 
 	/// <summary>
@@ -217,37 +216,37 @@ namespace JPB.DataAccess.Query
 	{
 		internal QueryBuilder(DbAccessLayer database, Type type)
 		{
-			this.ContainerObject = new InternalContainerContainer(database, type);
+			ContainerObject = new InternalContainerContainer(database, type);
 		}
 
 		internal QueryBuilder(IQueryContainer database)
 		{
-			this.ContainerObject = database;
+			ContainerObject = database;
 		}
 
 		internal QueryBuilder(IQueryBuilder<Stack> database)
 		{
-			this.ContainerObject = database.ContainerObject;
+			ContainerObject = database.ContainerObject;
 		}
 
 		internal QueryBuilder(IQueryBuilder<Stack> database, Type type)
 		{
-			this.ContainerObject = database.ContainerObject;
-			this.ContainerObject.ForType = type;
+			ContainerObject = database.ContainerObject;
+			ContainerObject.ForType = type;
 		}
 
 		/// <summary>
-		/// Creates a new Query
+		///     Creates a new Query
 		/// </summary>
 		/// <param name="database"></param>
 		public QueryBuilder(DbAccessLayer database)
 		{
-			this.ContainerObject = new InternalContainerContainer(database);
+			ContainerObject = new InternalContainerContainer(database);
 		}
-		
+
 
 		/// <summary>
-		/// Wraps the current QueryBuilder into a new Form by setting the Current query type
+		///     Wraps the current QueryBuilder into a new Form by setting the Current query type
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -255,16 +254,8 @@ namespace JPB.DataAccess.Query
 		{
 			return new QueryBuilder<T>(ContainerObject);
 		}
-		
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public object Clone()
-		{
-			return new QueryBuilder<Stack>(this.ContainerObject);
-		}
-		
-		public IQueryContainer ContainerObject { get; private set; }
+
+		public IQueryContainer ContainerObject { get; }
 
 		/// <summary>
 		///     Executes the Current QueryBuilder by setting the type
@@ -277,7 +268,15 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///		Executes the current QueryBuilder
+		/// </summary>
+		/// <returns></returns>
+		public object Clone()
+		{
+			return new QueryBuilder<Stack>(ContainerObject);
+		}
+
+		/// <summary>
+		///     Executes the current QueryBuilder
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable ForResult()
@@ -308,14 +307,13 @@ namespace JPB.DataAccess.Query
 		///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
 		/// </summary>
 		public QueryBuilder(DbAccessLayer database)
-			: base(database, typeof(T))
+			: base(database, typeof (T))
 		{
 		}
 
 		internal QueryBuilder(IQueryBuilder<Stack> source)
-			: base(source, typeof(T))
+			: base(source, typeof (T))
 		{
-
 		}
 
 		/// <summary>

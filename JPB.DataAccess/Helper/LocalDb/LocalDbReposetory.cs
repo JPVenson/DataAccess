@@ -1,63 +1,70 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Contacts.Pager;
-using System.Data;
-using System.Collections.ObjectModel;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
+	///     Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way.
+	///     Starting with 0 incriment by 1
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public abstract class LocalDbReposetory : ICollection
 	{
+		protected internal readonly IDictionary<object, object> _base;
+		protected internal readonly HashSet<ILocalDbConstraint> _constraints;
+		protected internal readonly LocalDbManager _databaseScope;
+		protected internal readonly DbAccessLayer _db;
+		protected internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
 		protected internal readonly object _lockRoot = new object();
 		protected internal readonly DbClassInfoCache TypeInfo;
 		protected internal readonly DbClassInfoCache TypeKeyInfo;
-		protected internal readonly DbAccessLayer _db;
-		protected internal readonly IDictionary<object, object> _base;
-		protected internal readonly LocalDbManager _databaseScope;
-		protected internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
-		protected internal readonly HashSet<ILocalDbConstraint> _constraints;
 
 		/// <summary>
-		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
+		///     Creates a new Instance that is bound to <paramref name="type" /> and uses <paramref name="keyGenerator" /> for
+		///     generation of PrimaryKeys
 		/// </summary>
-		protected LocalDbReposetory(Type type, ILocalPrimaryKeyValueProvider keyGenerator, params ILocalDbConstraint[] constraints)
+		protected LocalDbReposetory(Type type, ILocalPrimaryKeyValueProvider keyGenerator,
+			params ILocalDbConstraint[] constraints)
 		{
 			_constraints = new HashSet<ILocalDbConstraint>(constraints);
 			_databaseScope = LocalDbManager.Scope;
 			if (_databaseScope == null)
 			{
-				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate multibe tables in the same Application");
+				throw new NotSupportedException(
+					"Please define a new DatabaseScope that allows to seperate multibe tables in the same Application");
 			}
 
 			TypeInfo = new DbConfig().GetOrCreateClassInfoCache(type);
 			if (TypeInfo.PrimaryKeyProperty == null)
 			{
-				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'",
+					type.Name));
 			}
 
 			TypeKeyInfo = TypeInfo.PrimaryKeyProperty.PropertyType.GetClassInfo();
 
 			if (TypeKeyInfo == null)
 			{
-				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'",
+					type.Name));
 			}
 
 			if (!TypeKeyInfo.Type.IsValueType)
 			{
-				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of type of any value type cannot be used. Type: '{0}'", type.Name));
+				throw new NotSupportedException(
+					string.Format("Entitys without any PrimaryKey that is of type of any value type cannot be used. Type: '{0}'",
+						type.Name));
 			}
 
 			if (keyGenerator != null)
@@ -69,67 +76,36 @@ namespace JPB.DataAccess.Helper.LocalDb
 				ILocalPrimaryKeyValueProvider defaultKeyGen;
 				if (LocalDbManager.DefaultPkProvider.TryGetValue(TypeKeyInfo.Type, out defaultKeyGen))
 				{
-					_keyGenerator = defaultKeyGen.Clone() as ILocalPrimaryKeyValueProvider;
+					_keyGenerator = defaultKeyGen.Clone();
 				}
 				else
 				{
 					throw new NotSupportedException(
 						string.Format("You must specify ether an Primary key that is of one of this types " +
-									  "({1}) " +
-									  "or invoke the ctor with an proper keyGenerator. Type: '{0}'",
-									  type.Name,
-									  LocalDbManager
-									  .DefaultPkProvider
-									  .Keys
-									  .Select(f => f.Name)
-									  .Aggregate((e, f) => e + "," + f)));
+						              "({1}) " +
+						              "or invoke the ctor with an proper keyGenerator. Type: '{0}'",
+							type.Name,
+							LocalDbManager
+								.DefaultPkProvider
+								.Keys
+								.Select(f => f.Name)
+								.Aggregate((e, f) => e + "," + f)));
 				}
 			}
 			_base = new ConcurrentDictionary<object, object>(_keyGenerator);
 			_databaseScope.SetupDone += DatabaseScopeOnSetupDone;
 		}
 
-		private void DatabaseScopeOnSetupDone(object sender, EventArgs eventArgs)
-		{
-			_databaseScope.AddTable(this);
-
-			foreach (var dbPropertyInfoCach in TypeInfo.Propertys)
-			{
-				if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null && dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
-				{
-					_databaseScope.AddMapping(TypeInfo.Type, dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
-				}
-			}
-
-			ReposetoryCreated = true;
-		}
-
 		/// <summary>
-		/// Returns an value that indicates a proper DatabaseScope usage. 
-		/// If true the creation was successfull and all tables for the this table are mapped
-		/// The Reposetory cannot operate if the reposetory is not created!
-		/// </summary>
-		public bool ReposetoryCreated { get; private set; }
-
-		private void CheckCreatedElseThrow()
-		{
-			if (!ReposetoryCreated)
-			{
-				throw new InvalidOperationException("The database must be completly created until this Table is operational");
-			}
-		}
-
-		/// <summary>
-		/// Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
+		///     Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
 		protected LocalDbReposetory(Type type)
 			: this(type, null)
 		{
-
 		}
 
 		/// <summary>
-		/// Creates a new, database as fallback using batabase
+		///     Creates a new, database as fallback using batabase
 		/// </summary>
 		/// <param name="db"></param>
 		/// <param name="type"></param>
@@ -137,6 +113,34 @@ namespace JPB.DataAccess.Helper.LocalDb
 			: this(type)
 		{
 			_db = db;
+		}
+
+		/// <summary>
+		///     Returns an value that indicates a proper DatabaseScope usage.
+		///     If true the creation was successfull and all tables for the this table are mapped
+		///     The Reposetory cannot operate if the reposetory is not created!
+		/// </summary>
+		public bool ReposetoryCreated { get; private set; }
+
+		/// <summary>
+		///     Returns an object with the given Primarykey
+		/// </summary>
+		/// <param name="primaryKey"></param>
+		/// <returns></returns>
+		public object this[object primaryKey]
+		{
+			get
+			{
+				object value;
+				if (_base.TryGetValue(primaryKey, out value))
+					return value;
+				return null;
+			}
+		}
+
+		protected virtual bool IsReadOnly
+		{
+			get { return false; }
 		}
 
 		public IEnumerator GetEnumerator()
@@ -148,6 +152,60 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return _base.Values.GetEnumerator();
 		}
 
+		/// <summary>
+		///     Thread save
+		/// </summary>
+		/// <param name="array"></param>
+		/// <param name="index"></param>
+		public virtual void CopyTo(Array array, int index)
+		{
+			lock (SyncRoot)
+			{
+				var values = _base.Values.ToArray();
+				values.CopyTo(array, index);
+			}
+		}
+
+		public virtual int Count
+		{
+			get { return _base.Count; }
+		}
+
+		public virtual object SyncRoot
+		{
+			get { return _lockRoot; }
+		}
+
+		public virtual bool IsSynchronized
+		{
+			get { return Monitor.IsEntered(_lockRoot); }
+		}
+
+		private void DatabaseScopeOnSetupDone(object sender, EventArgs eventArgs)
+		{
+			_databaseScope.AddTable(this);
+
+			foreach (var dbPropertyInfoCach in TypeInfo.Propertys)
+			{
+				if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null &&
+				    dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
+				{
+					_databaseScope.AddMapping(TypeInfo.Type,
+						dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
+				}
+			}
+
+			ReposetoryCreated = true;
+		}
+
+		private void CheckCreatedElseThrow()
+		{
+			if (!ReposetoryCreated)
+			{
+				throw new InvalidOperationException("The database must be completly created until this Table is operational");
+			}
+		}
+
 		private object SetId(object item)
 		{
 			var idVal = TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
@@ -155,7 +213,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				lock (_lockRoot)
 				{
-					object newId = _keyGenerator.GetNextValue();
+					var newId = _keyGenerator.GetNextValue();
 					TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
 					return newId;
 				}
@@ -227,7 +285,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Adds a new Item to the Table
+		///     Adds a new Item to the Table
 		/// </summary>
 		/// <param name="item"></param>
 		protected virtual void Add(object item)
@@ -248,14 +306,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Removes all items from this Table
+		///     Removes all items from this Table
 		/// </summary>
 		protected virtual void Clear()
 		{
 			CheckCreatedElseThrow();
-			lock (this._lockRoot)
+			lock (_lockRoot)
 			{
-				foreach (var item in this._base)
+				foreach (var item in _base)
 				{
 					Remove(item);
 				}
@@ -276,7 +334,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Checks if the given primarykey is taken
+		///     Checks if the given primarykey is taken
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -286,7 +344,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Checks if the given primarykey is taken
+		///     Checks if the given primarykey is taken
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -300,7 +358,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			CheckCreatedElseThrow();
 			var id = GetId(item);
 			bool success;
-			lock (this._lockRoot)
+			lock (_lockRoot)
 			{
 				success = _base.Remove(id);
 				var hasInvalidOp = CheckEnforceConstraints(item);
@@ -320,23 +378,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Returns an object with the given Primarykey
-		/// </summary>
-		/// <param name="primaryKey"></param>
-		/// <returns></returns>
-		public object this[object primaryKey]
-		{
-			get
-			{
-				object value;
-				if (_base.TryGetValue(primaryKey, out value))
-					return value;
-				return null;
-			}
-		}
-
-		/// <summary>
-		/// Thread save
+		///     Thread save
 		/// </summary>
 		/// <returns></returns>
 		public object[] ToArray()
@@ -346,69 +388,51 @@ namespace JPB.DataAccess.Helper.LocalDb
 				return _base.Values.ToArray();
 			}
 		}
-
-		/// <summary>
-		/// Thread save
-		/// </summary>
-		/// <param name="array"></param>
-		/// <param name="index"></param>
-		public virtual void CopyTo(Array array, int index)
-		{
-			lock (SyncRoot)
-			{
-				var values = _base.Values.ToArray();
-				values.CopyTo(array, index);
-			}
-		}
-
-		public virtual int Count
-		{
-			get { return _base.Count; }
-		}
-
-		public virtual object SyncRoot
-		{
-			get { return this._lockRoot; }
-		}
-
-		public virtual bool IsSynchronized
-		{
-			get { return Monitor.IsEntered(_lockRoot); }
-		}
-
-		protected virtual bool IsReadOnly { get { return false; } }
 	}
 
 	/// <summary>
-	/// Provides an wrapper for the non Generic LocalDbReposetory 
+	///     Provides an wrapper for the non Generic LocalDbReposetory
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class LocalDbReposetory<T> : LocalDbReposetory, ICollection<T>
 	{
 		/// <summary>
-		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
+		///     Creates a new LocalDB Repro by using <typeparamref name="T" />
 		/// </summary>
 		public LocalDbReposetory(params ILocalDbConstraint[] constraints)
-			: base(typeof(T), null, constraints)
-		{
-		}
-		/// <summary>
-		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> that uses the DbAccessLayer as fallback if the requested item was not found localy
-		/// </summary>
-		public LocalDbReposetory(DbAccessLayer db)
-			: base(db, typeof(T))
-		{
-		}
-		/// <summary>
-		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> and uses the KeyProvider to generate Primarykeys
-		/// </summary>
-		public LocalDbReposetory(ILocalPrimaryKeyValueProvider keyProvider, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), keyProvider, constraints)
+			: base(typeof (T), null, constraints)
 		{
 		}
 
 		/// <summary>
-		/// Adds a new Item to the Table
+		///     Creates a new LocalDB Repro by using <typeparamref name="T" /> that uses the DbAccessLayer as fallback if the
+		///     requested item was not found localy
+		/// </summary>
+		public LocalDbReposetory(DbAccessLayer db)
+			: base(db, typeof (T))
+		{
+		}
+
+		/// <summary>
+		///     Creates a new LocalDB Repro by using <typeparamref name="T" /> and uses the KeyProvider to generate Primarykeys
+		/// </summary>
+		public LocalDbReposetory(ILocalPrimaryKeyValueProvider keyProvider, params ILocalDbConstraint[] constraints)
+			: base(typeof (T), keyProvider, constraints)
+		{
+		}
+
+		/// <summary>
+		///     Returns an object with the given Primarykey
+		/// </summary>
+		/// <param name="primaryKey"></param>
+		/// <returns></returns>
+		public new T this[object primaryKey]
+		{
+			get { return (T) base[primaryKey]; }
+		}
+
+		/// <summary>
+		///     Adds a new Item to the Table
 		/// </summary>
 		/// <param name="item"></param>
 		public void Add(T item)
@@ -417,7 +441,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Removes all items from this Table
+		///     Removes all items from this Table
 		/// </summary>
 		public void Clear()
 		{
@@ -425,7 +449,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Checks if the item is ether localy stored or on database
+		///     Checks if the item is ether localy stored or on database
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -435,29 +459,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Checks if the key is known
-		/// </summary>
-		/// <param name="key"></param>
-		/// <returns></returns>
-		public bool Contains(object key)
-		{
-			return base.ContainsId(key);
-		}
-
-		/// <summary>
-		/// Thread save
-		/// </summary>
-		/// <returns></returns>
-		public new T[] ToArray()
-		{
-			lock (SyncRoot)
-			{
-				return _base.Cast<T>().ToArray();
-			}
-		}
-
-		/// <summary>
-		/// Copys the current collection the an Array
+		///     Copys the current collection the an Array
 		/// </summary>
 		/// <param name="array"></param>
 		/// <param name="arrayIndex"></param>
@@ -467,7 +469,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Removes the item from this collection
+		///     Removes the item from this collection
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -477,7 +479,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Returns the count of all knwon items
+		///     Returns the count of all knwon items
 		/// </summary>
 		public int Count
 		{
@@ -485,7 +487,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// False
+		///     False
 		/// </summary>
 		public bool IsReadOnly
 		{
@@ -493,17 +495,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Returns an object with the given Primarykey
-		/// </summary>
-		/// <param name="primaryKey"></param>
-		/// <returns></returns>
-		public new T this[object primaryKey]
-		{
-			get { return (T)base[primaryKey]; }
-		}
-
-		/// <summary>
-		/// Gets an enumerator
+		///     Gets an enumerator
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerator<T> GetEnumerator()
@@ -516,7 +508,29 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return GetEnumerator();
 		}
 
-		public Contacts.Pager.IDataPager<T> CreatePager()
+		/// <summary>
+		///     Checks if the key is known
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		public bool Contains(object key)
+		{
+			return ContainsId(key);
+		}
+
+		/// <summary>
+		///     Thread save
+		/// </summary>
+		/// <returns></returns>
+		public new T[] ToArray()
+		{
+			lock (SyncRoot)
+			{
+				return _base.Cast<T>().ToArray();
+			}
+		}
+
+		public IDataPager<T> CreatePager()
 		{
 			return new LocalDataPager<T>(this);
 		}
@@ -524,14 +538,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 	public class LocalDataPager<T> : IDataPager<T>
 	{
+		private long _currentPage;
+
 		public LocalDataPager(LocalDbReposetory<T> localDbReposetory)
 		{
 			this.localDbReposetory = localDbReposetory;
-			SyncHelper = (s) => s();
+			SyncHelper = s => s();
 			CurrentPageItems = new ObservableCollection<T>();
 		}
 
-		private long _currentPage;
 		public List<IDbCommand> AppendedComands { get; set; }
 
 		public IDbCommand BaseQuery { get; set; }
@@ -548,11 +563,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
-		public ICollection<T> CurrentPageItems
-		{
-			get;
-			private set;
-		}
+		public ICollection<T> CurrentPageItems { get; }
 
 		public long MaxPage { get; private set; }
 
@@ -564,7 +575,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		IEnumerable IDataPager.CurrentPageItems
 		{
-			get { return this.CurrentPageItems; }
+			get { return CurrentPageItems; }
 		}
 
 		public event Action NewPageLoaded;
@@ -573,7 +584,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public void LoadPage(DbAccessLayer dbAccess)
 		{
 			SyncHelper(CurrentPageItems.Clear);
-			MaxPage = localDbReposetory.Count / this.PageSize;
+			MaxPage = localDbReposetory.Count/PageSize;
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoading;
@@ -583,14 +594,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 				}
 			}
 
-			var items = localDbReposetory.Skip((int)(this.CurrentPage * this.PageSize)).Take(this.PageSize).ToArray();
+			var items = localDbReposetory.Skip((int) (CurrentPage*PageSize)).Take(PageSize).ToArray();
 
 			foreach (var item in items)
 			{
-				SyncHelper(() =>
-				{
-					this.CurrentPageItems.Add(item);
-				});
+				SyncHelper(() => { CurrentPageItems.Add(item); });
 			}
 
 			if (CurrentPage > MaxPage)
@@ -607,8 +615,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		#region IDisposable Support
-		private bool disposedValue = false; // To detect redundant calls
-		private LocalDbReposetory<T> localDbReposetory;
+
+		private bool disposedValue; // To detect redundant calls
+		private readonly LocalDbReposetory<T> localDbReposetory;
 
 
 		protected virtual void Dispose(bool disposing)
@@ -641,7 +650,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			// TODO: uncomment the following line if the finalizer is overridden above.
 			// GC.SuppressFinalize(this);
 		}
-		#endregion
 
+		#endregion
 	}
 }

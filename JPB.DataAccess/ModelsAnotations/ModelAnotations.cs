@@ -6,15 +6,13 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.ModelsAnotations
 {
@@ -26,41 +24,36 @@ namespace JPB.DataAccess.ModelsAnotations
 	}
 
 	/// <summary>
-	/// Defines an 
+	///     Defines an
 	/// </summary>
 	public abstract class DbAccessTypeAttribute : DataAccessAttribute
 	{
 		/// <summary>
-		/// Defines the Target database this Method creates an Script for
+		///     Defines the Target database this Method creates an Script for
 		/// </summary>
 		public DbAccessType TargetDatabase { get; set; }
 	}
 
 	/// <summary>
-	///		Sets an type to be associated with the current class.
-	///		TO BE SUPPORTED
+	///     Sets an type to be associated with the current class.
+	///     TO BE SUPPORTED
 	/// </summary>
-	[System.AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public sealed class MethodProxyAttribute : DataAccessAttribute
 	{
-		readonly Type _methodProxy;
-
 		/// <summary>
-		/// Allows to create a proxy class that should contains Factory methods for the current class
+		///     Allows to create a proxy class that should contains Factory methods for the current class
 		/// </summary>
 		/// <param name="methodProxy"></param>
 		public MethodProxyAttribute(Type methodProxy)
 		{
-			this._methodProxy = methodProxy;
+			MethodProxy = methodProxy;
 		}
 
 		/// <summary>
-		///		The assocaiated type
+		///     The assocaiated type
 		/// </summary>
-		public Type MethodProxy
-		{
-			get { return _methodProxy; }
-		}
+		public Type MethodProxy { get; }
 	}
 
 	#region FactoryAttributes
@@ -70,11 +63,11 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     Marks this class to be allowed by the Framework for the CodeDOM Ado.net ctor creation
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public sealed class AutoGenerateCtorAttribute : DataAccessAttribute
 	{
 		/// <summary>
-		/// Creates a new Instance without any Meta Infos
+		///     Creates a new Instance without any Meta Infos
 		/// </summary>
 		public AutoGenerateCtorAttribute()
 		{
@@ -82,33 +75,34 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		/// Tells the framework how a factory for this class should be created
+		///     Tells the framework how a factory for this class should be created
 		/// </summary>
 		public CtorGeneratorMode CtorGeneratorMode { get; set; }
 
 		/// <summary>
-		/// If set to true all Assemblys that are used inside the base Assembly will be imported to the new one
+		///     If set to true all Assemblys that are used inside the base Assembly will be imported to the new one
 		/// </summary>
 		public bool FullSateliteImport { get; set; }
 	}
 
 	/// <summary>
-	/// Defines how an Constructor should be created
+	///     Defines how an Constructor should be created
 	/// </summary>
 	public enum CtorGeneratorMode
 	{
 		/// <summary>
-		/// Use and inherted class and set Propertys in its super Constructor. A Proxy will be created
+		///     Use and inherted class and set Propertys in its super Constructor. A Proxy will be created
 		/// </summary>
 		Inhert,
+
 		/// <summary>
-		/// Should be used when the Constructor is private or class is sealed. No Proxy created
+		///     Should be used when the Constructor is private or class is sealed. No Proxy created
 		/// </summary>
 		FactoryMethod
 	}
 
 	/// <summary>
-	/// Adds a namespace to the generated class
+	///     Adds a namespace to the generated class
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
 	public sealed class AutoGenerateCtorNamespaceAttribute : DataAccessAttribute
@@ -118,14 +112,13 @@ namespace JPB.DataAccess.ModelsAnotations
 		internal readonly string UsedNamespace;
 
 		/// <summary>
-		/// Creates a new Attribute that is used for CodeGeneration
-		/// This Attributes tell the factory to include certain namespaces.
-		/// 
+		///     Creates a new Attribute that is used for CodeGeneration
+		///     This Attributes tell the factory to include certain namespaces.
 		/// </summary>
 		/// <param name="usedNamespace"></param>
 		public AutoGenerateCtorNamespaceAttribute(string usedNamespace)
 		{
-			this.UsedNamespace = usedNamespace;
+			UsedNamespace = usedNamespace;
 		}
 	}
 
@@ -133,17 +126,16 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     When a methode is marked with this attribute it can be used to configurate the current class. Must be public static
 	///     void
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public sealed class ConfigMehtodAttribute : DataAccessAttribute
 	{
-
 	}
 
 	/// <summary>
 	///     Marks a Method as an Factory mehtod
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public class DeleteFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
@@ -154,7 +146,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The Method must have only one param that is of type IDataRecord and returns a new Instance
 	///     The Method must be static
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false)]
 	public sealed class ObjectFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
@@ -163,7 +155,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Marks a mehtod as an Factory method
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public sealed class SelectFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
@@ -172,17 +164,16 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Marks a mehtod as an Factory method
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public sealed class InsertFactoryMethodAttribute : DbAccessTypeAttribute
 	{
-
 	}
 
 	/// <summary>
 	///     Marks a mehtod as an Factory method
 	///     The method must return a <code>string</code> or <code>IQueryFactoryResult</code>
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
 	public sealed class UpdateFactoryMethodAttribute : DbAccessTypeAttribute
 	{
 	}
@@ -190,7 +181,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     Provieds a QueryCommand ( parametes not used ) for selection
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public sealed class SelectFactoryAttribute : DbAccessTypeAttribute, IQueryFactoryResult
 	{
 		/// <summary>
@@ -206,18 +197,18 @@ namespace JPB.DataAccess.ModelsAnotations
 		/// <summary>
 		///     The Select QueryCommand that are used for selection of this Class
 		/// </summary>
-		public string Query { get; private set; }
+		public string Query { get; }
 
 		/// <summary>
 		///     Not in USE
 		/// </summary>
-		public IEnumerable<IQueryParameter> Parameters { get; private set; }
+		public IEnumerable<IQueryParameter> Parameters { get; }
 	}
 
 	/// <summary>
 	///     Provieds a QueryCommand ( parametes not used ) for selection
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public sealed class StoredProcedureFactoryAttribute : DbAccessTypeAttribute, IQueryFactoryResult
 	{
 		/// <summary>
@@ -233,12 +224,12 @@ namespace JPB.DataAccess.ModelsAnotations
 		/// <summary>
 		///     The Select QueryCommand that are used for selection of this Class
 		/// </summary>
-		public string Query { get; private set; }
+		public string Query { get; }
 
 		/// <summary>
 		///     Not in USE
 		/// </summary>
-		public IEnumerable<IQueryParameter> Parameters { get; private set; }
+		public IEnumerable<IQueryParameter> Parameters { get; }
 	}
 
 	#endregion
@@ -246,7 +237,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     Ignores this Property when creating an Update or Insert statement
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public class InsertIgnoreAttribute : DbAccessTypeAttribute
 	{
 	}
@@ -254,7 +245,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     Indicates this Property to be resolved by a ForeignKey column
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public class ForeignKeyAttribute : InsertIgnoreAttribute
 	{
 		/// <summary>
@@ -266,26 +257,11 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     Indicates this Property to be resolved as a ForeignKey column
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public class ForeignKeyDeclarationAttribute : DataAccessAttribute
 	{
 		/// <summary>
-		/// The Key on the Foreign table
-		/// </summary>
-		public string ForeignKey { get; private set; }
-
-		/// <summary>
-		/// Table name of the Foreign constraint
-		/// </summary>
-		public string ForeignTable { get; private set; }
-
-		/// <summary>
-		/// The type of the table that is declared by ForginTable
-		/// </summary>
-		public Type ForeignType { get; private set; }
-
-		/// <summary>
-		/// Declares a new Foreign key constraint
+		///     Declares a new Foreign key constraint
 		/// </summary>
 		/// <param name="foreignKey"></param>
 		/// <param name="foreignTable"></param>
@@ -296,7 +272,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		}
 
 		/// <summary>
-		/// Declares a new Foreign key constraint
+		///     Declares a new Foreign key constraint
 		/// </summary>
 		/// <param name="foreignKey"></param>
 		/// <param name="foreignTable"></param>
@@ -306,13 +282,28 @@ namespace JPB.DataAccess.ModelsAnotations
 			ForeignType = foreignTable;
 			ForeignTable = foreignTable.GetClassInfo().TableName;
 		}
+
+		/// <summary>
+		///     The Key on the Foreign table
+		/// </summary>
+		public string ForeignKey { get; private set; }
+
+		/// <summary>
+		///     Table name of the Foreign constraint
+		/// </summary>
+		public string ForeignTable { get; private set; }
+
+		/// <summary>
+		///     The type of the table that is declared by ForginTable
+		/// </summary>
+		public Type ForeignType { get; private set; }
 	}
 
 	/// <summary>
 	///     Indicates that this property is a Primary key
 	///     Requert for Selection over PK
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public class PrimaryKeyAttribute : DataAccessAttribute
 	{
 	}
@@ -320,7 +311,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     Allows renaming of the local class name to any name and the mapping from that name to the Db Table name
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, Inherited = false)]
 	public class ForModelAttribute : DataAccessAttribute
 	{
 		/// <summary>
@@ -340,7 +331,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// <summary>
 	///     A rowstate that is used to Detect a newer version
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public sealed class RowVersionAttribute : InsertIgnoreAttribute
 	{
 	}
@@ -349,7 +340,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Marks a property to be ignored by the complete searching logic
 	///     Experimental
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
 	public class IgnoreReflectionAttribute : DataAccessAttribute
 	{
 	}
@@ -359,7 +350,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Must be of Type <code>IDictionary string Object</code>
 	///     Only for Automatik Loading
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public sealed class LoadNotImplimentedDynamicAttribute : IgnoreReflectionAttribute
 	{
 	}
@@ -369,7 +360,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     The Converter must inhert from
 	///     ModelAnotations.IValueConverter
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
 	public sealed class ValueConverterAttribute : DataAccessAttribute
 	{
 		private static readonly Dictionary<object, IValueConverter> ConverterInstance;
@@ -393,7 +384,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		{
 			Converter = converter;
 
-			if (!typeof(IValueConverter).IsAssignableFrom(converter))
+			if (!typeof (IValueConverter).IsAssignableFrom(converter))
 			{
 				throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
 			}
@@ -419,7 +410,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		internal IValueConverter CreateConverter()
 		{
 			//TODO Cache converter results
-			return (IValueConverter)Activator.CreateInstance(Converter);
+			return (IValueConverter) Activator.CreateInstance(Converter);
 		}
 	}
 
@@ -427,7 +418,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     Marks a Property as XML Serilized
 	///     If marked the output field from the query will be Serlized to the given object
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public sealed class FromXmlAttribute : ForModelAttribute
 	{
 		private static ILoadFromXmlStrategy _loadFromXmlStrategyInstance;
@@ -460,7 +451,7 @@ namespace JPB.DataAccess.ModelsAnotations
 			get { return _loadFromXmlStrategy; }
 			set
 			{
-				if (!typeof(ILoadFromXmlStrategy).IsAssignableFrom(value))
+				if (!typeof (ILoadFromXmlStrategy).IsAssignableFrom(value))
 					throw new ArgumentException("Not able to assgin value from IloadFromXMLStrategy");
 				_loadFromXmlStrategy = value;
 			}
@@ -469,7 +460,7 @@ namespace JPB.DataAccess.ModelsAnotations
 		internal ILoadFromXmlStrategy CreateLoader()
 		{
 			return _loadFromXmlStrategyInstance ??
-				   (_loadFromXmlStrategyInstance = (ILoadFromXmlStrategy)Activator.CreateInstance(_loadFromXmlStrategy));
+			       (_loadFromXmlStrategyInstance = (ILoadFromXmlStrategy) Activator.CreateInstance(_loadFromXmlStrategy));
 		}
 	}
 
@@ -478,7 +469,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	///     if the marked class contains a Generic Arguement
 	///     The result stream from the Select Statement will be parsed into the generic arguement
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public class StoredProcedureAttribute : InsertIgnoreAttribute
 	{
 	}

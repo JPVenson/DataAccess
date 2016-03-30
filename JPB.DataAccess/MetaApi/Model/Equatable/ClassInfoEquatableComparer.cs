@@ -15,9 +15,18 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
 	internal class ClassInfoEquatableComparer
 		: IEqualityComparer<IClassInfoCache>,
-		IEqualityComparer<Type>, 
-		IComparer<IClassInfoCache>
+			IEqualityComparer<Type>,
+			IComparer<IClassInfoCache>
 	{
+		public int Compare(IClassInfoCache x, IClassInfoCache y)
+		{
+			if (x == null)
+				return -1;
+			if (y == null)
+				return +1;
+			return string.Compare(x.ClassName, y.ClassName, StringComparison.Ordinal);
+		}
+
 		public bool Equals(IClassInfoCache x, IClassInfoCache y)
 		{
 			if (x == null && y == null)
@@ -34,15 +43,6 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public int GetHashCode(IClassInfoCache obj)
 		{
 			return GetHashCode(obj.Type);
-		}
-
-		public int Compare(IClassInfoCache x, IClassInfoCache y)
-		{
-			if (x == null)
-				return -1;
-			if (y == null)
-				return +1;
-			return System.String.Compare(x.ClassName, y.ClassName, System.StringComparison.Ordinal);
 		}
 
 		public bool Equals(Type x, Type y)

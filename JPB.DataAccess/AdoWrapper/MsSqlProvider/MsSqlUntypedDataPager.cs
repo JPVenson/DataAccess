@@ -16,7 +16,6 @@ using System.Linq;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
-using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
@@ -25,11 +24,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 	/// <typeparam name="T"></typeparam>
 	public class MsSqlUntypedDataPager<T> : IDataPager<T>
 	{
-		protected string SqlVersion;
 		private bool _cache;
 		private bool? _checkRun;
 		private long _currentPage;
 		private Action<Action> _syncHelper;
+		protected string SqlVersion;
 
 		/// <summary>
 		/// </summary>
@@ -63,16 +62,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 		public bool RaiseEvents { get; set; }
 
-		/// <summary>
-		///     Raised if new Page is loading
-		/// </summary>
-		public event Action NewPageLoading;
-
-		/// <summary>
-		///     Raised if new page is Loaded
-		/// </summary>
-		public event Action NewPageLoaded;
-
 		public List<IDbCommand> AppendedComands { get; set; }
 
 		public long CurrentPage
@@ -90,6 +79,16 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		public int PageSize { get; set; }
 
 		public ICollection<T> CurrentPageItems { get; protected set; }
+
+		/// <summary>
+		///     Raised if new Page is loading
+		/// </summary>
+		public event Action NewPageLoading;
+
+		/// <summary>
+		///     Raised if new page is Loaded
+		/// </summary>
+		public event Action NewPageLoaded;
 
 		void IDataPager.LoadPage(DbAccessLayer dbAccess)
 		{
@@ -218,7 +217,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				selectWhere = dbAccess.SelectNative(TargetType, s, command, true).Cast<T>().ToArray();
 			});
 
-			foreach (T item in selectWhere)
+			foreach (var item in selectWhere)
 			{
 				var item1 = item;
 				SyncHelper(() => CurrentPageItems.Add(item1));

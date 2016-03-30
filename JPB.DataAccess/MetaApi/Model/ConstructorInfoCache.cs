@@ -6,10 +6,10 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.Contacts.MetaApi;
@@ -18,35 +18,34 @@ using JPB.DataAccess.MetaApi.Model.Equatable;
 namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
-	/// Fake Constructor for Structs
+	///     Fake Constructor for Structs
 	/// </summary>
 	public class ConstructorStructFakeInfoCache :
 		MethodInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>,
 		IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>
 	{
 		/// <summary>
-		/// Creates a new Constructor for an Struct
+		///     Creates a new Constructor for an Struct
 		/// </summary>
 		/// <param name="del"></param>
 		/// <param name="name"></param>
 		public ConstructorStructFakeInfoCache(Func<object> del, string name)
-			: base((e, f) =>
-			{
-				return del();
-			}, ".ctor")
+			: base((e, f) => { return del(); }, ".ctor")
 		{
-
 		}
-
 #pragma warning disable CS1591
 		public int CompareTo(IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>> other)
 		{
-			return new ConstructorInfoCacheEquatableComparer<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>().Compare(this, other);
+			return
+				new ConstructorInfoCacheEquatableComparer<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>().Compare(
+					this, other);
 		}
 
 		public bool Equals(IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>> other)
 		{
-			return new ConstructorInfoCacheEquatableComparer<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>().Equals(this, other);
+			return
+				new ConstructorInfoCacheEquatableComparer<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>().Equals(
+					this, other);
 		}
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}
@@ -61,7 +60,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		/// <summary>
-		/// For internal use only
+		///     For internal use only
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -78,30 +77,30 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Invoke implimentation for Constructors. Calls the underlying Methodinfo without specifying an Caller
+		///     Invoke implimentation for Constructors. Calls the underlying Methodinfo without specifying an Caller
 		/// </summary>
 		/// <param name="param"></param>
 		/// <returns></returns>
 		public object Invoke(params object[] param)
 		{
-			return this.Invoke(null, param);
+			return Invoke(null, param);
 		}
 
 		/// <summary>
-		/// For internal use Only
+		///     For internal use Only
 		/// </summary>
 		/// <param name="info"></param>
 		/// <returns></returns>
 		public override IMethodInfoCache<TAtt, TArg> Init(MethodBase info)
 		{
 			if (info is ConstructorInfo)
-				return this.Init(info as ConstructorInfo);
+				return Init(info as ConstructorInfo);
 
 			throw new NotImplementedException();
 		}
 
 		/// <summary>
-		/// The method info casted as ConstructorInfo
+		///     The method info casted as ConstructorInfo
 		/// </summary>
 		public new ConstructorInfo MethodInfo
 		{
@@ -111,7 +110,7 @@ namespace JPB.DataAccess.MetaApi.Model
 
 		MethodBase IMethodInfoCache<TAtt, TArg>.MethodInfo
 		{
-			get { return this.MethodInfo; }
+			get { return MethodInfo; }
 		}
 
 		/// <summary>
@@ -124,7 +123,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// For Interal use Only
+		///     For Interal use Only
 		/// </summary>
 		/// <param name="ctorInfo"></param>
 		/// <returns></returns>

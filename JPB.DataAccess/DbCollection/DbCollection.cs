@@ -6,12 +6,12 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
@@ -107,7 +107,7 @@ namespace JPB.DataAccess.DbCollection
 				throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
 			}
 
-			foreach (T item in subset)
+			foreach (var item in subset)
 			{
 				Add(item, CollectionStates.Unchanged);
 				item.PropertyChanged += item_PropertyChanged;
@@ -119,15 +119,100 @@ namespace JPB.DataAccess.DbCollection
 		/// <exception cref="NotSupportedException"></exception>
 		public T this[int index]
 		{
-			get
-			{
-				return _internalCollection.ElementAt(index).Key;
-			}
+			get { return _internalCollection.ElementAt(index).Key; }
 			set
 			{
 				throw new NotSupportedException("Collection has a Bag behavior and does not support a Set on a specific position");
 			}
 		}
+
+		private bool ChangeState(T item, CollectionStates state)
+		{
+			var fod = _internalCollection.ContainsKey(item);
+
+			if (!fod)
+				return false;
+
+			_internalCollection[item] = state;
+			return true;
+		}
+
+		/// <summary>
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
+		public CollectionStates GetEntryState(T item)
+		{
+			CollectionStates entry;
+
+			if (!_internalCollection.TryGetValue(item, out entry))
+				return CollectionStates.Unknown;
+			return entry;
+		}
+
+		/// <summary>
+		///     Sync the Changes to this Collection to the Database
+		/// </summary>
+		public void SaveChanges(DbAccessLayer _layer)
+		{
+			var bulk = _layer.Database.CreateCommand("");
+			var removed = new List<T>();
+
+			foreach (var pair in _internalCollection)
+			{
+				IDbCommand tempCommand;
+				switch (pair.Value)
+				{
+					case CollectionStates.Added:
+						tempCommand = _layer.CreateInsertWithSelectCommand(typeof (T), pair.Key, _layer.Database);
+						break;
+					case CollectionStates.Removed:
+						tempCommand = _layer._CreateDelete(typeof (T).GetClassInfo(), pair.Key, _layer.Database);
+						removed.Add(pair.Key);
+						break;
+					case CollectionStates.Unchanged:
+						tempCommand = null;
+						break;
+					case CollectionStates.Changed:
+						tempCommand = _layer.CreateUpdate(pair.Key, _layer.Database);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+
+				if (tempCommand != null)
+				{
+					bulk = _layer.Database.MergeCommands(bulk, tempCommand, true);
+				}
+			}
+
+			var results = _layer.ExecuteMARS(bulk, typeof (T)).SelectMany(s => s).Cast<T>().ToArray();
+			//Added 
+			var added = _internalCollection.Where(s => s.Value == CollectionStates.Added).ToArray();
+			for (var i = 0; i < added.Length; i++)
+			{
+				var addedOne = added[i];
+				var newId = results[i];
+				DataConverterExtensions.CopyPropertys(addedOne.Value, newId);
+			}
+
+			//Removed
+			foreach (var item in removed)
+			{
+				_internalCollection.Remove(item);
+			}
+
+			foreach (var collectionStatese in _internalCollection.Keys.ToArray())
+			{
+				ChangeState(collectionStatese, CollectionStates.Unchanged);
+			}
+		}
+
+		//	public T Value { get; set; }
+		//	}
+		//		State = state;
+		//		Value = value;
+		//	{
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 		public IEnumerator<T> GetEnumerator()
@@ -140,7 +225,7 @@ namespace JPB.DataAccess.DbCollection
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return ((IEnumerable)_internalCollection).GetEnumerator();
+			return ((IEnumerable) _internalCollection).GetEnumerator();
 		}
 
 		public void Add(T item)
@@ -176,11 +261,8 @@ namespace JPB.DataAccess.DbCollection
 				_changeTracker.Remove(item);
 				return _internalCollection.Remove(item);
 			}
-			else
-			{
-				_changeTracker.Remove(item);
-				return ChangeState(item, CollectionStates.Removed);
-			}
+			_changeTracker.Remove(item);
+			return ChangeState(item, CollectionStates.Removed);
 		}
 
 		public int Count
@@ -217,99 +299,10 @@ namespace JPB.DataAccess.DbCollection
 				ChangeState(sender as T, CollectionStates.Changed);
 		}
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-
-		private bool ChangeState(T item, CollectionStates state)
-		{
-			var fod = _internalCollection.ContainsKey(item);
-
-			if (!fod)
-				return false;
-
-			_internalCollection[item] = state;
-			return true;
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="item"></param>
-		/// <returns></returns>
-		public CollectionStates GetEntryState(T item)
-		{
-			CollectionStates entry;			
-
-			if (!_internalCollection.TryGetValue(item, out entry))
-				return CollectionStates.Unknown;
-			return entry;
-		}
-
-		/// <summary>
-		///     Sync the Changes to this Collection to the Database
-		/// </summary>
-		public void SaveChanges(DbAccessLayer _layer)
-		{
-			var bulk = _layer.Database.CreateCommand("");
-			var removed = new List<T>();
-
-			foreach (var pair in _internalCollection)
-			{
-				IDbCommand tempCommand;
-				switch (pair.Value)
-				{
-					case CollectionStates.Added:
-						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key, _layer.Database);
-						break;
-					case CollectionStates.Removed:
-						tempCommand = _layer._CreateDelete(typeof(T).GetClassInfo(), pair.Key, _layer.Database);
-						removed.Add(pair.Key);
-						break;
-					case CollectionStates.Unchanged:
-						tempCommand = null;
-						break;
-					case CollectionStates.Changed:
-						tempCommand = _layer.CreateUpdate(pair.Key, _layer.Database);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
-
-				if (tempCommand != null)
-				{
-					bulk = _layer.Database.MergeCommands(bulk, tempCommand, true);
-				}
-			}
-
-			var results = _layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
-			//Added 
-			var added = _internalCollection.Where(s => s.Value == CollectionStates.Added).ToArray();
-			for (var i = 0; i < added.Length; i++)
-			{
-				var addedOne = added[i];
-				var newId = results[i];
-				DataConverterExtensions.CopyPropertys(addedOne.Value, newId);
-			}
-
-			//Removed
-			foreach (T item in removed)
-			{
-				_internalCollection.Remove(item);
-			}
-
-			foreach (var collectionStatese in _internalCollection.Keys.ToArray())
-			{
-				ChangeState(collectionStatese, CollectionStates.Unchanged);
-			}
-		}
+		//	public StateHolder(T value, CollectionStates state)
+		//{
 
 		//private class StateHolder : IEquatable<StateHolder>
-		//{
-		//	public StateHolder(T value, CollectionStates state)
-		//	{
-		//		Value = value;
-		//		State = state;
-		//	}
-
-		//	public T Value { get; set; }
 		//	public CollectionStates State { get; set; }
 
 		//	public override int GetHashCode()
@@ -355,29 +348,32 @@ namespace JPB.DataAccess.DbCollection
 	}
 
 	/// <summary>
-	/// All states that an item inside an DbCollection can be
+	///     All states that an item inside an DbCollection can be
 	/// </summary>
 	public enum CollectionStates
 	{
 		/// <summary>
-		/// Element request is not in store
+		///     Element request is not in store
 		/// </summary>
 		Unknown = 0,
 
 		/// <summary>
-		/// Object was created from the Database and has not changed
+		///     Object was created from the Database and has not changed
 		/// </summary>
 		Unchanged,
+
 		/// <summary>
-		/// Object from UserCode
+		///     Object from UserCode
 		/// </summary>
 		Added,
+
 		/// <summary>
-		/// Object was created from the database and has changed since then
+		///     Object was created from the database and has changed since then
 		/// </summary>
 		Changed,
+
 		/// <summary>
-		/// Object was created from the database and should be created
+		///     Object was created from the database and should be created
 		/// </summary>
 		Removed
 	}
