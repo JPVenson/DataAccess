@@ -6,10 +6,11 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 
-namespace JPB.DataAccess.AdoWrapper.MsSql
+namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	public class MsSqlDataPager<T> : MsSqlUntypedDataPager<T>
 	{

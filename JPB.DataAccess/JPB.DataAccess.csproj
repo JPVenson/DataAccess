@@ -162,10 +162,10 @@
     <Compile Include="MetaApi\Model\PropertyInfoCache.cs" />
     <Compile Include="Contacts\IDatabase.cs" />
     <Compile Include="Contacts\IDatabaseStrategy.cs" />
-    <Compile Include="AdoWrapper\MsSql\MsSql.cs" />
-    <Compile Include="AdoWrapper\MsSql\MsSqlUntypedDataPager.cs" />
-    <Compile Include="AdoWrapper\Odbc\Odbc.cs" />
-    <Compile Include="AdoWrapper\OleDB\OleDb.cs" />
+    <Compile Include="AdoWrapper\MsSqlProvider\MsSql.cs" />
+    <Compile Include="AdoWrapper\MsSqlProvider\MsSqlUntypedDataPager.cs" />
+    <Compile Include="AdoWrapper\OdbcProvider\Odbc.cs" />
+    <Compile Include="AdoWrapper\OleDBProvider\OleDb.cs" />
     <Compile Include="AdoWrapper\XmlDataRecord.cs" />
     <Compile Include="DataConverterExtensions.cs" />
     <Compile Include="DataHelperExtensions.cs" />
@@ -190,9 +190,9 @@
     <Compile Include="Contacts\ILoadFromXmlStrategy.cs" />
     <Compile Include="Contacts\LoadStrategy.cs" />
     <Compile Include="Contacts\Pager\IDataPager.cs" />
-    <Compile Include="AdoWrapper\MsSql\MsSqlDataPager.cs" />
+    <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataPager.cs" />
     <Compile Include="Contacts\Pager\IWrapperDataPager.cs" />
-    <Compile Include="AdoWrapper\MsSql\MsSqlDataConverterPager.cs" />
+    <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataConverterPager.cs" />
     <Compile Include="Query\Contracts\IQueryBuilder.cs" />
     <Compile Include="Query\Contracts\IQueryContainer.cs" />
     <Compile Include="Query\Contracts\ISelectQuery.cs" />
