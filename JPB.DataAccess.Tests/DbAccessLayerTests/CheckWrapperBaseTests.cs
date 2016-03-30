@@ -10,6 +10,7 @@ using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.QueryBuilder;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
