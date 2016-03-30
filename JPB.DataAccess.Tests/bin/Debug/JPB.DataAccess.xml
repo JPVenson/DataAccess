@@ -31,85 +31,85 @@
         </member>
         <member name="T:JPB.DataAccess.AdoWrapper.EgarDataRecord">
             <summary>
-            Provides an IDataRecord Access that enumerates the Source record
+                Provides an IDataRecord Access that enumerates the Source record
             </summary>
         </member>
         <member name="M:JPB.DataAccess.AdoWrapper.EgarDataRecord.#ctor(System.Data.IDataRecord)">
             <summary>
-            Enumerates all items in the source record
+                Enumerates all items in the source record
             </summary>
             <param name="sourceRecord"></param>
         </member>
         <member name="M:JPB.DataAccess.AdoWrapper.EgarDataRecord.FromDictionary(System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
-            Creates a new Eagar recrod based on an Dictionary
+                Creates a new Eagar recrod based on an Dictionary
             </summary>
             <returns></returns>
         </member>
-        <member name="T:JPB.DataAccess.AdoWrapper.MsSql.MsSql">
+        <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql">
             <summary>
                 Wrapps MsSQL spezifc data
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSql.CommandAsMsSql(System.Data.IDbCommand)">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql.CommandAsMsSql(System.Data.IDbCommand)">
             <summary>
             </summary>
             <returns></returns>
         </member>
-        <member name="T:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1">
+        <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1">
             <summary>
             </summary>
             <typeparam name="T"></typeparam>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.#ctor">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.#ctor">
             <summary>
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.TargetType">
+        <member name="P:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.TargetType">
             <summary>
                 Internal Use
             </summary>
         </member>
-        <member name="E:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.NewPageLoading">
+        <member name="E:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.NewPageLoading">
             <summary>
                 Raised if new Page is loading
             </summary>
         </member>
-        <member name="E:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.NewPageLoaded">
+        <member name="E:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.NewPageLoaded">
             <summary>
                 Raised if new page is Loaded
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.SyncHelper">
+        <member name="P:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.SyncHelper">
             <summary>
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.RaiseNewPageLoaded">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.RaiseNewPageLoaded">
             <summary>
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.RaiseNewPageLoading">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.RaiseNewPageLoading">
             <summary>
             </summary>
         </member>
-        <member name="T:JPB.DataAccess.AdoWrapper.MsSql.MsSqlDataConverterPager`2">
+        <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlDataConverterPager`2">
             <summary>
                 Converts all items from T to TE
             </summary>
             <typeparam name="T"></typeparam>
             <typeparam name="TE"></typeparam>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlDataConverterPager`2.#ctor">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlDataConverterPager`2.#ctor">
             <summary>
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.AdoWrapper.MsSql.MsSqlDataConverterPager`2.RaiseEvents">
+        <member name="P:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlDataConverterPager`2.RaiseEvents">
             <summary>
             </summary>
         </member>
         <member name="T:JPB.DataAccess.AdoWrapper.XmlDataRecord">
             <summary>
-            This is an Helper for reading Xml Based columns in a way as a Ado.net Constructor is written
+                This is an Helper for reading Xml Based columns in a way as a Ado.net Constructor is written
             </summary>
         </member>
         <member name="M:JPB.DataAccess.AdoWrapper.XmlDataRecord.TryParse(System.String,System.Type,System.Boolean)">
@@ -121,123 +121,114 @@
         </member>
         <member name="P:JPB.DataAccess.Contacts.ILocalDbConstraint.Name">
             <summary>
-            The name of this Constraint
+                The name of this Constraint
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Contacts.ILocalDbConstraint.CheckConstraint(System.Object)">
             <summary>
-            The function that checks if the certain constraint is fulfilled
+                The function that checks if the certain constraint is fulfilled
             </summary>
             <param name="item"></param>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider">
             <summary>
-            Contains logic for generating primary key values that are used by the LocalDbRepro
-            Per Instance of LocalTable
+                Contains logic for generating primary key values that are used by the LocalDbRepro
+                Per Instance of LocalTable
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider.GeneratingType">
             <summary>
-            Type contract what type this generator is for
+                Type contract what type this generator is for
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider.GetNextValue">
             <summary>
-            Generate a new Uniq primary key that has the type of GeneratingType
+                Generate a new Uniq primary key that has the type of GeneratingType
             </summary>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider.GetUninitilized">
             <summary>
-            Gets the object that indicates an Non Init primary key
+                Gets the object that indicates an Non Init primary key
             </summary>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider.Clone">
             <summary>
-            This should return a new Instance of the current ILocalPrimaryKeyValueProvider with resetted internal PK counter
+                This should return a new Instance of the current ILocalPrimaryKeyValueProvider with resetted internal PK counter
             </summary>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Contacts.ILogger">
             <summary>
-            Defines mehtods for Logging
+                Defines mehtods for Logging
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Contacts.ILogger.Write(System.String,System.Object[])">
             <summary>
-            Writes one or more chars to the output by using string.Format
+                Writes one or more chars to the output by using string.Format
             </summary>
             <param name="content"></param>
             <param name="arguments"></param>
         </member>
         <member name="M:JPB.DataAccess.Contacts.ILogger.WriteLine(System.String,System.Object[])">
             <summary>
-            Writes one or more chars to the output by using string.Format followed by an Enviroment.NewLine
+                Writes one or more chars to the output by using string.Format followed by an Enviroment.NewLine
             </summary>
             <param name="content"></param>
             <param name="arguments"></param>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IMethodArgsInfoCache`1.ArgumentName">
             <summary>
-            The name of this Param
+                The name of this Param
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IMethodArgsInfoCache`1.Type">
             <summary>
-            The type of this Param
+                The type of this Param
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IMethodArgsInfoCache`1.Attributes">
             <summary>
-            All Attached Attributes
+                All Attached Attributes
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IMethodArgsInfoCache`1.ParameterInfo">
             <summary>
-            Direct reflection
+                Direct reflection
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Contacts.MetaApi.IAttributeInfoCache">
             <summary>
-            Contains all Infos about an Attribute
+                Contains all Infos about an Attribute
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IAttributeInfoCache.Attribute">
             <summary>
-            	Direct Reflection
+                Direct Reflection
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IAttributeInfoCache.AttributeName">
             <summary>
-            	Uniqe ID for the Attribute [ToBeSupported]
+                Uniqe ID for the Attribute [ToBeSupported]
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Contacts.MetaApi.IAttributeInfoCache.Init(System.Attribute)">
             <summary>
-            Internal use Only
+                Internal use Only
             </summary>
             <param name="attribute"></param>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Contacts.MetaApi.IClassInfoCache`5">
             <summary>
-            
             </summary>
             <typeparam name="TProp"></typeparam>
             <typeparam name="TAttr"></typeparam>
             <typeparam name="TMeth"></typeparam>
             <typeparam name="TCtor"></typeparam>
             <typeparam name="TArg"></typeparam>
-        </member>
-        <member name="M:JPB.DataAccess.Contacts.MetaApi.IClassInfoCache`5.Init(System.Type,System.Boolean)">
-            <summary>
-            
-            </summary>
-            <param name="type"></param>
-            <param name="anon"></param>
-            <returns></returns>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IClassInfoCache`5.Propertys">
             <summary>
@@ -259,9 +250,16 @@
                 All Constructors
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Contacts.MetaApi.IClassInfoCache`5.Init(System.Type,System.Boolean)">
+            <summary>
+            </summary>
+            <param name="type"></param>
+            <param name="anon"></param>
+            <returns></returns>
+        </member>
         <member name="T:JPB.DataAccess.Contacts.MetaApi.IClassInfoCache">
             <summary>
-            Defines the most basic infos about an class
+                Defines the most basic infos about an class
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IClassInfoCache.ClassName">
@@ -276,7 +274,7 @@
         </member>
         <member name="T:JPB.DataAccess.Contacts.MetaApi.IConstructorInfoCache`2">
             <summary>
-            Holts all infos about an Constructor
+                Holts all infos about an Constructor
             </summary>
             <typeparam name="TAtt"></typeparam>
         </member>
@@ -302,12 +300,12 @@
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IMethodInfoCache`2.Arguments">
             <summary>
-            Arguments for this Method
+                Arguments for this Method
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.MetaApi.IMethodInfoCache`2.UseILWrapper">
             <summary>
-            When set to true, an IL Wrapper is used inside the Invoke method
+                When set to true, an IL Wrapper is used inside the Invoke method
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Contacts.MetaApi.IMethodInfoCache`2.Invoke(System.Object,System.Object[])">
@@ -362,7 +360,7 @@
         </member>
         <member name="M:JPB.DataAccess.Contacts.MetaApi.IPropertyInfoCache`1.Init(System.Reflection.PropertyInfo,System.Boolean)">
             <summary>
-            Sets all propertys on this instance
+                Sets all propertys on this instance
             </summary>
             <param name="propertyInfo"></param>
             <param name="anon"></param>
@@ -580,22 +578,23 @@
         </member>
         <member name="P:JPB.DataAccess.Contacts.IQueryParameter.Name">
             <summary>
-            The name of this Paramether with or without leeding @
+                The name of this Paramether with or without leeding @
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.IQueryParameter.Value">
             <summary>
-            The Real value that is given to Ado.net
+                The Real value that is given to Ado.net
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.IQueryParameter.SourceType">
             <summary>
-            In Certain cases ( as when using an NvarBinary column in MSSQL ) it is nessesary to declare the column type explicid
+                In Certain cases ( as when using an NvarBinary column in MSSQL ) it is nessesary to declare the column type
+                explicid
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.IQueryParameter.SourceDbType">
             <summary>
-            The from SourceType resultung SourceDbType
+                The from SourceType resultung SourceDbType
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Contacts.IValueConverter">
@@ -712,7 +711,8 @@
         </member>
         <member name="P:JPB.DataAccess.Contacts.Pager.IDataPager`1.BaseQuery">
             <summary>
-                The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
+                The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be
+                aware
                 of it
             </summary>
         </member>
@@ -882,7 +882,6 @@
         </member>
         <member name="T:JPB.DataAccess.DbInfoConfig.DbConfig">
             <summary>
-            
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbConfig.ConstructorSettings">
@@ -920,12 +919,11 @@
         </member>
         <member name="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodArgument">
             <summary>
-            
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodArgument.DeclaringMethod">
             <summary>
-            	The class that owns this Property
+                The class that owns this Property
             </summary>
         </member>
         <member name="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache">
@@ -934,33 +932,30 @@
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache.#ctor">
             <summary>
-            
             </summary>
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache.#ctor(System.Attribute)">
             <summary>
-            
             </summary>
         </member>
         <member name="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache`1">
             <summary>
-            Attributes with Database spezifc members
+                Attributes with Database spezifc members
             </summary>
             <typeparam name="TAttr"></typeparam>
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache`1.#ctor(JPB.DataAccess.MetaApi.Model.AttributeInfoCache)">
             <summary>
-            
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache`1.Attribute">
             <summary>
-            Strongly typed Attribute
+                Strongly typed Attribute
             </summary>
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache`1.WrapperOrNull(JPB.DataAccess.MetaApi.Model.AttributeInfoCache)">
             <summary>
-            Wraps and Attribute into an strong typed DbAttribute
+                Wraps and Attribute into an strong typed DbAttribute
             </summary>
             <param name="firstOrDefault"></param>
             <returns></returns>
@@ -972,16 +967,7 @@
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.#ctor">
             <summary>
-            
             </summary>
-        </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.Init(System.Type,System.Boolean)">
-            <summary>
-            For interal use Only
-            </summary>
-            <param name="type"></param>
-            <param name="anon"></param>
-            <returns></returns>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.Factory">
             <summary>
@@ -1005,7 +991,7 @@
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.MethodProxyAttribute">
             <summary>
-            	If knwon the MethodProxyAttribute Attribute
+                If knwon the MethodProxyAttribute Attribute
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.SchemaMappingValues">
@@ -1015,7 +1001,7 @@
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.TableName">
             <summary>
-            	Easy access to the SQL Table name
+                Easy access to the SQL Table name
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.HasRelations">
@@ -1025,13 +1011,21 @@
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.RowVersionProperty">
             <summary>
-            	If known the Property with an RowVersion Attribute
+                If known the Property with an RowVersion Attribute
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.PrimaryKeyProperty">
             <summary>
-            	If knwon the Property with an PrimaryKey Attribute
+                If knwon the Property with an PrimaryKey Attribute
             </summary>
+        </member>
+        <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.Init(System.Type,System.Boolean)">
+            <summary>
+                For interal use Only
+            </summary>
+            <param name="type"></param>
+            <param name="anon"></param>
+            <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache.Refresh(System.Boolean)">
             <summary>
@@ -1046,12 +1040,11 @@
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbConstructorInfoCache.#ctor">
             <summary>
-            
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbConstructorInfoCache.DeclaringClass">
             <summary>
-            	The class that owns this Property
+                The class that owns this Property
             </summary>
         </member>
         <member name="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache">
@@ -1061,12 +1054,11 @@
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache.#ctor">
             <summary>
-            
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache.DeclaringClass">
             <summary>
-            	The class that owns this Method
+                The class that owns this Method
             </summary>
         </member>
         <member name="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache">
@@ -1080,7 +1072,7 @@
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.DeclaringClass">
             <summary>
-            	The class that owns this Property
+                The class that owns this Property
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.ForModelAttribute">
@@ -1115,17 +1107,17 @@
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.RowVersionAttribute">
             <summary>
-            	if known the RowVersion Attribute
+                if known the RowVersion Attribute
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.PrimaryKeyAttribute">
             <summary>
-            	if knwon the PrimaryKey Attribute
+                if knwon the PrimaryKey Attribute
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.IgnoreAnyAttribute">
             <summary>
-            	if knwon the Ignore Reflection Attribute
+                if knwon the Ignore Reflection Attribute
             </summary>
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.Refresh">
@@ -1168,247 +1160,265 @@
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.FactoryHelperSettings.ReuseFactorys">
             <summary>
-            When a Factory is create inside an dll the factory can be reused. Deactivate this during tests beacuse it can cause problems.
+                When a Factory is create inside an dll the factory can be reused. Deactivate this during tests beacuse it can cause
+                problems.
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.FactoryHelperSettings.DefaultNamespaces">
             <summary>
-            A Collection that includes all Namespaces that are used by default to create new Factorys
+                A Collection that includes all Namespaces that are used by default to create new Factorys
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.DatabaseScope">
             <summary>
-            Provides a logical scope for defining databases. All DbCollections within this scope are logicly combined. 
-            Use the Using keyword to ensure correctness
+                Provides a logical scope for defining databases. All DbCollections within this scope are logicly combined.
+                Use the Using keyword to ensure correctness
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.DatabaseScope.#ctor">
             <summary>
-            Creates a new Database
+                Creates a new Database
             </summary>
         </member>
         <member name="E:JPB.DataAccess.Helper.LocalDb.DatabaseScope.SetupDone">
             <summary>
-            Will be invoked if dispose is called
+                Will be invoked if dispose is called
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbManager.Scope">
             <summary>
-            Access to the current local Scope
-            Not ThreadSave
+                Access to the current local Scope
+                Not ThreadSave
             </summary>
         </member>
         <member name="E:JPB.DataAccess.Helper.LocalDb.LocalDbManager.SetupDone">
             <summary>
-            Will be invoked when the current database is setup
+                Will be invoked when the current database is setup
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory">
             <summary>
-            Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
+                Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way.
+                Starting with 0 incriment by 1
             </summary>
             <typeparam name="T"></typeparam>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.#ctor(System.Type,JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider,JPB.DataAccess.Contacts.ILocalDbConstraint[])">
             <summary>
-            Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.ReposetoryCreated">
-            <summary>
-            Returns an value that indicates a proper DatabaseScope usage. 
-            If true the creation was successfull and all tables for the this table are mapped
-            The Reposetory cannot operate if the reposetory is not created!
+                Creates a new Instance that is bound to <paramref name="type" /> and uses <paramref name="keyGenerator" /> for
+                generation of PrimaryKeys
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.#ctor(System.Type)">
             <summary>
-            Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
+                Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.#ctor(JPB.DataAccess.Manager.DbAccessLayer,System.Type)">
             <summary>
-            Creates a new, database as fallback using batabase
+                Creates a new, database as fallback using batabase
             </summary>
             <param name="db"></param>
             <param name="type"></param>
         </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.ReposetoryCreated">
+            <summary>
+                Returns an value that indicates a proper DatabaseScope usage.
+                If true the creation was successfull and all tables for the this table are mapped
+                The Reposetory cannot operate if the reposetory is not created!
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Item(System.Object)">
+            <summary>
+                Returns an object with the given Primarykey
+            </summary>
+            <param name="primaryKey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.CopyTo(System.Array,System.Int32)">
+            <summary>
+                Thread save
+            </summary>
+            <param name="array"></param>
+            <param name="index"></param>
+        </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Add(System.Object)">
             <summary>
-            Adds a new Item to the Table
+                Adds a new Item to the Table
             </summary>
             <param name="item"></param>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Clear">
             <summary>
-            Removes all items from this Table
+                Removes all items from this Table
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Contains(System.Int64)">
             <summary>
-            Checks if the given primarykey is taken
+                Checks if the given primarykey is taken
             </summary>
             <param name="item"></param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Contains(System.Int32)">
             <summary>
-            Checks if the given primarykey is taken
+                Checks if the given primarykey is taken
             </summary>
             <param name="item"></param>
             <returns></returns>
         </member>
-        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Item(System.Object)">
-            <summary>
-            Returns an object with the given Primarykey
-            </summary>
-            <param name="primaryKey"></param>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.ToArray">
             <summary>
-            Thread save
+                Thread save
             </summary>
             <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.CopyTo(System.Array,System.Int32)">
-            <summary>
-            Thread save
-            </summary>
-            <param name="array"></param>
-            <param name="index"></param>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1">
             <summary>
-            Provides an wrapper for the non Generic LocalDbReposetory 
+                Provides an wrapper for the non Generic LocalDbReposetory
             </summary>
             <typeparam name="T"></typeparam>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.#ctor(JPB.DataAccess.Contacts.ILocalDbConstraint[])">
             <summary>
-            Creates a new LocalDB Repro by using <typeparamref name="T"/>
+                Creates a new LocalDB Repro by using <typeparamref name="T" />
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.#ctor(JPB.DataAccess.Manager.DbAccessLayer)">
             <summary>
-            Creates a new LocalDB Repro by using <typeparamref name="T"/> that uses the DbAccessLayer as fallback if the requested item was not found localy
+                Creates a new LocalDB Repro by using <typeparamref name="T" /> that uses the DbAccessLayer as fallback if the
+                requested item was not found localy
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.#ctor(JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider,JPB.DataAccess.Contacts.ILocalDbConstraint[])">
             <summary>
-            Creates a new LocalDB Repro by using <typeparamref name="T"/> and uses the KeyProvider to generate Primarykeys
+                Creates a new LocalDB Repro by using <typeparamref name="T" /> and uses the KeyProvider to generate Primarykeys
             </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Item(System.Object)">
+            <summary>
+                Returns an object with the given Primarykey
+            </summary>
+            <param name="primaryKey"></param>
+            <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Add(`0)">
             <summary>
-            Adds a new Item to the Table
+                Adds a new Item to the Table
             </summary>
             <param name="item"></param>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Clear">
             <summary>
-            Removes all items from this Table
+                Removes all items from this Table
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Contains(`0)">
             <summary>
-            Checks if the item is ether localy stored or on database
+                Checks if the item is ether localy stored or on database
             </summary>
             <param name="item"></param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Contains(System.Object)">
-            <summary>
-            Checks if the key is known
-            </summary>
-            <param name="key"></param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.ToArray">
-            <summary>
-            Thread save
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.CopyTo(`0[],System.Int32)">
             <summary>
-            Copys the current collection the an Array
+                Copys the current collection the an Array
             </summary>
             <param name="array"></param>
             <param name="arrayIndex"></param>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Remove(`0)">
             <summary>
-            Removes the item from this collection
+                Removes the item from this collection
             </summary>
             <param name="item"></param>
             <returns></returns>
         </member>
         <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Count">
             <summary>
-            Returns the count of all knwon items
+                Returns the count of all knwon items
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.IsReadOnly">
             <summary>
-            False
+                False
             </summary>
-        </member>
-        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Item(System.Object)">
-            <summary>
-            Returns an object with the given Primarykey
-            </summary>
-            <param name="primaryKey"></param>
-            <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.GetEnumerator">
             <summary>
-            Gets an enumerator
+                Gets an enumerator
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.Contains(System.Object)">
+            <summary>
+                Checks if the key is known
+            </summary>
+            <param name="key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1.ToArray">
+            <summary>
+                Thread save
             </summary>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalGuidPkProvider">
             <summary>
-            
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalIntPkProvider">
             <summary>
-            
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalIntPkProvider.#ctor">
+            <summary>
+                Default primary key generation starts with 1 incriments by 1
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalLongPkProvider">
             <summary>
-            
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.PocoPkComparer`1">
             <summary>
-            Compares 2 Pocos based on there PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey attribute
-            When both of the instances are of the same reference: return true
-            When one of the instances is default(T): return false
-            When both of the instances Primary Key has the assertNotDatabaseMember: return false
-            When both of the instances Primary Key are Equals: return true
-            return false
+                Compares 2 Pocos based on there PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey
+                attribute
+                When both of the instances are of the same reference: return true
+                When one of the instances is default(T): return false
+                When both of the instances Primary Key has the assertNotDatabaseMember: return false
+                When both of the instances Primary Key are Equals: return true
+                return false
             </summary>
             <typeparam name="T"></typeparam>
         </member>
-        <member name="P:JPB.DataAccess.Helper.PocoPkComparer`1.Value">
-            <summary>
-            When Equals is used the result is stored in this Property
-            </summary>
-        </member>
         <member name="M:JPB.DataAccess.Helper.PocoPkComparer`1.#ctor">
             <summary>
-            New Instance of the Auto Equality Comparer with no assertion on its default value for an Primary key
+                New Instance of the Auto Equality Comparer with no assertion on its default value for an Primary key
             </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.PocoPkComparer`1.Value">
+            <summary>
+                When Equals is used the result is stored in this Property
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.PocoPkComparer`1.Compare(`0,`0)">
+            <summary>
+                Checks if both arguments are ReferenceEquals
+                Checks if Left is null = 1
+                Checks if Right is null = -1
+                Calls the
+            </summary>
+            <param name="left"></param>
+            <param name="right"></param>
+            <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Helper.PocoPkComparer`1.Equals(`0,`0)">
             <summary>
-            Checks if both have the same Reference.
-            Checks if any but not both of them are null.
-            Compares both Primary keys against the assertNotDatabaseMember Object
-            Compares both Primary key Propertys by using Equals
+                Checks if both have the same Reference.
+                Checks if any but not both of them are null.
+                Compares both Primary keys against the assertNotDatabaseMember Object
+                Compares both Primary key Propertys by using Equals
             </summary>
             <param name="left"></param>
             <param name="right"></param>
@@ -1416,20 +1426,9 @@
         </member>
         <member name="M:JPB.DataAccess.Helper.PocoPkComparer`1.GetHashCode(`0)">
             <summary>
-            Calls the GetHashCode function on the PrimaryKey
+                Calls the GetHashCode function on the PrimaryKey
             </summary>
             <param name="obj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.PocoPkComparer`1.Compare(`0,`0)">
-            <summary>
-            Checks if both arguments are ReferenceEquals
-            Checks if Left is null = 1
-            Checks if Right is null = -1
-            Calls the 
-            </summary>
-            <param name="left"></param>
-            <param name="right"></param>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Helper.QueryParameter">
@@ -1445,14 +1444,13 @@
         </member>
         <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.#ctor(System.Boolean,System.UInt32)">
             <summary>
-            
             </summary>
-            <param name="transformInterlaced">If true an level will be displaced as <paramref name="intedtSize"/> spaces</param>
-            <param name="intedtSize">ammount of spaces for each level</param> 
+            <param name="transformInterlaced">If true an level will be displaced as <paramref name="intedtSize" /> spaces</param>
+            <param name="intedtSize">ammount of spaces for each level</param>
         </member>
         <member name="T:JPB.DataAccess.Logger.DefaultLogger">
             <summary>
-            The default logger that is used if no other is specified
+                The default logger that is used if no other is specified
             </summary>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.AttributeInfoCache">
@@ -1461,7 +1459,7 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.AttributeInfoCache.#ctor">
             <summary>
-            For internal use Only
+                For internal use Only
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.AttributeInfoCache.#ctor(System.Attribute)">
@@ -1471,30 +1469,30 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.AttributeInfoCache.Init(System.Attribute)">
             <summary>
-            For Interal use Only
+                For Interal use Only
             </summary>
             <param name="attribute"></param>
             <returns></returns>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.AttributeInfoCache.Attribute">
             <summary>
-            The Instance of the current Attribute
+                The Instance of the current Attribute
             </summary>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.AttributeInfoCache.AttributeName">
             <summary>
-            ToBeSupported
+                ToBeSupported
             </summary>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.AttributeInfoCache`1">
             <summary>
-            Easy access to the underlying Attribute by using generics
+                Easy access to the underlying Attribute by using generics
             </summary>
             <typeparam name="TAttr"></typeparam>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.AttributeInfoCache`1.Attribute">
             <summary>
-            The Instance of the current Attribute
+                The Instance of the current Attribute
             </summary>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5">
@@ -1504,21 +1502,21 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5.#ctor">
             <summary>
-            For internal use Only
+                For internal use Only
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5.DefaultFactory">
+            <summary>
+                The default constructor that takes no arguments if known
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5.Init(System.Type,System.Boolean)">
             <summary>
-            For interal use Only
+                For interal use Only
             </summary>
             <param name="type"></param>
             <param name="anon"></param>
             <returns></returns>
-        </member>
-        <member name="P:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5.DefaultFactory">
-            <summary>
-            The default constructor that takes no arguments if known
-            </summary>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5.ClassName">
             <summary>
@@ -1552,12 +1550,12 @@
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.ConstructorStructFakeInfoCache">
             <summary>
-            Fake Constructor for Structs
+                Fake Constructor for Structs
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ConstructorStructFakeInfoCache.#ctor(System.Func{System.Object},System.String)">
             <summary>
-            Creates a new Constructor for an Struct
+                Creates a new Constructor for an Struct
             </summary>
             <param name="del"></param>
             <param name="name"></param>
@@ -1569,26 +1567,26 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ConstructorInfoCache`2.#ctor">
             <summary>
-            For internal use only
+                For internal use only
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ConstructorInfoCache`2.Invoke(System.Object[])">
             <summary>
-            Invoke implimentation for Constructors. Calls the underlying Methodinfo without specifying an Caller
+                Invoke implimentation for Constructors. Calls the underlying Methodinfo without specifying an Caller
             </summary>
             <param name="param"></param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ConstructorInfoCache`2.Init(System.Reflection.MethodBase)">
             <summary>
-            For internal use Only
+                For internal use Only
             </summary>
             <param name="info"></param>
             <returns></returns>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.ConstructorInfoCache`2.MethodInfo">
             <summary>
-            The method info casted as ConstructorInfo
+                The method info casted as ConstructorInfo
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ConstructorInfoCache`2.Invoke(System.Object,System.Object[])">
@@ -1599,29 +1597,29 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.ConstructorInfoCache`2.Init(System.Reflection.ConstructorInfo)">
             <summary>
-            For Interal use Only
+                For Interal use Only
             </summary>
             <param name="ctorInfo"></param>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.Equatable.PropertyEquatableComparer`1">
             <summary>
-            Defines methods for compareing two Property Cache instances on its Name and location
+                Defines methods for compareing two Property Cache instances on its Name and location
             </summary>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.MethodArgsInfoCache`1">
             <summary>
-            Infos about Arguments delcared on a Mehtod
+                Infos about Arguments delcared on a Mehtod
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.MethodArgsInfoCache`1.#ctor">
             <summary>
-            For Internal use only
-            </summary>	
+                For Internal use only
+            </summary>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.MethodArgsInfoCache`1.ParameterInfo">
             <summary>
-            Direct reflection
+                Direct reflection
             </summary>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2">
@@ -1629,14 +1627,9 @@
                 Infos about the Method
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.#ctor">
-            <summary>
-            For internal use Only
-            </summary>
-        </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Init(System.Reflection.MethodBase)">
             <summary>
-            For Internal use Only
+                For Internal use Only
             </summary>
             <param name="mehtodInfo"></param>
             <returns></returns>
@@ -1645,7 +1638,6 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Init(System.Reflection.MethodBase,System.Type)">
             <summary>
-            
             </summary>
             <param name="mehtodInfo"></param>
             <param name="sourceType"></param>
@@ -1669,7 +1661,7 @@
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Arguments">
             <summary>
-            Arguments on this Method
+                Arguments on this Method
             </summary>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Attributes">
@@ -1683,6 +1675,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.#ctor">
+            <summary>
+                For internal use Only
+            </summary>
+        </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.PropertyInfoCache`1">
             <summary>
                 Infos about the Property
@@ -1694,7 +1691,7 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.PropertyInfoCache`1.#ctor">
             <summary>
-            For internal use Only
+                For internal use Only
             </summary>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.PropertyInfoCache`1.SetterDelegate">
@@ -1739,27 +1736,28 @@
         </member>
         <member name="T:JPB.DataAccess.MetaApi.MetaInfoStore`6">
             <summary>
-                Class info Storage. When this is a Global config store you should may never call the dispose method because it would erase all knwon types
+                Class info Storage. When this is a Global config store you should may never call the dispose method because it
+                would erase all knwon types
             </summary>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.MetaInfoStore`6.IsGlobal">
             <summary>
-            Is this instance mapped to the global Cache or does it only maintain its informations as long as it exists
+                Is this instance mapped to the global Cache or does it only maintain its informations as long as it exists
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.#ctor(System.Boolean)">
             <summary>
-            Creates a new Instance for storing class informations. Allows you to define if this is ether the global config store or a local one
+                Creates a new Instance for storing class informations. Allows you to define if this is ether the global config
+                store or a local one
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.#ctor">
             <summary>
-            Creates a new Instance for accessing the Global Config store
+                Creates a new Instance for accessing the Global Config store
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.#cctor">
             <summary>
-            
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.Clear">
@@ -1769,7 +1767,7 @@
         </member>
         <member name="P:JPB.DataAccess.MetaApi.MetaInfoStore`6.SClassInfoCaches">
             <summary>
-            Gloabel or local Cache
+                Gloabel or local Cache
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.GetOrCreateClassInfoCache(System.Type)">
@@ -1786,7 +1784,7 @@
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.GetOrCreateClassInfoCache(System.String,System.Boolean@)">
             <summary>
-            	Gets an Cache object of exists or creats one
+                Gets an Cache object of exists or creats one
             </summary>
             <param name="typeName"></param>
             <param name="newCreated"></param>
@@ -1825,12 +1823,12 @@
         </member>
         <member name="P:JPB.DataAccess.MetaApi.MetaInfoStore`6.EnableInstanceThreadSafety">
             <summary>
-            	if Enabled this can overwrite the EnableGlobalThreadSafety property
+                if Enabled this can overwrite the EnableGlobalThreadSafety property
             </summary>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.MetaInfoStoreExtentions">
             <summary>
-            Extention methods for easy access to meta infos
+                Extention methods for easy access to meta infos
             </summary>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStoreExtentions.IsAnonymousType(System.Type)">
@@ -1940,6 +1938,13 @@
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.CreateEgarRecord(System.Data.IDataRecord)">
+            <summary>
+                Sets the infomations from the
+                <paramref name="reader" />
+                into the given object
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
             <summary>
                 Factory
                 Will enumerate the
@@ -2168,7 +2173,6 @@
         </member>
         <member name="M:JPB.DataAccess.DbCollection.DbCollection`1.GetEntryState(`0)">
             <summary>
-            
             </summary>
             <param name="item"></param>
             <returns></returns>
@@ -2180,48 +2184,47 @@
         </member>
         <member name="T:JPB.DataAccess.DbCollection.CollectionStates">
             <summary>
-            All states that an item inside an DbCollection can be
+                All states that an item inside an DbCollection can be
             </summary>
         </member>
         <member name="F:JPB.DataAccess.DbCollection.CollectionStates.Unknown">
             <summary>
-            Element request is not in store
+                Element request is not in store
             </summary>
         </member>
         <member name="F:JPB.DataAccess.DbCollection.CollectionStates.Unchanged">
             <summary>
-            Object was created from the Database and has not changed
+                Object was created from the Database and has not changed
             </summary>
         </member>
         <member name="F:JPB.DataAccess.DbCollection.CollectionStates.Added">
             <summary>
-            Object from UserCode
+                Object from UserCode
             </summary>
         </member>
         <member name="F:JPB.DataAccess.DbCollection.CollectionStates.Changed">
             <summary>
-            Object was created from the database and has changed since then
+                Object was created from the database and has changed since then
             </summary>
         </member>
         <member name="F:JPB.DataAccess.DbCollection.CollectionStates.Removed">
             <summary>
-            Object was created from the database and should be created
+                Object was created from the database and should be created
             </summary>
         </member>
         <member name="T:JPB.DataAccess.DbEventArgs.DatabaseActionEvent">
             <summary>
-            Wraps an Event raised by the DbAccessLayer
+                Wraps an Event raised by the DbAccessLayer
             </summary>
         </member>
         <member name="M:JPB.DataAccess.DbEventArgs.DatabaseActionEvent.#ctor(JPB.DataAccess.DebuggerHelper.QueryDebugger)">
             <summary>
-            
             </summary>
             <param name="queryDebugger"></param>
         </member>
         <member name="P:JPB.DataAccess.DbEventArgs.DatabaseActionEvent.QueryDebugger">
             <summary>
-            If enabled the QueryDebugger that contains the QueryCommand
+                If enabled the QueryDebugger that contains the QueryCommand
             </summary>
         </member>
         <member name="T:JPB.DataAccess.DebuggerHelper.QueryDebugger">
@@ -2235,7 +2238,8 @@
         </member>
         <member name="P:JPB.DataAccess.DebuggerHelper.QueryDebugger.UseDefaultDatabase">
             <summary>
-                When set to true the QueryCommand debugger creates an own instance the the Default database connection assumd by the type
+                When set to true the QueryCommand debugger creates an own instance the the Default database connection assumd by
+                the type
                 of the IDbCommand it contains
             </summary>
         </member>
@@ -2266,12 +2270,14 @@
         </member>
         <member name="F:JPB.DataAccess.Manager.DbAccessLayer.DefaultAssertionObject">
             <summary>
-            Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the instance. This field overrides 
+                Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the
+                instance. This field overrides
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.DefaultAssertionObjectRewrite">
             <summary>
-            When specifying an Long as DefaultAssertionObject the PocoPkComparer will use instedt the value casted as int when the property is int instedt of Long and vice versa (more Rewrite operations may follow)
+                When specifying an Long as DefaultAssertionObject the PocoPkComparer will use instedt the value casted as int when
+                the property is int instedt of Long and vice versa (more Rewrite operations may follow)
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.Debugger">
@@ -2281,7 +2287,8 @@
         </member>
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.IsMultiProviderEnvironment">
             <summary>
-            	If set to True a strict check for the Targetdatabase Property on each Factory or provider specific method is done otherwise this Check is skiped 
+                If set to True a strict check for the Targetdatabase Property on each Factory or provider specific method is done
+                otherwise this Check is skiped
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.DatabaseStrategy">
@@ -2455,14 +2462,14 @@
         </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.Map(System.Data.DbType)">
             <summary>
-            Map an SourceDbType to the proper C# mscore lib type
+                Map an SourceDbType to the proper C# mscore lib type
             </summary>
             <param name="source"></param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.Map(System.Type)">
             <summary>
-            Map an C# mscore lib type to the proper SourceDbType
+                Map an C# mscore lib type to the proper SourceDbType
             </summary>
             <param name="source"></param>
             <returns></returns>
@@ -2596,6 +2603,13 @@
                 If enabled Related structures will be loaded into the source object
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Manager.DbAccessLayer.ExecuteMARS(System.Data.IDbCommand,System.Type[])">
+            <summary>
+                Executes a IDbCommand that will return multibe result sets that will be parsed to the marsTypes in order they are
+                provided
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.Select(System.Type,System.Object)">
             <summary>
                 Execute select on a database with a standard Where [Primary Key] = <paramref name="pk" />
@@ -2713,13 +2727,14 @@
         </member>
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.Multipath">
             <summary>
-            Activates Deadlock and Stackoverflow detection and Prevention
-            When an Stackoverflow inside an SelectFactoryMethod is detected an other method for creating the selectstatement is used as long as there are other options
+                Activates Deadlock and Stackoverflow detection and Prevention
+                When an Stackoverflow inside an SelectFactoryMethod is detected an other method for creating the selectstatement is
+                used as long as there are other options
             </summary>
         </member>
         <member name="F:JPB.DataAccess.Manager.DbAccessLayer._isIndented">
             <summary>
-            For StackOverflow detection
+                For StackOverflow detection
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.CreateSelect(System.Type,System.Object)">
@@ -3033,13 +3048,6 @@
             <typeparam name="T"></typeparam>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Manager.DbAccessLayer.ExecuteMARS(System.Data.IDbCommand,System.Type[])">
-            <summary>
-                Executes a IDbCommand that will return multibe result sets that will be parsed to the marsTypes in order they are
-                provided
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.Update``1(``0,JPB.DataAccess.Contacts.IDatabase)">
             <summary>
                 Will update by using the CreateUpdate function
@@ -3171,42 +3179,42 @@
         </member>
         <member name="T:JPB.DataAccess.Query.Contracts.IQueryBuilder`1">
             <summary>
-            Provides access to the interal query storage and enumeration Function
+                Provides access to the interal query storage and enumeration Function
             </summary>
             <typeparam name="Stack"></typeparam>
         </member>
         <member name="P:JPB.DataAccess.Query.Contracts.IQueryBuilder`1.ContainerObject">
             <summary>
-            The interal value holder
+                The interal value holder
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Query.Contracts.IQueryBuilder`1.ForResult``1">
             <summary>
-            Enumerates the current query for a type <typeparamref name="E"/>
+                Enumerates the current query for a type <typeparamref name="E" />
             </summary>
             <typeparam name="E"></typeparam>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Query.Contracts.IQueryBuilder`1.ChangeType``1">
             <summary>
-            Wraps this query type to an new QueryElement
+                Wraps this query type to an new QueryElement
             </summary>
             <typeparam name="T"></typeparam>
             <returns></returns>
         </member>
         <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.ForType">
             <summary>
-            	Declares the Return type that is awaited
+                Declares the Return type that is awaited
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.AutoParameterCounter">
             <summary>
-            	Gets the current number of used SQL Arguments
+                Gets the current number of used SQL Arguments
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.Parts">
             <summary>
-            	Defines all elements added by the Add Method
+                Defines all elements added by the Add Method
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.EnumerationMode">
@@ -3221,7 +3229,7 @@
         </member>
         <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainer.AccessLayer">
             <summary>
-            	Access to the underlying AccessLayer
+                Access to the underlying AccessLayer
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Query.Contracts.IQueryContainer.Compile">
@@ -3275,14 +3283,6 @@
                 Lazy loading
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.Query.InternalContainerContainer.AccessLayer">
-            <summary>
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.Query.InternalContainerContainer.ForType">
-            <summary>
-            </summary>
-        </member>
         <member name="M:JPB.DataAccess.Query.InternalContainerContainer.#ctor(JPB.DataAccess.Manager.DbAccessLayer,System.Type)">
             <summary>
                 Creates a new Instance of an QueryCommand Builder that creates Database aware querys
@@ -3296,6 +3296,14 @@
         <member name="P:JPB.DataAccess.Query.InternalContainerContainer.AutoLinebreak">
             <summary>
                 If enabled the IQueryContainer will insert linebreaks after some Commands
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.InternalContainerContainer.AccessLayer">
+            <summary>
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.InternalContainerContainer.ForType">
+            <summary>
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Query.InternalContainerContainer.GetEnumerator">
@@ -3339,20 +3347,15 @@
         </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`1.#ctor(JPB.DataAccess.Manager.DbAccessLayer)">
             <summary>
-            Creates a new Query
+                Creates a new Query
             </summary>
             <param name="database"></param>
         </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`1.ChangeType``1">
             <summary>
-            Wraps the current QueryBuilder into a new Form by setting the Current query type
+                Wraps the current QueryBuilder into a new Form by setting the Current query type
             </summary>
             <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Query.QueryBuilder`1.Clone">
-            <summary>
-            </summary>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`1.ForResult``1">
@@ -3362,9 +3365,14 @@
             <typeparam name="E"></typeparam>
             <returns></returns>
         </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilder`1.Clone">
+            <summary>
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Query.QueryBuilder`1.ForResult">
             <summary>
-            	Executes the current QueryBuilder
+                Executes the current QueryBuilder
             </summary>
             <returns></returns>
         </member>
@@ -3399,14 +3407,14 @@
         </member>
         <member name="M:JPB.DataAccess.Query.MsQueryBuilderExtentions.SetVariable(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery},System.String,System.Object)">
             <summary>
-            	Declares a new Variable of the Given SQL Type by using its length 
+                Declares a new Variable of the Given SQL Type by using its length
             </summary>
             <typeparam name="T"></typeparam>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Query.MsQueryBuilderExtentions.DeclareVariable(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery},System.String,System.Data.SqlDbType,System.Int32,System.Object)">
             <summary>
-            	Declares a new Variable of the Given SQL Type by using its length 
+                Declares a new Variable of the Given SQL Type by using its length
             </summary>
             <typeparam name="T"></typeparam>
             <returns></returns>
@@ -3419,7 +3427,7 @@
         </member>
         <member name="M:JPB.DataAccess.Query.MsQueryBuilderExtentions.ForXml(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.ISelectQuery},System.Type)">
             <summary>
-            Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
+                Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
             </summary>
             <param name="query"></param>
             <param name="target"></param>
@@ -3580,6 +3588,152 @@
                 QueryCommand string
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Add``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},JPB.DataAccess.Query.GenericQueryPart)">
+            <summary>
+                Adds a QueryCommand part to the Local collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Add``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},JPB.DataAccess.Query.GenericQueryPart)">
+            <summary>
+                Adds a QueryCommand part to the Local collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryQ``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,JPB.DataAccess.Contacts.IQueryParameter[])">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryCommand``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},System.Data.IDbCommand)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryCommand``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Data.IDbCommand)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryText``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object[])">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery})">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery},System.Type)">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type)">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0})">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Update``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},``0)">
+            <summary>
+                Adds a Update - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Update``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type,System.Object)">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.InBracket``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Action{JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.INestedRoot}})">
+            <summary>
+                Creates a Common Table Expression that selects a Specific type
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.AsPager``1(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
+            <summary>
+                Wraps the Existing command into a DataPager for the underlying Database
+                Accepts only Where statements
+                <example>
+                </example>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.AsPagerViewModel``2(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
+            <summary>
+                Wraps the Existing command into a DataPager for the underlying Database
+                Accepts only Where statements
+                <example>
+                </example>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Where``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
+            <summary>
+                Adds a SQL WHERE Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
+            <summary>
+                Adds And Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery})">
+            <summary>
+                Adds And Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Or(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
+            <summary>
+                Adds Or Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.WithParamerters``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Object)">
+            <summary>
+                Adds Parameter to the QueryCommand object without adding a Statement
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Query.QueryEagerEnumerator.Load">
             <summary>
                 Mehtod for async loading this will bring us some m secs
@@ -3624,7 +3778,8 @@
         </member>
         <member name="M:JPB.DataAccess.Query.GenericQueryPart.FromCommand(System.Data.IDbCommand)">
             <summary>
-                Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and parameter
+                Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and
+                parameter
             </summary>
             <param name="command"></param>
             <returns></returns>
@@ -3659,154 +3814,8 @@
         </member>
         <member name="T:JPB.DataAccess.Query.TApplyMode">
             <summary>
-            	Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the QueryCommand Builder
+                Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the QueryCommand Builder
             </summary>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Add``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},JPB.DataAccess.Query.GenericQueryPart)">
-            <summary>
-                Adds a QueryCommand part to the Local collection
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Add``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},JPB.DataAccess.Query.GenericQueryPart)">
-            <summary>
-                Adds a QueryCommand part to the Local collection
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryQ``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,JPB.DataAccess.Contacts.IQueryParameter[])">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryCommand``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},System.Data.IDbCommand)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryCommand``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Data.IDbCommand)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryText``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object[])">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery})">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery},System.Type)">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type)">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0})">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Update``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},``0)">
-            <summary>
-                Adds a Update - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Update``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type,System.Object)">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.InBracket``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Action{JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.INestedRoot}})">
-            <summary>
-                Creates a Common Table Expression that selects a Specific type
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.AsPager``1(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
-            <summary>
-                Wraps the Existing command into a DataPager for the underlying Database
-                Accepts only Where statements
-                <example>
-                </example>
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.AsPagerViewModel``2(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
-            <summary>
-                Wraps the Existing command into a DataPager for the underlying Database
-                Accepts only Where statements
-                <example>
-                </example>
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Where``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
-            <summary>
-                Adds a SQL WHERE Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
-            <summary>
-                Adds And Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery})">
-            <summary>
-                Adds And Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Or(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
-            <summary>
-                Adds Or Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.WithParamerters``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Object)">
-            <summary>
-                Adds Parameter to the QueryCommand object without adding a Statement
-            </summary>
-            <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.DataAccessAttribute">
             <summary>
@@ -3815,29 +3824,29 @@
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.DbAccessTypeAttribute">
             <summary>
-            Defines an 
+                Defines an
             </summary>
         </member>
         <member name="P:JPB.DataAccess.ModelsAnotations.DbAccessTypeAttribute.TargetDatabase">
             <summary>
-            Defines the Target database this Method creates an Script for
+                Defines the Target database this Method creates an Script for
             </summary>
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.MethodProxyAttribute">
             <summary>
-            	Sets an type to be associated with the current class.
-            	TO BE SUPPORTED
+                Sets an type to be associated with the current class.
+                TO BE SUPPORTED
             </summary>
         </member>
         <member name="M:JPB.DataAccess.ModelsAnotations.MethodProxyAttribute.#ctor(System.Type)">
             <summary>
-            Allows to create a proxy class that should contains Factory methods for the current class
+                Allows to create a proxy class that should contains Factory methods for the current class
             </summary>
             <param name="methodProxy"></param>
         </member>
         <member name="P:JPB.DataAccess.ModelsAnotations.MethodProxyAttribute.MethodProxy">
             <summary>
-            	The assocaiated type
+                The assocaiated type
             </summary>
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.AutoGenerateCtorAttribute">
@@ -3847,44 +3856,43 @@
         </member>
         <member name="M:JPB.DataAccess.ModelsAnotations.AutoGenerateCtorAttribute.#ctor">
             <summary>
-            Creates a new Instance without any Meta Infos
+                Creates a new Instance without any Meta Infos
             </summary>
         </member>
         <member name="P:JPB.DataAccess.ModelsAnotations.AutoGenerateCtorAttribute.CtorGeneratorMode">
             <summary>
-            Tells the framework how a factory for this class should be created
+                Tells the framework how a factory for this class should be created
             </summary>
         </member>
         <member name="P:JPB.DataAccess.ModelsAnotations.AutoGenerateCtorAttribute.FullSateliteImport">
             <summary>
-            If set to true all Assemblys that are used inside the base Assembly will be imported to the new one
+                If set to true all Assemblys that are used inside the base Assembly will be imported to the new one
             </summary>
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.CtorGeneratorMode">
             <summary>
-            Defines how an Constructor should be created
+                Defines how an Constructor should be created
             </summary>
         </member>
         <member name="F:JPB.DataAccess.ModelsAnotations.CtorGeneratorMode.Inhert">
             <summary>
-            Use and inherted class and set Propertys in its super Constructor. A Proxy will be created
+                Use and inherted class and set Propertys in its super Constructor. A Proxy will be created
             </summary>
         </member>
         <member name="F:JPB.DataAccess.ModelsAnotations.CtorGeneratorMode.FactoryMethod">
             <summary>
-            Should be used when the Constructor is private or class is sealed. No Proxy created
+                Should be used when the Constructor is private or class is sealed. No Proxy created
             </summary>
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.AutoGenerateCtorNamespaceAttribute">
             <summary>
-            Adds a namespace to the generated class
+                Adds a namespace to the generated class
             </summary>
         </member>
         <member name="M:JPB.DataAccess.ModelsAnotations.AutoGenerateCtorNamespaceAttribute.#ctor(System.String)">
             <summary>
-            Creates a new Attribute that is used for CodeGeneration
-            This Attributes tell the factory to include certain namespaces.
-            
+                Creates a new Attribute that is used for CodeGeneration
+                This Attributes tell the factory to include certain namespaces.
             </summary>
             <param name="usedNamespace"></param>
         </member>
@@ -3988,34 +3996,34 @@
                 Indicates this Property to be resolved as a ForeignKey column
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.ForeignKey">
-            <summary>
-            The Key on the Foreign table
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.ForeignTable">
-            <summary>
-            Table name of the Foreign constraint
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.ForeignType">
-            <summary>
-            The type of the table that is declared by ForginTable
-            </summary>
-        </member>
         <member name="M:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.#ctor(System.String,System.String)">
             <summary>
-            Declares a new Foreign key constraint
+                Declares a new Foreign key constraint
             </summary>
             <param name="foreignKey"></param>
             <param name="foreignTable"></param>
         </member>
         <member name="M:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.#ctor(System.String,System.Type)">
             <summary>
-            Declares a new Foreign key constraint
+                Declares a new Foreign key constraint
             </summary>
             <param name="foreignKey"></param>
             <param name="foreignTable"></param>
+        </member>
+        <member name="P:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.ForeignKey">
+            <summary>
+                The Key on the Foreign table
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.ForeignTable">
+            <summary>
+                Table name of the Foreign constraint
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.ForeignType">
+            <summary>
+                The type of the table that is declared by ForginTable
+            </summary>
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.PrimaryKeyAttribute">
             <summary>
