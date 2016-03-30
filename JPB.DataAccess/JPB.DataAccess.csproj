@@ -216,6 +216,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="JPB.DataAccess.licenseheader" />
+    <None Include="JPB.DataAccess.nuspec" />
     <None Include="strongNameKeyDataAccess.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
