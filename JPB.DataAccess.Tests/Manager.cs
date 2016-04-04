@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DebuggerHelper;
@@ -21,7 +22,7 @@ namespace JPB.DataAccess.Tests
 	{
 		private DbAccessLayer expectWrapper;
 
-		public const string SConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
+		public const string SConnectionString = "Data Source={0};Version=3;";
 		public DbAccessType DbAccessType
 		{
 			get { return DbAccessType.MsSql; }
@@ -38,14 +39,11 @@ namespace JPB.DataAccess.Tests
 				return expectWrapper;
 
 			string dbname = "testDB";
-
-
-
 			var sqlLiteFileName = dbname + ".sqlite";
 			if (File.Exists(sqlLiteFileName))
 				File.Delete(sqlLiteFileName);
 			File.Create(sqlLiteFileName).Close();
-			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
+			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, sqlLiteFileName));
 			expectWrapper.ExecuteGenericCommand(
 			expectWrapper.Database.CreateCommand(
 				string.Format(
@@ -58,17 +56,28 @@ namespace JPB.DataAccess.Tests
 
 	public class MsSQLManager : IManager
 	{
-		private static DbAccessLayer expectWrapper;
+		public MsSQLManager()
+		{
+			ConnectionType = "DefaultConnection";
 
-		public const string SConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
+			if (Environment.GetEnvironmentVariable("IsAppVayorBuild") == true.ToString())
+			{
+				ConnectionType = "CiConnection";
+			}
+		}
+
+		private static DbAccessLayer expectWrapper;
+		
 		public DbAccessType DbAccessType
 		{
 			get { return DbAccessType.MsSql; }
 		}
 
+		public string ConnectionType { get; set; }
+
 		public string ConnectionString
 		{
-			get { return SConnectionString; }
+			get { return ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString; }
 		}
 
 		public DbAccessLayer GetWrapper()

@@ -26,6 +26,7 @@ namespace JPB.DataAccess.Tests.PagerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
 		public void PagerCall()
 		{
 			//this test might be fail as the cleanup can produce a lock exception. Run this test as a standalone
@@ -84,9 +85,10 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				pager.LoadPage(expectWrapper);
 				Assert.AreEqual(pager.CurrentPageItems.Count, newPageSize);
+
+				#endregion
 			}
 
-			#endregion
 		}
 	}
 }
