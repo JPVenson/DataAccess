@@ -1,10 +1,7 @@
-﻿using System;
-using System.Configuration;
-using System.IO;
+﻿using System.Reflection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
 #if SqLite
@@ -18,120 +15,32 @@ namespace JPB.DataAccess.Tests
 		DbAccessLayer GetWrapper();
 	}
 
-	public class SqLiteManager : IManager
-	{
-		private DbAccessLayer expectWrapper;
-
-		public const string SConnectionString = "Data Source={0};Version=3;";
-		public DbAccessType DbAccessType
-		{
-			get { return DbAccessType.MsSql; }
-		}
-
-		public string ConnectionString
-		{
-			get { return SConnectionString; }
-		}
-
-		public DbAccessLayer GetWrapper()
-		{
-			if (expectWrapper != null)
-				return expectWrapper;
-
-			string dbname = "testDB";
-			var sqlLiteFileName = dbname + ".sqlite";
-			if (File.Exists(sqlLiteFileName))
-				File.Delete(sqlLiteFileName);
-			File.Create(sqlLiteFileName).Close();
-			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, sqlLiteFileName));
-			expectWrapper.ExecuteGenericCommand(
-			expectWrapper.Database.CreateCommand(
-				string.Format(
-					"CREATE TABLE {0}({1} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, {2} TEXT);",
-					UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
-		
-			return expectWrapper;
-		}
-	}
-
-	public class MsSQLManager : IManager
-	{
-		public MsSQLManager()
-		{
-			ConnectionType = "DefaultConnection";
-
-			if (Environment.GetEnvironmentVariable("IsAppVayorBuild") == true.ToString())
-			{
-				ConnectionType = "CiConnection";
-			}
-		}
-
-		private static DbAccessLayer expectWrapper;
-		
-		public DbAccessType DbAccessType
-		{
-			get { return DbAccessType.MsSql; }
-		}
-
-		public string ConnectionType { get; set; }
-
-		public string ConnectionString
-		{
-			get { return ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString; }
-		}
-
-		public DbAccessLayer GetWrapper()
-		{
-			if (expectWrapper != null)
-				return expectWrapper;
-
-			string dbname = "testDB";
-
-			var redesginDatabase = string.Format(
-"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-dbname);
-
-			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
-
-			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString + "Initial Catalog={0};", dbname));
-			expectWrapper.ExecuteGenericCommand(
-			expectWrapper.Database.CreateCommand(
-				string.Format(
-					"CREATE TABLE {0} ( {1} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL, {2} NVARCHAR(MAX));",
-					UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
-																					 "AS BEGIN " +
-																					 "SELECT * FROM Users " +
-																					 "END"));
-
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
-																		  "AS BEGIN " +
-																		  "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
-																		  "END "));
-
-			return expectWrapper;
-		}
-	}
-
 	public class Manager : IManager
 	{
 		public DbAccessType GetElementType()
 		{
-			var category = TestContext.CurrentContext.Test.Properties["Category"];
-
-			if (category.Contains("MsSQL"))
+			var customAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<CategoryAttribute>();
+			if (customAttribute.Name == "MsSQL")
 			{
 				return DbAccessType.MsSql;
 			}
-			else if (category.Contains("SqLite"))
+			else if(customAttribute.Name == "SqLite")
 			{
 				return DbAccessType.SqLite;
 			}
 			return DbAccessType.Unknown;
+
+			//var category = TestContext.CurrentContext.Test.Properties["Category"];
+
+			//if (category.Contains("MsSQL"))
+			//{
+			//	return DbAccessType.MsSql;
+			//}
+			//else if (category.Contains("SqLite"))
+			//{
+			//	return DbAccessType.SqLite;
+			//}
+			//return DbAccessType.Unknown;
 		}
 
 		public DbAccessLayer GetWrapper()
@@ -140,9 +49,9 @@ dbname);
 
 			if (GetElementType() == DbAccessType.MsSql)
 			{
-				expectWrapper = new MsSQLManager().GetWrapper();
+				expectWrapper = new MsSqlManager().GetWrapper();
 			}
-			else if (GetElementType() == DbAccessType.MsSql)
+			else if (GetElementType() == DbAccessType.SqLite)
 			{
 				expectWrapper = new SqLiteManager().GetWrapper();
 			}

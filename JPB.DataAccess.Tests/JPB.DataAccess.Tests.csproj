@@ -87,9 +87,11 @@
     <Compile Include="LocalDbTests\LocalDbWithFkTest.cs" />
     <Compile Include="Manager.cs" />
     <Compile Include="MetaApiTests\MetaApiTest.cs" />
+    <Compile Include="MsSqlManager.cs" />
     <Compile Include="PagerTests\PagerUnitTest.cs" />
     <Compile Include="PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqLiteManager.cs" />
     <Compile Include="TestModels\CheckWrapperBaseTests\FooTest.cs" />
     <Compile Include="TestModels\CheckWrapperBaseTests\Image.cs" />
     <Compile Include="TestModels\CheckWrapperBaseTests\TestProcA.cs" />
