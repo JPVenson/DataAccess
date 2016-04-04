@@ -12,15 +12,6 @@ namespace JPB.DataAccess.Tests
 		public MsSqlManager()
 		{
 			ConnectionType = "DefaultConnection";
-
-			Console.WriteLine("---------------------------------------------");
-			Console.WriteLine("Environment Variables");
-			Hashtable variables = Environment.GetEnvironmentVariables() as Hashtable;
-			foreach (DictionaryEntry item in variables)
-			{
-				Console.WriteLine(string.Format("{0} - '{1}'", item.Key, item.Value));
-			}
-
 			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
 			{
 				ConnectionType = "CiConnection";
