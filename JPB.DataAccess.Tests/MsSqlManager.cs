@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
@@ -11,7 +13,15 @@ namespace JPB.DataAccess.Tests
 		{
 			ConnectionType = "DefaultConnection";
 
-			if (Environment.GetEnvironmentVariable("IsAppVayorBuild") == true.ToString())
+			Console.WriteLine("---------------------------------------------");
+			Console.WriteLine("Environment Variables");
+			Hashtable variables = Environment.GetEnvironmentVariables() as Hashtable;
+			foreach (DictionaryEntry item in variables)
+			{
+				Console.WriteLine(string.Format("{0} - '{1}'", item.Key, item.Value));
+			}
+
+			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
 			{
 				ConnectionType = "CiConnection";
 			}
