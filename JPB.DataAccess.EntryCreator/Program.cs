@@ -16,6 +16,7 @@ using System.Windows;
 using JPB.DataAccess.EntityCreator.MsSql;
 using System.Xml.Serialization;
 using System.Collections.Generic;
+using System.Reflection;
 using Clipboard = System.Windows.Clipboard;
 using MessageBox = System.Windows.MessageBox;
 using TextDataFormat = System.Windows.TextDataFormat;
@@ -38,6 +39,14 @@ namespace JPB.DataAccess.EntityCreator
 				if (File.Exists(args[0]))
 				{
 					AutoConsole = new AutoConsole(args[0]);
+
+					var version = Assembly.GetExecutingAssembly().GetName().Version;
+					if (new Version(AutoConsole.Options.Version) != version)
+					{
+						Console.WriteLine("WARNING");
+						Console.WriteLine(string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.", version, AutoConsole.Options.Version));
+						Console.WriteLine("There might be errors or unexpected Behavor");
+					}
 				}
 				else
 				{
