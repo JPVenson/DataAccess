@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
@@ -19,15 +20,20 @@ namespace JPB.DataAccess.Tests
 	{
 		public DbAccessType GetElementType()
 		{
+			Console.WriteLine("---------------------------------------------");
+			Console.WriteLine("Element type Lookup");
 			var customAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<CategoryAttribute>();
 			if (customAttribute.Name == "MsSQL")
 			{
+				Console.WriteLine("Found MsSQL");
 				return DbAccessType.MsSql;
 			}
-			else if(customAttribute.Name == "SqLite")
+			else if (customAttribute.Name == "SqLite")
 			{
+				Console.WriteLine("Found SqLite");
 				return DbAccessType.SqLite;
 			}
+			Console.WriteLine("Found NON ERROR");
 			return DbAccessType.Unknown;
 
 			//var category = TestContext.CurrentContext.Test.Properties["Category"];
@@ -46,12 +52,12 @@ namespace JPB.DataAccess.Tests
 		public DbAccessLayer GetWrapper()
 		{
 			DbAccessLayer expectWrapper = null;
-
-			if (GetElementType() == DbAccessType.MsSql)
+			var elementType = GetElementType();
+			if (elementType == DbAccessType.MsSql)
 			{
 				expectWrapper = new MsSqlManager().GetWrapper();
 			}
-			else if (GetElementType() == DbAccessType.SqLite)
+			else if (elementType == DbAccessType.SqLite)
 			{
 				expectWrapper = new SqLiteManager().GetWrapper();
 			}
@@ -67,58 +73,3 @@ namespace JPB.DataAccess.Tests
 		}
 	}
 }
-
-
-/*
-
-#if MsSql
-		public const string SConnectionString = "Data Source=(localdb)\\ProjectsV12;Integrated Security=True;";
-		public DbAccessType DbAccessType
-		{
-			get { return DbAccessType.MsSql; }
-		}
-
-				public string ConnectionString
-		{
-			get { return SConnectionString; }
-		}
-#endif
-
-#if SqLite
-		public const string SConnectionString = "Data Source=testDB.sqlite;Version=3;New=True;PRAGMA journal_mode=WAL;";
-		public DbAccessType DbAccessType
-		{
-			get { return DbAccessType.SqLite; }
-		}
-
-				public string ConnectionString
-		{
-			get { return SConnectionString; }
-		}
-#endif
-
-		public DbAccessLayer GetWrapper()
-		{
-			if (expectWrapper != null)
-				return expectWrapper;
-
-			string dbname = "testDB";
-
-#if SqLite
-			
-#endif
-
-#if MsSql
-		
-#endif
-			DbConfig.ConstructorSettings.CreateDebugCode = false;
-
-			Assert.NotNull(expectWrapper);
-			bool checkDatabase = expectWrapper.CheckDatabase();
-			Assert.IsTrue(checkDatabase);
-
-			expectWrapper.Multipath = true;
-			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
-			return expectWrapper;
-		}
-*/
