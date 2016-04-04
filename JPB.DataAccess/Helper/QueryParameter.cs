@@ -18,8 +18,8 @@ namespace JPB.DataAccess.Helper
 	/// </summary>
 	public class QueryParameter : IQueryParameter
 	{
-		private object m_value;
-		private Type m_sourceType;
+		private object _value;
+		private Type _sourceType;
 		// ReSharper disable CSharpWarnings::CS1591
 		private QueryParameter()
 		{
@@ -52,21 +52,23 @@ namespace JPB.DataAccess.Helper
 
 		public object Value
 		{
-			get { return m_value; }
+			get { return _value; }
 			set
 			{
 				SourceType = value == null ? DBNull.Value.GetType() : value.GetType();
-				m_value = value;
+				_value = value;
 			}
 		}
 
 		public Type SourceType
 		{
-			get { return m_sourceType; }
+			get { return _sourceType; }
 			set
 			{
-				m_sourceType = value;
-				SourceDbType = DbAccessLayer.Map(value).Value;
+				_sourceType = value;
+				var dbType = DbAccessLayer.Map(value);
+				if (dbType != null)
+					SourceDbType = dbType.Value;
 			}
 		}
 

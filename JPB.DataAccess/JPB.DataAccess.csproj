@@ -182,7 +182,7 @@
     <Compile Include="Manager\DbAccessLayerExecuteProcedure.cs" />
     <Compile Include="Manager\DbAccessLayerInsert.cs" />
     <Compile Include="Manager\DbAccessLayerSelect.cs" />
-    <Compile Include="Manager\DBAccessLayerUpdate.cs" />
+    <Compile Include="Manager\DbAccessLayerUpdate.cs" />
     <Compile Include="Manager\DbAccessLayerValidation.cs" />
     <Compile Include="Manager\DbAccessType.cs" />
     <Compile Include="Manager\PreDefinedProviderCollection.cs" />
