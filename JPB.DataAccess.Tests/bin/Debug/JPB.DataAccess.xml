@@ -46,64 +46,64 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:JPB.DataAccess.AdoWrapper.MsSql.MsSql">
+        <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql">
             <summary>
                 Wrapps MsSQL spezifc data
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSql.CommandAsMsSql(System.Data.IDbCommand)">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql.CommandAsMsSql(System.Data.IDbCommand)">
             <summary>
             </summary>
             <returns></returns>
         </member>
-        <member name="T:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1">
+        <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1">
             <summary>
             </summary>
             <typeparam name="T"></typeparam>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.#ctor">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.#ctor">
             <summary>
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.TargetType">
+        <member name="P:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.TargetType">
             <summary>
                 Internal Use
             </summary>
         </member>
-        <member name="E:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.NewPageLoading">
+        <member name="E:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.NewPageLoading">
             <summary>
                 Raised if new Page is loading
             </summary>
         </member>
-        <member name="E:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.NewPageLoaded">
+        <member name="E:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.NewPageLoaded">
             <summary>
                 Raised if new page is Loaded
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.SyncHelper">
+        <member name="P:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.SyncHelper">
             <summary>
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.RaiseNewPageLoaded">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.RaiseNewPageLoaded">
             <summary>
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlUntypedDataPager`1.RaiseNewPageLoading">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager`1.RaiseNewPageLoading">
             <summary>
             </summary>
         </member>
-        <member name="T:JPB.DataAccess.AdoWrapper.MsSql.MsSqlDataConverterPager`2">
+        <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlDataConverterPager`2">
             <summary>
                 Converts all items from T to TE
             </summary>
             <typeparam name="T"></typeparam>
             <typeparam name="TE"></typeparam>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSql.MsSqlDataConverterPager`2.#ctor">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlDataConverterPager`2.#ctor">
             <summary>
             </summary>
         </member>
-        <member name="P:JPB.DataAccess.AdoWrapper.MsSql.MsSqlDataConverterPager`2.RaiseEvents">
+        <member name="P:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlDataConverterPager`2.RaiseEvents">
             <summary>
             </summary>
         </member>
@@ -1375,6 +1375,11 @@
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalIntPkProvider">
             <summary>
             
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalIntPkProvider.#ctor">
+            <summary>
+            Default primary key generation starts with 1 incriments by 1
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalLongPkProvider">

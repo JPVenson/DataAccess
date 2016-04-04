@@ -14,9 +14,10 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
-    [Serializable]
-    public class Options
-    {
-        public string[] Actions { get; set; }
-    }
+	[Serializable]
+	public class Options
+	{
+		public string Version { get; set; }
+		public string[] Actions { get; set; }
+	}
 }

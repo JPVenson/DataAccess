@@ -114,7 +114,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine(@"\compile");
 			Console.WriteLine("		Starts the Compiling of all Tables");
 			Console.WriteLine(@"\ns");
-			Console.WriteLine("		Defines a default Namespace");
+			Console.WriteLine("		Defines a default NewNamespace");
 			Console.WriteLine(@"\fkGen");
 			Console.WriteLine("		Generates ForgeinKeyDeclarations");
 			Console.WriteLine(@"\addConfigMethod");
@@ -229,6 +229,11 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine("Enter your DefaultNamespace");
 			var ns = Program.AutoConsole.GetNextOption();
 			foreach (var item in _tableNames.Concat(_views))
+			{
+				item.NewNamespace = ns;
+			}
+
+			foreach (var item in _storedProcs)
 			{
 				item.NewNamespace = ns;
 			}
@@ -850,6 +855,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				var targetCsName = proc.GetClassName();
 				var compiler = new ProcedureCompiler(TargetDir, targetCsName);
 				compiler.CompileHeader = this.GenerateCompilerHeader;
+				compiler.Namespace = proc.NewNamespace;
 				compiler.GenerateConfigMethod = GenerateConfigMethod;
 				compiler.TableName = proc.NewTableName;
 				if (proc.Parameter.ParamaterSpParams != null)

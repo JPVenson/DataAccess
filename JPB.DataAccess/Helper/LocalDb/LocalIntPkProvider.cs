@@ -14,7 +14,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		public LocalIntPkProvider()
 		{
-			_counter = 1;
+			_counter = 0;
 			Seed = 1;
 			Incriment = 1;
 		}
@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public int Seed { get; private set; }
 		public int Incriment { get; private set; }
 
-		private volatile int _counter = 1;
+		private volatile int _counter;
 
 		public Type GeneratingType
 		{

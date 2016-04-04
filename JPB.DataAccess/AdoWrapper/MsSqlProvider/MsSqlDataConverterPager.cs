@@ -6,12 +6,13 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using JPB.DataAccess.Contacts.Pager;
 
-namespace JPB.DataAccess.AdoWrapper.MsSql
+namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
 	///     Converts all items from T to TE

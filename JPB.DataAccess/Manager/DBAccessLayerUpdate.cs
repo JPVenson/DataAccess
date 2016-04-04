@@ -183,7 +183,7 @@ namespace JPB.DataAccess.Manager
 				DbPropertyInfoCache property;
 				classInfo.Propertys.TryGetValue(schemaName, out property);
 				var dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
-				queryBuilder.QueryQ(string.Format("{0} = @{1}", info, index), new QueryParameter(index.ToString(), dataValue));
+				queryBuilder.QueryQ(string.Format("{0} = @{1}", info, index), new QueryParameter(index.ToString(), dataValue, property.PropertyType));
 				if (index + 1 < propertyInfos.Length)
 					queryBuilder.QueryD(",");
 			}
