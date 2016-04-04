@@ -6,7 +6,7 @@ namespace JPB.DataAccess.Tests
 {
 	public class SqLiteManager : IManager
 	{
-		private DbAccessLayer expectWrapper;
+		private static DbAccessLayer expectWrapper;
 
 		public const string SConnectionString = "Data Source={0};";
 		public DbAccessType DbAccessType
