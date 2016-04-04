@@ -18,9 +18,9 @@ namespace JPB.DataAccess.Manager
 	{
 		private readonly Dictionary<DbAccessType, string> _preDefinedProvider = new Dictionary<DbAccessType, string>
 		{
-			{DbAccessType.MsSql, "JPB.DataAccess.AdoWrapper.MsSql.MsSql"},
-			{DbAccessType.OleDb, "JPB.DataAccess.AdoWrapper.OleDB.OleDb"},
-			{DbAccessType.Obdc, "JPB.DataAccess.AdoWrapper.Obdc.Obdc"},
+			{DbAccessType.MsSql, "JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql"},
+			{DbAccessType.OleDb, "JPB.DataAccess.AdoWrapper.OdbcProvider.OleDb"},
+			{DbAccessType.Obdc, "JPB.DataAccess.AdoWrapper.OleDBProvider.Obdc"},
 			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite"},
 		};
 
