@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Tests
 			get { return DbAccessType.MsSql; }
 		}
 
-		private string _connectionString;
+		private static string _connectionString;
 		public string ConnectionType { get; set; }
 
 		public string ConnectionString
@@ -33,7 +33,11 @@ namespace JPB.DataAccess.Tests
 			{
 				if (_connectionString != null)
 					return _connectionString;
-				return _connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
+				_connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
+				Console.WriteLine("-------------------------------------------");
+				Console.WriteLine("Connection String");
+				Console.WriteLine(_connectionString);
+				return _connectionString;
 			}
 		}
 
