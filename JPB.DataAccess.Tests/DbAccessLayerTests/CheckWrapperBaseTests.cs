@@ -140,19 +140,19 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol + "TEST");
 			});
 
-			var unexpected = typeof(Exception);
+//			var unexpected = typeof(Exception);
 
-#if MsSql
-			unexpected = typeof(SqlException);
-#endif
-#if SqLite
-			unexpected = typeof(SQLiteException);
-#endif
+//#if MsSql
+//			unexpected = typeof(SqlException);
+//#endif
+//#if SqLite
+//			unexpected = typeof(SQLiteException);
+//#endif
 
 			Assert.That(() =>
 			{
 				expectWrapper.Insert(new ConfigLessUser { PropertyB = insGuid });
-			}, Throws.Exception.TypeOf(unexpected));
+			}, Throws.Exception);
 		}
 
 		[Test]

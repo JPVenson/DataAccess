@@ -71,6 +71,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -97,11 +98,17 @@
     <Compile Include="..\JPB.DataAccess.Tests\MetaApiTests\MetaApiTest.cs">
       <Link>MetaApiTests\MetaApiTest.cs</Link>
     </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\MsSqlManager.cs">
+      <Link>MsSqlManager.cs</Link>
+    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerUnitTest.cs">
       <Link>PagerTests\PagerUnitTest.cs</Link>
     </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs">
       <Link>PocoPkEquallityTests\PocoPkEqualityComparerTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\SqLiteManager.cs">
+      <Link>SqLiteManager.cs</Link>
     </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\FooTest.cs">
       <Link>TestModels\CheckWrapperBaseTests\FooTest.cs</Link>
@@ -130,6 +137,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\JPB.DataAccess.Tests\App.config">
+      <Link>App.config</Link>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

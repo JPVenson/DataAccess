@@ -13,9 +13,11 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
@@ -80,6 +82,11 @@ namespace JPB.DataAccess.Manager
 		public DbAccessType DbAccessType { get; private set; }
 
 		/// <summary>
+		/// The default path for loading external Providers via DbAccessType
+		/// </summary>
+		public string DefaultLookupPath { get; private set; }
+
+		/// <summary>
 		///     Current Database
 		///     Can be used to write multi statements
 		///     Is used for ALL NonStatic statments creators
@@ -109,6 +116,7 @@ namespace JPB.DataAccess.Manager
 
 		internal DbAccessLayer(ILogger logger = null)
 		{
+			DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
 			_logger = logger;
 			if (logger == null)
 			{
@@ -136,7 +144,7 @@ namespace JPB.DataAccess.Manager
 			DbAccessType = dbAccessType;
 			Database = new DefaultDatabaseAccess();
 			var database =
-				ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value.GenerateStrategy(connection);
+				GenerateStrategy(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value, connection);
 			Database.Attach(database);
 			DatabaseStrategy = database;
 		}
@@ -153,7 +161,7 @@ namespace JPB.DataAccess.Manager
 
 			ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
-			var database = fullTypeNameToIDatabaseStrategy.GenerateStrategy(connection);
+			var database = GenerateStrategy(fullTypeNameToIDatabaseStrategy, String.Concat((object) connection));
 
 			Database = new DefaultDatabaseAccess();
 			Database.Attach(database);
@@ -189,6 +197,66 @@ namespace JPB.DataAccess.Manager
 
 			DbAccessType = DbAccessType.Unknown;
 			Database = database;
+		}
+
+		internal IDatabaseStrategy GenerateStrategy(string fullValidIdentifyer, string connection)
+		{
+			if (String.IsNullOrEmpty(fullValidIdentifyer))
+				throw new ArgumentException("Type was not found");
+
+			var type = Type.GetType(fullValidIdentifyer);
+			if (type == null)
+			{
+				var parallelQuery = Directory.EnumerateFiles(DefaultLookupPath, "*.dll",
+					SearchOption.TopDirectoryOnly);
+
+				//Assembly assam = null;
+
+				Parallel.ForEach(parallelQuery, (s, e) =>
+				{
+					Assembly loadFile;
+					try
+					{
+						loadFile = Assembly.LoadFile(s);
+					}
+					catch (Exception)
+					{
+						return;
+					}
+					var resolve = loadFile.GetType(fullValidIdentifyer);
+					if (resolve != null)
+					{
+						type = resolve;
+						//assam = loadFile;
+						e.Break();
+					}
+				});
+
+				if (type == null)
+					throw new ArgumentException("Type was not found");
+			}
+
+			//check the type to be a Strategy
+
+			if (!typeof(IDatabaseStrategy).IsAssignableFrom(type))
+			{
+				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
+			}
+
+			//try constructor injection
+			var ctOfType =
+				type.GetConstructors()
+					.FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
+			if (ctOfType != null)
+			{
+				return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
+			}
+			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
+			if (instanceOfType == null)
+				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
+
+			instanceOfType.ConnectionString = connection;
+			return instanceOfType;
 		}
 
 		private void ResolveDbType(string fullTypeNameToIDatabaseStrategy)

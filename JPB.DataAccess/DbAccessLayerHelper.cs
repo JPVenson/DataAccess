@@ -364,66 +364,6 @@ namespace JPB.DataAccess
 			//return db.MergeTextToParameters(mergedCommandText, @base, toInsert, autoRename);
 		}
 
-		internal static IDatabaseStrategy GenerateStrategy(this string fullValidIdentifyer, string connection)
-		{
-			if (String.IsNullOrEmpty(fullValidIdentifyer))
-				throw new ArgumentException("Type was not found");
-
-			var type = Type.GetType(fullValidIdentifyer);
-			if (type == null)
-			{
-				var parallelQuery = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*.dll",
-					SearchOption.TopDirectoryOnly);
-
-				//Assembly assam = null;
-
-				Parallel.ForEach(parallelQuery, (s, e) =>
-				{
-					Assembly loadFile;
-					try
-					{
-						loadFile = Assembly.LoadFile(s);
-					}
-					catch (Exception)
-					{
-						return;
-					}
-					var resolve = loadFile.GetType(fullValidIdentifyer);
-					if (resolve != null)
-					{
-						type = resolve;
-						//assam = loadFile;
-						e.Break();
-					}
-				});
-
-				if (type == null)
-					throw new ArgumentException("Type was not found");
-			}
-
-			//check the type to be a Strategy
-
-			if (!typeof(IDatabaseStrategy).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
-			}
-
-			//try constructor injection
-			var ctOfType =
-				type.GetConstructors()
-					.FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
-			if (ctOfType != null)
-			{
-				return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
-			}
-			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
-			if (instanceOfType == null)
-				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
-
-			instanceOfType.ConnectionString = connection;
-			return instanceOfType;
-		}
-
 		/// <summary>
 		///     Creates a new Instance based on possible Ctor's and the given
 		///     <paramref name="reader" />
