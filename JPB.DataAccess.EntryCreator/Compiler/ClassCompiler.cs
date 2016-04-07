@@ -102,7 +102,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 		//public CodeMemberMethod GenerateTypeConstructor(
 		//	IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
 		//{
-		//	return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn, NewNamespace);
+		//	return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn, Namespace);
 		//}
 
 		private Type[] _externalTypes;

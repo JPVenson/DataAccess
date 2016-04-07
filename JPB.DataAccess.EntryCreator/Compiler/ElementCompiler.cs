@@ -295,8 +295,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 					cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
 
 					var compileUnit = new CodeCompileUnit();
-
-
+					
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System.CodeDom.Compiler"));

@@ -2299,6 +2299,11 @@
                 Selected dbAccessType
             </summary>
         </member>
+        <member name="P:JPB.DataAccess.Manager.DbAccessLayer.DefaultLookupPath">
+            <summary>
+            The default path for loading external Providers via DbAccessType
+            </summary>
+        </member>
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.Database">
             <summary>
                 Current Database

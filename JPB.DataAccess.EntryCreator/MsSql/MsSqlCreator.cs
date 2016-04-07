@@ -21,19 +21,37 @@ using System.Xml.Serialization;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
-	public class MsSqlCreator : IEntryCreator
+	public interface IMsSqlCreator
+	{
+		IEnumerable<ITableInfoModel> Tables { get; set; }
+		IEnumerable<Dictionary<int, string>> Enums { get; }
+		IEnumerable<ITableInfoModel> Views { get; set; }
+		IEnumerable<StoredPrcInfoModel> StoredProcs { get; }
+		string TargetDir { get; set; }
+		bool GenerateConstructor { get; set; }
+		bool GenerateForgeinKeyDeclarations { get; set; }
+		bool GenerateCompilerHeader { get; set; }
+		bool GenerateConfigMethod { get; set; }
+		string Namespace { get; set; }
+		string SqlVersion { get; set; }
+		void CreateEntrys(string connection, string outputPath, string database);
+		void Compile();
+	}
+
+	public class MsSqlCreator : IEntryCreator, IMsSqlCreator
 	{
 		public static DbAccessLayer Manager;
-		private List<TableInfoModel> _tableNames;
-		private List<Dictionary<int, string>> _enums;
-		private List<TableInfoModel> _views;
-		private List<StoredPrcInfoModel> _storedProcs;
+		public IEnumerable<ITableInfoModel> Tables { get; set; }
+		public IEnumerable<Dictionary<int, string>> Enums { get; private set; }
+		public IEnumerable<ITableInfoModel> Views { get; set; }
+		public IEnumerable<StoredPrcInfoModel> StoredProcs { get; private set; }
 
 		public string TargetDir { get; set; }
-		public bool WithAutoCtor { get; set; }
+		public bool GenerateConstructor { get; set; }
 		public bool GenerateForgeinKeyDeclarations { get; set; }
 		public bool GenerateCompilerHeader { get; set; }
 		public bool GenerateConfigMethod { get; set; }
+		public string Namespace { get; set; }
 
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
@@ -51,13 +69,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			if (!checkDatabase)
 			{
-				Console.WriteLine("Database not accessible. Maybe wrong Connection or no Selected Database?");
+				throw new Exception("Database not accessible. Maybe wrong Connection or no Selected Database?");
 				return;
 			}
 			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
 			if (string.IsNullOrEmpty(databaseName))
 			{
-				Console.WriteLine("Database not exists. Maybe wrong Connection or no Selected Database?");
+				throw new Exception("Database not exists. Maybe wrong Connection or no Selected Database?");
 				return;
 			}
 			Console.WriteLine("Connection OK ... Reading Server Version ...");
@@ -68,12 +86,12 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			Console.WriteLine("Reading Tables from {0} ...", databaseName);
 
-			_tableNames = Manager.Select<TableInformations>().Select(s => new TableInfoModel(s, databaseName)).ToList();
-			_views = Manager.Select<ViewInformation>().Select(s => new TableInfoModel(s, databaseName)).ToList();
-			_storedProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
+			Tables = Manager.Select<TableInformations>().Select(s => new TableInfoModel(s, databaseName)).ToList();
+			Views = Manager.Select<ViewInformation>().Select(s => new TableInfoModel(s, databaseName)).ToList();
+			StoredProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
 
-			Console.WriteLine("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", _tableNames.Count, _views.Count, _storedProcs.Count);
-			_enums = new List<Dictionary<int, string>>();
+			Console.WriteLine("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", Tables.Count(), Views.Count(), StoredProcs.Count());
+			Enums = new List<Dictionary<int, string>>();
 			RenderMenu();
 		}
 
@@ -88,23 +106,23 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		{
 			Console.WriteLine("Tables:");
 			int i = 0;
-			for (; i < _tableNames.Count; i++)
+			for (; i < Tables.Count(); i++)
 			{
-				Console.WriteLine("{0} \t {1}", i, _tableNames[i].Info.TableName);
+				Console.WriteLine("{0} \t {1}", i, Tables.ToArray()[i].Info.TableName);
 			}
 
 			Console.WriteLine("Views:");
 			int j = i;
-			for (; j < _views.Count + i; j++)
+			for (; j < Views.Count() + i; j++)
 			{
-				Console.WriteLine("{0} \t {1}", j, _views[j - i].Info.TableName);
+				Console.WriteLine("{0} \t {1}", j, Views.ToArray()[j - i].Info.TableName);
 			}
 
 			Console.WriteLine("Procedures:");
 			int k = j;
-			for (; k < _storedProcs.Count + j; k++)
+			for (; k < StoredProcs.Count() + j; k++)
 			{
-				Console.WriteLine("{0} \t {1}", k, _storedProcs[k - j].Parameter.TableName);
+				Console.WriteLine("{0} \t {1}", k, StoredProcs.ToArray()[k - j].Parameter.TableName);
 			}
 
 			Console.WriteLine("Actions: ");
@@ -114,7 +132,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine(@"\compile");
 			Console.WriteLine("		Starts the Compiling of all Tables");
 			Console.WriteLine(@"\ns");
-			Console.WriteLine("		Defines a default NewNamespace");
+			Console.WriteLine("		Defines a default Namespace");
 			Console.WriteLine(@"\fkGen");
 			Console.WriteLine("		Generates ForgeinKeyDeclarations");
 			Console.WriteLine(@"\addConfigMethod");
@@ -144,19 +162,19 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			var hasSelectTable = int.TryParse(input, out result);
 			if (hasSelectTable)
 			{
-				if (result > _tableNames.Count || result < 0)
+				if (result > Tables.Count() || result < 0)
 				{
 					Console.WriteLine("Unvalid number");
 					RenderMenu();
 					return;
 				}
-				
-				RenderTableMenu(_tableNames.ElementAt(result));
+
+				RenderTableMenu(Tables.ElementAt(result));
 			}
 
-			var tableName = _tableNames.FirstOrDefault(s => s.GetClassName() == readLine);
+			var tableName = Tables.FirstOrDefault(s => s.GetClassName() == readLine);
 
-			if(tableName != null)
+			if (tableName != null)
 			{
 				RenderTableMenu(tableName);
 			}
@@ -175,7 +193,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						SetForgeinKeyDeclarationCreation();
 						break;
 					case @"\compile":
-						RenderCompiler();
+						Compile();
 						break;
 					case @"\withautoctor":
 						SetRenderAutoCtor();
@@ -185,7 +203,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						break;
 					case @"\addcompilerheader":
 						SetCompilerHeader();
-						break;					
+						break;
 					case @"\exit":
 						return;
 
@@ -219,8 +237,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private void SetRenderAutoCtor()
 		{
-			WithAutoCtor = !WithAutoCtor;
-			Console.WriteLine("Auto Ctor is {0}", WithAutoCtor ? "set" : "unset");
+			GenerateConstructor = !GenerateConstructor;
+			Console.WriteLine("Auto Ctor is {0}", GenerateConstructor ? "set" : "unset");
 			RenderMenuAction();
 		}
 
@@ -228,15 +246,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		{
 			Console.WriteLine("Enter your DefaultNamespace");
 			var ns = Program.AutoConsole.GetNextOption();
-			foreach (var item in _tableNames.Concat(_views))
-			{
-				item.NewNamespace = ns;
-			}
-
-			foreach (var item in _storedProcs)
-			{
-				item.NewNamespace = ns;
-			}
+			Namespace = ns;
 			RenderMenuAction();
 		}
 
@@ -336,68 +346,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		}
 
 
-		private void AutoAlignNames()
+		public void AutoAlignNames()
 		{
-			Console.WriteLine("Auto rename Columns after common cs usage");
-			Console.WriteLine();
-			foreach (var tableInfoModel in _tableNames)
-			{
-				var tableName = tableInfoModel.Info.TableName;
-				Console.WriteLine("Check Table: {0}", tableName);
-				var newName = CheckOrAlterName(tableName);
-				if (newName != tableName)
-				{
-					Console.WriteLine("Alter Table'{0}' to '{1}'", tableName, newName);
-					tableInfoModel.NewTableName = newName;
-				}
-
-				Console.WriteLine();
-
-				foreach (var columnInfo in tableInfoModel.ColumnInfos)
-				{
-					var columnName = columnInfo.ColumnInfo.ColumnName;
-					Console.WriteLine("\tCheck Column: {0}", columnName);
-					var newColumnName = CheckOrAlterName(columnName);
-					if (newColumnName != columnName)
-					{
-						Console.WriteLine("\tAlter Column'{0}' to '{1}'", columnName, newColumnName);
-						columnInfo.NewColumnName = newColumnName;
-					}
-				}
-			}
-
-			Console.WriteLine("Renaming is done");
+			SharedMethods.AutoAlignNames(this.Tables);
 			RenderMenuAction();
 		}
 
-		private static readonly char[] unvalid = { '_', ' ' };
-
-		private string CheckOrAlterName(string name)
-		{
-			var newName = name;
-
-			foreach (var unvalidPart in unvalid)
-			{
-				if (newName.Contains(unvalidPart))
-				{
-					var indexOfElement = newName.IndexOf(unvalidPart.ToString(CultureInfo.InvariantCulture), System.StringComparison.Ordinal) + 1;
-					if (indexOfElement < newName.Length)
-					{
-						var elementAt = newName.ElementAt(indexOfElement);
-						if (!unvalid.Contains(elementAt))
-						{
-							var remove = newName.Remove(indexOfElement, 1);
-							newName = remove.Insert(indexOfElement, elementAt.ToString(CultureInfo.InvariantCulture).ToUpper());
-						}
-					}
-					newName = newName.Replace(unvalidPart.ToString(CultureInfo.InvariantCulture), string.Empty);
-				}
-			}
-
-			return newName;
-		}
-
-		private void RenderTableMenu(TableInfoModel selectedTable)
+		private void RenderTableMenu(ITableInfoModel selectedTable)
 		{
 			Console.WriteLine("Actions:");
 
@@ -618,7 +573,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 									Console.WriteLine("The Enum table '{0}' does not contains exactly one column of type int", column.ForgeinKeyDeclarations.TableName);
 									break;
 								}
-								
+
 								column.EnumDeclaration = new EnumDeclarationModel();
 								column.EnumDeclaration.Name = column.ForgeinKeyDeclarations.TableName + "LookupValues";
 
@@ -740,18 +695,18 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					case @"\back":
 						RenderMenu();
 						return;
-					default:						
+					default:
 						break;
 				}
 
 			RenderTableMenu(selectedTable);
 		}
 
-		private void RenderCompiler()
+		public void Compile()
 		{
 			Console.WriteLine("Start compiling with selected options");
 
-			var elements = _tableNames.Concat(_views);
+			var elements = Tables.Concat(Views);
 
 			foreach (var item in elements.Where(f => f.ColumnInfos.Any(e => e.EnumDeclaration != null)))
 			{
@@ -762,11 +717,12 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						var targetCsName = column.EnumDeclaration.Name;
 						var compiler = new EnumCompiler(TargetDir, targetCsName);
 						compiler.CompileHeader = this.GenerateCompilerHeader;
-						compiler.Namespace = item.NewNamespace;
+						compiler.Namespace = Namespace;
 						compiler.GenerateConfigMethod = GenerateConfigMethod;
 						foreach (var enumMember in column.EnumDeclaration.Values)
 						{
-							compiler.Add(new CodeMemberField() {
+							compiler.Add(new CodeMemberField()
+							{
 								Name = enumMember.Value,
 								InitExpression = new CodePrimitiveExpression(enumMember.Key)
 							});
@@ -779,75 +735,10 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			foreach (var tableInfoModel in elements)
 			{
-				if (tableInfoModel.Exclude)
-					continue;
-
-				var targetCsName = tableInfoModel.GetClassName();
-
-				var compiler = new ClassCompiler(TargetDir, targetCsName);
-				compiler.CompileHeader = this.GenerateCompilerHeader;
-				compiler.Namespace = tableInfoModel.NewNamespace;
-				compiler.TableName = tableInfoModel.Info.TableName;
-				compiler.GenerateConfigMethod = GenerateConfigMethod;
-
-				if (tableInfoModel.CreateSelectFactory || WithAutoCtor)
-				{
-					compiler.GenerateTypeConstructorBasedOnElements(tableInfoModel.ColumnInfos.Where(s => !s.Exclude));
-				}
-
-				foreach (var columInfoModel in tableInfoModel.ColumnInfos)
-				{
-					if (columInfoModel.Exclude)
-						continue;
-
-					var codeMemberProperty = compiler.AddProperty(columInfoModel);
-					if (columInfoModel.PrimaryKey)
-					{
-						codeMemberProperty.CustomAttributes.Add(
-							new CodeAttributeDeclaration(typeof(PrimaryKeyAttribute).Name));
-					}
-					if (columInfoModel.InsertIgnore)
-					{
-						codeMemberProperty.CustomAttributes.Add(
-							new CodeAttributeDeclaration(typeof(InsertIgnoreAttribute).Name));
-					}
-					if (columInfoModel.ForgeinKeyDeclarations != null)
-					{
-						var isRefTypeKnown = _tableNames.FirstOrDefault(s => s.Info.TableName == columInfoModel.ForgeinKeyDeclarations.TableName);
-
-						if (isRefTypeKnown == null)
-						{
-							codeMemberProperty.CustomAttributes.Add(
-	new CodeAttributeDeclaration(typeof(ForeignKeyDeclarationAttribute).Name,
-	new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TargetColumn)),
-	new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TableName))));
-						}
-						else
-						{
-							codeMemberProperty.CustomAttributes.Add(
-	new CodeAttributeDeclaration(typeof(ForeignKeyDeclarationAttribute).Name,
-	new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TargetColumn)),
-	new CodeAttributeArgument(new CodeTypeOfExpression(isRefTypeKnown.GetClassName()))));
-						}
-					}
-
-					if (columInfoModel.ColumnInfo.TargetType2 == "Timestamp")
-					{
-						codeMemberProperty.CustomAttributes.Add(
-						   new CodeAttributeDeclaration(typeof(RowVersionAttribute).Name));
-					}
-				}
-
-				if (tableInfoModel.CreateFallbackProperty)
-				{
-					compiler.AddFallbackProperty();
-				}
-
-				Console.WriteLine("Compile Class {0}", compiler.Name);
-				compiler.Compile(tableInfoModel.ColumnInfos);
+				SharedMethods.CompileTable(tableInfoModel, this);
 			}
 
-			foreach (var proc in _storedProcs)
+			foreach (var proc in StoredProcs)
 			{
 				if (proc.Exclude)
 					continue;
@@ -855,7 +746,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				var targetCsName = proc.GetClassName();
 				var compiler = new ProcedureCompiler(TargetDir, targetCsName);
 				compiler.CompileHeader = this.GenerateCompilerHeader;
-				compiler.Namespace = proc.NewNamespace;
+				compiler.Namespace = Namespace;
 				compiler.GenerateConfigMethod = GenerateConfigMethod;
 				compiler.TableName = proc.NewTableName;
 				if (proc.Parameter.ParamaterSpParams != null)

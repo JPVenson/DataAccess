@@ -24,9 +24,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public StoredProcedureInformation Parameter { get; set; }
 		public bool Exclude { get; set; }
 		public string NewTableName { get; set; }
-
-		public string NewNamespace { get; set; }
-
+		
 		public StoredPrcInfoModel(StoredProcedureInformation parameter)
 		{
 			Parameter = parameter;
@@ -61,7 +59,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public IDictionary<string, object> DataHolder { get; set; }
 	}
 
-	public class TableInfoModel
+	public class TableInfoModel : ITableInfoModel
 	{
 		public TableInformations Info { get; set; }
 		public string Database { get; set; }
@@ -71,7 +69,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public bool CreateFallbackProperty { get; set; }
 		public bool CreateSelectFactory { get; set; }
 		public bool CreateDataRecordLoader { get; set; }
-		public string NewNamespace { get; set; }
 
 		public TableInfoModel(TableInformations info, string database)
 		{
@@ -167,7 +164,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public string Name { get; set; }
 	}
 
-	public class ColumInfoModel
+	public class ColumInfoModel : IColumInfoModel
 	{
 		public ColumInfoModel(ColumnInfo columnInfo)
 		{

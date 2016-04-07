@@ -120,9 +120,12 @@
     <Compile Include="MsSql\ColumnInfo.cs" />
     <Compile Include="MsSql\DbTypeToCsType.cs" />
     <Compile Include="IEntryCreator.cs" />
+    <Compile Include="MsSql\IColumInfoModel.cs" />
+    <Compile Include="MsSql\ITableInfoModel.cs" />
     <Compile Include="MsSql\MsSqlCreator.cs" />
     <Compile Include="MsSql\NoYesConverter.cs" />
     <Compile Include="MsSql\Options.cs" />
+    <Compile Include="MsSql\SharedMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MsSql\TableInfoModel.cs" />
