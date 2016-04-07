@@ -31,14 +31,16 @@ namespace JPB.DataAccess.EntityCreator
 		{
 			var prog = new Program();
 
+			var pathToCommandSet = "";
 			string outputDir = "";
 			string connectionString = "";
 
 			if (args.Count() == 1)
 			{
-				if (File.Exists(args[0]))
+				pathToCommandSet = args[0];
+				if (File.Exists(pathToCommandSet))
 				{
-					AutoConsole = new AutoConsole(args[0]);
+					AutoConsole = new AutoConsole(pathToCommandSet);
 
 					var version = Assembly.GetExecutingAssembly().GetName().Version;
 					if (new Version(AutoConsole.Options.Version) != version)
@@ -137,8 +139,8 @@ namespace JPB.DataAccess.EntityCreator
 
 
 			new MsSqlCreator().CreateEntrys(connectionString, outputDir, string.Empty);
-			if (AutoConsole.Options == null && args.Length > 0)
-				AutoConsole.SaveStorage(args[0]);
+			if (AutoConsole.Options == null && pathToCommandSet != null)
+				AutoConsole.SaveStorage(pathToCommandSet);
 
 		}
 	}
