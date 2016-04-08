@@ -23,6 +23,7 @@ namespace JPB.DataAccess.EntityCreator.UI
 		public MainWindow()
 		{
 			InitializeComponent();
+			DataContext = new MainWindowViewModel();
 		}
 	}
 }

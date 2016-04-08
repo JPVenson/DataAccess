@@ -15,16 +15,19 @@ using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 using System.Data;
+using System.Xml.Serialization;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
+	[Serializable]
 	public class StoredPrcInfoModel
 	{
 		public StoredProcedureInformation Parameter { get; set; }
 		public bool Exclude { get; set; }
 		public string NewTableName { get; set; }
-		
+
 		public StoredPrcInfoModel(StoredProcedureInformation parameter)
 		{
 			Parameter = parameter;
@@ -59,25 +62,30 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public IDictionary<string, object> DataHolder { get; set; }
 	}
 
+	[Serializable]
 	public class TableInfoModel : ITableInfoModel
 	{
 		public TableInformations Info { get; set; }
 		public string Database { get; set; }
-		public List<ColumInfoModel> ColumnInfos { get; set; }
+		public IEnumerable<IColumInfoModel> ColumnInfos { get; set; }
 		public string NewTableName { get; set; }
 		public bool Exclude { get; set; }
 		public bool CreateFallbackProperty { get; set; }
 		public bool CreateSelectFactory { get; set; }
 		public bool CreateDataRecordLoader { get; set; }
+		public TableInfoModel()
+		{
 
-		public TableInfoModel(TableInformations info, string database)
+		}
+
+		public TableInfoModel(TableInformations info, string database, DbAccessLayer db)
 		{
 			CreateSelectFactory = true;
 			Info = info;
 			Database = database;
-			ColumnInfos = MsSqlCreator.Manager.Select<ColumnInfo>(new object[] { Info.TableName }).Select(s => new ColumInfoModel(s)).ToList();
+			ColumnInfos = db.Select<ColumnInfo>(new object[] { Info.TableName, database }).Select(s => new ColumInfoModel(s)).ToList();
 
-			var firstOrDefault = MsSqlCreator.Manager.RunPrimetivSelect(typeof(string),
+			var firstOrDefault = db.RunPrimetivSelect(typeof(string),
 				"SELECT COLUMN_NAME " +
 				"FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc " +
 				"JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu " +
@@ -95,7 +103,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				columInfoModel.PrimaryKey = true;
 
 
-			var forgeinKeyDeclarations = MsSqlCreator.Manager.Select<ForgeinKeyInfoModel>(new object[] { info.TableName, database });
+			var forgeinKeyDeclarations = db.Select<ForgeinKeyInfoModel>(new object[] { info.TableName, database });
 
 			foreach (var item in ColumnInfos)
 			{
@@ -115,6 +123,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		}
 	}
 
+	[Serializable]
 	public class ForgeinKeyInfoModel
 	{
 		public ForgeinKeyInfoModel()
@@ -154,18 +163,25 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		}
 	}
 
+	[Serializable]
 	public class EnumDeclarationModel
 	{
 		public EnumDeclarationModel()
 		{
 			Values = new Dictionary<int, string>();
 		}
-		public Dictionary<int,string> Values { get; private set; }
+		public Dictionary<int, string> Values { get; private set; }
 		public string Name { get; set; }
 	}
 
+	[Serializable]
 	public class ColumInfoModel : IColumInfoModel
 	{
+		public ColumInfoModel()
+		{
+
+		}
+
 		public ColumInfoModel(ColumnInfo columnInfo)
 		{
 			ColumnInfo = columnInfo;

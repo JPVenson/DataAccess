@@ -1,0 +1,140 @@
+﻿<UserControl x:Class="JPB.DataAccess.EntityCreator.UI.MsSQL.View.SqlEntityCreatorView"
+			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:local="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.View"
+			 xmlns:viewModel="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel"
+			 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+			 mc:Ignorable="d" 
+			 d:DesignHeight="300" d:DesignWidth="500" d:DataContext="{d:DesignInstance viewModel:SqlEntityCreatorViewModel}">
+	<DockPanel Dock="Top">
+		<DockPanel Dock="Top">
+			<Button DockPanel.Dock="Right" Command="{Binding ConnectToDatabaseCommand}" Content="Connect"/>
+			<Button Command="{Binding SaveConfigCommand}" Content="Save"></Button>
+			<Button Command="{Binding LoadConfigCommand}" Content="Load"></Button>
+			<Button Command="{Binding CompileCommand}" Content="Compile"></Button>
+			<Label DockPanel.Dock="Left" Content="Connection String:"/>
+			<TextBox Text="{Binding ConnectionString, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding NotConnected}"/>
+		</DockPanel>
+		<DockPanel Dock="Bottom">
+			<Label Content="{Binding Status}"></Label>
+		</DockPanel>
+		<DockPanel Dock="Top">
+
+			<xctk:PropertyGrid Width="450" Margin="10"
+										   SelectedObject="{Binding}"
+										   SelectedObjectType="{x:Type viewModel:TableInfoViewModel}"
+											AutoGenerateProperties="False">
+				<xctk:PropertyGrid.PropertyDefinitions>
+					<xctk:PropertyDefinition TargetProperties="GenerateConstructor" />
+					<xctk:PropertyDefinition TargetProperties="Namespace" />
+					<xctk:PropertyDefinition TargetProperties="GenerateForgeinKeyDeclarations" />
+					<xctk:PropertyDefinition TargetProperties="GenerateConfigMethod" />
+					<xctk:PropertyDefinition TargetProperties="GenerateCompilerHeader" />
+				</xctk:PropertyGrid.PropertyDefinitions>
+			</xctk:PropertyGrid>
+
+			<ScrollViewer>
+				<DockPanel>
+					<ListBox DockPanel.Dock="Left" ItemsSource="{Binding Tables}" SelectedItem="{Binding SelectedTable}">
+						<ListBox.ItemTemplate>
+							<DataTemplate DataType="{x:Type viewModel:TableInfoViewModel}">
+								<DockPanel>
+									<Label Content="{Binding Info.TableName}"></Label>
+									<Label Content=" | "></Label>
+									<Label Content="{Binding NewTableName}"></Label>
+								</DockPanel>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+
+					<DockPanel Dock="Left" DataContext="{Binding SelectedTable}">
+						<Button DockPanel.Dock="Top" Content="Preview" Command="{Binding CreatePreviewCommand}" />
+						<xctk:PropertyGrid Width="450" Margin="10"
+										   SelectedObject="{Binding}"
+										   SelectedObjectType="{x:Type viewModel:TableInfoViewModel}"
+											AutoGenerateProperties="False">
+							<xctk:PropertyGrid.PropertyDefinitions>
+								<xctk:PropertyDefinition TargetProperties="Database" />
+								<xctk:PropertyDefinition TargetProperties="NewTableName" />
+								<xctk:PropertyDefinition TargetProperties="Exclude" />
+								<xctk:PropertyDefinition TargetProperties="CreateFallbackProperty" />
+								<xctk:PropertyDefinition TargetProperties="CreateSelectFactory" />
+								<xctk:PropertyDefinition TargetProperties="CreateDataRecordLoader" />
+							</xctk:PropertyGrid.PropertyDefinitions>
+						</xctk:PropertyGrid>
+						<DockPanel Dock="Left">
+							<ListBox DockPanel.Dock="Left" ItemsSource="{Binding ColumnInfoModels}" SelectedItem="{Binding SelectedColumn}">
+								<ListBox.ItemTemplate>
+									<DataTemplate DataType="{x:Type viewModel:ColumnInfoViewModel}">
+										<DockPanel>
+											<Label Content="{Binding ColumnInfo.ColumnName}"></Label>
+											<Label Content=" | "></Label>
+											<Label Content="{Binding NewColumnName}"></Label>
+										</DockPanel>
+									</DataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+						</DockPanel>
+
+						<xctk:PropertyGrid Width="450" Margin="10"
+										   SelectedObject="{Binding SelectedColumn}"
+										   SelectedObjectType="{x:Type viewModel:ColumnInfoViewModel}"
+										AutoGenerateProperties="False">
+							<xctk:PropertyGrid.PropertyDefinitions>
+								<xctk:PropertyDefinition TargetProperties="NewColumnName" />
+								<xctk:PropertyDefinition TargetProperties="IsRowVersion" />
+								<xctk:PropertyDefinition TargetProperties="PrimaryKey" />
+								<xctk:PropertyDefinition TargetProperties="InsertIgnore" />
+								<xctk:PropertyDefinition TargetProperties="Exclude" />
+								<xctk:PropertyDefinition TargetProperties="ForgeinKeyDeclartaions" />
+							</xctk:PropertyGrid.PropertyDefinitions>
+						</xctk:PropertyGrid>
+					</DockPanel>
+				</DockPanel>
+			</ScrollViewer>
+		</DockPanel>
+	</DockPanel>
+</UserControl>
+<!--<Grid>
+	<Grid.ColumnDefinitions>
+		<ColumnDefinition />
+		<ColumnDefinition />
+	</Grid.ColumnDefinitions>
+	<Grid.RowDefinitions>
+		<RowDefinition />
+		<RowDefinition />
+		<RowDefinition />
+		<RowDefinition />
+		<RowDefinition />
+		<RowDefinition />
+		<RowDefinition />
+	</Grid.RowDefinitions>
+
+	<Label Grid.Row="0" Grid.Column="0" Content="Table Name"/>
+	<Label Grid.Row="1" Grid.Column="0" Content="CSharp Name"/>
+	<Label Grid.Row="2" Grid.Column="0" Content="Exclude from Build"/>
+	<Label Grid.Row="3" Grid.Column="0" Content="Fallback Property"/>
+	<Label Grid.Row="4" Grid.Column="0" Content="Select Factory"/>
+	<Label Grid.Row="5" Grid.Column="0" Content="Constructor"/>
+	<Label Grid.Row="6" Grid.Column="0" Content="Columns"/>
+	<TextBox Grid.Row="0" Grid.Column="1" IsEnabled="False" Text="{Binding Info.TableName}" />
+	<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewTableName}"/>
+	<CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding Exclude}"/>
+	<CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding CreateFallbackProperty}"/>
+	<CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding CreateSelectFactory}"/>
+	<CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding CreateDataRecordLoader}"/>
+	<DockPanel Grid.Row="5" Grid.Column="1">
+		<ListBox DockPanel.Dock="Left" ItemsSource="{Binding ColumnInfos}" SelectedItem="{Binding SelectedColumn}">
+			<ListBox.ItemTemplate>
+				<DataTemplate DataType="{x:Type viewModel:ColumnInfoViewModel}">
+					<Label Content="{Binding ColumnInfo.ColumnName}"></Label>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+		<DockPanel>
+
+		</DockPanel>
+	</DockPanel>
+</Grid>-->

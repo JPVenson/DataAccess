@@ -18,9 +18,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.View
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : UserControl
+	public partial class SqlEntityCreatorView : UserControl
 	{
-		public MainWindow()
+		public SqlEntityCreatorView()
 		{
 			InitializeComponent();
 		}

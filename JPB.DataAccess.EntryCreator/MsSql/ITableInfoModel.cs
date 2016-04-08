@@ -6,7 +6,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 	{
 		TableInformations Info { get; set; }
 		string Database { get; set; }
-		List<ColumInfoModel> ColumnInfos { get; set; }
+		IEnumerable<IColumInfoModel> ColumnInfos { get; }
 		string NewTableName { get; set; }
 		bool Exclude { get; set; }
 		bool CreateFallbackProperty { get; set; }

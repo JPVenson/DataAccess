@@ -1,5 +1,6 @@
 ﻿using System.CodeDom;
 using System.Collections.Generic;
+using System.IO;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Helper;
@@ -16,7 +17,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		}
 
-		public override void Compile(IEnumerable<ColumInfoModel> columnInfos)
+		public override void Compile(IEnumerable<IColumInfoModel> columnInfos, Stream to = null)
 		{
 			if (string.IsNullOrEmpty(TableName))
 			{

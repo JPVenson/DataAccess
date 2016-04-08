@@ -34,7 +34,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return codeMemberProperty;
 		}
 
-		internal CodeMemberProperty AddProperty(ColumInfoModel info)
+		internal CodeMemberProperty AddProperty(IColumInfoModel info)
 		{
 			var propertyName = info.GetPropertyName();
 			var targetType = info.ColumnInfo.TargetType.FullName;
@@ -107,7 +107,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		private Type[] _externalTypes;
 
-		internal void GenerateTypeConstructorBasedOnElements(IEnumerable<ColumInfoModel> columnInfos)
+		internal void GenerateTypeConstructorBasedOnElements(IEnumerable<IColumInfoModel> columnInfos)
 		{
 			Add(new CodeConstructor() {
 				Attributes = MemberAttributes.Public

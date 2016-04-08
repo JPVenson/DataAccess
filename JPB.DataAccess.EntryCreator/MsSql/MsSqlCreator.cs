@@ -21,26 +21,9 @@ using System.Xml.Serialization;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
-	public interface IMsSqlCreator
-	{
-		IEnumerable<ITableInfoModel> Tables { get; set; }
-		IEnumerable<Dictionary<int, string>> Enums { get; }
-		IEnumerable<ITableInfoModel> Views { get; set; }
-		IEnumerable<StoredPrcInfoModel> StoredProcs { get; }
-		string TargetDir { get; set; }
-		bool GenerateConstructor { get; set; }
-		bool GenerateForgeinKeyDeclarations { get; set; }
-		bool GenerateCompilerHeader { get; set; }
-		bool GenerateConfigMethod { get; set; }
-		string Namespace { get; set; }
-		string SqlVersion { get; set; }
-		void CreateEntrys(string connection, string outputPath, string database);
-		void Compile();
-	}
-
 	public class MsSqlCreator : IEntryCreator, IMsSqlCreator
 	{
-		public static DbAccessLayer Manager;
+		public DbAccessLayer Manager;
 		public IEnumerable<ITableInfoModel> Tables { get; set; }
 		public IEnumerable<Dictionary<int, string>> Enums { get; private set; }
 		public IEnumerable<ITableInfoModel> Views { get; set; }
@@ -86,8 +69,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			Console.WriteLine("Reading Tables from {0} ...", databaseName);
 
-			Tables = Manager.Select<TableInformations>().Select(s => new TableInfoModel(s, databaseName)).ToList();
-			Views = Manager.Select<ViewInformation>().Select(s => new TableInfoModel(s, databaseName)).ToList();
+			Tables = Manager.Select<TableInformations>().Select(s => new TableInfoModel(s, databaseName, Manager)).ToList();
+			Views = Manager.Select<ViewInformation>().Select(s => new TableInfoModel(s, databaseName, Manager)).ToList();
 			StoredProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
 
 			Console.WriteLine("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", Tables.Count(), Views.Count(), StoredProcs.Count());

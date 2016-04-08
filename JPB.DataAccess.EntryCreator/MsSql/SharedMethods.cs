@@ -2,6 +2,7 @@
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 	{
 		public static ILogger Logger = new DefaultLogger();
 
-		public static void CompileTable(ITableInfoModel tableInfoModel, IMsSqlCreator sourceCreator)
+		public static void CompileTable(ITableInfoModel tableInfoModel, IMsSqlCreator sourceCreator, Stream to = null)
 		{
 			if (tableInfoModel.Exclude)
 				return;
@@ -27,6 +28,10 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			compiler.CompileHeader = sourceCreator.GenerateCompilerHeader;
 			compiler.Namespace = sourceCreator.Namespace;
 			compiler.TableName = tableInfoModel.Info.TableName;
+			if (to != null)
+			{
+				compiler.WriteAllways = true;
+			}
 			compiler.GenerateConfigMethod = sourceCreator.GenerateConfigMethod;
 
 			if (tableInfoModel.CreateSelectFactory || sourceCreator.GenerateConstructor)
@@ -84,7 +89,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			}
 
 			Logger.WriteLine("Compile Class {0}", compiler.Name);
-			compiler.Compile(tableInfoModel.ColumnInfos);
+			compiler.Compile(tableInfoModel.ColumnInfos, to);
 		}
 
 		public static void AutoAlignNames(IEnumerable<ITableInfoModel> tableNames)

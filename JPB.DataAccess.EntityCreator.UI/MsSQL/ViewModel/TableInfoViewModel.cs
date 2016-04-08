@@ -4,17 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
+using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
 	public class TableInfoViewModel : AsyncViewModelBase, ITableInfoModel
 	{
-		public TableInfoModel SourceElement { get; set; }
+		private readonly IMsSqlCreator _compilerOptions;
+		public ITableInfoModel SourceElement { get; set; }
 
-		public TableInfoViewModel(TableInfoModel sourceElement)
+		public TableInfoViewModel(ITableInfoModel sourceElement, IMsSqlCreator compilerOptions)
 		{
+			_compilerOptions = compilerOptions;
 			SourceElement = sourceElement;
+			ColumnInfoModels = new ThreadSaveObservableCollection<ColumnInfoViewModel>(SourceElement.ColumnInfos.Select(f => new ColumnInfoViewModel(f)));
+			CreatePreviewCommand = new DelegateCommand(CreatePreviewExecute, CanCreatePreviewExecute);
 		}
 
 		public TableInformations Info
@@ -37,14 +43,35 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		public List<ColumInfoModel> ColumnInfos
+		private IColumInfoModel _selectedColumn;
+
+		public IColumInfoModel SelectedColumn
 		{
-			get { return SourceElement.ColumnInfos; }
+			get { return _selectedColumn; }
 			set
 			{
-				SourceElement.ColumnInfos = value;
-				SendPropertyChanged();
+				SendPropertyChanging(() => SelectedColumn);
+				_selectedColumn = value;
+				SendPropertyChanged(() => SelectedColumn);
 			}
+		}
+
+		private ThreadSaveObservableCollection<ColumnInfoViewModel> _columnInfoModels;
+
+		public ThreadSaveObservableCollection<ColumnInfoViewModel> ColumnInfoModels
+		{
+			get { return _columnInfoModels; }
+			set
+			{
+				SendPropertyChanging(() => ColumnInfoModels);
+				_columnInfoModels = value;
+				SendPropertyChanged(() => ColumnInfoModels);
+			}
+		}
+
+		public IEnumerable<IColumInfoModel> ColumnInfos
+		{
+			get { return ColumnInfoModels; }
 		}
 
 		public string NewTableName
@@ -100,6 +127,20 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		public string GetClassName()
 		{
 			return ((ITableInfoModel) SourceElement).GetClassName();
+		}
+
+		public DelegateCommand CreatePreviewCommand { get; private set; }
+
+		private void CreatePreviewExecute(object sender)
+		{
+			var previewWindwo = new ClassPreviewWindow();
+			previewWindwo.DataContext = new ClassPreviewViewModel(SourceElement, _compilerOptions);
+			previewWindwo.Show();
+		}
+
+		private bool CanCreatePreviewExecute(object sender)
+		{
+			return true;
 		}
 	}
 }

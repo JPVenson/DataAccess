@@ -118,9 +118,11 @@
     <Compile Include="Compiler\EnumCompiler.cs" />
     <Compile Include="Compiler\ProcedureCompiler.cs" />
     <Compile Include="MsSql\ColumnInfo.cs" />
+    <Compile Include="MsSql\ConfigStore.cs" />
     <Compile Include="MsSql\DbTypeToCsType.cs" />
     <Compile Include="IEntryCreator.cs" />
     <Compile Include="MsSql\IColumInfoModel.cs" />
+    <Compile Include="MsSql\IMsSqlCreator.cs" />
     <Compile Include="MsSql\ITableInfoModel.cs" />
     <Compile Include="MsSql\MsSqlCreator.cs" />
     <Compile Include="MsSql\NoYesConverter.cs" />

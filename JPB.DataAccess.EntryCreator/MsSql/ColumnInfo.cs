@@ -15,17 +15,18 @@ using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
+	[Serializable]
 	public class ColumnInfo
 	{
 		private string _targetType2;
 
 		[SelectFactoryMethod()]
-		public static IQueryFactoryResult SelectColumns(string tableName)
+		public static IQueryFactoryResult SelectColumns(string tableName, string database)
 		{
 			return new QueryFactoryResult("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND TABLE_CATALOG = @database", new[]
 			{
 				new QueryParameter("@tableName", tableName),
-				new QueryParameter("@database", MsSqlCreator.Manager.Database.DatabaseName)
+				new QueryParameter("@database", database)
 			});
 		}
 
