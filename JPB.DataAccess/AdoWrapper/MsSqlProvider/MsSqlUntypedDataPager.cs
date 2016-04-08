@@ -160,7 +160,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						.QueryD(pk)
 						.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
 						{
-							PagedRows = CurrentPage*PageSize,
+							PagedRows = (CurrentPage - 1) *PageSize,
 							PageSize
 						})
 						.ContainerObject
@@ -198,7 +198,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 									page.QueryText("@PagedRows * @PageSize + 1")
 										.WithParamerters(new
 										{
-											PagedRows = CurrentPage,
+											PagedRows = (CurrentPage - 1),
 											PageSize
 										});
 								},
