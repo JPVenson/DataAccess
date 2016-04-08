@@ -18,6 +18,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public LocalDataPager(LocalDbReposetory<T> localDbReposetory)
 		{
 			this.localDbReposetory = localDbReposetory;
+			this.CurrentPage = 1;
 			SyncHelper = (s) => s();
 			CurrentPageItems = new ObservableCollection<T>();
 		}
@@ -34,8 +35,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 			get { return _currentPage; }
 			set
 			{
-				if (value >= 0)
+				if (value >= 1)
 					_currentPage = value;
+				else
+				{
+					throw new InvalidOperationException("The current page must be bigger or equals 1");
+				}
 			}
 		}
 

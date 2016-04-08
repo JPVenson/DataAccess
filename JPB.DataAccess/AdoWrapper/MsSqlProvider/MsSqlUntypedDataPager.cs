@@ -35,7 +35,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// </summary>
 		public MsSqlUntypedDataPager()
 		{
-			CurrentPage = 0;
+			CurrentPage = 1;
 			PageSize = 10;
 			AppendedComands = new List<IDbCommand>();
 			CurrentPageItems = new ObservableCollection<T>();
@@ -80,8 +80,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			get { return _currentPage; }
 			set
 			{
-				if (value >= 0)
+				if (value >= 1)
+				{
 					_currentPage = value;
+				}
+				else
+				{
+					throw new InvalidOperationException("The current page must be bigger or equals 1");
+				}
 			}
 		}
 

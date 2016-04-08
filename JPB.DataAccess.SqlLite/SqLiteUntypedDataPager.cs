@@ -35,7 +35,7 @@ namespace JPB.DataAccess.SqLite
 		/// </summary>
 		public SqLiteUntypedDataPager()
 		{
-			CurrentPage = 0;
+			CurrentPage = 1;
 			PageSize = 10;
 			AppendedComands = new List<IDbCommand>();
 			CurrentPageItems = new ObservableCollection<T>();
@@ -80,8 +80,12 @@ namespace JPB.DataAccess.SqLite
 			get { return _currentPage; }
 			set
 			{
-				if (value >= 0)
+				if (value >= 1)
 					_currentPage = value;
+				else
+				{
+					throw new InvalidOperationException("The current page must be bigger or equals 1");
+				}
 			}
 		}
 

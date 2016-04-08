@@ -662,7 +662,7 @@
         </member>
         <member name="P:JPB.DataAccess.Contacts.Pager.IDataPager.CurrentPage">
             <summary>
-                Id of Current page beween 0 and MaxPage
+                Id of Current page beween 1 and MaxPage
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Contacts.Pager.IDataPager.MaxPage">
@@ -1192,6 +1192,12 @@
             Will be invoked if dispose is called
             </summary>
         </member>
+        <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1">
+            <summary>
+            Provides LINQ paged access to an LocalDbReporsetory
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
         <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbManager.Scope">
             <summary>
             Access to the current local Scope
@@ -1202,81 +1208,6 @@
             <summary>
             Will be invoked when the current database is setup
             </summary>
-        </member>
-        <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory">
-            <summary>
-            Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
-            </summary>
-            <typeparam name="T"></typeparam>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.#ctor(System.Type,JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider,JPB.DataAccess.Contacts.ILocalDbConstraint[])">
-            <summary>
-            Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.ReposetoryCreated">
-            <summary>
-            Returns an value that indicates a proper DatabaseScope usage. 
-            If true the creation was successfull and all tables for the this table are mapped
-            The Reposetory cannot operate if the reposetory is not created!
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.#ctor(System.Type)">
-            <summary>
-            Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.#ctor(JPB.DataAccess.Manager.DbAccessLayer,System.Type)">
-            <summary>
-            Creates a new, database as fallback using batabase
-            </summary>
-            <param name="db"></param>
-            <param name="type"></param>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Add(System.Object)">
-            <summary>
-            Adds a new Item to the Table
-            </summary>
-            <param name="item"></param>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Clear">
-            <summary>
-            Removes all items from this Table
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Contains(System.Int64)">
-            <summary>
-            Checks if the given primarykey is taken
-            </summary>
-            <param name="item"></param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Contains(System.Int32)">
-            <summary>
-            Checks if the given primarykey is taken
-            </summary>
-            <param name="item"></param>
-            <returns></returns>
-        </member>
-        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.Item(System.Object)">
-            <summary>
-            Returns an object with the given Primarykey
-            </summary>
-            <param name="primaryKey"></param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.ToArray">
-            <summary>
-            Thread save
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory.CopyTo(System.Array,System.Int32)">
-            <summary>
-            Thread save
-            </summary>
-            <param name="array"></param>
-            <param name="index"></param>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDbReposetory`1">
             <summary>
@@ -1366,6 +1297,81 @@
             Gets an enumerator
             </summary>
             <returns></returns>
+        </member>
+        <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase">
+            <summary>
+            Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.#ctor(System.Type,JPB.DataAccess.Contacts.ILocalPrimaryKeyValueProvider,JPB.DataAccess.Contacts.ILocalDbConstraint[])">
+            <summary>
+            Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.ReposetoryCreated">
+            <summary>
+            Returns an value that indicates a proper DatabaseScope usage. 
+            If true the creation was successfull and all tables for the this table are mapped
+            The Reposetory cannot operate if the reposetory is not created!
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.#ctor(System.Type)">
+            <summary>
+            Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.#ctor(JPB.DataAccess.Manager.DbAccessLayer,System.Type)">
+            <summary>
+            Creates a new, database as fallback using batabase
+            </summary>
+            <param name="db"></param>
+            <param name="type"></param>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.Add(System.Object)">
+            <summary>
+            Adds a new Item to the Table
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.Clear">
+            <summary>
+            Removes all items from this Table
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.Contains(System.Int64)">
+            <summary>
+            Checks if the given primarykey is taken
+            </summary>
+            <param name="item"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.Contains(System.Int32)">
+            <summary>
+            Checks if the given primarykey is taken
+            </summary>
+            <param name="item"></param>
+            <returns></returns>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.Item(System.Object)">
+            <summary>
+            Returns an object with the given Primarykey
+            </summary>
+            <param name="primaryKey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.ToArray">
+            <summary>
+            Thread save
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbReposetoryBase.CopyTo(System.Array,System.Int32)">
+            <summary>
+            Thread save
+            </summary>
+            <param name="array"></param>
+            <param name="index"></param>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.LocalGuidPkProvider">
             <summary>
@@ -2297,6 +2303,11 @@
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.DbAccessType">
             <summary>
                 Selected dbAccessType
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Manager.DbAccessLayer.DefaultLookupPath">
+            <summary>
+            The default path for loading external Providers via DbAccessType
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Manager.DbAccessLayer.Database">

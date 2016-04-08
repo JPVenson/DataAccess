@@ -106,6 +106,9 @@
     <Compile Include="..\JPB.DataAccess.Tests\MsSqlManager.cs">
       <Link>MsSqlManager.cs</Link>
     </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerConstraintTests.cs">
+      <Link>PagerTests\PagerConstraintTests.cs</Link>
+    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerUnitTest.cs">
       <Link>PagerTests\PagerUnitTest.cs</Link>
     </Compile>
