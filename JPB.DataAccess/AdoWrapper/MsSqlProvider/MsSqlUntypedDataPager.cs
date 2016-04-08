@@ -230,9 +230,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				SyncHelper(() => CurrentPageItems.Add(item1));
 			}
 
-			if (CurrentPage > MaxPage)
-				CurrentPage = MaxPage;
-
 			RaiseNewPageLoaded();
 		}
 
