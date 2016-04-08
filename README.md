@@ -1,5 +1,5 @@
-Download 2.0.0.0012 - 10.6 MB
-Download from Github
+[![Build status](https://ci.appveyor.com/api/projects/status/vatab1g9oyo6sriq/branch/master?svg=true)](https://ci.appveyor.com/project/JPVenson/dataaccess/branch/master)
+
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 
 You can also contact me on gitter at https://gitter.im/JPVenson/DataAccess.
