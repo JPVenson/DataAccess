@@ -24,6 +24,11 @@ namespace JPB.DataAccess.AdoWrapper
 	[DebuggerDisplay("OpenRuns {_handlecounter}, IsConnectionOpen {_conn2 != null}, IsTransactionOpen {_trans != null}")]
 	public sealed class DefaultDatabaseAccess : IDatabase
 	{
+		/// <summary>
+		/// If enabled each query will be decompiled and the LastInsertedQuery property will be set
+		/// </summary>
+		public bool Debugger { get; set; }
+
 		private IDbConnection _conn2;
 		private volatile int _handlecounter;
 		private IDatabaseStrategy _strategy;
@@ -34,6 +39,15 @@ namespace JPB.DataAccess.AdoWrapper
 		public IWrapperDataPager<T, TE> CreatePager<T, TE>()
 		{
 			return _strategy.CreateConverterPager<T, TE>();
+		}
+
+		private QueryDebugger CreateQueryDebuggerAuto(IDbCommand cmd)
+		{
+			if (Debugger)
+			{
+				return new QueryDebugger(cmd, this);
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -166,7 +180,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
 		{
 			var cmd = _strategy.CreateCommand(strSql, GetConnection(), fields);
-			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 			if (_trans != null)
 				cmd.Transaction = _trans;
 			return cmd;
@@ -188,7 +202,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 			if (_trans != null)
 				cmd.Transaction = _trans;
-			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 			return cmd.ExecuteNonQuery();
 		}
 
@@ -234,7 +248,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			if (_trans != null)
 				cmd.Transaction = _trans;
-			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 			return cmd.ExecuteScalar();
 		}
 
@@ -251,7 +265,7 @@ namespace JPB.DataAccess.AdoWrapper
 				{
 					if (_trans != null)
 						cmd.Transaction = _trans;
-					LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+					LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 
 					return _strategy.CreateDataTable(name, cmd);
 				}
@@ -265,7 +279,7 @@ namespace JPB.DataAccess.AdoWrapper
 				using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 				{
 					IDataAdapter da = _strategy.CreateDataAdapter(cmd); //todo//
-					LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+					LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 
 					var ds = new DataSet();
 					da.Fill(ds);
@@ -314,7 +328,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public IEnumerable<T> GetEntitiesList<T>(IDbCommand cmd, Func<IDataRecord, T> func)
 		{
-			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 			using (var dr = cmd.ExecuteReader())
 			{
 				while (dr.Read())
@@ -517,7 +531,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDictionary<K, V> GetEntitiesDictionary<K, V>(IDbCommand cmd, Func<IDataRecord, KeyValuePair<K, V>> func)
 		{
 			var htRes = new Dictionary<K, V>();
-			LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 
 			using (var dr = cmd.ExecuteReader())
 			{
@@ -618,7 +632,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+				LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 
 				return cmd.ExecuteNonQuery();
 			}
@@ -635,7 +649,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+				LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 
 				return cmd.ExecuteNonQuery();
 			}
@@ -649,7 +663,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+				LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 				return cmd.ExecuteReader();
 			}
 		}
@@ -662,7 +676,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;
-				LastExecutedQuery = cmd.CreateQueryDebuggerAuto(this);
+				LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 				return cmd.ExecuteScalar();
 			}
 		}
