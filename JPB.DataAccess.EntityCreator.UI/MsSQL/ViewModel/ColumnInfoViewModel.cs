@@ -12,7 +12,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 	{
 		public IColumInfoModel Model { get; set; }
 
-		public ColumnInfoViewModel(IColumInfoModel model)
+		public ColumnInfoViewModel(IColumInfoModel model) : base(App.Current.Dispatcher)
 		{
 			Model = model;
 		}

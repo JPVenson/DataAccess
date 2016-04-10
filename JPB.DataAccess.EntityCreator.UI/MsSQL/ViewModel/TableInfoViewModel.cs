@@ -5,17 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
+using JPB.ErrorValidation;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	public class TableInfoViewModel : AsyncViewModelBase, ITableInfoModel
+	public class TableInfoViewModel : DataErrorBase<TableInfoViewModel, TableInfoModelErrorProvider>, ITableInfoModel
 	{
-		private readonly IMsSqlCreator _compilerOptions;
+		private readonly SqlEntityCreatorViewModel _compilerOptions;
 		public ITableInfoModel SourceElement { get; set; }
 
-		public TableInfoViewModel(ITableInfoModel sourceElement, IMsSqlCreator compilerOptions)
+		public TableInfoViewModel(ITableInfoModel sourceElement, SqlEntityCreatorViewModel compilerOptions) : base(App.Current.Dispatcher)
 		{
 			_compilerOptions = compilerOptions;
 			SourceElement = sourceElement;
@@ -134,13 +135,13 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private void CreatePreviewExecute(object sender)
 		{
 			var previewWindwo = new ClassPreviewWindow();
-			previewWindwo.DataContext = new ClassPreviewViewModel(SourceElement, _compilerOptions);
+			previewWindwo.DataContext = new ClassPreviewViewModel(this, _compilerOptions);
 			previewWindwo.Show();
 		}
 
 		private bool CanCreatePreviewExecute(object sender)
 		{
-			return true;
+			return this._compilerOptions.SelectedTable != null;
 		}
 	}
 }

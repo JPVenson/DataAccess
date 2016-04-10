@@ -265,6 +265,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
+			//Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;Database=TestDB;
 			IsEnumeratingDatabase = true;
 			TargetDir = outputPath;
 			Manager = new DbAccessLayer(DbAccessType.MsSql, connection);
@@ -275,18 +276,22 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 			catch (Exception)
 			{
+				IsEnumeratingDatabase = false;
 				Connected = false;
 			}
 
 			if (!Connected)
 			{
+				IsEnumeratingDatabase = false;
 				Status = ("Database not accessible. Maybe wrong Connection or no Selected Database?");
 				return;
 			}
 			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
 			if (string.IsNullOrEmpty(databaseName))
 			{
+				IsEnumeratingDatabase = false;
 				Status = ("Database not exists. Maybe wrong Connection or no Selected Database?");
+				Connected = false;
 				return;
 			}
 			Status = "Connection OK ... Reading Server Version ...";

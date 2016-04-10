@@ -42,7 +42,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			foreach (var columInfoModel in tableInfoModel.ColumnInfos)
 			{
 				if (columInfoModel.Exclude)
-					return;
+					continue;
 
 				var codeMemberProperty = compiler.AddProperty(columInfoModel);
 				if (columInfoModel.PrimaryKey)

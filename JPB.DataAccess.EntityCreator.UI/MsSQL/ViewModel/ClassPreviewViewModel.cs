@@ -6,25 +6,46 @@ using System.Text;
 using System.Threading.Tasks;
 using ICSharpCode.AvalonEdit.Highlighting;
 using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.ErrorValidation;
 using JPB.WPFBase.MVVM.ViewModel;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	public class ClassPreviewViewModel : AsyncViewModelBase
+	public class ClassPreviewViewModel : DataErrorBase<ClassPreviewViewModel, ClassPreviewViewModelErrorProvider>
 	{
-		public ClassPreviewViewModel(ITableInfoModel sourceElement, IMsSqlCreator compilerInfos)
+		private readonly SqlEntityCreatorViewModel _compilerInfos;
+
+		public ClassPreviewViewModel(TableInfoViewModel sourceElement, SqlEntityCreatorViewModel compilerInfos)
 		{
+			_compilerInfos = compilerInfos;
 			SourceElement = sourceElement;
 
 			this.HightlightProvider = HighlightingManager.Instance.GetDefinition("C#");
 
+			Refresh();
+		}
+
+		public IHighlightingDefinition HightlightProvider { get; set; }
+
+		private void Refresh()
+		{
+			if(!CheckCanExecuteCondition())
+				return;
+
 			base.SimpleWorkWithSyncContinue(() =>
 			{
-				using (var memsStream = new MemoryStream())
+				try
 				{
-					SharedMethods.CompileTable(this.SourceElement, compilerInfos, memsStream);
-					memsStream.Seek(0, SeekOrigin.Begin);
-					return Encoding.ASCII.GetString(memsStream.ToArray());
+					using (var memsStream = new MemoryStream())
+					{
+						SharedMethods.CompileTable(this.SourceElement, _compilerInfos, memsStream);
+						memsStream.Seek(0, SeekOrigin.Begin);
+						return Encoding.ASCII.GetString(memsStream.ToArray());
+					}
+				}
+				catch (Exception e)
+				{
+					return e.Message;
 				}
 			}, s =>
 			{
@@ -32,8 +53,42 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			});
 		}
 
-		public IHighlightingDefinition HightlightProvider { get; set; }
+		private bool _keepUpdated;
 
+		public bool KeepUpdated
+		{
+			get { return _keepUpdated; }
+			set
+			{
+				SendPropertyChanging(() => KeepUpdated);
+				_keepUpdated = value;
+				SendPropertyChanged(() => KeepUpdated);
+
+				if (value)
+				{
+					foreach (var columnInfoViewModel in this.SourceElement.ColumnInfoModels)
+					{
+						columnInfoViewModel.PropertyChanged += _compilerInfos_PropertyChanged;
+					}
+					this.SourceElement.PropertyChanged += _compilerInfos_PropertyChanged;
+					this._compilerInfos.PropertyChanged += _compilerInfos_PropertyChanged;
+				}
+				else
+				{
+					foreach (var columnInfoViewModel in this.SourceElement.ColumnInfoModels)
+					{
+						columnInfoViewModel.PropertyChanged -= _compilerInfos_PropertyChanged;
+					}
+					this.SourceElement.PropertyChanged -= _compilerInfos_PropertyChanged;
+					this._compilerInfos.PropertyChanged -= _compilerInfos_PropertyChanged;
+				}
+			}
+		}
+
+		private void _compilerInfos_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			Refresh();
+		}
 
 		private string _result;
 
@@ -61,9 +116,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		private ITableInfoModel _sourceElement;
+		private TableInfoViewModel _sourceElement;
 
-		public ITableInfoModel SourceElement
+		public TableInfoViewModel SourceElement
 		{
 			get { return _sourceElement; }
 			set

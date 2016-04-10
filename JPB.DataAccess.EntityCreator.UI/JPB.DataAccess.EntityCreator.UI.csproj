@@ -112,8 +112,10 @@
   <ItemGroup>
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="MsSQL\ViewModel\ClassPreviewViewModel.cs" />
+    <Compile Include="MsSQL\ViewModel\ClassPreviewViewModelErrorProvider.cs" />
     <Compile Include="MsSQL\ViewModel\ColumnInfoViewModel.cs" />
     <Compile Include="MsSQL\ViewModel\SqlEntityCreatorViewModel.cs" />
+    <Compile Include="MsSQL\ViewModel\TableInfoModelErrorProvider.cs" />
     <Compile Include="MsSQL\ViewModel\TableInfoViewModel.cs" />
     <Compile Include="MsSQL\View\ClassPreviewWindow.xaml.cs">
       <DependentUpon>ClassPreviewWindow.xaml</DependentUpon>
