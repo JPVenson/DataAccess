@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
@@ -7,7 +8,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		IEnumerable<ITableInfoModel> Tables { get; set; }
 		IEnumerable<Dictionary<int, string>> Enums { get; }
 		IEnumerable<ITableInfoModel> Views { get; set; }
-		IEnumerable<StoredPrcInfoModel> StoredProcs { get; }
+		IEnumerable<IStoredPrcInfoModel> StoredProcs { get; }
 		string TargetDir { get; set; }
 		bool GenerateConstructor { get; set; }
 		bool GenerateForgeinKeyDeclarations { get; set; }

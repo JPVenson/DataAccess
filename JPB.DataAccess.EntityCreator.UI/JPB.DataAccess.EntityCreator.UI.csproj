@@ -151,9 +151,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JPB.DataAccess.EntryCreator\JPB.DataAccess.EntityCreator.csproj">
-      <Project>{3ad5d28e-db61-47f4-9425-aadbbb338c1b}</Project>
-      <Name>JPB.DataAccess.EntityCreator</Name>
+    <ProjectReference Include="..\JPB.DataAccess.EntityCreator.Core\JPB.DataAccess.EntityCreator.Core.csproj">
+      <Project>{5BC12918-3A58-4E94-8AA2-B2CF56DC9DE9}</Project>
+      <Name>JPB.DataAccess.EntityCreator.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
       <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>

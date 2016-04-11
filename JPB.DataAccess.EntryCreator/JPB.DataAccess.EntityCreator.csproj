@@ -113,31 +113,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoConsole.cs" />
-    <Compile Include="Compiler\ClassCompiler.cs" />
-    <Compile Include="Compiler\ElementCompiler.cs" />
-    <Compile Include="Compiler\EnumCompiler.cs" />
-    <Compile Include="Compiler\ProcedureCompiler.cs" />
-    <Compile Include="MsSql\ColumnInfo.cs" />
-    <Compile Include="MsSql\ConfigStore.cs" />
-    <Compile Include="MsSql\DbTypeToCsType.cs" />
-    <Compile Include="IEntryCreator.cs" />
-    <Compile Include="MsSql\IColumInfoModel.cs" />
-    <Compile Include="MsSql\IMsSqlCreator.cs" />
-    <Compile Include="MsSql\ITableInfoModel.cs" />
     <Compile Include="MsSql\MsSqlCreator.cs" />
-    <Compile Include="MsSql\NoYesConverter.cs" />
-    <Compile Include="MsSql\Options.cs" />
-    <Compile Include="MsSql\SharedMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MsSql\TableInfoModel.cs" />
-    <Compile Include="MsSql\TableInformations.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="JPB.DataAccess.EntryCreator.licenseheader" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.EntityCreator.Core\JPB.DataAccess.EntityCreator.Core.csproj">
+      <Project>{5bc12918-3a58-4e94-8aa2-b2cf56dc9de9}</Project>
+      <Name>JPB.DataAccess.EntityCreator.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
       <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
       <Name>JPB.DataAccess</Name>

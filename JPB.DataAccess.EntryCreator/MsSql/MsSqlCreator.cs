@@ -18,6 +18,10 @@ using JPB.DataAccess.EntityCreator.Compiler;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using System.Xml.Serialization;
+using JPB.DataAccess.EntityCreator.Core;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Models;
+using JPB.DataAccess.EntityCreator.Core.Poco;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
@@ -27,7 +31,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public IEnumerable<ITableInfoModel> Tables { get; set; }
 		public IEnumerable<Dictionary<int, string>> Enums { get; private set; }
 		public IEnumerable<ITableInfoModel> Views { get; set; }
-		public IEnumerable<StoredPrcInfoModel> StoredProcs { get; private set; }
+		public IEnumerable<IStoredPrcInfoModel> StoredProcs { get; private set; }
 
 		public string TargetDir { get; set; }
 		public bool GenerateConstructor { get; set; }

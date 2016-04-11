@@ -24,7 +24,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			CreatePreviewCommand = new DelegateCommand(CreatePreviewExecute, CanCreatePreviewExecute);
 		}
 
-		public TableInformations Info
+		public ITableInformations Info
 		{
 			get { return SourceElement.Info; }
 			set

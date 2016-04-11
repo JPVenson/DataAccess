@@ -26,7 +26,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		}
 
-		internal CodeMemberProperty AddFallbackProperty()
+		public CodeMemberProperty AddFallbackProperty()
 		{
 			var codeMemberProperty = AddProperty("FallbackDictorary", typeof(Dictionary<string, object>));
 			var fallbackAtt = new LoadNotImplimentedDynamicAttribute();
@@ -34,7 +34,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return codeMemberProperty;
 		}
 
-		internal CodeMemberProperty AddProperty(IColumInfoModel info)
+		public CodeMemberProperty AddProperty(IColumInfoModel info)
 		{
 			var propertyName = info.GetPropertyName();
 			var targetType = info.ColumnInfo.TargetType.FullName;
@@ -66,12 +66,12 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return codeMemberProperty;
 		}
 
-		internal CodeMemberProperty AddProperty(string name, Type type)
+		public CodeMemberProperty AddProperty(string name, Type type)
 		{
 			return AddProperty(name, new CodeTypeReference(type));
 		}
 
-		internal CodeMemberProperty AddProperty(string name, CodeTypeReference propType)
+		public CodeMemberProperty AddProperty(string name, CodeTypeReference propType)
 		{
 			var property = new CodeMemberProperty();
 
@@ -107,7 +107,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		private Type[] _externalTypes;
 
-		internal void GenerateTypeConstructorBasedOnElements(IEnumerable<IColumInfoModel> columnInfos)
+		public void GenerateTypeConstructorBasedOnElements(IEnumerable<IColumInfoModel> columnInfos)
 		{
 			Add(new CodeConstructor() {
 				Attributes = MemberAttributes.Public

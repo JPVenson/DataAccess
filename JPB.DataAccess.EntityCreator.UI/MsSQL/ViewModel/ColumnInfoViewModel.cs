@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.WPFBase.MVVM.ViewModel;
 
@@ -17,7 +18,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			Model = model;
 		}
 
-		public ColumnInfo ColumnInfo
+		public IColumnInfo ColumnInfo
 		{
 			get { return Model.ColumnInfo; }
 			set
@@ -67,7 +68,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		public EnumDeclarationModel EnumDeclaration
+		public IEnumDeclarationModel EnumDeclaration
 		{
 			get { return Model.EnumDeclaration; }
 			set
@@ -87,7 +88,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		public ForgeinKeyInfoModel ForgeinKeyDeclarations
+		public IForgeinKeyInfoModel ForgeinKeyDeclarations
 		{
 			get { return Model.ForgeinKeyDeclarations; }
 			set

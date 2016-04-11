@@ -54,7 +54,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		public string Name { get { return _base.Name; } }
 
-		public bool CompileHeader { get; internal set; }
+		public bool CompileHeader { get; set; }
 
 		public bool GenerateConfigMethod { get; set; }
 

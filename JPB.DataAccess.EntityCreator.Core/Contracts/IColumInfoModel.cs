@@ -1,15 +1,17 @@
+using JPB.DataAccess.EntityCreator.Core.Contracts;
+
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
 	public interface IColumInfoModel
 	{
-		ColumnInfo ColumnInfo { get; set; }
+		IColumnInfo ColumnInfo { get; set; }
 		string NewColumnName { get; set; }
 		bool IsRowVersion { get; set; }
 		bool PrimaryKey { get; set; }
 		bool InsertIgnore { get; set; }
-		EnumDeclarationModel EnumDeclaration { get; set; }
+		IEnumDeclarationModel EnumDeclaration { get; set; }
 		bool Exclude { get; set; }
-		ForgeinKeyInfoModel ForgeinKeyDeclarations { get; set; }
+		IForgeinKeyInfoModel ForgeinKeyDeclarations { get; set; }
 		string GetPropertyName();
 	}
 }

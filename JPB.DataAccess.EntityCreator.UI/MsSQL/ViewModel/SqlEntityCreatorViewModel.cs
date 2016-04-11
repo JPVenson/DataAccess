@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Models;
+using JPB.DataAccess.EntityCreator.Core.Poco;
 using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Manager;
 using JPB.WPFBase.MVVM.DelegateCommand;
@@ -27,7 +30,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 			Tables = new ThreadSaveObservableCollection<TableInfoViewModel>();
 			Views = new ThreadSaveObservableCollection<TableInfoViewModel>();
-			StoredProcs = new ThreadSaveObservableCollection<StoredPrcInfoModel>();
+			StoredProcs = new ThreadSaveObservableCollection<IStoredPrcInfoModel>();
 			Enums = new ThreadSaveObservableCollection<Dictionary<int, string>>();
 		}
 
@@ -183,9 +186,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		private ThreadSaveObservableCollection<StoredPrcInfoModel> _storedProcs;
+		private ThreadSaveObservableCollection<IStoredPrcInfoModel> _storedProcs;
 
-		public ThreadSaveObservableCollection<StoredPrcInfoModel> StoredProcs
+		public ThreadSaveObservableCollection<IStoredPrcInfoModel> StoredProcs
 		{
 			get { return _storedProcs; }
 			set
@@ -381,7 +384,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		IEnumerable<StoredPrcInfoModel> IMsSqlCreator.StoredProcs
+		IEnumerable<IStoredPrcInfoModel> IMsSqlCreator.StoredProcs
 		{
 			get { return this.StoredProcs; }
 		}

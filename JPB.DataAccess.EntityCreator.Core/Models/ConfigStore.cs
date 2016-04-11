@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Models;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
@@ -13,7 +15,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		public List<ITableInfoModel> Tables { get; set; }
 		public List<ITableInfoModel> Views { get; set; }
-		public List<StoredPrcInfoModel> StoredPrcInfoModels { get; set; }
+		public List<IStoredPrcInfoModel> StoredPrcInfoModels { get; set; }
 
 		public bool GenerateConstructor { get; set; }
 		public bool GenerateForgeinKeyDeclarations { get; set; }
