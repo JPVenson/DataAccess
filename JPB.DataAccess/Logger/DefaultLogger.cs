@@ -15,11 +15,15 @@ namespace JPB.DataAccess.Logger
 	{
 		public void Write(string content, params object[] arguments)
 		{
+			if (content == null)
+				content = string.Empty;
 			Trace.Write(string.Format(content, arguments));
 		}
 
 		public void WriteLine(string content, params object[] arguments)
 		{
+			if (content == null)
+				content = string.Empty;
 			Trace.WriteLine(string.Format(content, arguments));
 		}
 	}
