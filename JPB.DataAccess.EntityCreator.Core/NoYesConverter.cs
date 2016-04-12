@@ -6,11 +6,12 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Globalization;
 using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core
 {
 	class NoYesConverter : IValueConverter
 	{

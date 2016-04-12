@@ -8,9 +8,10 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 */
 
 using System;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Poco
 {
 	[Serializable]
 	[SelectFactory("SELECT name FROM sysobjects WHERE xtype='U'")]

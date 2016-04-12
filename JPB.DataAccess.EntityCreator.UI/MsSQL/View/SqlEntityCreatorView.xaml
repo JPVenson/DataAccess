@@ -12,14 +12,12 @@
 	<DockPanel Dock="Top">
 		<xctk:BusyIndicator IsBusy="{Binding IsWorking}" BusyContent="{Binding Status}">
 			<DockPanel>
-				<DockPanel Dock="Top">
-					<Button DockPanel.Dock="Right" Command="{Binding ConnectToDatabaseCommand}" Content="Connect"/>
-					<Button Command="{Binding SaveConfigCommand}" Content="Save"></Button>
-					<Button Command="{Binding LoadConfigCommand}" Content="Load"></Button>
-					<Button Command="{Binding CompileCommand}" Content="Compile"></Button>
-					<Label DockPanel.Dock="Left" Content="Connection String:"/>
-					<TextBox Text="{Binding ConnectionString, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding NotConnected}"/>
-				</DockPanel>
+				<Menu DockPanel.Dock="Top">
+					<MenuItem DockPanel.Dock="Right" Command="{Binding ConnectToDatabaseCommand}" Header="Connect"/>
+					<MenuItem Command="{Binding SaveConfigCommand}" Header="Save"></MenuItem>
+					<MenuItem Command="{Binding LoadConfigCommand}" Header="Load"></MenuItem>
+					<MenuItem Command="{Binding CompileCommand}" Header="Compile"></MenuItem>
+				</Menu>
 				<DockPanel Dock="Bottom">
 					<Label Content="{Binding Status}"></Label>
 				</DockPanel>

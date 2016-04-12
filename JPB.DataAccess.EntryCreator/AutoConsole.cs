@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.MsSql;
 
 namespace JPB.DataAccess.EntityCreator

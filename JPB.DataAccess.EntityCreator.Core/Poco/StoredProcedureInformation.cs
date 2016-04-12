@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using JPB.DataAccess.EntityCreator.Core.Models;
-using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.EntityCreator.Core.Poco

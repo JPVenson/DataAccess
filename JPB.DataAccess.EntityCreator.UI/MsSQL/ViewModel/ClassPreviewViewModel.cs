@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ICSharpCode.AvalonEdit.Highlighting;
-using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.EntityCreator.Core;
 using JPB.ErrorValidation;
 using JPB.WPFBase.MVVM.ViewModel;
 

@@ -10,7 +10,6 @@ using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.QueryBuilder;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
@@ -330,7 +329,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Users refSelect = expectWrapper.InsertWithSelect(val);
 
 			Assert.AreEqual(refSelect.UserName, val.UserName);
-			Assert.AreNotEqual(refSelect.User_ID, val.User_ID);
+			Assert.AreNotEqual(refSelect.UserID, val.UserID);
 		}
 
 		[Test]
@@ -345,7 +344,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Users expectedUser = expectWrapper.InsertWithSelect(new Users { UserName = insGuid });
 			Assert.IsNotNull(expectedUser);
 			Assert.AreEqual(expectedUser.UserName, insGuid);
-			Assert.AreNotEqual(expectedUser.User_ID, default(long));
+			Assert.AreNotEqual(expectedUser.UserID, default(long));
 		}
 
 		[Test]
@@ -360,7 +359,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Users expectedUser = expectWrapper.InsertWithSelect(new Users { UserName = insGuid });
 			Assert.IsNotNull(expectedUser);
 			Assert.AreEqual(expectedUser.UserName, insGuid);
-			Assert.AreNotEqual(expectedUser.User_ID, default(long));
+			Assert.AreNotEqual(expectedUser.UserID, default(long));
 		}
 
 		[Test]
@@ -467,7 +466,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				.Top(1)
 				.ForResult<Users>()
 				.Single();
-			long id = singleEntity.User_ID;
+			long id = singleEntity.UserID;
 			Assert.IsNotNull(singleEntity);
 
 			string preName = singleEntity.UserName;
@@ -482,8 +481,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var refEntity = expectWrapper.Select<Users>(id);
 
 			Assert.IsNotNull(refEntity);
-			Assert.AreEqual(id, refEntity.User_ID);
-			Assert.AreEqual(singleEntity.User_ID, refEntity.User_ID);
+			Assert.AreEqual(id, refEntity.UserID);
+			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
 			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
 		}
 
@@ -495,11 +494,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			InsertTest();
 			Users singleEntity = expectWrapper
 				.Query()
-				.Select<Users>()
+				.Select<TestModels.CheckWrapperBaseTests.Users>()
 				.Top(1)
 				.ForResult<Users>()
 				.Single();
-			long id = singleEntity.User_ID;
+			long id = singleEntity.UserID;
 			Assert.IsNotNull(singleEntity);
 
 			string preName = singleEntity.UserName;
@@ -514,8 +513,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var refEntity = expectWrapper.Select<Users>(id);
 
 			Assert.IsNotNull(refEntity);
-			Assert.AreEqual(id, refEntity.User_ID);
-			Assert.AreEqual(singleEntity.User_ID, refEntity.User_ID);
+			Assert.AreEqual(id, refEntity.UserID);
+			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
 			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
 		}
 
@@ -531,11 +530,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			string testInsertName = Guid.NewGuid().ToString();
 			Users testUser = expectWrapper.InsertWithSelect(new Users { UserName = testInsertName });
 			Assert.IsNotNull(testUser);
-			Assert.AreNotEqual(testUser.User_ID, default(long));
+			Assert.AreNotEqual(testUser.UserID, default(long));
 
-			var selTestUser = expectWrapper.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.User_ID);
+			var selTestUser = expectWrapper.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.UserID);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
-			Assert.AreEqual(selTestUser.UserId, testUser.User_ID);
+			Assert.AreEqual(selTestUser.UserId, testUser.UserID);
 		}
 
 		[Test]
@@ -550,11 +549,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			string testInsertName = Guid.NewGuid().ToString();
 			Users testUser = expectWrapper.InsertWithSelect(new Users { UserName = testInsertName });
 			Assert.IsNotNull(testUser);
-			Assert.AreNotEqual(testUser.User_ID, default(long));
+			Assert.AreNotEqual(testUser.UserID, default(long));
 
-			var selTestUser = expectWrapper.SelectWhere<Users>("User_ID = @id", new { id = testUser.User_ID }).FirstOrDefault();
+			var selTestUser = expectWrapper.SelectWhere<Users>("User_ID = @id", new { id = testUser.UserID }).FirstOrDefault();
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
-			Assert.AreEqual(selTestUser.User_ID, testUser.User_ID);
+			Assert.AreEqual(selTestUser.UserID, testUser.UserID);
 		}
 
 		[Test]
@@ -563,15 +562,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectModelsSelect()
 		{
 			RangeInsertTest();
-			Users firstAvaibleUser = expectWrapper.Query().Select<Users>().Top(1).ForResult<Users>().First();
+			Users firstAvaibleUser = expectWrapper.Query().Select<TestModels.CheckWrapperBaseTests.Users>().Top(1).ForResult<Users>().First();
 
-			var refSelect = expectWrapper.Select<Users_PK>(firstAvaibleUser.User_ID);
+			var refSelect = expectWrapper.Select<Users_PK>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(refSelect);
 
-			var userSelectAlternatingProperty = expectWrapper.Select<Users_PK_IDFM>(firstAvaibleUser.User_ID);
+			var userSelectAlternatingProperty = expectWrapper.Select<Users_PK_IDFM>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(userSelectAlternatingProperty);
 
-			var userSelectStaticSel = expectWrapper.Select<Users_PK_IDFM_CLASSEL>(firstAvaibleUser.User_ID);
+			var userSelectStaticSel = expectWrapper.Select<Users_PK_IDFM_CLASSEL>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(userSelectStaticSel);
 		}
 
@@ -586,7 +585,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Users[] refSelect = expectWrapper.SelectNative<Users>(UsersMeta.SelectStatement);
 			Assert.IsTrue(refSelect.Any());
 
-			long anyId = refSelect.FirstOrDefault().User_ID;
+			long anyId = refSelect.FirstOrDefault().UserID;
 			Assert.AreNotEqual(anyId, 0);
 
 			refSelect =
@@ -684,9 +683,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			singleEntity.UserName = postName;
 			expectWrapper.Update(singleEntity);
 
-			var refEntity = expectWrapper.Select<Users>(singleEntity.User_ID);
+			var refEntity = expectWrapper.Select<Users>(singleEntity.UserID);
 			Assert.IsNotNull(refEntity);
-			Assert.AreEqual(singleEntity.User_ID, refEntity.User_ID);
+			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
 			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
 		}
 	}

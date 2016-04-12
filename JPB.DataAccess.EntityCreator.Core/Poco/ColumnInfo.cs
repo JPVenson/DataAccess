@@ -6,15 +6,15 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
-using System.Data;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Poco
 {
 	[Serializable]
 	public class ColumnInfo : IColumnInfo

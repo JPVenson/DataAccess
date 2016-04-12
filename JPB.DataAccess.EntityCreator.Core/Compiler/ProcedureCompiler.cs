@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.EntityCreator.Compiler
+namespace JPB.DataAccess.EntityCreator.Core.Compiler
 {
 	public class ProcedureCompiler : ClassCompiler
 	{

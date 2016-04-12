@@ -6,13 +6,10 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+using System;
+
+namespace JPB.DataAccess.EntityCreator.Core.Models
 {
 	[Serializable]
 	public class Options

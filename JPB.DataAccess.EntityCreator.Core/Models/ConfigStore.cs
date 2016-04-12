@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
-using JPB.DataAccess.EntityCreator.Core.Models;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Models
 {
 	[Serializable]
 	public class ConfigStore

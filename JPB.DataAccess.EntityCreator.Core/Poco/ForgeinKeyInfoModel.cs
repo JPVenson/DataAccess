@@ -1,9 +1,10 @@
 using System;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.QueryBuilder;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Poco
 {
 	[Serializable]
 	public class ForgeinKeyInfoModel : IForgeinKeyInfoModel

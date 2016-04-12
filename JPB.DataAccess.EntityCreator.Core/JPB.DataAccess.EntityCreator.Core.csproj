@@ -48,6 +48,7 @@
     <Compile Include="Compiler\ProcedureCompiler.cs" />
     <Compile Include="Contracts\IColumInfoModel.cs" />
     <Compile Include="Contracts\IColumnInfo.cs" />
+    <Compile Include="Contracts\IElementComparer.cs" />
     <Compile Include="Contracts\IEntryCreator.cs" />
     <Compile Include="Contracts\IEnumDeclarationModel.cs" />
     <Compile Include="Contracts\IForgeinKeyInfoModel.cs" />

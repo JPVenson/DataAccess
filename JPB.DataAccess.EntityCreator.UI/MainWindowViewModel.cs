@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.WPFBase.MVVM.ViewModel;
 
 namespace JPB.DataAccess.EntityCreator.UI

@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.EntityCreator.Compiler;
+using JPB.DataAccess.EntityCreator.Core.Compiler;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Logger;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core
 {
 	public static class SharedMethods
 	{

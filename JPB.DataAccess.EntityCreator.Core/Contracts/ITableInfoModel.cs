@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
 	public interface ITableInfoModel
 	{

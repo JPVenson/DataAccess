@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Models
 {
 	[Serializable]
 	public class SpParam

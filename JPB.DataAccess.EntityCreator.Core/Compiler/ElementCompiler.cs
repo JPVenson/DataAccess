@@ -9,12 +9,12 @@ using System.Security.Cryptography;
 using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CSharp;
 
-namespace JPB.DataAccess.EntityCreator.Compiler
+namespace JPB.DataAccess.EntityCreator.Core.Compiler
 {
 	public abstract class ElementCompiler
 	{
