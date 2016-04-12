@@ -108,6 +108,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="MsSQL\View\SqlEntityWizard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainWindowViewModel.cs" />
@@ -122,6 +126,9 @@
     </Compile>
     <Compile Include="MsSQL\View\SqlEntityCreatorView.xaml.cs">
       <DependentUpon>SqlEntityCreatorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MsSQL\View\SqlEntityWizard.xaml.cs">
+      <DependentUpon>SqlEntityWizard.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

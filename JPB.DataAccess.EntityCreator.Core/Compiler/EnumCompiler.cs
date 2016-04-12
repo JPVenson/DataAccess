@@ -1,4 +1,4 @@
-namespace JPB.DataAccess.EntityCreator.Compiler
+namespace JPB.DataAccess.EntityCreator.Core.Compiler
 {
 	public class EnumCompiler : ElementCompiler
 	{

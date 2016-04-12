@@ -6,6 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Data;
 using System.Data.Odbc;
@@ -14,7 +15,7 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.AdoWrapper.Odbc
+namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 {
 	public class Obdc : IDatabaseStrategy
 	{

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
 using JPB.ErrorValidation;
 using JPB.WPFBase.MVVM.DelegateCommand;

@@ -2,17 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Management.Instrumentation;
-using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Helper;
-using JPB.DataAccess.Manager;
-using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.QueryBuilder
+namespace JPB.DataAccess.Query
 {
 	public static class QueryBuilderExtentions
 	{

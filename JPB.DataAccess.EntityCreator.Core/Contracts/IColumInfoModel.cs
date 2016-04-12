@@ -1,8 +1,8 @@
-using JPB.DataAccess.EntityCreator.Core.Contracts;
+using System;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
-	public interface IColumInfoModel
+	public interface IColumInfoModel : IElementComparer<IColumInfoModel>, IEquatable<IColumInfoModel>
 	{
 		IColumnInfo ColumnInfo { get; set; }
 		string NewColumnName { get; set; }

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using JPB.DataAccess.EntityCreator.Core.Contracts;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
 	public interface IMsSqlCreator
 	{

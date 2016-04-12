@@ -142,6 +142,7 @@ namespace JPB.DataAccess.MetaApi
 
 		/// <summary>
 		///		Gets an Cache object of exists or creats one
+		///		Return value can be null
 		/// </summary>
 		/// <param name="typeName"></param>
 		/// <param name="newCreated"></param>
@@ -162,6 +163,9 @@ namespace JPB.DataAccess.MetaApi
 				if (element == null)
 				{
 					var type = Type.GetType(typeName, true, false);
+
+					if (type == null)
+						return null;
 
 					element = new TClass();
 					SClassInfoCaches.Add(element);
@@ -214,6 +218,36 @@ namespace JPB.DataAccess.MetaApi
 		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(Type t)
 		{
 			GetOrCreateClassInfoCache(t);
+			return this;
+		}
+
+		/// <summary>
+		///     Append
+		///     as an Optimistic input to the store.
+		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
+		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(TClass existingItem)
+		{
+			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
+			try
+			{
+				if (isThreadSave)
+				{
+					Monitor.Enter(SClassInfoCaches);
+				}
+
+				SClassInfoCaches.Add(existingItem);
+			}
+			finally
+			{
+				if (isThreadSave)
+				{
+					Monitor.Exit(SClassInfoCaches);
+				}
+			}
 			return this;
 		}
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
-using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.WPFBase.MVVM.ViewModel;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
@@ -101,6 +100,16 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		public string GetPropertyName()
 		{
 			return Model.GetPropertyName();
+		}
+
+		public IEnumerable<string> Compare(IColumInfoModel other)
+		{
+			return Model.Compare(other);
+		}
+
+		public bool Equals(IColumInfoModel other)
+		{
+			return Model.Equals(other);
 		}
 	}
 }

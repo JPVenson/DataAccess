@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.EntityCreator.Core;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
-using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Manager;
+using JPB.DynamicInputBox;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
@@ -40,6 +41,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		{
 			var fileDialog = new OpenFileDialog();
 			fileDialog.Multiselect = false;
+			fileDialog.CheckFileExists = true;
+			fileDialog.DefaultExt = "*.msConfigStore";
 			fileDialog.ShowDialog();
 			if (File.Exists(fileDialog.FileName))
 			{
@@ -48,7 +51,19 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				this.StoredProcs.Clear();
 
 				var binFormatter = new BinaryFormatter();
-				var options = (ConfigStore)binFormatter.Deserialize(fileDialog.OpenFile());
+				ConfigStore options;
+				try
+				{
+					using (var fs = fileDialog.OpenFile())
+					{
+						options = (ConfigStore)binFormatter.Deserialize(fs);
+					}
+				}
+				catch (Exception)
+				{
+					Status = "File is an in invalid format";
+					return;
+				}
 
 				foreach (var option in options.Tables)
 				{
@@ -89,10 +104,11 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		private void SaveConfigExecute(object sender)
 		{
-			var fileDialog = new OpenFileDialog();
-			fileDialog.Multiselect = false;
+			var fileDialog = new SaveFileDialog();
+			fileDialog.DefaultExt = ".msConfigStore";
+			fileDialog.CheckFileExists = false;
 			var fileResult = fileDialog.ShowDialog();
-			if (fileResult.HasValue && fileResult.Value)
+			if (fileResult == DialogResult.OK)
 			{
 				var options = new ConfigStore();
 				options.StoredPrcInfoModels = this.StoredProcs.ToList();
@@ -111,7 +127,14 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 					options.SourceConnectionString = this.ConnectionString;
 				}
 
-				new BinaryFormatter().Serialize(File.Open(fileDialog.FileName, FileMode.OpenOrCreate), options);
+				if (File.Exists(fileDialog.FileName))
+				{
+					File.Delete(fileDialog.FileName);
+				}
+				using (var fs = fileDialog.OpenFile())
+				{
+					new BinaryFormatter().Serialize(fs, options);
+				}
 			}
 		}
 
@@ -236,19 +259,21 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		private void ConnectToDatabaseExecute(object sender)
 		{
+			var dynLoader = InputWindow.ShowRichTextInput("Connection String:");
+
+			if (string.IsNullOrEmpty(dynLoader))
+				return;
+
+			this.ConnectionString = dynLoader;
 			base.SimpleWork(() =>
 			{
-				//var fileChooser = new OpenFileDialog();
-				//fileChooser.ShowDialog();
-				//fileChooser.Multiselect = false;
-
 				this.CreateEntrys(ConnectionString, "C:\\", string.Empty);
 			});
 		}
 
 		private bool CanConnectToDatabaseExecute(object sender)
 		{
-			return !Connected && !string.IsNullOrEmpty(ConnectionString) && base.CheckCanExecuteCondition() && !IsEnumeratingDatabase;
+			return !Connected && base.CheckCanExecuteCondition() && !IsEnumeratingDatabase;
 		}
 
 		private bool _isEnumeratingDatabase;

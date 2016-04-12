@@ -6,17 +6,17 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
-using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Globalization;
-using JPB.DataAccess.Contacts;
 using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using JPB.DataAccess.Contacts;
 using Microsoft.SqlServer.Server;
 using Microsoft.SqlServer.Types;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator.Core
 {
     public class DbTypeToCsType : IValueConverter
     {

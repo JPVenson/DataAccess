@@ -91,6 +91,7 @@ namespace JPB.DataAccess.Manager
 			IDbCommand insertRange = null;
 
 			uint toke = 0;
+			int tokeAll = 0;
 			var type = typeof (T);
 
 			for (var i = 0; i < entrys.Count(); i++)
@@ -102,8 +103,9 @@ namespace JPB.DataAccess.Manager
 					insertRange = singelCommand;
 					continue;
 				}
-				insertRange = db.MergeCommands(insertRange, singelCommand, true);
+				insertRange = db.MergeTextToParameters(insertRange, singelCommand, true, tokeAll);
 				toke++;
+				tokeAll++;
 
 				if (toke == RangerInsertPation)
 				{

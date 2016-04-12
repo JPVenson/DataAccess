@@ -13,7 +13,6 @@ using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
-using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 
