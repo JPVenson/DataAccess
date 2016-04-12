@@ -59,7 +59,6 @@
     <Compile Include="Models\ColumInfoModel.cs" />
     <Compile Include="Models\ConfigStore.cs" />
     <Compile Include="Models\EnumDeclarationModel.cs" />
-    <Compile Include="Models\Options.cs" />
     <Compile Include="Models\SpParam.cs" />
     <Compile Include="Models\StoredPrcInfoModel.cs" />
     <Compile Include="NoYesConverter.cs" />

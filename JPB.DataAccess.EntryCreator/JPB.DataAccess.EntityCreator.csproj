@@ -114,6 +114,7 @@
   <ItemGroup>
     <Compile Include="AutoConsole.cs" />
     <Compile Include="MsSql\MsSqlCreator.cs" />
+    <Compile Include="MsSql\Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
