@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return new LocalIntPkProvider();
 		}
 
-		public bool Equals(object x, object y)
+		public new bool Equals(object x, object y)
 		{
 			return (int)x == (int)y;
 		}

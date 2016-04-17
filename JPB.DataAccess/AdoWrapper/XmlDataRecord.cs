@@ -233,7 +233,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 				return record;
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				return null;
 			}

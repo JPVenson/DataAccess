@@ -27,7 +27,6 @@ namespace JPB.DataAccess.SqLite
 	public class SqLiteUntypedDataPager<T> : IDataPager<T>
 	{
 		private bool _cache;
-		private bool? _checkRun;
 		private long _currentPage;
 		private Action<Action> _syncHelper;
 

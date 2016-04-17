@@ -43,15 +43,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			base.Add(item);
 		}
-
-		/// <summary>
-		/// Removes all items from this Table
-		/// </summary>
-		public void Clear()
-		{
-			base.Clear();
-		}
-
+		
 		/// <summary>
 		/// Checks if the item is ether localy stored or on database
 		/// </summary>
@@ -67,7 +59,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
-		public bool Contains(object key)
+		public override bool Contains(object key)
 		{
 			return base.ContainsId(key);
 		}
@@ -105,22 +97,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Returns the count of all knwon items
-		/// </summary>
-		public int Count
-		{
-			get { return base.Count; }
-		}
-
-		/// <summary>
-		/// False
-		/// </summary>
-		public bool IsReadOnly
-		{
-			get { return base.IsReadOnly; }
-		}
-
-		/// <summary>
 		/// Returns an object with the given Primarykey
 		/// </summary>
 		/// <param name="primaryKey"></param>
@@ -134,14 +110,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Gets an enumerator
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerator<T> GetEnumerator()
+		public new IEnumerator<T> GetEnumerator()
 		{
 			return _base.Values.Cast<T>().GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
 		}
 
 		public Contacts.Pager.IDataPager<T> CreatePager()

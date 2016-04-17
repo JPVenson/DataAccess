@@ -104,9 +104,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 		//{
 		//	return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn, NewNamespace);
 		//}
-
-		private Type[] _externalTypes;
-
+		
 		internal void GenerateTypeConstructorBasedOnElements(IEnumerable<ColumInfoModel> columnInfos)
 		{
 			Add(new CodeConstructor() {

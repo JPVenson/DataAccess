@@ -206,7 +206,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return null;
 		}
 
-		protected virtual bool ContainsId(object fkValueForTableX)
+		public virtual bool ContainsId(object fkValueForTableX)
 		{
 			var local = _base.ContainsKey(fkValueForTableX);
 			if (!local)
@@ -226,7 +226,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Adds a new Item to the Table
 		/// </summary>
 		/// <param name="item"></param>
-		protected virtual void Add(object item)
+		public virtual void Add(object item)
 		{
 			CheckCreatedElseThrow();
 			if (_db != null)
@@ -246,7 +246,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Removes all items from this Table
 		/// </summary>
-		protected virtual void Clear()
+		public virtual void Clear()
 		{
 			CheckCreatedElseThrow();
 			lock (this._lockRoot)
@@ -258,7 +258,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
-		protected virtual bool Contains(object item)
+		public virtual bool Contains(object item)
 		{
 			CheckCreatedElseThrow();
 			var pk = GetId(item);
@@ -276,7 +276,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		protected virtual bool Contains(long item)
+		public virtual bool Contains(long item)
 		{
 			return ContainsId(item);
 		}
@@ -286,12 +286,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		protected virtual bool Contains(int item)
+		public virtual bool Contains(int item)
 		{
 			return ContainsId(item);
 		}
 
-		protected virtual bool Remove(object item)
+		public virtual bool Remove(object item)
 		{
 			CheckCreatedElseThrow();
 			var id = GetId(item);
@@ -372,6 +372,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 			get { return Monitor.IsEntered(_lockRoot); }
 		}
 
-		protected virtual bool IsReadOnly { get { return false; } }
+		public virtual bool IsReadOnly { get { return false; } }
 	}
 }

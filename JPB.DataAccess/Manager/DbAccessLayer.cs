@@ -381,7 +381,9 @@ namespace JPB.DataAccess.Manager
 			if (created)
 				return source;
 
+#pragma warning disable 618
 			return ReflectionPropertySet(source, type, reader, mapping, DbAccessType);
+#pragma warning restore 618
 		}
 
 		/// <summary>
@@ -474,6 +476,8 @@ namespace JPB.DataAccess.Manager
 			Dictionary<int, DbPropertyInfoCache> cache,
 			DbAccessType? dbAccessType)
 		{
+			if (instance == null) throw new ArgumentNullException(nameof(instance));
+			if (info == null) throw new ArgumentNullException(nameof(info));
 			if (reader == null)
 				return instance;
 
@@ -493,20 +497,6 @@ namespace JPB.DataAccess.Manager
 					cache.Add(i, val);
 				}
 			}
-
-			//for (int i = 0; i < reader.FieldCount; i++)
-			//{
-			//	var dbName = info.SchemaMappingValues.ElementAt(i).Key;
-			//	listofpropertys.Append(info.SchemaMappingDatabaseToLocal(dbName), reader.GetValue(i));
-			//}
-
-			//foreach (var schemaMappingValue in info.SchemaMappingValues)
-			//{
-			//}
-
-			//for (int i = 0; i < reader.FieldCount; i++)
-			//	listofpropertys.Append(type.GetDbToLocalSchemaMapping(reader.GetName(i)), reader.GetValue(i));
-
 
 			for (var i = 0; i < reader.FieldCount; i++)
 			{
@@ -544,7 +534,7 @@ namespace JPB.DataAccess.Manager
 
 						//Check for List
 						//if this is a list we are expecting other entrys inside
-						if (DataConverterExtensions.CheckForListInterface(property))
+						if (property.CheckForListInterface())
 						{
 							//target Property is of type list
 							//so expect a xml valid list Take the first element and expect the propertys inside this first element
@@ -583,11 +573,10 @@ namespace JPB.DataAccess.Manager
 						{
 							//the t
 							object xmlSerilizedProperty = 
-								DbAccessLayerHelper.SetPropertysViaReflection(property
-								.PropertyInfo
-								.PropertyType
-								.GetClassInfo(), 
-								XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType, true),
+								property
+									.PropertyInfo
+									.PropertyType
+									.GetClassInfo().SetPropertysViaReflection(XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType, true),
 								dbAccessType);
 
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
