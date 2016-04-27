@@ -34,7 +34,7 @@ namespace JPB.DataAccess.Manager
 	/// <summary>
 	///     Contanins some Helper mehtods for CRUD operation
 	/// </summary>
-	[DebuggerDisplay("DB={dbAccessType}, QueryDebug={Database.LastExecutedQuery.DebuggerQuery}")]
+	[DebuggerDisplay("DB={DatabaseStrategy}, QueryDebug={Database.LastExecutedQuery ? Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
 		[DebuggerStepThrough]
 #endif
@@ -55,6 +55,12 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>")]
 		public object DefaultAssertionObject;
+
+		/// <summary>
+		///     if set the created reader of an read operation will be completely stored then the open connection will be closed
+		///     Default is true
+		/// </summary>
+		public bool LoadCompleteResultBeforeMapping { get; set; }
 
 		/// <summary>
 		/// When specifying an Long as DefaultAssertionObject the PocoPkComparer will use instedt the value casted as int when the property is int instedt of Long and vice versa (more Rewrite operations may follow)
@@ -138,7 +144,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (dbAccessType == DbAccessType.Unknown)
 			{
-				throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof (DbAccessType));
+				throw new InvalidEnumArgumentException("dbAccessType", (int)DbAccessType.Unknown, typeof(DbAccessType));
 			}
 
 			DbAccessType = dbAccessType;
@@ -161,7 +167,7 @@ namespace JPB.DataAccess.Manager
 
 			ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
-			var database = GenerateStrategy(fullTypeNameToIDatabaseStrategy, String.Concat((object) connection));
+			var database = GenerateStrategy(fullTypeNameToIDatabaseStrategy, String.Concat((object)connection));
 
 			Database = new DefaultDatabaseAccess();
 			Database.Attach(database);
@@ -177,8 +183,8 @@ namespace JPB.DataAccess.Manager
 		{
 			if (database == null)
 				throw new ArgumentNullException("database");
-
-			ResolveDbType(database.GetType().FullName);
+			this.DbAccessType = database.SourceDatabase;
+			//ResolveDbType(database.GetType().FullName);
 
 			Database = new DefaultDatabaseAccess();
 			Database.Attach(database);
@@ -263,7 +269,7 @@ namespace JPB.DataAccess.Manager
 		{
 			// ReSharper disable once PossibleInvalidOperationException
 			var firstOrDefault =
-				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
+				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?)s)
 					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
 			if (firstOrDefault == null)
 			{
@@ -274,8 +280,6 @@ namespace JPB.DataAccess.Manager
 				DbAccessType = firstOrDefault.Value.Key;
 			}
 		}
-
-	
 
 		/// <summary>
 		///     Check for Availability
@@ -302,7 +306,7 @@ namespace JPB.DataAccess.Manager
 				foreach (IQueryParameter item in values)
 					command.Parameters.AddWithValue(item.Name, item.Value, Database);
 
-			return Database.Run(s => s.ExecuteNonQuery(command));
+			return this.ExecuteGenericCommand(command);
 		}
 
 		/// <summary>
@@ -312,7 +316,7 @@ namespace JPB.DataAccess.Manager
 		public int ExecuteGenericCommand(string query, dynamic paramenter)
 		{
 			return ExecuteGenericCommand(query,
-				(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
+				(IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
 		}
 
 		/// <summary>
@@ -323,12 +327,6 @@ namespace JPB.DataAccess.Manager
 		{
 			return Database.Run(s => s.ExecuteNonQuery(command));
 		}
-
-		/// <summary>
-		///     if set the created reader of an read operation will be completely stored then the open connection will be closed
-		///     Default is true
-		/// </summary>
-		public bool LoadCompleteResultBeforeMapping { get; set; }
 
 		/// <summary>
 		///     Creates a Strong typed query that awaits a Result
@@ -367,7 +365,6 @@ namespace JPB.DataAccess.Manager
 			return SetPropertysViaReflection(type, reader, null);
 		}
 
-
 		/// <summary>
 		///     Creates a new Instance based on possible Ctor's and the given
 		///     <paramref name="reader" />
@@ -390,9 +387,9 @@ namespace JPB.DataAccess.Manager
 		///     Creates an instance based on a Ctor injection or Reflection loading
 		/// </summary>
 		/// <returns></returns>
-		public static object CreateInstance(DbClassInfoCache classInfo, 
-			IDataRecord reader, 
-			out bool fullLoaded, 
+		public static object CreateInstance(DbClassInfoCache classInfo,
+			IDataRecord reader,
+			out bool fullLoaded,
 			DbAccessType? accessType = null)
 		{
 			if (classInfo.Factory != null)
@@ -401,13 +398,15 @@ namespace JPB.DataAccess.Manager
 				return classInfo.Factory(reader);
 			}
 
-			var objectFactorys = classInfo.Constructors.Where(s => s.Arguments.Count == 1 
-			&& s.Arguments.First().Type == typeof(IDataRecord)).ToArray();
+			var objectFactorys = classInfo.Constructors.Where(s =>
+											s.Arguments.Count == 1
+											&& s.Arguments.First().Type == typeof(IDataRecord))
+											.ToArray();
 
 			var constructor = objectFactorys.FirstOrDefault(s =>
 			s.Attributes.Any(f =>
 				f.Attribute is ObjectFactoryMethodAttribute
-				&& (!accessType.HasValue || (f.Attribute as ObjectFactoryMethodAttribute).TargetDatabase == accessType.Value)));
+				&& (!accessType.HasValue || ((ObjectFactoryMethodAttribute)f.Attribute).TargetDatabase == accessType.Value)));
 
 			if (constructor == null)
 				constructor = objectFactorys.FirstOrDefault();
@@ -442,7 +441,7 @@ namespace JPB.DataAccess.Manager
 							if (returnType != null && returnType.ParameterType == classInfo.Type)
 							{
 								if (factory.Arguments.Count == 1 &&
-								    factory.Arguments.First().Type == typeof(IDataRecord))
+									factory.Arguments.First().Type == typeof(IDataRecord))
 								{
 									classInfo.FullFactory = true;
 									classInfo.Factory = s => factory.Invoke(new object[] { reader });
@@ -458,7 +457,7 @@ namespace JPB.DataAccess.Manager
 
 			if (emptyCtor == null)
 			{
-				throw new NotSupportedException("You have to define ether an ObjectFactoryMethod as static or constructor or any constructor without any arguments");
+				throw new NotSupportedException("You have to define ether an ObjectFactoryMethod as static or constructor with and IDataReader or an constructor without any arguments");
 			}
 
 			classInfo.FullFactory = false;
@@ -572,7 +571,7 @@ namespace JPB.DataAccess.Manager
 						else
 						{
 							//the t
-							object xmlSerilizedProperty = 
+							object xmlSerilizedProperty =
 								property
 									.PropertyInfo
 									.PropertyType
@@ -642,13 +641,13 @@ namespace JPB.DataAccess.Manager
 
 			if (reader is EgarDataRecord)
 			{
-				(reader as EgarDataRecord).Dispose();
+				(reader as IDisposable).Dispose();
 			}
 
 			return instance;
 		}
 
-		
+
 		internal List<IDataRecord> EnumerateDataRecords(IDbCommand query, bool egarLoading)
 		{
 			return EnumerateMarsDataRecords(query, egarLoading).FirstOrDefault();

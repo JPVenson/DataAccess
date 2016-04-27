@@ -348,23 +348,6 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Not Connection save
-		///     Must be executed inside a Valid Connection
-		///     Takes <paramref name="base" /> as base of Connection propertys
-		///     Merges the Command text of Both commands sepperated by a space
-		///     Creats a new command based on
-		///     <paramref name="db" />
-		///     and Adds the Merged Commandtext and all parameter to it
-		/// </summary>
-		/// <returns></returns>
-		public static IDbCommand InsertCommands(IDatabase db, IDbCommand @base, IDbCommand toInsert, bool autoRename = false)
-		{
-			throw new NotSupportedException();
-			//var mergedCommandText = string.Format(@base.CommandText, toInsert);
-			//return db.MergeTextToParameters(mergedCommandText, @base, toInsert, autoRename);
-		}
-
-		/// <summary>
 		///     Creates a new Instance based on possible Ctor's and the given
 		///     <paramref name="reader" />
 		/// </summary>

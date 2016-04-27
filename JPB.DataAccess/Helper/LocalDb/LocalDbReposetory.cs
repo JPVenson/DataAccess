@@ -55,16 +55,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Checks if the key is known
-		/// </summary>
-		/// <param name="key"></param>
-		/// <returns></returns>
-		public override bool Contains(object key)
-		{
-			return base.ContainsId(key);
-		}
-
-		/// <summary>
 		/// Thread save
 		/// </summary>
 		/// <returns></returns>
