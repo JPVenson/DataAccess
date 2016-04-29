@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JPB.DataAccess, Version=2.0.135.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\JPB.DataAccess.2.0.135.0\lib\net45\JPB.DataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -74,10 +78,7 @@
     <Compile Include="SharedMethods.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
-      <Name>JPB.DataAccess</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

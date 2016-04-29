@@ -1792,6 +1792,7 @@
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.GetOrCreateClassInfoCache(System.String,System.Boolean@)">
             <summary>
             	Gets an Cache object of exists or creats one
+            	Return value can be null
             </summary>
             <param name="typeName"></param>
             <param name="newCreated"></param>
@@ -1814,6 +1815,16 @@
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.Include(System.Type)">
+            <summary>
+                Append
+                as an Optimistic input to the store.
+                This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
+                This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.Include(`0)">
             <summary>
                 Append
                 as an Optimistic input to the store.
@@ -3590,6 +3601,152 @@
                 QueryCommand string
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Add``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},JPB.DataAccess.Query.GenericQueryPart)">
+            <summary>
+                Adds a QueryCommand part to the Local collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Add``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},JPB.DataAccess.Query.GenericQueryPart)">
+            <summary>
+                Adds a QueryCommand part to the Local collection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryQ``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,JPB.DataAccess.Contacts.IQueryParameter[])">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryCommand``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},System.Data.IDbCommand)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryCommand``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Data.IDbCommand)">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.QueryText``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object[])">
+            <summary>
+                Adds a QueryCommand part to <paramref name="builder" />
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery})">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery},System.Type)">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type)">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0})">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Update``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},``0)">
+            <summary>
+                Adds a Update - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Update``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type,System.Object)">
+            <summary>
+                Adds a Select - Statement
+                Uses reflection or a Factory mehtod to create
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.InBracket``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Action{JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.INestedRoot}})">
+            <summary>
+                Creates a Common Table Expression that selects a Specific type
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.AsPager``1(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
+            <summary>
+                Wraps the Existing command into a DataPager for the underlying Database
+                Accepts only Where statements
+                <example>
+                </example>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.AsPagerViewModel``2(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
+            <summary>
+                Wraps the Existing command into a DataPager for the underlying Database
+                Accepts only Where statements
+                <example>
+                </example>
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Where``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
+            <summary>
+                Adds a SQL WHERE Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
+            <summary>
+                Adds And Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery})">
+            <summary>
+                Adds And Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.Or(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
+            <summary>
+                Adds Or Condition
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryBuilderExtentions.WithParamerters``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Object)">
+            <summary>
+                Adds Parameter to the QueryCommand object without adding a Statement
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Query.QueryEagerEnumerator.Load">
             <summary>
                 Mehtod for async loading this will bring us some m secs
@@ -3671,152 +3828,6 @@
             <summary>
             	Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the QueryCommand Builder
             </summary>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Add``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},JPB.DataAccess.Query.GenericQueryPart)">
-            <summary>
-                Adds a QueryCommand part to the Local collection
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Add``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},JPB.DataAccess.Query.GenericQueryPart)">
-            <summary>
-                Adds a QueryCommand part to the Local collection
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryQ``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,JPB.DataAccess.Contacts.IQueryParameter[])">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryD``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryCommand``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},System.Data.IDbCommand)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryCommand``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Data.IDbCommand)">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.QueryText``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object[])">
-            <summary>
-                Adds a QueryCommand part to <paramref name="builder" />
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery})">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IRootQuery},System.Type)">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type)">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Select``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0})">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Update``2(JPB.DataAccess.Query.Contracts.IQueryBuilder{``1},``0)">
-            <summary>
-                Adds a Update - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Update``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Type,System.Object)">
-            <summary>
-                Adds a Select - Statement
-                Uses reflection or a Factory mehtod to create
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.InBracket``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Action{JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.INestedRoot}})">
-            <summary>
-                Creates a Common Table Expression that selects a Specific type
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.AsPager``1(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
-            <summary>
-                Wraps the Existing command into a DataPager for the underlying Database
-                Accepts only Where statements
-                <example>
-                </example>
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.AsPagerViewModel``2(JPB.DataAccess.Query.Contracts.IQueryContainer,System.Int32)">
-            <summary>
-                Wraps the Existing command into a DataPager for the underlying Database
-                Accepts only Where statements
-                <example>
-                </example>
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Where``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.String,System.Object)">
-            <summary>
-                Adds a SQL WHERE Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
-            <summary>
-                Adds And Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.And(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery})">
-            <summary>
-                Adds And Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.Or(JPB.DataAccess.Query.Contracts.IQueryBuilder{JPB.DataAccess.Query.Contracts.IConditionalQuery},System.String,System.Object)">
-            <summary>
-                Adds Or Condition
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.QueryBuilder.QueryBuilderExtentions.WithParamerters``1(JPB.DataAccess.Query.Contracts.IQueryBuilder{``0},System.Object)">
-            <summary>
-                Adds Parameter to the QueryCommand object without adding a Statement
-            </summary>
-            <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.DataAccessAttribute">
             <summary>

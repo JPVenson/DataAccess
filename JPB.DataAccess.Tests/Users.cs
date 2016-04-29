@@ -8,16 +8,19 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Data;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.ModelsAnotations;
-
 namespace JPB.DataAccess.Tests
 {
+	using JPB.DataAccess.DbInfoConfig;
+	using System;
+	using System.Collections.Generic;
+	using System.CodeDom.Compiler;
+	using System.Linq;
+	using System.Data;
+	using JPB.DataAccess.ModelsAnotations;
+
 	// Created by BORGCUBE\User
-	// Created on 2016 März 25
-	[GeneratedCode("JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator", "1.0.0.8")]
+	// Created on 2016 April 30
+	[GeneratedCodeAttribute("JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator", "1.0.0.8")]
 	public sealed partial class Users
 	{
 		public Users()
@@ -47,11 +50,11 @@ namespace JPB.DataAccess.Tests
 				this._userName = value;
 			}
 		}
-		partial void BeforeConfig();
-		partial void AfterConfig();
-		partial void BeforeConfig(ConfigurationResolver<Users> config);
-		partial void AfterConfig(ConfigurationResolver<Users> config);
-		[ObjectFactoryMethod()]
+		static partial void BeforeConfig();
+		static partial void AfterConfig();
+		static partial void BeforeConfig(ConfigurationResolver<Users> config);
+		static partial void AfterConfig(ConfigurationResolver<Users> config);
+		[ObjectFactoryMethodAttribute()]
 		public static Users Factory(IDataRecord record)
 		{
 			Users super;
@@ -62,22 +65,23 @@ namespace JPB.DataAccess.Tests
 			if ((username == System.DBNull.Value))
 			{
 				super.UserName = null;
-			} else
+			}
+			else
 			{
 				super.UserName = ((string)(username));
 			}
 			return super;
 		}
-		[ConfigMehtod()]
-		void ConfigUsers(ConfigurationResolver<Users> config)
+		[ConfigMehtodAttribute()]
+		public static void ConfigUsers(ConfigurationResolver<Users> config)
 		{
-			this.BeforeConfig();
-			this.BeforeConfig(config);
+			Users.BeforeConfig();
+			Users.BeforeConfig(config);
 			config.SetFactory(Users.Factory, true);
 			config.SetPropertyAttribute(s => s.UserID, new ForModelAttribute("User_ID"));
 			config.SetPropertyAttribute(s => s.UserID, new PrimaryKeyAttribute());
-			this.AfterConfig();
-			this.AfterConfig(config);
+			Users.AfterConfig();
+			Users.AfterConfig(config);
 		}
 	}
 }

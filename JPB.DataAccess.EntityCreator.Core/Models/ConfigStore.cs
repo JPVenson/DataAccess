@@ -19,5 +19,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Models
 		public bool GenerateConfigMethod { get; set; }
 		public string Namespace { get; set; }
 		public string TargetDir { get; set; }
+
+		public string Version { get; set; }
 	}
 }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
-	public interface IMsSqlCreator
+	public interface IMsSqlCreator : IEntryCreator
 	{
 		IEnumerable<ITableInfoModel> Tables { get; set; }
 		IEnumerable<Dictionary<int, string>> Enums { get; }

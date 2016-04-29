@@ -8,14 +8,6 @@
 		xmlns:view="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.View"
 		mc:Ignorable="d"
 		Title="MainWindow" Height="350" Width="525" d:DataContext="{d:DesignInstance local:MainWindowViewModel}">
-	<!--<Window.Resources>
-		<ResourceDictionary>
-			<DataTemplate DataType="{x:Type viewModel:SqlEntityCreatorViewModel}">
-				<view:SqlEntityCreatorView></view:SqlEntityCreatorView>
-			</DataTemplate>
-		</ResourceDictionary>
-	</Window.Resources>-->
-	
 	<Grid>
 		<view:SqlEntityCreatorView DataContext="{Binding SelectedProvider}"></view:SqlEntityCreatorView>
 	</Grid>

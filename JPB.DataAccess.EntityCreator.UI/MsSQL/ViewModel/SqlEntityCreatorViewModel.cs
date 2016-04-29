@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using JPB.DataAccess.DbInfoConfig;
@@ -16,11 +18,12 @@ using JPB.DataAccess.Manager;
 using JPB.DynamicInputBox;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
+using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	public class SqlEntityCreatorViewModel : AsyncViewModelBase, IEntryCreator, IMsSqlCreator
+	public class SqlEntityCreatorViewModel : AsyncViewModelBase, IMsSqlCreator
 	{
 		public SqlEntityCreatorViewModel()
 		{
@@ -65,6 +68,19 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 					return;
 				}
 
+				var version = typeof(SharedMethods).Assembly.GetName().Version;
+				if (new Version(options.Version) != version)
+				{
+					var messageBoxResult = MessageBox.Show(App.Current.MainWindow,
+						"Warning Version missmatch",
+						string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.",
+							version, options.Version),
+						MessageBoxButton.OKCancel);
+
+					if(messageBoxResult == MessageBoxResult.Cancel)
+						return;
+				}
+
 				foreach (var option in options.Tables)
 				{
 					this.Tables.Add(new TableInfoViewModel(option, this));
@@ -90,7 +106,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				this.GenerateConfigMethod = options.GenerateConfigMethod;
 				this.Namespace = options.Namespace;
 				this.TargetDir = options.TargetDir;
-
 				this.SelectedTable = Tables.FirstOrDefault();
 			}
 		}
@@ -121,6 +136,10 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				options.GenerateConfigMethod = this.GenerateConfigMethod;
 				options.Namespace = this.Namespace;
 				options.TargetDir = this.TargetDir;
+
+				var version = typeof(SharedMethods).Assembly.GetName().Version;
+			
+				options.Version = version.ToString();
 
 				if (this.ConnectionString != null)
 				{
@@ -293,6 +312,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
+			Status = "Try to connect";
 			//Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;Database=TestDB;
 			IsEnumeratingDatabase = true;
 			TargetDir = outputPath;
@@ -325,6 +345,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			Status = "Connection OK ... Reading Server Version ...";
 
 			SqlVersion = Manager.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+			Status = "Reading Tables";
 
 			int counter = 3;
 			base.SimpleWorkWithSyncContinue(() =>
@@ -346,6 +367,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				if (counter == 0)
 				{
 					IsEnumeratingDatabase = false;
+					Status = "Done";
 				}
 			});
 			base.SimpleWorkWithSyncContinue(() =>
@@ -367,28 +389,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				if (counter == 0)
 				{
 					IsEnumeratingDatabase = false;
+					Status = "Done";
 				}
 			});
-			//base.SimpleWorkWithSyncContinue(() =>
-			//{
-			//	return
-			//		new DbAccessLayer(DbAccessType.MsSql, connection)
-			//		.Select<StoredProcedureInformation>()
-			//		.Select(s => new StoredPrcInfoModel(s))
-			//		.ToList();
-			//}, dbInfo =>
-			//{
-			//	foreach (var source in dbInfo)
-			//	{
-			//		if (Tables.All(f => f.Info.TableName != source.))
-			//			StoredProcs.Add(source);
-			//	}
-			//	counter--;
-			//	if (counter == 0)
-			//	{
-			//		IsEnumeratingDatabase = false;
-			//	}
-			//});
 		}
 
 		public void Compile()
@@ -404,6 +407,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				this.TargetDir = dir.SelectedPath;
 				foreach (var tableInfoModel in this.Tables)
 				{
+					Status = String.Format("Compiling Table '{0}'", tableInfoModel.GetClassName());
 					SharedMethods.CompileTable(tableInfoModel, this);
 				}
 			}
@@ -413,6 +417,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		{
 			get { return this.StoredProcs; }
 		}
+
 		public string TargetDir { get; set; }
 		private bool _generateConstructor;
 

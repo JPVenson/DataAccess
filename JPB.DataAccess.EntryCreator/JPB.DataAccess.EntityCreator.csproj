@@ -73,6 +73,10 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JPB.DataAccess, Version=2.0.135.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\JPB.DataAccess.2.0.135.0\lib\net45\JPB.DataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Microsoft SQL Server\120\SDK\Assemblies\Microsoft.SqlServer.Types.dll</HintPath>
@@ -121,15 +125,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="JPB.DataAccess.EntryCreator.licenseheader" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JPB.DataAccess.EntityCreator.Core\JPB.DataAccess.EntityCreator.Core.csproj">
       <Project>{5bc12918-3a58-4e94-8aa2-b2cf56dc9de9}</Project>
       <Name>JPB.DataAccess.EntityCreator.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
-      <Name>JPB.DataAccess</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

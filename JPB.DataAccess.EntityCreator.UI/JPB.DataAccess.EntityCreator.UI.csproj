@@ -39,6 +39,10 @@
       <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="JPB.DataAccess, Version=2.0.135.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\JPB.DataAccess.2.0.135.0\lib\net45\JPB.DataAccess.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="JPB.WPFToolsAwsome, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WPFToolsAwsome.1.0.4\lib\net45\JPB.WPFToolsAwsome.dll</HintPath>
       <Private>True</Private>
@@ -161,10 +165,6 @@
     <ProjectReference Include="..\JPB.DataAccess.EntityCreator.Core\JPB.DataAccess.EntityCreator.Core.csproj">
       <Project>{5BC12918-3A58-4E94-8AA2-B2CF56DC9DE9}</Project>
       <Name>JPB.DataAccess.EntityCreator.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
-      <Name>JPB.DataAccess</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

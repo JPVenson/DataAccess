@@ -26,3 +26,7 @@
 /JPB.DataAccess.EntryCreator/JPB.DataAccess.EntityCreator.csproj.user
 /JPB.DataAccess/JPB.DataAccess.v12.suo
 /.vs/JPB.DataAccess/v14/.suo
+/JPB.DataAccess.EntityCreator.Core/bin/Debug
+/JPB.DataAccess.EntityCreator.Core/obj/Debug
+/JPB.DataAccess.EntityCreator.UI/bin/Debug
+/JPB.DataAccess.EntityCreator.UI/obj/Debug

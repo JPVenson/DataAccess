@@ -35,18 +35,6 @@ namespace JPB.DataAccess.Tests
 			}
 			Console.WriteLine("Found NON ERROR");
 			return DbAccessType.Unknown;
-
-			//var category = TestContext.CurrentContext.Test.Properties["Category"];
-
-			//if (category.Contains("MsSQL"))
-			//{
-			//	return DbAccessType.MsSql;
-			//}
-			//else if (category.Contains("SqLite"))
-			//{
-			//	return DbAccessType.SqLite;
-			//}
-			//return DbAccessType.Unknown;
 		}
 
 		public DbAccessLayer GetWrapper()
