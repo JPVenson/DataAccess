@@ -28,7 +28,7 @@ namespace JPB.DataAccess.DbInfoConfig
 	/// <summary>
 	///     Only for internal use
 	/// </summary>
-	internal class FactoryHelper
+	public class FactoryHelper
 	{
 		public static CodeMemberMethod GenerateTypeConstructor(bool factory = false)
 		{
