@@ -6,7 +6,7 @@ Please consider to give some Feedback on CodeProject
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
-namespace JPB.DataAccess.EntityCreator
+namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
     public interface IEntryCreator
     {

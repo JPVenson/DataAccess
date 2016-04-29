@@ -21,7 +21,6 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.Query
 {

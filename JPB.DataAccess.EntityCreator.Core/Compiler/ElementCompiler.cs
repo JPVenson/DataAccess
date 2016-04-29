@@ -9,12 +9,12 @@ using System.Security.Cryptography;
 using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CSharp;
 
-namespace JPB.DataAccess.EntityCreator.Compiler
+namespace JPB.DataAccess.EntityCreator.Core.Compiler
 {
 	public abstract class ElementCompiler
 	{
@@ -34,7 +34,10 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 		public const string GitURL = "https://github.com/JPVenson/DataAccess";
 		public const string AttrbuteHeader = "JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator";
 
-
+		/// <summary>
+		/// if set to true the output will be allways written
+		/// </summary>
+		public bool WriteAllways { get; set; }
 		public string TargetDir { get; private set; }
 		public string TableName { get; set; }
 		public string TargetCsName { get; private set; }
@@ -51,7 +54,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 		public string Name { get { return _base.Name; } }
 
-		public bool CompileHeader { get; internal set; }
+		public bool CompileHeader { get; set; }
 
 		public bool GenerateConfigMethod { get; set; }
 
@@ -83,7 +86,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return writer.ToString();
 		}
 
-		public List<DbPropertyInfoCache> ColumninfosToInfoCache(IEnumerable<ColumInfoModel> columnInfos)
+		public List<DbPropertyInfoCache> ColumninfosToInfoCache(IEnumerable<IColumInfoModel> columnInfos)
 		{
 			var dic = new List<DbPropertyInfoCache>();
 
@@ -123,8 +126,16 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 			return dic;
 		}
 
-		public virtual void Compile(IEnumerable<ColumInfoModel> columnInfos)
+		public virtual void Compile(IEnumerable<IColumInfoModel> columnInfos, Stream to = null)
 		{
+			if (to != null)
+			{
+				if (!to.CanSeek)
+					throw new InvalidOperationException("The stream must be seekable");
+				if (!to.CanWrite)
+					throw new InvalidOperationException("The stream must be writeable");
+			}
+
 			this.PreCompile();
 			if (string.IsNullOrEmpty(TableName))
 			{
@@ -171,103 +182,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 
 			if (GenerateConfigMethod)
 			{
-				const string configArgumentName = "config";
-
-				var configArgument = string.Format("ConfigurationResolver<{0}>", TargetCsName);
-
-				importNameSpace.Imports.Add(new CodeNamespaceImport(typeof(ConfigurationResolver<>).Namespace));
-
-				string[] eventNames = new string[] { "BeforeConfig()", "AfterConfig()", "BeforeConfig(" + configArgument + " config)", "AfterConfig(" + configArgument + " config)" };
-
-				foreach (string eventName in eventNames)
-				{
-					CodeMemberField eventHook = new CodeMemberField(); //do it as a FIELD instead of a METHOD
-					eventHook.Name = eventName;
-					eventHook.Attributes = MemberAttributes.Static;
-					eventHook.Type = new CodeTypeReference("partial void");
-					_base.Members.Add(eventHook);
-				}
-
-				var configMethod = new CodeMemberMethod();
-				configMethod.Attributes = MemberAttributes.Static | MemberAttributes.Public;
-				
-				configMethod.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ConfigMehtodAttribute).Name));
-				configMethod.Name = "Config" + TargetCsName;
-				configMethod.Parameters.Add(new CodeParameterDeclarationExpression(configArgument, configArgumentName));
-				var configRef = new CodeVariableReferenceExpression(configArgumentName);
-
-				configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName), "BeforeConfig"));
-				configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName), "BeforeConfig", configRef));
-
-				if (!string.IsNullOrEmpty(TableName) && TableName != TargetCsName)
-				{
-					var setNewTablenameOnConfig = new CodeMethodInvokeExpression(configRef,
-						"SetClassAttribute", 
-						new CodeObjectCreateExpression(typeof(ForModelAttribute).Name,
-							new CodePrimitiveExpression(TableName)));
-					configMethod.Statements.Add(setNewTablenameOnConfig);
-				}
-
-				foreach (var member in this.MembersFromBase.Cast<CodeTypeMember>().ToArray())
-				{
-					if (member is CodeMemberProperty || (member is CodeMemberMethod && !(member is CodeConstructor)))
-					{
-						var property = member as CodeTypeMember;
-						if (property.CustomAttributes != null)
-							foreach (CodeAttributeDeclaration attribute in property.CustomAttributes)
-							{
-								var dbAttribute = new CodeObjectCreateExpression(attribute.Name);
-								foreach (CodeAttributeArgument attributeArgument in attribute.Arguments)
-								{
-									dbAttribute.Parameters.Add(attributeArgument.Value);
-								}
-								var methodName = (member is CodeMemberProperty) ? "SetPropertyAttribute" : "SetMethodAttribute";
-								var propDelegate = new CodeSnippetExpression("s => s." + property.Name);
-								var configPropCall = new CodeMethodInvokeExpression(configRef, methodName, propDelegate, dbAttribute);
-
-								configMethod.Statements.Add(configPropCall);
-							}
-
-						property.CustomAttributes.Clear();
-					}
-
-					if (member is CodeConstructor)
-					{
-						var ctor = member as CodeConstructor;
-						if (ctor.CustomAttributes.Cast<CodeAttributeDeclaration>().Any(f => f.Name == typeof(ObjectFactoryMethodAttribute).Name))
-						{	
-							var dbInfos = ColumninfosToInfoCache(columnInfos);
-
-							var codeFactory = FactoryHelper.GenerateTypeConstructor(true);
-							var super = new CodeVariableReferenceExpression("super");
-
-							var pocoVariable = new CodeVariableDeclarationStatement(TargetCsName, "super");
-							codeFactory.Statements.Add(pocoVariable);
-
-							var codeAssignment = new CodeAssignStatement(super, new CodeObjectCreateExpression(TargetCsName));
-							codeFactory.Statements.Add(codeAssignment);
-							FactoryHelper.GenerateBody(dbInfos.ToDictionary(s => s.DbName),
-								new FactoryHelperSettings(),
-								importNameSpace,
-								codeFactory,
-								super);
-
-							codeFactory.ReturnType = new CodeTypeReference(TargetCsName);
-							codeFactory.Statements.Add(new CodeMethodReturnStatement(super));
-							_base.Members.Add(codeFactory);
-							_base.Members.Remove(member);
-							var factorySet = new CodeMethodInvokeExpression(configRef, 
-								"SetFactory",
-								new CodeMethodReferenceExpression(new CodeTypeReferenceExpression(TargetCsName), codeFactory.Name),
-								new CodePrimitiveExpression(true));
-							configMethod.Statements.Add(factorySet);
-						}
-					}
-				}
-				configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName), "AfterConfig"));
-				configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName), "AfterConfig", configRef));
-
-				_base.Members.Add(configMethod);
+				GenerateConfigMehtod(columnInfos, importNameSpace);
 			}
 			else
 			{
@@ -278,7 +193,9 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 						new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName)));
 					_base.CustomAttributes.Add(codeAttributeDeclaration);
 				}
-			}		
+			}
+
+			var compileUnit = new CodeCompileUnit();
 
 			using (var memStream = new MemoryStream())
 			{
@@ -293,10 +210,7 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 					cp.ReferencedAssemblies.Add("System.Xml.dll");
 					cp.ReferencedAssemblies.Add("System.Xml.Linq.dll");
 					cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
-
-					var compileUnit = new CodeCompileUnit();
-
-
+					
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System.CodeDom.Compiler"));
@@ -323,21 +237,149 @@ namespace JPB.DataAccess.EntityCreator.Compiler
 				var hasher = MD5.Create();
 				var neuHash = hasher.ComputeHash(memStream.ToArray());
 				var targetFileName = Path.Combine(TargetDir, _base.Name + ".cs");
-				using (var fileStream = new FileStream(targetFileName, FileMode.OpenOrCreate))
+				if (to == null)
 				{
-					var exisitingHash = hasher.ComputeHash(fileStream);
-					if (!exisitingHash.SequenceEqual(neuHash))
+					using (var fileStream = new FileStream(targetFileName, FileMode.OpenOrCreate))
+					{
+						var exisitingHash = hasher.ComputeHash(fileStream);
+						if (!exisitingHash.SequenceEqual(neuHash))
+						{
+							Console.WriteLine("Class changed. Old file will be kept and new contnt will be written");
+							fileStream.SetLength(0);
+							fileStream.Flush();
+							fileStream.Seek(0, SeekOrigin.Begin);
+							memStream.WriteTo(fileStream);
+							memStream.Flush();
+							fileStream.Flush();
+						}
+					}
+					
+				}
+				else
+				{
+					var exisitingHash = hasher.ComputeHash(to);
+					if (WriteAllways || !exisitingHash.SequenceEqual(neuHash))
 					{
 						Console.WriteLine("Class changed. Old file will be kept and new contnt will be written");
-						fileStream.SetLength(0);
-						fileStream.Flush();
-						fileStream.Seek(0, SeekOrigin.Begin);
-						memStream.WriteTo(fileStream);
+						to.SetLength(0);
+						to.Flush();
+						to.Seek(0, SeekOrigin.Begin);
+						memStream.WriteTo(to);
 						memStream.Flush();
-						fileStream.Flush();
+						to.Flush();
 					}
 				}
 			}
+		}
+
+		private void GenerateConfigMehtod(IEnumerable<IColumInfoModel> columnInfos, CodeNamespace importNameSpace)
+		{
+			const string configArgumentName = "config";
+
+			var configArgument = string.Format("ConfigurationResolver<{0}>", TargetCsName);
+
+			importNameSpace.Imports.Add(new CodeNamespaceImport(typeof (ConfigurationResolver<>).Namespace));
+
+			string[] eventNames = new string[]
+			{
+				"BeforeConfig()", "AfterConfig()", "BeforeConfig(" + configArgument + " config)",
+				"AfterConfig(" + configArgument + " config)"
+			};
+
+			foreach (string eventName in eventNames)
+			{
+				CodeMemberField eventHook = new CodeMemberField(); //do it as a FIELD instead of a METHOD
+				eventHook.Name = eventName;
+				eventHook.Attributes = MemberAttributes.Static;
+				eventHook.Type = new CodeTypeReference("partial void");
+				_base.Members.Add(eventHook);
+			}
+
+			var configMethod = new CodeMemberMethod();
+			configMethod.Attributes = MemberAttributes.Static | MemberAttributes.Public;
+
+			configMethod.CustomAttributes.Add(new CodeAttributeDeclaration(typeof (ConfigMehtodAttribute).Name));
+			configMethod.Name = "Config" + TargetCsName;
+			configMethod.Parameters.Add(new CodeParameterDeclarationExpression(configArgument, configArgumentName));
+			var configRef = new CodeVariableReferenceExpression(configArgumentName);
+
+			configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName),
+				"BeforeConfig"));
+			configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName),
+				"BeforeConfig", configRef));
+
+			if (!string.IsNullOrEmpty(TableName) && TableName != TargetCsName)
+			{
+				var setNewTablenameOnConfig = new CodeMethodInvokeExpression(configRef,
+					"SetClassAttribute",
+					new CodeObjectCreateExpression(typeof (ForModelAttribute).Name,
+						new CodePrimitiveExpression(TableName)));
+				configMethod.Statements.Add(setNewTablenameOnConfig);
+			}
+
+			foreach (var member in this.MembersFromBase.Cast<CodeTypeMember>().ToArray())
+			{
+				if (member is CodeMemberProperty || (member is CodeMemberMethod && !(member is CodeConstructor)))
+				{
+					var property = member as CodeTypeMember;
+					if (property.CustomAttributes != null)
+						foreach (CodeAttributeDeclaration attribute in property.CustomAttributes)
+						{
+							var dbAttribute = new CodeObjectCreateExpression(attribute.Name);
+							foreach (CodeAttributeArgument attributeArgument in attribute.Arguments)
+							{
+								dbAttribute.Parameters.Add(attributeArgument.Value);
+							}
+							var methodName = (member is CodeMemberProperty) ? "SetPropertyAttribute" : "SetMethodAttribute";
+							var propDelegate = new CodeSnippetExpression("s => s." + property.Name);
+							var configPropCall = new CodeMethodInvokeExpression(configRef, methodName, propDelegate, dbAttribute);
+
+							configMethod.Statements.Add(configPropCall);
+						}
+
+					property.CustomAttributes.Clear();
+				}
+
+				if (member is CodeConstructor)
+				{
+					var ctor = member as CodeConstructor;
+					if (
+						ctor.CustomAttributes.Cast<CodeAttributeDeclaration>()
+							.Any(f => f.Name == typeof (ObjectFactoryMethodAttribute).Name))
+					{
+						var dbInfos = ColumninfosToInfoCache(columnInfos);
+
+						var codeFactory = FactoryHelper.GenerateTypeConstructor(true);
+						var super = new CodeVariableReferenceExpression("super");
+
+						var pocoVariable = new CodeVariableDeclarationStatement(TargetCsName, "super");
+						codeFactory.Statements.Add(pocoVariable);
+
+						var codeAssignment = new CodeAssignStatement(super, new CodeObjectCreateExpression(TargetCsName));
+						codeFactory.Statements.Add(codeAssignment);
+						FactoryHelper.GenerateBody(dbInfos.ToDictionary(s => s.DbName),
+							new FactoryHelperSettings(),
+							importNameSpace,
+							codeFactory,
+							super);
+
+						codeFactory.ReturnType = new CodeTypeReference(TargetCsName);
+						codeFactory.Statements.Add(new CodeMethodReturnStatement(super));
+						_base.Members.Add(codeFactory);
+						_base.Members.Remove(member);
+						var factorySet = new CodeMethodInvokeExpression(configRef,
+							"SetFactory",
+							new CodeMethodReferenceExpression(new CodeTypeReferenceExpression(TargetCsName), codeFactory.Name),
+							new CodePrimitiveExpression(true));
+						configMethod.Statements.Add(factorySet);
+					}
+				}
+			}
+			configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName), "AfterConfig"));
+			configMethod.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression(TargetCsName), "AfterConfig",
+				configRef));
+
+			_base.Members.Add(configMethod);
 		}
 	}
 }

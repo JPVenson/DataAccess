@@ -12,7 +12,6 @@ using JPB.DataAccess.Query;
 using JPB.DataAccess.QueryFactory;
 using System;
 using System.CodeDom.Compiler;
-using JPB.DataAccess.QueryBuilder;
 
 namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 {

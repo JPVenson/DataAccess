@@ -21,7 +21,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// <summary>
 	///     for internal use only
 	/// </summary>
-	[DebuggerDisplay("{type.Name}")]
+	[DebuggerDisplay("{Type.Name}")]
 	[Serializable]
 	public abstract class ClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
 		: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>

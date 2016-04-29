@@ -33,8 +33,8 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			var user = new Users();
 			_users.Add(user);
 			Assert.IsNotNull(user);
-			Assert.AreNotEqual(user.User_ID, 0);
-			Assert.AreEqual(user.User_ID, 1);
+			Assert.AreNotEqual(user.UserID, 0);
+			Assert.AreEqual(user.UserID, 1);
 		}
 
 		[Test]
@@ -54,7 +54,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_users.Add(user);
 
 			//Add TestMethod
-			Assert.IsTrue(_users.Contains(user.User_ID));
+			Assert.IsTrue(_users.Contains(user.UserID));
 		}
 
 		[Test]

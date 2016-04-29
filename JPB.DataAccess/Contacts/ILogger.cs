@@ -23,6 +23,6 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <param name="content"></param>
 		/// <param name="arguments"></param>
-		void WriteLine(string content, params object[] arguments);
+		void WriteLine(string content = null, params object[] arguments);
 	}
 }

@@ -44,7 +44,8 @@ namespace JPB.DataAccess
 		internal static IDbCommand MergeTextToParameters(this IDatabase db,
 			IDbCommand @base,
 			IDbCommand last,
-			bool autoRename = false)
+			bool autoRename = false,
+			int seed = 1)
 		{
 			var parameter =
 				@base.Parameters.Cast<IDataParameter>()
@@ -65,7 +66,7 @@ namespace JPB.DataAccess
 							String.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
 								item.ParameterName));
 					}
-					var counter = 1;
+					var counter = seed;
 					var parameterName = item.ParameterName;
 					var buffParam = parameterName;
 					while (parameter.Any(s => s.Name == buffParam))

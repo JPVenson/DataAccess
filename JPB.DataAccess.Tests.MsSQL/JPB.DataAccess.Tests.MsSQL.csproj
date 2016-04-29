@@ -134,6 +134,9 @@
     <Compile Include="..\JPB.DataAccess.Tests\TestModels\XmlDataRecordTest\InstanceMock.cs">
       <Link>TestModels\XmlDataRecordTest\InstanceMock.cs</Link>
     </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Users.cs">
+      <Link>Users.cs</Link>
+    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\XmlDataRecordTests\XmlDataRecordTest.cs">
       <Link>XmlDataRecordTests\XmlDataRecordTest.cs</Link>
     </Compile>
