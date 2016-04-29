@@ -106,7 +106,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		private Type[] _externalTypes;
 
-		public void GenerateTypeConstructorBasedOnElements(IEnumerable<IColumInfoModel> columnInfos)
+		public void GenerateTypeConstructorBasedOnElements(IEnumerable<ColumInfoModel> columnInfos)
 		{
 			Add(new CodeConstructor() {
 				Attributes = MemberAttributes.Public

@@ -56,6 +56,9 @@ namespace JPB.DataAccess.Tests.PagerTests
 			{
 				Assert.IsNotNull(pager);
 
+				pager.CurrentPage = 1;
+				pager.PageSize = 25;
+
 				#region CheckEvents
 
 				bool triggeredNewPageLoaded = false;

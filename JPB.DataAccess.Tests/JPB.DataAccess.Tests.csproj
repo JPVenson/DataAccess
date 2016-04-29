@@ -88,6 +88,7 @@
     <Compile Include="Manager.cs" />
     <Compile Include="MetaApiTests\MetaApiTest.cs" />
     <Compile Include="MsSqlManager.cs" />
+    <Compile Include="PagerTests\PagerConstraintTests.cs" />
     <Compile Include="PagerTests\PagerUnitTest.cs" />
     <Compile Include="PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

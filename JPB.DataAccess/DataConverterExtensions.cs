@@ -51,18 +51,6 @@ namespace JPB.DataAccess
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		internal static QueryDebugger CreateQueryDebuggerAuto(this IDbCommand command, IDatabase source)
-		{
-			//if (DbAccessLayer.Debugger)
-			//{
-			//	return new QueryDebugger(command, source);
-			//}
-			return null;
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
 		public static QueryDebugger CreateQueryDebugger(this IDbCommand command, IDatabase source = null)
 		{
 			return new QueryDebugger(command, source);

@@ -17,7 +17,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		internal LocalDbManager()
 		{
-			_database = new Dictionary<Type, LocalDbReposetory>();
+			_database = new Dictionary<Type, LocalDbReposetoryBase>();
 			_mappings = new HashSet<ReproMappings>();
 		}
 
@@ -51,10 +51,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 				handler(this, new EventArgs());
 		}
 
-		private readonly Dictionary<Type, LocalDbReposetory> _database;
+		private readonly Dictionary<Type, LocalDbReposetoryBase> _database;
 		private readonly HashSet<ReproMappings> _mappings;
 
-		internal void AddTable(LocalDbReposetory repro)
+		internal void AddTable(LocalDbReposetoryBase repro)
 		{
 			_database.Add(repro.TypeInfo.Type, repro);
 		}
@@ -64,7 +64,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_mappings.Add(new ReproMappings(source, target));
 		}
 
-		internal IEnumerable<LocalDbReposetory> GetMappings(Type thisType)
+		internal IEnumerable<LocalDbReposetoryBase> GetMappings(Type thisType)
 		{
 			var mapping = _mappings.Where(f => f.TargetType == thisType).ToArray();
 			return _database.Where(f => mapping.Any(e => e.SourceType == f.Key)).Select(f => f.Value);

@@ -32,7 +32,7 @@ namespace JPB.DataAccess.Manager
 		public bool RaiseEvents { get; set; }
 
 		/// <summary>
-		///     Should raise non Instance bound Events
+		///     Should raise events (Performace critical!)
 		/// </summary>
 		public static bool RaiseStaticEvents { get; set; }
 
@@ -67,7 +67,7 @@ namespace JPB.DataAccess.Manager
 
 			var handler = OnDelete;
 			if (handler != null)
-				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
+				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(source)), s => { }, null);
 		}
 
 		internal void RaiseSelect(IDbCommand query, IDatabase source)
@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Manager
 				return;
 			var handler = OnSelect;
 			if (handler != null)
-				handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
+				handler.BeginInvoke(null, new DatabaseActionEvent(query.CreateQueryDebugger(source)), s => { }, null);
 		}
 
 		internal void RaiseUpdate(object sender, IDbCommand query, IDatabase source)
@@ -86,7 +86,7 @@ namespace JPB.DataAccess.Manager
 
 			var handler = OnUpdate;
 			if (handler != null)
-				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
+				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(source)), s => { }, null);
 		}
 
 		internal void RaiseInsert(object sender, IDbCommand query, IDatabase source)
@@ -96,7 +96,7 @@ namespace JPB.DataAccess.Manager
 
 			var handler = OnInsert;
 			if (handler != null)
-				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebuggerAuto(source)), s => { }, null);
+				handler.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(source)), s => { }, null);
 		}
 	}
 }

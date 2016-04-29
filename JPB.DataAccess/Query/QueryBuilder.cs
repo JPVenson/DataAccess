@@ -329,7 +329,7 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerator<T> GetEnumerator()
+		public new IEnumerator<T> GetEnumerator()
 		{
 			if (ContainerObject.ForType == null)
 				throw new ArgumentNullException("No type Supplied", new Exception());

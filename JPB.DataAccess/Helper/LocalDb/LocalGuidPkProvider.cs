@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return new LocalGuidPkProvider();
 		}
 
-		public bool Equals(object x, object y)
+		public new bool Equals(object x, object y)
 		{
 			return (Guid)x == (Guid)y;
 		}

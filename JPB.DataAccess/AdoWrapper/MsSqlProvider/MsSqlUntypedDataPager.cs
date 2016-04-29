@@ -34,7 +34,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// </summary>
 		public MsSqlUntypedDataPager()
 		{
-			CurrentPage = 0;
+			CurrentPage = 1;
 			PageSize = 10;
 			AppendedComands = new List<IDbCommand>();
 			CurrentPageItems = new ObservableCollection<T>();
@@ -79,8 +79,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			get { return _currentPage; }
 			set
 			{
-				if (value >= 0)
+				if (value >= 1)
+				{
 					_currentPage = value;
+				}
+				else
+				{
+					throw new InvalidOperationException("The current page must be bigger or equals 1");
+				}
 			}
 		}
 
@@ -159,7 +165,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						.QueryD(pk)
 						.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
 						{
-							PagedRows = CurrentPage*PageSize,
+							PagedRows = (CurrentPage - 1) *PageSize,
 							PageSize
 						})
 						.ContainerObject
@@ -197,7 +203,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 									page.QueryText("@PagedRows * @PageSize + 1")
 										.WithParamerters(new
 										{
-											PagedRows = CurrentPage,
+											PagedRows = (CurrentPage - 1),
 											PageSize
 										});
 								},
@@ -222,9 +228,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				var item1 = item;
 				SyncHelper(() => CurrentPageItems.Add(item1));
 			}
-
-			if (CurrentPage > MaxPage)
-				CurrentPage = MaxPage;
 
 			RaiseNewPageLoaded();
 		}

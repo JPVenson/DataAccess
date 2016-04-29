@@ -36,7 +36,7 @@ namespace JPB.DataAccess.Contacts.Pager
 		List<IDbCommand> AppendedComands { get; set; }
 
 		/// <summary>
-		///     Id of Current page beween 0 and MaxPage
+		///     Id of Current page beween 1 and MaxPage
 		/// </summary>
 		long CurrentPage { get; set; }
 

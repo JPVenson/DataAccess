@@ -36,7 +36,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			return val;
 		}
 
-		public new DbClassInfoCache GetOrCreateClassInfoCache(string type)
+		public DbClassInfoCache GetOrCreateClassInfoCache(string type)
 		{
 			bool isNewCreated;
 			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);

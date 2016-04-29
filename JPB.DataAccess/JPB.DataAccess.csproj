@@ -21,7 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\JPB.DataAccess.XML</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -130,9 +131,11 @@
     <Compile Include="Helper\EnumMemberConverter.cs" />
     <Compile Include="Helper\LocalDb\DatabaseScope.cs" />
     <Compile Include="Helper\LocalDb\ForginKeyConstraintException.cs" />
+    <Compile Include="Helper\LocalDb\LocalDataPager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbConstraint.cs" />
     <Compile Include="Helper\LocalDb\LocalDbManager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbReposetory.cs" />
+    <Compile Include="Helper\LocalDb\LocalDbReposetoryBase.cs" />
     <Compile Include="Helper\LocalDb\LocalGuidPkProvider.cs" />
     <Compile Include="Helper\LocalDb\LocalIntPkProvider.cs" />
     <Compile Include="Helper\LocalDb\LocalLongPkProvider.cs" />
