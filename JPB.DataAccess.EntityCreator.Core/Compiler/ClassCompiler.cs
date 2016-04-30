@@ -12,6 +12,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 
@@ -106,7 +107,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		private Type[] _externalTypes;
 
-		public void GenerateTypeConstructorBasedOnElements(IEnumerable<ColumInfoModel> columnInfos)
+		public void GenerateTypeConstructorBasedOnElements(IEnumerable<IColumInfoModel> columnInfos)
 		{
 			Add(new CodeConstructor() {
 				Attributes = MemberAttributes.Public
