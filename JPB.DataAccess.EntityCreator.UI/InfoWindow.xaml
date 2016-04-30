@@ -1,0 +1,51 @@
+﻿<Window x:Class="JPB.DataAccess.EntityCreator.UI.InfoWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:local="clr-namespace:JPB.DataAccess.EntityCreator.UI"
+		mc:Ignorable="d"
+		WindowStyle="ToolWindow"
+		ResizeMode="NoResize"
+		Title="Info" Height="250" Width="500" d:DataContext="{d:DesignInstance local:InfoWindowViewModel}">
+	<DockPanel LastChildFill="False">
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition />
+				<ColumnDefinition />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="25" />
+				<RowDefinition Height="25" />
+				<RowDefinition Height="25" />
+				<RowDefinition Height="25" />
+				<RowDefinition Height="25" />
+				<RowDefinition />
+			</Grid.RowDefinitions>
+
+			<Label Grid.Column="0" Grid.Row="0" Content="Creator Name" />
+			<TextBlock Grid.Column="1" Grid.Row="0" Text="Jean-Pierre Bachmann" />
+			<Label Grid.Column="0" Grid.Row="1" Content="Creator Link (German Only)" />
+			<TextBlock Grid.Column="1" Grid.Row="1" Text="">
+				<Hyperlink NavigateUri="http://jean-pierre-bachmann.de/" RequestNavigate="Hyperlink_RequestNavigate">
+					http://jean-pierre-bachmann.de/
+				</Hyperlink>
+			</TextBlock>
+			<Label Grid.Column="0" Grid.Row="2" Content="Yet Another Orm, DataAccess Version" />
+			<TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding DataAccessVersion}" />
+			<Label Grid.Column="0" Grid.Row="3" Content="Entity Creator Core Version" />
+			<TextBlock Grid.Column="1" Grid.Row="3" Text="{Binding CoreVersion}" />
+			<Label Grid.Column="0" Grid.Row="4" Content="Entity Creator UI Version" />
+			<TextBlock Grid.Column="1" Grid.Row="4" Text="{Binding UiVersion}" />
+			<Label Grid.Column="0" Grid.Row="5" Content="Licence" />
+			<TextBlock Grid.Column="1" Grid.Row="5" 
+				   TextWrapping="Wrap">
+				This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+				To view a copy of this license, visit 
+				<Hyperlink NavigateUri="http://creativecommons.org/licenses/by-sa/4.0/" RequestNavigate="Hyperlink_RequestNavigate">
+					http://creativecommons.org/licenses/by-sa/4.0/
+				</Hyperlink>
+			</TextBlock>
+		</Grid>
+	</DockPanel>
+</Window>

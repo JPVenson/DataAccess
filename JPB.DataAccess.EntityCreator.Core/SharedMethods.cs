@@ -124,7 +124,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 			Logger.WriteLine("Renaming is done");
 		}
 
-		private static readonly char[] unvalid = { '_', ' ' };
+		private static readonly char[] unvalid = { '_', ' ', '.' };
 
 		public static string CheckOrAlterName(string name)
 		{

@@ -98,15 +98,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			_base.Members.Add(property);
 			return property;
 		}
-
-		//public CodeMemberMethod GenerateTypeConstructor(
-		//	IEnumerable<KeyValuePair<string, Tuple<string, Type>>> propertyToDbColumn)
-		//{
-		//	return FactoryHelper.GenerateTypeConstructor(propertyToDbColumn, Namespace);
-		//}
-
-		private Type[] _externalTypes;
-
+		
 		public void GenerateTypeConstructorBasedOnElements(IEnumerable<IColumInfoModel> columnInfos)
 		{
 			Add(new CodeConstructor() {

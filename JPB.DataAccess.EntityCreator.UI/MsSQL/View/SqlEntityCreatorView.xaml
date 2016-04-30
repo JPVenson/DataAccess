@@ -17,6 +17,7 @@
 					<MenuItem Command="{Binding SaveConfigCommand}" Header="Save"></MenuItem>
 					<MenuItem Command="{Binding LoadConfigCommand}" Header="Load"></MenuItem>
 					<MenuItem Command="{Binding CompileCommand}" Header="Compile"></MenuItem>
+					<MenuItem Command="{Binding OpenInfoWindowCommand}" Header="Info"></MenuItem>
 				</Menu>
 				<DockPanel Dock="Bottom">
 					<Label Content="{Binding Status}"></Label>

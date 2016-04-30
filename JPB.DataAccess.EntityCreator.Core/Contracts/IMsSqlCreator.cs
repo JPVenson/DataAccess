@@ -15,7 +15,6 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool GenerateConfigMethod { get; set; }
 		string Namespace { get; set; }
 		string SqlVersion { get; set; }
-		void CreateEntrys(string connection, string outputPath, string database);
 		void Compile();
 	}
 }

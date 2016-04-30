@@ -31,11 +31,19 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			CompileCommand = new DelegateCommand(CompileExecute, CanCompileExecute);
 			ConnectToDatabaseCommand = new DelegateCommand(ConnectToDatabaseExecute, CanConnectToDatabaseExecute); SaveConfigCommand = new DelegateCommand(SaveConfigExecute, CanSaveConfigExecute);
 			LoadConfigCommand = new DelegateCommand(LoadConfigExecute, CanLoadConfigExecute);
+			OpenInfoWindowCommand = new DelegateCommand(OpenInfoWindowExecute);
 
 			Tables = new ThreadSaveObservableCollection<TableInfoViewModel>();
 			Views = new ThreadSaveObservableCollection<TableInfoViewModel>();
 			StoredProcs = new ThreadSaveObservableCollection<IStoredPrcInfoModel>();
 			Enums = new ThreadSaveObservableCollection<Dictionary<int, string>>();
+		}
+
+		public DelegateCommand OpenInfoWindowCommand { get; set; }
+
+		public void OpenInfoWindowExecute(object sender)
+		{
+			new InfoWindow().ShowDialog();
 		}
 
 		public DelegateCommand LoadConfigCommand { get; private set; }

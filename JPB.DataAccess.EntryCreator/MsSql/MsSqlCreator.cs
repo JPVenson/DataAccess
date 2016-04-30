@@ -25,7 +25,7 @@ using JPB.DataAccess.EntityCreator.Core.Poco;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
-	public class MsSqlCreator : IEntryCreator, IMsSqlCreator
+	public class MsSqlCreator : IMsSqlCreator
 	{
 		public DbAccessLayer Manager;
 		public IEnumerable<ITableInfoModel> Tables { get; set; }
@@ -57,13 +57,11 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			if (!checkDatabase)
 			{
 				throw new Exception("Database not accessible. Maybe wrong Connection or no Selected Database?");
-				return;
 			}
 			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
 			if (string.IsNullOrEmpty(databaseName))
 			{
 				throw new Exception("Database not exists. Maybe wrong Connection or no Selected Database?");
-				return;
 			}
 			Console.WriteLine("Connection OK ... Reading Server Version ...");
 
