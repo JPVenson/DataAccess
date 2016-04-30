@@ -27,11 +27,11 @@
 										   SelectedObjectType="{x:Type viewModel:TableInfoViewModel}"
 											AutoGenerateProperties="False">
 						<xctk:PropertyGrid.PropertyDefinitions>
-							<xctk:PropertyDefinition TargetProperties="GenerateConstructor" />
-							<xctk:PropertyDefinition TargetProperties="Namespace" />
-							<xctk:PropertyDefinition TargetProperties="GenerateForgeinKeyDeclarations" />
-							<xctk:PropertyDefinition TargetProperties="GenerateConfigMethod" />
-							<xctk:PropertyDefinition TargetProperties="GenerateCompilerHeader" />
+							<xctk:PropertyDefinition TargetProperties="GenerateConstructor" Description="Creates an Ado.net Loader Constructor. Overrides POCO level CreateDataRecordLoader" />
+							<xctk:PropertyDefinition TargetProperties="Namespace" Description="The Namespace for all POCO's" />
+							<xctk:PropertyDefinition TargetProperties="GenerateForgeinKeyDeclarations" Description="Create ForeignKeyDeclarationAttribute attribute on ForgeinKey Propertys" />
+							<xctk:PropertyDefinition TargetProperties="GenerateConfigMethod" Description="Creates an Method that Manipulates the ConfigStore. This removes all Attributes from all propertys and the class. It also remove (if exists) the Ado.net Constructor" />
+							<xctk:PropertyDefinition TargetProperties="GenerateCompilerHeader" Description="Creates an Comment with the current Date and Creating user" />
 						</xctk:PropertyGrid.PropertyDefinitions>
 					</xctk:PropertyGrid>
 
@@ -45,17 +45,6 @@
 										<xcdg:Column FieldName="NewTableName" Title="C# Name"/>
 									</xcdg:DataGridControl.Columns>
 								</xcdg:DataGridControl>
-								<!--<ListBox DockPanel.Dock="Left" ItemsSource="{Binding Tables}" SelectedItem="{Binding SelectedTable}">
-									<ListBox.ItemTemplate>
-										<DataTemplate DataType="{x:Type viewModel:TableInfoViewModel}">
-											<DockPanel>
-												<Label Content="{Binding Info.TableName}"></Label>
-												<Label Content=" | "></Label>
-												<Label Content="{Binding NewTableName}"></Label>
-											</DockPanel>
-										</DataTemplate>
-									</ListBox.ItemTemplate>
-								</ListBox>-->
 							</DockPanel>
 
 							<DockPanel Dock="Left" DataContext="{Binding SelectedTable}">
@@ -67,12 +56,25 @@
 										   SelectedObjectType="{x:Type viewModel:TableInfoViewModel}"
 											AutoGenerateProperties="False">
 												<xctk:PropertyGrid.PropertyDefinitions>
-													<xctk:PropertyDefinition TargetProperties="Database" />
-													<xctk:PropertyDefinition TargetProperties="NewTableName" />
-													<xctk:PropertyDefinition TargetProperties="Exclude" />
-													<xctk:PropertyDefinition TargetProperties="CreateFallbackProperty" />
-													<xctk:PropertyDefinition TargetProperties="CreateSelectFactory" />
-													<xctk:PropertyDefinition TargetProperties="CreateDataRecordLoader" />
+													<xctk:PropertyDefinition 
+														TargetProperties="NewTableName" 
+														DisplayName="Cs Name"
+														Description="If blank the Table name will be used as class name. If not blank this field will be used" />
+													<xctk:PropertyDefinition 
+														TargetProperties="Exclude" 
+														Description="If set this class will be skiped" />
+													<xctk:PropertyDefinition 
+														TargetProperties="CreateFallbackProperty" 
+														DisplayName="Fallback Property"
+														Description="Creates and Annotates an property that will be filled with all columns that cannot be matched" />
+													<xctk:PropertyDefinition 
+														TargetProperties="CreateSelectFactory" 
+														DisplayName="Select Query"
+														Description="ToBeSupported" />
+													<xctk:PropertyDefinition 
+														TargetProperties="CreateDataRecordLoader" 
+														DisplayName="IDataRecord Constructor"
+														Description="Create an ado.net Constructor" />
 												</xctk:PropertyGrid.PropertyDefinitions>
 											</xctk:PropertyGrid>
 										</DockPanel>
@@ -102,12 +104,25 @@
 										   SelectedObjectType="{x:Type viewModel:ColumnInfoViewModel}"
 										AutoGenerateProperties="False">
 											<xctk:PropertyGrid.PropertyDefinitions>
-												<xctk:PropertyDefinition TargetProperties="NewColumnName" />
-												<xctk:PropertyDefinition TargetProperties="IsRowVersion" />
-												<xctk:PropertyDefinition TargetProperties="PrimaryKey" />
-												<xctk:PropertyDefinition TargetProperties="InsertIgnore" />
-												<xctk:PropertyDefinition TargetProperties="Exclude" />
-												<xctk:PropertyDefinition TargetProperties="ForgeinKeyDeclartaions" />
+												<xctk:PropertyDefinition 
+													TargetProperties="NewColumnName" 
+													DisplayName="Property Name"
+													Description="If blank the Column name will be used for this property." />
+												<xctk:PropertyDefinition 
+													TargetProperties="IsRowVersion" 
+													DisplayName="Row Version"
+													Description="Should this Property be used to ensure the version of the local instance"/>
+												<xctk:PropertyDefinition 
+													TargetProperties="PrimaryKey" 
+													DisplayName="Primary Key"
+													Description="Should this Property be used to provide an uniq key" />
+												<xctk:PropertyDefinition 
+													TargetProperties="InsertIgnore" 
+													DisplayName="Ignore on Insert"
+													Description="Should this Property be ignored if inserted" />
+												<xctk:PropertyDefinition 
+													TargetProperties="Exclude" 
+													Description="Should this Property be excluded" />
 											</xctk:PropertyGrid.PropertyDefinitions>
 										</xctk:PropertyGrid>
 									</DockPanel>
