@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,6 +19,7 @@ using JPB.DataAccess.Manager;
 using JPB.DynamicInputBox;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
+using Microsoft.Data.ConnectionUI;
 using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
@@ -54,8 +56,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			fileDialog.Multiselect = false;
 			fileDialog.CheckFileExists = true;
 			fileDialog.DefaultExt = "*.msConfigStore";
-			fileDialog.ShowDialog();
-			if (File.Exists(fileDialog.FileName))
+			var result = fileDialog.ShowDialog();
+			if (result.HasValue && result.Value == true && File.Exists(fileDialog.FileName))
 			{
 				this.Tables.Clear();
 				this.Views.Clear();
@@ -286,16 +288,27 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		private void ConnectToDatabaseExecute(object sender)
 		{
-			var dynLoader = InputWindow.ShowRichTextInput("Connection String:");
+			var dcd = new DataConnectionDialog();
+			dcd.DataSources.Add(DataSource.SqlDataSource);
 
-			if (string.IsNullOrEmpty(dynLoader))
-				return;
-
-			this.ConnectionString = dynLoader;
-			base.SimpleWork(() =>
+			if (DataConnectionDialog.Show(dcd) == DialogResult.OK)
 			{
-				this.CreateEntrys(ConnectionString, "C:\\", string.Empty);
-			});
+				if (string.IsNullOrEmpty(dcd.ConnectionString))
+					return;
+
+				var sqlConnectionString = new SqlConnectionStringBuilder(dcd.ConnectionString);
+				if (string.IsNullOrEmpty(sqlConnectionString.DataSource))
+				{
+					this.Status = "Please provide a DataSource";
+					return;
+				}
+
+				this.ConnectionString = dcd.ConnectionString;
+				base.SimpleWork(() =>
+				{
+					this.CreateEntrys(ConnectionString, "C:\\", string.Empty);
+				});
+			}
 		}
 
 		private bool CanConnectToDatabaseExecute(object sender)
