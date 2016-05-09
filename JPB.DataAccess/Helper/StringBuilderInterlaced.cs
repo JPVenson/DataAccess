@@ -11,7 +11,7 @@ using System.Text;
 
 namespace JPB.DataAccess.Helper
 {
-	internal class StringBuilderInterlaced
+	public class StringBuilderInterlaced
 	{
 		private readonly StringBuilder _source;
 		private int _interlacedLevel;
