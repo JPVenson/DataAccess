@@ -65,7 +65,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void CheckFactory()
 		{
 			InsertTest();
-			Assert.That(() => expectWrapper.Select<Users_StaticQueryFactoryForSelect>(), Is.GreaterThan(0));
+			Assert.That(() => expectWrapper.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_StaticQueryFactoryForSelect testUser = null;
