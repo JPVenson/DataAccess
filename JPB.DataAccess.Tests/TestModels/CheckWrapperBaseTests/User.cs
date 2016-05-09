@@ -62,6 +62,14 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 	}
 
 	[AutoGenerateCtor(CtorGeneratorMode = CtorGeneratorMode.FactoryMethod)]
+	[ForModel(UsersMeta.UserTable)]
+	public class UsersWithoutProperties
+	{
+		[PrimaryKey]
+		public long User_ID { get; set; }
+	}
+
+	[AutoGenerateCtor(CtorGeneratorMode = CtorGeneratorMode.FactoryMethod)]
 	public class Users
 	{
 		[PrimaryKey]

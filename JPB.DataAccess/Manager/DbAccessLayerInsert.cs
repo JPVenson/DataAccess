@@ -140,7 +140,7 @@ namespace JPB.DataAccess.Manager
 
 			if (string.IsNullOrEmpty(csvprops))
 			{
-				query = "INSERT INTO " + classInfo.TableName + "DEFAULT VALUES";
+				query = "INSERT INTO " + classInfo.TableName + " DEFAULT VALUES";
 			}
 			else
 			{
