@@ -4,7 +4,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
 	public interface IColumInfoModel : IElementComparer<IColumInfoModel>, IEquatable<IColumInfoModel>
 	{
-		IColumnInfo ColumnInfo { get; set; }
+		IColumnInfo ColumnInfo { get; }
 		string NewColumnName { get; set; }
 		bool IsRowVersion { get; set; }
 		bool PrimaryKey { get; set; }

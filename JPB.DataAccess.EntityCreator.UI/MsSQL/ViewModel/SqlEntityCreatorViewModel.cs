@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.EntityCreator.Core;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
@@ -34,11 +35,15 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			ConnectToDatabaseCommand = new DelegateCommand(ConnectToDatabaseExecute, CanConnectToDatabaseExecute); SaveConfigCommand = new DelegateCommand(SaveConfigExecute, CanSaveConfigExecute);
 			LoadConfigCommand = new DelegateCommand(LoadConfigExecute, CanLoadConfigExecute);
 			OpenInfoWindowCommand = new DelegateCommand(OpenInfoWindowExecute);
+			DeleteSelectedTableCommand = new DelegateCommand(DeleteSelectedTableExecute, CanDeleteSelectedTableExecute);
+			AddTableCommand = new DelegateCommand(AddTableExecute, CanAddTableExecute);
 
 			Tables = new ThreadSaveObservableCollection<TableInfoViewModel>();
 			Views = new ThreadSaveObservableCollection<TableInfoViewModel>();
 			StoredProcs = new ThreadSaveObservableCollection<IStoredPrcInfoModel>();
 			Enums = new ThreadSaveObservableCollection<Dictionary<int, string>>();
+
+			SharedMethods.Logger = new DelegateLogger((message) => this.Status = message);
 		}
 
 		public DelegateCommand OpenInfoWindowCommand { get; set; }
@@ -56,6 +61,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			fileDialog.Multiselect = false;
 			fileDialog.CheckFileExists = true;
 			fileDialog.DefaultExt = "*.msConfigStore";
+			fileDialog.Filter = "ConfigFile (*.msConfigStore)|*.msConfigStore";
 			var result = fileDialog.ShowDialog();
 			if (result.HasValue && result.Value == true && File.Exists(fileDialog.FileName))
 			{
@@ -131,6 +137,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		{
 			var fileDialog = new SaveFileDialog();
 			fileDialog.DefaultExt = ".msConfigStore";
+			fileDialog.Filter = "ConfigFile (*.msConfigStore)|*.msConfigStore";
 			fileDialog.CheckFileExists = false;
 			var fileResult = fileDialog.ShowDialog();
 			if (fileResult == DialogResult.OK)
@@ -520,6 +527,36 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
+		public DelegateCommand AddTableCommand { get; private set; }
+
+		private void AddTableExecute(object sender)
+		{
+			this.Tables.Add(new TableInfoViewModel(new TableInfoModel()
+			{
+				Info = new TableInformations()
+				{
+					TableName = "New Table"
+				}
+			}, this));
+		}
+
+		private bool CanAddTableExecute(object sender)
+		{
+			return true;
+		}
+
+		public DelegateCommand DeleteSelectedTableCommand { get; private set; }
+
+		private void DeleteSelectedTableExecute(object sender)
+		{
+			this.Tables.Remove(this.SelectedTable);
+		}
+
+		private bool CanDeleteSelectedTableExecute(object sender)
+		{
+			return this.SelectedTable != null;
+		}
+
 		public DelegateCommand CompileCommand { get; private set; }
 
 		private void CompileExecute(object sender)
@@ -548,6 +585,32 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private bool CanAdjustNamesExecute(object sender)
 		{
 			return base.CheckCanExecuteCondition();
+		}
+	}
+
+	public class DelegateLogger : ILogger
+	{
+		private readonly Action<string> _resolve;
+
+		public DelegateLogger(Action<string> resolve)
+		{
+			_resolve = resolve;
+		}
+
+		public void Write(string content, params object[] arguments)
+		{
+			_resolve(string.Format(content, arguments));
+		}
+
+		public void WriteLine(string content = null, params object[] arguments)
+		{
+			if (content == null)
+			{
+				_resolve(Environment.NewLine);
+				return;
+			}
+			_resolve(string.Format(content, arguments));
+			_resolve(Environment.NewLine);
 		}
 	}
 }

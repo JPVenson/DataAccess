@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Poco;
 using JPB.WPFBase.MVVM.ViewModel;
+using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
@@ -15,16 +17,17 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		public ColumnInfoViewModel(IColumInfoModel model) : base(App.Current.Dispatcher)
 		{
 			Model = model;
+			ColumnViewModel = new ColumnViewModel(ColumnInfo);
 		}
 
+		[ExpandableObject]
+		[DisplayName("Column Info")]
+		public ColumnViewModel ColumnViewModel { get; set; }
+
+		[Browsable(false)]
 		public IColumnInfo ColumnInfo
 		{
 			get { return Model.ColumnInfo; }
-			set
-			{
-				Model.ColumnInfo = value;
-				SendPropertyChanged();
-			}
 		}
 
 		public string NewColumnName

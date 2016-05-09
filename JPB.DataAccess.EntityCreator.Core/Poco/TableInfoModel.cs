@@ -31,7 +31,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		public bool CreateDataRecordLoader { get; set; }
 		public TableInfoModel()
 		{
-
+			ColumnInfos = new List<IColumInfoModel>();
 		}
 
 		public TableInfoModel(TableInformations info, string database, DbAccessLayer db)

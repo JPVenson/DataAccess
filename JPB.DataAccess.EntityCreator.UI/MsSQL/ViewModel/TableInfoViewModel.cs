@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Models;
+using JPB.DataAccess.EntityCreator.Core.Poco;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
 using JPB.ErrorValidation;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
+using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
@@ -20,10 +24,14 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		{
 			_compilerOptions = compilerOptions;
 			SourceElement = sourceElement;
-			ColumnInfoModels = new ThreadSaveObservableCollection<ColumnInfoViewModel>(SourceElement.ColumnInfos.Select(f => new ColumnInfoViewModel(f)));
+			ColumnInfoModels = new ThreadSaveObservableCollection<ColumnInfoViewModel>(
+				SourceElement.ColumnInfos.Select(f => new ColumnInfoViewModel(f)));
 			CreatePreviewCommand = new DelegateCommand(CreatePreviewExecute, CanCreatePreviewExecute);
+			AddColumnCommand = new DelegateCommand(AddColumnExecute, CanAddColumnExecute);
+			RemoveColumnCommand = new DelegateCommand(RemoveColumnExecute, CanRemoveColumnExecute);
 		}
 
+		[ExpandableObject]
 		public ITableInformations Info
 		{
 			get { return SourceElement.Info; }
@@ -44,9 +52,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		private IColumInfoModel _selectedColumn;
+		private ColumnInfoViewModel _selectedColumn;
 
-		public IColumInfoModel SelectedColumn
+		public ColumnInfoViewModel SelectedColumn
 		{
 			get { return _selectedColumn; }
 			set
@@ -128,6 +136,40 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		public string GetClassName()
 		{
 			return ((ITableInfoModel) SourceElement).GetClassName();
+		}
+
+		public DelegateCommand RemoveColumnCommand { get; private set; }
+
+		private void RemoveColumnExecute(object sender)
+		{
+			this.ColumnInfoModels.Remove(this.SelectedColumn);
+		}
+
+		private bool CanRemoveColumnExecute(object sender)
+		{
+			return this.SelectedColumn != null;
+		}
+
+		public DelegateCommand AddColumnCommand { get; private set; }
+
+		private void AddColumnExecute(object sender)
+		{
+			var columnData = new ColumnInfo()
+			{
+				ColumnName = "New Column",
+				TargetType2 = SqlDbType.Binary.ToString()
+			};
+
+			var columnMeta = new ColumInfoModel(columnData);
+
+			var collumnVm = new ColumnInfoViewModel(columnMeta);
+
+			this.ColumnInfoModels.Add(collumnVm);
+		}
+
+		private bool CanAddColumnExecute(object sender)
+		{
+			return true;
 		}
 
 		public DelegateCommand CreatePreviewCommand { get; private set; }

@@ -133,10 +133,17 @@
     <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="MsSQL\ViewModel\ClassPreviewViewModel.cs" />
     <Compile Include="MsSQL\ViewModel\ClassPreviewViewModelErrorProvider.cs" />
-    <Compile Include="MsSQL\ViewModel\ColumnInfoViewModel.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\ColumnComparer.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\Models\ColumnInfoViewModel.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\Models\ColumnViewModel.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\Models\MergeStatus.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\TableComparer.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\Models\PropertyMergeItem.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\Models\ResolverViewModel.cs" />
     <Compile Include="MsSQL\ViewModel\SqlEntityCreatorViewModel.cs" />
     <Compile Include="MsSQL\ViewModel\TableInfoModelErrorProvider.cs" />
     <Compile Include="MsSQL\ViewModel\TableInfoViewModel.cs" />
+    <Compile Include="MsSQL\ViewModel\Comparer\Models\TableMergeItem.cs" />
     <Compile Include="MsSQL\View\ClassPreviewWindow.xaml.cs">
       <DependentUpon>ClassPreviewWindow.xaml</DependentUpon>
     </Compile>

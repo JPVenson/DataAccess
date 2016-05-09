@@ -50,6 +50,9 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 			set
 			{
 				TargetType = DbTypeToCsType.GetClrType(value);
+				if(TargetType == null)
+					return;
+
 				if (Nullable && !TargetType.IsClass && !TargetType.Name.StartsWith("Nullable"))
 				{
 					TargetType = typeof (Nullable<>).MakeGenericType(TargetType);

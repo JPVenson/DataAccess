@@ -98,6 +98,11 @@ namespace JPB.DataAccess.EntityCreator.Core
 			foreach (var tableInfoModel in tableNames)
 			{
 				var tableName = tableInfoModel.Info.TableName;
+				if (!string.IsNullOrEmpty(tableInfoModel.NewTableName))
+				{
+					tableName = tableInfoModel.NewTableName;
+				}
+
 				Logger.WriteLine("Check Table: {0}", tableName);
 				var newName = CheckOrAlterName(tableName);
 				if (newName != tableName)
@@ -111,6 +116,11 @@ namespace JPB.DataAccess.EntityCreator.Core
 				foreach (var columnInfo in tableInfoModel.ColumnInfos)
 				{
 					var columnName = columnInfo.ColumnInfo.ColumnName;
+					if (!string.IsNullOrEmpty(columnInfo.NewColumnName))
+					{
+						columnName = columnInfo.NewColumnName;
+					}
+
 					Logger.WriteLine("\tCheck Column: {0}", columnName);
 					var newColumnName = CheckOrAlterName(columnName);
 					if (newColumnName != columnName)

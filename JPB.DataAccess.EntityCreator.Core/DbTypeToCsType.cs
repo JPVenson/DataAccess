@@ -49,7 +49,7 @@ namespace JPB.DataAccess.EntityCreator.Core
             var resultState = Enum.TryParse(sqlType, true, out result);
             if(!resultState)
             {
-                return _userDefinedTypes.First(s => s.Key.ToLower() == sqlType).Value;
+                return _userDefinedTypes.FirstOrDefault(s => s.Key.ToLower() == sqlType).Value;
             }           
 
             return GetClrType(result);
