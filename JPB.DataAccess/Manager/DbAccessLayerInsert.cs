@@ -137,11 +137,19 @@ namespace JPB.DataAccess.Manager
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
 			var csvprops = classInfo.CreatePropertyCsv(ignore);
 			string query;
-			var values = "";
-			for (var index = 0; index < propertyInfos.Length; index++)
-				values = values + ("@" + index + ",");
-			values = values.Remove(values.Length - 1);
-			query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
+
+			if (string.IsNullOrEmpty(csvprops))
+			{
+				query = "INSERT INTO " + classInfo.TableName + "DEFAULT VALUES";
+			}
+			else
+			{
+				var values = "";
+				for (var index = 0; index < propertyInfos.Length; index++)
+					values = values + ("@" + index + ",");
+				values = values.Remove(values.Length - 1);
+				query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
+			}
 
 			var orignialProps = classInfo.GetPropertysViaRefection(ignore).ToArray();
 

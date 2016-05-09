@@ -261,7 +261,10 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static string CreatePropertyCsv(this DbClassInfoCache type, params string[] ignore)
 		{
-			return FilterDbSchemaMapping(type, ignore).Aggregate((e, f) => e + ", " + f);
+			var filteredList = FilterDbSchemaMapping(type, ignore).ToArray();
+			if (filteredList.Any())
+				return filteredList.Aggregate((e, f) => e + ", " + f);
+			return string.Empty;
 		}
 
 		/// <summary>
@@ -294,7 +297,7 @@ namespace JPB.DataAccess
 			return FilterDbSchemaMapping(typeof(T).GetClassInfo(), ignore);
 		}
 
-		
+
 
 		/// <summary>
 		///     Maps propertys to database of given type
