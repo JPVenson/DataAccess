@@ -62,7 +62,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			lock (SyncRoot)
 			{
-				return _base.Cast<T>().ToArray();
+				return _base.Values.Cast<T>().ToArray();
 			}
 		}
 

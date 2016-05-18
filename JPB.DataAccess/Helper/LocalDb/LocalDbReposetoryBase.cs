@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
@@ -15,6 +16,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
+	[Serializable]
 	public abstract class LocalDbReposetoryBase : ICollection
 	{
 		protected internal readonly object _lockRoot = new object();
@@ -25,7 +27,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected internal readonly LocalDbManager _databaseScope;
 		protected internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
 		protected internal readonly HashSet<ILocalDbConstraint> _constraints;
-
+		
 		/// <summary>
 		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
 		/// </summary>
@@ -373,5 +375,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		public virtual bool IsReadOnly { get { return false; } }
+		
 	}
 }
