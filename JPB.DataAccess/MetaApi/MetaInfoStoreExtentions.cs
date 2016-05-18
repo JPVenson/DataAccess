@@ -9,6 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using JPB.DataAccess.DbInfoConfig;
 #if !DEBUG
 using System.Diagnostics;
 #endif
@@ -30,9 +31,9 @@ namespace JPB.DataAccess.MetaApi
 			//http://stackoverflow.com/questions/1650681/determining-whether-a-type-is-an-anonymous-type
 			return type.Namespace == null;
 		}
-		
+
 		public static string GetPropertyInfoFromLabda<TSource, TProperty>(
-			Expression<Func<TSource, TProperty>> propertyLambda)
+			this Expression<Func<TSource, TProperty>> propertyLambda)
 		{
 			var type = typeof(TSource);
 
@@ -51,8 +52,29 @@ namespace JPB.DataAccess.MetaApi
 			return propInfo.Name;
 		}
 
+		public static DbPropertyInfoCache GetFullPropertyInfoFromLabda<TSource, TProperty>(
+			this Expression<Func<TSource, TProperty>> propertyLambda)
+		{
+
+			var member = propertyLambda.Body as MemberExpression;
+			if (member == null)
+				throw new ArgumentException(String.Format(
+					"Expression '{0}' refers to a method, not a property.",
+					propertyLambda));
+
+			var propInfo = member.Member as PropertyInfo;
+			if (propInfo == null)
+				throw new ArgumentException(String.Format(
+					"Expression '{0}' refers to a field, not a property.",
+					propertyLambda));
+
+			var type = typeof(TSource).GetClassInfo();
+
+			return type.Propertys[propInfo.Name];
+		}
+
 		public static string GetMehtodInfoFromLabda<TSource, TProperty>(
-			Expression<Func<TSource, TProperty>> propertyLambda)
+			this Expression<Func<TSource, TProperty>> propertyLambda)
 		{
 			var type = typeof(TSource);
 

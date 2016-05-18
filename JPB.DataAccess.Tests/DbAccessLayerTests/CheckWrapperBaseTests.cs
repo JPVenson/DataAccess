@@ -84,22 +84,20 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void CheckFactoryWithArguments()
 		{
 			InsertTest();
-			var refSelect =
-				expectWrapper.Select<Users_StaticQueryFactoryForSelectWithArugments>();
-			Assert.IsTrue(refSelect.Length > 0);
+			Assert.That(() => expectWrapper.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
-			var testUser =
-				expectWrapper.InsertWithSelect(new Users_StaticQueryFactoryForSelectWithArugments { UserName = testInsertName });
-			Assert.IsNotNull(testUser);
-			Assert.AreNotEqual(testUser.UserId, default(long));
+			Users_StaticQueryFactoryForSelect testUser = null;
+			Assert.That(() => testUser = expectWrapper.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
+						Is.Not.Null
+						.And.Property("UserId").Not.EqualTo(0));
 
 			var selTestUser =
 				expectWrapper.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId })
 					.FirstOrDefault();
-			Assert.IsNotNull(selTestUser);
-			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
-			Assert.AreEqual(selTestUser.UserId, testUser.UserId);
+			Assert.That(selTestUser, Is.Not.Null
+				.And.Property("UserName").EqualTo(testUser.UserName)
+				.And.Property("UserId").EqualTo(testUser.UserId));
 		}
 
 		[Test]
@@ -216,18 +214,21 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbConfig.Clear();
 
 			expectWrapper.Insert(new UsersAutoGenerateConstructorWithSingleXml());
-			var elements = expectWrapper.Query()
+
+			var query = expectWrapper.Query()
 				.QueryText("SELECT")
 				.QueryText("res." + UsersMeta.UserIDCol)
 				.QueryText(",res." + UsersMeta.UserNameCol)
 				.QueryText(",")
-				.InBracket(s => s.Select(typeof(UsersAutoGenerateConstructorWithSingleXml)).ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
-				.ChangeType<IElementProducer>()
-				.As("Sub")
+				.InBracket(s =>
+				s.Select<UsersAutoGenerateConstructorWithSingleXml>()
+				.ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+				.QueryText("AS Sub")
 				.QueryText("FROM")
 				.QueryText(UsersMeta.UserTable)
-				.As("res")
-				.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
+				.QueryText("AS res");
+			var elements =
+				query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
 
 			var result = elements.ToArray();
 
@@ -250,12 +251,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				.QueryText("res." + UsersMeta.UserIDCol)
 				.QueryText(",res." + UsersMeta.UserNameCol)
 				.QueryText(",")
-				.InBracket(s => s.Select(typeof(UsersAutoGenerateConstructorWithMultiXml)).ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
-				.ChangeType<IElementProducer>()
-				.As("Subs")
+				.InBracket(s => s.Select<UsersAutoGenerateConstructorWithMultiXml>().ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+				.QueryText("AS Subs")
 				.QueryText("FROM")
 				.QueryText(UsersMeta.UserTable)
-				.As("res")
+				.QueryText("AS res")
 				.ForResult<UsersAutoGenerateConstructorWithMultiXml>();
 
 			var result = elements.ToArray();
@@ -385,7 +385,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			RangeInsertTest();
 
-			var baseQuery = expectWrapper.Query().Select(typeof(Users));
+			var baseQuery = expectWrapper.Query().Select<Users>();
 			var queryA = baseQuery.ContainerObject.Compile();
 			var queryB = baseQuery.ContainerObject.Compile();
 			Assert.IsNotNull(queryA);
@@ -478,7 +478,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			InsertTest();
 			var singleEntity = expectWrapper
 				.Query()
-				.Select(typeof(Users))
+				.Select<Users>()
 				.Top(1)
 				.ForResult<Users>()
 				.Single();
@@ -685,7 +685,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			InsertTest();
 			var query = expectWrapper
 				.Query()
-				.Select(typeof(Users))
+				.Select<Users>()
 				.Top(1);
 			var singleEntity = query
 				.ForResult<Users>()

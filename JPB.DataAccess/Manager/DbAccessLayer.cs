@@ -28,6 +28,7 @@ using JPB.DataAccess.Logger;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.Manager
 {
@@ -332,27 +333,27 @@ namespace JPB.DataAccess.Manager
 		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
 		/// <returns></returns>
-		public IQueryBuilder<IRootQuery> Query()
+		public RootQuery Query()
 		{
-			return new QueryBuilder<IRootQuery>(this);
+			return new RootQuery(this);
 		}
 
 		/// <summary>
 		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
 		/// <returns></returns>
-		public IQueryBuilder<IRootQuery> Query(Type targetType)
+		public RootQuery Query(Type targetType)
 		{
-			return new QueryBuilder<IRootQuery>(this, targetType);
+			return new RootQuery(this, targetType);
 		}
 
 		/// <summary>
 		///     Creates a Strong typed query that awaits a Result
 		/// </summary>
 		/// <returns></returns>
-		public IQueryBuilder<IRootQuery> Query<T>()
+		public RootQuery Query<T>()
 		{
-			return new QueryBuilder<IRootQuery>(this, typeof(T));
+			return new RootQuery(this, typeof(T));
 		}
 
 		/// <summary>

@@ -130,7 +130,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					.Query()
 					.QueryText("WITH CTE AS")
 					.InBracket(query => query.QueryCommand(finalAppendCommand))
-					.LineBreak()
 					.QueryText("SELECT COUNT(1) FROM CTE")
 					.ContainerObject
 					.Compile();
@@ -140,12 +139,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				//if (finalAppendCommand != null)
 				//    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
 
-				var maxItems = dbAccess.RunPrimetivSelect(typeof (long), selectMaxCommand).FirstOrDefault();
+				var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
 				if (maxItems != null)
 				{
 					long parsedCount;
 					long.TryParse(maxItems.ToString(), out parsedCount);
-					MaxPage = parsedCount/PageSize;
+					MaxPage = parsedCount / PageSize;
 				}
 
 				//Check select strategy
@@ -157,15 +156,16 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 				if (CheckVersionForFetch())
 				{
-					command = dbAccess.Query()
+					command = dbAccess
+						.Query()
 						.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
-						.SelectStar()
+						.QueryText("SELECT * FROM")
 						.QueryText("CTE")
 						.QueryText("ORDER BY")
 						.QueryD(pk)
 						.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
 						{
-							PagedRows = (CurrentPage - 1) *PageSize,
+							PagedRows = (CurrentPage - 1) * PageSize,
 							PageSize
 						})
 						.ContainerObject
@@ -179,7 +179,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						{
 							if (BaseQuery != null)
 							{
-								baseCte.Select(typeof (T));
+								baseCte.Select<T>();
 							}
 							else
 							{
@@ -188,16 +188,16 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						})
 						.WithCte("CTE", cte =>
 						{
-							cte.SelectStarFrom(sel =>
-							{
-								sel.Select()
+							cte.QueryText("SELECT * FROM (")
+									.Select<T>()
 									.RowNumberOrder("@pk")
-									.WithParamerters(new {Pk = pk})
-									.As("RowNr")
-									.QueryText(", BASECTE.* FROM BASECTE");
-							})
+									.WithParamerters(new { Pk = pk })
+									.QueryText("AS RowNr")
+									.QueryText(", BASECTE.* FROM BASECTE")
+								.QueryText(")")
 								.As("TBL")
-								.Where("RowNr")
+								.Where()
+								.Column("RowNr")
 								.Between(page =>
 								{
 									page.QueryText("@PagedRows * @PageSize + 1")

@@ -77,5 +77,20 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.IsTrue(_users.Remove(user));
 			Assert.AreEqual(_users.Count, 0);
 		}
+
+
+		[Test]
+		public void Enumerate()
+		{
+			var user = new Users();
+			_users.Add(user);
+			_users.Add(user);
+			_users.Add(user);
+			_users.Add(user);
+			_users.Add(user);
+			_users.Add(user);
+			Assert.That(_users.Count, Is.EqualTo(6));
+			Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Count").EqualTo(6));
+		}
 	}
 }

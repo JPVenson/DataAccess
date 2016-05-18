@@ -12,6 +12,7 @@ using JPB.DataAccess.Query;
 using JPB.DataAccess.QueryFactory;
 using System;
 using System.CodeDom.Compiler;
+using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 {
@@ -367,9 +368,9 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static void GetSelectStatement(IQueryBuilder<IRootQuery> builder)
+		public static void GetSelectStatement(RootQuery builder)
 		{
-			builder.Select(typeof(Users_StaticQueryFactoryForSelect));
+			builder.Select<Users_StaticQueryFactoryForSelect>();
 		}
 	}
 
@@ -383,13 +384,12 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static void GetSelectStatement(IQueryBuilder<IRootQuery> builder, long whereId)
+		public static void GetSelectStatement(RootQuery builder, long whereId)
 		{
-			builder.Select(typeof(Users_StaticQueryFactoryForSelectWithArugments))
-				.Where(UsersMeta.UserIDCol + " = @whereId", new
-				{
-					whereId
-				});
+			builder.Select<Users_StaticQueryFactoryForSelectWithArugments>()
+				.Where()
+				.Column(s => s.UserId)
+				.Is(whereId);
 		}
 	}
 }

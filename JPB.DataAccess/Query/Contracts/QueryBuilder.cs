@@ -1,13 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace JPB.DataAccess.Query.Contracts
 {
-	/// <summary>
-	/// Provides access to the interal query storage and enumeration Function
-	/// </summary>
-	/// <typeparam name="Stack"></typeparam>
-	public interface IQueryBuilder<Stack>
-		where Stack : IQueryElement
+	public interface IQueryBuilder
 	{
 		/// <summary>
 		/// The interal value holder

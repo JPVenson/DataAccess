@@ -200,9 +200,18 @@
     <Compile Include="Query\Contracts\IQueryBuilder.cs" />
     <Compile Include="Query\Contracts\IQueryContainer.cs" />
     <Compile Include="Query\Contracts\ISelectQuery.cs" />
+    <Compile Include="Query\Contracts\QueryBuilder.cs" />
     <Compile Include="Query\CteQueryPart.cs" />
     <Compile Include="Query\EnumerationMode.cs" />
-    <Compile Include="Query\MsQueryBuilderTypedExtentions.cs" />
+    <Compile Include="Query\InternalContainerContainer.cs" />
+    <Compile Include="Query\Operators\ConditionalColumnQuery.cs" />
+    <Compile Include="Query\Operators\ConditionalEvalQuery.cs" />
+    <Compile Include="Query\Operators\ConditionalQuery.cs" />
+    <Compile Include="Query\Operators\ElementProducer.cs" />
+    <Compile Include="Query\Operators\QueryElement.cs" />
+    <Compile Include="Query\Operators\RootQuery.cs" />
+    <Compile Include="Query\Operators\SelectQuery.cs" />
+    <Compile Include="Query\Operators\UpdateQuery.cs" />
     <Compile Include="Query\QueryBuilder.cs" />
     <Compile Include="Query\MsQueryBuilderExtentions.cs" />
     <Compile Include="Query\QueryBuilderExtentions.cs" />
@@ -223,6 +232,7 @@
     <None Include="JPB.DataAccess.nuspec" />
     <None Include="strongNameKeyDataAccess.pfx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

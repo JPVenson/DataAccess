@@ -1,11 +1,11 @@
 ﻿namespace JPB.DataAccess.Query.Contracts
 {
-	public interface IQueryElement
+	public interface IQueryElement : IQueryBuilder
 	{
 
 	}
 
-	public interface IElementProducer : IQueryElement, IIdentifyerElementQuery
+	public interface IElementProducer<out T> : IIdentifyerElementQuery
 	{
 		
 	}
@@ -20,17 +20,27 @@
 
 	}
 
-	public interface IConditionalQuery : IQueryElement, IIdentifyerElementQuery
+	public interface IConditionalQuery<out T> : IElementProducer<T>
 	{
 
 	}
 
-	public interface ISelectQuery : IQueryElement, IIdentifyerElementQuery, IElementProducer
+	public interface IConditionalColumnQuery<out T> : IQueryElement
 	{
 
 	}
 
-	public interface IUpdateQuery : IQueryElement, IElementProducer
+	public interface IConditionalEvalQuery<out T> : IQueryElement
+	{
+
+	}
+
+	public interface ISelectQuery<out T> : IElementProducer<T>
+	{
+
+	}
+
+	public interface IUpdateQuery<out T> : IElementProducer<T>
 	{
 
 	}

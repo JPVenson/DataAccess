@@ -123,8 +123,8 @@ namespace JPB.DataAccess.SqLite
 					{
 						f.QueryCommand(finalAppendCommand);
 					})
-					.Select()
-					.Count("1")
+					.Select<T>()
+					.QueryText("COUNT 1")
 					.QueryText("FROM CTE")
 					.ContainerObject
 					.Compile();
@@ -151,8 +151,8 @@ namespace JPB.DataAccess.SqLite
 
 				command = dbAccess.Query()
 						.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
-						.SelectStar("CTE")
-						.OrderBy(pk)
+						.QueryText("SELECT * FROM CTE")
+						.QueryText("ORDER BY " + pk)
 						.QueryD("ASC LIMIT @PageSize OFFSET @PagedRows", new
 						{
 							PagedRows = CurrentPage * PageSize,

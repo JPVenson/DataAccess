@@ -13,6 +13,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.Contacts;
@@ -20,7 +22,9 @@ using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.Query
 {
@@ -32,11 +36,11 @@ namespace JPB.DataAccess.Query
 		
 
 		/// <summary>
-		///		Declares a new Variable of the Given SQL Type by using its length 
+		///		Sets an Variable to the given value
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static IQueryBuilder<IRootQuery> SetVariable(this IQueryBuilder<IRootQuery> query, string name, object value)
+		public static RootQuery SetVariable(this RootQuery query, string name, object value)
 		{
 			var transpiledValue = MsSql.ParameterValue(new SqlParameter(name, value));
 			var sqlName = name;
@@ -52,7 +56,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static IQueryBuilder<IRootQuery> DeclareVariable(this IQueryBuilder<IRootQuery> query, string name, SqlDbType type, int length = int.MaxValue, object value = null)
+		public static RootQuery DeclareVariable(this RootQuery query, string name, SqlDbType type, int length = int.MaxValue, object value = null)
 		{
 			var sqlName = name;
 			if (!sqlName.StartsWith("@"))
@@ -69,13 +73,11 @@ namespace JPB.DataAccess.Query
 			return query;
 		}
 
-	
-
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IRootQuery> WithCteForType(this IQueryBuilder<IRootQuery> query, Type target, string cteName,
+		public static RootQuery WithCteForType(this RootQuery query, Type target, string cteName,
 			bool useStarOperator = false)
 		{
 			var cteBuilder = new StringBuilder();
@@ -96,16 +98,17 @@ namespace JPB.DataAccess.Query
 		/// <param name="query"></param>
 		/// <param name="target"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> ForXml(this IQueryBuilder<ISelectQuery> query, Type target)
+		public static ElementProducer<string> ForXml<TPoco>(this ElementProducer<TPoco> query, Type target)
 		{
-			return query.QueryText("FOR XML PATH('{0}'),ROOT('ArrayOf{0}'), TYPE", target.Name);
+			return new ElementProducer<string>(query.QueryText("FOR XML PATH('{0}'),ROOT('ArrayOf{0}'), TYPE", target.Name));
 		}
 
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
-		public static IQueryBuilder<IRootQuery> WithCte(this IQueryBuilder<IRootQuery> query, 
-			string cteName, Action<IQueryBuilder<INestedRoot>> cteAction,
+		public static RootQuery WithCte(this RootQuery query, 
+			string cteName, 
+			Action<RootQuery> cteAction,
 			bool subCte = false)
 		{
 			var lod = query.ContainerObject.Parts.LastOrDefault();
@@ -125,32 +128,20 @@ namespace JPB.DataAccess.Query
 			query.Add(new CteQueryPart(""));
 			return query;
 		}
+		
 
 		/// <summary>
-		///     Creates a Common Table Expression that selects a Specific type
+		///    Creates an closed sub select
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<T> LineBreak<T>(this IQueryBuilder<T> query) where T : IQueryElement
+		public static SelectQuery<T> SubSelect<T>(this RootQuery query,
+			Action<SelectQuery<T>> subSelect)
 		{
-			query.QueryText(Environment.NewLine);
-			return query;
-		}		
-
-		/// <summary>
-		///     Creates a Common Table Expression that selects a Specific type
-		/// </summary>
-		/// <returns></returns>
-		public static IQueryBuilder<T> SubSelect<T>(this IQueryBuilder<IRootQuery> query,
-			Action<IQueryBuilder<INestedRoot>> subSelect,
-			Type type)
-			where T: IQueryElement
-		{
-			query.QueryText("(");
-			query.Select(type);
-			var nestedQuery = query.ChangeType<INestedRoot>();
-			subSelect(nestedQuery);
-			query.QueryText(")");
-			return query.ChangeType<T>();
+			var q = query
+				.QueryText("(")
+				.Select<T>();
+			subSelect(q);
+			return q.QueryText(")");
 		}
 
 	
@@ -161,74 +152,21 @@ namespace JPB.DataAccess.Query
 		/// <param name="query"></param>
 		/// <param name="from"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> SelectStarFrom<T>(this IQueryBuilder<T> query, Action<IQueryBuilder<INestedRoot>> from) 
-			where T : IRootQuery
+		public static SelectQuery<T> SelectStar<T>(this RootQuery query) 
 		{
-			query.QueryText("SELECT * FROM");
-			query
-				.ChangeType<INestedRoot>()
-				.InBracket(from);
-			return query.ChangeType<ISelectQuery>();
+			return new SelectQuery<T>(query.QueryText("SELECT * FROM " + typeof(T).GetClassInfo().TableName));
 		}
-
-		/// <summary>
-		///     Adds a select * from without a table name, to the query
-		/// </summary>
-		/// <param name="query"></param>
-		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> SelectStar(this IQueryBuilder<IRootQuery> query)
-		{
-			query.QueryText("SELECT * FROM");
-			return query.ChangeType<ISelectQuery>();
-		}
-
-		/// <summary>
-		///     Adds a select * from without a table name, to the query
-		/// </summary>
-		/// <param name="query"></param>
-		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> SelectStar(this IQueryBuilder<IRootQuery> query, string table)
-		{
-			query.QueryText("SELECT * FROM " + table);
-			return query.ChangeType<ISelectQuery>();
-		}
-
-		/// <summary>
-		///     Adds a Select * from followed by the table name of the entity that is used in the <paramref name="type" />
-		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="type"></param>
-		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> SelectStar(this IQueryBuilder<IRootQuery> query, Type type)
-		{
-			query.QueryText("SELECT * FROM {0}", type.GetClassInfo().TableName);
-			return query.ChangeType<ISelectQuery>();
-		}
-
+		
 		/// <summary>
 		///     Adds a Between statement followed by anything added from the action
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="from"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query, Action<IQueryBuilder<IConditionalQuery>> from)
+		public static ConditionalEvalQuery<T> Between<T>(this ConditionalColumnQuery<T> query)
 		{
-			query.QueryText("BETWEEN");
-			from(query);
-			return query;
+			return new ConditionalEvalQuery<T>(query.QueryText("BETWEEN"));
 		}
-
-		/// <summary>
-		///     Adds a Between statement to the query
-		/// </summary>
-		/// <param name="query"></param>
-		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query)
-		{
-			query.QueryText("BETWEEN");
-			return query;
-		}
-
 
 		/// <summary>
 		///     Adds a between statement followed by a query defined in <paramref name="valueA" /> folowed by an and statement and
@@ -238,79 +176,45 @@ namespace JPB.DataAccess.Query
 		/// <param name="valueA"></param>
 		/// <param name="valueB"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Between(
-			this IQueryBuilder<IConditionalQuery> query,
-			Action<IQueryBuilder<INestedRoot>> valueA,
-			Action<IQueryBuilder<INestedRoot>> valueB)
+		public static ConditionalEvalQuery<T> Between<T>(
+			this ConditionalColumnQuery<T> query,
+			object valA,
+			object valB)
 		{
-			query.Between();
-			query.InBracket(valueA);
-			query.And();
-			query.InBracket(valueB);
-			return query;
+			return new ConditionalEvalQuery<T>(query.Between()
+				.QueryQ("@bet_valA", new QueryParameter("@bet_valA", valA, valA.GetType()))
+				.And()
+				.QueryQ("@bet_valB", new QueryParameter("@bet_valB", valA, valA.GetType())));
 		}
 
 		/// <summary>
-		///     Adds a static beween statement for the given 2 values
+		///     Adds a between statement followed by a query defined in <paramref name="valueA" /> folowed by an and statement and
+		///     an secound query defined in the <paramref name="valueB" />
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="valueA"></param>
 		/// <param name="valueB"></param>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Between(this IQueryBuilder<IConditionalQuery> query, Double valueA, Double valueB)
+		public static ConditionalEvalQuery<T> Between<T>(
+			this ConditionalColumnQuery<T> query,
+			Action<RootQuery> valA,
+			Action<RootQuery> valB)
 		{
-			var paramaterAAutoId = query.ContainerObject.GetNextParameterId().ToString();
-			var paramaterBAutoId = query.ContainerObject.GetNextParameterId().ToString();
+			var condtion = query.Between();
+			valA(new RootQuery(condtion));
+			condtion.And();
+			valA(new RootQuery(condtion));
 
-			query.QueryText("BETWEEN @{0} AND @{1}", paramaterAAutoId, paramaterBAutoId);
-			query.QueryQ("",
-				new QueryParameter(paramaterAAutoId, valueA),
-				new QueryParameter(paramaterBAutoId, valueB));
-			return query;
+			return new ConditionalEvalQuery<T>(condtion);
 		}
 
-	
-
-		/// <summary>
-		///     Creates a Common Table Expression that selects a Specific type
-		/// </summary>
-		/// <returns></returns>
-		public static IQueryBuilder<IRootQuery> SubSelect(this IQueryBuilder<IRootQuery> query, Type type)
+		public static RootQuery Apply(this RootQuery query, 
+			ApplyMode mode, 
+			Action<IQueryBuilder> innerText)
 		{
-			query.QueryText("(");
-			query.Select(type);
-			query.QueryText(")");
-			return query;
-		}
-
-		///// <summary>
-		///// Creates a Common Table Expression that selects a Specific type
-		///// </summary>
-		//
-		//
-		//
-		//
-		///// <returns></returns>
-		//public static IQueryContainer WithCteForQuery(this IQueryContainer query, Action<QueryBuilder> subSelect, string cteName)
-		//{
-		//    var IQueryContainer = new IQueryContainer(query.Database);
-		//    subSelect(queryContainer);
-		//    var compileFlat = IQueryContainer.CompileFlat();
-		//    var cteBuilder = new StringBuilder();
-		//    cteBuilder.Append("WITH ");
-		//    cteBuilder.Append(cteName);
-		//    cteBuilder.Append(" AS ( ");
-		//    cteBuilder.Append(compileFlat.Item1);
-		//    query.Parts.Append(new QueryPart(cteBuilder.ToString(), compileFlat.Item2));
-		//    return query;
-		//}
-
-		public static IQueryBuilder<IRootQuery> Apply(this IQueryBuilder<IRootQuery> query, ApplyMode mode, Action<IQueryBuilder<INestedRoot>> innerText, string asId)
-		{
-			query.QueryText(mode.ApplyType);
-			var quer = query.ChangeType<INestedRoot>();
-			quer.InBracket(innerText);
-			quer.ChangeType<IElementProducer>().As(asId);
+			query
+				.QueryText(mode.ApplyType);
+			query.InBracket(innerText);
 			return query;
 		}
 
@@ -318,8 +222,7 @@ namespace JPB.DataAccess.Query
 		///     Append an AS part
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<T> As<T>(this IQueryBuilder<T> query, string alias)
-			where T : IElementProducer
+		public static ElementProducer<T> As<T>(this ElementProducer<T> query, string alias)
 		{
 			return query.QueryText("AS " + alias);
 		}
@@ -328,88 +231,47 @@ namespace JPB.DataAccess.Query
 		///     Append an Contains part
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Contains(this IQueryBuilder<IConditionalQuery> query, string alias)
+		public static ConditionalEvalQuery<T> Contains<T>(this ConditionalColumnQuery<T> query, object alias)
 		{
-			return query.QueryText("CONTAINS ({0})", alias);
+			return new ConditionalEvalQuery<T>(query.QueryQ("CONTAINS (@Cont_A{0})", new QueryParameter("@Cont_A", alias, alias.GetType())));
 		}
-
-		/// <summary>
-		///     Append an Contains part
-		/// </summary>
-		/// <returns></returns>
-		public static IQueryBuilder<IConditionalQuery> Contains(this IQueryBuilder<IConditionalQuery> query, object alias)
-		{
-			var paramaterAutoId = query.ContainerObject.GetNextParameterId();
-			return query.QueryQ(string.Format("CONTAINS (@{0})", paramaterAutoId),
-				new QueryParameter(paramaterAutoId.ToString(CultureInfo.InvariantCulture), alias));
-		}
-
+		
 		/// <summary>
 		///     Append an RowNumberOrder part
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<ISelectQuery> RowNumberOrder(this IQueryBuilder<ISelectQuery> query, string over, bool Desc = false)
+		public static ElementProducer<T> RowNumberOrder<T>(this ElementProducer<T> query, string over, bool desc = false)
 		{
-			return query.QueryText("ROW_NUMBER() OVER (ORDER BY {0} {1})", over, Desc ? "DESC" : "ASC");
+			return query.QueryText("ROW_NUMBER() OVER (ORDER BY {0} {1})", over, desc ? "DESC" : "ASC");
 		}
-
-	
 
 		/// <summary>
 		///     Adds a LEFT JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, Type source, Type target)
+		public static RootQuery Join<T,TE>(this ElementProducer<T> query, string mode = null)
 		{
-			var sourcePK = source.GetFK(target);
-			var targetPK = target.GetPK();
-			var targetTable = target.GetClassInfo().TableName;
-			var sourceTable = source.GetClassInfo().TableName;
-			return query.QueryText("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
+			var sourcePK = typeof(T).GetFK(typeof(TE));
+			var targetPK = typeof(TE).GetClassInfo().GetPK();
+			var targetTable = typeof(TE).GetClassInfo().TableName;
+			var sourceTable = typeof(T).GetClassInfo().TableName;
+			return new RootQuery(query.QueryText("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable));
 		}
 
 		/// <summary>
 		///     Adds a JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, JoinMode mode, Type source, Type target)
+		public static RootQuery Join<T, TE>(this ElementProducer<T> query, JoinMode mode)
 		{
-			return Join(query, mode.JoinType, source, target);
-		}
-
-		/// <summary>
-		///     Adds a JOIN to the Statement
-		/// </summary>
-		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join(this IQueryBuilder<IElementProducer> query, string mode, Type source, Type target)
-		{
-			if (query == null) throw new ArgumentNullException("query");
-			if (mode == null) throw new ArgumentNullException("mode");
-			if (source == null) throw new ArgumentNullException("source");
-			if (target == null) throw new ArgumentNullException("target");
-
-			var sourcePK = source.GetFK(target);
-			var targetPK = target.GetPK();
-			var targetTable = target.GetClassInfo().TableName;
-			var sourceTable = source.GetClassInfo().TableName;
-			return query.QueryText(mode + " JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable);
-		}
-
-		/// <summary>
-		///     Adds a JOIN to the Statement
-		/// </summary>
-		/// <returns></returns>
-		public static IQueryBuilder<IElementProducer> Join<Source, Target>(this IQueryBuilder<IElementProducer> query, JoinMode mode)
-		{
-			return Join(query, mode, typeof(Source), typeof(Target));
+			return Join<T,TE>(query, mode.JoinType);
 		}
 
 		/// <summary>
 		///     Inserts a TOP statement
 		/// </summary>
 		/// <returns></returns>
-		public static IQueryBuilder<T> Top<T>(this IQueryBuilder<T> query, uint top) 
-			where T : IElementProducer
+		public static ElementProducer<T> Top<T>(this ElementProducer<T> query, uint top)
 		{
 			switch (query.ContainerObject.AccessLayer.Database.TargetDatabase)
 			{
@@ -436,18 +298,30 @@ namespace JPB.DataAccess.Query
 			return query;
 		}
 
-	
+		//public static IQueryBuilder<T> Count<T>(this IQueryBuilder<T> query, string what)
+		//	where T : IElementProducer
+		//{
+		//	return query.QueryText("COUNT(" + what + ")");
+		//}
 
-		public static IQueryBuilder<T> Count<T>(this IQueryBuilder<T> query, string what)
-			where T : IElementProducer
+		public static ConditionalQuery<TPoco> OrderBy<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
-			return query.QueryText("COUNT(" + what + ")");
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over));
 		}
 
-		public static IQueryBuilder<T> OrderBy<T>(this IQueryBuilder<T> query, string over, bool desc = false)
-			where T : IElementProducer
+		public static ConditionalQuery<TPoco> OrderBy<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return query.QueryText("ORDER BY {0} {1}", over, desc ? "DESC" : "ASC");
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()));
+		}
+
+		public static ConditionalQuery<TPoco> OrderByDesc<TPoco>(this ElementProducer<TPoco> query, string over)
+		{
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over));
+		}
+
+		public static ConditionalQuery<TPoco> OrderByDesc<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
+		{
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()));
 		}
 
 		/// <summary>

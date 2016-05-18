@@ -22,6 +22,7 @@ using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Manager
@@ -307,7 +308,7 @@ namespace JPB.DataAccess.Manager
 				{
 					var searchMethodWithFittingParams = methods.Where(s =>
 					{
-						var parameterInfos = s.Arguments.Where(f => typeof(IQueryBuilder<IRootQuery>) != f.Type).ToArray();
+						var parameterInfos = s.Arguments.Where(f => typeof(RootQuery) != f.Type).ToArray();
 
 						if (parameterInfos.Length != arguments.Count)
 							return false;
@@ -344,8 +345,8 @@ namespace JPB.DataAccess.Manager
 
 					var cleanParams = arguments.Any() ? arguments : null;
 					var dbMethodArgument = method.Arguments.FirstOrDefault();
-					IQueryBuilder<IRootQuery> queryBuilder = null;
-					if (dbMethodArgument != null && dbMethodArgument.Type == typeof(IQueryBuilder<IRootQuery>))
+					IQueryBuilder queryBuilder = null;
+					if (dbMethodArgument != null && dbMethodArgument.Type == typeof(RootQuery))
 					{
 						queryBuilder = Query();
 						if (cleanParams == null)

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -169,10 +170,13 @@ namespace JPB.DataAccess.Manager
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
 
-			var queryBuilder = new QueryBuilder<IRootQuery>(this);
-			queryBuilder.QueryD("UPDATE");
-			queryBuilder.QueryD(classInfo.TableName);
-			queryBuilder.QueryD("SET");
+			var sb = new StringBuilder();
+
+			sb.Append("UPDATE ");
+			sb.Append(classInfo.TableName);
+			sb.Append(" SET ");
+			var para = new List<IQueryParameter>();
+
 			for (var index = 0; index < propertyInfos.Length; index++)
 			{
 				var info = propertyInfos[index];
@@ -180,14 +184,17 @@ namespace JPB.DataAccess.Manager
 				DbPropertyInfoCache property;
 				classInfo.Propertys.TryGetValue(schemaName, out property);
 				var dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
-				queryBuilder.QueryQ(string.Format("{0} = @{1}", info, index), new QueryParameter(index.ToString(), dataValue, property.PropertyType));
+				para.Add(new QueryParameter(index.ToString(), dataValue, property.PropertyType));
+				sb.Append(string.Format(" {0} = @{1} ", info, index));
 				if (index + 1 < propertyInfos.Length)
-					queryBuilder.QueryD(",");
+					sb.Append(",");
 			}
 
-			queryBuilder.ChangeType<IElementProducer>().Where(string.Format("{0} = @pkValue", pk), new { pkValue = pkProperty.Getter.Invoke(entry) });
+			para.Add(new QueryParameter("pkValue", pkProperty.Getter.Invoke(entry), pkProperty.PropertyType));
 
-			return queryBuilder.ContainerObject.Compile();
+			sb.Append(string.Format("WHERE {0} = @pkValue ", pk));
+
+			return Database.CreateCommandWithParameterValues(sb.ToString(), para);
 		}
 
 		/// <summary>

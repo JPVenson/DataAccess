@@ -30,6 +30,7 @@ namespace JPB.DataAccess.Query
 			_builder = builder.Clone() as QueryBuilder<T, TE>;
 		}
 
+
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
 			return _builder.GetEnumerator();
