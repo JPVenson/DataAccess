@@ -5,7 +5,7 @@ using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.WPFBase.MVVM.ViewModel;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
-namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
+namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 {
 	public class SqlDataTypeItemSource : IItemsSource
 	{

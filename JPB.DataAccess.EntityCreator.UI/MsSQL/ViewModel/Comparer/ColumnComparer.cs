@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models;
 
-namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
+namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer
 {
 	public class ColumnComparer
 	{

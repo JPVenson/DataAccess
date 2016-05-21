@@ -96,7 +96,7 @@ namespace JPB.DataAccess.Helper
 			{
 				value = Value.ToString();
 			}
-			sb.AppendInterlacedLine("neq QueryParameter {")
+			sb.AppendInterlacedLine("new QueryParameter {")
 				.Up()
 				.AppendInterlacedLine("Name = {0},", Name)
 				.AppendInterlacedLine("Value.ToString = {0}", value)

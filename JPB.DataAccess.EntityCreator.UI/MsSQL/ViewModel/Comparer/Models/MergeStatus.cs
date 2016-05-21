@@ -1,4 +1,4 @@
-namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
+namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 {
 	public enum MergeStatus
 	{

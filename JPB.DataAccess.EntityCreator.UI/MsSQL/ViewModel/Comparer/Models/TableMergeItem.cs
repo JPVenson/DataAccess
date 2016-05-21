@@ -1,7 +1,7 @@
 ﻿using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.WPFBase.MVVM.ViewModel;
 
-namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
+namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 {
 	public class TableMergeItem : AsyncViewModelBase
 	{

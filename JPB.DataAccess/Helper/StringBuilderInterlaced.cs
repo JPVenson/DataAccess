@@ -15,7 +15,7 @@ namespace JPB.DataAccess.Helper
 	{
 		private readonly StringBuilder _source;
 		private int _interlacedLevel;
-		private readonly uint _interlacedSpace = 4;
+		private readonly uint _interlacedSpace;
 		private readonly bool _transformInterlaced;
 
 		/// <summary>

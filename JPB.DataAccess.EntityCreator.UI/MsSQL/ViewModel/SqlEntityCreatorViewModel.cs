@@ -99,6 +99,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 				foreach (var option in options.Tables)
 				{
+					var itemExisits = this.Tables.FirstOrDefault(s => s.Info.TableName == option.Info.TableName);
+					if (itemExisits != null)
+					{
+						this.Tables.Remove(itemExisits);
+					}
+
 					this.Tables.Add(new TableInfoViewModel(option, this));
 				}
 				foreach (var option in options.Views)

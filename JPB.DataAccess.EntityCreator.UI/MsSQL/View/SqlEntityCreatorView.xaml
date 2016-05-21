@@ -7,6 +7,7 @@
 			 xmlns:viewModel="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel"
 			 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 			 xmlns:xcdg="http://schemas.xceed.com/wpf/xaml/datagrid"
+			 xmlns:models="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models"
 			 mc:Ignorable="d" 
 			 d:DesignHeight="300" d:DesignWidth="500" d:DataContext="{d:DesignInstance viewModel:SqlEntityCreatorViewModel}">
 	<DockPanel Dock="Top">
@@ -24,7 +25,7 @@
 					<Label Content="{Binding Status}"></Label>
 				</DockPanel>
 				<DockPanel Dock="Top">
-					<xctk:PropertyGrid Width="450" Margin="10"
+					<xctk:PropertyGrid Width="200" Margin="10"
 										   SelectedObject="{Binding}"
 										   SelectedObjectType="{x:Type viewModel:TableInfoViewModel}"
 											AutoGenerateProperties="False">
@@ -117,7 +118,7 @@
 										</DockPanel>
 										<xctk:PropertyGrid Width="450" Margin="10"
 										   SelectedObject="{Binding SelectedColumn}"
-										   SelectedObjectType="{x:Type viewModel:ColumnInfoViewModel}"
+										   SelectedObjectType="{x:Type models:ColumnInfoViewModel}"
 											AutoGenerateProperties="False">
 											<xctk:PropertyGrid.PropertyDefinitions>
 												<xctk:PropertyDefinition 

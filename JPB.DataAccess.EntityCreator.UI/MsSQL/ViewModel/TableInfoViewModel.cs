@@ -8,6 +8,7 @@ using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
+using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models;
 using JPB.ErrorValidation;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
