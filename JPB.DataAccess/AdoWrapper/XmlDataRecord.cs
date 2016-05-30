@@ -26,14 +26,17 @@ namespace JPB.DataAccess.AdoWrapper
 		private readonly DbClassInfoCache _target;
 		private readonly XElement baseElement;
 
-		internal XmlDataRecord(string xmlStream, Type target)
-			: this(xmlStream, target.GetClassInfo())
+		internal XmlDataRecord(string xmlStream, Type target, DbConfig config)
+			: this(xmlStream, config.GetOrCreateClassInfoCache(target))
 		{
 
 		}
 
-		internal XmlDataRecord(XDocument baseElement, Type target)
-			: this(baseElement, target.GetClassInfo())
+		internal XmlDataRecord(XDocument baseElement, Type target, DbConfig config = null)
+			: this(baseElement,
+				  config != null 
+					? config.GetOrCreateClassInfoCache(target) 
+					: new DbConfig().GetOrCreateClassInfoCache(target))
 		{
 
 		}
@@ -217,14 +220,14 @@ namespace JPB.DataAccess.AdoWrapper
 		///     takes care of the loader strategy
 		/// </summary>
 		/// <returns></returns>
-		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single)
+		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single, DbConfig accessLayer = null)
 		{
 			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
 				return null;
 			try
 			{
 				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
-				var record = new XmlDataRecord(xDocument, target);
+				var record = new XmlDataRecord(xDocument, target, accessLayer);
 
 				if (single)
 				{

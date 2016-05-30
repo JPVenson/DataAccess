@@ -23,7 +23,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(T entry)
 		{
-			var deleteCommand = CreateDeleteQueryFactory(entry.GetType().GetClassInfo(), entry, Database);
+			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(entry.GetType()), entry, Database);
 			RaiseDelete(entry, deleteCommand, Database);
 			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}
@@ -31,7 +31,7 @@ namespace JPB.DataAccess.Manager
 		internal IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry, IDatabase db)
 		{
 			if (classInfo.PrimaryKeyProperty == null)
-				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.ClassName));
+				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.Name));
 
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
@@ -45,7 +45,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(T entry, IDatabase db, params object[] parameter)
 		{
-			var deleteCommand = CreateDeleteQueryFactory(entry.GetType().GetClassInfo(), entry, db, parameter);
+			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(entry.GetType()), entry, db, parameter);
 			RaiseDelete(entry, deleteCommand, db);
 			db.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}

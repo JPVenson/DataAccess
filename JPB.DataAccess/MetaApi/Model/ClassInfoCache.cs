@@ -68,10 +68,10 @@ namespace JPB.DataAccess.MetaApi.Model
 			if (type == null)
 				throw new ArgumentNullException("type");
 
-			if (!string.IsNullOrEmpty(ClassName))
+			if (!string.IsNullOrEmpty(Name))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 
-			ClassName = type.FullName;
+			Name = type.FullName;
 			Type = type;
 			Attributes = new HashSet<TAttr>(type
 				.GetCustomAttributes(true)
@@ -157,9 +157,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		public dynamic DefaultFactory { get; protected internal set; }
 
 		/// <summary>
-		///     The .net ClassName
+		///     The full .net ClassName with namespace
 		/// </summary>
-		public string ClassName { get; protected internal set; }
+		public string Name { get; protected internal set; }
 
 		/// <summary>
 		///     The .net Type instance

@@ -50,26 +50,26 @@ namespace JPB.DataAccess.DbInfoConfig
 			return pocoCreator;
 		}
 
-		public static CodeMemberMethod GenerateConstructor(Type target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
+		public static CodeMemberMethod GenerateConstructor(DbClassInfoCache target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
 		{
 			var codeConstructor = GenerateTypeConstructor();
 			GenerateBody(target, settings, importNameSpace, codeConstructor, new CodeBaseReferenceExpression());
 			return codeConstructor;
 		}
 
-		public static CodeMemberMethod GenerateFactory(Type target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
+		public static CodeMemberMethod GenerateFactory(DbClassInfoCache target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
 		{
 			var codeFactory = GenerateTypeConstructor(true);
 			var super = new CodeVariableReferenceExpression("super");
 
-			var pocoVariable = new CodeVariableDeclarationStatement(target, "super");
+			var pocoVariable = new CodeVariableDeclarationStatement(target.Type, "super");
 			codeFactory.Statements.Add(pocoVariable);
 
-			var codeAssignment = new CodeAssignStatement(super, new CodeObjectCreateExpression(target));
+			var codeAssignment = new CodeAssignStatement(super, new CodeObjectCreateExpression(target.Type));
 			codeFactory.Statements.Add(codeAssignment);
 
 			GenerateBody(target, settings, importNameSpace, codeFactory, super);
-			codeFactory.ReturnType = new CodeTypeReference(target);
+			codeFactory.ReturnType = new CodeTypeReference(target.Type);
 			codeFactory.Statements.Add(new CodeMethodReturnStatement(super));
 
 			return codeFactory;
@@ -209,7 +209,9 @@ namespace JPB.DataAccess.DbInfoConfig
 							typeofProperty,
 							new CodePrimitiveExpression(true));
 
-						var setProps = new CodeMethodInvokeExpression(getClassInfo, "SetPropertysViaReflection", tryParse);
+						var setProps = new CodeMethodInvokeExpression(getClassInfo, "SetPropertysViaReflection", tryParse,
+							new CodeSnippetExpression("null"),
+							new CodeSnippetExpression("null"));
 						var setExpr = new CodeAssignStatement(refToProperty,
 							new CodeCastExpression(propertyInfoCache.PropertyType, setProps));
 						checkXmlForNull.TrueStatements.Add(setExpr);
@@ -335,13 +337,13 @@ namespace JPB.DataAccess.DbInfoConfig
 			}
 		}
 
-		public static void GenerateBody(Type sourceType,
+		public static void GenerateBody(DbClassInfoCache sourceType,
 			FactoryHelperSettings settings,
 			CodeNamespace importNameSpace,
 			CodeMemberMethod container,
 			CodeExpression target)
 		{
-			GenerateBody(sourceType.GetClassInfo().Propertys, settings, importNameSpace, container, target);
+			GenerateBody(sourceType.Propertys, settings, importNameSpace, container, target);
 		}
 
 		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<DbPropertyInfoCache> propertyToDbColumn, string altNamespace)
@@ -368,37 +370,38 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		[SecurityCritical]
-		internal static Func<IDataRecord, object> CreateFactory(Type target, FactoryHelperSettings settings)
+		internal static Func<IDataRecord, object> CreateFactory(DbClassInfoCache target, FactoryHelperSettings settings)
 		{
-			var classInfo = target.GetClassInfo();
 			var classCtorAttr =
-				classInfo.Attributes.First(s => s.Attribute is AutoGenerateCtorAttribute).Attribute as
+				target.Attributes.First(s => s.Attribute is AutoGenerateCtorAttribute).Attribute as
 					AutoGenerateCtorAttribute;
 
 			CodeNamespace importNameSpace;
-			importNameSpace = new CodeNamespace(target.Namespace);
+			importNameSpace = new CodeNamespace(target.Type.Namespace);
 			var cp = new CompilerParameters();
 			string superName;
 			var compiler = new CodeTypeDeclaration();
 			compiler.IsClass = true;
 
-			var generateFactory = target.IsSealed || classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod;
+			var generateFactory = target.Type.IsSealed || classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod;
 
 			CodeMemberMethod codeConstructor;
+			var codeName = target.Name.Split('.').Last();
+
 			if (generateFactory)
 			{
 				codeConstructor = GenerateFactory(target, settings, importNameSpace);
-				superName = target.Name + "_Factory";
+				superName = codeName + "_Factory";
 				compiler.Attributes = MemberAttributes.Static;
 			}
 			else
 			{
-				compiler.BaseTypes.Add(target);
+				compiler.BaseTypes.Add(target.Type);
 				codeConstructor = GenerateConstructor(target, settings, importNameSpace);
 				compiler.IsPartial = true;
-				superName = target.Name + "_Super";
+				superName = codeName + "_Super";
 			}
-			if (classInfo.Constructors.Any(f => f.Arguments.Any()))
+			if (target.Constructors.Any(f => f.Arguments.Any()))
 			{
 				throw new TypeAccessException(string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
 			}
@@ -410,7 +413,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			cp.GenerateInMemory = true;
 			cp.OutputAssembly =
 				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-				+ @"\" + target.FullName
+				+ @"\" + target.Type.FullName
 				+ "_Poco.dll";
 
 			Assembly compiledAssembly;
@@ -420,7 +423,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			if (File.Exists(cp.OutputAssembly) && settings.ReuseFactorys)
 			{
 				var bufferAssam = Assembly.Load(cp.OutputAssembly);
-				targetType = target.GetTypeInfo();
+				targetType = target.Type.GetTypeInfo();
 				var type = bufferAssam.DefinedTypes.FirstOrDefault(s => s == targetType);
 				if (targetType != null)
 					constructorInfos = targetType.GetConstructors();
@@ -444,7 +447,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				}
 
 				//cp.GenerateExecutable = true;
-				cp.ReferencedAssemblies.Add(target.Assembly.Location);
+				cp.ReferencedAssemblies.Add(target.Type.Assembly.Location);
 				cp.ReferencedAssemblies.Add("System.dll");
 				cp.ReferencedAssemblies.Add("System.Core.dll");
 				cp.ReferencedAssemblies.Add("System.Data.dll");
@@ -458,14 +461,14 @@ namespace JPB.DataAccess.DbInfoConfig
 					importNameSpace.Imports.Add(new CodeNamespaceImport(defaultNamespace));
 				}
 
-				foreach (var additionalNamespace in classInfo.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
+				foreach (var additionalNamespace in target.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
 				{
 					importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
 				}
 
 				if (classCtorAttr.FullSateliteImport)
 				{
-					foreach (var referencedAssembly in target.Assembly.GetReferencedAssemblies())
+					foreach (var referencedAssembly in target.Type.Assembly.GetReferencedAssemblies())
 					{
 						cp.ReferencedAssemblies.Add(referencedAssembly.Name);
 					}
@@ -526,7 +529,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				return true;
 			});
 
-			var dm = new DynamicMethod("Create" + target.Name, target, new[] { typeof(IDataRecord) }, target, true);
+			var dm = new DynamicMethod("Create" + target.Name.Split('.')[0], target.Type, new[] { typeof(IDataRecord) }, target.Type, true);
 			var il = dm.GetILGenerator();
 			if (generateFactory)
 			{

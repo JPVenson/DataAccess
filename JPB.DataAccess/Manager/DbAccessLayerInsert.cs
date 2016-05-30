@@ -154,7 +154,7 @@ namespace JPB.DataAccess.Manager
 			var orignialProps = classInfo.GetPropertysViaRefection(ignore).ToArray();
 
 			ValidateEntity(entry);
-			return db.CreateCommandWithParameterValues(classInfo.Type, query, orignialProps, entry);
+			return this.CreateCommandWithParameterValues(classInfo.Type, query, orignialProps, entry);
 		}
 
 		/// <summary>
@@ -167,7 +167,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
 		{
-			return CreateInsertQueryFactory(type.GetClassInfo(), entry, db, parameter);
+			return CreateInsertQueryFactory(this.GetClassInfo(type), entry, db, parameter);
 
 			//return type.CreateCommandOfClassAttribute<InsertFactoryMethodAttribute>(entry, db,
 			//	(e, f) => _CreateInsert(type, e, f), parameter);

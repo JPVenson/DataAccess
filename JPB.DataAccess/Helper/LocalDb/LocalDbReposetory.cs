@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Helper.LocalDb
@@ -16,8 +17,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
 		/// </summary>
-		public LocalDbReposetory(params ILocalDbConstraint[] constraints)
-			: base(typeof(T), null, constraints)
+		public LocalDbReposetory(DbConfig config, params ILocalDbConstraint[] constraints)
+			: base(typeof(T), null, config, constraints)
 		{
 		}
 		/// <summary>
@@ -30,8 +31,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> and uses the KeyProvider to generate Primarykeys
 		/// </summary>
-		public LocalDbReposetory(ILocalPrimaryKeyValueProvider keyProvider, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), keyProvider, constraints)
+		public LocalDbReposetory(DbConfig config, ILocalPrimaryKeyValueProvider keyProvider, params ILocalDbConstraint[] constraints)
+			: base(typeof(T), keyProvider, config, constraints)
 		{
 		}
 
@@ -43,7 +44,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			base.Add(item);
 		}
-		
+
 		/// <summary>
 		/// Checks if the item is ether localy stored or on database
 		/// </summary>

@@ -31,7 +31,7 @@ namespace JPB.DataAccess.MetaApi
 		where TClass : class, IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>, new()
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
-		where TMeth /*HeHeHe*/ : class, IMethodInfoCache<TAttr, TArg>, new()
+		where TMeth : class, IMethodInfoCache<TAttr, TArg>, new()
 		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
@@ -80,7 +80,7 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		/// Gloabel or local Cache
+		/// Global or local Cache
 		/// </summary>
 		protected internal virtual HashSet<TClass> SClassInfoCaches
 		{
@@ -125,8 +125,9 @@ namespace JPB.DataAccess.MetaApi
 				if (element == null)
 				{
 					element = new TClass();
-					SClassInfoCaches.Add(element);
-					element.Init(type);
+					if (!type.IsAnonymousType())
+						SClassInfoCaches.Add(element);
+					element.Init(type, type.IsAnonymousType());
 					newCreated = true;
 				}
 			}
@@ -159,7 +160,7 @@ namespace JPB.DataAccess.MetaApi
 					Monitor.Enter(SClassInfoCaches);
 				}
 
-				element = SClassInfoCaches.FirstOrDefault(s => s.ClassName.Equals(typeName));
+				element = SClassInfoCaches.FirstOrDefault(s => s.Name.Equals(typeName));
 				if (element == null)
 				{
 					var type = Type.GetType(typeName, true, false);

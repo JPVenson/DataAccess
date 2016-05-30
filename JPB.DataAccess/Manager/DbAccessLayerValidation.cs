@@ -20,7 +20,7 @@ namespace JPB.DataAccess.Manager
 		///     Validates a Entity
 		/// </summary>
 		/// <exception cref="ValidationException"></exception>
-		public static void ValidateEntity(object instance)
+		public void ValidateEntity(object instance)
 		{
 			var context = new ValidationContext(instance);
 			Validator.ValidateObject(instance, context, false);
@@ -30,9 +30,9 @@ namespace JPB.DataAccess.Manager
 		///     Validates a Entity
 		/// </summary>
 		/// <exception cref="ValidationException"></exception>
-		public static void ValidateEntityPk(object instance)
+		public void ValidateEntityPk(object instance)
 		{
-			var pkProperty = instance.GetType().GetClassInfo().PrimaryKeyProperty.PropertyName;
+			var pkProperty = this.GetClassInfo(instance.GetType()).PrimaryKeyProperty.PropertyName;
 			var context = new ValidationContext(instance);
 			context.MemberName = pkProperty;
 			Validator.ValidateProperty(instance, context);
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.Manager
 		///     Validates a Entity
 		/// </summary>
 		/// <exception cref="ValidationException"></exception>
-		public static Tuple<bool, ICollection<ValidationResult>> TryValidateEntity(object instance)
+		public Tuple<bool, ICollection<ValidationResult>> TryValidateEntity(object instance)
 		{
 			var context = new ValidationContext(instance);
 			var result = new Collection<ValidationResult>();

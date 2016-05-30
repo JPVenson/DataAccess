@@ -22,6 +22,12 @@ namespace JPB.DataAccess.DbInfoConfig
 			ConstructorSettings = new FactoryHelperSettings();
 		}
 
+		public DbConfig(bool local = false) 
+			: base(local)
+		{
+			
+		}
+
 		/// <summary>
 		///     The settings that are used to create a DOM ctor
 		/// </summary>
@@ -32,7 +38,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			bool isNewCreated;
 			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
 			if (isNewCreated)
-				val.CheckForConfig();
+				val.CheckForConfig(this);
 			return val;
 		}
 
@@ -41,7 +47,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			bool isNewCreated;
 			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
 			if (isNewCreated)
-				val.CheckForConfig();
+				val.CheckForConfig(this);
 			return val;
 		}
 

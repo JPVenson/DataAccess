@@ -108,12 +108,10 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var insGuid = Guid.NewGuid().ToString();
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
-
-			var config = new DbConfig();
-
+			
 			DbConfig.Clear();
 
-			config.SetConfig<ConfigLessUser>(f =>
+			expectWrapper.Config.SetConfig<ConfigLessUser>(f =>
 			{
 				f.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
 				f.SetPrimaryKey(e => e.PropertyA);
@@ -144,8 +142,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
-			var config = new DbConfig();
-			config.SetConfig<ConfigLessUser>(f =>
+			expectWrapper.Config.SetConfig<ConfigLessUser>(f =>
 			{
 				f.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
 				f.SetPrimaryKey(e => e.PropertyA);
@@ -236,7 +233,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsNotEmpty(result);
 		}
 
-		[Test]
+		[Test()]
 		[Category("MsSQL")]
 		public void AutoGenFactoryTestXmlMulti()
 		{

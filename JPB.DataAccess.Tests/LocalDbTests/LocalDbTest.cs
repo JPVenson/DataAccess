@@ -1,4 +1,5 @@
-﻿using JPB.DataAccess.Helper.LocalDb;
+﻿using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
@@ -21,7 +22,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			using (new DatabaseScope())
 			{
-				_users = new LocalDbReposetory<Users>();
+				_users = new LocalDbReposetory<Users>(new DbConfig());
 			}
 
 			Assert.IsTrue(_users.ReposetoryCreated);
@@ -85,12 +86,14 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			var user = new Users();
 			_users.Add(user);
 			_users.Add(user);
-			_users.Add(user);
-			_users.Add(user);
-			_users.Add(user);
-			_users.Add(user);
-			Assert.That(_users.Count, Is.EqualTo(6));
-			Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Count").EqualTo(6));
+			Assert.That(_users.Count, Is.EqualTo(1));
+			Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Length").EqualTo(1));
+			_users.Add(new Users());
+			_users.Add(new Users());
+			_users.Add(new Users());
+			_users.Add(new Users());
+			Assert.That(_users.Count, Is.EqualTo(5));
+			Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Length").EqualTo(5));
 		}
 	}
 }

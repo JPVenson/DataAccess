@@ -32,6 +32,33 @@ namespace JPB.DataAccess
 	public static class DbAccessLayerHelper
 	{
 		/// <summary>
+		///     Creates a new Instance based on possible Ctor's and the given
+		///     <paramref name="reader" />
+		/// </summary>
+		/// <returns></returns>
+		public static object SetPropertysViaReflection(
+			this DbClassInfoCache type,
+			IDataRecord reader,
+			DbAccessType? accessType = null,
+			DbConfig config = null)
+		{
+			if (reader == null)
+				return null;
+
+			bool created;
+			object source = DbAccessLayer.CreateInstance(type, reader, out created);
+			if (created)
+				return source;
+
+			if(config == null)
+				config = new DbConfig();
+
+#pragma warning disable 618
+			return DbAccessLayer.ReflectionPropertySet(config, source, type, reader, null, accessType);
+#pragma warning restore 618
+		}
+
+		/// <summary>
 		///     Not Connection save
 		///     Must be executed inside a Valid Connection
 		/// </summary>
@@ -122,10 +149,10 @@ namespace JPB.DataAccess
 		///     <paramref name="propertyInfos" />
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, Type type, string query,
+		public static IDbCommand CreateCommandWithParameterValues(this DbAccessLayer db, Type type, string query,
 			string[] propertyInfos, object entry)
 		{
-			var classInfo = type.GetClassInfo();
+			var classInfo = db.GetClassInfo(type);
 			var propertyvalues =
 				propertyInfos.Select(
 					propertyInfo =>
@@ -136,7 +163,7 @@ namespace JPB.DataAccess
 						var dataValue = val ?? DBNull.Value;
 						return new Tuple<Type, object>(property.PropertyType, dataValue);
 					}).ToArray();
-			return db.CreateCommandWithParameterValues(query, propertyvalues);
+			return db.Database.CreateCommandWithParameterValues(query, propertyvalues);
 		}
 
 		/// <summary>
@@ -164,7 +191,7 @@ namespace JPB.DataAccess
 		///     <paramref name="propertyInfos" />
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateCommandWithParameterValues<T>(this IDatabase db, string query, string[] propertyInfos,
+		public static IDbCommand CreateCommandWithParameterValues<T>(this DbAccessLayer db, string query, string[] propertyInfos,
 			T entry)
 		{
 			return db.CreateCommandWithParameterValues(typeof(T), query, propertyInfos, entry);
@@ -230,10 +257,17 @@ namespace JPB.DataAccess
 				return parameter as IEnumerable<IQueryParameter>;
 			}
 
-			return (from element in parameter.GetType().GetClassInfo().Propertys
-					let value = parameter.GetParamaterValue(element.Key)
-					select new QueryParameter(element.Key.CheckParamter(), value)).Cast<IQueryParameter>()
-				.ToList();
+			using (var dbConfig = new DbConfig(true))
+			{
+				var dynType = dbConfig.GetOrCreateClassInfoCache(parameter.GetType());
+				var elements = new List<IQueryParameter>();
+				foreach (var dynProperty in dynType.Propertys)
+				{
+					var convertedParam = parameter.GetParamaterValue(dbConfig, dynProperty.Key);
+					elements.Add(new QueryParameter(dynProperty.Key.CheckParamter(), convertedParam));					
+				}
+				return elements;
+			}
 		}
 
 		/// <summary>
@@ -250,9 +284,9 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static string CreatePropertyCsv<T>(bool ignorePk = false)
+		public static string CreatePropertyCsv<T>(DbConfig config, bool ignorePk = false)
 		{
-			return CreatePropertyCsv(typeof(T).GetClassInfo(), ignorePk);
+			return CreatePropertyCsv(config.GetOrCreateClassInfoCache(typeof(T)), ignorePk);
 		}
 
 		/// <summary>
@@ -264,16 +298,16 @@ namespace JPB.DataAccess
 			var filteredList = FilterDbSchemaMapping(type, ignore).ToArray();
 			if (filteredList.Any())
 				return filteredList.Aggregate((e, f) => e + ", " + f);
-			return string.Empty;
+			return String.Empty;
 		}
 
 		/// <summary>
 		///     Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
 		/// </summary>
 		/// <returns></returns>
-		internal static string CreatePropertyCsv<T>(params string[] ignore)
+		internal static string CreatePropertyCsv<T>(DbConfig config, params string[] ignore)
 		{
-			return CreatePropertyCsv(typeof(T).GetClassInfo(), ignore);
+			return CreatePropertyCsv(config.GetOrCreateClassInfoCache(typeof(T)), ignore);
 		}
 
 		/// <summary>
@@ -292,9 +326,9 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		internal static IEnumerable<string> FilterDbSchemaMapping<T>(params string[] ignore)
+		internal static IEnumerable<string> FilterDbSchemaMapping<T>(DbConfig config, params string[] ignore)
 		{
-			return FilterDbSchemaMapping(typeof(T).GetClassInfo(), ignore);
+			return FilterDbSchemaMapping(config.GetOrCreateClassInfoCache(typeof(T)), ignore);
 		}
 
 
@@ -313,9 +347,9 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		internal static IEnumerable<string> CreatePropertyNames<T>(bool ignorePk = false)
+		internal static IEnumerable<string> CreatePropertyNames<T>(DbConfig config, bool ignorePk = false)
 		{
-			return ignorePk ? FilterDbSchemaMapping<T>(typeof(T).GetPK()) : FilterDbSchemaMapping<T>(new string[0]);
+			return ignorePk ? FilterDbSchemaMapping<T>(config, typeof(T).GetPK(config)) : FilterDbSchemaMapping<T>(config, new string[0]);
 		}
 
 		/// <summary>
@@ -349,36 +383,6 @@ namespace JPB.DataAccess
 		public static IDbCommand ConcatCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
 		{
 			return db.MergeTextToParameters(@base, last, autoRename);
-		}
-
-		/// <summary>
-		///     Creates a new Instance based on possible Ctor's and the given
-		///     <paramref name="reader" />
-		/// </summary>
-		/// <returns></returns>
-		public static object SetPropertysViaReflection(this DbClassInfoCache type, IDataRecord reader)
-		{
-			return type.SetPropertysViaReflection(reader, null);
-		}
-
-		/// <summary>
-		///     Creates a new Instance based on possible Ctor's and the given
-		///     <paramref name="reader" />
-		/// </summary>
-		/// <returns></returns>
-		public static object SetPropertysViaReflection(this DbClassInfoCache type, IDataRecord reader, DbAccessType? accessType)
-		{
-			if (reader == null)
-				return null;
-
-			bool created;
-			object source = DbAccessLayer.CreateInstance(type, reader, out created);
-			if (created)
-				return source;
-
-#pragma warning disable 618
-			return DbAccessLayer.ReflectionPropertySet(source, type, reader, null, accessType);
-#pragma warning restore 618
 		}
 	}
 }

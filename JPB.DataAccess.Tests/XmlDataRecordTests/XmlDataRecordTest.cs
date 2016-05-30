@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.TestModels.XmlDataRecordTest;
 using NUnit.Framework;
 
@@ -75,8 +76,8 @@ namespace JPB.DataAccess.Tests.XmlDataRecordTests
 				xmlSerilizer.Serialize(ms, new InstanceMock());
 				content = Encoding.Default.GetString(ms.ToArray());
 			}
-
-			new XmlDataRecord(XDocument.Parse(content), typeof (InstanceMock));
+			Assert.That(() => new XmlDataRecord(XDocument.Parse(content), typeof(InstanceMock), new DbConfig()), Throws.Nothing);
+			;
 		}
 	}
 }

@@ -54,7 +54,7 @@ namespace JPB.DataAccess.Query
 					return false;
 
 				var dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
-				Current = _queryContainer.AccessLayer.SetPropertysViaReflection(_type.GetClassInfo(), dataRecord);
+				Current = _queryContainer.AccessLayer.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type), dataRecord);
 				_elements.Add(Current);
 
 				return true;

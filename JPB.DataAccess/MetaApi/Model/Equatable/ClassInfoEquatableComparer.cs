@@ -24,7 +24,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 				return true;
 			if (x == null || y == null)
 				return false;
-			if (x.ClassName != y.ClassName)
+			if (x.Name != y.Name)
 				return false;
 			if (x.Type == y.Type)
 				return true;
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 				return -1;
 			if (y == null)
 				return +1;
-			return System.String.Compare(x.ClassName, y.ClassName, System.StringComparison.Ordinal);
+			return System.String.Compare(x.Name, y.Name, System.StringComparison.Ordinal);
 		}
 
 		public bool Equals(Type x, Type y)

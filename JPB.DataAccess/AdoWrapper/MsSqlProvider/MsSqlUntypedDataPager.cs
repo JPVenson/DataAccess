@@ -124,7 +124,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 				SyncHelper(CurrentPageItems.Clear);
 
-				var pk = TargetType.GetPK();
+				var pk = TargetType.GetPK(dbAccess.Config);
 
 				var selectMaxCommand = dbAccess
 					.Query()

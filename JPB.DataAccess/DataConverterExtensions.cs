@@ -70,53 +70,43 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <returns></returns>
 		/// <exception cref="ArgumentNullException"></exception>
-		internal static object GetParamaterValue(this object source, string name)
+		internal static object GetParamaterValue(this object source, DbConfig config, string name)
 		{
 			if (source == null)
 				throw new ArgumentNullException("source");
-			var propertyInfo = GetParamater(source, name);
+
+			DbPropertyInfoCache propertyInfo;
+			config.GetOrCreateClassInfoCache(source.GetType()).Propertys.TryGetValue(name, out propertyInfo);
 			if (propertyInfo == null)
 				throw new ArgumentNullException("name");
 			return propertyInfo.GetConvertedValue(source);
 		}
 
 		/// <summary>
-		///     retuns the Cashed Property info from Refection Cash
-		/// </summary>
-		/// <returns></returns>
-		internal static DbPropertyInfoCache GetParamater(this object source, string name)
-		{
-			DbPropertyInfoCache val;
-			source.GetType().GetClassInfo().Propertys.TryGetValue(name, out val);
-			return val;
-		}
-
-
-		/// <summary>
 		///     Get and Convert the found PK name into Database name
 		/// </summary>
 		/// <returns></returns>
-		public static string GetPK(this Type type)
+		public static string GetPK(this Type type, DbConfig config)
 		{
-			return type.GetClassInfo().PrimaryKeyProperty.DbName;
+			return config.GetOrCreateClassInfoCache(type).PrimaryKeyProperty.DbName;
 		}
 
 		/// <summary>
 		///     Returns All forgin keys of the given type
 		/// </summary>
 		/// <returns></returns>
-		public static DbPropertyInfoCache[] GetFKs(this Type type)
+		public static DbPropertyInfoCache[] GetFKs(this Type type, DbConfig config)
 		{
-			return type.GetClassInfo().Propertys.Where(f => f.Value.ForginKeyAttribute != null).Select(f => f.Value).ToArray();
+			return config.GetOrCreateClassInfoCache(type).Propertys.Where(f => f.Value.ForginKeyAttribute != null).Select(f => f.Value).ToArray();
 		}
 
 		/// <summary>
 		///     Gets the first Forgin key that is of type <paramref name="fkType" />
 		/// </summary>
 		/// <returns></returns>
-		public static string GetFK(this Type type, Type fkType)
+		public static string GetFK(this Type type, Type fkType, DbConfig config)
 		{
-			var hasFk = type.GetClassInfo()
+			var hasFk = config.GetOrCreateClassInfoCache(type)
 				.Propertys
 				.Select(f => f.Value)
 				.Where(f => f.ForginKeyAttribute != null)
@@ -131,16 +121,16 @@ namespace JPB.DataAccess
 		///     <paramref name="databaseName" />
 		/// </summary>
 		/// <returns></returns>
-		public static string GetFK(this Type type, string databaseName)
+		public static string GetFK(this Type type, string databaseName, DbConfig config)
 		{
-			var classInfo = type.GetClassInfo();
+			var classInfo = config.GetOrCreateClassInfoCache(type);
 			return classInfo.GetDbToLocalSchemaMapping(databaseName);
 		}
 
-		internal static bool CopyPropertys(object @base, object newObject)
+		internal static bool CopyPropertys(object @base, object newObject, DbConfig config)
 		{
 			var updated = false;
-			var propertys = @base.GetType().GetClassInfo().Propertys.Select(f => f.Value);
+			var propertys = config.GetOrCreateClassInfoCache(@base.GetType()).Propertys.Select(f => f.Value);
 			foreach (var propertyInfo in propertys)
 			{
 				var oldValue = propertyInfo.GetConvertedValue(@base);
@@ -189,11 +179,11 @@ namespace JPB.DataAccess
 		/// <typeparam name="T"></typeparam>
 		/// <typeparam name="E"></typeparam>
 		/// <returns></returns>
-		internal static object GetPK<T>(this T source)
+		internal static object GetPK<T>(this T source, DbConfig config)
 		{
-			string pk = typeof (T).GetClassInfo().PrimaryKeyProperty.PropertyName;
+			string pk = config.GetOrCreateClassInfoCache(typeof(T)).PrimaryKeyProperty.PropertyName;
 			DbPropertyInfoCache val;
-			typeof(T).GetClassInfo().Propertys.TryGetValue(pk, out val);
+			config.GetOrCreateClassInfoCache(typeof(T)).Propertys.TryGetValue(pk, out val);
 			return val.GetConvertedValue(source);
 		}
 
@@ -238,18 +228,18 @@ namespace JPB.DataAccess
 		///     returns all propertys that are marked as Forgin keys
 		/// </summary>
 		/// <returns></returns>
-		public static DbPropertyInfoCache[] GetNavigationProps(this Type type)
+		public static DbPropertyInfoCache[] GetNavigationProps(this Type type, DbConfig config)
 		{
-			return type.GetClassInfo().Propertys.Where(s => s.Value.ForginKeyAttribute != null).Select(s => s.Value).ToArray();
+			return config.GetOrCreateClassInfoCache(type).Propertys.Where(s => s.Value.ForginKeyAttribute != null).Select(s => s.Value).ToArray();
 		}
 
 		/// <summary>
 		///     returns all propertys that are marked as Forgin keys
 		/// </summary>
 		/// <returns></returns>
-		internal static DbPropertyInfoCache[] GetNavigationProps<T>()
+		internal static DbPropertyInfoCache[] GetNavigationProps<T>(DbConfig config)
 		{
-			return GetNavigationProps(typeof(T));
+			return GetNavigationProps(typeof(T), config);
 		}
 
 		/// <summary>
@@ -272,10 +262,6 @@ namespace JPB.DataAccess
 		///     and wrapps all infos into a Egar record
 		/// </summary>
 		/// <returns></returns>
-		public static EgarDataRecord CreateEgarRecord(this IDataRecord rec)
-		{
-			return new EgarDataRecord(rec);
-		}
 
 		internal static object ChangeType(object value, Type conversion)
 		{

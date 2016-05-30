@@ -23,7 +23,7 @@ namespace JPB.DataAccess.Query.Operators
 			var cmd = ContainerObject
 				.AccessLayer
 				.CreateSelectQueryFactory(
-					typeof(T).GetClassInfo(),
+					this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
 					ContainerObject.AccessLayer.Database);
 			return new SelectQuery<T>(this.QueryCommand(cmd));
 		}
@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Query.Operators
 				this
 				.ContainerObject
 				.AccessLayer
-				._CreateUpdate(typeof(T).GetClassInfo(), obj)));
+				._CreateUpdate(this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
 		}
 
 		public RootQuery(DbAccessLayer database, Type type) : base(database, type)

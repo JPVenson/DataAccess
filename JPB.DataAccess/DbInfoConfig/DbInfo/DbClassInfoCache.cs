@@ -64,6 +64,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			foreach (var dbPropertyInfoCach in Propertys)
 			{
 				dbPropertyInfoCach.Value.DeclaringClass = this;
+				//dbPropertyInfoCach.Value.ClassType = new DbClassInfoCache(dbPropertyInfoCach.Value.PropertyType);
 			}
 			foreach (var dbPropertyInfoCach in Mehtods)
 			{
@@ -122,7 +123,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			get
 			{
 				if (ForModel == null)
-					return ClassName.Split('.').Last();
+					return Name.Split('.').Last();
 				return ForModel.Attribute.AlternatingName;
 			}
 		}
@@ -183,23 +184,23 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			}
 		}
 
-		internal void CheckForConfig()
+		internal void CheckForConfig(DbConfig config)
 		{
 			var configMethods = Mehtods
 				.Where(f => f.MethodInfo.IsStatic && f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
 			if (configMethods.Any())
 			{
-				var config = new DbConfig();
 				foreach (var item in configMethods.Where(f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(DbConfig)))
 				{
 					item.MethodInfo.Invoke(null, new object[] { config });
 				}
 
-				var resolver = typeof(ConfigurationResolver<>)
-					.MakeGenericType(this.Type)
-					.GetClassInfo()
+				var fod = config.GetOrCreateClassInfoCache(typeof(ConfigurationResolver<>)
+					.MakeGenericType(this.Type))
 					.Constructors
-					.FirstOrDefault()
+					.First();
+
+				var resolver = fod
 					.Invoke(null, config, this);
 				foreach (var item in configMethods.Where(f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(ConfigurationResolver<>).MakeGenericType(this.Type)))
 				{
@@ -213,7 +214,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		internal void CreateFactory()
 		{
 			if (!FullFactory)
-				Factory = FactoryHelper.CreateFactory(Type, DbConfig.ConstructorSettings);
+				Factory = FactoryHelper.CreateFactory(this, DbConfig.ConstructorSettings);
 			FullFactory = true;
 		}
 

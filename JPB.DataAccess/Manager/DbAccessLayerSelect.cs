@@ -123,7 +123,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected object[] Select(Type type, IDatabase db, bool egarLoading, params object[] parameter)
 		{
-			return Select(type, db, CreateSelectQueryFactory(type.GetClassInfo(), parameter), egarLoading);
+			return Select(type, db, CreateSelectQueryFactory(this.GetClassInfo(type), parameter), egarLoading);
 		}
 
 		/// <summary>
@@ -172,7 +172,7 @@ namespace JPB.DataAccess.Manager
 		public IDbCommand CreateSelect(Type type, string query)
 		{
 			return DbAccessLayerHelper.CreateCommand(Database,
-				CreateSelectQueryFactory(type.GetClassInfo()).CommandText + " " + query);
+				CreateSelectQueryFactory(this.GetClassInfo(type)).CommandText + " " + query);
 		}
 
 
@@ -192,7 +192,7 @@ namespace JPB.DataAccess.Manager
 		public IDbCommand CreateSelect(Type type, string query, IEnumerable<IQueryParameter> paramenter)
 		{
 			var plainCommand = Database.CreateCommand(
-				CreateSelectQueryFactory(type.GetClassInfo(), Database).CommandText + " " + query);
+				CreateSelectQueryFactory(this.GetClassInfo(type), Database).CommandText + " " + query);
 			if (paramenter != null)
 				foreach (IQueryParameter para in paramenter)
 					plainCommand.Parameters.AddWithValue(para.Name, para.Value, Database);
@@ -396,11 +396,11 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, object pk)
 		{
-			if (type.GetClassInfo().PrimaryKeyProperty == null)
+			if (this.GetClassInfo(type).PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("Class '{0}' does not define any Primary key", type.Name));
 
-			var query = CreateSelectQueryFactory(type.GetClassInfo()).CommandText
-				+ " WHERE " + type.GetClassInfo().PrimaryKeyProperty.DbName + " = @pk";
+			var query = CreateSelectQueryFactory(this.GetClassInfo(type)).CommandText
+				+ " WHERE " + this.GetClassInfo(type).PrimaryKeyProperty.DbName + " = @pk";
 			var cmd = Database.CreateCommand(query);
 			cmd.Parameters.AddWithValue("@pk", pk, Database);
 			return cmd;
@@ -421,9 +421,9 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public static string CreateSelect(Type type)
+		public string CreateSelect(Type type)
 		{
-			return CreateSelect(type.GetClassInfo());
+			return CreateSelect(GetClassInfo(type));
 		}
 
 		/// <summary>
@@ -467,7 +467,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, IDatabase db)
 		{
-			return CreateSelect(type.GetClassInfo(), db);
+			return CreateSelect(this.GetClassInfo(type), db);
 		}
 
 		/// <summary>
@@ -502,7 +502,7 @@ namespace JPB.DataAccess.Manager
 		public IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query, bool egarLoading)
 		{
 			RaiseSelect(query, database);
-			var typeInfo = type.GetClassInfo();
+			var typeInfo = this.GetClassInfo(type);
 
 			if (egarLoading)
 			{
@@ -837,7 +837,7 @@ namespace JPB.DataAccess.Manager
 		public object LoadNavigationProps(object source, IDatabase accessLayer, bool egarLoading)
 		{
 			//Get nav Propertys
-			foreach (var propertyInfo in source.GetType().GetNavigationProps())
+			foreach (var propertyInfo in source.GetType().GetNavigationProps(this.Config))
 			{
 				//var firstOrDefault = source.GetFK<long>(propertyInfo.ClassName);
 				IDbCommand sqlCommand;
@@ -850,13 +850,13 @@ namespace JPB.DataAccess.Manager
 				Type targetType = null;
 				if (propertyInfo.CheckForListInterface())
 				{
-					object pk = source.GetPK();
+					object pk = source.GetPK(this.Config);
 					var targetName = firstOrDefault.KeyName;
 					targetType = propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 
 					if (String.IsNullOrEmpty(targetName))
 					{
-						targetName = targetType.GetPK();
+						targetName = targetType.GetPK(this.Config);
 					}
 
 					sqlCommand = CreateSelect(targetType,
@@ -867,7 +867,7 @@ namespace JPB.DataAccess.Manager
 				}
 				else
 				{
-					object fkproperty = source.GetParamaterValue(firstOrDefault.KeyName);
+					object fkproperty = source.GetParamaterValue(this.Config, firstOrDefault.KeyName);
 
 					if (fkproperty == null)
 						continue;
@@ -911,7 +911,7 @@ namespace JPB.DataAccess.Manager
 		{
 			var objects = RunSelect(type, database, command, egarLoading);
 
-			if (ProcessNavigationPropertys && type.GetClassInfo().HasRelations)
+			if (ProcessNavigationPropertys && this.GetClassInfo(type).HasRelations)
 				foreach (object model in objects)
 					LoadNavigationProps(model, database);
 
@@ -1025,7 +1025,7 @@ namespace JPB.DataAccess.Manager
 			{
 				var dataRecord = mars[index];
 				var expectedResult = marsTypes[index];
-				concatedMarsToType.Add(new Tuple<DbClassInfoCache, List<IDataRecord>>(expectedResult.GetClassInfo(), dataRecord));
+				concatedMarsToType.Add(new Tuple<DbClassInfoCache, List<IDataRecord>>(this.GetClassInfo(expectedResult), dataRecord));
 			}
 			var list =
 				concatedMarsToType.Select(s => s.Item2.Select(e => SetPropertysViaReflection(s.Item1, e)).AsParallel().ToList())
