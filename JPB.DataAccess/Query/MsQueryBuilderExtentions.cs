@@ -33,7 +33,10 @@ namespace JPB.DataAccess.Query
 	/// </summary>
 	public static class MsQueryBuilderExtentions
 	{
-		
+		public static ConditionalEvalQuery<T> Like<T>(this ConditionalColumnQuery<T> query, string value)
+		{
+			return new ConditionalEvalQuery<T>(query.QueryD("LIKE @arg", new { arg = value }));
+		}
 
 		/// <summary>
 		///		Sets an Variable to the given value
@@ -106,8 +109,8 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
-		public static RootQuery WithCte(this RootQuery query, 
-			string cteName, 
+		public static RootQuery WithCte(this RootQuery query,
+			string cteName,
 			Action<RootQuery> cteAction,
 			bool subCte = false)
 		{
@@ -128,7 +131,7 @@ namespace JPB.DataAccess.Query
 			query.Add(new CteQueryPart(""));
 			return query;
 		}
-		
+
 
 		/// <summary>
 		///    Creates an closed sub select
@@ -144,19 +147,19 @@ namespace JPB.DataAccess.Query
 			return q.QueryText(")");
 		}
 
-	
-		
+
+
 		/// <summary>
 		///     Creates a QueryCommand that uses the * Operator to select all date from the inner query
 		/// </summary>
 		/// <param name="query"></param>
 		/// <param name="from"></param>
 		/// <returns></returns>
-		public static SelectQuery<T> SelectStar<T>(this RootQuery query) 
+		public static SelectQuery<T> SelectStar<T>(this RootQuery query)
 		{
 			return new SelectQuery<T>(query.QueryText("SELECT * FROM " + typeof(T).GetClassInfo().TableName));
 		}
-		
+
 		/// <summary>
 		///     Adds a Between statement followed by anything added from the action
 		/// </summary>
@@ -208,8 +211,8 @@ namespace JPB.DataAccess.Query
 			return new ConditionalEvalQuery<T>(condtion);
 		}
 
-		public static RootQuery Apply(this RootQuery query, 
-			ApplyMode mode, 
+		public static RootQuery Apply(this RootQuery query,
+			ApplyMode mode,
 			Action<IQueryBuilder> innerText)
 		{
 			query
@@ -235,7 +238,7 @@ namespace JPB.DataAccess.Query
 		{
 			return new ConditionalEvalQuery<T>(query.QueryQ("CONTAINS (@Cont_A{0})", new QueryParameter("@Cont_A", alias, alias.GetType())));
 		}
-		
+
 		/// <summary>
 		///     Append an RowNumberOrder part
 		/// </summary>
@@ -249,7 +252,7 @@ namespace JPB.DataAccess.Query
 		///     Adds a LEFT JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static RootQuery Join<T,TE>(this ElementProducer<T> query, string mode = null)
+		public static RootQuery Join<T, TE>(this ElementProducer<T> query, string mode = null)
 		{
 			var sourcePK = typeof(T).GetFK(typeof(TE));
 			var targetPK = typeof(TE).GetClassInfo().GetPK();
@@ -264,7 +267,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static RootQuery Join<T, TE>(this ElementProducer<T> query, JoinMode mode)
 		{
-			return Join<T,TE>(query, mode.JoinType);
+			return Join<T, TE>(query, mode.JoinType);
 		}
 
 		/// <summary>
