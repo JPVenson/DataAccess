@@ -639,6 +639,27 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsTrue(refSelect.Length > 0);
 		}
 
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void SelectPrimitivSelectNullHandling()
+		{
+			InsertTest();
+
+			var refSelect =
+				expectWrapper.RunPrimetivSelect<long>(
+					UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA",
+					new QueryParameter("paramA", null));
+			Assert.IsTrue(refSelect.Length > 0);
+
+			string n = null;
+
+			refSelect =
+				expectWrapper.RunPrimetivSelect<long>(
+					UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA", new { paramA = n });
+			Assert.IsTrue(refSelect.Length > 0);
+		}
+
 
 		[Test]
 		[Category("MsSQL")]
