@@ -36,10 +36,18 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	{
 		private DbAccessLayer expectWrapper;
 
-		[SetUp]
+		[OneTimeSetUp]
 		public void Init()
 		{
 			expectWrapper = new Manager().GetWrapper();
+		}
+
+		[SetUp]
+		public void Clear()
+		{
+			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
+			if (expectWrapper.DbAccessType == DbAccessType.MsSql)
+				expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.UserTable), null);
 		}
 
 		[Test]
@@ -153,14 +161,14 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol + "TEST");
 			});
 
-//			var unexpected = typeof(Exception);
+			//			var unexpected = typeof(Exception);
 
-//#if MsSql
-//			unexpected = typeof(SqlException);
-//#endif
-//#if SqLite
-//			unexpected = typeof(SQLiteException);
-//#endif
+			//#if MsSql
+			//			unexpected = typeof(SqlException);
+			//#endif
+			//#if SqLite
+			//			unexpected = typeof(SQLiteException);
+			//#endif
 
 			Assert.That(() =>
 			{
@@ -413,35 +421,32 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var expectedUser = expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
 			Assert.IsNotNull(expectedUser);
-			Assert.AreNotEqual(expectedUser.Count, 0);
+			Assert.AreNotEqual(expectedUser.Length, 0);
 
 			var refSelect =
 				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.UserTable)));
-			Assert.AreEqual(expectedUser.Count, refSelect);
+			Assert.AreEqual(expectedUser.Length, refSelect);
 		}
 
 		[Test]
 		public void ProcedureParamTest()
 		{
 			RangeInsertTest();
-			//const int procParamA = 5;
 
-			var expectedUser =
-				expectWrapper.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
-				{
-					Number = 20
-				});
-
-			Assert.IsNotNull(expectedUser);
-
-			//var refselect =
-			//    expectwrapper.database.run(
-			//        s =>
-			//            s.getskalar(string.format("select count(*) from {0} us where {1} > us.user_id", usersmeta.usertable,
-			//                procparama)));
-			//assert.areequal(expecteduser.count, refselect);
+			Assert.That(() => expectWrapper.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
+			{
+				Number = 10
+			}), Is.Not.Null.And.Property("Length").EqualTo(9));
 		}
 
+		[Test]
+		public void ProcedureDirectParamTest()
+		{
+			RangeInsertTest();
+
+			Assert.That(() => expectWrapper.Select<TestProcBParamsDirect>(new object[] { 10 }),
+				Is.Not.Null.And.Property("Length").EqualTo(9));
+		}
 
 		[Test]
 		[Category("MsSQL")]
