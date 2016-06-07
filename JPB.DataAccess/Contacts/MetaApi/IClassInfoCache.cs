@@ -66,7 +66,7 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		/// <summary>
 		///     The .net ClassName
 		/// </summary>
-		string ClassName { get; }
+		string Name { get; }
 
 		/// <summary>
 		///     The .net Type instance

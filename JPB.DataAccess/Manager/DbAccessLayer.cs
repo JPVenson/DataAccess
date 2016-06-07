@@ -47,6 +47,18 @@ namespace JPB.DataAccess.Manager
 
 		private ILogger _logger;
 
+		private DbConfig _config;
+
+		public DbConfig Config
+		{
+			get { return _config; }
+		}
+
+		/// <summary>
+		///     Defines a set of Providers that are inclueded in this DLL or are weak refernced.
+		/// </summary>
+		public static PreDefinedProviderCollection ProviderCollection { get; private set; }
+
 		/// <summary>
 		/// Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the instance. This field overrides 
 		/// </summary>
@@ -111,14 +123,16 @@ namespace JPB.DataAccess.Manager
 			}
 		}
 
-
-		/// <summary>
-		///     Defines a set of Providers that are inclueded in this DLL or are weak refernced.
-		/// </summary>
-		public static PreDefinedProviderCollection ProviderCollection { get; private set; }
-
-		internal DbAccessLayer(ILogger logger = null)
+		internal DbAccessLayer(ILogger logger = null, DbConfig config = null)
 		{
+			if (config == null)
+			{
+				_config = new DbConfig();
+			}
+			else
+			{
+				_config = new DbConfig();
+			}
 			DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
 			_logger = logger;
 			if (logger == null)
@@ -136,8 +150,8 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Create a DbAccessLayer that uses a Predefined type and Connection string
 		/// </summary>
-		public DbAccessLayer(DbAccessType dbAccessType, string connection, ILogger logger = null)
-			: this(logger)
+		public DbAccessLayer(DbAccessType dbAccessType, string connection, ILogger logger = null, DbConfig config = null)
+			: this(logger, config)
 		{
 			if (dbAccessType == DbAccessType.Unknown)
 			{
@@ -156,8 +170,8 @@ namespace JPB.DataAccess.Manager
 		///     Create a DbAccessLAyer with exernal Strategy
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection, ILogger logger = null)
-			: this(logger)
+		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection, ILogger logger = null, DbConfig config = null)
+			: this(logger, config)
 		{
 			if (string.IsNullOrEmpty(fullTypeNameToIDatabaseStrategy))
 				throw new ArgumentNullException("fullTypeNameToIDatabaseStrategy");
@@ -175,8 +189,8 @@ namespace JPB.DataAccess.Manager
 		///     Create a DbAccessLayer with a new Database
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public DbAccessLayer(IDatabaseStrategy database, ILogger logger = null)
-			: this(logger)
+		public DbAccessLayer(IDatabaseStrategy database, ILogger logger = null, DbConfig config = null)
+			: this(logger, config)
 		{
 			if (database == null)
 				throw new ArgumentNullException("database");
@@ -192,14 +206,19 @@ namespace JPB.DataAccess.Manager
 		///     Creates a DbAccessLayer with a new Database
 		///     dbAccessType will be Guessed
 		/// </summary>
-		public DbAccessLayer(IDatabase database, ILogger logger = null)
-			: this(logger)
+		public DbAccessLayer(IDatabase database, ILogger logger = null, DbConfig config = null)
+			: this(logger, config)
 		{
 			if (database == null)
 				throw new ArgumentNullException("database");
 
 			DbAccessType = DbAccessType.Unknown;
 			Database = database;
+		}
+
+		public DbClassInfoCache GetClassInfo(Type type)
+		{
+			return this.Config.GetOrCreateClassInfoCache(type);
 		}
 
 		internal IDatabaseStrategy GenerateStrategy(string fullValidIdentifyer, string connection)
@@ -319,6 +338,12 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public int ExecuteGenericCommand(string query, dynamic paramenter)
 		{
+			if (paramenter is IEnumerable<IQueryParameter>)
+			{
+				var parm = (IEnumerable<IQueryParameter>)paramenter;
+				return ExecuteGenericCommand(query, parm);
+			}
+
 			return ExecuteGenericCommand(query,
 				(IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
 		}
@@ -366,7 +391,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader)
 		{
-			return SetPropertysViaReflection(type, reader, null);
+			return SetPropertysViaReflection(type, reader, DbAccessType);
 		}
 
 		/// <summary>
@@ -383,7 +408,7 @@ namespace JPB.DataAccess.Manager
 				return source;
 
 #pragma warning disable 618
-			return ReflectionPropertySet(source, type, reader, mapping, DbAccessType);
+			return ReflectionPropertySet(Config, source, type, reader, mapping, DbAccessType);
 #pragma warning restore 618
 		}
 
@@ -473,6 +498,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		[Obsolete("This mehtod is replaced by several FASTER equal ones. It may be replaced, updated or delted. But it will change that is for sure. legacy support only")]
 		public static object ReflectionPropertySet(
+			DbConfig config,
 			object instance,
 			DbClassInfoCache info,
 			IDataRecord reader,
@@ -542,12 +568,12 @@ namespace JPB.DataAccess.Manager
 							//target Property is of type list
 							//so expect a xml valid list Take the first element and expect the propertys inside this first element
 							var record = XmlDataRecord.TryParse(xmlStream,
-								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault(), false);
+								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault(), false, config);
 							var xmlDataRecords = record.CreateListOfItems();
 
 							var genericArguments =
-								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault().GetClassInfo();
-							List<object> enumerableOfItems = xmlDataRecords.Select(s => DbAccessLayerHelper.SetPropertysViaReflection(genericArguments, s)).ToList();
+								config.GetOrCreateClassInfoCache(property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault());
+							List<object> enumerableOfItems = xmlDataRecords.Select(s => DbAccessLayerHelper.SetPropertysViaReflection(genericArguments, s, dbAccessType, config)).ToList();
 							object castedList;
 
 							if (genericArguments.Type.IsClass && genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
@@ -574,14 +600,14 @@ namespace JPB.DataAccess.Manager
 						}
 						else
 						{
-							//the t
-							object xmlSerilizedProperty =
-								property
-									.PropertyInfo
-									.PropertyType
-									.GetClassInfo().SetPropertysViaReflection(XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType, true),
-								dbAccessType);
+							var classInfo = config.GetOrCreateClassInfoCache(property
+								.PropertyInfo
+								.PropertyType);
 
+							var xmlDataRecord = XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType, true, config);
+
+							//the t
+							object xmlSerilizedProperty = DbAccessLayerHelper.SetPropertysViaReflection(classInfo, xmlDataRecord, dbAccessType, config);
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
 						}
 					}
@@ -691,7 +717,7 @@ namespace JPB.DataAccess.Manager
 								var resultSet = new List<IDataRecord>();
 								while (dr.Read())
 								{
-									resultSet.Add(dr.CreateEgarRecord());
+									resultSet.Add(new EgarDataRecord(dr, this));
 								}
 								records.Add(resultSet);
 							} while (dr.NextResult());
@@ -703,6 +729,16 @@ namespace JPB.DataAccess.Manager
 					}
 					return records;
 				});
+		}
+
+		/// <summary>
+		///     Creates a new Instance based on possible Ctor's and the given
+		///     <paramref name="reader" />
+		/// </summary>
+		/// <returns></returns>
+		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader, DbAccessType? accessType)
+		{
+			return DbAccessLayerHelper.SetPropertysViaReflection(type, reader, DbAccessType, Config);
 		}
 
 		internal IEnumerable EnumerateDirectDataRecords(IDbCommand query,

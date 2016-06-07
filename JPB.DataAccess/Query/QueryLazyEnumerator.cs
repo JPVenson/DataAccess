@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Query
 
 		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type)
 		{
-			_type = type.GetClassInfo();
+			_type = queryContainer.AccessLayer.GetClassInfo(type);
 			_accessLayer = new DbAccessLayer(queryContainer.AccessLayer.Database);
 			_accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
 			_executeReader = queryContainer.Compile().ExecuteReader();

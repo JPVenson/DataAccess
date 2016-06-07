@@ -78,6 +78,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		//	}
 		//}
 
+
+		//public DbClassInfoCache ClassType { get; protected internal set; }
+
 		/// <summary>
 		///		The class that owns this Property
 		/// </summary>

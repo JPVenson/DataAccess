@@ -1,4 +1,5 @@
-﻿using JPB.DataAccess.Helper.LocalDb;
+﻿using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
@@ -21,7 +22,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			using (new DatabaseScope())
 			{
-				_users = new LocalDbReposetory<Users>();
+				_users = new LocalDbReposetory<Users>(new DbConfig());
 			}
 
 			Assert.IsTrue(_users.ReposetoryCreated);

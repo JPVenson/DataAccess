@@ -11,22 +11,23 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper
 {
 	public sealed class EagarDataReader : EgarDataRecord, IDataReader
 	{
-		internal EagarDataReader(object sourceObject)
+		internal EagarDataReader(object sourceObject, DbAccessLayer accessLayer)
 		{
-			var type = sourceObject.GetType().GetClassInfo();
-			foreach (var item in type.Propertys)
+			foreach (var item in accessLayer.Config.GetOrCreateClassInfoCache(sourceObject.GetType()).Propertys)
 			{
 				Objects.Add(item.Key, item.Value.Getter.Invoke(sourceObject));
 			}
 		}
 
-		public EagarDataReader(IDataRecord sourceRecord)
-			: base(sourceRecord)
+		public EagarDataReader(IDataRecord sourceRecord, DbAccessLayer accessLayer)
+			: base(sourceRecord, accessLayer)
 		{
 		}
 
@@ -60,13 +61,15 @@ namespace JPB.DataAccess.AdoWrapper
 	/// </summary>
 	public class EgarDataRecord : IDataRecord, IDisposable
 	{
+		private readonly DbAccessLayer _accessLayer;
+
 		/// <summary>
 		/// Enumerates all items in the source record
 		/// </summary>
-		/// <param name="sourceRecord"></param>
-		public EgarDataRecord(IDataRecord sourceRecord)
+		public EgarDataRecord(IDataRecord sourceRecord, DbAccessLayer accessLayer)
 			: this()
 		{
+			_accessLayer = accessLayer;
 			for (var i = 0; i < sourceRecord.FieldCount; i++)
 			{
 				var obj = sourceRecord.GetValue(i);
@@ -239,7 +242,8 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public IDataReader GetData(int i)
 		{
-			return new EagarDataReader(GetValue(i));
+			var val = GetValue(i);
+			return new EagarDataReader(val, _accessLayer);
 		}
 
 		public bool IsDBNull(int i)

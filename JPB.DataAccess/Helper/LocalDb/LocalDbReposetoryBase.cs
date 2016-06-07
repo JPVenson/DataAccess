@@ -19,6 +19,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	[Serializable]
 	public abstract class LocalDbReposetoryBase : ICollection
 	{
+		private readonly DbConfig _config;
 		protected internal readonly object _lockRoot = new object();
 		protected internal readonly DbClassInfoCache TypeInfo;
 		protected internal readonly DbClassInfoCache TypeKeyInfo;
@@ -31,8 +32,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
 		/// </summary>
-		protected LocalDbReposetoryBase(Type type, ILocalPrimaryKeyValueProvider keyGenerator, params ILocalDbConstraint[] constraints)
+		protected LocalDbReposetoryBase(Type type, 
+			ILocalPrimaryKeyValueProvider keyGenerator,
+			DbConfig config,
+			params ILocalDbConstraint[] constraints)
 		{
+			_config = config;
 			_constraints = new HashSet<ILocalDbConstraint>(constraints);
 			_databaseScope = LocalDbManager.Scope;
 			if (_databaseScope == null)
@@ -40,13 +45,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate multibe tables in the same Application");
 			}
 
-			TypeInfo = new DbConfig().GetOrCreateClassInfoCache(type);
+			TypeInfo = _config.GetOrCreateClassInfoCache(type);
 			if (TypeInfo.PrimaryKeyProperty == null)
 			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
 			}
 
-			TypeKeyInfo = TypeInfo.PrimaryKeyProperty.PropertyType.GetClassInfo();
+			TypeKeyInfo = _config.GetOrCreateClassInfoCache(TypeInfo.PrimaryKeyProperty.PropertyType);
 
 			if (TypeKeyInfo == null)
 			{
@@ -121,7 +126,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
 		protected LocalDbReposetoryBase(Type type)
-			: this(type, null)
+			: this(type, null, new DbConfig())
 		{
 
 		}

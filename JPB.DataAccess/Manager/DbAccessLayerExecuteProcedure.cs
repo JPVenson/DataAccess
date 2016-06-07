@@ -104,7 +104,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public void ExecuteProcedureNonResult(Type type, object procParam)
 		{
-			var command = CreateProcedureCall(type.GetClassInfo(), procParam, Database);
+			var command = CreateProcedureCall(this.GetClassInfo(type), procParam, Database);
 			Database.ExecuteNonQuery(command);
 		}
 
@@ -149,7 +149,7 @@ namespace JPB.DataAccess.Manager
 				.ToArray();
 		}
 
-		private static IDbCommand CreateProcedureCall(DbClassInfoCache procParamType, object procParam, IDatabase db)
+		private IDbCommand CreateProcedureCall(DbClassInfoCache procParamType, object procParam, IDatabase db)
 		{
 			var sb = new StringBuilder();
 			sb.Append("EXECUTE ");
@@ -166,7 +166,7 @@ namespace JPB.DataAccess.Manager
 					sb.Append(", ");
 			}
 
-			var procedureProcessor = new ProcedureProcessor(sb.ToString());
+			var procedureProcessor = new ProcedureProcessor(sb.ToString(), this);
 			procedureProcessor.QueryParameters = procParams;
 			ValidateEntity(procParam);
 			return procedureProcessor.CreateCommand(procParam, db);
@@ -190,8 +190,11 @@ namespace JPB.DataAccess.Manager
 
 		private class ProcedureProcessor : IProcedureProcessor
 		{
-			public ProcedureProcessor(string query)
+			private readonly DbAccessLayer _dbAccessLayer;
+
+			public ProcedureProcessor(string query, DbAccessLayer dbAccessLayer)
 			{
+				_dbAccessLayer = dbAccessLayer;
 				Query = query;
 				QueryParameters = new List<IQueryParameter>();
 			}
@@ -204,7 +207,7 @@ namespace JPB.DataAccess.Manager
 			public IDbCommand CreateCommand(object target, IDatabase db)
 			{
 				if (TargetType == null)
-					TargetType = target.GetType().GetClassInfo();
+					TargetType = _dbAccessLayer.GetClassInfo(target.GetType());
 
 				var dbCommand = db.CreateCommand(Query);
 

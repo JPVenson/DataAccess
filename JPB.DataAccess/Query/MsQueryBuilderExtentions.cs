@@ -87,9 +87,9 @@ namespace JPB.DataAccess.Query
 			cteBuilder.Append("WITH ");
 			cteBuilder.Append(cteName);
 			cteBuilder.Append(" (");
-			cteBuilder.Append(!useStarOperator ? target.GetClassInfo().CreatePropertyCsv() : "*");
+			cteBuilder.Append(!useStarOperator ? query.ContainerObject.AccessLayer.GetClassInfo(target).CreatePropertyCsv() : "*");
 			cteBuilder.Append(") AS (");
-			cteBuilder.Append(DbAccessLayer.CreateSelect(target));
+			cteBuilder.Append(query.ContainerObject.AccessLayer.CreateSelect(target));
 			cteBuilder.Append(")");
 			query.Add(new CteQueryPart(cteBuilder.ToString()));
 			return query;
@@ -157,7 +157,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static SelectQuery<T> SelectStar<T>(this RootQuery query)
 		{
-			return new SelectQuery<T>(query.QueryText("SELECT * FROM " + typeof(T).GetClassInfo().TableName));
+			return new SelectQuery<T>(query.QueryText("SELECT * FROM " + query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)).TableName));
 		}
 
 		/// <summary>
@@ -254,10 +254,11 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static RootQuery Join<T, TE>(this ElementProducer<T> query, string mode = null)
 		{
-			var sourcePK = typeof(T).GetFK(typeof(TE));
-			var targetPK = typeof(TE).GetClassInfo().GetPK();
-			var targetTable = typeof(TE).GetClassInfo().TableName;
-			var sourceTable = typeof(T).GetClassInfo().TableName;
+			var accessLayer = query.ContainerObject.AccessLayer;
+			var sourcePK = typeof(T).GetFK(typeof(TE), query.ContainerObject.AccessLayer.Config);
+			var targetPK = accessLayer.GetClassInfo(typeof(TE)).GetPK(query.ContainerObject.AccessLayer.Config);
+			var targetTable = accessLayer.GetClassInfo(typeof(TE)).TableName;
+			var sourceTable = accessLayer.GetClassInfo(typeof(T)).TableName;
 			return new RootQuery(query.QueryText("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable));
 		}
 

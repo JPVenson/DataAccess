@@ -75,7 +75,7 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(typeof(T), entry.GetPK());
+					var query = CreateSelect(typeof(T), entry.GetPK(this.Config));
 					RaiseUpdate(entry, query, s);
 					return RunSelect<T>(query).FirstOrDefault();
 				}
@@ -99,12 +99,12 @@ namespace JPB.DataAccess.Manager
 			{
 				if (!CheckRowVersion(entry))
 				{
-					var query = CreateSelect(entry.GetType(), entry.GetPK<T>());
+					var query = CreateSelect(entry.GetType(), entry.GetPK<T>(this.Config));
 					RaiseUpdate(entry, query, s);
 					var @select = RunSelect<T>(query).FirstOrDefault();
 
 					var updated = false;
-					DataConverterExtensions.CopyPropertys(entry, @select);
+					DataConverterExtensions.CopyPropertys(entry, @select, this.Config);
 
 					LoadNavigationProps(@select, Database);
 
@@ -123,20 +123,20 @@ namespace JPB.DataAccess.Manager
 		/// <returns>True when the version is Equals, otherwise false</returns>
 		private bool CheckRowVersion<T>(T entry)
 		{
-			var type = typeof(T).GetClassInfo();
+			var type = this.GetClassInfo(typeof(T));
 			var rowVersion =
-				entry
-					.GetType()
-					.GetClassInfo()
+				this
+					.GetClassInfo(entry
+					.GetType())
 					.RowVersionProperty;
 			if (rowVersion != null)
 			{
 				var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
-				if (rowversionValue != null || entry.GetPK() == DataConverterExtensions.GetDefault(type.PrimaryKeyProperty.PropertyType))
+				if (rowversionValue != null || entry.GetPK(this.Config) == DataConverterExtensions.GetDefault(type.PrimaryKeyProperty.PropertyType))
 				{
 					var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
 					var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +
-											  type.GetPK() + " = " + entry.GetPK();
+											  type.GetPK(this.Config) + " = " + entry.GetPK(this.Config);
 
 					var skalar = Database.GetSkalar(staticRowVersion);
 					if (skalar == null)
@@ -150,7 +150,7 @@ namespace JPB.DataAccess.Manager
 
 		private IDbCommand CreateUpdateQueryFactory<T>(T entry, params object[] parameter)
 		{
-			return CreateUpdateQueryFactory(entry.GetType().GetClassInfo(), entry, parameter);
+			return CreateUpdateQueryFactory(this.GetClassInfo(entry.GetType()), entry, parameter);
 		}
 
 		internal IDbCommand _CreateUpdate(DbClassInfoCache classInfo, object entry)

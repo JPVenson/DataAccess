@@ -18,7 +18,14 @@
 
 	public class ClassCreating
 	{
-		public ClassCreating(string propString)
+		public ClassCreating()
+		{
+		}
+	}
+
+	public class ClassCreatingWithArguments
+	{
+		public ClassCreatingWithArguments(string propString)
 		{
 			PropString = propString;
 		}

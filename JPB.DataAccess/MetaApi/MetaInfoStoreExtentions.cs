@@ -26,7 +26,7 @@ namespace JPB.DataAccess.MetaApi
 		///     Anonymous type check by naming convention
 		/// </summary>
 		/// <returns></returns>
-		internal static Boolean IsAnonymousType(this Type type)
+		internal static bool IsAnonymousType(this Type type)
 		{
 			//http://stackoverflow.com/questions/1650681/determining-whether-a-type-is-an-anonymous-type
 			return type.Namespace == null;
@@ -52,26 +52,26 @@ namespace JPB.DataAccess.MetaApi
 			return propInfo.Name;
 		}
 
-		public static DbPropertyInfoCache GetFullPropertyInfoFromLabda<TSource, TProperty>(
-			this Expression<Func<TSource, TProperty>> propertyLambda)
-		{
+		//public static DbPropertyInfoCache GetFullPropertyInfoFromLabda<TSource, TProperty>(
+		//	this Expression<Func<TSource, TProperty>> propertyLambda)
+		//{
 
-			var member = propertyLambda.Body as MemberExpression;
-			if (member == null)
-				throw new ArgumentException(String.Format(
-					"Expression '{0}' refers to a method, not a property.",
-					propertyLambda));
+		//	var member = propertyLambda.Body as MemberExpression;
+		//	if (member == null)
+		//		throw new ArgumentException(String.Format(
+		//			"Expression '{0}' refers to a method, not a property.",
+		//			propertyLambda));
 
-			var propInfo = member.Member as PropertyInfo;
-			if (propInfo == null)
-				throw new ArgumentException(String.Format(
-					"Expression '{0}' refers to a field, not a property.",
-					propertyLambda));
+		//	var propInfo = member.Member as PropertyInfo;
+		//	if (propInfo == null)
+		//		throw new ArgumentException(String.Format(
+		//			"Expression '{0}' refers to a field, not a property.",
+		//			propertyLambda));
 
-			var type = typeof(TSource).GetClassInfo();
+		//	var type = typeof(TSource).GetClassInfo();
 
-			return type.Propertys[propInfo.Name];
-		}
+		//	return type.Propertys[propInfo.Name];
+		//}
 
 		public static string GetMehtodInfoFromLabda<TSource, TProperty>(
 			this Expression<Func<TSource, TProperty>> propertyLambda)

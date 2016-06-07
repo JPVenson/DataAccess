@@ -18,19 +18,25 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 		[Test]
 		public void ClassCreating()
 		{
-			var cache = new DbConfig();
+			var cache = new DbConfig(true);
 			cache.Include<ClassCreating>();
-			dynamic result = cache.SClassInfoCaches.First().DefaultFactory();
-			Assert.IsNotNull(result);
+			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
 		}
 
 		[Test]
 		public void TestStructCreating()
 		{
-			var cache = new DbConfig();
+			var cache = new DbConfig(true);
 			cache.Include<StructCreating>();
-			dynamic result = cache.SClassInfoCaches.First().DefaultFactory();
-			Assert.IsNotNull(result);
+			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
+		}
+
+		[Test]
+		public void ClassCreatingWithArguments()
+		{
+			var cache = new DbConfig(true);
+			cache.Include<ClassCreatingWithArguments>();
+			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Throws.Exception);
 		}
 	}
 }

@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -42,6 +43,17 @@ namespace JPB.DataAccess.DbCollection
 			{
 				_base.Add(item);
 			}
+		}
+
+		public static NonObservableDbCollection<T> FromXml(string xml)
+		{
+			return new NonObservableDbCollection<T>(
+				XmlDataRecord.TryParse(xml,
+					typeof(T), false)
+					.CreateListOfItems()
+					.Select((item) => typeof(T)
+						.GetClassInfo()
+						.SetPropertysViaReflection(item)));
 		}
 
 		public IEnumerator<T> GetEnumerator()
@@ -260,7 +272,7 @@ namespace JPB.DataAccess.DbCollection
 						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key, _layer.Database);
 						break;
 					case CollectionStates.Removed:
-						tempCommand = _layer._CreateDelete(typeof(T).GetClassInfo(), pair.Key, _layer.Database);
+						tempCommand = _layer._CreateDelete(_layer.GetClassInfo(typeof(T)), pair.Key, _layer.Database);
 						removed.Add(pair.Key);
 						break;
 					case CollectionStates.Unchanged:
@@ -286,7 +298,7 @@ namespace JPB.DataAccess.DbCollection
 			{
 				var addedOne = added[i];
 				var newId = results[i];
-				DataConverterExtensions.CopyPropertys(addedOne.Value, newId);
+				DataConverterExtensions.CopyPropertys(addedOne.Value, newId, _layer.Config);
 			}
 
 			//Removed

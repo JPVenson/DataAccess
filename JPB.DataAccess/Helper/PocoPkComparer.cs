@@ -40,37 +40,68 @@ namespace JPB.DataAccess.Helper
 		/// New Instance of the Auto Equality Comparer with no assertion on its default value for an Primary key
 		/// </summary>
 		public PocoPkComparer()
-			: this(DefaultAssertionObject, DefaultAssertionObject != null)
+			: this(DefaultAssertionObject, new DbConfig(), DefaultAssertionObject != null)
 		{
 		}
 
 		public PocoPkComparer(int assertNotDatabaseMember)
-			: this((object)assertNotDatabaseMember, true)
+			: this((object)assertNotDatabaseMember, new DbConfig(), true)
 		{
 
 		}
 
 		public PocoPkComparer(string assertNotDatabaseMember)
-			: this((object)assertNotDatabaseMember, true)
+			: this((object)assertNotDatabaseMember, new DbConfig(), true)
 		{
 
 		}
 
 
 		public PocoPkComparer(long assertNotDatabaseMember)
-			: this((object)assertNotDatabaseMember, true)
+			: this((object)assertNotDatabaseMember, new DbConfig(), true)
 		{
 
 		}
 
-		internal PocoPkComparer(object assertNotDatabaseMember, bool useAssertion = false, string propertyName = null)
+		/// <summary>
+		/// New Instance of the Auto Equality Comparer with no assertion on its default value for an Primary key
+		/// </summary>
+		public PocoPkComparer(DbConfig config)
+			: this(DefaultAssertionObject, config, DefaultAssertionObject != null)
+		{
+		}
+
+		public PocoPkComparer(int assertNotDatabaseMember, DbConfig config)
+			: this((object)assertNotDatabaseMember, config, true)
+		{
+
+		}
+
+		public PocoPkComparer(string assertNotDatabaseMember, DbConfig config)
+			: this((object)assertNotDatabaseMember, config, true)
+		{
+
+		}
+
+
+		public PocoPkComparer(long assertNotDatabaseMember, DbConfig config)
+			: this((object)assertNotDatabaseMember, config, true)
+		{
+
+		}
+
+		internal PocoPkComparer(
+			object assertNotDatabaseMember, 
+			DbConfig config,
+			bool useAssertion = false, 
+			string propertyName = null)
 		{
 			if (assertNotDatabaseMember == null && PocoPkComparer<T>.DefaultAssertionObject != null)
 			{
 				assertNotDatabaseMember = PocoPkComparer<T>.DefaultAssertionObject;
 				useAssertion = true;
 			}
-			Init(assertNotDatabaseMember, useAssertion, propertyName);
+			Init(assertNotDatabaseMember, useAssertion, config, propertyName);
 		}
 
 		internal static void Visit(ref Expression left, ref Expression right)
@@ -87,11 +118,15 @@ namespace JPB.DataAccess.Helper
 				left = Expression.Convert(left, right.Type);
 		}
 
-		private void Init(object assertNotDatabaseMember, bool useAssertion, string property = null)
+		private void Init(
+			object assertNotDatabaseMember, 
+			bool useAssertion, 
+			DbConfig config,
+			string property = null)
 		{
 			var plainType = typeof(T);
 
-			_typeInfo = plainType.GetClassInfo();
+			_typeInfo = config.GetOrCreateClassInfoCache(plainType);
 			if (_typeInfo.PrimaryKeyProperty == null && string.IsNullOrEmpty(property))
 				throw new NotSupportedException(string.Format("The type '{0}' does not define any PrimaryKey", plainType.Name));
 
@@ -253,7 +288,7 @@ namespace JPB.DataAccess.Helper
 				return -1;
 
 			if (_compareTo == null)
-				throw new NotSupportedException(string.Format("The Primary key on object '{0}' does not implement IComparable", this._typeInfo.ClassName));
+				throw new NotSupportedException(string.Format("The Primary key on object '{0}' does not implement IComparable", this._typeInfo.Name));
 			return _compareTo(left, right);
 		}
 	}
