@@ -16,18 +16,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Helper;
 using JPB.DataAccess.Logger;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.Query;
-using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.Manager
@@ -290,8 +286,15 @@ namespace JPB.DataAccess.Manager
 		{
 			if (Database == null)
 				return false;
-			Database.Connect();
-			Database.CloseConnection();
+			try
+			{
+				Database.Connect();
+				Database.CloseConnection();
+			}
+			catch (Exception)
+			{
+				return false;
+			}
 			return true;
 		}
 
@@ -321,7 +324,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Execute a QueryCommand and without Paramters
+		///     Execute a QueryCommand without Paramters
 		/// </summary>
 		/// <returns></returns>
 		public int ExecuteGenericCommand(IDbCommand command)
@@ -330,7 +333,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Strong typed query that awaits a Result
+		///     Creates a Strong typed query that awaits no Result
 		/// </summary>
 		/// <returns></returns>
 		public RootQuery Query()
@@ -648,15 +651,28 @@ namespace JPB.DataAccess.Manager
 			return instance;
 		}
 
-
-		internal List<IDataRecord> EnumerateDataRecords(IDbCommand query, bool egarLoading)
+		internal IEnumerable EnumerateDataRecords(IDbCommand query, bool direct, DbClassInfoCache type)
 		{
-			return EnumerateMarsDataRecords(query, egarLoading).FirstOrDefault();
+			if (direct)
+			{
+				return EnumerateDataRecords(query)
+					.Select(f => SetPropertysViaReflection(type, f))
+					.ToArray();
+			}
+			else
+			{
+				return EnumerateDirectDataRecords(query, type);
+			}
+		}
+
+
+		internal List<IDataRecord> EnumerateDataRecords(IDbCommand query)
+		{
+			return EnumerateMarsDataRecords(query).FirstOrDefault();
 		}
 
 		internal List<List<IDataRecord>> EnumerateMarsDataRecords(
-			IDbCommand query,
-			bool egarLoading = true)
+			IDbCommand query)
 		{
 			return Database.Run(
 				s =>

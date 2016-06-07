@@ -420,27 +420,27 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.AreEqual(expectedUser.Count, refSelect);
 		}
 
-		//[Test]
-		//public void ProcedureParamTest()
-		//{
-		//	RangeInsertTest();
-		//	//const int procParamA = 5;
+		[Test]
+		public void ProcedureParamTest()
+		{
+			RangeInsertTest();
+			//const int procParamA = 5;
 
-		//	var expectedUser =
-		//		expectWrapper.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
-		//		{
-		//			Number = 20
-		//		});
+			var expectedUser =
+				expectWrapper.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
+				{
+					Number = 20
+				});
 
-		//	Assert.IsNotNull(expectedUser);
+			Assert.IsNotNull(expectedUser);
 
-		//	//var refselect =
-		//	//    expectwrapper.database.run(
-		//	//        s =>
-		//	//            s.getskalar(string.format("select count(*) from {0} us where {1} > us.user_id", usersmeta.usertable,
-		//	//                procparama)));
-		//	//assert.areequal(expecteduser.count, refselect);
-		//}
+			//var refselect =
+			//    expectwrapper.database.run(
+			//        s =>
+			//            s.getskalar(string.format("select count(*) from {0} us where {1} > us.user_id", usersmeta.usertable,
+			//                procparama)));
+			//assert.areequal(expecteduser.count, refselect);
+		}
 
 
 		[Test]
@@ -482,6 +482,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				.Top(1)
 				.ForResult<Users>()
 				.Single();
+
 			var id = singleEntity.UserID;
 			Assert.IsNotNull(singleEntity);
 
@@ -645,19 +646,19 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectPrimitivSelectNullHandling()
 		{
 			InsertTest();
-
-			var refSelect =
+			Assert.That(() =>
+			{
 				expectWrapper.RunPrimetivSelect<long>(
-					UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA",
-					new QueryParameter("paramA", null));
-			Assert.IsTrue(refSelect.Length > 0);
+						UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA",
+						new QueryParameter("paramA", null));
+			}, Throws.Exception);
 
-			string n = null;
-
-			refSelect =
+			Assert.That(() =>
+			{
+				string n = null;
 				expectWrapper.RunPrimetivSelect<long>(
 					UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA", new { paramA = n });
-			Assert.IsTrue(refSelect.Length > 0);
+			}, Throws.Exception);
 		}
 
 
@@ -668,34 +669,34 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			RangeInsertTest();
 
-			var dbCollection = expectWrapper.CreateDbCollection<Users_Col>();
-			Assert.AreEqual(dbCollection.Count, 100);
+			DbCollection<Users_Col> dbCollection = null;
+			Assert.That(() => dbCollection = expectWrapper.CreateDbCollection<Users_Col>(), Throws.Nothing);
+			Assert.That(dbCollection, Is.Not.Empty);
+			Assert.That(dbCollection.Count, Is.EqualTo(100));
 
-			dbCollection.Add(new Users_Col());
-			Assert.AreEqual(dbCollection.Count, 101);
+			Assert.That(() => dbCollection.Add(new Users_Col()), Throws.Nothing);
+			Assert.That(dbCollection.Count, Is.EqualTo(101));
 
-			dbCollection.SaveChanges(expectWrapper);
-			var refAfterAdd = expectWrapper.Select<Users_Col>();
-			Assert.AreEqual(refAfterAdd.Length, 101);
+			Assert.That(() => dbCollection.SaveChanges(expectWrapper), Throws.Nothing);
+			Assert.That(() => expectWrapper.Select<Users_Col>().Length, Is.EqualTo(101));
 
-			dbCollection.Remove(dbCollection.First());
-			Assert.AreEqual(dbCollection.Count, 100);
+			Assert.That(() => dbCollection.Remove(dbCollection.First()), Throws.Nothing);
+			Assert.That(dbCollection.Count, Is.EqualTo(100));
 
-			dbCollection.SaveChanges(expectWrapper);
-			refAfterAdd = expectWrapper.Select<Users_Col>();
-			Assert.AreEqual(refAfterAdd.Length, 100);
+			Assert.That(() => dbCollection.SaveChanges(expectWrapper), Throws.Nothing);
+			Assert.That(() => expectWrapper.Select<Users_Col>().Length, Is.EqualTo(100));
 
 			var user25 = dbCollection[25];
 			user25.UserName = Guid.NewGuid().ToString();
 
-			Assert.AreEqual(dbCollection.GetEntryState(user25), CollectionStates.Changed);
-			dbCollection.SaveChanges(expectWrapper);
-			Assert.AreEqual(dbCollection.GetEntryState(user25), CollectionStates.Unchanged);
+			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Changed));
+			Assert.That(() => dbCollection.SaveChanges(expectWrapper), Throws.Nothing);
+			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Unchanged));
 
-			var elementAfterChange = expectWrapper.Select<Users_Col>(user25.User_ID);
-
-			Assert.AreEqual(elementAfterChange.User_ID, user25.User_ID);
-			Assert.AreEqual(elementAfterChange.UserName, user25.UserName);
+			Assert.That(() => expectWrapper.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
+				.Property("User_ID").EqualTo(user25.User_ID)
+				.And
+				.Property("UserName").EqualTo(user25.UserName));
 		}
 
 		[Test]

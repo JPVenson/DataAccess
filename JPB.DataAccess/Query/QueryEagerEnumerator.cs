@@ -80,7 +80,7 @@ namespace JPB.DataAccess.Query
 			_task = new Task(() =>
 			{
 				var query = _queryContainer.Compile();
-				_enumerateDataRecords = _queryContainer.AccessLayer.EnumerateDataRecords(query, true);
+				_enumerateDataRecords = _queryContainer.AccessLayer.EnumerateDataRecords(query);
 			});
 			_task.Start();
 		}

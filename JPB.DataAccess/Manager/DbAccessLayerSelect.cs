@@ -499,35 +499,35 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query, bool egarLoading)
+		public IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query)
 		{
 			RaiseSelect(query, database);
 			var typeInfo = type.GetClassInfo();
+			return EnumerateDataRecords(query, this.LoadCompleteResultBeforeMapping, typeInfo);
 
-			if (egarLoading)
-			{
-				var results = EnumerateDataRecords(query, true);
-				var recordToNameMapping = new Dictionary<int, DbPropertyInfoCache>();
+			//if (egarLoading)
+			//{
+			//	var recordToNameMapping = new Dictionary<int, DbPropertyInfoCache>();
 
-				if (!results.Any())
-					return new ArrayList();
+			//	if (!results.Any())
+			//		return new ArrayList();
 
-				var anyReader = results.First();
+			//	var anyReader = results.First();
 
-				for (var i = 0; i < anyReader.FieldCount; i++)
-				{
-					DbPropertyInfoCache val = null;
-					typeInfo.Propertys.TryGetValue(typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i)),
-						out val);
-					recordToNameMapping.Add(i, val);
-				}
+			//	for (var i = 0; i < anyReader.FieldCount; i++)
+			//	{
+			//		DbPropertyInfoCache val = null;
+			//		typeInfo.Propertys.TryGetValue(typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i)),
+			//			out val);
+			//		recordToNameMapping.Add(i, val);
+			//	}
 
-				return
-					results
-						.Select(record => SetPropertysViaReflection(typeInfo, record, recordToNameMapping))
-						.ToArray();
-			}
-			return EnumerateDirectDataRecords(query, typeInfo);
+			//	return
+			//		results
+			//			.Select(record => SetPropertysViaReflection(typeInfo, record, recordToNameMapping))
+			//			.ToArray();
+			//}
+			//return EnumerateDirectDataRecords(query, typeInfo);
 		}
 
 		/// <summary>
@@ -535,9 +535,9 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public object[] RunSelect(Type type, IDatabase database, IDbCommand query, bool egarLoading)
+		public object[] RunSelect(Type type, IDatabase database, IDbCommand query)
 		{
-			return RunDynamicSelect(type, database, query, egarLoading).Cast<object>().ToArray();
+			return RunDynamicSelect(type, database, query).Cast<object>().ToArray();
 		}
 
 		/// <summary>
@@ -546,9 +546,9 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public T[] RunSelect<T>(IDatabase database, IDbCommand query, bool egarLoading)
+		public T[] RunSelect<T>(IDatabase database, IDbCommand query)
 		{
-			return RunSelect(typeof(T), database, query, egarLoading).Cast<T>().ToArray();
+			return RunSelect(typeof(T), database, query).Cast<T>().ToArray();
 		}
 
 		/// <summary>
@@ -559,7 +559,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <returns></returns>
 		public object[] RunSelect(Type type, IDatabase database, string query,
-			IEnumerable<IQueryParameter> paramenter, bool egarLoading)
+			IEnumerable<IQueryParameter> paramenter)
 		{
 			return
 				database.Run(
@@ -569,7 +569,7 @@ namespace JPB.DataAccess.Manager
 
 						foreach (IQueryParameter item in paramenter)
 							command.Parameters.AddWithValue(item.Name, item.Value, s);
-						return RunSelect(type, database, command, egarLoading);
+						return RunSelect(type, database, command);
 					}
 					);
 		}
@@ -582,20 +582,19 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public T[] RunSelect<T>(IDatabase database, string query, IEnumerable<IQueryParameter> paramenter,
-			bool egarLoading)
+		public T[] RunSelect<T>(IDatabase database, string query, IEnumerable<IQueryParameter> paramenter)
 		{
-			return RunSelect(typeof(T), database, query, paramenter, egarLoading).Cast<T>().ToArray();
+			return RunSelect(typeof(T), database, query, paramenter).Cast<T>().ToArray();
 		}
 
 		private object[] RunSelect(Type type, IDbCommand command)
 		{
-			return RunSelect(type, Database, command, LoadCompleteResultBeforeMapping);
+			return RunSelect(type, Database, command);
 		}
 
 		private T[] RunSelect<T>(IDbCommand command)
 		{
-			return RunSelect(typeof(T), Database, command, LoadCompleteResultBeforeMapping).Cast<T>().ToArray();
+			return RunSelect(typeof(T), Database, command).Cast<T>().ToArray();
 		}
 
 		#endregion
@@ -695,7 +694,7 @@ namespace JPB.DataAccess.Manager
 		public object[] RunPrimetivSelect(Type type, IDbCommand command)
 		{
 			RaiseSelect(command, Database);
-			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping).Select(s => s[0]).ToArray();
+			return EnumerateDataRecords(command).Select(s => s[0]).ToArray();
 		}
 
 		/// <summary>
@@ -796,10 +795,10 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public object[] SelectNative(Type type, IDatabase database, IDbCommand command, bool multiRow, bool egarLoading)
+		public object[] SelectNative(Type type, IDatabase database, IDbCommand command, bool multiRow)
 		{
 			if (!multiRow)
-				return SelectNative(type, database, command, egarLoading);
+				return SelectNative(type, database, command);
 
 			//var guessingRelations = new Dictionary<PropertyInfo, IDbCommand>();
 
@@ -817,24 +816,14 @@ namespace JPB.DataAccess.Manager
 			 */
 
 			return
-				RunSelect(type, database, command, egarLoading).AsParallel().Select(s => LoadNavigationProps(s, database)).ToArray();
-		}
-
-		/// <summary>
-		///     ToBeSupported
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public T LoadNavigationProps<T>(T source, IDatabase accessLayer, bool egarloading = false)
-		{
-			return (T)LoadNavigationProps(source as object, accessLayer, egarloading);
+				RunSelect(type, database, command).AsParallel().Select(s => LoadNavigationProps(s, database)).ToArray();
 		}
 
 		/// <summary>
 		///     ToBeSupported
 		/// </summary>
 		/// <returns></returns>
-		public object LoadNavigationProps(object source, IDatabase accessLayer, bool egarLoading)
+		public object LoadNavigationProps(object source, IDatabase accessLayer)
 		{
 			//Get nav Propertys
 			foreach (var propertyInfo in source.GetType().GetNavigationProps())
@@ -876,7 +865,7 @@ namespace JPB.DataAccess.Manager
 					sqlCommand = CreateSelect(targetType, fkproperty);
 				}
 
-				var orDefault = RunSelect(targetType, accessLayer, sqlCommand, egarLoading);
+				var orDefault = RunSelect(targetType, accessLayer, sqlCommand);
 
 				//result is list and property is list
 				if (orDefault.CheckForListInterface() && propertyInfo.CheckForListInterface())
@@ -907,9 +896,9 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public object[] SelectNative(Type type, IDatabase database, IDbCommand command, bool egarLoading)
+		public object[] SelectNative(Type type, IDatabase database, IDbCommand command)
 		{
-			var objects = RunSelect(type, database, command, egarLoading);
+			var objects = RunSelect(type, database, command);
 
 			if (ProcessNavigationPropertys && type.GetClassInfo().HasRelations)
 				foreach (object model in objects)
@@ -953,7 +942,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T[] SelectNative<T>(string query, IEnumerable<IQueryParameter> paramenter)
 		{
-			return RunSelect<T>(Database, query, paramenter, LoadCompleteResultBeforeMapping);
+			return RunSelect<T>(Database, query, paramenter);
 		}
 
 		/// <summary>
@@ -1019,7 +1008,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public List<List<object>> ExecuteMARS(IDbCommand bulk, params Type[] marsTypes)
 		{
-			var mars = EnumerateMarsDataRecords(bulk, LoadCompleteResultBeforeMapping);
+			var mars = EnumerateMarsDataRecords(bulk);
 			var concatedMarsToType = new List<Tuple<DbClassInfoCache, List<IDataRecord>>>();
 			for (var index = 0; index < mars.Count; index++)
 			{
