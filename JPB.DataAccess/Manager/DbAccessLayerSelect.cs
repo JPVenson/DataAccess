@@ -233,14 +233,14 @@ namespace JPB.DataAccess.Manager
 				}
 			}
 
-			return GenericQueryCreation<SelectFactoryMethodAttribute>(type, (e, f) => _CreateSelect(type, f), null, parameter);
+			return GenericQueryCreation<SelectFactoryMethodAttribute>(type, (e, f) => _CreateSelect(type, Database), null, parameter);
 		}
 
 		internal IDbCommand CreateInsertQueryFactory(DbClassInfoCache type,
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => _CreateInsert(type, e, f), entity);
+			return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => _CreateInsert(type, e), entity);
 		}
 
 		internal IDbCommand CreateUpdateQueryFactory(DbClassInfoCache type,
@@ -254,7 +254,7 @@ namespace JPB.DataAccess.Manager
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => _CreateDelete(type, e, f), entity);
+			return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => _CreateDelete(type, e), entity);
 		}
 
 		internal IDbCommand GenericQueryCreation<TE>(
@@ -501,7 +501,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public IEnumerable RunDynamicSelect(Type type, IDatabase database, IDbCommand query)
 		{
-			RaiseSelect(query, database);
+			RaiseSelect(query);
 			var typeInfo = type.GetClassInfo();
 			return EnumerateDataRecords(query, this.LoadCompleteResultBeforeMapping, typeInfo);
 
@@ -693,7 +693,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] RunPrimetivSelect(Type type, IDbCommand command)
 		{
-			RaiseSelect(command, Database);
+			RaiseSelect(command);
 			return EnumerateDataRecords(command).Select(s => s[0]).ToArray();
 		}
 

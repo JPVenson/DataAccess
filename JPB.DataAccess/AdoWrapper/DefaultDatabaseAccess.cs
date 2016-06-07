@@ -81,7 +81,7 @@ namespace JPB.DataAccess.AdoWrapper
 				return _strategy.SourceDatabase;
 			}
 		}
-
+		
 		public bool IsAttached
 		{
 			get { return (_strategy != null); }
@@ -115,6 +115,26 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDbTransaction GetTransaction()
 		{
 			return _trans;
+		}
+
+		public IsolationLevel GetDefaultTransactionLevel()
+		{
+			switch (TargetDatabase)
+			{
+				case DbAccessType.Experimental:
+				case DbAccessType.Unknown:
+					return IsolationLevel.Unspecified;
+				case DbAccessType.MsSql:
+				case DbAccessType.MySql:
+					return IsolationLevel.ReadUncommitted;
+				case DbAccessType.OleDb:
+				case DbAccessType.Obdc:
+					return IsolationLevel.ReadCommitted;
+				case DbAccessType.SqLite:
+					return IsolationLevel.Serializable;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		public void Connect(IsolationLevel? levl = null)
@@ -297,7 +317,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDatabase Clone()
 		{
 			var db = new DefaultDatabaseAccess();
-			db.Attach((IDatabaseStrategy)_strategy.Clone());
+			db.Attach((IDatabaseStrategy) _strategy.Clone());
 			return db;
 		}
 
@@ -365,10 +385,9 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 		}
 
-
 		public void RunInTransaction(Action<IDatabase> action)
 		{
-			this.RunInTransaction(action, IsolationLevel.ReadUncommitted);
+			this.RunInTransaction(action, GetDefaultTransactionLevel());
 		}
 
 		public void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction)
@@ -396,7 +415,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				//defaulting it
 				//Connect(IsolationLevel.ReadUncommitted);
-				Connect(IsolationLevel.ReadUncommitted);
+				Connect(GetDefaultTransactionLevel());
 
 				var res = func(this);
 
@@ -434,8 +453,7 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 		}
 
-		public Exception TryOnEntitiesList(string strQuery, Action<IDataRecord> action, string strMessageOnEmpty,
-			bool bHandleConnection)
+		public Exception TryOnEntitiesList(string strQuery, Action<IDataRecord> action, string strMessageOnEmpty, bool bHandleConnection)
 		{
 			if (bHandleConnection)
 				Connect();
@@ -464,8 +482,7 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 		}
 
-		public IEnumerable<T> GetEntitiesListWithIndex<T>(string strQuery, Func<long, IDataRecord, T> func,
-			bool bHandleConnection)
+		public IEnumerable<T> GetEntitiesListWithIndex<T>(string strQuery, Func<long, IDataRecord, T> func, bool bHandleConnection)
 		{
 			if (bHandleConnection)
 				Connect();
@@ -490,8 +507,7 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 		}
 
-		public IDictionary<K, V> GetEntitiesDictionary<K, V>(string strQuery, Func<IDataRecord, KeyValuePair<K, V>> func,
-			bool bHandleConnection, string strExceptionMessage = null)
+		public IDictionary<K, V> GetEntitiesDictionary<K, V>(string strQuery, Func<IDataRecord, KeyValuePair<K, V>> func, bool bHandleConnection, string strExceptionMessage = null)
 		{
 			var htRes = new Dictionary<K, V>();
 
@@ -547,8 +563,7 @@ namespace JPB.DataAccess.AdoWrapper
 			return htRes;
 		}
 
-		public V GetNextPagingStep<V>(string strQuery, Func<IDataRecord, V> func, long iPageSize, V @default,
-			bool bHandleConnection, string strExceptionMessage = null)
+		public V GetNextPagingStep<V>(string strQuery, Func<IDataRecord, V> func, long iPageSize, V @default, bool bHandleConnection, string strExceptionMessage = null)
 		{
 			if (bHandleConnection)
 				Connect();
@@ -643,9 +658,7 @@ namespace JPB.DataAccess.AdoWrapper
 			if (null == GetConnection())
 				throw new Exception("DB2.ExecuteNonQuery: void connection");
 			var counter = 0;
-			using (var cmd = _strategy.CreateCommand(strSql,
-				GetConnection(),
-				param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
+			using (var cmd = _strategy.CreateCommand(strSql, GetConnection(), param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
 			{
 				if (_trans != null)
 					cmd.Transaction = _trans;

@@ -23,19 +23,19 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(T entry)
 		{
-			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(entry.GetType()), entry, Database);
-			RaiseDelete(entry, deleteCommand, Database);
+			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(entry.GetType()), entry);
+			RaiseDelete(entry, deleteCommand);
 			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}
 
-		internal IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry, IDatabase db)
+		internal IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry)
 		{
 			if (classInfo.PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.Name));
 
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
-			return db.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
+			return Database.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
 		}
 
 		/// <summary>
@@ -43,11 +43,11 @@ namespace JPB.DataAccess.Manager
 		///     uses factory Mehtod if availbile
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		public void Delete<T>(T entry, IDatabase db, params object[] parameter)
+		public void Delete<T>(T entry, params object[] parameter)
 		{
-			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(entry.GetType()), entry, db, parameter);
-			RaiseDelete(entry, deleteCommand, db);
-			db.Run(s => { s.ExecuteNonQuery(deleteCommand); });
+			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(entry.GetType()), entry, parameter);
+			RaiseDelete(entry, deleteCommand);
+			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}
 	}
 }

@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Manager
 			db.RunInTransaction(s =>
 			{
 				var dbCommand = CreateUpdate(entry, s);
-				RaiseUpdate(entry, dbCommand, s);
+				RaiseUpdate(entry, dbCommand);
 				s.ExecuteNonQuery(dbCommand);
 			});
 		}
@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Manager
 				if (!CheckRowVersion(entry))
 				{
 					var query = CreateSelect(typeof(T), entry.GetPK(this.Config));
-					RaiseUpdate(entry, query, s);
+					RaiseUpdate(entry, query);
 					return RunSelect<T>(query).FirstOrDefault();
 				}
 				return entry;
@@ -100,7 +100,7 @@ namespace JPB.DataAccess.Manager
 				if (!CheckRowVersion(entry))
 				{
 					var query = CreateSelect(entry.GetType(), entry.GetPK<T>(this.Config));
-					RaiseUpdate(entry, query, s);
+					RaiseUpdate(entry, query);
 					var @select = RunSelect<T>(query).FirstOrDefault();
 
 					var updated = false;

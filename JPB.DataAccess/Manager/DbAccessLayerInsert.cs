@@ -49,18 +49,6 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Insert a
-		///     <paramref name="entry" />
-		///     ,then selectes this entry based on the last inserted ID and creates a new model
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public T InsertWithSelect<T>(T entry)
-		{
-			return InsertWithSelect(entry, Database, LoadCompleteResultBeforeMapping);
-		}
-
-		/// <summary>
 		///     Creates AutoStatements in the size of RangerInsertPation
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
@@ -68,13 +56,13 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.RunInTransaction(c =>
 			{
-				var insertRangeCommand = CreateInsertRangeCommand(entry.ToArray(), c);
+				var insertRangeCommand = CreateInsertRangeCommand(entry.ToArray());
 				//TODO 
 				uint curr = 0;
 				foreach (IDbCommand item in insertRangeCommand)
 				{
 					curr += RangerInsertPation;
-					RaiseInsert(entry.Skip(((int) curr)).Take((int) RangerInsertPation), item, c);
+					RaiseInsert(entry.Skip(((int) curr)).Take((int) RangerInsertPation), item);
 					c.ExecuteNonQuery(item);
 				}
 			});
@@ -85,7 +73,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public IDbCommand[] CreateInsertRangeCommand<T>(T[] entrys, IDatabase db)
+		public IDbCommand[] CreateInsertRangeCommand<T>(T[] entrys)
 		{
 			var commands = new List<IDbCommand>();
 			IDbCommand insertRange = null;
@@ -96,14 +84,14 @@ namespace JPB.DataAccess.Manager
 
 			for (var i = 0; i < entrys.Count(); i++)
 			{
-				var singelCommand = CreateInsert(type, entrys[i], db);
+				var singelCommand = CreateInsert(type, entrys[i]);
 
 				if (insertRange == null)
 				{
 					insertRange = singelCommand;
 					continue;
 				}
-				insertRange = db.MergeTextToParameters(insertRange, singelCommand, true, tokeAll);
+				insertRange = Database.MergeTextToParameters(insertRange, singelCommand, true, tokeAll);
 				toke++;
 				tokeAll++;
 
@@ -124,7 +112,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="entry" />
 		/// </summary>
 		/// <returns></returns>
-		public IDbCommand _CreateInsert(DbClassInfoCache classInfo, object entry, IDatabase db)
+		public IDbCommand _CreateInsert(DbClassInfoCache classInfo, object entry)
 		{
 			var ignore =
 				classInfo
@@ -165,9 +153,9 @@ namespace JPB.DataAccess.Manager
 		///     if possible
 		/// </summary>
 		/// <returns></returns>
-		public IDbCommand CreateInsert(Type type, object entry, IDatabase db, params object[] parameter)
+		public IDbCommand CreateInsert(Type type, object entry, params object[] parameter)
 		{
-			return CreateInsertQueryFactory(this.GetClassInfo(type), entry, db, parameter);
+			return CreateInsertQueryFactory(this.GetClassInfo(type), entry, parameter);
 
 			//return type.CreateCommandOfClassAttribute<InsertFactoryMethodAttribute>(entry, db,
 			//	(e, f) => _CreateInsert(type, e, f), parameter);
@@ -196,10 +184,10 @@ namespace JPB.DataAccess.Manager
 		///     Creates an insert command with appended LastInsertedIDCommand from the IDatabase interface
 		/// </summary>
 		/// <returns></returns>
-		public IDbCommand CreateInsertWithSelectCommand(Type type, object entry, IDatabase db)
+		public IDbCommand CreateInsertWithSelectCommand(Type type, object entry)
 		{
-			var dbCommand = CreateInsert(type, entry, db);
-			return db.MergeCommands(dbCommand, db.GetlastInsertedIdCommand());
+			var dbCommand = CreateInsert(type, entry);
+			return Database.MergeCommands(dbCommand, Database.GetlastInsertedIdCommand());
 		}
 
 		/// <summary>
@@ -207,13 +195,13 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public object InsertWithSelect(Type type, object entry, IDatabase db, bool egarLoading)
+		public object InsertWithSelect(Type type, object entry)
 		{
-			return db.Run(s =>
+			return Database.Run(s =>
 			{
-				var mergeCommands = CreateInsertWithSelectCommand(type, entry, db);
-				RaiseInsert(entry, mergeCommands, s);
-				return Select(type, s.GetSkalar(mergeCommands), s, egarLoading);
+				var mergeCommands = CreateInsertWithSelectCommand(type, entry);
+				RaiseInsert(entry, mergeCommands);
+				return Select(type, s.GetSkalar(mergeCommands));
 			});
 		}
 
@@ -224,9 +212,9 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public T InsertWithSelect<T>(T entry, IDatabase db, bool egarLoading)
+		public T InsertWithSelect<T>(T entry)
 		{
-			return (T) InsertWithSelect(typeof (T), entry, db, egarLoading);
+			return (T) InsertWithSelect(typeof (T), entry);
 		}
 	}
 }

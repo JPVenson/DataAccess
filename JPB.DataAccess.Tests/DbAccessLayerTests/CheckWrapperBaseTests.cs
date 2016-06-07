@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Security;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
@@ -18,7 +15,7 @@ using System.Data.SQLite;
 #endif
 
 #if MsSql
-using System.Data.SqlClient;
+
 #endif
 
 
@@ -40,13 +37,13 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Init()
 		{
 			expectWrapper = new Manager().GetWrapper();
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
-			expectWrapper.Config.Dispose();
 		}
 
 		[SetUp]
 		public void Clear()
 		{
+			expectWrapper.Config.Dispose();
+			DbConfig.Clear();
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 			if (expectWrapper.DbAccessType == DbAccessType.MsSql)
 				expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.UserTable), null);
@@ -217,6 +214,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void AutoGenFactoryTestXmlSingle()
 		{
+			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+				return;
+
 			DbConfig.Clear();
 
 			expectWrapper.Insert(new UsersAutoGenerateConstructorWithSingleXml());
@@ -246,6 +246,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void AutoGenFactoryTestXmlMulti()
 		{
+			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+				return;
 			DbConfig.Clear();
 
 			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
@@ -414,6 +416,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void ProcedureParamLessTest()
 		{
+			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+				return;
 			RangeInsertTest();
 			var expectedUser = expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
@@ -647,6 +651,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void SelectPrimitivSelectNullHandling()
 		{
+			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+				return;
 			InsertTest();
 			Assert.That(() =>
 			{

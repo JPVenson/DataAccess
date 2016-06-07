@@ -269,10 +269,10 @@ namespace JPB.DataAccess.DbCollection
 				switch (pair.Value)
 				{
 					case CollectionStates.Added:
-						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key, _layer.Database);
+						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key);
 						break;
 					case CollectionStates.Removed:
-						tempCommand = _layer._CreateDelete(_layer.GetClassInfo(typeof(T)), pair.Key, _layer.Database);
+						tempCommand = _layer._CreateDelete(_layer.GetClassInfo(typeof(T)), pair.Key);
 						removed.Add(pair.Key);
 						break;
 					case CollectionStates.Unchanged:
