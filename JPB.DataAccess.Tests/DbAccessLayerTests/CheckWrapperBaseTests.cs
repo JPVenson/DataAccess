@@ -42,14 +42,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			expectWrapper = new Manager().GetWrapper();
 		}
 
-		[SetUp]
-		public void Clear()
-		{
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
-			if (expectWrapper.DbAccessType == DbAccessType.MsSql)
-				expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.UserTable), null);
-		}
-
 		[Test]
 		[Category("MsSQL")]
 		[Category("SqLite")]
