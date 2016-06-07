@@ -43,9 +43,9 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		/// Creates a new Instance for storing class informations. Allows you to define if this is ether the global config store or a local one
 		/// </summary>
-		public MetaInfoStore(bool isGlobal)
+		public MetaInfoStore(bool local)
 		{
-			IsGlobal = isGlobal;
+			IsGlobal = !local;
 			_classInfoCaches = new HashSet<TClass>();
 		}
 

@@ -40,6 +40,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Init()
 		{
 			expectWrapper = new Manager().GetWrapper();
+			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
+			expectWrapper.Config.Dispose();
 		}
 
 		[Test]
@@ -213,17 +215,17 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			expectWrapper.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 
 			var query = expectWrapper.Query()
-				.QueryText("SELECT")
-				.QueryText("res." + UsersMeta.UserIDCol)
-				.QueryText(",res." + UsersMeta.UserNameCol)
-				.QueryText(",")
+					.QueryText("SELECT")
+					.QueryText("res." + UsersMeta.UserIDCol)
+					.QueryText(",res." + UsersMeta.UserNameCol)
+					.QueryText(",")
 				.InBracket(s =>
 				s.Select<UsersAutoGenerateConstructorWithSingleXml>()
 				.ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
-				.QueryText("AS Sub")
-				.QueryText("FROM")
-				.QueryText(UsersMeta.UserTable)
-				.QueryText("AS res");
+					.QueryText("AS Sub")
+					.QueryText("FROM")
+					.QueryText(UsersMeta.UserTable)
+					.QueryText("AS res");
 			var elements =
 				query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
 
@@ -323,7 +325,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			var insGuid = Guid.NewGuid().ToString();
 
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
 			expectWrapper.Insert(new Users { UserName = insGuid });
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.UserTable);

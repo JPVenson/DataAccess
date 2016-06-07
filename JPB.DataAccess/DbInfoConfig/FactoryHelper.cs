@@ -171,31 +171,36 @@ namespace JPB.DataAccess.DbInfoConfig
 						var typeArgument = propertyInfoCache.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 						var codeTypeOfListArg = new CodeTypeOfExpression(typeArgument);
 
-						var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
-							"TryParse",
-							new CodeCastExpression(typeof(string), uncastLocalVariableRef),
-							codeTypeOfListArg,
-							new CodePrimitiveExpression(false));
+						var instanceHelper = new CodeMethodInvokeExpression(
+							new CodeTypeReferenceExpression(typeof(NonObservableDbCollection<>).MakeGenericType(typeArgument)), 
+							"FromXml",
+							new CodeCastExpression(typeof(string), new CodeVariableReferenceExpression(variableName)));
 
-						var xmlDataRecords = new CodeMethodInvokeExpression(tryParse, "CreateListOfItems");
-						var getClassInfo = new CodeMethodInvokeExpression(codeTypeOfListArg, "GetClassInfo");
+						//var tryParse = new CodeMethodInvokeExpression(xmlRecordType,
+						//	"TryParse",
+						//	new CodeCastExpression(typeof(string), uncastLocalVariableRef),
+						//	codeTypeOfListArg,
+						//	new CodePrimitiveExpression(false));
 
-						var xmlRecordsToObjects = new CodeMethodInvokeExpression(xmlDataRecords, "Select",
-							new CodeMethodReferenceExpression(getClassInfo, "SetPropertysViaReflection"));
+						//var xmlDataRecords = new CodeMethodInvokeExpression(tryParse, "CreateListOfItems");
+						//var getClassInfo = new CodeMethodInvokeExpression(codeTypeOfListArg, "GetClassInfo");
 
-						CodeObjectCreateExpression collectionCreate;
-						if (typeArgument != null && (typeArgument.IsClass && typeArgument.GetInterface("INotifyPropertyChanged") != null))
-						{
-							collectionCreate = new CodeObjectCreateExpression(typeof(DbCollection<>).MakeGenericType(typeArgument),
-								xmlRecordsToObjects);
-						}
-						else
-						{
-							collectionCreate = new CodeObjectCreateExpression(typeof(NonObservableDbCollection<>).MakeGenericType(typeArgument),
-								xmlRecordsToObjects);
-						}
+						//var xmlRecordsToObjects = new CodeMethodInvokeExpression(xmlDataRecords, "Select",
+						//	new CodeMethodReferenceExpression(getClassInfo, "SetPropertysViaReflection"));
 
-						var setExpr = new CodeAssignStatement(refToProperty, collectionCreate);
+						//CodeObjectCreateExpression collectionCreate;
+						//if (typeArgument != null && (typeArgument.IsClass && typeArgument.GetInterface("INotifyPropertyChanged") != null))
+						//{
+						//	collectionCreate = new CodeObjectCreateExpression(typeof(DbCollection<>).MakeGenericType(typeArgument),
+						//		xmlRecordsToObjects);
+						//}
+						//else
+						//{
+						//	collectionCreate = new CodeObjectCreateExpression(typeof(NonObservableDbCollection<>).MakeGenericType(typeArgument),
+						//		xmlRecordsToObjects);
+						//}
+
+						var setExpr = new CodeAssignStatement(refToProperty, instanceHelper);
 						checkXmlForNull.TrueStatements.Add(setExpr);
 					}
 					else
