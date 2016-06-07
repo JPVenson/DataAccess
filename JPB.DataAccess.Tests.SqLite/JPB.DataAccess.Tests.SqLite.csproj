@@ -109,9 +109,6 @@
     <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerConstraintTests.cs">
       <Link>PagerTests\PagerConstraintTests.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerUnitTest.cs">
-      <Link>PagerTests\PagerUnitTest.cs</Link>
-    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs">
       <Link>PocoPkEquallityTests\PocoPkEqualityComparerTest.cs</Link>
     </Compile>

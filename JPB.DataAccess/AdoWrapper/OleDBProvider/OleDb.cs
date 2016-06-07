@@ -16,6 +16,9 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 {
+	/// <summary>
+	/// Default UNTESTED impl
+	/// </summary>
 	public class OleDb : IDatabaseStrategy
 	{
 		private const string TEMPLATE_MSSQL_UNTRUSTED =

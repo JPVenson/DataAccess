@@ -17,6 +17,9 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 {
+	/// <summary>
+	/// Default UNTESTED impl
+	/// </summary>
 	public class Obdc : IDatabaseStrategy
 	{
 		private const string TEMPLATE_MSSQL_UNTRUSTED =

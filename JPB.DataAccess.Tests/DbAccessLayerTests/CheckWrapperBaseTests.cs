@@ -430,8 +430,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
 		public void ProcedureParamTest()
 		{
+			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+				return;
 			RangeInsertTest();
 
 			Assert.That(() => expectWrapper.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
@@ -441,8 +444,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Category("MsSQL")]
 		public void ProcedureDirectParamTest()
 		{
+			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+				return;
 			RangeInsertTest();
 
 			Assert.That(() => expectWrapper.Select<TestProcBParamsDirect>(new object[] { 10 }),
