@@ -17,6 +17,8 @@
 /JPB.DataAccess.Tests/obj
 /JPB.DataAccess.Tests/bin
 *.pdb
+*.exe
+*.dll
 /JPB.DataAccess.SqlLite/obj
 /JPB.DataAccess.SqlLite/bin
 /JPB.DataAccess.Tests.MsSQL/obj
