@@ -29,7 +29,14 @@ namespace JPB.DataAccess.Helper
 		{
 			Name = name;
 			Value = value;
-			SourceType = value.GetType();
+			if (value != null)
+			{
+				SourceType = value.GetType();
+			}
+			else
+			{
+				SourceType = DBNull.Value.GetType();
+			}
 		}
 
 		public QueryParameter(string name, object value, Type valType)

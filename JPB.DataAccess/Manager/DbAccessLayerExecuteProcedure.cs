@@ -7,6 +7,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -120,14 +121,21 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Executes a Procedure object into the Database
 		/// </summary>
-		public List<object> ExecuteProcedure(Type procParamType, Type resultType, object procParam)
+		public IEnumerable ExecuteProcedure(Type procParamType, Type resultType, object procParam)
 		{
-			var command = CreateProcedureCall(this.GetClassInfo(procParamType), procParam, Database);
-			var typeInfo = this.GetClassInfo(resultType);
-
-			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
-				.Select(s => SetPropertysViaReflection(typeInfo, s))
-				.ToList();
+			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
+			var typeInfo = resultType.GetClassInfo();
+			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping, typeInfo);
+			//if (LoadCompleteResultBeforeMapping)
+			//{
+			//	return EnumerateDataRecords(command)
+			//		.Select(s => SetPropertysViaReflection(typeInfo, s))
+			//		.ToList();
+			//}
+			//else
+			//{
+			//	return EnumerateDirectDataRecords(command, typeInfo);
+			//}
 		}
 
 		/// <summary>
@@ -135,8 +143,8 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public object[] ExecuteProcedurePrimetiv(Type procParamType, Type resultType, object procParam)
 		{
-			var command = CreateProcedureCall(this.GetClassInfo(procParamType), procParam, Database);
-			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping)
+			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
+			return EnumerateDataRecords(command)
 				.Select(dataRecord => dataRecord[0])
 				.ToArray();
 		}
@@ -205,7 +213,7 @@ namespace JPB.DataAccess.Manager
 
 				foreach (var queryParameter in QueryParameters)
 				{
-					var realName = TargetType.GetLocalToDbSchemaMapping(queryParameter.Name);
+					var realName = TargetType.GetDbToLocalSchemaMapping(queryParameter.Name);
 					var value = TargetType.Propertys[realName].Getter.Invoke(target);
 					dbCommand.Parameters.AddWithValue(queryParameter.Name.CheckParamter(), value, db);
 				}
