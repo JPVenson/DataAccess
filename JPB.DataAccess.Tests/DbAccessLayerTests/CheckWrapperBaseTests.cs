@@ -346,6 +346,26 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		[Category("MsSQL")]
 		[Category("SqLite")]
+		public void InsertDefaultValues()
+		{
+			new DbConfig(false)
+				.Include<Users>()
+				.SetConfig<Users>(conf =>
+				{
+					conf.SetPropertyAttribute(s => s.UserName, new IgnoreReflectionAttribute());
+				});
+			
+			expectWrapper.Insert(new Users());
+			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.UserTable);
+			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, DBNull.Value);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
 		public void InsertWithSelect()
 		{
 			var val = new Users { UserName = "test" };
