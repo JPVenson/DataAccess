@@ -1,4 +1,5 @@
-﻿using JPB.DataAccess.ModelsAnotations;
+﻿using System;
+using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 {
@@ -9,8 +10,19 @@ namespace JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests
 
 		public string Text { get; set; }
 
-		[ForeignKeyDeclaration("BookId", typeof (Book))]
+		[ForeignKeyDeclaration("BookId", typeof(Book))]
 		public int IdBook { get; set; }
+	}
+
+	public class ImageNullable
+	{
+		[PrimaryKey]
+		public long ImageId { get; set; }
+
+		public string Text { get; set; }
+
+		[ForeignKeyDeclaration("BookId", typeof(Book))]
+		public Nullable<int> IdBook { get; set; }
 	}
 
 	public class Book

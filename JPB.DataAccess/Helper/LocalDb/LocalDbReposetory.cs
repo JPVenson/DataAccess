@@ -10,6 +10,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	/// Provides an wrapper for the non Generic LocalDbReposetory 
+	/// Thread Save as on every call to the enumerator a new collection is created
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public class LocalDbReposetory<T> : LocalDbReposetoryBase, ICollection<T>
@@ -63,7 +64,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			lock (SyncRoot)
 			{
-				return _base.Values.Cast<T>().ToArray();
+				return Base.Values.Cast<T>().ToArray();
 			}
 		}
 
@@ -103,7 +104,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <returns></returns>
 		public new IEnumerator<T> GetEnumerator()
 		{
-			return _base.Values.Cast<T>().GetEnumerator();
+			return Base.Values.Cast<T>().GetEnumerator();
 		}
 
 		public Contacts.Pager.IDataPager<T> CreatePager()

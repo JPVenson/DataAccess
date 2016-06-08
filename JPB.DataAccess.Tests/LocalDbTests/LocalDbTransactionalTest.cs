@@ -28,6 +28,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 		private LocalDbReposetory<Book> _books;
 		private LocalDbReposetory<Image> _images;
+		private LocalDbReposetory<ImageNullable> _imagesNullable;
 
 		[SetUp]
 		public void TestInit()
@@ -36,12 +37,8 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				_books = new LocalDbReposetory<Book>(new DbConfig());
 				_images = new LocalDbReposetory<Image>(new DbConfig());
-				Assert.IsFalse(_books.ReposetoryCreated);
-				Assert.IsFalse(_images.ReposetoryCreated);
+				_imagesNullable = new LocalDbReposetory<ImageNullable>(new DbConfig());
 			}
-
-			Assert.IsTrue(_books.ReposetoryCreated);
-			Assert.IsTrue(_images.ReposetoryCreated);
 		}
 
 		[Test]
@@ -88,6 +85,85 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 				}
 			}, Throws.Exception.TypeOf<ForginKeyConstraintException>());
 
+		}
+
+		[Test]
+		public void ParentWithNullableChild()
+		{
+			Assert.That(() =>
+			{
+				using (var transaction = new TransactionScope())
+				{
+					var book = new Book();
+					var image = new ImageNullable();
+
+					Assert.That(() => _books.Add(book), Throws.Nothing);
+					image.IdBook = book.BookId;
+					Assert.That(() => _imagesNullable.Add(image), Throws.Nothing);
+					transaction.Complete();
+				}
+			}, Throws.Nothing);
+
+		}
+
+		[Test]
+		public void ParentWithNullableChildIsNull()
+		{
+			Assert.That(() =>
+			{
+				using (var transaction = new TransactionScope())
+				{
+					var book = new Book();
+					var image = new ImageNullable();
+
+					Assert.That(() => _books.Add(book), Throws.Nothing);
+					image.IdBook = null;
+					Assert.That(() => _imagesNullable.Add(image), Throws.Nothing);
+					transaction.Complete();
+				}
+			}, Throws.Nothing);
+		}
+
+		[Test]
+		public void ParentWithNullableChildWithPkInsert()
+		{
+			Assert.That(() =>
+			{
+				using (var transaction = new TransactionScope())
+				{
+					using (new IdentityInsertScope())
+					{
+						var book = new Book();
+						var image = new ImageNullable();
+
+						Assert.That(() => _books.Add(book), Throws.Nothing);
+						image.IdBook = book.BookId;
+						Assert.That(() => _imagesNullable.Add(image), Throws.Nothing);
+						transaction.Complete();
+					}
+				}
+			}, Throws.Nothing);
+		}
+
+		[Test]
+		public void ParentWithNullableChildIsNullWithPkInsert()
+		{
+			Assert.That(() =>
+			{
+				using (var transaction = new TransactionScope())
+				{
+					using (new IdentityInsertScope())
+					{
+						var book = new Book();
+						var image = new ImageNullable();
+
+						Assert.That(() => _books.Add(book), Throws.Nothing);
+						image.IdBook = null;
+						Assert.That(() => _imagesNullable.Add(image), Throws.Nothing);
+						transaction.Complete();
+					}
+				}
+			}, Throws.Nothing);
 		}
 
 		[Test]

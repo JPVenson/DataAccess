@@ -1,4 +1,6 @@
-﻿using JPB.DataAccess.DbInfoConfig;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
@@ -26,6 +28,46 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			}
 
 			Assert.IsTrue(_users.ReposetoryCreated);
+		}
+
+		[Test]
+		public void SimpleParallelAccess()
+		{
+			Assert.That(() =>
+			{
+				Parallel.For(0, 999, (d) =>
+				{
+					_users.Add(new Users());
+				});
+			}, Throws.Nothing);
+		}
+
+		[Test]
+		public void AdvParallelAccess()
+		{
+			Assert.That(() =>
+			{
+				Parallel.For(0, 999, (d) =>
+				{
+					foreach (var userse in _users)
+					{
+						
+					}
+					var firstOrDefault = _users.FirstOrDefault();
+					if (d % 2 == 0)
+					{
+						_users.Add(new Users());
+					}
+					else
+					{
+						_users.Remove(firstOrDefault);
+					}
+					foreach (var userse in _users)
+					{
+
+					}
+				});
+			}, Throws.Nothing);
 		}
 
 		[Test]

@@ -20,7 +20,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 			"would violate an constraint on table " +
 			"'{1}' " +
 			"on the property" +
-			"'{4}'",
+			"'{4}'" +
+			"\r\nAll transactions will be rolled back",
 			changedTableName, 
 			constraintTableName, 
 			constraintValue,

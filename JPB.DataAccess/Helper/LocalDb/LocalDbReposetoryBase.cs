@@ -16,6 +16,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	/// Defines an Area that allows identity Inserts
+	/// IDENTITY_INSERT on SQL
 	/// </summary>
 	public sealed class IdentityInsertScope : IDisposable
 	{
@@ -24,6 +25,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 		[ThreadStatic]
 		private static IdentityInsertScope _current;
 
+		/// <summary>
+		/// Creates a new Idenity Scope. Close it with Dispose
+		/// Must be created inside an TransactionScope
+		/// </summary>
+		/// <param name="rewriteDefaultValues">Should every DefaultValue still be set to a valid Id</param>
 		public IdentityInsertScope(bool rewriteDefaultValues = false)
 		{
 			RewriteDefaultValues = rewriteDefaultValues;
@@ -40,6 +46,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			RewriteDefaultValues = rewriteDefaultValues;
 		}
 
+		/// <summary>
+		/// The current Identity Scope
+		/// </summary>
 		public static IdentityInsertScope Current
 		{
 			get { return _current; }
@@ -63,24 +72,25 @@ namespace JPB.DataAccess.Helper.LocalDb
 	}
 
 	/// <summary>
-	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
+	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. 
+	/// Starting with 0 incriment by 1
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Serializable]
 	public abstract class LocalDbReposetoryBase : ICollection
 	{
 		private readonly DbConfig _config;
-		protected internal readonly object _lockRoot = new object();
+		protected internal readonly object LockRoot = new object();
 		protected internal readonly DbClassInfoCache TypeInfo;
 		protected internal readonly DbClassInfoCache TypeKeyInfo;
-		protected internal readonly DbAccessLayer _db;
-		protected internal readonly IDictionary<object, object> _base;
-		protected internal readonly LocalDbManager _databaseScope;
-		protected internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
-		protected internal readonly HashSet<ILocalDbConstraint> _constraints;
+		protected internal readonly DbAccessLayer Db;
+		protected internal readonly IDictionary<object, object> Base;
+		protected internal readonly LocalDbManager DatabaseScope;
+		protected internal readonly ILocalPrimaryKeyValueProvider KeyGenerator;
+		protected internal readonly HashSet<ILocalDbConstraint> Constraints;
 		private Transaction _currentTransaction;
 		private IdentityInsertScope _currentIdentityInsertScope;
-		private List<TransactionalItem> _transactionalItems = new List<TransactionalItem>();
+		private readonly List<TransactionalItem> _transactionalItems = new List<TransactionalItem>();
 
 		internal class TransactionalItem
 		{
@@ -103,48 +113,53 @@ namespace JPB.DataAccess.Helper.LocalDb
 			params ILocalDbConstraint[] constraints)
 		{
 			_config = config;
-			_constraints = new HashSet<ILocalDbConstraint>(constraints);
-			_databaseScope = LocalDbManager.Scope;
-			if (_databaseScope == null)
+			Constraints = new HashSet<ILocalDbConstraint>(constraints);
+			DatabaseScope = LocalDbManager.Scope;
+			if (DatabaseScope == null)
 			{
-				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate multibe tables in the same Application");
+				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate" +
+				                                " multibe tables in the same Application");
 			}
 
 			TypeInfo = _config.GetOrCreateClassInfoCache(type);
 			if (TypeInfo.PrimaryKeyProperty == null)
 			{
-				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. " +
+				                                              "Type: '{0}'", type.Name));
 			}
 
 			TypeKeyInfo = _config.GetOrCreateClassInfoCache(TypeInfo.PrimaryKeyProperty.PropertyType);
 
 			if (TypeKeyInfo == null)
 			{
-				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. Type: '{0}'", type.Name));
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. " +
+				                                              "Type: '{0}'", type.Name));
 			}
 
 			if (!TypeKeyInfo.Type.IsValueType)
 			{
-				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of type of any value type cannot be used. Type: '{0}'", type.Name));
+				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of " +
+				                                              "type of any value type cannot be used. Type: '{0}'", type.Name));
 			}
 
 			if (keyGenerator != null)
 			{
-				_keyGenerator = keyGenerator;
+				KeyGenerator = keyGenerator;
 			}
 			else
 			{
 				ILocalPrimaryKeyValueProvider defaultKeyGen;
 				if (LocalDbManager.DefaultPkProvider.TryGetValue(TypeKeyInfo.Type, out defaultKeyGen))
 				{
-					_keyGenerator = defaultKeyGen.Clone() as ILocalPrimaryKeyValueProvider;
+					KeyGenerator = defaultKeyGen.Clone() as ILocalPrimaryKeyValueProvider;
 				}
 				else
 				{
 					throw new NotSupportedException(
 						string.Format("You must specify ether an Primary key that is of one of this types " +
 									  "({1}) " +
-									  "or invoke the ctor with an proper keyGenerator. Type: '{0}'",
+									  "or invoke the ctor with an proper keyGenerator. " +
+						              "Type: '{0}'",
 							type.Name,
 							LocalDbManager
 								.DefaultPkProvider
@@ -153,19 +168,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 								.Aggregate((e, f) => e + "," + f)));
 				}
 			}
-			_base = new ConcurrentDictionary<object, object>(_keyGenerator);
-			_databaseScope.SetupDone += DatabaseScopeOnSetupDone;
+			Base = new ConcurrentDictionary<object, object>();
+			DatabaseScope.SetupDone += DatabaseScopeOnSetupDone;
 		}
 
 		private void DatabaseScopeOnSetupDone(object sender, EventArgs eventArgs)
 		{
-			_databaseScope.AddTable(this);
+			DatabaseScope.AddTable(this);
 
 			foreach (var dbPropertyInfoCach in TypeInfo.Propertys)
 			{
 				if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null && dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
 				{
-					_databaseScope.AddMapping(TypeInfo.Type, dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
+					DatabaseScope.AddMapping(TypeInfo.Type, dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
 				}
 			}
 
@@ -204,60 +219,79 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected LocalDbReposetoryBase(DbAccessLayer db, Type type)
 			: this(type)
 		{
-			_db = db;
+			Db = db;
 		}
 
 		public IEnumerator GetEnumerator()
 		{
 			CheckCreatedElseThrow();
-			if (_db != null)
-				return _db.Select(TypeInfo.Type).GetEnumerator();
+			if (Db != null)
+				return Db.Select(TypeInfo.Type).GetEnumerator();
 
-			return _base.Values.GetEnumerator();
+			return Base.Values.GetEnumerator();
 		}
 
 		private object SetNextId(object item)
 		{
-			var idVal = TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
+			var idVal = GetId(item);
 			if (IdentityInsertScope.Current != null && this._currentIdentityInsertScope == null)
 			{
 				this._currentIdentityInsertScope = IdentityInsertScope.Current;
 			}
+
 			if (this._currentIdentityInsertScope != null)
 			{
-				if (!this._currentIdentityInsertScope.RewriteDefaultValues)
+				if (idVal.Equals(KeyGenerator.GetUninitilized()) && !this._currentIdentityInsertScope.RewriteDefaultValues)
 				{
 					return idVal;
 				}
-			}
-
-			if (idVal.Equals(_keyGenerator.GetUninitilized()))
-			{
-				lock (_lockRoot)
+				if (!idVal.Equals(KeyGenerator.GetUninitilized()))
 				{
-					object newId = _keyGenerator.GetNextValue();
+					return idVal;
+				}
+				lock (LockRoot)
+				{
+					object newId = KeyGenerator.GetNextValue();
 					TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
 					return newId;
 				}
 			}
-			return idVal;
+
+			if (idVal.Equals(KeyGenerator.GetUninitilized()))
+			{
+				lock (LockRoot)
+				{
+					object newId = KeyGenerator.GetNextValue();
+					TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
+					return newId;
+				}
+			}
+
+			var exception =
+				new InvalidOperationException(string.Format("Cannot insert explicit value for identity column in table '{0}' " +
+				                                            "when no IdentityInsertScope exists.", this.TypeInfo.Name));
+			throw exception;
 		}
 
 		private object GetId(object item)
 		{
-			return TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
+			var key = TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
+			if (key == null)
+			{
+				var exception = new InvalidOperationException(string.Format("The PrimaryKey value '{0}' is null.", key));
+				throw exception;
+			}
+			if (key.GetType() != this.TypeKeyInfo.Type)
+			{
+				var exception = new InvalidOperationException(string.Format("The PrimaryKey value '{0}' is invalid.", key));
+				throw exception;
+			}
+			return key;
 		}
-
-		//private void EnforceConstraints(object item)
-		//{
-		//	var ex = CheckEnforceConstraints(item);
-		//	if (ex != null)
-		//		throw ex;
-		//}
-
+		
 		private ConstraintException CheckEnforceConstraints(object refItem)
 		{
-			var refTables = _databaseScope.GetMappings(TypeInfo.Type);
+			var refTables = DatabaseScope.GetMappings(TypeInfo.Type);
 
 			foreach (var localDbReposetory in refTables)
 			{
@@ -268,22 +302,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 							s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == localDbReposetory.TypeInfo.TableName)
 						.Value;
 
-				if (fkPropForTypeX != null)
+				if (fkPropForTypeX == null)
+					continue;
+
+				var fkValueForTableX = fkPropForTypeX.Getter.Invoke(refItem);
+				if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
 				{
-					var fkValueForTableX = fkPropForTypeX.Getter.Invoke(refItem);
-					if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
-					{
-						return new ForginKeyConstraintException(
-							TypeInfo.TableName,
-							localDbReposetory.TypeInfo.TableName,
-							fkValueForTableX,
-							TypeInfo.PrimaryKeyProperty.PropertyName,
-							fkPropForTypeX.PropertyName);
-					}
+					return new ForginKeyConstraintException(
+						TypeInfo.TableName,
+						localDbReposetory.TypeInfo.TableName,
+						fkValueForTableX,
+						TypeInfo.PrimaryKeyProperty.PropertyName,
+						fkPropForTypeX.PropertyName);
 				}
 			}
 
-			foreach (var item in _constraints)
+			foreach (var item in Constraints)
 			{
 				if (!item.CheckConstraint(refItem))
 				{
@@ -296,16 +330,16 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public virtual bool ContainsId(object fkValueForTableX)
 		{
-			var local = _base.ContainsKey(fkValueForTableX);
+			var local = Base.ContainsKey(fkValueForTableX);
 			if (!local)
 			{
 				//try upcasting
-				local = _base.ContainsKey(Convert.ChangeType(fkValueForTableX, TypeInfo.PrimaryKeyProperty.PropertyType));
+				local = Base.ContainsKey(Convert.ChangeType(fkValueForTableX, TypeInfo.PrimaryKeyProperty.PropertyType));
 			}
 
-			if (!local && _db != null)
+			if (!local && Db != null)
 			{
-				return _db.Select(TypeInfo.Type, fkValueForTableX) != null;
+				return Db.Select(TypeInfo.Type, fkValueForTableX) != null;
 			}
 			return local;
 		}
@@ -346,27 +380,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 				return null;
 			}
-			else
-			{
-				var ex = this.CheckEnforceConstraints(changedItem);
+			var ex = this.CheckEnforceConstraints(changedItem);
 
-				if (throwInstant && ex != null)
-				{
-					throw ex;
-				}
-				return ex;
+			if (throwInstant && ex != null)
+			{
+				throw ex;
 			}
+			return ex;
 		}
 
 		private void _currentTransaction_TransactionCompleted(object sender, TransactionEventArgs e)
 		{
-			if (e.Transaction.TransactionInformation.Status == TransactionStatus.Aborted)
+			lock (this.LockRoot)
 			{
-				this._currentTransaction_Rollback();
-			}
-			else
-			{
-				this._currentTransaction_TransactionCompleted();
+				if (e.Transaction.TransactionInformation.Status == TransactionStatus.Aborted)
+				{
+					this._currentTransaction_Rollback();
+				}
+				else
+				{
+					this._currentTransaction_TransactionCompleted();
+				}
 			}
 		}
 
@@ -377,16 +411,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 				switch (transactionalItem.State)
 				{
 					case CollectionStates.Unknown:
-						break;
 					case CollectionStates.Unchanged:
-						break;
-					case CollectionStates.Added:
-						_base.Remove(transactionalItem.Item);
-						break;
 					case CollectionStates.Changed:
 						break;
+					case CollectionStates.Added:
+						Base.Remove(transactionalItem.Item);
+						break;
 					case CollectionStates.Removed:
-						_base.Add(GetId(transactionalItem.Item), transactionalItem.Item);
+						Base.Add(GetId(transactionalItem.Item), transactionalItem.Item);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -396,27 +428,30 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		private void _currentTransaction_TransactionCompleted()
 		{
-			try
+			lock (this.LockRoot)
 			{
-				foreach (var transactionalItem in _transactionalItems)
+				try
 				{
-					var checkEnforceConstraints = this.CheckEnforceConstraints(transactionalItem.Item);
-					if (checkEnforceConstraints != null)
+					foreach (var transactionalItem in _transactionalItems)
 					{
-						try
+						var checkEnforceConstraints = this.CheckEnforceConstraints(transactionalItem.Item);
+						if (checkEnforceConstraints != null)
 						{
-							throw checkEnforceConstraints;
-						}
-						finally
-						{
-							_currentTransaction_Rollback();
+							try
+							{
+								throw checkEnforceConstraints;
+							}
+							finally
+							{
+								_currentTransaction_Rollback();
+							}
 						}
 					}
 				}
-			}
-			finally
-			{
-				_transactionalItems.Clear();
+				finally
+				{
+					_transactionalItems.Clear();
+				}
 			}
 		}
 
@@ -427,16 +462,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public virtual void Add(object item)
 		{
 			CheckCreatedElseThrow();
-			if (_db != null)
+			if (Db != null)
 			{
-				_db.Insert(item);
+				Db.Insert(item);
 			}
 			else
 			{
 				if (!Contains(item))
 				{
-					AttachTransactionIfSet(item, CollectionStates.Added, true);
-					_base.Add(SetNextId(item), item);
+					AttachTransactionIfSet(item, 
+						CollectionStates.Added, 
+						true);
+					Base.Add(SetNextId(item), item);
 				}
 			}
 		}
@@ -447,9 +484,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public virtual void Clear()
 		{
 			CheckCreatedElseThrow();
-			lock (this._lockRoot)
+			lock (this.LockRoot)
 			{
-				foreach (var item in this._base)
+				foreach (var item in this.Base)
 				{
 					Remove(item);
 				}
@@ -460,10 +497,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			CheckCreatedElseThrow();
 			var pk = GetId(item);
-			var local = _base.Contains(new KeyValuePair<object, object>(pk, item));
-			if (!local && _db != null)
+			var local = Base.Contains(new KeyValuePair<object, object>(pk, item));
+			if (!local && Db != null)
 			{
-				return _db.Select(TypeInfo.Type, pk) != null;
+				return Db.Select(TypeInfo.Type, pk) != null;
 			}
 
 			return local;
@@ -494,20 +531,20 @@ namespace JPB.DataAccess.Helper.LocalDb
 			CheckCreatedElseThrow();
 			var id = GetId(item);
 			bool success;
-			lock (this._lockRoot)
+			lock (this.LockRoot)
 			{
-				success = _base.Remove(id);
+				success = Base.Remove(id);
 				var hasInvalidOp = AttachTransactionIfSet(item, CollectionStates.Removed);
 				if (hasInvalidOp != null)
 				{
-					_base.Add(id, item);
+					Base.Add(id, item);
 					throw hasInvalidOp;
 				}
 			}
 
-			if (!success && _db != null)
+			if (!success && Db != null)
 			{
-				_db.Delete(item);
+				Db.Delete(item);
 				success = true;
 			}
 			return success;
@@ -523,7 +560,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			get
 			{
 				object value;
-				if (_base.TryGetValue(primaryKey, out value))
+				if (Base.TryGetValue(primaryKey, out value))
 					return value;
 				return null;
 			}
@@ -537,7 +574,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			lock (SyncRoot)
 			{
-				return _base.Values.ToArray();
+				return Base.Values.ToArray();
 			}
 		}
 
@@ -550,24 +587,24 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			lock (SyncRoot)
 			{
-				var values = _base.Values.ToArray();
+				var values = Base.Values.ToArray();
 				values.CopyTo(array, index);
 			}
 		}
 
 		public virtual int Count
 		{
-			get { return _base.Count; }
+			get { return Base.Count; }
 		}
 
 		public virtual object SyncRoot
 		{
-			get { return this._lockRoot; }
+			get { return this.LockRoot; }
 		}
 
 		public virtual bool IsSynchronized
 		{
-			get { return Monitor.IsEntered(_lockRoot); }
+			get { return Monitor.IsEntered(LockRoot); }
 		}
 
 		public virtual bool IsReadOnly

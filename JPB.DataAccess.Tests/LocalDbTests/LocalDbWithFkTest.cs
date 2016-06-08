@@ -17,6 +17,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	{
 		private LocalDbReposetory<Book> _books;
 		private LocalDbReposetory<Image> _images;
+		private LocalDbReposetory<ImageNullable> _imagesNullable;
 
 		[SetUp]
 		public void TestInit()
@@ -25,12 +26,15 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				_books = new LocalDbReposetory<Book>(new DbConfig());
 				_images = new LocalDbReposetory<Image>(new DbConfig());
+				_imagesNullable = new LocalDbReposetory<ImageNullable>(new DbConfig());
 				Assert.IsFalse(_books.ReposetoryCreated);
 				Assert.IsFalse(_images.ReposetoryCreated);
+				Assert.IsFalse(_imagesNullable.ReposetoryCreated);
 			}
 
 			Assert.IsTrue(_books.ReposetoryCreated);
 			Assert.IsTrue(_images.ReposetoryCreated);
+			Assert.IsTrue(_imagesNullable.ReposetoryCreated);
 		}
 
 		[Test]
@@ -63,6 +67,28 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 			_books.Remove(book);
 			Assert.That(() => _images.Add(image), Throws.Exception.TypeOf<ForginKeyConstraintException>());
+		}
+
+		[Test]
+		public void ParentWithNullableChild()
+		{
+			var book = new Book();
+			var image = new ImageNullable();
+
+			Assert.That(() => _books.Add(book), Throws.Nothing);
+			image.IdBook = book.BookId;
+			Assert.That(() => _imagesNullable.Add(image), Throws.Nothing);
+		}
+
+		[Test]
+		public void ParentWithNullableChildIsNull()
+		{
+			var book = new Book();
+			var image = new ImageNullable();
+
+			Assert.That(() => _books.Add(book), Throws.Nothing);
+			image.IdBook = null;
+			Assert.That(() => _imagesNullable.Add(image), Throws.Nothing);
 		}
 
 		[Test]
