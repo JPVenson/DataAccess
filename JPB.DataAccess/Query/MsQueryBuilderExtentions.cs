@@ -213,12 +213,20 @@ namespace JPB.DataAccess.Query
 
 		public static RootQuery Apply(this RootQuery query,
 			ApplyMode mode,
-			Action<IQueryBuilder> innerText)
+			Action<RootQuery> innerText)
 		{
 			query
 				.QueryText(mode.ApplyType);
 			query.InBracket(innerText);
-			return query;
+			return new RootQuery(query);
+		}
+
+		public static ElementProducer<T> Apply<T>(this ElementProducer<T> query,
+			ApplyMode mode,
+			Action<RootQuery> innerText)
+		{
+			query.QueryText(mode.ApplyType);
+			return new ElementProducer<T>(new RootQuery(query).InBracket(innerText));
 		}
 
 		/// <summary>

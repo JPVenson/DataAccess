@@ -34,10 +34,6 @@ namespace JPB.DataAccess.Query.Operators
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="query"></param>
-		/// <param name="columnName"></param>
-		/// <returns></returns>
 		public ConditionalEvalQuery<TPoco> Is(object value)
 		{
 			if (value == null)
@@ -46,16 +42,12 @@ namespace JPB.DataAccess.Query.Operators
 			}
 			var nextParameterId = this.ContainerObject.GetNextParameterId();
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ("= @m_val", new QueryParameter(string.Format("@m_val"), value)));
+				.QueryQ("= @m_val" + nextParameterId, new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
 		}
 
 		/// <summary>
 		/// Defines an condition that should be inverted
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="query"></param>
-		/// <param name="columnName"></param>
-		/// <returns></returns>
 		public ConditionalEvalQuery<TPoco> Not(object value)
 		{
 			if (value == null)
@@ -64,7 +56,25 @@ namespace JPB.DataAccess.Query.Operators
 			}
 			var nextParameterId = this.ContainerObject.GetNextParameterId();
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ("<> @m_val", new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
+				.QueryQ("<> @m_val" + nextParameterId, new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
+		}
+
+		/// <summary>
+		/// Prepaires an Conditional Query
+		/// </summary>
+		public ConditionalEvalQuery<TPoco> IsQueryValue(string value)
+		{
+			return new ConditionalEvalQuery<TPoco>(this
+				.QueryQ("= " + value));
+		}
+
+		/// <summary>
+		/// Defines an condition that should be inverted
+		/// </summary>
+		public ConditionalEvalQuery<TPoco> NotQueryValue(string value)
+		{
+			return new ConditionalEvalQuery<TPoco>(this
+					.QueryQ("<> " + value));
 		}
 	}
 }
