@@ -316,6 +316,10 @@ namespace JPB.DataAccess.Manager
 						for (var i = 0; i < parameterInfos.Length; i++)
 						{
 							var para = parameterInfos[i];
+							if (para.ParameterInfo.IsOptional)
+							{
+								continue;
+							}
 							var tryParam = arguments[i];
 							if (tryParam == null)
 								return false;

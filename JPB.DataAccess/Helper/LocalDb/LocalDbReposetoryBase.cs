@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
+using System.Transactions;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
@@ -28,11 +30,25 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected internal readonly LocalDbManager _databaseScope;
 		protected internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
 		protected internal readonly HashSet<ILocalDbConstraint> _constraints;
-		
+		private Transaction _currentTransaction;
+		private List<TransactionalItem> _transactionalItems = new List<TransactionalItem>();
+
+		internal class TransactionalItem
+		{
+			internal object Item { get; set; }
+			internal CollectionStates State { get; set; }
+
+			internal TransactionalItem(object item, CollectionStates state)
+			{
+				Item = item;
+				State = state;
+			}
+		}
+
 		/// <summary>
 		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
 		/// </summary>
-		protected LocalDbReposetoryBase(Type type, 
+		protected LocalDbReposetoryBase(Type type,
 			ILocalPrimaryKeyValueProvider keyGenerator,
 			DbConfig config,
 			params ILocalDbConstraint[] constraints)
@@ -78,8 +94,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					throw new NotSupportedException(
 						string.Format("You must specify ether an Primary key that is of one of this types " +
-						              "({1}) " +
-						              "or invoke the ctor with an proper keyGenerator. Type: '{0}'",
+									  "({1}) " +
+									  "or invoke the ctor with an proper keyGenerator. Type: '{0}'",
 							type.Name,
 							LocalDbManager
 								.DefaultPkProvider
@@ -229,6 +245,90 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return local;
 		}
 
+		private ConstraintException AttachTransactionIfSet(object changedItem, CollectionStates action,  bool throwInstant = false)
+		{
+			if (Transaction.Current != null)
+			{
+				if (this._currentTransaction == null)
+				{
+					this._currentTransaction = Transaction.Current;
+					this._currentTransaction.TransactionCompleted += _currentTransaction_TransactionCompleted;
+				}
+
+				var hasElement = this._transactionalItems.FirstOrDefault(s => s.Item == changedItem);
+				if (hasElement != null)
+				{
+					if (hasElement.State == CollectionStates.Added)
+					{
+						if (action == CollectionStates.Removed)
+						{
+							this._transactionalItems.Remove(hasElement);
+						}
+					}
+
+					if (hasElement.State == CollectionStates.Removed)
+					{
+						if (action == CollectionStates.Added)
+						{
+							hasElement.State = CollectionStates.Unchanged;
+						}
+					}
+				}
+				else
+				{
+					this._transactionalItems.Add(new TransactionalItem(changedItem, action));
+				}
+
+				return null;
+			}
+			else
+			{
+				var ex = this.CheckEnforceConstraints(changedItem);
+				
+				if (throwInstant && ex != null)
+				{
+					throw ex;
+				}
+				return ex;
+			}
+		}
+
+		private void _currentTransaction_TransactionCompleted(object sender, TransactionEventArgs e)
+		{
+			try
+			{
+				foreach (var transactionalItem in _transactionalItems)
+				{
+					var checkEnforceConstraints = this.CheckEnforceConstraints(transactionalItem.Item);
+					if (checkEnforceConstraints != null)
+					{
+						switch (transactionalItem.State)
+						{
+							case CollectionStates.Unknown:
+								break;
+							case CollectionStates.Unchanged:
+								break;
+							case CollectionStates.Added:
+								_base.Remove(transactionalItem.Item);
+								break;
+							case CollectionStates.Changed:
+								break;
+							case CollectionStates.Removed:
+								_base.Add(GetId(transactionalItem.Item), transactionalItem.Item);
+								break;
+							default:
+								throw new ArgumentOutOfRangeException();
+						}
+						throw checkEnforceConstraints;
+					}
+				}
+			}
+			finally
+			{
+				_transactionalItems.Clear();
+			}
+		}
+
 		/// <summary>
 		/// Adds a new Item to the Table
 		/// </summary>
@@ -244,7 +344,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				if (!Contains(item))
 				{
-					EnforceConstraints(item);
+					AttachTransactionIfSet(item, CollectionStates.Added, true);
 					_base.Add(SetId(item), item);
 				}
 			}
@@ -306,7 +406,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			lock (this._lockRoot)
 			{
 				success = _base.Remove(id);
-				var hasInvalidOp = CheckEnforceConstraints(item);
+				var hasInvalidOp = AttachTransactionIfSet(item, CollectionStates.Removed);
 				if (hasInvalidOp != null)
 				{
 					_base.Add(id, item);
@@ -379,7 +479,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			get { return Monitor.IsEntered(_lockRoot); }
 		}
 
-		public virtual bool IsReadOnly { get { return false; } }
-		
+		public virtual bool IsReadOnly
+		{
+			get { return false; }
+		}
 	}
 }

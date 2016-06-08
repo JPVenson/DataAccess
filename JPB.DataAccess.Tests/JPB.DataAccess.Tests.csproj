@@ -73,6 +73,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -83,6 +84,7 @@
     <Compile Include="DbAccessLayerTests\CheckWrapperBaseTests.cs" />
     <Compile Include="DbCollectionTests\DbCollection.cs" />
     <Compile Include="LocalDbTests\LocalDbTest.cs" />
+    <Compile Include="LocalDbTests\LocalDbTransactionalTest.cs" />
     <Compile Include="LocalDbTests\LocalDbWithConstraintsTest.cs" />
     <Compile Include="LocalDbTests\LocalDbWithFkTest.cs" />
     <Compile Include="Manager.cs" />
