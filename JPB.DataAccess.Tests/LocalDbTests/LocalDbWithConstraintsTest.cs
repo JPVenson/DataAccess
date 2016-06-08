@@ -9,6 +9,13 @@ using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.LocalDbTests
+#if MsSql
+.MsSQL
+#endif
+
+#if SqLite
+.SqLite
+#endif
 {
 	[TestFixture]
 	public class LocalDbWithConstraintsTest

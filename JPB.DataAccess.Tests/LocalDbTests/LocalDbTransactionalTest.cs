@@ -10,6 +10,13 @@ using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.LocalDbTests
+#if MsSql
+.MsSQL
+#endif
+
+#if SqLite
+.SqLite
+#endif
 {
 	[TestFixture]
 	public class LocalDbTransactionalTest
@@ -43,9 +50,10 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			var image = new Image();
 			Assert.That(() =>
 			{
-				using (new TransactionScope())
+				using (var transaction  = new TransactionScope())
 				{
 					Assert.That(() => _images.Add(image), Throws.Nothing);
+					transaction.Complete();
 				}
 			}, Throws.Exception.TypeOf<ForginKeyConstraintException>());
 			
@@ -66,7 +74,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			Assert.That(() =>
 			{
-				using (new TransactionScope())
+				using (var transaction = new TransactionScope())
 				{
 					var book = new Book();
 					_books.Add(book);
@@ -76,6 +84,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 					_books.Remove(book);
 					Assert.That(() => _images.Add(image), Throws.Nothing);
+					transaction.Complete();
 				}
 			}, Throws.Exception.TypeOf<ForginKeyConstraintException>());
 
@@ -86,7 +95,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			Assert.That(() =>
 			{
-				using (new TransactionScope())
+				using (var transaction = new TransactionScope())
 				{
 					var image = new Image();
 					_images.Add(image);
@@ -99,13 +108,64 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 					Assert.AreNotEqual(_books.Count, 0);
 					Assert.AreNotEqual(_images.Count, 0);
-					Assert.IsTrue(_images.Remove(image));
-					Assert.IsTrue(_books.Remove(book));
-					Assert.AreEqual(_books.Count, 0);
-					Assert.AreEqual(_images.Count, 0);
+					transaction.Complete();
 				}
 			}, Throws.Nothing);
-			
+
+		}
+
+		[Test]
+		public void IdentityInsert()
+		{
+			Assert.That(() =>
+			{
+				using (var transaction = new TransactionScope())
+				{
+					using (new IdentityInsertScope())
+					{
+						var image = new Image();
+						image.ImageId = 10;
+						_images.Add(image);
+						var book = new Book();
+						_books.Add(book);
+						image.IdBook = book.BookId;
+
+						Assert.That(book.BookId, Is.EqualTo(0));
+						Assert.That(image.ImageId, Is.EqualTo(10));
+
+						Assert.AreNotEqual(_books.Count, 0);
+						Assert.AreNotEqual(_images.Count, 0);
+						transaction.Complete();
+					}
+				}
+			}, Throws.Nothing);
+		}
+
+		[Test]
+		public void IdentityInsertAutoSetUninit()
+		{
+			Assert.That(() =>
+			{
+				using (var transaction = new TransactionScope())
+				{
+					using (new IdentityInsertScope(true))
+					{
+						var image = new Image();
+						image.ImageId = 10;
+						_images.Add(image);
+						var book = new Book();
+						_books.Add(book);
+						image.IdBook = book.BookId;
+
+						Assert.That(book.BookId, Is.EqualTo(1));
+						Assert.That(image.ImageId, Is.EqualTo(10));
+
+						Assert.AreNotEqual(_books.Count, 0);
+						Assert.AreNotEqual(_images.Count, 0);
+						transaction.Complete();
+					}
+				}
+			}, Throws.Nothing);
 		}
 	}
 }

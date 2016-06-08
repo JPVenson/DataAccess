@@ -15,6 +15,54 @@ using JPB.DataAccess.Manager;
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
+	/// Defines an Area that allows identity Inserts
+	/// </summary>
+	public sealed class IdentityInsertScope : IDisposable
+	{
+		internal bool RewriteDefaultValues { get; private set; }
+
+		[ThreadStatic]
+		private static IdentityInsertScope _current;
+
+		public IdentityInsertScope(bool rewriteDefaultValues = false)
+		{
+			RewriteDefaultValues = rewriteDefaultValues;
+			if (Current != null)
+				throw new InvalidOperationException("Nested Identity Scopes are not supported");
+			if (Transaction.Current == null)
+				throw new InvalidOperationException("Has to be executed inside a valid TransactionScope");
+			if (Current == null)
+				Current = new IdentityInsertScope(rewriteDefaultValues, true);
+		}
+
+		private IdentityInsertScope(bool rewriteDefaultValues = false, bool nested = false)
+		{
+			RewriteDefaultValues = rewriteDefaultValues;
+		}
+
+		public static IdentityInsertScope Current
+		{
+			get { return _current; }
+			private set { _current = value; }
+		}
+
+		public event EventHandler OnIdentityInsertCompleted;
+
+		internal void OnOnIdentityInsertCompleted()
+		{
+			var handler = OnIdentityInsertCompleted;
+			if (handler != null)
+				handler(this, EventArgs.Empty);
+		}
+
+		public void Dispose()
+		{
+			OnOnIdentityInsertCompleted();
+			Current = null;
+		}
+	}
+
+	/// <summary>
 	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. Starting with 0 incriment by 1
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
@@ -31,6 +79,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected internal readonly ILocalPrimaryKeyValueProvider _keyGenerator;
 		protected internal readonly HashSet<ILocalDbConstraint> _constraints;
 		private Transaction _currentTransaction;
+		private IdentityInsertScope _currentIdentityInsertScope;
 		private List<TransactionalItem> _transactionalItems = new List<TransactionalItem>();
 
 		internal class TransactionalItem
@@ -167,10 +216,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return _base.Values.GetEnumerator();
 		}
 
-		private object SetId(object item)
+		private object SetNextId(object item)
 		{
 			var idVal = TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
-			if (idVal != _keyGenerator.GetUninitilized())
+			if (IdentityInsertScope.Current != null && this._currentIdentityInsertScope == null)
+			{
+				this._currentIdentityInsertScope = IdentityInsertScope.Current;
+			}
+			if (this._currentIdentityInsertScope != null)
+			{
+				if (!this._currentIdentityInsertScope.RewriteDefaultValues)
+				{
+					return idVal;
+				}
+			}
+
+			if (idVal.Equals(_keyGenerator.GetUninitilized()))
 			{
 				lock (_lockRoot)
 				{
@@ -179,7 +240,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 					return newId;
 				}
 			}
-
 			return idVal;
 		}
 
@@ -188,12 +248,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return TypeInfo.PrimaryKeyProperty.Getter.Invoke(item);
 		}
 
-		private void EnforceConstraints(object item)
-		{
-			var ex = CheckEnforceConstraints(item);
-			if (ex != null)
-				throw ex;
-		}
+		//private void EnforceConstraints(object item)
+		//{
+		//	var ex = CheckEnforceConstraints(item);
+		//	if (ex != null)
+		//		throw ex;
+		//}
 
 		private ConstraintException CheckEnforceConstraints(object refItem)
 		{
@@ -213,7 +273,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 					var fkValueForTableX = fkPropForTypeX.Getter.Invoke(refItem);
 					if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
 					{
-						return new ForginKeyConstraintException(TypeInfo.TableName, localDbReposetory.TypeInfo.TableName, fkValueForTableX);
+						return new ForginKeyConstraintException(
+							TypeInfo.TableName,
+							localDbReposetory.TypeInfo.TableName,
+							fkValueForTableX,
+							TypeInfo.PrimaryKeyProperty.PropertyName,
+							fkPropForTypeX.PropertyName);
 					}
 				}
 			}
@@ -245,7 +310,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return local;
 		}
 
-		private ConstraintException AttachTransactionIfSet(object changedItem, CollectionStates action,  bool throwInstant = false)
+		private ConstraintException AttachTransactionIfSet(object changedItem, CollectionStates action, bool throwInstant = false)
 		{
 			if (Transaction.Current != null)
 			{
@@ -284,7 +349,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			else
 			{
 				var ex = this.CheckEnforceConstraints(changedItem);
-				
+
 				if (throwInstant && ex != null)
 				{
 					throw ex;
@@ -295,6 +360,42 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		private void _currentTransaction_TransactionCompleted(object sender, TransactionEventArgs e)
 		{
+			if (e.Transaction.TransactionInformation.Status == TransactionStatus.Aborted)
+			{
+				this._currentTransaction_Rollback();
+			}
+			else
+			{
+				this._currentTransaction_TransactionCompleted();
+			}
+		}
+
+		private void _currentTransaction_Rollback()
+		{
+			foreach (var transactionalItem in _transactionalItems)
+			{
+				switch (transactionalItem.State)
+				{
+					case CollectionStates.Unknown:
+						break;
+					case CollectionStates.Unchanged:
+						break;
+					case CollectionStates.Added:
+						_base.Remove(transactionalItem.Item);
+						break;
+					case CollectionStates.Changed:
+						break;
+					case CollectionStates.Removed:
+						_base.Add(GetId(transactionalItem.Item), transactionalItem.Item);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+		}
+
+		private void _currentTransaction_TransactionCompleted()
+		{
 			try
 			{
 				foreach (var transactionalItem in _transactionalItems)
@@ -302,24 +403,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 					var checkEnforceConstraints = this.CheckEnforceConstraints(transactionalItem.Item);
 					if (checkEnforceConstraints != null)
 					{
-						switch (transactionalItem.State)
+						try
 						{
-							case CollectionStates.Unknown:
-								break;
-							case CollectionStates.Unchanged:
-								break;
-							case CollectionStates.Added:
-								_base.Remove(transactionalItem.Item);
-								break;
-							case CollectionStates.Changed:
-								break;
-							case CollectionStates.Removed:
-								_base.Add(GetId(transactionalItem.Item), transactionalItem.Item);
-								break;
-							default:
-								throw new ArgumentOutOfRangeException();
+							throw checkEnforceConstraints;
 						}
-						throw checkEnforceConstraints;
+						finally
+						{
+							_currentTransaction_Rollback();
+						}
 					}
 				}
 			}
@@ -345,7 +436,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (!Contains(item))
 				{
 					AttachTransactionIfSet(item, CollectionStates.Added, true);
-					_base.Add(SetId(item), item);
+					_base.Add(SetNextId(item), item);
 				}
 			}
 		}
