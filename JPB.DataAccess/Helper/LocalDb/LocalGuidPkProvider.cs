@@ -20,7 +20,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public object GetUninitilized()
 		{
-			return null;
+			return new Guid();
 		}
 
 		public ILocalPrimaryKeyValueProvider Clone()

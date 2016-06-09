@@ -309,6 +309,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
 				{
 					return new ForginKeyConstraintException(
+						"ForginKey",
 						TypeInfo.TableName,
 						localDbReposetory.TypeInfo.TableName,
 						fkValueForTableX,

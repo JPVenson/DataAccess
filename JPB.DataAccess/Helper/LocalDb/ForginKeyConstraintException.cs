@@ -5,6 +5,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	internal class ForginKeyConstraintException : ConstraintException
 	{
 		public ForginKeyConstraintException(
+			string constraintName,
 			string changedTableName, 
 			string constraintTableName, 
 			object constraintValue,
@@ -17,7 +18,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			"'{3}'" +
 			"on the table " +
 			"'{0}' " +
-			"would violate an constraint on table " +
+			"would violate the constraint '{5}' on table " +
 			"'{1}' " +
 			"on the property" +
 			"'{4}'" +
@@ -26,7 +27,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 			constraintTableName, 
 			constraintValue,
 			pkName,
-			fkName))
+			fkName, 
+			constraintName))
 		{
 
 		}
