@@ -23,7 +23,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	{
 		public LocalDbTransactionalTest()
 		{
-			
+
 		}
 
 		private LocalDbReposetory<Book> _books;
@@ -47,13 +47,13 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			var image = new Image();
 			Assert.That(() =>
 			{
-				using (var transaction  = new TransactionScope())
+				using (var transaction = new TransactionScope())
 				{
 					Assert.That(() => _images.Add(image), Throws.Nothing);
 					transaction.Complete();
 				}
 			}, Throws.Exception.TypeOf<ForginKeyConstraintException>());
-			
+
 		}
 
 		[Test]
@@ -103,7 +103,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 					transaction.Complete();
 				}
 			}, Throws.Nothing);
-
 		}
 
 		[Test]
@@ -203,6 +202,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 						image.ImageId = 10;
 						_images.Add(image);
 						var book = new Book();
+						book.BookId = 0;
 						_books.Add(book);
 						image.IdBook = book.BookId;
 

@@ -42,7 +42,7 @@ namespace JPB.DataAccess.Query.Operators
 			}
 			var nextParameterId = this.ContainerObject.GetNextParameterId();
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ("= @m_val" + nextParameterId, new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
+				.QueryQ(string.Format("= @m_val{0}", nextParameterId), new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
 		}
 
 		/// <summary>
@@ -56,7 +56,7 @@ namespace JPB.DataAccess.Query.Operators
 			}
 			var nextParameterId = this.ContainerObject.GetNextParameterId();
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ("<> @m_val" + nextParameterId, new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
+				.QueryQ(string.Format("<> @m_val{0}", nextParameterId), new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
 		}
 
 		/// <summary>

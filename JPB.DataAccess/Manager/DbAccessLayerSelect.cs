@@ -819,8 +819,14 @@ namespace JPB.DataAccess.Manager
 			 * are loading the result an then loading based on that the items             
 			 */
 
-			return
-				RunSelect(type, database, command).AsParallel().Select(s => LoadNavigationProps(s, database)).ToArray();
+			var sel = RunSelect(type, database, command);
+
+			if (ProcessNavigationPropertys && this.GetClassInfo(type).HasRelations)
+			{
+				return sel.AsParallel().Select(s => LoadNavigationProps(s, database)).ToArray();
+			}
+
+			return sel;
 		}
 
 		/// <summary>

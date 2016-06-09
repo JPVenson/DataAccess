@@ -122,6 +122,7 @@
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
+    <Compile Include="AdoWrapper\ObjectDataRecord.cs" />
     <Compile Include="Contacts\ILocalDbConstraint.cs" />
     <Compile Include="Contacts\ILocalPrimaryKeyValueProvider.cs" />
     <Compile Include="Contacts\ILogger.cs" />
@@ -132,16 +133,18 @@
     <Compile Include="DbInfoConfig\FactoryHelper.cs" />
     <Compile Include="DbInfoConfig\FactoryHelperSettings.cs" />
     <Compile Include="Helper\EnumMemberConverter.cs" />
-    <Compile Include="Helper\LocalDb\DatabaseScope.cs" />
-    <Compile Include="Helper\LocalDb\ForginKeyConstraintException.cs" />
+    <Compile Include="Helper\LocalDb\Scopes\DatabaseScope.cs" />
+    <Compile Include="Helper\LocalDb\DataContent.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\ForginKeyConstraintException.cs" />
+    <Compile Include="Helper\LocalDb\Scopes\IdentityInsertScope.cs" />
     <Compile Include="Helper\LocalDb\LocalDataPager.cs" />
-    <Compile Include="Helper\LocalDb\LocalDbConstraint.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\LocalDbConstraint.cs" />
     <Compile Include="Helper\LocalDb\LocalDbManager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbReposetory.cs" />
     <Compile Include="Helper\LocalDb\LocalDbReposetoryBase.cs" />
-    <Compile Include="Helper\LocalDb\LocalGuidPkProvider.cs" />
-    <Compile Include="Helper\LocalDb\LocalIntPkProvider.cs" />
-    <Compile Include="Helper\LocalDb\LocalLongPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalGuidPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalIntPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalLongPkProvider.cs" />
     <Compile Include="Helper\PocoPkComparer.cs" />
     <Compile Include="Helper\LocalDb\ReproMappings.cs" />
     <Compile Include="Contacts\MetaApi\IMethodArgsInfoCache.cs" />

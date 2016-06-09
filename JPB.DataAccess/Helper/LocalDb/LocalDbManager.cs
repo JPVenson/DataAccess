@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		internal static readonly Dictionary<Type, ILocalPrimaryKeyValueProvider> DefaultPkProvider;
-			
+
 		[ThreadStatic]
 		private static LocalDbManager _scope;
 
@@ -39,6 +39,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 			internal set { _scope = value; }
 		}
 
+		internal Dictionary<Type, LocalDbReposetoryBase> Database
+		{
+			get { return _database; }
+		}
+
 		/// <summary>
 		/// Will be invoked when the current database is setup
 		/// </summary>
@@ -47,7 +52,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		internal void OnSetupDone()
 		{
 			var handler = SetupDone;
-			if (handler != null) 
+			if (handler != null)
 				handler(this, new EventArgs());
 		}
 
@@ -68,6 +73,38 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			var mapping = _mappings.Where(f => f.TargetType == thisType).ToArray();
 			return _database.Where(f => mapping.Any(e => e.SourceType == f.Key)).Select(f => f.Value);
+		}
+
+		/// <summary>
+		/// Creates a new Class that supportes the <c>IXmlSerializable</c> interface. It is linked to this 
+		/// database and can be used to read or write all content in this database.
+		/// To Write all elements
+		/// <example>
+		/// <code>
+		/// using (var memStream = new MemoryStream())
+		///	{
+		///		new XmlSerializer(typeof(DataContent)).Serialize(memStream, LocalDbManager.Scope.GetSerializableContent());
+		///		var xml = Encoding.ASCII.GetString(memStream.ToArray());
+		///	}
+		/// </code> 
+		/// When reading the data the database creation has to be in progress. You must execute the statement inside the DatabaseScope you want to fill
+		/// <code>
+		/// using (new DatabaseScope())
+		///	{
+		///		//Table creation ...
+		///		//new LocalDbReposetory&lt;T&gt;(new DbConfig())
+		///		using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes(DbLoaderResouces.UsersInDatabaseDump)))
+		///		{
+		///			new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
+		///		}
+		///	}
+		/// </code> 
+		/// </example>
+		/// </summary>
+		/// <returns></returns>
+		public DataContent GetSerializableContent()
+		{
+			return new DataContent(this);
 		}
 	}
 }

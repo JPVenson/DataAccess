@@ -87,6 +87,9 @@
     <Compile Include="..\JPB.DataAccess.Tests\DbCollectionTests\DbCollection.cs">
       <Link>DbCollectionTests\DbCollection.cs</Link>
     </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\DatabaseSerializerTest.cs">
+      <Link>LocalDbTests\DatabaseSerializerTest.cs</Link>
+    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbTest.cs">
       <Link>LocalDbTests\LocalDbTest.cs</Link>
     </Compile>
@@ -120,30 +123,6 @@
     <Compile Include="..\JPB.DataAccess.Tests\SqLiteManager.cs">
       <Link>SqLiteManager.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\FooTest.cs">
-      <Link>TestModels\CheckWrapperBaseTests\FooTest.cs</Link>
-    </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\Image.cs">
-      <Link>TestModels\CheckWrapperBaseTests\Image.cs</Link>
-    </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\TestProcA.cs">
-      <Link>TestModels\CheckWrapperBaseTests\TestProcA.cs</Link>
-    </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\TestProcAResult.cs">
-      <Link>TestModels\CheckWrapperBaseTests\TestProcAResult.cs</Link>
-    </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\TestModels\CheckWrapperBaseTests\User.cs">
-      <Link>TestModels\CheckWrapperBaseTests\User.cs</Link>
-    </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\TestModels\MetaAPI\StructCreating.cs">
-      <Link>TestModels\MetaAPI\StructCreating.cs</Link>
-    </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\TestModels\XmlDataRecordTest\InstanceMock.cs">
-      <Link>TestModels\XmlDataRecordTest\InstanceMock.cs</Link>
-    </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\Users.cs">
-      <Link>Users.cs</Link>
-    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\XmlDataRecordTests\XmlDataRecordTest.cs">
       <Link>XmlDataRecordTests\XmlDataRecordTest.cs</Link>
     </Compile>
@@ -156,6 +135,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.Tests\JPB.DataAccess.Tests.csproj">
+      <Project>{33acdf31-634c-4183-bbd9-f3b25ac1f601}</Project>
+      <Name>JPB.DataAccess.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
       <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
       <Name>JPB.DataAccess</Name>

@@ -15,63 +15,6 @@ using JPB.DataAccess.Manager;
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	/// Defines an Area that allows identity Inserts
-	/// IDENTITY_INSERT on SQL
-	/// </summary>
-	public sealed class IdentityInsertScope : IDisposable
-	{
-		internal bool RewriteDefaultValues { get; private set; }
-
-		[ThreadStatic]
-		private static IdentityInsertScope _current;
-
-		/// <summary>
-		/// Creates a new Idenity Scope. Close it with Dispose
-		/// Must be created inside an TransactionScope
-		/// </summary>
-		/// <param name="rewriteDefaultValues">Should every DefaultValue still be set to a valid Id</param>
-		public IdentityInsertScope(bool rewriteDefaultValues = false)
-		{
-			RewriteDefaultValues = rewriteDefaultValues;
-			if (Current != null)
-				throw new InvalidOperationException("Nested Identity Scopes are not supported");
-			if (Transaction.Current == null)
-				throw new InvalidOperationException("Has to be executed inside a valid TransactionScope");
-			if (Current == null)
-				Current = new IdentityInsertScope(rewriteDefaultValues, true);
-		}
-
-		private IdentityInsertScope(bool rewriteDefaultValues = false, bool nested = false)
-		{
-			RewriteDefaultValues = rewriteDefaultValues;
-		}
-
-		/// <summary>
-		/// The current Identity Scope
-		/// </summary>
-		public static IdentityInsertScope Current
-		{
-			get { return _current; }
-			private set { _current = value; }
-		}
-
-		public event EventHandler OnIdentityInsertCompleted;
-
-		internal void OnOnIdentityInsertCompleted()
-		{
-			var handler = OnIdentityInsertCompleted;
-			if (handler != null)
-				handler(this, EventArgs.Empty);
-		}
-
-		public void Dispose()
-		{
-			OnOnIdentityInsertCompleted();
-			Current = null;
-		}
-	}
-
-	/// <summary>
 	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. 
 	/// Starting with 0 incriment by 1
 	/// </summary>
@@ -85,12 +28,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected internal readonly DbClassInfoCache TypeKeyInfo;
 		protected internal readonly DbAccessLayer Db;
 		protected internal readonly IDictionary<object, object> Base;
-		protected internal readonly LocalDbManager DatabaseScope;
+		private readonly LocalDbManager _databaseDatabase;
 		protected internal readonly ILocalPrimaryKeyValueProvider KeyGenerator;
 		protected internal readonly HashSet<ILocalDbConstraint> Constraints;
 		private Transaction _currentTransaction;
 		private IdentityInsertScope _currentIdentityInsertScope;
 		private readonly List<TransactionalItem> _transactionalItems = new List<TransactionalItem>();
+		private bool _isMigrating;
 
 		internal class TransactionalItem
 		{
@@ -106,6 +50,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		/// <summary>
 		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
+		/// Must created inside an DatabaseScope
 		/// </summary>
 		protected LocalDbReposetoryBase(Type type,
 			ILocalPrimaryKeyValueProvider keyGenerator,
@@ -114,8 +59,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			_config = config;
 			Constraints = new HashSet<ILocalDbConstraint>(constraints);
-			DatabaseScope = LocalDbManager.Scope;
-			if (DatabaseScope == null)
+			_databaseDatabase = LocalDbManager.Scope;
+			if (_databaseDatabase == null)
 			{
 				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate" +
 				                                " multibe tables in the same Application");
@@ -169,22 +114,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 				}
 			}
 			Base = new ConcurrentDictionary<object, object>();
-			DatabaseScope.SetupDone += DatabaseScopeOnSetupDone;
+			_databaseDatabase.AddTable(this);
+			_databaseDatabase.SetupDone += DatabaseDatabaseOnSetupDone;
 		}
 
-		private void DatabaseScopeOnSetupDone(object sender, EventArgs eventArgs)
+		private void DatabaseDatabaseOnSetupDone(object sender, EventArgs eventArgs)
 		{
-			DatabaseScope.AddTable(this);
-
 			foreach (var dbPropertyInfoCach in TypeInfo.Propertys)
 			{
 				if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null && dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
 				{
-					DatabaseScope.AddMapping(TypeInfo.Type, dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
+					_databaseDatabase.AddMapping(TypeInfo.Type, dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
 				}
 			}
 
 			ReposetoryCreated = true;
+			IsMigrating = false;
 		}
 
 		/// <summary>
@@ -196,7 +141,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		private void CheckCreatedElseThrow()
 		{
-			if (!ReposetoryCreated)
+			if (!ReposetoryCreated && !IsMigrating)
 			{
 				throw new InvalidOperationException("The database must be completly created until this Table is operational");
 			}
@@ -291,7 +236,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		
 		private ConstraintException CheckEnforceConstraints(object refItem)
 		{
-			var refTables = DatabaseScope.GetMappings(TypeInfo.Type);
+			var refTables = _databaseDatabase.GetMappings(TypeInfo.Type);
 
 			foreach (var localDbReposetory in refTables)
 			{
@@ -611,6 +556,17 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public virtual bool IsReadOnly
 		{
 			get { return false; }
+		}
+
+		public LocalDbManager Database
+		{
+			get { return _databaseDatabase; }
+		}
+
+		internal bool IsMigrating
+		{
+			get { return _isMigrating; }
+			set { _isMigrating = value; }
 		}
 	}
 }
