@@ -31,6 +31,8 @@ namespace JPB.DataAccess.MetaApi.Model
 		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
+		private Type _type;
+
 		internal ClassInfoCache(Type type, bool anon = false)
 		{
 			//this is ok.
@@ -164,7 +166,11 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     The .net Type instance
 		/// </summary>
-		public Type Type { get; protected internal set; }
+		public Type Type
+		{
+			get { return _type; }
+			protected internal set { _type = value; }
+		}
 
 		/// <summary>
 		///     All Propertys

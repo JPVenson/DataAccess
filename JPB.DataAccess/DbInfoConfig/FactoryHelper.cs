@@ -172,7 +172,7 @@ namespace JPB.DataAccess.DbInfoConfig
 						var codeTypeOfListArg = new CodeTypeOfExpression(typeArgument);
 
 						var instanceHelper = new CodeMethodInvokeExpression(
-							new CodeTypeReferenceExpression(typeof(NonObservableDbCollection<>).MakeGenericType(typeArgument)), 
+							new CodeTypeReferenceExpression(typeof(NonObservableDbCollection<>).MakeGenericType(typeArgument)),
 							"FromXml",
 							new CodeCastExpression(typeof(string), new CodeVariableReferenceExpression(variableName)));
 
@@ -548,26 +548,6 @@ namespace JPB.DataAccess.DbInfoConfig
 				il.Emit(OpCodes.Ldarg_0);
 				il.Emit(OpCodes.Newobj, matchingCtor);
 				il.Emit(OpCodes.Ret);
-
-				//if (settings.HideSuperCreation)
-				//{
-				//	il.Emit(OpCodes.Ldarg_0);
-				//	il.Emit(OpCodes.Newobj, matchingCtor);
-				//	var buffVariable = il.DeclareLocal(typeof(object));
-				//	var classVariable = il.DeclareLocal(target);
-
-				//	il.Emit(OpCodes.Stloc, buffVariable);
-				//	il.Emit(OpCodes.Ldloc, buffVariable);
-				//	il.Emit(OpCodes.Castclass, target);
-
-				//	il.Emit(OpCodes.Stloc, classVariable);
-				//	il.Emit(OpCodes.Ldloc, classVariable);
-				//	il.Emit(OpCodes.Ret);
-				//}
-				//else
-				//{
-
-				//}
 			}
 
 			if (!settings.CreateDebugCode)
@@ -581,26 +561,27 @@ namespace JPB.DataAccess.DbInfoConfig
 			return func;
 		}
 
-		public static T Cast<T>(object o)
+		internal static TypeBuilder GetTypeBuilder(string name)
 		{
-			return (T)o;
+			var an = new AssemblyName(name);
+			var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
+			var moduleBuilder = assemblyBuilder.DefineDynamicModule(name + "Module");
+			var tb = moduleBuilder.DefineType(name
+								, TypeAttributes.Public |
+								TypeAttributes.Class |
+								TypeAttributes.AutoClass |
+								TypeAttributes.AnsiClass |
+								TypeAttributes.BeforeFieldInit |
+								TypeAttributes.AutoLayout
+								, null);
+			return tb;
 		}
 
-		//var an = new AssemblyName();
-		//an.Name = "HelloReflectionEmit";
-		//var ad = AppDomain.CurrentDomain;
-
-		//var ab = ad.DefineDynamicAssembly(an,
-		//	AssemblyBuilderAccess.Save);
-		//var mb = ab.DefineDynamicModule(an.Name, "Hello.dll");
-		//var tb = mb.DefineType("Foo.Bar", TypeAttributes.Public | TypeAttributes.Class);
-		//var fb = tb.DefineMethod("CreateFactory",
-		//	MethodAttributes.Public |
-		//	MethodAttributes.Static,
-		//	sourceType, new Type[] { typeof(IDataRecord) });
-		//var dataRecord = fb.GetParameters()[0];
-		//var ilg = fb.GetILGenerator();
-		//ilg.Emit(OpCodes.Ldarg_0);
-		//ilg.Emit(OpCodes.Stl);
+		internal static Type CompileNewType(string name)
+		{
+			var tb = GetTypeBuilder(name);
+			tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+			return tb.CreateType();
+		}
 	}
 }

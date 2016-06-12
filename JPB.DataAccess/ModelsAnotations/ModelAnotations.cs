@@ -26,7 +26,7 @@ namespace JPB.DataAccess.ModelsAnotations
 	}
 
 	/// <summary>
-	/// Defines an 
+	/// Defines an function or property that is specific for an single database
 	/// </summary>
 	public abstract class DbAccessTypeAttribute : DataAccessAttribute
 	{

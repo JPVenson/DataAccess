@@ -50,6 +50,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				val.CheckForConfig(this);
 			return val;
 		}
+		
 
 		/// <summary>
 		///     Allows you to alter the MetaInfoStore store that holds <typeparamref name="T"></typeparamref>

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Transactions;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
@@ -35,6 +36,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private IdentityInsertScope _currentIdentityInsertScope;
 		private readonly List<TransactionalItem> _transactionalItems = new List<TransactionalItem>();
 		private bool _isMigrating;
+		private readonly bool _keepOriginalObject;
 
 		internal class TransactionalItem
 		{
@@ -48,15 +50,23 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
-		/// <summary>
-		/// Creates a new Instance that is bound to <paramref name="type"/> and uses <paramref name="keyGenerator"/> for generation of PrimaryKeys
-		/// Must created inside an DatabaseScope
-		/// </summary>
+		///  <summary>
+		///  Creates a new Instance that is bound to &lt;paramref name="type"/&gt; and uses &lt;paramref name="keyGenerator"/&gt; for generation of PrimaryKeys
+		/// 	Must created inside an DatabaseScope
+		///  </summary>
+		///  <param name="type">The type of an Valid Poco</param>
+		///  <param name="keyGenerator">The Strategy to generate an uniqe PrimaryKey that matches the PrimaryKey Property</param>
+		///  <param name="config">The Config store to use</param>
+		/// <param name="useOrignalObjectInMemory">If enabled the given object referance will be used (Top performance). 
+		/// if Disabled each object has to be define an Valid Ado.Net constructor to allow a copy (Can be slow)</param>
+		/// <param name="constraints">Additonal Constrains to ensure database like Data Integrity</param>
 		protected LocalDbReposetoryBase(Type type,
 			ILocalPrimaryKeyValueProvider keyGenerator,
 			DbConfig config,
+			bool useOrignalObjectInMemory,
 			params ILocalDbConstraint[] constraints)
 		{
+			_keepOriginalObject = useOrignalObjectInMemory;
 			_config = config;
 			Constraints = new HashSet<ILocalDbConstraint>(constraints);
 			_databaseDatabase = LocalDbManager.Scope;
@@ -151,7 +161,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
 		protected LocalDbReposetoryBase(Type type)
-			: this(type, null, new DbConfig())
+			: this(type, null, new DbConfig(), true)
 		{
 
 		}
@@ -407,19 +417,37 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <param name="item"></param>
 		public virtual void Add(object item)
 		{
+			var elementToAdd = item;
 			CheckCreatedElseThrow();
 			if (Db != null)
 			{
-				Db.Insert(item);
+				Db.Insert(elementToAdd);
 			}
 			else
 			{
-				if (!Contains(item))
+				if (!Contains(elementToAdd))
 				{
-					AttachTransactionIfSet(item, 
+					AttachTransactionIfSet(elementToAdd, 
 						CollectionStates.Added, 
 						true);
-					Base.Add(SetNextId(item), item);
+					var id = SetNextId(elementToAdd);
+					if (!_keepOriginalObject)
+					{
+						bool fullyLoaded;
+						elementToAdd = DbAccessLayer.CreateInstance(
+							TypeInfo, 
+							new ObjectDataRecord(item, _config, 0), 
+							out fullyLoaded, 
+							DbAccessType.Unknown);
+						if (!fullyLoaded)
+						{
+							throw new InvalidOperationException(string.Format("The given type did not provide a Full ado.net constructor " +
+							                                                  "and the setting of the propertys did not succeed. " +
+							                                                  "Type: '{0}'", item.GetType()));
+						}
+					}
+
+					Base.Add(id, elementToAdd);
 				}
 			}
 		}

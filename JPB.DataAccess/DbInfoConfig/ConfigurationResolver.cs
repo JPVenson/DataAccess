@@ -147,6 +147,20 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
+		///     Adds a Fake property to the class getter and setter will be invoked like normal ones
+		/// </summary>
+		/// <typeparam name="TE"></typeparam>
+		public void CreateProperty<TE>(string name, params AttributeInfoCache[] attributes)
+		{
+			if (name == null)
+				throw new ArgumentNullException("name");
+			if (ClassInfoCache.Propertys.Any(s => s.Key == name))
+				throw new ArgumentOutOfRangeException("name", "Property name does exist. Cannot define a property twice");
+			var propInfo = new DbAutoPropertyInfoCache<TE>(name, attributes);
+			ClassInfoCache.Propertys.Add(name, propInfo);
+		}
+
+		/// <summary>
 		///     set a Attribute on a class
 		/// </summary>
 		public void SetClassAttribute(DataAccessAttribute attribute)

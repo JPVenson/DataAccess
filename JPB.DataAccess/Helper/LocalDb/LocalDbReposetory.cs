@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
 		/// </summary>
 		public LocalDbReposetory(DbConfig config, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), null, config, constraints)
+			: base(typeof(T), null, config, true,  constraints)
 		{
 		}
 		/// <summary>
@@ -33,7 +33,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> and uses the KeyProvider to generate Primarykeys
 		/// </summary>
 		public LocalDbReposetory(DbConfig config, ILocalPrimaryKeyValueProvider keyProvider, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), keyProvider, config, constraints)
+			: base(typeof(T), keyProvider, config, true, constraints)
 		{
 		}
 

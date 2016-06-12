@@ -100,65 +100,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			_createMethod = new Lazy<Func<object, object[], object>>(() => Wrap((MethodInfo)mehtodInfo, sourceType));
 			return this;
 		}
-
-		//static Func<object, object[], object> Wrap(MethodBase method, Type declaringType)
-		//{
-		//	var dynAssmName = new AssemblyName("DynamicMethodCacheAssam" + declaringType.Name);
-		//	var dynAssm = AppDomain.CurrentDomain.DefineDynamicAssembly(dynAssmName, AssemblyBuilderAccess.Run);
-		//	var dynModule = dynAssm.DefineDynamicModule("DynamicMethodModule" + declaringType.Name);
-
-		//	var dynType = dynModule.DefineType("DynamicWrapperType" + declaringType.Name, TypeAttributes.Public);
-		//	var dm = dynType.DefineMethod("InvokeWrapper" + declaringType.Name, MethodAttributes.Public);
-		//	var il = dm.GetILGenerator();
-
-		//	if (method.ContainsGenericParameters)
-		//	{
-		//		for (int index = 0; index < method.GetGenericArguments().Length; index++)
-		//		{
-		//			var genericArgument = method.GetGenericArguments()[index];
-		//			var genericTypeParameterBuilders = dm.DefineGenericParameters(genericArgument.Name);
-		//			il.DeclareLocal(genericTypeParameterBuilders[0]);
-		//		}
-		//	}
-
-		//	if (!method.IsStatic)
-		//	{
-		//		il.Emit(OpCodes.Ldarg_0);
-		//		il.Emit(OpCodes.Unbox_Any, declaringType);
-		//	}
-		//	var parameters = method.GetParameters();
-		//	for (int i = 0; i < parameters.Length; i++)
-		//	{
-		//		il.Emit(OpCodes.Ldarg_1);
-		//		il.Emit(OpCodes.Ldc_I4, i);
-		//		il.Emit(OpCodes.Ldelem_Ref);
-		//		il.Emit(OpCodes.Unbox_Any, parameters[i].ParameterType);
-		//	}
-		//	if (method is MethodInfo)
-		//	{
-		//		var methodInfo = method as MethodInfo;
-		//		il.EmitCall(method.IsStatic || declaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, methodInfo, null);
-		//		if (methodInfo.ReturnType == null || methodInfo.ReturnType == typeof(void))
-		//		{
-		//			il.Emit(OpCodes.Ldnull);
-		//		}
-		//		else if (methodInfo.ReturnType.IsValueType)
-		//		{
-		//			il.Emit(OpCodes.Box, methodInfo.ReturnType);
-		//		}
-		//	}
-		//	else if (method is ConstructorInfo)
-		//	{
-		//		var ctorInfo = method as ConstructorInfo;
-		//		il.Emit(OpCodes.Newobj, ctorInfo);
-		//	}
-
-		//	il.Emit(OpCodes.Ret);
-		//	var createType = dynType.CreateType();
-
-		//	return (Func<object, object[], object>)dm.CreateDelegate(typeof(Func<object, object[], object>));
-		//}
-
+		
 		static Func<object, object[], object> Wrap(MethodBase method, Type declaringType)
 		{
 			var dm = new DynamicMethod(method.Name, typeof(object), new[] { typeof(object), typeof(object[]) }, declaringType, true);
@@ -261,6 +203,18 @@ namespace JPB.DataAccess.MetaApi.Model
 		public override int GetHashCode()
 		{
 			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().GetHashCode(this);
+		}
+	}
+
+	public class MethodInfoCacheImpl<TAtt, TArg, T> 
+		: MethodInfoCache<TAtt, TArg> 
+			where TAtt : class, IAttributeInfoCache, new() 
+			where TArg : class, IMethodArgsInfoCache<TAtt>, new()
+	{
+		public MethodInfoCacheImpl() 
+			: base()
+		{
+			
 		}
 	}
 }

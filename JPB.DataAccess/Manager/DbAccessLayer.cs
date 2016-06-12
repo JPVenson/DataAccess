@@ -496,7 +496,9 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
-		[Obsolete("This mehtod is replaced by several FASTER equal ones. It may be replaced, updated or delted. But it will change that is for sure. legacy support only")]
+		[Obsolete("This mehtod is replaced by several FASTER equal ones. " +
+		          "It may be replaced, updated or delted. But it will change that is for sure. " +
+		          "legacy support only")]
 		public static object ReflectionPropertySet(
 			DbConfig config,
 			object instance,
@@ -505,8 +507,8 @@ namespace JPB.DataAccess.Manager
 			Dictionary<int, DbPropertyInfoCache> cache,
 			DbAccessType? dbAccessType)
 		{
-			if (instance == null) throw new ArgumentNullException(nameof(instance));
-			if (info == null) throw new ArgumentNullException(nameof(info));
+			if (instance == null) throw new ArgumentNullException("instance");
+			if (info == null) throw new ArgumentNullException("info");
 			if (reader == null)
 				return instance;
 

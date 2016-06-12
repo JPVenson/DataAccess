@@ -17,6 +17,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using JPB.DataAccess.Contacts.MetaApi;
+using JPB.DataAccess.DbInfoConfig;
 
 namespace JPB.DataAccess.MetaApi
 {
@@ -111,6 +112,7 @@ namespace JPB.DataAccess.MetaApi
 		/// <returns></returns>
 		protected internal virtual TClass GetOrCreateClassInfoCache(Type type, out bool newCreated)
 		{
+			if (type == null) throw new ArgumentNullException("type");
 			newCreated = false;
 			TClass element;
 			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
@@ -150,6 +152,8 @@ namespace JPB.DataAccess.MetaApi
 		/// <returns></returns>
 		protected internal virtual TClass GetOrCreateClassInfoCache(string typeName, out bool newCreated)
 		{
+			if (string.IsNullOrEmpty(typeName))
+				throw new ArgumentException("Value cannot be null or empty.", "typeName");
 			newCreated = false;
 			TClass element;
 			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
@@ -182,6 +186,48 @@ namespace JPB.DataAccess.MetaApi
 				}
 			}
 			return element;
+		}
+
+		/// <summary>
+		/// Creates a new Runtime Fake type that can be filled with propertys
+		/// </summary>
+		/// <exception cref="InvalidOperationException">If type exists in store this exception</exception>
+		/// <returns></returns>
+		protected internal virtual TClass GetFake(string typeName)
+		{
+			if (string.IsNullOrEmpty(typeName))
+				throw new ArgumentException("Value cannot be null or empty.", "typeName");
+			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
+			try
+			{
+				if (isThreadSave)
+				{
+					Monitor.Enter(SClassInfoCaches);
+				}
+
+				var element = SClassInfoCaches.FirstOrDefault(s => s.Name.Equals(typeName));
+				if (element != null)
+				{
+					throw new InvalidOperationException("Type exists cannot create a new type");
+				}
+				var type = FactoryHelper.CompileNewType(typeName);
+
+				if (type == null)
+					return null;
+
+				element = new TClass();
+				SClassInfoCaches.Add(element);
+				element.Init(type);
+				return element;
+			}
+			finally
+			{
+				if (isThreadSave)
+				{
+					Monitor.Exit(SClassInfoCaches);
+				}
+			}
+
 		}
 
 		/// <summary>
