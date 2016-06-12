@@ -212,7 +212,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		/// Activates Deadlock and Stackoverflow detection and Prevention
-		/// When an Stackoverflow inside an SelectFactoryMethod is detected an other method for creating the selectstatement is used as long as there are other options
+		/// When an Stackoverflow inside any FactoryMethod is detected an other method for creating the statement is used as long as there are other options
 		/// </summary>
 		public bool Multipath { get; set; }
 
@@ -281,7 +281,7 @@ namespace JPB.DataAccess.Manager
 					}
 					else
 					{
-						throw new InvalidOperationException("This method is not allowed in the context of an SelectFactoryMethod. Enable Multipath to allow the Intiligent Select creation");
+						throw new InvalidOperationException("This method is not allowed in the context of any FactoryMethod. Enable Multipath to allow the Intiligent Query creation");
 					}
 				}
 				_isIndented = true;
