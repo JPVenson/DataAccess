@@ -214,7 +214,7 @@ namespace JPB.DataAccess.SqLite
 				//	command = selectQuery.Compile();
 				//}
 				//cannot cast to T[] 
-				selectWhere = dbAccess.SelectNative(TargetType, s, command, true).Cast<T>().ToArray();
+				selectWhere = dbAccess.SelectNative(TargetType, command, true).Cast<T>().ToArray();
 			});
 
 			foreach (T item in selectWhere)

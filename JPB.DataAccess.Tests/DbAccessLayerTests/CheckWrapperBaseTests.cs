@@ -9,6 +9,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
+using NUnit.Framework.Compatibility;
 
 #if SqLite
 using System.Data.SQLite;
@@ -341,6 +342,59 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertRange10kTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
+			var containingList = new List<Users>();
+
+			for (int i = 0; i < 10000; i++)
+			{
+				containingList.Add(new Users() { UserName = Guid.NewGuid().ToString("N") });
+			}
+
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+			expectWrapper.InsertRange(containingList);
+			stopWatch.Stop();
+			//Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
+
+			var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.UserTable);
+			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, 10000);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertRange10kEachItemTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
+			var containingList = new List<Users>();
+
+			for (int i = 0; i < 10000; i++)
+			{
+				containingList.Add(new Users() { UserName = Guid.NewGuid().ToString("N") });
+			}
+
+			expectWrapper.RangerInsertPation = 1;
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+			expectWrapper.InsertRange(containingList);
+			stopWatch.Stop();
+			Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
+
+			var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.UserTable);
+			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, 10000);
 		}
 
 		[Test]

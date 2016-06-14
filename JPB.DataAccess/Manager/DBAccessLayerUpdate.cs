@@ -106,7 +106,7 @@ namespace JPB.DataAccess.Manager
 					var updated = false;
 					DataConverterExtensions.CopyPropertys(entry, @select, this.Config);
 
-					LoadNavigationProps(@select, Database);
+					LoadNavigationProps(@select);
 
 					return updated;
 				}

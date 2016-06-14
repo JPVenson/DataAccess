@@ -23,8 +23,7 @@ namespace JPB.DataAccess.Query.Operators
 			var cmd = ContainerObject
 				.AccessLayer
 				.CreateSelectQueryFactory(
-					this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
-					ContainerObject.AccessLayer.Database);
+					this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)));
 			return new SelectQuery<T>(this.QueryCommand(cmd));
 		}
 

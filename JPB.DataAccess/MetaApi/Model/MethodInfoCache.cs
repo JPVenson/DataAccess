@@ -20,7 +20,9 @@ using JPB.DataAccess.MetaApi.Model.Equatable;
 namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
-	///     Infos about the Method
+	///     Infos about the Method on an Class. The given Delegate to the Function is not stored. 
+	///		This IL Body will be extracted and a new Function will be created on runtime for each calling function.
+	///		Use the <code>FakeMethodInfoCache</code> to create a direct delgate cache that will reuse the delegate pointer and the declaring class
 	/// </summary>
 	[DebuggerDisplay("{MethodName}")]
 	[Serializable]
@@ -35,10 +37,16 @@ namespace JPB.DataAccess.MetaApi.Model
 			Init(mehtodInfo);
 		}
 
-		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, string name = null, params TAtt[] attributes)
+		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, params TAtt[] attributes)
 			: this()
 		{
 			Init(fakeMehtod.GetMethodInfo());
+		}
+
+		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, Type declaringType, string name = null, params TAtt[] attributes)
+			: this()
+		{
+			Init(fakeMehtod.GetMethodInfo(), declaringType, name);
 		}
 
 		/// <summary>
@@ -70,12 +78,11 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo)
 		{
-			UseILWrapper = true;
 			return this.Init(mehtodInfo, mehtodInfo.DeclaringType);
 		}
 
 		/// <summary>
-		/// 
+		/// For Internal use Only
 		/// </summary>
 		/// <param name="mehtodInfo"></param>
 		/// <param name="sourceType"></param>
@@ -85,13 +92,38 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo, Type sourceType)
 		{
+			return this.Init(mehtodInfo, sourceType, null);
+		}
+
+		/// <summary>
+		/// For Internal use Only
+		/// </summary>
+		/// <param name="mehtodInfo"></param>
+		/// <param name="sourceType"></param>
+		/// <param name="name">User name for this Mehtod.</param>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		// ReSharper disable once MethodOverloadWithOptionalParameter
+		public virtual IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo, Type sourceType, string name = null)
+		{
+			UseILWrapper = false;
+
 			if (!string.IsNullOrEmpty(MethodName))
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 
 			if (mehtodInfo == null)
 				throw new ArgumentNullException("mehtodInfo");
 			MethodInfo = mehtodInfo;
-			MethodName = mehtodInfo.Name;
+			if (string.IsNullOrEmpty(name))
+			{
+				MethodName = mehtodInfo.Name;
+			}
+			else
+			{
+				MethodName = name;
+			}
 			Attributes = new HashSet<TAtt>(mehtodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
@@ -171,6 +203,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public virtual HashSet<TAtt> Attributes { get; protected internal set; }
 
+		/// <summary>
+		/// Does not use the Original Delegate. Instad uses IL injection to create a new Delegate
+		/// </summary>
 		public bool UseILWrapper
 		{
 			get;
@@ -203,18 +238,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		public override int GetHashCode()
 		{
 			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().GetHashCode(this);
-		}
-	}
-
-	public class MethodInfoCacheImpl<TAtt, TArg, T> 
-		: MethodInfoCache<TAtt, TArg> 
-			where TAtt : class, IAttributeInfoCache, new() 
-			where TArg : class, IMethodArgsInfoCache<TAtt>, new()
-	{
-		public MethodInfoCacheImpl() 
-			: base()
-		{
-			
 		}
 	}
 }

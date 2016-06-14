@@ -131,7 +131,10 @@
     <Compile Include="DbInfoConfig\ConfigHelpers.cs" />
     <Compile Include="DbInfoConfig\ConfigurationResolver.cs" />
     <Compile Include="DbInfoConfig\DbConfig.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\DbAutoStaticPropertyInfoCache.cs" />
     <Compile Include="DbInfoConfig\DbInfo\DbMethodArgument.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\FakeMethodInfoCache.cs" />
+    <Compile Include="DbInfoConfig\DbInfo\FakePropertyMethodInfoCache.cs" />
     <Compile Include="DbInfoConfig\FactoryHelper.cs" />
     <Compile Include="DbInfoConfig\FactoryHelperSettings.cs" />
     <Compile Include="Helper\EnumMemberConverter.cs" />

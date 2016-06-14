@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Manager
 	public delegate void DatabaseActionHandler(object sender, DatabaseActionEvent e);
 
 	/// <summary>
-	///     A database operation is done
+	///     A database operation is failed
 	/// </summary>
 	public delegate void DatabaseFailedActionHandler(object sender, Exception e);
 

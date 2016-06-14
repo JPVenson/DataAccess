@@ -50,7 +50,7 @@ namespace JPB.DataAccess
 			if (created)
 				return source;
 
-			if(config == null)
+			if (config == null)
 				config = new DbConfig();
 
 #pragma warning disable 618
@@ -58,58 +58,88 @@ namespace JPB.DataAccess
 #pragma warning restore 618
 		}
 
-		/// <summary>
+		/// <summary>		
 		///     Not Connection save
-		///     Must be executed inside a Valid Connection
+		///     Must be executed inside a Valid Connection 
 		/// </summary>
+		/// <param name="db"></param>
+		/// <param name="base">left part of the query</param>
+		/// <param name="last">right part of the query</param>
+		/// <param name="autoRename">If an conflict happens a renaming operation happens(use this argument if you are done with the query generation otherwise querys might be invalid) if an collision is detected and this is false an exception will be thrown</param>
 		/// <returns></returns>
-		public static IDbCommand MergeCommands(this IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
+		public static IDbCommand MergeCommands(this IDatabase db, IDbCommand @base, IDbCommand last,
+			bool autoRename = false)
 		{
 			return db.MergeTextToParameters(@base, last, autoRename);
+		}
+
+		internal static IDbCommand AppendSuffix(this IDatabase db, IDbCommand left, string suffix)
+		{
+			var commandText = left.CommandText;
+			var parameter = new List<QueryParameter>();
+			foreach (var param in left.Parameters.Cast<IDataParameter>())
+			{
+				commandText = commandText.Replace(param.ParameterName, param.ParameterName + suffix);
+				parameter.Add(new QueryParameter(param.ParameterName + suffix, param.Value, param.DbType));
+			}
+			return db.CreateCommandWithParameterValues(commandText, parameter);
 		}
 
 		internal static IDbCommand MergeTextToParameters(this IDatabase db,
 			IDbCommand @base,
 			IDbCommand last,
 			bool autoRename = false,
-			int seed = 1)
+			int seed = 1,
+			bool pessimistic = true)
 		{
-			var parameter =
-				@base.Parameters.Cast<IDataParameter>()
-					.Select(item => new QueryParameter(item.ParameterName, item.Value, item.DbType))
-					.Cast<IQueryParameter>()
-					.ToList();
-
 			var commandText = last.CommandText;
 
-			foreach (IDataParameter item in last.Parameters.Cast<IDataParameter>())
+			if (pessimistic)
 			{
-				if (parameter.Any(s => s.Name == item.ParameterName))
-				{
-					//Parameter is found twice in both commands so rename it
-					if (!autoRename)
-					{
-						throw new ArgumentOutOfRangeException("base",
-							String.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
-								item.ParameterName));
-					}
-					var counter = seed;
-					var parameterName = item.ParameterName;
-					var buffParam = parameterName;
-					while (parameter.Any(s => s.Name == buffParam))
-					{
-						buffParam = String.Format("{0}_{1}", parameterName, counter);
-						counter++;
-					}
-					commandText = commandText.Replace(item.ParameterName, buffParam);
+				var parameter =
+					@base.Parameters.Cast<IDataParameter>()
+						.Select(item => new QueryParameter(item.ParameterName, item.Value, item.DbType))
+						.Cast<IQueryParameter>()
+						.ToList();
 
-					item.ParameterName = buffParam;
+
+				foreach (IDataParameter item in last.Parameters.Cast<IDataParameter>())
+				{
+					if (parameter.Any(s => s.Name == item.ParameterName))
+					{
+						//Parameter is found twice in both commands so rename it
+						if (!autoRename)
+						{
+							throw new ArgumentOutOfRangeException("base",
+								String.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
+									item.ParameterName));
+						}
+						var counter = seed;
+						var parameterName = item.ParameterName;
+						var buffParam = parameterName;
+						while (parameter.Any(s => s.Name == buffParam))
+						{
+							buffParam = String.Format("{0}_{1}", parameterName, counter);
+							counter++;
+						}
+						commandText = commandText.Replace(item.ParameterName, buffParam);
+
+						item.ParameterName = buffParam;
+					}
+
+					parameter.Add(new QueryParameter(item.ParameterName, item.Value, item.DbType));
 				}
 
-				parameter.Add(new QueryParameter(item.ParameterName, item.Value, item.DbType));
+				return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, parameter);
 			}
-
-			return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, parameter);
+			else
+			{
+				var arguments = new List<IDataParameter>(@base
+					.Parameters
+					.Cast<IDataParameter>());
+				arguments.AddRange(last.Parameters.Cast<IDataParameter>());
+				return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, arguments);
+			}
 		}
 
 		/// <summary>
@@ -242,6 +272,33 @@ namespace JPB.DataAccess
 			return cmd;
 		}
 
+		/// <summary>
+		///     Wraps
+		///     <paramref name="query" />
+		///     into a Command and adds the values
+		///     values are added by Name of IQueryParamter
+		///     If item of
+		///     <paramref name="values" />
+		///     contains a name that does not contains @ it will be added
+		/// </summary>
+		/// <returns></returns>
+		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, string query,
+			IEnumerable<IDataParameter> values)
+		{
+			var cmd = CreateCommand(db, query);
+			if (values == null)
+				return cmd;
+			foreach (var queryParameter in values)
+			{
+				var dbDataParameter = cmd.CreateParameter();
+				dbDataParameter.DbType = queryParameter.DbType;
+				dbDataParameter.Value = queryParameter.Value;
+				dbDataParameter.ParameterName = queryParameter.ParameterName;
+				cmd.Parameters.Add(dbDataParameter);
+			}
+			return cmd;
+		}
+
 		internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(this object parameter)
 		{
 			if (parameter == null)
@@ -264,7 +321,7 @@ namespace JPB.DataAccess
 				foreach (var dynProperty in dynType.Propertys)
 				{
 					var convertedParam = parameter.GetParamaterValue(dbConfig, dynProperty.Key);
-					elements.Add(new QueryParameter(dynProperty.Key.CheckParamter(), convertedParam));					
+					elements.Add(new QueryParameter(dynProperty.Key.CheckParamter(), convertedParam));
 				}
 				return elements;
 			}

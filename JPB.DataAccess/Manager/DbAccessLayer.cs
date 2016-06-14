@@ -131,20 +131,20 @@ namespace JPB.DataAccess.Manager
 			}
 			else
 			{
-				_config = new DbConfig();
+				_config = config;
 			}
-			DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
-			_logger = logger;
+			this.DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
+			this._logger = logger;
 			if (logger == null)
 			{
 				_logger = new DefaultLogger();
 			}
 
-			Debugger = false;
-			LoadCompleteResultBeforeMapping = true;
-
-			SelectDbAccessLayer();
-			UpdateDbAccessLayer();
+			this.Debugger = false;
+			this.LoadCompleteResultBeforeMapping = true;
+			this.CheckFactoryArguments = true;
+			this.SelectDbAccessLayer();
+			this.UpdateDbAccessLayer();
 		}
 
 		/// <summary>

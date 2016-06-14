@@ -86,7 +86,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentNullException("methodBody");
 			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
-			var mehtodInfo = new DbMethodInfoCache(methodBody, methodName, attributes);
+			var mehtodInfo = new DbMethodInfoCache(methodBody, ClassInfoCache.Type, methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
@@ -106,7 +106,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			{
 				methodBody((Source)o, (Input)objects[0]);
 				return null;
-			}, methodName, attributes);
+			}, ClassInfoCache.Type, methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
@@ -124,7 +124,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
 			{
 				return methodBody((Source)o);
-			}, methodName, attributes);
+			}, ClassInfoCache.Type,  methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
@@ -149,14 +149,15 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake property to the class getter and setter will be invoked like normal ones
 		/// </summary>
-		/// <typeparam name="TE"></typeparam>
-		public void CreateProperty<TE>(string name, params AttributeInfoCache[] attributes)
+		/// <typeparam name="TE">Type of the Property</typeparam>
+		/// <typeparam name="T">Type where the Static Property should be mapped to</typeparam>
+		public void CreateStaticProperty<TE, T>(string name, params AttributeInfoCache[] attributes)
 		{
 			if (name == null)
 				throw new ArgumentNullException("name");
 			if (ClassInfoCache.Propertys.Any(s => s.Key == name))
 				throw new ArgumentOutOfRangeException("name", "Property name does exist. Cannot define a property twice");
-			var propInfo = new DbAutoPropertyInfoCache<TE>(name, attributes);
+			var propInfo = new DbAutoStaticPropertyInfoCache<TE>(name, typeof(T), attributes);
 			ClassInfoCache.Propertys.Add(name, propInfo);
 		}
 

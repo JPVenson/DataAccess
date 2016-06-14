@@ -33,7 +33,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			: base((e, f) =>
 			{
 				return del();
-			}, ".ctor")
+			}, typeof(ConstructorStructFakeInfoCache), ".ctor")
 		{
 
 		}

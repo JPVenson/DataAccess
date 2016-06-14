@@ -17,34 +17,6 @@ using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
-	internal class DbAutoPropertyInfoCache<TE> : DbPropertyInfoCache
-	{
-		private TE _value;
-		internal DbAutoPropertyInfoCache(string name, params AttributeInfoCache[] attributes)
-		{
-			if (name == null)
-				throw new ArgumentNullException("name");
-			if (attributes == null)
-				throw new ArgumentNullException("attributes");
-
-			PropertyName = name;
-
-			Setter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) =>
-			{
-				Value = (TE) objects[0];
-				return null;
-			});
-
-			Getter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) => Value);
-		}
-
-		public TE Value
-		{
-			get { return _value; }
-			set { _value = value; }
-		}
-	}
-
 	internal class DbPropertyInfoCache<TE> : DbPropertyInfoCache
 	{
 		internal DbPropertyInfoCache(string name, Action<dynamic, TE> setter = null, Func<dynamic, TE> getter = null,
@@ -59,7 +31,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) =>
+				Setter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) =>
 				{
 					setter(o, (TE)objects[0]);
 					return null;
@@ -68,7 +40,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) => getter(o));
+				Getter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) => getter(o));
 			}
 		}
 	}
@@ -85,7 +57,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) =>
+				Setter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) =>
 				{
 					setter((T)o, (TE)objects[0]);
 					return null;
@@ -94,7 +66,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>((o, objects) => getter((T)o));
+				Getter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) => getter((T)o));
 			}
 		}
 	}

@@ -45,7 +45,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Insert<T>(T entry)
 		{
-			Insert(typeof (T), entry);
+			Insert(typeof(T), entry);
 		}
 
 		/// <summary>
@@ -59,10 +59,10 @@ namespace JPB.DataAccess.Manager
 				var insertRangeCommand = CreateInsertRangeCommand(entry.ToArray());
 				//TODO 
 				uint curr = 0;
-				foreach (IDbCommand item in insertRangeCommand)
+				foreach (var item in insertRangeCommand)
 				{
 					curr += RangerInsertPation;
-					RaiseInsert(entry.Skip(((int) curr)).Take((int) RangerInsertPation), item);
+					RaiseInsert(entry.Skip(((int)curr)).Take((int)RangerInsertPation), item);
 					c.ExecuteNonQuery(item);
 				}
 			});
@@ -80,30 +80,34 @@ namespace JPB.DataAccess.Manager
 
 			uint toke = 0;
 			int tokeAll = 0;
-			var type = typeof (T);
+			var type = typeof(T);
+
+			var compiledRange = RangerInsertPation == 0 ? 0.1 * entrys.Length : (int)RangerInsertPation;
 
 			for (var i = 0; i < entrys.Count(); i++)
 			{
 				var singelCommand = CreateInsert(type, entrys[i]);
+				singelCommand = Database.AppendSuffix(singelCommand, "_" + i);
 
 				if (insertRange == null)
 				{
 					insertRange = singelCommand;
 					continue;
 				}
-				insertRange = Database.MergeTextToParameters(insertRange, singelCommand, true, tokeAll);
+
+				insertRange = Database.MergeTextToParameters(insertRange, singelCommand, true, tokeAll, false);
 				toke++;
 				tokeAll++;
 
-				if (toke == RangerInsertPation)
+				if (toke >= compiledRange)
 				{
 					toke = 0;
 					commands.Add(insertRange);
 					insertRange = null;
 				}
 			}
-
-			commands.Add(insertRange);
+			if (insertRange != null)
+				commands.Add(insertRange);
 			return commands.ToArray();
 		}
 
@@ -168,7 +172,7 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Insert<T>(T entry, IDatabase db)
 		{
-			Insert(typeof (T), entry, db);
+			Insert(typeof(T), entry, db);
 		}
 
 		/// <summary>
@@ -214,7 +218,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T InsertWithSelect<T>(T entry)
 		{
-			return (T) InsertWithSelect(typeof (T), entry);
+			return (T)InsertWithSelect(typeof(T), entry);
 		}
 	}
 }
