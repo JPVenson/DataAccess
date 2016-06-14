@@ -69,6 +69,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 					do
 					{
 						var indexOfElementString = reader.GetAttribute("Index");
+						if(indexOfElementString == null)
+							throw new InvalidDataException("Invalid XML document for Db import. index for a table is unset");
 						reader.ReadStartElement(TableContentList);
 						var type = elements[indexOfElementString];
 						var table = LocalDbManager.Scope.Database[type];
