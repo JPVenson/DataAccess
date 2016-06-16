@@ -104,8 +104,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				IDbCommand finalAppendCommand;
 				if (AppendedComands.Any())
 				{
-					finalAppendCommand = AppendedComands.Aggregate(DbAccessLayerHelper.CreateCommand(s, "WHERE"),
-						(current, comand) => DbAccessLayerHelper.ConcatCommands(s, current, comand));
+					if (BaseQuery == null)
+					{
+						BaseQuery = dbAccess.CreateSelect<T>();
+					}
+
+					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
+						(current, comand) => s.MergeTextToParameters(current, comand, false, 1, true, false));
 				}
 				else
 				{
@@ -144,7 +149,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				{
 					long parsedCount;
 					long.TryParse(maxItems.ToString(), out parsedCount);
-					MaxPage = parsedCount / PageSize;
+					MaxPage = (long)Math.Ceiling((decimal)parsedCount / PageSize);
 				}
 
 				//Check select strategy

@@ -90,7 +90,8 @@ namespace JPB.DataAccess
 			IDbCommand last,
 			bool autoRename = false,
 			int seed = 1,
-			bool pessimistic = true)
+			bool pessimistic = true,
+			bool insertDelimiter = true)
 		{
 			var commandText = last.CommandText;
 
@@ -130,7 +131,7 @@ namespace JPB.DataAccess
 					parameter.Add(new QueryParameter(item.ParameterName, item.Value, item.DbType));
 				}
 
-				return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, parameter);
+				return db.CreateCommandWithParameterValues(@base.CommandText + (insertDelimiter ? "; " : " ") + commandText, parameter);
 			}
 			else
 			{

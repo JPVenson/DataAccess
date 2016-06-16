@@ -32,8 +32,6 @@ namespace JPB.DataAccess.Tests.PagerTests
 #endif
 		public void PagerCall()
 		{
-			//this test might be fail as the cleanup can produce a lock exception. Run this test as a standalone
-
 			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
 
 			int upperCountTestUsers = 100;
@@ -43,21 +41,23 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 			for (int i = 0; i < upperCountTestUsers; i++)
 			{
-				testUers.Add(new Users {UserName = insGuid});
+				testUers.Add(new Users { UserName = insGuid });
 			}
 
 			expectWrapper.InsertRange(testUers);
 
 			object refSelect =
 				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.UserTable)));
-			Assert.AreEqual(testUers.Count, refSelect);
+			Assert.That(testUers.Count, Is.EqualTo(refSelect));
 
 			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())
 			{
-				Assert.IsNotNull(pager);
+				Assert.That(pager, Is.Not.Null);
 
 				pager.CurrentPage = 1;
 				pager.PageSize = 25;
+
+				Assert.That(pager.MaxPage, Is.EqualTo(0));
 
 				#region CheckEvents
 
@@ -69,14 +69,16 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				pager.LoadPage(expectWrapper);
 
-				Assert.IsFalse(triggeredNewPageLoaded);
-				Assert.IsFalse(triggeredNewPageLoading);
+				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
+				Assert.That(triggeredNewPageLoaded, Is.False);
+				Assert.That(triggeredNewPageLoading, Is.False);
 
 				pager.RaiseEvents = true;
 				pager.LoadPage(expectWrapper);
 
-				Assert.IsTrue(triggeredNewPageLoaded);
-				Assert.IsTrue(triggeredNewPageLoading);
+				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
+				Assert.That(triggeredNewPageLoaded);
+				Assert.That(triggeredNewPageLoading);
 
 				#endregion
 
@@ -84,13 +86,92 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				int oldPageSize = pager.PageSize;
 				int newPageSize = 20;
-				Assert.AreEqual(pager.CurrentPageItems.Count, oldPageSize);
+				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(oldPageSize));
 
 				pager.PageSize = newPageSize;
-				Assert.AreEqual(pager.PageSize, newPageSize);
+				Assert.That(pager.PageSize, Is.EqualTo(newPageSize));
 
 				pager.LoadPage(expectWrapper);
-				Assert.AreEqual(pager.CurrentPageItems.Count, newPageSize);
+				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
+				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(newPageSize));
+
+				#endregion
+			}
+
+		}
+
+		[Test]
+		[Category("MsSQL")]
+#if SqLite
+		[Ignore("MsSQL only")]
+#endif
+		public void PagerConditionalCall()
+		{
+			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
+			expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.UserTable), null);
+
+			int upperCountTestUsers = 100;
+			var testUers = new List<Users>();
+
+			string insGuid = Guid.NewGuid().ToString();
+
+			for (int i = 0; i < upperCountTestUsers; i++)
+			{
+				testUers.Add(new Users { UserName = insGuid });
+			}
+
+			expectWrapper.InsertRange(testUers);
+
+			object refSelect =
+				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.UserTable)));
+			Assert.That(testUers.Count, Is.EqualTo(refSelect));
+
+			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())
+			{
+				pager.AppendedComands.Add(expectWrapper.Database.CreateCommand("WHERE User_ID = 1"));
+
+				Assert.That(pager, Is.Not.Null);
+
+				pager.CurrentPage = 1;
+				pager.PageSize = 25;
+
+				Assert.That(pager.MaxPage, Is.EqualTo(0));
+
+				#region CheckEvents
+
+				bool triggeredNewPageLoaded = false;
+				bool triggeredNewPageLoading = false;
+
+				pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
+				pager.NewPageLoading += () => triggeredNewPageLoading = true;
+
+				pager.LoadPage(expectWrapper);
+
+				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
+				Assert.That(triggeredNewPageLoaded, Is.False);
+				Assert.That(triggeredNewPageLoading, Is.False);
+
+				pager.RaiseEvents = true;
+				pager.LoadPage(expectWrapper);
+
+				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
+				Assert.That(triggeredNewPageLoaded);
+				Assert.That(triggeredNewPageLoading);
+
+				#endregion
+
+				#region CheckPage Size
+
+				int oldPageSize = pager.PageSize;
+				int newPageSize = 20;
+				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(1));
+
+				pager.PageSize = newPageSize;
+				Assert.That(pager.PageSize, Is.EqualTo(newPageSize));
+
+				pager.LoadPage(expectWrapper);
+				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
+				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(1));
 
 				#endregion
 			}

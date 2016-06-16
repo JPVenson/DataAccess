@@ -117,7 +117,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 			//Add TestMethod
 			Assert.That(_users.Remove(user), Is.True);
-			Assert.That(_users.Count, Is.EqualTo(1));
+			Assert.That(_users.Count, Is.EqualTo(0));
 		}
 
 

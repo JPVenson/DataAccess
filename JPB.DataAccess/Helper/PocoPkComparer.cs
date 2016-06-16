@@ -98,7 +98,7 @@ namespace JPB.DataAccess.Helper
 		{
 			if (assertNotDatabaseMember == null && PocoPkComparer<T>.DefaultAssertionObject != null)
 			{
-				assertNotDatabaseMember = PocoPkComparer<T>.DefaultAssertionObject;
+				assertNotDatabaseMember = DefaultAssertionObject;
 				useAssertion = true;
 			}
 			Init(assertNotDatabaseMember, useAssertion, config, propertyName);
@@ -235,9 +235,6 @@ namespace JPB.DataAccess.Helper
 				Value = left;
 				return true;
 			}
-
-			if (leftNull && rightNull)
-				return true;
 
 			if (leftNull)
 				return false;
