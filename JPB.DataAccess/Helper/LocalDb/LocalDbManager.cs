@@ -93,7 +93,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///	{
 		///		//Table creation ...
 		///		//new LocalDbReposetory&lt;T&gt;(new DbConfig())
-		///		using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes(DbLoaderResouces.UsersInDatabaseDump)))
+		///		using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes("xml")))
 		///		{
 		///			new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
 		///		}

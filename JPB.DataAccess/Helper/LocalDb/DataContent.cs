@@ -10,6 +10,10 @@ using System.Xml.Serialization;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
+	/// <summary>
+	/// Provieds the IXmlSerializable interface for an entire database.
+	/// Not thread save
+	/// </summary>
 	public class DataContent : IXmlSerializable
 	{
 		private readonly LocalDbManager _instance;

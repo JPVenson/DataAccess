@@ -510,7 +510,6 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Creates a Select by using a Factory mehtod or auto generated querys
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		private static IDbCommand _CreateSelect(DbClassInfoCache type, IDatabase db)
 		{

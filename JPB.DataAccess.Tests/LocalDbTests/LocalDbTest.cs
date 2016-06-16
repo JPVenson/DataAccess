@@ -75,9 +75,8 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var user = new Users();
 			_users.Add(user);
-			Assert.IsNotNull(user);
-			Assert.AreNotEqual(user.UserID, 0);
-			Assert.AreEqual(user.UserID, 1);
+			Assert.That(user, Is.Not.Null);
+			Assert.That(user.UserID, Is.EqualTo(1));
 		}
 
 		[Test]
@@ -87,7 +86,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_users.Add(user);
 
 			//Add TestMethod
-			Assert.IsTrue(_users.Contains(user));
+			Assert.That(_users.Contains(user), Is.True);
 		}
 
 		[Test]
@@ -97,7 +96,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_users.Add(user);
 
 			//Add TestMethod
-			Assert.IsTrue(_users.Contains(user.UserID));
+			Assert.That(_users.Contains(user.UserID), Is.True);
 		}
 
 		[Test]
@@ -107,7 +106,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_users.Add(user);
 
 			//Add TestMethod
-			Assert.AreEqual(_users.Count, 1);
+			Assert.That(_users.Count, Is.EqualTo(1));
 		}
 
 		[Test]
@@ -117,8 +116,8 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_users.Add(user);
 
 			//Add TestMethod
-			Assert.IsTrue(_users.Remove(user));
-			Assert.AreEqual(_users.Count, 0);
+			Assert.That(_users.Remove(user), Is.True);
+			Assert.That(_users.Count, Is.EqualTo(1));
 		}
 
 

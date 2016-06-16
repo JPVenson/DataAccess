@@ -17,9 +17,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	/// Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way. 
-	/// Starting with 0 incriment by 1
+	/// Starting with 0 incriment by 1.
+	/// When enumerating the Repro you will only receive the Current state as it is designed to be thread save
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	[Serializable]
 	public abstract class LocalDbReposetoryBase : ICollection
 	{
