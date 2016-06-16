@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Transactions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
+using JPB.DataAccess.Helper.LocalDb.Constraints;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 

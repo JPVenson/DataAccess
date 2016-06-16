@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace JPB.DataAccess.Helper.LocalDb
+﻿namespace JPB.DataAccess.Helper.LocalDb.Constraints
 {
 	internal class ForginKeyConstraintException : ConstraintException
 	{
@@ -29,14 +27,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 			pkName,
 			fkName, 
 			constraintName))
-		{
-
-		}
-	}
-
-	internal class ConstraintException : Exception
-	{
-		public ConstraintException(string message) : base(message)
 		{
 
 		}

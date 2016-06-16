@@ -7,6 +7,7 @@ using System.Transactions;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {

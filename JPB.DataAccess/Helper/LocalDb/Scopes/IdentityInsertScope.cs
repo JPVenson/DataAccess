@@ -1,7 +1,7 @@
 using System;
 using System.Transactions;
 
-namespace JPB.DataAccess.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb.Scopes
 {
 	/// <summary>
 	/// Defines an Area that allows identity Inserts
@@ -17,6 +17,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new Idenity Scope. Close it with Dispose
 		/// Must be created inside an TransactionScope
+		/// it is strongy recommanded to create this class inside an using construct!
 		/// </summary>
 		/// <param name="rewriteDefaultValues">Should every DefaultValue still be set to a valid Id</param>
 		public IdentityInsertScope(bool rewriteDefaultValues = false)

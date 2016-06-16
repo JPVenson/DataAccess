@@ -1,7 +1,7 @@
 ﻿using System;
 using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 {
 	/// <summary>
 	/// 

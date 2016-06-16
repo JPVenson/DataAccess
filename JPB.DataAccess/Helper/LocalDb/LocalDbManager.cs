@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {

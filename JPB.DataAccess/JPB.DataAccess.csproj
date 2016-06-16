@@ -138,6 +138,9 @@
     <Compile Include="DbInfoConfig\FactoryHelper.cs" />
     <Compile Include="DbInfoConfig\FactoryHelperSettings.cs" />
     <Compile Include="Helper\EnumMemberConverter.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\ConstraintException.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\ForActionCancelToken.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\InsteadtOfActionToken.cs" />
     <Compile Include="Helper\LocalDb\Scopes\DatabaseScope.cs" />
     <Compile Include="Helper\LocalDb\DataContent.cs" />
     <Compile Include="Helper\LocalDb\Constraints\ForginKeyConstraintException.cs" />
@@ -150,6 +153,13 @@
     <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalGuidPkProvider.cs" />
     <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalIntPkProvider.cs" />
     <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalLongPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\TransactionalItem.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\ReplicationNode.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\TriggerAfterCollection.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\TriggerException.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\TriggerForCollection.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\TriggerForTableCollection.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\TriggerInsteadtOfCollection.cs" />
     <Compile Include="Helper\PocoPkComparer.cs" />
     <Compile Include="Helper\LocalDb\ReproMappings.cs" />
     <Compile Include="Contacts\MetaApi\IMethodArgsInfoCache.cs" />
