@@ -20,6 +20,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		}
 
 		/// <summary>
+		/// Creates a new Database
+		/// </summary>
+		internal DatabaseScope(LocalDbManager dbManager)
+		{
+			LocalDbManager.Scope = dbManager;
+		}
+
+		/// <summary>
 		/// Will be invoked if dispose is called
 		/// </summary>
 		public event EventHandler SetupDone

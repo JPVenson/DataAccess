@@ -1,4 +1,5 @@
-﻿using System.CodeDom;
+﻿using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
 		/// </summary>
 		public LocalDbReposetory(DbConfig config, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), null, config, true,  constraints)
+			: base(typeof(T), null, config, true, constraints)
 		{
 		}
 		/// <summary>
@@ -38,6 +39,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
+		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
+		/// </summary>
+		/// <param name="config"></param>
+		/// <param name="useOrignalObjectInMemory">If set to true the original object is used otherwise a copy will be created</param>
+		/// <param name="keyGenerator"></param>
+		/// <param name="constraints"></param>
+		public LocalDbReposetory(DbConfig config, bool useOrignalObjectInMemory, ILocalPrimaryKeyValueProvider keyGenerator, params ILocalDbConstraint[] constraints)
+			: base(typeof(T), keyGenerator, config, useOrignalObjectInMemory, constraints)
+		{
+		}
+
+		/// <summary>
 		/// Adds a new Item to the Table
 		/// </summary>
 		/// <param name="item"></param>
@@ -47,7 +60,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Checks if the item is ether localy stored or on database
+		/// Checks if the item ref is ether localy stored or on database
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -76,6 +89,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public void CopyTo(T[] array, int arrayIndex)
 		{
 			base.CopyTo(array, arrayIndex);
+		}
+
+		public bool Update(T item)
+		{
+			return base.Update(item);
 		}
 
 		/// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
@@ -15,17 +16,24 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 .SqLite
 #endif
 {
-	[TestFixture]
+	[TestFixture(false)]
+	[TestFixture(true)]
 	public class LocalDbTest
 	{
+		private readonly bool _useObjectCopy;
 		private LocalDbReposetory<Users> _users;
+
+		public LocalDbTest(bool useObjectCopy)
+		{
+			_useObjectCopy = useObjectCopy;
+		}
 
 		[SetUp]
 		public void TestInit()
 		{
 			using (new DatabaseScope())
 			{
-				_users = new LocalDbReposetory<Users>(new DbConfig());
+				_users = new LocalDbReposetory<Users>(new DbConfig(), _useObjectCopy, null);
 			}
 
 			Assert.IsTrue(_users.ReposetoryCreated);
@@ -52,7 +60,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 				{
 					foreach (var userse in _users)
 					{
-						
+
 					}
 					var firstOrDefault = _users.FirstOrDefault();
 					if (d % 2 == 0)
@@ -87,7 +95,10 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_users.Add(user);
 
 			//Add TestMethod
-			Assert.That(_users.Contains(user), Is.True);
+			if (_useObjectCopy)
+				Assert.That(_users.Contains(user), Is.True);
+			else
+				Assert.That(_users.Contains(user), Is.False);
 		}
 
 		[Test]
@@ -121,15 +132,24 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.That(_users.Count, Is.EqualTo(0));
 		}
 
-
 		[Test]
 		public void Enumerate()
 		{
 			var user = new Users();
 			_users.Add(user);
-			_users.Add(user);
-			Assert.That(_users.Count, Is.EqualTo(1));
-			Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Length").EqualTo(1));
+			if (_useObjectCopy)
+			{
+				_users.Add(user);
+				Assert.That(_users.Count, Is.EqualTo(1));
+				Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Length").EqualTo(1));
+			}
+			else
+			{
+				Assert.That(() => _users.Add(user), Throws.Exception.TypeOf<InvalidOperationException>());
+				Assert.That(_users.Count, Is.EqualTo(1));
+				Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Length").EqualTo(1));
+			}
+			
 			_users.Add(new Users());
 			_users.Add(new Users());
 			_users.Add(new Users());

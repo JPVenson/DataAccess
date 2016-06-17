@@ -148,7 +148,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     If true the creation was successfull and all tables for the this table are mapped
 		///     The Reposetory cannot operate if the reposetory is not created!
 		/// </summary>
-		public bool ReposetoryCreated { get; private set; }
+		public bool ReposetoryCreated { get; internal set; }
 
 		/// <summary>
 		///     Returns an object with the given Primarykey
@@ -188,7 +188,17 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (Db != null)
 				return Db.Select(TypeInfo.Type).GetEnumerator();
 
-			return Base.Values.GetEnumerator();
+			return Base.Values.Select(s =>
+			{
+				if (_keepOriginalObject)
+					return s;
+				bool fullyLoaded;
+				return DbAccessLayer.CreateInstance(
+					TypeInfo,
+					new ObjectDataRecord(s, _config, 0),
+					out fullyLoaded,
+					DbAccessType.Unknown);
+			}).GetEnumerator();
 		}
 
 		/// <summary>
@@ -200,7 +210,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			lock (SyncRoot)
 			{
-				var values = Base.Values.ToArray();
+				var values = this.ToArray();
 				values.CopyTo(array, index);
 			}
 		}
@@ -222,18 +232,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		private void DatabaseDatabaseOnSetupDone(object sender, EventArgs eventArgs)
 		{
-			foreach (var dbPropertyInfoCach in TypeInfo.Propertys)
+			ReposetoryCreated = false;
+			lock (LockRoot)
 			{
-				if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null &&
-					dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
+				foreach (var dbPropertyInfoCach in TypeInfo.Propertys)
 				{
-					_databaseDatabase.AddMapping(TypeInfo.Type,
-						dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
+					if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null &&
+						dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
+					{
+						_databaseDatabase.AddMapping(TypeInfo.Type,
+							dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
+					}
 				}
-			}
 
-			ReposetoryCreated = true;
-			IsMigrating = false;
+				ReposetoryCreated = true;
+				IsMigrating = false;
+			}
 		}
 
 		private void CheckCreatedElseThrow()
@@ -473,6 +487,43 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
+		/// When using the KeepOriginalObject option set to false you can update any element by using this function
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
+		public virtual bool Update(object item)
+		{
+			Triggers.For.OnUpdate(item);
+			bool op;
+			if (Db != null)
+			{
+				if (!this.Triggers.InsteadOf.OnUpdate(item))
+				{
+					op = Db.Update(item);
+				}
+				else
+				{
+					op = true;
+				}
+				this.Triggers.After.OnUpdate(item);
+				return op;
+			}
+
+			var getElement = this[GetId(item)];
+			if(getElement == null)
+				return false;
+			if (object.ReferenceEquals(item, getElement))
+				return true;
+
+			if (!this.Triggers.InsteadOf.OnUpdate(item))
+			{
+				DataConverterExtensions.CopyPropertys(item, getElement, _config);
+			}
+			this.Triggers.After.OnUpdate(item);
+			return true;
+		}
+
+		/// <summary>
 		///     Adds a new Item to the Table
 		/// </summary>
 		/// <param name="item"></param>
@@ -620,7 +671,17 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			lock (SyncRoot)
 			{
-				return Base.Values.ToArray();
+				return Base.Values.Select(s =>
+				{
+					if (_keepOriginalObject)
+						return s;
+					bool fullyLoaded;
+					return DbAccessLayer.CreateInstance(
+							TypeInfo,
+							new ObjectDataRecord(s, _config, 0),
+							out fullyLoaded,
+							DbAccessType.Unknown);
+				}).ToArray();
 			}
 		}
 

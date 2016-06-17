@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
@@ -74,6 +76,21 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			var mapping = _mappings.Where(f => f.TargetType == thisType).ToArray();
 			return _database.Where(f => mapping.Any(e => e.SourceType == f.Key)).Select(f => f.Value);
+		}
+
+		/// <summary>
+		/// allowes to Add or remove tabels from this Database. 
+		/// If you try to use the tables before calling dispose on the returned Scope an InvalidOperationException will be thrown
+		/// </summary>
+		/// <returns></returns>
+		public DatabaseScope Alter()
+		{
+			_mappings.Clear();
+			foreach (var localDbReposetoryBase in _database)
+			{
+				localDbReposetoryBase.Value.ReposetoryCreated = false;
+			}
+			return new DatabaseScope(Scope);
 		}
 
 		/// <summary>
