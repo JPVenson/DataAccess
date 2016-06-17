@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Linq.Expressions;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 
-namespace JPB.DataAccess.Helper.LocalDb.Constraints
+namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 {
-	public class LocalDbConstraint : ILocalDbConstraint
+	public class LocalDbCheckConstraint : ILocalDbCheckConstraint
 	{
-		public LocalDbConstraint(string name, Func<object,bool> constraint)
+		public LocalDbCheckConstraint(string name, Func<object, bool> constraint)
 		{
 			_name = name;
 			_constraint = constraint;

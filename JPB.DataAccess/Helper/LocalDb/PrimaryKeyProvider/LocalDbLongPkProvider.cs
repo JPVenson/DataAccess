@@ -6,7 +6,7 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 	/// <summary>
 	/// 
 	/// </summary>
-	public class LocalLongPkProvider : ILocalPrimaryKeyValueProvider
+	public class LocalDbLongPkProvider : ILocalDbPrimaryKeyConstraint
 	{
 		private long _counter = 1;
 		public static string LastMessage = "";
@@ -26,9 +26,9 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 			return 0L;
 		}
 
-		public ILocalPrimaryKeyValueProvider Clone()
+		public ILocalDbPrimaryKeyConstraint Clone()
 		{
-			return new LocalLongPkProvider();
+			return new LocalDbLongPkProvider();
 		}
 
 		public new bool Equals(object x, object y)

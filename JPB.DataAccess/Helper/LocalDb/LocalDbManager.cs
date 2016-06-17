@@ -12,10 +12,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 	{
 		static LocalDbManager()
 		{
-			DefaultPkProvider = new Dictionary<Type, ILocalPrimaryKeyValueProvider>();
-			DefaultPkProvider.Add(typeof(int), new LocalIntPkProvider());
-			DefaultPkProvider.Add(typeof(long), new LocalLongPkProvider());
-			DefaultPkProvider.Add(typeof(Guid), new LocalGuidPkProvider());
+			DefaultPkProvider = new Dictionary<Type, ILocalDbPrimaryKeyConstraint>();
+			DefaultPkProvider.Add(typeof(int), new LocalDbIntPkProvider());
+			DefaultPkProvider.Add(typeof(long), new LocalDbLongPkProvider());
+			DefaultPkProvider.Add(typeof(Guid), new LocalDbGuidPkProvider());
 		}
 
 		internal LocalDbManager()
@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_mappings = new HashSet<ReproMappings>();
 		}
 
-		internal static readonly Dictionary<Type, ILocalPrimaryKeyValueProvider> DefaultPkProvider;
+		internal static readonly Dictionary<Type, ILocalDbPrimaryKeyConstraint> DefaultPkProvider;
 
 		[ThreadStatic]
 		private static LocalDbManager _scope;

@@ -7,19 +7,19 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 	/// <summary>
 	/// 
 	/// </summary>
-	public class LocalIntPkProvider : ILocalPrimaryKeyValueProvider
+	public class LocalDbIntPkProvider : ILocalDbPrimaryKeyConstraint
 	{
 		/// <summary>
 		/// Default primary key generation starts with 1 incriments by 1
 		/// </summary>
-		public LocalIntPkProvider()
+		public LocalDbIntPkProvider()
 		{
 			_counter = 0;
 			Seed = 1;
 			Incriment = 1;
 		}
 
-		public LocalIntPkProvider(int seed, int incriment)
+		public LocalDbIntPkProvider(int seed, int incriment)
 		{
 			_counter = seed;
 			Seed = seed;
@@ -46,9 +46,9 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 			return 0;
 		}
 
-		public ILocalPrimaryKeyValueProvider Clone()
+		public ILocalDbPrimaryKeyConstraint Clone()
 		{
-			return new LocalIntPkProvider();
+			return new LocalDbIntPkProvider();
 		}
 
 		public new bool Equals(object x, object y)

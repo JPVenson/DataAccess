@@ -6,7 +6,7 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 	/// <summary>
 	/// 
 	/// </summary>
-	public class LocalGuidPkProvider : ILocalPrimaryKeyValueProvider
+	public class LocalDbGuidPkProvider : ILocalDbPrimaryKeyConstraint
 	{
 		public Type GeneratingType
 		{
@@ -23,9 +23,9 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 			return new Guid();
 		}
 
-		public ILocalPrimaryKeyValueProvider Clone()
+		public ILocalDbPrimaryKeyConstraint Clone()
 		{
-			return new LocalGuidPkProvider();
+			return new LocalDbGuidPkProvider();
 		}
 
 		public new bool Equals(object x, object y)

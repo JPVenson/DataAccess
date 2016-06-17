@@ -19,8 +19,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/>
 		/// </summary>
-		public LocalDbReposetory(DbConfig config, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), null, config, true, constraints)
+		public LocalDbReposetory(DbConfig config)
+			: base(typeof(T), null, config, true)
 		{
 		}
 		/// <summary>
@@ -33,8 +33,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// Creates a new LocalDB Repro by using <typeparamref name="T"/> and uses the KeyProvider to generate Primarykeys
 		/// </summary>
-		public LocalDbReposetory(DbConfig config, ILocalPrimaryKeyValueProvider keyProvider, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), keyProvider, config, true, constraints)
+		public LocalDbReposetory(DbConfig config, ILocalDbPrimaryKeyConstraint keyProvider)
+			: base(typeof(T), keyProvider, config, true)
 		{
 		}
 
@@ -44,9 +44,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <param name="config"></param>
 		/// <param name="useOrignalObjectInMemory">If set to true the original object is used otherwise a copy will be created</param>
 		/// <param name="keyGenerator"></param>
-		/// <param name="constraints"></param>
-		public LocalDbReposetory(DbConfig config, bool useOrignalObjectInMemory, ILocalPrimaryKeyValueProvider keyGenerator, params ILocalDbConstraint[] constraints)
-			: base(typeof(T), keyGenerator, config, useOrignalObjectInMemory, constraints)
+		/// <param name="checkConstraints"></param>
+		public LocalDbReposetory(DbConfig config, bool useOrignalObjectInMemory, ILocalDbPrimaryKeyConstraint keyGenerator)
+			: base(typeof(T), keyGenerator, config, useOrignalObjectInMemory)
 		{
 		}
 

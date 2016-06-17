@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Transactions;
@@ -12,6 +13,7 @@ using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper.LocalDb.Constraints;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Collections;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Helper.LocalDb.Trigger;
 using JPB.DataAccess.Manager;
@@ -31,9 +33,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private readonly bool _keepOriginalObject;
 		private readonly List<TransactionalItem> _transactionalItems = new List<TransactionalItem>();
 		protected internal readonly IDictionary<object, object> Base;
-		protected internal readonly HashSet<ILocalDbConstraint> Constraints;
 		protected internal readonly DbAccessLayer Db;
-		protected internal readonly ILocalPrimaryKeyValueProvider KeyGenerator;
 		protected internal readonly object LockRoot = new object();
 		protected internal readonly DbClassInfoCache TypeInfo;
 		protected internal readonly DbClassInfoCache TypeKeyInfo;
@@ -54,16 +54,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     If enabled the given object referance will be used (Top performance).
 		///     if Disabled each object has to be define an Valid Ado.Net constructor to allow a copy (Can be slow)
 		/// </param>
-		/// <param name="constraints">Additonal Constrains to ensure database like Data Integrity</param>
 		protected LocalDbReposetoryBase(Type type,
-			ILocalPrimaryKeyValueProvider keyGenerator,
+			ILocalDbPrimaryKeyConstraint keyGenerator,
 			DbConfig config,
-			bool useOrignalObjectInMemory,
-			params ILocalDbConstraint[] constraints)
+			bool useOrignalObjectInMemory)
 		{
 			_keepOriginalObject = useOrignalObjectInMemory;
 			_config = config;
-			Constraints = new HashSet<ILocalDbConstraint>(constraints);
 			_databaseDatabase = LocalDbManager.Scope;
 			if (_databaseDatabase == null)
 			{
@@ -92,16 +89,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 															  "type of any value type cannot be used. Type: '{0}'", type.Name));
 			}
 
+			ILocalDbPrimaryKeyConstraint primaryKeyConstraint;
+
 			if (keyGenerator != null)
 			{
-				KeyGenerator = keyGenerator;
+				primaryKeyConstraint = keyGenerator;
 			}
 			else
 			{
-				ILocalPrimaryKeyValueProvider defaultKeyGen;
+				ILocalDbPrimaryKeyConstraint defaultKeyGen;
 				if (LocalDbManager.DefaultPkProvider.TryGetValue(TypeKeyInfo.Type, out defaultKeyGen))
 				{
-					KeyGenerator = defaultKeyGen.Clone() as ILocalPrimaryKeyValueProvider;
+					primaryKeyConstraint = defaultKeyGen.Clone() as ILocalDbPrimaryKeyConstraint;
 				}
 				else
 				{
@@ -118,6 +117,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 								.Aggregate((e, f) => e + "," + f)));
 				}
 			}
+
+			Constraints = new ConstraintCollection(this, primaryKeyConstraint);
 			Triggers = new TriggerForTableCollection(this);
 			Base = new ConcurrentDictionary<object, object>();
 			_databaseDatabase.AddTable(this);
@@ -268,27 +269,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 			if (_currentIdentityInsertScope != null)
 			{
-				if (idVal.Equals(KeyGenerator.GetUninitilized()) && !_currentIdentityInsertScope.RewriteDefaultValues)
+				if (idVal.Equals(Constraints.PrimaryKey.GetUninitilized()) && !_currentIdentityInsertScope.RewriteDefaultValues)
 				{
 					return idVal;
 				}
-				if (!idVal.Equals(KeyGenerator.GetUninitilized()))
+				if (!idVal.Equals(Constraints.PrimaryKey.GetUninitilized()))
 				{
 					return idVal;
 				}
 				lock (LockRoot)
 				{
-					var newId = KeyGenerator.GetNextValue();
+					var newId = Constraints.PrimaryKey.GetNextValue();
 					TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
 					return newId;
 				}
 			}
 
-			if (idVal.Equals(KeyGenerator.GetUninitilized()))
+			if (idVal.Equals(Constraints.PrimaryKey.GetUninitilized()))
 			{
 				lock (LockRoot)
 				{
-					var newId = KeyGenerator.GetNextValue();
+					var newId = Constraints.PrimaryKey.GetNextValue();
 					TypeInfo.PrimaryKeyProperty.Setter.Invoke(item, Convert.ChangeType(newId, TypeInfo.PrimaryKeyProperty.PropertyType));
 					return newId;
 				}
@@ -316,7 +317,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return key;
 		}
 
-		private ConstraintException CheckEnforceConstraints(object refItem)
+		private ConstraintException EnforceCheckConstraints(object refItem)
 		{
 			var refTables = _databaseDatabase.GetMappings(TypeInfo.Type);
 
@@ -345,13 +346,21 @@ namespace JPB.DataAccess.Helper.LocalDb
 				}
 			}
 
-			foreach (var item in Constraints)
-			{
-				if (!item.CheckConstraint(refItem))
-				{
-					return new ConstraintException(string.Format("The Constraint '{0}' has detected an invalid object", item.Name));
-				}
-			}
+			//foreach (var item in Constraints.Check)
+			//{
+			//	if (!item.CheckConstraint(refItem))
+			//	{
+			//		return new ConstraintException(string.Format("The Check Constraint '{0}' has detected an invalid object", item.Name));
+			//	}
+			//}
+
+			//foreach (var item in Constraints.Unique)
+			//{
+			//	if (!item.CheckConstraint(refItem))
+			//	{
+			//		return new ConstraintException(string.Format("The Unique Constraint '{0}' has detected an invalid object", item.Name));
+			//	}
+			//}
 
 			return null;
 		}
@@ -409,7 +418,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 				return null;
 			}
-			var ex = CheckEnforceConstraints(changedItem);
+			var ex = EnforceCheckConstraints(changedItem);
 
 			if (throwInstant && ex != null)
 			{
@@ -465,7 +474,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					foreach (var transactionalItem in _transactionalItems)
 					{
-						var checkEnforceConstraints = CheckEnforceConstraints(transactionalItem.Item);
+						var checkEnforceConstraints = EnforceCheckConstraints(transactionalItem.Item);
 						if (checkEnforceConstraints != null)
 						{
 							try
@@ -508,18 +517,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 				this.Triggers.After.OnUpdate(item);
 				return op;
 			}
-
+			this.Constraints.Check.Enforce(item);
+			this.Constraints.Unique.Enforce(item);
 			var getElement = this[GetId(item)];
-			if(getElement == null)
+			if (getElement == null)
 				return false;
 			if (object.ReferenceEquals(item, getElement))
 				return true;
-
 			if (!this.Triggers.InsteadOf.OnUpdate(item))
 			{
 				DataConverterExtensions.CopyPropertys(item, getElement, _config);
 			}
 			this.Triggers.After.OnUpdate(item);
+			this.Constraints.Unique.ItemUpdated(item);
 			return true;
 		}
 
@@ -542,10 +552,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				if (!Contains(elementToAdd))
 				{
-					this.Triggers.For.OnInsert(item);
 					AttachTransactionIfSet(elementToAdd,
 						CollectionStates.Added,
 						true);
+					this.Constraints.Check.Enforce(item);
+					this.Constraints.Unique.Enforce(item);
+					this.Triggers.For.OnInsert(item);
 					var id = SetNextId(elementToAdd);
 					if (!_keepOriginalObject)
 					{
@@ -575,6 +587,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 						Base.Remove(id);
 						throw e;
 					}
+					this.Constraints.Unique.ItemAdded(item);
 				}
 			}
 		}
@@ -651,6 +664,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					Base.Add(id, item);
 					hasInvalidOp.Throw();
 				}
+				this.Constraints.Unique.ItemRemoved(item);
 			}
 
 			if (!success && Db != null)
@@ -691,6 +705,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// Contains acccess to INSERT/DELETE/UPDATE(WIP) Triggers
 		/// </summary>
 		public TriggerForTableCollection Triggers { get; private set; }
+
+		public ConstraintCollection Constraints { get; private set; }
 
 		#endregion
 	}
