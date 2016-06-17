@@ -78,7 +78,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 							throw new InvalidDataException("Invalid XML document for Db import. index for a table is unset");
 						reader.ReadStartElement(TableContentList);
 						var type = elements[indexOfElementString];
-						var table = LocalDbManager.Scope.Database[type];
+						var table = LocalDbManager.Scope.Database.First(s => s.Key.AssemblyQualifiedName == type.AssemblyQualifiedName).Value;
 						table.IsMigrating = true;
 						do
 						{

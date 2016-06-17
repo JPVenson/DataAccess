@@ -543,10 +543,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 			CheckCreatedElseThrow();
 			if (Db != null)
 			{
-				this.Triggers.For.OnInsert(item);
-				if (!this.Triggers.InsteadOf.OnInsert(item))
+				this.Triggers.For.OnInsert(elementToAdd);
+				if (!this.Triggers.InsteadOf.OnInsert(elementToAdd))
 					Db.Insert(elementToAdd);
-				this.Triggers.After.OnInsert(item);
+				this.Triggers.After.OnInsert(elementToAdd);
 			}
 			else
 			{
@@ -555,10 +555,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 					AttachTransactionIfSet(elementToAdd,
 						CollectionStates.Added,
 						true);
-					this.Constraints.Check.Enforce(item);
-					this.Constraints.Unique.Enforce(item);
-					this.Triggers.For.OnInsert(item);
+					this.Constraints.Check.Enforce(elementToAdd);
+					this.Constraints.Unique.Enforce(elementToAdd);
+					this.Triggers.For.OnInsert(elementToAdd);
 					var id = SetNextId(elementToAdd);
+					this.Constraints.Default.Enforce(elementToAdd);
 					if (!_keepOriginalObject)
 					{
 						bool fullyLoaded;
@@ -571,23 +572,23 @@ namespace JPB.DataAccess.Helper.LocalDb
 						{
 							throw new InvalidOperationException(string.Format("The given type did not provide a Full ado.net constructor " +
 																			  "and the setting of the propertys did not succeed. " +
-																			  "Type: '{0}'", item.GetType()));
+																			  "Type: '{0}'", elementToAdd.GetType()));
 						}
 					}
-					if (!this.Triggers.InsteadOf.OnInsert(item))
+					if (!this.Triggers.InsteadOf.OnInsert(elementToAdd))
 					{
 						Base.Add(id, elementToAdd);
 					}
 					try
 					{
-						this.Triggers.After.OnInsert(item);
+						this.Triggers.After.OnInsert(elementToAdd);
 					}
 					catch (Exception e)
 					{
 						Base.Remove(id);
 						throw e;
 					}
-					this.Constraints.Unique.ItemAdded(item);
+					this.Constraints.Unique.ItemAdded(elementToAdd);
 				}
 			}
 		}

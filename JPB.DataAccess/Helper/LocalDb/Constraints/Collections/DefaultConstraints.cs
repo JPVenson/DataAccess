@@ -66,5 +66,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		{
 			get { return false; }
 		}
+
+		public void Enforce(object elementToAdd)
+		{
+			foreach (var localDbDefaultConstraint in _constraints)
+			{
+				localDbDefaultConstraint.DefaultValue(elementToAdd);
+			}
+		}
 	}
 }

@@ -108,43 +108,35 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 			Assert.That(() =>
 			{
-				images.Constraints.Check.Add(new LocalDbCheckConstraint("TestConstraint", s =>
-				{
-					var item = s as Image;
-					return item.IdBook > 0 && item.IdBook < 10;
-				}));
+				images.Constraints.Unique.Add(new LocalDbUniqueConstraint("BookId is Unique", s => ((Image)s).IdBook));
 			}, Throws.Exception.TypeOf<InvalidOperationException>());
 		}
 
-		//[Test]
-		//public void AddDefaultConstraint()
-		//{
-		//	var images = TestInit(null, null, null);
+		[Test]
+		public void AddDefaultConstraint()
+		{
+			var images = TestInit(null, null, new[]
+			{
+				new LocalDbDefaultConstraint("DefaultConstraint", 666, (source, constVal) => (source as Image).IdBook = (int)constVal),
+			});
 
-		//	var image = new Image();
-		//	image.IdBook = 20;
-		//	Assert.That(() => images.Add(image), Throws.Nothing);
-		//	var sec = new Image();
-		//	sec.IdBook = 20;
+			var image = new Image();
+			image.IdBook = 20;
+			Assert.That(() => images.Add(image), Throws.Nothing);
+			Assert.That(() => image.IdBook, Is.EqualTo(666));
+		}
 
-		//	Assert.That(() => images.Add(sec), Throws.Exception.TypeOf<ConstraintException>());
-		//	Assert.That(images.Count, Is.EqualTo(1));
-		//}
+		[Test]
+		public void AddDefaultConstraintAfter()
+		{
+			var images = TestInit(null, null, null);
 
-		//[Test]
-		//public void AddDefaultConstraintAfter()
-		//{
-		//	var images = TestInit(null, null, null);
-
-		//	Assert.That(() =>
-		//	{
-		//		images.Constraints.Check.Add(new LocalDbCheckConstraint("TestConstraint", s =>
-		//		{
-		//			var item = s as Image;
-		//			return item.IdBook > 0 && item.IdBook < 10;
-		//		}));
-		//	}, Throws.Exception.TypeOf<InvalidOperationException>());
-		//}
+			Assert.That(() =>
+			{
+				images.Constraints.Default.Add(
+				new LocalDbDefaultConstraint("DefaultConstraint", 666, (source, constVal) => (source as Image).IdBook = (int)constVal));
+			}, Throws.Exception.TypeOf<InvalidOperationException>());
+		}
 
 	}
 }
