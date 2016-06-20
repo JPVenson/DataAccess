@@ -69,7 +69,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public void LoadPage(DbAccessLayer dbAccess)
 		{
 			SyncHelper(CurrentPageItems.Clear);
-			MaxPage = localDbReposetory.Count / this.PageSize;
+			MaxPage = (long) Math.Ceiling((((decimal)localDbReposetory.Count / this.PageSize)));
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoading;

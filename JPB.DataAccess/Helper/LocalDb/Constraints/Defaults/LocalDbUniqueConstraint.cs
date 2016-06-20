@@ -16,6 +16,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			Func<TEntity, TKey> getKey,
 			IEqualityComparer<TKey> elementComparer = null)
 		{
+			LockRoot = new object();
 			if (name == null) throw new ArgumentNullException("name");
 			if (getKey == null) throw new ArgumentNullException("getKey");
 			Name = name;
@@ -32,29 +33,42 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 		}
 
 		private readonly HashSet<TKey> _index;
+		private readonly object LockRoot;
 
 		public string Name { get; private set; }
 		public bool CheckConstraint(TEntity item)
 		{
-			if (_index.Contains(_getKey(item)))
-				return false;
+			lock (LockRoot)
+			{
+				if (_index.Contains(_getKey(item)))
+					return false;
+			}
 			return true;
 		}
 
 		public void Add(TEntity item)
 		{
-			_index.Add(_getKey(item));
+			lock (LockRoot)
+			{
+				_index.Add(_getKey(item));
+			}
 		}
 
 		public void Delete(TEntity item)
 		{
-			_index.Remove(_getKey(item));
+			lock (LockRoot)
+			{
+				_index.Remove(_getKey(item));
+			}
 		}
 
 		public void Update(TEntity item)
 		{
-			Delete(item);
-			Add(item);
+			lock (LockRoot)
+			{
+				Delete(item);
+				Add(item);
+			}
 		}
 	}
 }

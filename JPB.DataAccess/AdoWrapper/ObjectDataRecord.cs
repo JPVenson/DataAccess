@@ -31,9 +31,14 @@ namespace JPB.DataAccess.AdoWrapper
 			FieldCount = _classTypeCache.Propertys.Count;
 		}
 
+		private object GetConvertedValue(object val)
+		{
+			return val ?? DBNull.Value;
+		}
+
 		public object GetValue(string name)
 		{
-			return _classTypeCache.Propertys[_classTypeCache.SchemaMappingDatabaseToLocal(name)].Getter.Invoke(_poco);
+			return GetConvertedValue(_classTypeCache.Propertys[_classTypeCache.SchemaMappingDatabaseToLocal(name)].Getter.Invoke(_poco));
 		}
 
 		public string GetName(int i)
@@ -53,7 +58,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public object GetValue(int i)
 		{
-			return _classTypeCache.Propertys.ElementAt(i).Value.Getter.Invoke(_poco);
+			return GetConvertedValue(_classTypeCache.Propertys.ElementAt(i).Value.Getter.Invoke(_poco));
 		}
 
 		public int GetValues(object[] values)
@@ -61,7 +66,7 @@ namespace JPB.DataAccess.AdoWrapper
 			var i = 0;
 			foreach (var dbPropertyInfoCach in _classTypeCache.Propertys)
 			{
-				values[i++] = dbPropertyInfoCach.Value.Getter.Invoke(_poco);
+				values[i++] = GetConvertedValue(dbPropertyInfoCach.Value.Getter.Invoke(_poco));
 			}
 			return _classTypeCache.Propertys.Count;
 		}
