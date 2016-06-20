@@ -2,32 +2,98 @@ using System;
 
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
-	public class TriggerInsteadtOfCollection
+	public interface ITriggerInsteadtOfCollection<TEntity>
 	{
-		private readonly LocalDbReposetoryBase _tabel;
+		event EventHandler<IInsteadtOfActionToken<TEntity>> Insert;
+		event EventHandler<IInsteadtOfActionToken<TEntity>> Update;
+		event EventHandler<IInsteadtOfActionToken<TEntity>> Delete;
+		bool OnInsert(TEntity obj);
+		bool OnUpdate(TEntity obj);
+		bool OnDelete(TEntity obj);
+	}
 
-		public TriggerInsteadtOfCollection(LocalDbReposetoryBase tabel)
+	public class TriggerInsteadtOfCollection<TEntity> : ITriggerInsteadtOfCollection<TEntity>
+	{
+		private readonly LocalDbReposetory<TEntity> _tabel;
+		private readonly ITriggerInsteadtOfCollection<TEntity> _duplication;
+
+		internal TriggerInsteadtOfCollection(LocalDbReposetory<TEntity> tabel, ITriggerInsteadtOfCollection<TEntity> duplication = null)
 		{
 			_tabel = tabel;
+			_duplication = duplication;
 		}
 
-		public TriggerInsteadtOfCollection()
+		internal TriggerInsteadtOfCollection()
 		{
 		}
 
-		public event EventHandler<InsteadtOfActionToken> Insert;
-		public event EventHandler<InsteadtOfActionToken> Update;
-		public event EventHandler<InsteadtOfActionToken> Delete;
+		private event EventHandler<IInsteadtOfActionToken<TEntity>> _insert;
+		private event EventHandler<IInsteadtOfActionToken<TEntity>> _update;
+		private event EventHandler<IInsteadtOfActionToken<TEntity>> _delete;
+
+		public virtual event EventHandler<IInsteadtOfActionToken<TEntity>> Insert
+		{
+			add
+			{
+				_insert += value;
+				if (_duplication != null)
+					_duplication.Insert += value;
+			}
+			remove
+			{
+				_insert -= value;
+				if (_duplication != null)
+					_duplication.Insert -= value;
+			}
+		}
+
+		/// <summary>
+		/// Will be invoked when an Entity is updated
+		/// </summary>
+		public virtual event EventHandler<IInsteadtOfActionToken<TEntity>> Update
+		{
+			add
+			{
+				_update += value;
+				if (_duplication != null)
+					_duplication.Update += value;
+			}
+			remove
+			{
+				_update -= value;
+				if (_duplication != null)
+					_duplication.Update -= value;
+			}
+		}
+
+		/// <summary>
+		/// Will be invoked when the Remove function is called
+		/// </summary>
+		public virtual event EventHandler<IInsteadtOfActionToken<TEntity>> Delete
+		{
+			add
+			{
+				_delete += value;
+				if (_duplication != null)
+					_duplication.Delete += value;
+			}
+			remove
+			{
+				_delete -= value;
+				if (_duplication != null)
+					_duplication.Delete -= value;
+			}
+		}
 
 		[ThreadStatic]
 		internal static bool AsInsteadtOf;
 
-		private bool InvokeTrigger(EventHandler<InsteadtOfActionToken> trigger, object obj)
+		private bool InvokeTrigger(EventHandler<IInsteadtOfActionToken<TEntity>> trigger, TEntity obj)
 		{
-			if(_tabel == null)
+			if (_tabel == null)
 				return false;
 
-			var token = new InsteadtOfActionToken(obj, _tabel);
+			var token = new InsteadtOfActionToken<TEntity>(obj, _tabel);
 			if (trigger != null)
 			{
 				try
@@ -44,24 +110,24 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			return false;
 		}
 
-		internal virtual bool OnInsert(object obj)
+		public virtual bool OnInsert(TEntity obj)
 		{
-			return InvokeTrigger(Insert, obj);
+			return InvokeTrigger(_insert, obj);
 		}
 
-		internal virtual bool OnUpdate(object obj)
+		public virtual bool OnUpdate(TEntity obj)
 		{
-			return InvokeTrigger(Update, obj);
+			return InvokeTrigger(_update, obj);
 		}
 
-		internal virtual bool OnDelete(object obj)
+		public virtual bool OnDelete(TEntity obj)
 		{
-			return InvokeTrigger(Delete, obj);
+			return InvokeTrigger(_delete, obj);
 		}
 
-		public static TriggerInsteadtOfCollection Empty()
+		public static TriggerInsteadtOfCollection<TEntity> Empty()
 		{
-			return new TriggerInsteadtOfCollection();
+			return new TriggerInsteadtOfCollection<TEntity>();
 		}
 	}
 }

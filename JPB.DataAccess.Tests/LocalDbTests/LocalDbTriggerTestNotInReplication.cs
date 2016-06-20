@@ -11,11 +11,18 @@ using JPB.DataAccess.Helper.LocalDb.Trigger;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.LocalDbTests
+#if MsSql
+.MsSQL
+#endif
+
+#if SqLite
+.SqLite
+#endif
 {
 	[TestFixture]
-	public class LocalDbTriggerTest
+	public class LocalDbTriggerTestNotInReplication
 	{
-		public LocalDbTriggerTest()
+		public LocalDbTriggerTestNotInReplication()
 		{
 
 		}
@@ -35,12 +42,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.For.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
-			repro.Triggers.NotForReplication.After.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.After.Insert += (sender, token) =>
 			{
 				token.Cancel("AFTER");
 			};
@@ -48,7 +55,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.That(() =>
 			{
 				repro.Add(new Users());
-			}, Throws.Exception.TypeOf<TriggerException>().With.Property("Reason").EqualTo("AFTER"));
+			}, Throws.Exception.InstanceOf<ITriggerException>().With.Property("Reason").EqualTo("AFTER"));
 			Assert.That(orderFlag, Is.True);
 			Assert.That(repro.Count, Is.EqualTo(0));
 		}
@@ -58,12 +65,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.For.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
-			repro.Triggers.NotForReplication.After.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.After.Delete += (sender, token) =>
 			{
 				token.Cancel("AFTER");
 			};
@@ -74,7 +81,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.That(() =>
 			{
 				repro.Remove(repro.FirstOrDefault());
-			}, Throws.Exception.TypeOf<TriggerException>().With.Property("Reason").EqualTo("AFTER"));
+			}, Throws.Exception.InstanceOf<ITriggerException>().With.Property("Reason").EqualTo("AFTER"));
 			Assert.That(orderFlag, Is.True);
 			Assert.That(repro.Count, Is.EqualTo(1));
 		}
@@ -84,13 +91,13 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.For.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 				token.Cancel("FOR");
 			};
-			repro.Triggers.NotForReplication.After.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.After.Insert += (sender, token) =>
 			{
 				Assert.Fail("This should not be called");
 			};
@@ -98,7 +105,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.That(() =>
 			{
 				repro.Add(new Users());
-			}, Throws.Exception.TypeOf<TriggerException>().With.Property("Reason").EqualTo("FOR"));
+			}, Throws.Exception.InstanceOf<ITriggerException>().With.Property("Reason").EqualTo("FOR"));
 			Assert.That(orderFlag, Is.True);
 			Assert.That(repro.Count, Is.EqualTo(0));
 		}
@@ -108,13 +115,13 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.For.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 				token.Cancel("FOR");
 			};
-			repro.Triggers.NotForReplication.After.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.After.Delete += (sender, token) =>
 			{
 				Assert.Fail("This should not be called");
 			};
@@ -125,7 +132,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.That(() =>
 			{
 				repro.Remove(repro.FirstOrDefault());
-			}, Throws.Exception.TypeOf<TriggerException>().With.Property("Reason").EqualTo("FOR"));
+			}, Throws.Exception.InstanceOf<ITriggerException>().With.Property("Reason").EqualTo("FOR"));
 			Assert.That(orderFlag, Is.True);
 			Assert.That(repro.Count, Is.EqualTo(1));
 		}
@@ -135,12 +142,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.For.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
-			repro.Triggers.NotForReplication.After.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.After.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 			};
@@ -155,12 +162,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.For.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
-			repro.Triggers.NotForReplication.After.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.After.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 			};
@@ -178,12 +185,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.For.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
-			repro.Triggers.NotForReplication.After.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.After.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 			};
@@ -203,19 +210,19 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			var orderFlag = false;
 			var deleted = false;
 
-			repro.Triggers.NotForReplication.For.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.For.Delete += (sender, token) =>
 			{
 				if (!deleted)
 					Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
 
-			repro.Triggers.NotForReplication.After.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.After.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 			};
 
-			repro.Triggers.NotForReplication.InsteadOf.Delete += (sender, token) =>
+			repro.Triggers.WithReplication.InsteadOf.Delete += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 				deleted = true;
@@ -237,16 +244,16 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			var repro = MockRepro();
 			var orderFlag = false;
-			repro.Triggers.NotForReplication.For.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.For.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
-			repro.Triggers.NotForReplication.After.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.After.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 			};
-			repro.Triggers.NotForReplication.InsteadOf.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.InsteadOf.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 			};
@@ -262,20 +269,20 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			var repro = MockRepro();
 			var orderFlag = false;
 			var inserted = false;
-			
-			repro.Triggers.NotForReplication.For.Insert += (sender, token) =>
+
+			repro.Triggers.WithReplication.For.Insert += (sender, token) =>
 			{
 				if (!inserted)
 					Assert.That(orderFlag, Is.False);
 				orderFlag = true;
 			};
 
-			repro.Triggers.NotForReplication.After.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.After.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 			};
 
-			repro.Triggers.NotForReplication.InsteadOf.Insert += (sender, token) =>
+			repro.Triggers.WithReplication.InsteadOf.Insert += (sender, token) =>
 			{
 				Assert.That(orderFlag, Is.True);
 				inserted = true;
@@ -295,6 +302,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.That(repro.Count, Is.EqualTo(1));
 		}
 
-		
+
 	}
 }

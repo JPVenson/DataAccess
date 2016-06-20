@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.Contacts
 {
-	public interface ILocalDbCheckConstraint : ILocalDbConstraint
+	public interface ILocalDbCheckConstraint<in TEntity> : ILocalDbConstraint
 	{
 
 
@@ -15,7 +15,7 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns>True if success false if failed</returns>
-		bool CheckConstraint(object item);
+		bool CheckConstraint(TEntity item);
 	}
 
 	public interface ILocalDbConstraint

@@ -91,7 +91,8 @@
     <Compile Include="LocalDbTests\DatabaseSerializerTest.cs" />
     <Compile Include="LocalDbTests\LocalDbTest.cs" />
     <Compile Include="LocalDbTests\LocalDbTransactionalTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbTriggerTest.cs" />
+    <Compile Include="LocalDbTests\LocalDbTriggerTestInReplication.cs" />
+    <Compile Include="LocalDbTests\LocalDbTriggerTestNotInReplication.cs" />
     <Compile Include="LocalDbTests\LocalDbWithConstraintsTest.cs" />
     <Compile Include="LocalDbTests\LocalDbWithFkTest.cs" />
     <Compile Include="Manager.cs" />

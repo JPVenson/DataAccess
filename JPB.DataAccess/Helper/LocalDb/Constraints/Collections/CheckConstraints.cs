@@ -5,19 +5,19 @@ using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
-	public class CheckConstraints : ICollection<ILocalDbCheckConstraint>
+	public class CheckConstraints<TEntity> : ICheckConstraints<TEntity>
 	{
-		private readonly LocalDbReposetoryBase _localDbReposetoryBase;
+		private readonly LocalDbReposetory<TEntity> _localDbReposetory;
 
-		private HashSet<ILocalDbCheckConstraint> _constraints;
+		private HashSet<ILocalDbCheckConstraint<TEntity>> _constraints;
 
-		public CheckConstraints(LocalDbReposetoryBase localDbReposetoryBase)
+		public CheckConstraints(LocalDbReposetory<TEntity> localDbReposetory)
 		{
-			_constraints = new HashSet<ILocalDbCheckConstraint>(new ConstraintComparer());
-			_localDbReposetoryBase = localDbReposetoryBase;
+			_constraints = new HashSet<ILocalDbCheckConstraint<TEntity>>(new ConstraintComparer());
+			_localDbReposetory = localDbReposetory;
 		}
 
-		public IEnumerator<ILocalDbCheckConstraint> GetEnumerator()
+		public IEnumerator<ILocalDbCheckConstraint<TEntity>> GetEnumerator()
 		{
 			return _constraints.GetEnumerator();
 		}
@@ -27,33 +27,33 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			return ((IEnumerable) _constraints).GetEnumerator();
 		}
 
-		public void Add(ILocalDbCheckConstraint item)
+		public void Add(ILocalDbCheckConstraint<TEntity> item)
 		{
-			if (_localDbReposetoryBase.ReposetoryCreated)
+			if (_localDbReposetory.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(item);
 		}
 
 		public void Clear()
 		{
-			if (_localDbReposetoryBase.ReposetoryCreated)
+			if (_localDbReposetory.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Clear();
 		}
 
-		public bool Contains(ILocalDbCheckConstraint item)
+		public bool Contains(ILocalDbCheckConstraint<TEntity> item)
 		{
 			return _constraints.Contains(item);
 		}
 
-		public void CopyTo(ILocalDbCheckConstraint[] array, int arrayIndex)
+		public void CopyTo(ILocalDbCheckConstraint<TEntity>[] array, int arrayIndex)
 		{
 			_constraints.CopyTo(array, arrayIndex);
 		}
 
-		public bool Remove(ILocalDbCheckConstraint item)
+		public bool Remove(ILocalDbCheckConstraint<TEntity> item)
 		{
-			if (_localDbReposetoryBase.ReposetoryCreated)
+			if (_localDbReposetory.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			return _constraints.Remove(item);
 		}
@@ -68,7 +68,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			get { return false; }
 		}
 
-		public void Enforce(object item)
+		public void Enforce(TEntity item)
 		{
 			foreach (var localDbCheckConstraint in _constraints)
 			{

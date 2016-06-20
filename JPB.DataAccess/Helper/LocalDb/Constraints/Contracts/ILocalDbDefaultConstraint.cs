@@ -2,8 +2,8 @@ using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Contracts
 {
-	public interface ILocalDbDefaultConstraint : ILocalDbConstraint
+	public interface ILocalDbDefaultConstraint<in TEntity> : ILocalDbConstraint
 	{
-		void DefaultValue(object item);
+		void DefaultValue(TEntity item);
 	}
 }

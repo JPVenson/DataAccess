@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		}
 
 		/// <summary>
-		/// Will be invoked if dispose is called
+		/// Will be invoked if dispose is called. The delegate is always invoked due the Migration time
 		/// </summary>
 		public event EventHandler SetupDone
 		{

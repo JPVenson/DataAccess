@@ -1,27 +1,28 @@
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
-	public class TriggerForTableCollection
+	public class TriggerForTableCollection<TEntity> 
+		: ITriggerForTableCollectionInternalUsage<TEntity> 
 	{
-		private readonly LocalDbReposetoryBase _table;
+		private readonly LocalDbReposetory<TEntity> _table;
 
-		internal TriggerForTableCollection(LocalDbReposetoryBase table)
+		internal TriggerForTableCollection(LocalDbReposetory<TEntity> table)
 		{
 			_table = table;
-			NotForReplication = new ReplicationNode(_table);
-			WithReplication = new ReplicationNode(_table, NotForReplication);
+			NotForReplication = new ReplicationNode<TEntity>(_table);
+			WithReplication = new ReplicationNode<TEntity>(_table, NotForReplication);
 		}
 
 		/// <summary>
 		/// Should the trigger also trigger when a XML set is loaded
 		/// </summary>
-		public ReplicationNode WithReplication { get; private set; }
+		public IReplicationNode<TEntity> WithReplication { get; private set; }
 
 		/// <summary>
 		/// Should the trigger only trigger due to normal usage
 		/// </summary>
-		public ReplicationNode NotForReplication { get; private set; }
+		public IReplicationNode<TEntity> NotForReplication { get; private set; }
 
-		internal TriggerForCollection For
+		public ISequentialTriggerCollection<TEntity> For
 		{
 			get
 			{
@@ -31,7 +32,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			}
 		}
 
-		internal TriggerAfterCollection After
+		public virtual ISequentialTriggerCollection<TEntity> After
 		{
 			get
 			{
@@ -41,23 +42,18 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			}
 		}
 
-		internal TriggerInsteadtOfCollection InsteadOf
+		public virtual ITriggerInsteadtOfCollection<TEntity> InsteadOf
 		{
 			get
 			{
-				if (TriggerInsteadtOfCollection.AsInsteadtOf)
-					return TriggerInsteadtOfCollection.Empty();
-
-				TriggerInsteadtOfCollection target;
+				if (TriggerInsteadtOfCollection<TEntity>.AsInsteadtOf)
+					return TriggerInsteadtOfCollection<TEntity>.Empty();
+				
 				if (_table.IsMigrating)
 				{
-					target = WithReplication.InsteadOf;
+					return WithReplication.InsteadOf;
 				}
-				else
-				{
-					target = NotForReplication.InsteadOf;
-				}
-				return target;
+				return NotForReplication.InsteadOf;
 			}
 		}
 	}

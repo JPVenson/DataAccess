@@ -7,14 +7,14 @@ using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 {
-	public class LocalDbUniqueConstraint : ILocalDbUniqueConstraint
+	public class LocalDbUniqueConstraint<TEntity, TKey> : ILocalDbUniqueConstraint<TEntity>
 	{
-		private readonly Func<object, object> _getKey;
+		private readonly Func<TEntity, TKey> _getKey;
 
 		public LocalDbUniqueConstraint(
 			string name,
-			Func<object, object> getKey,
-			IEqualityComparer<object> elementComparer = null)
+			Func<TEntity, TKey> getKey,
+			IEqualityComparer<TKey> elementComparer = null)
 		{
 			if (name == null) throw new ArgumentNullException("name");
 			if (getKey == null) throw new ArgumentNullException("getKey");
@@ -23,35 +23,35 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 
 			if (elementComparer != null)
 			{
-				_index = new HashSet<object>(elementComparer);
+				_index = new HashSet<TKey>(elementComparer);
 			}
 			else
 			{
-				_index = new HashSet<object>();
+				_index = new HashSet<TKey>();
 			}
 		}
 
-		private HashSet<object> _index;
+		private readonly HashSet<TKey> _index;
 
 		public string Name { get; private set; }
-		public bool CheckConstraint(object item)
+		public bool CheckConstraint(TEntity item)
 		{
 			if (_index.Contains(_getKey(item)))
 				return false;
 			return true;
 		}
 
-		public void Add(object item)
+		public void Add(TEntity item)
 		{
 			_index.Add(_getKey(item));
 		}
 
-		public void Delete(object item)
+		public void Delete(TEntity item)
 		{
 			_index.Remove(_getKey(item));
 		}
 
-		public void Update(object item)
+		public void Update(TEntity item)
 		{
 			Delete(item);
 			Add(item);

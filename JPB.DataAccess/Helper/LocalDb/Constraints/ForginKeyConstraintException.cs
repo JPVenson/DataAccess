@@ -1,6 +1,6 @@
 ﻿namespace JPB.DataAccess.Helper.LocalDb.Constraints
 {
-	internal class ForginKeyConstraintException : ConstraintException
+	public class ForginKeyConstraintException : ConstraintException
 	{
 		public ForginKeyConstraintException(
 			string constraintName,

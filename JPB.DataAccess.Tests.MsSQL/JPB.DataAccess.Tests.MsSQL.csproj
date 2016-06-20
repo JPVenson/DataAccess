@@ -96,9 +96,6 @@
     <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbTransactionalTest.cs">
       <Link>LocalDbTests\LocalDbTransactionalTest.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbTriggerTest.cs">
-      <Link>LocalDbTests\LocalDbTriggerTest.cs</Link>
-    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\LocalDbTests\LocalDbWithConstraintsTest.cs">
       <Link>LocalDbTests\LocalDbWithConstraintsTest.cs</Link>
     </Compile>
@@ -129,6 +126,7 @@
     <Compile Include="..\JPB.DataAccess.Tests\XmlDataRecordTests\XmlDataRecordTest.cs">
       <Link>XmlDataRecordTests\XmlDataRecordTest.cs</Link>
     </Compile>
+    <Compile Include="LocalDbTests\LocalDbTriggerTestNotInReplication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

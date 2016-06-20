@@ -19,18 +19,18 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 	}
 
-	public class UniqueConstrains : ICollection<ILocalDbUniqueConstraint>
+	public class UniqueConstrains<TEntity> : IUniqueConstrains<TEntity>
 	{
-		private readonly LocalDbReposetoryBase _localDbReposetoryBase;
-		private HashSet<ILocalDbUniqueConstraint> _constraints;
+		private readonly LocalDbReposetory<TEntity> _localDbReposetory;
+		private HashSet<ILocalDbUniqueConstraint<TEntity>> _constraints;
 
-		public UniqueConstrains(LocalDbReposetoryBase localDbReposetoryBase)
+		public UniqueConstrains(LocalDbReposetory<TEntity> localDbReposetory)
 		{
-			_constraints = new HashSet<ILocalDbUniqueConstraint>(new ConstraintComparer());
-			_localDbReposetoryBase = localDbReposetoryBase;
+			_constraints = new HashSet<ILocalDbUniqueConstraint<TEntity>>();
+			_localDbReposetory = localDbReposetory;
 		}
 
-		public IEnumerator<ILocalDbUniqueConstraint> GetEnumerator()
+		public IEnumerator<ILocalDbUniqueConstraint<TEntity>> GetEnumerator()
 		{
 			return _constraints.GetEnumerator();
 		}
@@ -40,33 +40,33 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			return ((IEnumerable)_constraints).GetEnumerator();
 		}
 
-		public void Add(ILocalDbUniqueConstraint item)
+		public void Add(ILocalDbUniqueConstraint<TEntity> item)
 		{
-			if (_localDbReposetoryBase.ReposetoryCreated)
+			if (_localDbReposetory.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(item);
 		}
 
 		public void Clear()
 		{
-			if (_localDbReposetoryBase.ReposetoryCreated)
+			if (_localDbReposetory.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Clear();
 		}
 
-		public bool Contains(ILocalDbUniqueConstraint item)
+		public bool Contains(ILocalDbUniqueConstraint<TEntity> item)
 		{
 			return _constraints.Contains(item);
 		}
 
-		public void CopyTo(ILocalDbUniqueConstraint[] array, int arrayIndex)
+		public void CopyTo(ILocalDbUniqueConstraint<TEntity>[] array, int arrayIndex)
 		{
 			_constraints.CopyTo(array, arrayIndex);
 		}
 
-		public bool Remove(ILocalDbUniqueConstraint item)
+		public bool Remove(ILocalDbUniqueConstraint<TEntity> item)
 		{
-			if (_localDbReposetoryBase.ReposetoryCreated)
+			if (_localDbReposetory.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			return _constraints.Remove(item);
 		}
@@ -81,7 +81,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			get { return false; }
 		}
 
-		public void ItemAdded(object item)
+		public void ItemAdded(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
 			{
@@ -89,7 +89,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			}
 		}
 
-		public void ItemRemoved(object item)
+		public void ItemRemoved(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
 			{
@@ -97,7 +97,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			}
 		}
 
-		public void ItemUpdated(object item)
+		public void ItemUpdated(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
 			{
@@ -105,7 +105,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			}
 		}
 		
-		public void Enforce(object item)
+		public void Enforce(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
 			{

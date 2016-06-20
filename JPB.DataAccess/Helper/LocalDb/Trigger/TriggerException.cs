@@ -3,12 +3,12 @@ using System.Runtime.Serialization;
 
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
-	public class TriggerException : Exception
+	public class TriggerException<TEntity> : Exception, ITriggerException
 	{
 		[OptionalField]
-		private readonly LocalDbReposetoryBase _table;
+		private readonly LocalDbReposetory<TEntity> _table;
 
-		public TriggerException(string reason, LocalDbReposetoryBase table)
+		public TriggerException(string reason, LocalDbReposetory<TEntity> table)
 			: base("One trigger rejected the change. See reason.")
 		{
 			Reason = reason;
@@ -17,7 +17,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 
 		public string Reason { get; private set; }
 
-		public LocalDbReposetoryBase Table
+		public LocalDbReposetory<TEntity> Table
 		{
 			get { return _table; }
 		}

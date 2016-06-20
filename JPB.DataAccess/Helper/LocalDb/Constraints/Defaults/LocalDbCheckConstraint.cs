@@ -5,16 +5,16 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 {
-	public class LocalDbCheckConstraint : ILocalDbCheckConstraint
+	public class LocalDbCheckConstraint<TEntity> : ILocalDbCheckConstraint<TEntity>
 	{
-		public LocalDbCheckConstraint(string name, Func<object, bool> constraint)
+		public LocalDbCheckConstraint(string name, Func<TEntity, bool> constraint)
 		{
 			_name = name;
 			_constraint = constraint;
 		}
 
 		private string _name;
-		private Func<object, bool> _constraint;
+		private Func<TEntity, bool> _constraint;
 
 		public string Name
 		{
@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			}
 		}
 
-		public bool CheckConstraint(object item)
+		public bool CheckConstraint(TEntity item)
 		{
 			try
 			{

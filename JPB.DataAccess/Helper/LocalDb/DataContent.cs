@@ -74,12 +74,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 					do
 					{
 						var indexOfElementString = reader.GetAttribute("Index");
-						if(indexOfElementString == null)
+						if (indexOfElementString == null)
 							throw new InvalidDataException("Invalid XML document for Db import. index for a table is unset");
 						reader.ReadStartElement(TableContentList);
 						var type = elements[indexOfElementString];
 						var table = LocalDbManager.Scope.Database.First(s => s.Key.AssemblyQualifiedName == type.AssemblyQualifiedName).Value;
-						table.IsMigrating = true;
 						do
 						{
 							object emptyElement = table.TypeInfo.DefaultFactory();
@@ -88,7 +87,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 							{
 								var propName = reader.Name;
 								var isNumm = reader.IsEmptyElement;
-								
+
 								var value = reader.ReadElementContentAsString();
 								var dbPropertyInfoCache = table.TypeInfo.Propertys[table.TypeInfo.SchemaMappingDatabaseToLocal(propName)];
 
@@ -97,7 +96,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 								{
 									contvertedValue = Convert.ChangeType(value, dbPropertyInfoCache.PropertyType);
 								}
-						
+
 								dbPropertyInfoCache.Setter.Invoke(emptyElement, contvertedValue);
 							} while (reader.Name != table.TypeInfo.TableName);
 							reader.ReadEndElement();
