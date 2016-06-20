@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Transactions;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -28,7 +30,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 	public class LocalDbReposetory<TEntity> : ICollection<TEntity>, ILocalDbReposetoryBaseInternalUsage
 	{
 		private readonly List<TransactionalItem<TEntity>> _transactionalItems = new List<TransactionalItem<TEntity>>();
-		protected internal readonly DbAccessLayer Db;
 		protected internal readonly object LockRoot = new object();
 		private DbConfig _config;
 		private IdentityInsertScope _currentIdentityInsertScope;
@@ -75,17 +76,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		///     Creates a new, database as fallback using batabase
-		/// </summary>
-		/// <param name="db"></param>
-		/// <param name="type"></param>
-		protected LocalDbReposetory(DbAccessLayer db)
-			: this()
-		{
-			Db = db;
-		}
-
-		/// <summary>
 		///     Returns an object with the given Primarykey
 		/// </summary>
 		/// <param name="primaryKey"></param>
@@ -122,11 +112,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		public virtual ConstraintCollection<TEntity> Constraints { get; private set; }
 
+		public DbConfig Config
+		{
+			get { return _config; }
+		}
+
 		public virtual bool IsReadOnly
 		{
 			get { return false; }
 		}
-
 
 		public virtual int Count
 		{
@@ -141,55 +135,45 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			var elementToAdd = item;
 			CheckCreatedElseThrow();
-			if (Db != null)
+			if (!Contains(elementToAdd))
 			{
+				AttachTransactionIfSet(elementToAdd,
+					CollectionStates.Added,
+					true);
+				Constraints.Check.Enforce(elementToAdd);
+				Constraints.Unique.Enforce(elementToAdd);
 				TriggersUsage.For.OnInsert(elementToAdd);
-				if (!TriggersUsage.InsteadOf.OnInsert(elementToAdd))
-					Db.Insert(elementToAdd);
-				TriggersUsage.After.OnInsert(elementToAdd);
-			}
-			else
-			{
-				if (!Contains(elementToAdd))
+				var id = SetNextId(elementToAdd);
+				Constraints.Default.Enforce(elementToAdd);
+				if (!_keepOriginalObject)
 				{
-					AttachTransactionIfSet(elementToAdd,
-						CollectionStates.Added,
-						true);
-					Constraints.Check.Enforce(elementToAdd);
-					Constraints.Unique.Enforce(elementToAdd);
-					TriggersUsage.For.OnInsert(elementToAdd);
-					var id = SetNextId(elementToAdd);
-					Constraints.Default.Enforce(elementToAdd);
-					if (!_keepOriginalObject)
+					bool fullyLoaded;
+					elementToAdd = (TEntity)DbAccessLayer.CreateInstance(
+						_typeInfo,
+						new ObjectDataRecord(item, _config, 0),
+						out fullyLoaded,
+						DbAccessType.Unknown);
+					if (!fullyLoaded)
 					{
-						bool fullyLoaded;
-						elementToAdd = (TEntity) DbAccessLayer.CreateInstance(
-							_typeInfo,
-							new ObjectDataRecord(item, _config, 0),
-							out fullyLoaded,
-							DbAccessType.Unknown);
-						if (!fullyLoaded)
-						{
-							throw new InvalidOperationException(string.Format("The given type did not provide a Full ado.net constructor " +
-							                                                  "and the setting of the propertys did not succeed. " +
-							                                                  "Type: '{0}'", elementToAdd.GetType()));
-						}
+						throw new InvalidOperationException(string.Format("The given type did not provide a Full ado.net constructor " +
+																		  "and the setting of the propertys did not succeed. " +
+																		  "Type: '{0}'", elementToAdd.GetType()));
 					}
-					if (!TriggersUsage.InsteadOf.OnInsert(elementToAdd))
-					{
-						Base.Add(id, elementToAdd);
-					}
-					try
-					{
-						TriggersUsage.After.OnInsert(elementToAdd);
-					}
-					catch (Exception e)
-					{
-						Base.Remove(id);
-						throw e;
-					}
-					Constraints.Unique.ItemAdded(elementToAdd);
 				}
+				if (!TriggersUsage.InsteadOf.OnInsert(elementToAdd))
+				{
+					Base.Add(id, elementToAdd);
+				}
+				try
+				{
+					TriggersUsage.After.OnInsert(elementToAdd);
+				}
+				catch (Exception)
+				{
+					Base.Remove(id);
+					throw;
+				}
+				Constraints.Unique.ItemAdded(elementToAdd);
 			}
 		}
 
@@ -213,11 +197,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 			CheckCreatedElseThrow();
 			var pk = GetId(item);
 			var local = Base.Contains(new KeyValuePair<object, TEntity>(pk, (TEntity) item));
-			if (!local && Db != null)
-			{
-				return Db.Select(_typeInfo.Type, pk) != null;
-			}
-
 			return local;
 		}
 
@@ -230,6 +209,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
+		/// <summary>
+		/// Removes the given Item based on its PrimaryKey
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public bool Remove(TEntity item)
 		{
 			CheckCreatedElseThrow();
@@ -256,29 +240,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 				}
 				Constraints.Unique.ItemRemoved(item);
 			}
-
-			if (!success && Db != null)
-			{
-				TriggersUsage.For.OnDelete(item);
-				Db.Delete(item);
-				TriggersUsage.After.OnDelete(item);
-				success = true;
-			}
 			return success;
 		}
 
 		IEnumerator<TEntity> IEnumerable<TEntity>.GetEnumerator()
 		{
 			CheckCreatedElseThrow();
-			if (Db != null)
-				return Db.Select<TEntity>().Cast<TEntity>().GetEnumerator();
-
 			return Base.Values.Select(s =>
 			{
 				if (_keepOriginalObject)
 					return s;
 				bool fullyLoaded;
-				return (TEntity)DbAccessLayer.CreateInstance(
+				return (TEntity) DbAccessLayer.CreateInstance(
 					_typeInfo,
 					new ObjectDataRecord(s, _config, 0),
 					out fullyLoaded,
@@ -298,6 +271,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		public bool ReposetoryCreated { get; set; }
 
+		[DebuggerHidden]
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		bool ILocalDbReposetoryBaseInternalUsage.ReposetoryCreated
 		{
 			get { return ReposetoryCreated; }
@@ -350,11 +325,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				//try upcasting
 				local = Base.ContainsKey(Convert.ChangeType(fkValueForTableX, _typeInfo.PrimaryKeyProperty.PropertyType));
 			}
-
-			if (!local && Db != null)
-			{
-				return Db.Select(_typeInfo.Type, fkValueForTableX) != null;
-			}
+			
 			return local;
 		}
 
@@ -390,27 +361,36 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public virtual bool Remove(object item)
 		{
-			return Remove((TEntity) item)
-				;
+			return Remove((TEntity) item);
 		}
 
+		/// <summary>
+		/// Updates the Entity in memory. Only applies to LocalDbReposetorys that uses Object copys
+		/// </summary>
+		/// <param name="item"></param>
+		/// <returns></returns>
 		public bool Update(object item)
 		{
 			return Update((TEntity) item);
 		}
 
+		/// <summary>
+		/// Gets the Generated Type Cache
+		/// </summary>
 		public DbClassInfoCache TypeInfo
 		{
 			get { return _typeInfo; }
-			set { _typeInfo = value; }
 		}
 
-		public DbConfig Config
-		{
-			get { return _config; }
-		}
-
-		protected void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config, bool useOrignalObjectInMemory)
+		/// <summary>
+		/// Internal Usage
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="keyGenerator"></param>
+		/// <param name="config"></param>
+		/// <param name="useOrignalObjectInMemory"></param>
+		protected virtual void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config,
+			bool useOrignalObjectInMemory)
 		{
 			if (_config != null)
 				throw new InvalidOperationException("Multibe calls of Init are not supported");
@@ -443,6 +423,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of " +
 				                                              "type of any value type cannot be used. Type: '{0}'", type.Name));
+			}
+
+			if (_keepOriginalObject)
+			{
+				if (!TypeInfo.FullFactory)
+				{
+					throw new NotSupportedException(string.Format("The given type did not provide a Full ado.net constructor " +
+																			  "Type: '{0}'", TypeInfo));
+				}
 			}
 
 			ILocalDbPrimaryKeyConstraint primaryKeyConstraint;
@@ -596,23 +585,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 						fkPropForTypeX.PropertyName);
 				}
 			}
-
-			//foreach (var item in Constraints.Check)
-			//{
-			//	if (!item.CheckConstraint(refItem))
-			//	{
-			//		return new ConstraintException(string.Format("The Check Constraint '{0}' has detected an invalid object", item.Name));
-			//	}
-			//}
-
-			//foreach (var item in Constraints.Unique)
-			//{
-			//	if (!item.CheckConstraint(refItem))
-			//	{
-			//		return new ConstraintException(string.Format("The Unique Constraint '{0}' has detected an invalid object", item.Name));
-			//	}
-			//}
-
 			return null;
 		}
 
@@ -724,6 +696,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 							}
 						}
 					}
+
+					Constraints.PrimaryKey.UpdateIndex(_transactionalItems.Count);
 				}
 				finally
 				{
@@ -733,27 +707,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		///     When using the KeepOriginalObject option set to false you can update any element by using this function
+		/// Updates the Entity in memory. Only applies to LocalDbReposetorys that uses Object copys
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
 		public virtual bool Update(TEntity item)
 		{
 			TriggersUsage.For.OnUpdate(item);
-			bool op;
-			if (Db != null)
-			{
-				if (!TriggersUsage.InsteadOf.OnUpdate(item))
-				{
-					op = Db.Update(item);
-				}
-				else
-				{
-					op = true;
-				}
-				TriggersUsage.After.OnUpdate(item);
-				return op;
-			}
 			Constraints.Check.Enforce(item);
 			Constraints.Unique.Enforce(item);
 			var getElement = this[GetId(item)];
@@ -770,7 +730,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return true;
 		}
 
-		public Contacts.Pager.IDataPager<TEntity> CreatePager()
+		public IDataPager<TEntity> CreatePager()
 		{
 			return new LocalDataPager<TEntity>(this);
 		}
@@ -788,7 +748,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					if (_keepOriginalObject)
 						return s;
 					bool fullyLoaded;
-					return (TEntity)DbAccessLayer.CreateInstance(
+					return (TEntity) DbAccessLayer.CreateInstance(
 						_typeInfo,
 						new ObjectDataRecord(s, _config, 0),
 						out fullyLoaded,

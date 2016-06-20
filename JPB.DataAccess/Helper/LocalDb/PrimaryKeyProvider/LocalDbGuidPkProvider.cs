@@ -28,6 +28,16 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 			return new LocalDbGuidPkProvider();
 		}
 
+		public void UpdateIndex(long index)
+		{
+			
+		}
+
+		public void UpdateIndex(object index)
+		{
+			
+		}
+
 		public new bool Equals(object x, object y)
 		{
 			return (Guid)x == (Guid)y;

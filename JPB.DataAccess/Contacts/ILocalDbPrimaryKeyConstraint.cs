@@ -32,5 +32,11 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <returns></returns>
 		ILocalDbPrimaryKeyConstraint Clone();
+
+		/// <summary>
+		/// Allows to update the index be faking the number of calles to GetNextNumber by <paramref name="index"/>
+		/// </summary>
+		/// <param name="index"></param>
+		void UpdateIndex(long index);
 	}
 }

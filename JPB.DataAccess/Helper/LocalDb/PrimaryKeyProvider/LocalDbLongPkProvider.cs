@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
@@ -8,8 +9,21 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 	/// </summary>
 	public class LocalDbLongPkProvider : ILocalDbPrimaryKeyConstraint
 	{
+		public LocalDbLongPkProvider()
+		{
+			_counter = 0;
+			Seed = 1;
+			Incriment = 1;
+		}
+
+		public LocalDbLongPkProvider(int seed, int incriment)
+		{
+			_counter = seed;
+			Seed = seed;
+			Incriment = incriment;
+		}
+
 		private long _counter = 1;
-		public static string LastMessage = "";
 
 		public Type GeneratingType
 		{
@@ -18,8 +32,11 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 
 		public object GetNextValue()
 		{
-			return _counter++;
+			return Interlocked.Add(ref _counter, Incriment);
 		}
+
+		public int Seed { get; private set; }
+		public int Incriment { get; private set; }
 
 		public object GetUninitilized()
 		{
@@ -29,6 +46,11 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 		public ILocalDbPrimaryKeyConstraint Clone()
 		{
 			return new LocalDbLongPkProvider();
+		}
+
+		public void UpdateIndex(long index)
+		{
+			Interlocked.Add(ref _counter, index);
 		}
 
 		public new bool Equals(object x, object y)

@@ -51,6 +51,11 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 			return new LocalDbIntPkProvider();
 		}
 
+		public void UpdateIndex(long index)
+		{
+			Interlocked.Add(ref _counter, (int)index);
+		}
+
 		public new bool Equals(object x, object y)
 		{
 			return (int)x == (int)y;

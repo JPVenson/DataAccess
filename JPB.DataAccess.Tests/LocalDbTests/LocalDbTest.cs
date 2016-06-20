@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
@@ -155,6 +157,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_users.Add(new Users());
 			Assert.That(_users.Count, Is.EqualTo(5));
 			Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Length").EqualTo(5));
+
+			var arr = new object[_users.Count];
+			Assert.That(() => _users.CopyTo(arr, 0), Throws.Nothing);
+
+			var userArr = new Users[_users.Count];
+			Assert.That(() => _users.CopyTo(userArr, 0), Throws.Nothing);
 		}
 	}
 }
