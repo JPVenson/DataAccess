@@ -763,11 +763,16 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return true;
 		}
 
+		public Contacts.Pager.IDataPager<TEntity> CreatePager()
+		{
+			return new LocalDataPager<TEntity>(this);
+		}
+
 		/// <summary>
 		///     Thread save
 		/// </summary>
 		/// <returns></returns>
-		public object[] ToArray()
+		public TEntity[] ToArray()
 		{
 			lock (SyncRoot)
 			{
@@ -776,7 +781,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					if (_keepOriginalObject)
 						return s;
 					bool fullyLoaded;
-					return DbAccessLayer.CreateInstance(
+					return (TEntity)DbAccessLayer.CreateInstance(
 						_typeInfo,
 						new ObjectDataRecord(s, _config, 0),
 						out fullyLoaded,

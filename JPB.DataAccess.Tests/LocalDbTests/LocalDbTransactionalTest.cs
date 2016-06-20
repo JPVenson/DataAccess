@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
+﻿using System.Transactions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Constraints;
@@ -23,11 +18,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	[TestFixture]
 	public class LocalDbTransactionalTest
 	{
-		public LocalDbTransactionalTest()
-		{
-
-		}
-
 		private LocalDbReposetory<Book> _books;
 		private LocalDbReposetory<Image> _images;
 		private LocalDbReposetory<ImageNullable> _imagesNullable;

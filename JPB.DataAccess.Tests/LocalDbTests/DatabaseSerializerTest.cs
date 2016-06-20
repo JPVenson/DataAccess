@@ -8,7 +8,6 @@ using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
-using NUnit.Framework.Constraints;
 
 namespace JPB.DataAccess.Tests.LocalDbTests
 #if MsSql
@@ -22,11 +21,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	[TestFixture]
 	public class DatabaseSerializerTest
 	{
-		public DatabaseSerializerTest()
-		{
-
-		}
-
 		[Test]
 		public void WriteUsers()
 		{

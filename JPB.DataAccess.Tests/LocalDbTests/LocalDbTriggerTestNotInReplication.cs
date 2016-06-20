@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Transactions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
@@ -22,11 +18,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	[TestFixture]
 	public class LocalDbTriggerTestNotInReplication
 	{
-		public LocalDbTriggerTestNotInReplication()
-		{
-
-		}
-
 		private LocalDbReposetory<Users> MockRepro()
 		{
 			LocalDbReposetory<Users> users;

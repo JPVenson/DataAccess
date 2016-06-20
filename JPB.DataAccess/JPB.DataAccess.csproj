@@ -148,6 +148,7 @@
     <Compile Include="Helper\LocalDb\Constraints\Contracts\ILocalDbDefaultConstraint.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Contracts\ILocalDbUniqueConstraint.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Defaults\LocalDbDefaultConstraint.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\Defaults\LocalDbDefaultConstraintEx.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Defaults\LocalDbUniqueConstraint.cs" />
     <Compile Include="Helper\LocalDb\ILocalDbReposetoryBase.cs" />
     <Compile Include="Helper\LocalDb\Scopes\ReplicationScope.cs" />

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Tests.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.LocalDbTests
@@ -44,7 +43,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			Assert.That(() =>
 			{
-				Parallel.For(0, 999, (d) =>
+				Parallel.For(0, 999, d =>
 				{
 					_users.Add(new Users());
 				});
@@ -56,7 +55,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			Assert.That(() =>
 			{
-				Parallel.For(0, 999, (d) =>
+				Parallel.For(0, 999, d =>
 				{
 					foreach (var userse in _users)
 					{

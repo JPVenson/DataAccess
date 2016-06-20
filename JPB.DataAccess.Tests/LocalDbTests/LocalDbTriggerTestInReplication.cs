@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Transactions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
@@ -19,11 +17,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	[TestFixture]
 	public class LocalDbTriggerTestInReplication
 	{
-		public LocalDbTriggerTestInReplication()
-		{
-
-		}
-
 		public class DbScope : IDisposable
 		{
 			public LocalDbReposetory<Users> users;

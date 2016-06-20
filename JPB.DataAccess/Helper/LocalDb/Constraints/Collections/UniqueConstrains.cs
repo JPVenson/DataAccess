@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
@@ -45,6 +46,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 			if (_localDbReposetory.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(item);
+		}
+
+		public void Add<TValue>(string name, Func<TEntity, TValue> item)
+		{
+			if (_localDbReposetory.ReposetoryCreated)
+				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			_constraints.Add(new LocalDbUniqueConstraint<TEntity, TValue>(name, item));
 		}
 
 		public void Clear()
