@@ -405,6 +405,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 			set { _typeInfo = value; }
 		}
 
+		public DbConfig Config
+		{
+			get { return _config; }
+		}
+
 		protected void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config, bool useOrignalObjectInMemory)
 		{
 			if (_config != null)
