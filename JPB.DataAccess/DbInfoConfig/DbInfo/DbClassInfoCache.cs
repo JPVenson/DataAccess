@@ -93,7 +93,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public bool FullFactory { get; set; }
+		public bool FullFactory { get; internal set; }
 
 		/// <summary>
 		///     If known the ForModelAttribute attribute

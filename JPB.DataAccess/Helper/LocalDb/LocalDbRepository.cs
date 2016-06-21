@@ -425,7 +425,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				                                              "type of any value type cannot be used. Type: '{0}'", type.Name));
 			}
 
-			if (_keepOriginalObject)
+			if (!_keepOriginalObject)
 			{
 				if (!TypeInfo.FullFactory)
 				{
