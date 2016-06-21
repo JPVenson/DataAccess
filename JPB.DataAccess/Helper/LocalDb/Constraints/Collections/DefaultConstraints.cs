@@ -10,13 +10,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
 	public class DefaultConstraints<TEntity> : IDefaultConstraints<TEntity>
 	{
-		private readonly LocalDbReposetory<TEntity> _localDbReposetory;
+		private readonly LocalDbRepository<TEntity> _localDbRepository;
 		private HashSet<ILocalDbDefaultConstraint<TEntity>> _constraints;
 
-		public DefaultConstraints(LocalDbReposetory<TEntity> localDbReposetory)
+		public DefaultConstraints(LocalDbRepository<TEntity> localDbRepository)
 		{
 			_constraints = new HashSet<ILocalDbDefaultConstraint<TEntity>>(new ConstraintComparer());
-			_localDbReposetory = localDbReposetory;
+			_localDbRepository = localDbRepository;
 		}
 
 		public IEnumerator<ILocalDbDefaultConstraint<TEntity>> GetEnumerator()
@@ -31,35 +31,35 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 
 		public void Add(ILocalDbDefaultConstraint<TEntity> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(item);
 		}
 
 		public void Add<TValue>(string name, TValue value, Action<TEntity, TValue> setter)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(new LocalDbDefaultConstraint<TEntity, TValue>(name, value, setter));
 		}
 
 		public void Add<TValue>(DbConfig config, string name, Func<TValue> generateValue, Expression<Func<TEntity, TValue>> column)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(new LocalDbDefaultConstraintEx<TEntity, TValue>(config, name, generateValue, column));
 		}
 
 		public void Add<TValue>(string name, Func<TValue> generateValue, Expression<Func<TEntity, TValue>> column)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
-			_constraints.Add(new LocalDbDefaultConstraintEx<TEntity, TValue>(_localDbReposetory.Config, name, generateValue, column));
+			_constraints.Add(new LocalDbDefaultConstraintEx<TEntity, TValue>(_localDbRepository.Config, name, generateValue, column));
 		}
 
 		public void Clear()
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Clear();
 		}
@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 
 		public bool Remove(ILocalDbDefaultConstraint<TEntity> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			return _constraints.Remove(item);
 		}

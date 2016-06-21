@@ -14,10 +14,10 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 
 	public class TriggerInsteadtOfCollection<TEntity> : ITriggerInsteadtOfCollection<TEntity>
 	{
-		private readonly LocalDbReposetory<TEntity> _tabel;
+		private readonly LocalDbRepository<TEntity> _tabel;
 		private readonly ITriggerInsteadtOfCollection<TEntity> _duplication;
 
-		internal TriggerInsteadtOfCollection(LocalDbReposetory<TEntity> tabel, ITriggerInsteadtOfCollection<TEntity> duplication = null)
+		internal TriggerInsteadtOfCollection(LocalDbRepository<TEntity> tabel, ITriggerInsteadtOfCollection<TEntity> duplication = null)
 		{
 			_tabel = tabel;
 			_duplication = duplication;

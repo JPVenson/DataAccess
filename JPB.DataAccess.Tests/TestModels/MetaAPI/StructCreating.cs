@@ -30,6 +30,15 @@
 			PropString = propString;
 		}
 
-		public string PropString { get; private set; }
+		public string PropString { get; set; }
+	}
+
+	public class ClassSpeedMeasurement
+	{
+		public ClassSpeedMeasurement()
+		{
+		}
+
+		public string PropString { get; set; }
 	}
 }

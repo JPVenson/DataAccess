@@ -27,7 +27,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	///     When enumerating the Repro you will only receive the Current state as it is designed to be thread save
 	/// </summary>
 	[Serializable]
-	public class LocalDbReposetory<TEntity> : ICollection<TEntity>, ILocalDbReposetoryBaseInternalUsage
+	public class LocalDbRepository<TEntity> : ICollection<TEntity>, ILocalDbReposetoryBaseInternalUsage
 	{
 		private readonly List<TransactionalItem<TEntity>> _transactionalItems = new List<TransactionalItem<TEntity>>();
 		protected internal readonly object LockRoot = new object();
@@ -59,7 +59,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     if Disabled each object has to be define an Valid Ado.Net constructor to allow a copy (Can be slow)
 		/// </param>
 		/// <param name="triggerProto">The given trigger collection</param>
-		public LocalDbReposetory(
+		public LocalDbRepository(
 			DbConfig config,
 			bool useOrignalObjectInMemory = true,
 			ILocalDbPrimaryKeyConstraint keyGenerator = null)
@@ -70,7 +70,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
-		protected LocalDbReposetory()
+		protected LocalDbRepository()
 			: this(new DbConfig())
 		{
 		}

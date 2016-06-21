@@ -5,14 +5,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 	public class SequentialSequentialTriggerCollection<TEntity>
 		: ISequentialTriggerCollection<TEntity>
 	{
-		protected readonly LocalDbReposetory<TEntity> Tabel;
+		protected readonly LocalDbRepository<TEntity> Tabel;
 		protected readonly ISequentialTriggerCollection<TEntity> Duplication;
 
 		protected virtual event EventHandler<ISequentialToken<TEntity>> _insert;
 		protected virtual event EventHandler<ISequentialToken<TEntity>> _update;
 		protected virtual event EventHandler<ISequentialToken<TEntity>> _delete;
 
-		internal SequentialSequentialTriggerCollection(LocalDbReposetory<TEntity> tabel, ISequentialTriggerCollection<TEntity> duplication = null)
+		internal SequentialSequentialTriggerCollection(LocalDbRepository<TEntity> tabel, ISequentialTriggerCollection<TEntity> duplication = null)
 		{
 			Tabel = tabel;
 			Duplication = duplication;

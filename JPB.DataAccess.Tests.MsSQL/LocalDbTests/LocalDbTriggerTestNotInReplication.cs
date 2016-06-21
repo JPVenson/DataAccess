@@ -20,12 +20,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 		}
 
-		private LocalDbReposetory<Users> MockRepro()
+		private LocalDbRepository<Users> MockRepro()
 		{
-			LocalDbReposetory<Users> users;
+			LocalDbRepository<Users> users;
 			using (var db = new DatabaseScope())
 			{
-				users = new LocalDbReposetory<Users>(new DbConfig());
+				users = new LocalDbRepository<Users>(new DbConfig());
 			}
 			return users;
 		}

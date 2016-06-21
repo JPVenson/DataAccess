@@ -24,10 +24,10 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		[Test]
 		public void WriteUsers()
 		{
-			LocalDbReposetory<Users> users;
+			LocalDbRepository<Users> users;
 			using (new DatabaseScope())
 			{
-				users = new LocalDbReposetory<Users>(new DbConfig());
+				users = new LocalDbRepository<Users>(new DbConfig());
 			}
 
 			users.Add(new Users());
@@ -47,10 +47,10 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		[Test]
 		public void ReadUsers()
 		{
-			LocalDbReposetory<Users> users;
+			LocalDbRepository<Users> users;
 			using (var scope = new DatabaseScope())
 			{
-				users = new LocalDbReposetory<Users>(new DbConfig());
+				users = new LocalDbRepository<Users>(new DbConfig());
 
 				scope.SetupDone += Scope_SetupDone1;
 			}
@@ -72,12 +72,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		[Test]
 		public void WriteBooksWithImages()
 		{
-			LocalDbReposetory<Book> books;
-			LocalDbReposetory<Image> images;
+			LocalDbRepository<Book> books;
+			LocalDbRepository<Image> images;
 			using (new DatabaseScope())
 			{
-				books = new LocalDbReposetory<Book>(new DbConfig());
-				images = new LocalDbReposetory<Image>(new DbConfig());
+				books = new LocalDbRepository<Book>(new DbConfig());
+				images = new LocalDbRepository<Image>(new DbConfig());
 				Assert.IsFalse(books.ReposetoryCreated);
 				Assert.IsFalse(images.ReposetoryCreated);
 			}
@@ -105,12 +105,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		[Test]
 		public void ReadBooksWithImages()
 		{
-			LocalDbReposetory<Book> books;
-			LocalDbReposetory<Image> images;
+			LocalDbRepository<Book> books;
+			LocalDbRepository<Image> images;
 			using (var scope = new DatabaseScope())
 			{
-				books = new LocalDbReposetory<Book>(new DbConfig());
-				images = new LocalDbReposetory<Image>(new DbConfig());
+				books = new LocalDbRepository<Book>(new DbConfig());
+				images = new LocalDbRepository<Image>(new DbConfig());
 
 				scope.SetupDone += Scope_SetupDone;
 			}

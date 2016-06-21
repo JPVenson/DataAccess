@@ -105,6 +105,9 @@
     <Compile Include="..\JPB.DataAccess.Tests\Manager.cs">
       <Link>Manager.cs</Link>
     </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\MetaApiTests\MetaApiSpeedTest.cs">
+      <Link>MetaApiTests\MetaApiSpeedTest.cs</Link>
+    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\MetaApiTests\MetaApiTest.cs">
       <Link>MetaApiTests\MetaApiTest.cs</Link>
     </Compile>

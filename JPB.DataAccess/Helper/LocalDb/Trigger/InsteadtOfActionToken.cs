@@ -16,13 +16,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 
 	public class InsteadtOfActionToken<TEntity> : IInsteadtOfActionToken<TEntity>
 	{
-		public InsteadtOfActionToken(TEntity item, LocalDbReposetory<TEntity> table)
+		public InsteadtOfActionToken(TEntity item, LocalDbRepository<TEntity> table)
 		{
 			Item = item;
 			Table = table;
 		}
 
 		public virtual TEntity Item { get; private set; }
-		public LocalDbReposetory<TEntity> Table { get; private set; }
+		public LocalDbRepository<TEntity> Table { get; private set; }
 	}
 }

@@ -5,17 +5,17 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
 	public class ConstraintCollection<TEntity>
 	{
-		private readonly LocalDbReposetory<TEntity> _localDbReposetory;
+		private readonly LocalDbRepository<TEntity> _localDbRepository;
 
 		internal ConstraintCollection(
-			LocalDbReposetory<TEntity> localDbReposetory,
+			LocalDbRepository<TEntity> localDbRepository,
 			ILocalDbPrimaryKeyConstraint primaryKey)
 		{
-			_localDbReposetory = localDbReposetory;
+			_localDbRepository = localDbRepository;
 			PrimaryKey = primaryKey;
-			Unique = new UniqueConstrains<TEntity>(localDbReposetory);
-			Default = new DefaultConstraints<TEntity>(localDbReposetory);
-			Check = new CheckConstraints<TEntity>(localDbReposetory);
+			Unique = new UniqueConstrains<TEntity>(localDbRepository);
+			Default = new DefaultConstraints<TEntity>(localDbRepository);
+			Check = new CheckConstraints<TEntity>(localDbRepository);
 		}
 
 		/// <summary>

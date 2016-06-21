@@ -3,6 +3,6 @@
 	public interface IInsteadtOfActionToken<TEntity>
 	{
 		TEntity Item { get; }
-		LocalDbReposetory<TEntity> Table { get; }
+		LocalDbRepository<TEntity> Table { get; }
 	}
 }

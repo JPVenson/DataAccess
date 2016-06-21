@@ -163,7 +163,7 @@
     <Compile Include="Helper\LocalDb\LocalDataPager.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Defaults\LocalDbCheckConstraint.cs" />
     <Compile Include="Helper\LocalDb\LocalDbManager.cs" />
-    <Compile Include="Helper\LocalDb\LocalDbReposetory.cs" />
+    <Compile Include="Helper\LocalDb\LocalDbRepository.cs" />
     <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbGuidPkProvider.cs" />
     <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbIntPkProvider.cs" />
     <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbLongPkProvider.cs" />

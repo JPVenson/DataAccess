@@ -17,18 +17,18 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	[TestFixture]
 	public class LocalDbWithFkTest
 	{
-		private LocalDbReposetory<Book> _books;
-		private LocalDbReposetory<Image> _images;
-		private LocalDbReposetory<ImageNullable> _imagesNullable;
+		private LocalDbRepository<Book> _books;
+		private LocalDbRepository<Image> _images;
+		private LocalDbRepository<ImageNullable> _imagesNullable;
 
 		[SetUp]
 		public void TestInit()
 		{
 			using (new DatabaseScope())
 			{
-				_books = new LocalDbReposetory<Book>(new DbConfig());
-				_images = new LocalDbReposetory<Image>(new DbConfig());
-				_imagesNullable = new LocalDbReposetory<ImageNullable>(new DbConfig());
+				_books = new LocalDbRepository<Book>(new DbConfig());
+				_images = new LocalDbRepository<Image>(new DbConfig());
+				_imagesNullable = new LocalDbRepository<ImageNullable>(new DbConfig());
 				Assert.IsFalse(_books.ReposetoryCreated);
 				Assert.IsFalse(_images.ReposetoryCreated);
 				Assert.IsFalse(_imagesNullable.ReposetoryCreated);

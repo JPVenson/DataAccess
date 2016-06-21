@@ -47,10 +47,10 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 
 	public class ReplicationNode<TEntity> : IReplicationNode<TEntity>
 	{
-		private readonly LocalDbReposetory<TEntity> _table;
+		private readonly LocalDbRepository<TEntity> _table;
 		private readonly IReplicationNode<TEntity> _duplication;
 
-		internal ReplicationNode(LocalDbReposetory<TEntity> table, IReplicationNode<TEntity> duplication = null)
+		internal ReplicationNode(LocalDbRepository<TEntity> table, IReplicationNode<TEntity> duplication = null)
 		{
 			_table = table;
 			_duplication = duplication;

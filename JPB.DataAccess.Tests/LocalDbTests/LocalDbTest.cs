@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	public class LocalDbTest
 	{
 		private readonly bool _useObjectCopy;
-		private LocalDbReposetory<Users> _users;
+		private LocalDbRepository<Users> _users;
 
 		public LocalDbTest(bool useObjectCopy)
 		{
@@ -34,7 +34,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			using (new DatabaseScope())
 			{
-				_users = new LocalDbReposetory<Users>(new DbConfig(), _useObjectCopy, null);
+				_users = new LocalDbRepository<Users>(new DbConfig(), _useObjectCopy, null);
 			}
 
 			Assert.IsTrue(_users.ReposetoryCreated);
@@ -59,9 +59,11 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				Parallel.For(0, 999, d =>
 				{
+					var i = 0;
 					foreach (var userse in _users)
 					{
-
+						Assert.That(userse, Is.Not.Null);
+						i += 1;
 					}
 					var firstOrDefault = _users.FirstOrDefault();
 					if (d % 2 == 0)
@@ -74,7 +76,8 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 					}
 					foreach (var userse in _users)
 					{
-
+						Assert.That(userse, Is.Not.Null);
+						i -= 1;
 					}
 				});
 			}, Throws.Nothing);

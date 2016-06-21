@@ -8,14 +8,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
 	public class CheckConstraints<TEntity> : ICheckConstraints<TEntity>
 	{
-		private readonly LocalDbReposetory<TEntity> _localDbReposetory;
+		private readonly LocalDbRepository<TEntity> _localDbRepository;
 
 		private HashSet<ILocalDbCheckConstraint<TEntity>> _constraints;
 
-		public CheckConstraints(LocalDbReposetory<TEntity> localDbReposetory)
+		public CheckConstraints(LocalDbRepository<TEntity> localDbRepository)
 		{
 			_constraints = new HashSet<ILocalDbCheckConstraint<TEntity>>(new ConstraintComparer());
-			_localDbReposetory = localDbReposetory;
+			_localDbRepository = localDbRepository;
 		}
 
 		public IEnumerator<ILocalDbCheckConstraint<TEntity>> GetEnumerator()
@@ -30,21 +30,21 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 
 		public void Add(ILocalDbCheckConstraint<TEntity> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(item);
 		}
 
 		public void Add(string name, Func<TEntity, bool> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(new LocalDbCheckConstraint<TEntity>(name, item));
 		}
 
 		public void Clear()
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Clear();
 		}
@@ -61,7 +61,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 
 		public bool Remove(ILocalDbCheckConstraint<TEntity> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			return _constraints.Remove(item);
 		}

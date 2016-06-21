@@ -22,13 +22,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 
 	public class UniqueConstrains<TEntity> : IUniqueConstrains<TEntity>
 	{
-		private readonly LocalDbReposetory<TEntity> _localDbReposetory;
+		private readonly LocalDbRepository<TEntity> _localDbRepository;
 		private HashSet<ILocalDbUniqueConstraint<TEntity>> _constraints;
 
-		public UniqueConstrains(LocalDbReposetory<TEntity> localDbReposetory)
+		public UniqueConstrains(LocalDbRepository<TEntity> localDbRepository)
 		{
 			_constraints = new HashSet<ILocalDbUniqueConstraint<TEntity>>();
-			_localDbReposetory = localDbReposetory;
+			_localDbRepository = localDbRepository;
 		}
 
 		public IEnumerator<ILocalDbUniqueConstraint<TEntity>> GetEnumerator()
@@ -43,21 +43,21 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 
 		public void Add(ILocalDbUniqueConstraint<TEntity> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(item);
 		}
 
 		public void Add<TValue>(string name, Func<TEntity, TValue> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Add(new LocalDbUniqueConstraint<TEntity, TValue>(name, item));
 		}
 
 		public void Clear()
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			_constraints.Clear();
 		}
@@ -74,7 +74,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 
 		public bool Remove(ILocalDbUniqueConstraint<TEntity> item)
 		{
-			if (_localDbReposetory.ReposetoryCreated)
+			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
 			return _constraints.Remove(item);
 		}

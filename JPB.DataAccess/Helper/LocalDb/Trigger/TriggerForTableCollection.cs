@@ -3,9 +3,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 	public class TriggerForTableCollection<TEntity> 
 		: ITriggerForTableCollectionInternalUsage<TEntity> 
 	{
-		private readonly LocalDbReposetory<TEntity> _table;
+		private readonly LocalDbRepository<TEntity> _table;
 
-		internal TriggerForTableCollection(LocalDbReposetory<TEntity> table)
+		internal TriggerForTableCollection(LocalDbRepository<TEntity> table)
 		{
 			_table = table;
 			NotForReplication = new ReplicationNode<TEntity>(_table);

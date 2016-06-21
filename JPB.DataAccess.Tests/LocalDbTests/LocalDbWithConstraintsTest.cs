@@ -23,14 +23,14 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	public class LocalDbWithConstraintsTest
 	{
 
-		public LocalDbReposetory<Image> TestInit(IEnumerable<ILocalDbCheckConstraint<Image>> checks,
+		public LocalDbRepository<Image> TestInit(IEnumerable<ILocalDbCheckConstraint<Image>> checks,
 			IEnumerable<ILocalDbUniqueConstraint<Image>> unique,
 			IEnumerable<ILocalDbDefaultConstraint<Image>> defaults)
 		{
-			LocalDbReposetory<Image> images;
+			LocalDbRepository<Image> images;
 			using (new DatabaseScope())
 			{
-				images = new LocalDbReposetory<Image>(new DbConfig());
+				images = new LocalDbRepository<Image>(new DbConfig());
 				if (checks != null)
 					foreach (var localDbCheckConstraint in checks)
 					{

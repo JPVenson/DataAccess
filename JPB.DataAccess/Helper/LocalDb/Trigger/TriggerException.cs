@@ -6,9 +6,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 	public class TriggerException<TEntity> : Exception, ITriggerException
 	{
 		[OptionalField]
-		private readonly LocalDbReposetory<TEntity> _table;
+		private readonly LocalDbRepository<TEntity> _table;
 
-		public TriggerException(string reason, LocalDbReposetory<TEntity> table)
+		public TriggerException(string reason, LocalDbRepository<TEntity> table)
 			: base("One trigger rejected the change. See reason.")
 		{
 			Reason = reason;
@@ -17,7 +17,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 
 		public string Reason { get; private set; }
 
-		public LocalDbReposetory<TEntity> Table
+		public LocalDbRepository<TEntity> Table
 		{
 			get { return _table; }
 		}

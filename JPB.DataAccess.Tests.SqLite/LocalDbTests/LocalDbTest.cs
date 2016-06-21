@@ -21,7 +21,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	public class LocalDbTest
 	{
 		private readonly bool _useObjectCopy;
-		private LocalDbReposetory<Users> _users;
+		private LocalDbRepository<Users> _users;
 
 		public LocalDbTest(bool useObjectCopy)
 		{
@@ -33,7 +33,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			using (new DatabaseScope())
 			{
-				_users = new LocalDbReposetory<Users>(new DbConfig(), _useObjectCopy, null);
+				_users = new LocalDbRepository<Users>(new DbConfig(), _useObjectCopy, null);
 			}
 
 			Assert.IsTrue(_users.ReposetoryCreated);

@@ -19,12 +19,12 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 	{
 		public class DbScope : IDisposable
 		{
-			public LocalDbReposetory<Users> users;
+			public LocalDbRepository<Users> users;
 			public DatabaseScope database;
 			public DbScope()
 			{
 				database = new DatabaseScope();
-				users = new LocalDbReposetory<Users>(new DbConfig());
+				users = new LocalDbRepository<Users>(new DbConfig());
 			}
 
 			public void Dispose()

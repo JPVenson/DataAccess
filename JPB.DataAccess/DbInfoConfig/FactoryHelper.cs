@@ -30,6 +30,13 @@ namespace JPB.DataAccess.DbInfoConfig
 	/// </summary>
 	public class FactoryHelper
 	{
+		/// <summary>
+		/// Creates a new CodeDOM Element that is ether a Factory(Public Static Object Factory) or an constructor
+		/// Both functions accepts only one Argument of type IDataRecord
+		/// Both functions are empty
+		/// </summary>
+		/// <param name="factory"></param>
+		/// <returns></returns>
 		public static CodeMemberMethod GenerateTypeConstructor(bool factory = false)
 		{
 			CodeMemberMethod pocoCreator;
@@ -50,6 +57,13 @@ namespace JPB.DataAccess.DbInfoConfig
 			return pocoCreator;
 		}
 
+		/// <summary>
+		/// Generates a Constructor with a Full Ado.Net constructor
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="settings"></param>
+		/// <param name="importNameSpace"></param>
+		/// <returns></returns>
 		public static CodeMemberMethod GenerateConstructor(DbClassInfoCache target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
 		{
 			var codeConstructor = GenerateTypeConstructor();
@@ -57,6 +71,14 @@ namespace JPB.DataAccess.DbInfoConfig
 			return codeConstructor;
 		}
 
+		/// <summary>
+		/// Generates a Function with a Full ado.net constructor beavior.
+		/// It Creates a new Instance of <param name="target"></param> and then fills all public properties
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="settings"></param>
+		/// <param name="importNameSpace"></param>
+		/// <returns></returns>
 		public static CodeMemberMethod GenerateFactory(DbClassInfoCache target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
 		{
 			var codeFactory = GenerateTypeConstructor(true);
@@ -108,6 +130,14 @@ namespace JPB.DataAccess.DbInfoConfig
 			}
 		}
 
+		/// <summary>
+		/// Creates a new body in stlye of an Ado.net Constructor and attaches it to the <paramref name="target"/>
+		/// </summary>
+		/// <param name="properties"></param>
+		/// <param name="settings"></param>
+		/// <param name="importNameSpace"></param>
+		/// <param name="container"></param>
+		/// <param name="target"></param>
 		public static void GenerateBody(Dictionary<string, DbPropertyInfoCache> properties,
 			FactoryHelperSettings settings,
 			CodeNamespace importNameSpace,
