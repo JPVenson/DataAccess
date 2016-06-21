@@ -740,7 +740,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader, DbAccessType? accessType)
 		{
-			return DbAccessLayerHelper.SetPropertysViaReflection(type, reader, DbAccessType, Config);
+			return type.SetPropertysViaReflection(reader, DbAccessType, Config);
 		}
 
 		internal IEnumerable EnumerateDirectDataRecords(IDbCommand query,

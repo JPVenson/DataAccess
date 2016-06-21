@@ -70,6 +70,11 @@ namespace JPB.DataAccess.Query
 		{
 		}
 
+		internal QueryLazyEnumerator(IQueryContainer queryContainer)
+			: base(queryContainer, typeof(T))
+		{
+		}
+
 		public new T Current
 		{
 			get { return (T) base.Current; }

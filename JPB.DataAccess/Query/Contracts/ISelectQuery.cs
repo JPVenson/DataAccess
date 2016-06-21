@@ -1,4 +1,6 @@
-﻿namespace JPB.DataAccess.Query.Contracts
+﻿using System.Collections.Generic;
+
+namespace JPB.DataAccess.Query.Contracts
 {
 	public interface IQueryElement : IQueryBuilder
 	{
@@ -7,7 +9,6 @@
 
 	public interface IElementProducer<out T> : IIdentifyerElementQuery
 	{
-		
 	}
 
 	public interface IJoinQuery : IQueryElement

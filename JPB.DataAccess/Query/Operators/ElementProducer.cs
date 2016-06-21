@@ -31,6 +31,16 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
+		///     Executes the Current QueryBuilder by setting the type
+		/// </summary>
+		/// <typeparam name="E"></typeparam>
+		/// <returns></returns>
+		public IEnumerable<TPoco> ForResult()
+		{
+			return new QueryEnumeratorEx<TPoco>(this);
+		}
+
+		/// <summary>
 		///     Adds a SQL WHERE statement
 		///		does not emit any conditional statement
 		///		should be followed by Column()

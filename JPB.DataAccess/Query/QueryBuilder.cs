@@ -62,7 +62,7 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public object Clone()
+		public QueryBuilderX Clone()
 		{
 			return new QueryBuilderX(this.ContainerObject);
 		}
@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public IEnumerable<E> ForResult<E>()
 		{
-			return new QueryEnumerator<IQueryElement, E>(new QueryBuilder<E, IQueryElement>(this.ChangeType<IQueryElement>()));
+			return new QueryEnumeratorEx<E>(this);
 		}
 
 		/// <summary>
@@ -90,6 +90,16 @@ namespace JPB.DataAccess.Query
 			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
 				return new QueryEagerEnumerator(ContainerObject, ContainerObject.ForType);
 			return new QueryLazyEnumerator(ContainerObject, ContainerObject.ForType);
+		}
+
+		/// <summary>
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerator<TPoco> GetEnumerator<TPoco>()
+		{
+			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+				return new QueryEagerEnumerator<TPoco>(ContainerObject);
+			return new QueryLazyEnumerator<TPoco>(ContainerObject);
 		}
 	}
 
