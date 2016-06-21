@@ -81,38 +81,40 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DbAccessLayerTests\CheckWrapperBaseTests.cs" />
-    <Compile Include="DbCollectionTests\DbCollection.cs" />
-    <Compile Include="DbLoaderResouces.Designer.cs">
+    <Compile Include="Overwrite\DataMigrationHelper.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs" />
+    <Compile Include="Overwrite\DbCollectionTests\DbCollection.cs" />
+    <Compile Include="Base\DbLoaderResouces.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>DbLoaderResouces.resx</DependentUpon>
     </Compile>
-    <Compile Include="LocalDbTests\DatabaseSerializerTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbTransactionalTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbTriggerTestInReplication.cs" />
-    <Compile Include="LocalDbTests\LocalDbTriggerTestNotInReplication.cs" />
-    <Compile Include="LocalDbTests\LocalDbWithConstraintsTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbWithFkTest.cs" />
-    <Compile Include="Manager.cs" />
-    <Compile Include="MetaApiTests\MetaApiSpeedTest.cs" />
-    <Compile Include="MetaApiTests\MetaApiTest.cs" />
-    <Compile Include="MsSqlManager.cs" />
-    <Compile Include="PagerTests\PagerConstraintTests.cs" />
-    <Compile Include="PagerTests\PagerUnitTest.cs" />
-    <Compile Include="PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
+    <Compile Include="Overwrite\LocalDbTests\DatabaseSerializerTest.cs" />
+    <Compile Include="Overwrite\LocalDbTests\LocalDbTest.cs" />
+    <Compile Include="Overwrite\LocalDbTests\LocalDbTransactionalTest.cs" />
+    <Compile Include="Overwrite\LocalDbTests\LocalDbTriggerTestInReplication.cs" />
+    <Compile Include="Overwrite\LocalDbTests\LocalDbTriggerTestNotInReplication.cs" />
+    <Compile Include="Overwrite\LocalDbTests\LocalDbWithConstraintsTest.cs" />
+    <Compile Include="Overwrite\LocalDbTests\LocalDbWithFkTest.cs" />
+    <Compile Include="Overwrite\Manager.cs" />
+    <Compile Include="Overwrite\MetaApiTests\MetaApiSpeedTest.cs" />
+    <Compile Include="Overwrite\MetaApiTests\MetaApiTest.cs" />
+    <Compile Include="Overwrite\MsSqlManager.cs" />
+    <Compile Include="Overwrite\PagerTests\PagerConstraintTests.cs" />
+    <Compile Include="Overwrite\PagerTests\PagerUnitTest.cs" />
+    <Compile Include="Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqLiteManager.cs" />
-    <Compile Include="TestModels\CheckWrapperBaseTests\FooTest.cs" />
-    <Compile Include="TestModels\CheckWrapperBaseTests\Image.cs" />
-    <Compile Include="TestModels\CheckWrapperBaseTests\TestProcA.cs" />
-    <Compile Include="TestModels\CheckWrapperBaseTests\TestProcAResult.cs" />
-    <Compile Include="TestModels\CheckWrapperBaseTests\User.cs" />
-    <Compile Include="TestModels\MetaAPI\StructCreating.cs" />
-    <Compile Include="TestModels\XmlDataRecordTest\InstanceMock.cs" />
-    <Compile Include="Users.cs" />
-    <Compile Include="XmlDataRecordTests\XmlDataRecordTest.cs" />
+    <Compile Include="Overwrite\QueryBuilderTests\QueryBuilderTests.cs" />
+    <Compile Include="Overwrite\SqLiteManager.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\FooTest.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Image.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcA.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcAResult.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\User.cs" />
+    <Compile Include="Base\TestModels\MetaAPI\StructCreating.cs" />
+    <Compile Include="Base\TestModels\XmlDataRecordTest\InstanceMock.cs" />
+    <Compile Include="Base\Users.cs" />
+    <Compile Include="Overwrite\XmlDataRecordTests\XmlDataRecordTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
@@ -122,10 +124,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="Base\packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DbLoaderResouces.resx">
+    <EmbeddedResource Include="Base\DbLoaderResouces.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>DbLoaderResouces.Designer.cs</LastGenOutput>
     </EmbeddedResource>

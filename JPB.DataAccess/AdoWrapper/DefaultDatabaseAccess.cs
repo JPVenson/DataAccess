@@ -385,6 +385,10 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 		}
 
+		/// <summary>
+		/// Creates a new Transaction and executes the Action inside it. Then closes the Transaction
+		/// </summary>
+		/// <param name="action"></param>
 		public void RunInTransaction(Action<IDatabase> action)
 		{
 			this.RunInTransaction(action, GetDefaultTransactionLevel());
@@ -411,11 +415,16 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public T RunInTransaction<T>(Func<IDatabase, T> func)
 		{
+			return RunInTransaction(func, GetDefaultTransactionLevel());
+		}
+
+		public T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction)
+		{
 			try
 			{
 				//defaulting it
 				//Connect(IsolationLevel.ReadUncommitted);
-				Connect(GetDefaultTransactionLevel());
+				Connect(transaction);
 
 				var res = func(this);
 

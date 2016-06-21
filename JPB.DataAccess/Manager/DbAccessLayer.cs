@@ -366,23 +366,23 @@ namespace JPB.DataAccess.Manager
 			return new RootQuery(this);
 		}
 
-		/// <summary>
-		///     Creates a Strong typed query that awaits a Result
-		/// </summary>
-		/// <returns></returns>
-		public RootQuery Query(Type targetType)
-		{
-			return new RootQuery(this, targetType);
-		}
+		///// <summary>
+		/////     Creates a Strong typed query that awaits a Result
+		///// </summary>
+		///// <returns></returns>
+		//public RootQuery Query(Type targetType)
+		//{
+		//	return new RootQuery(this, targetType);
+		//}
 
-		/// <summary>
-		///     Creates a Strong typed query that awaits a Result
-		/// </summary>
-		/// <returns></returns>
-		public RootQuery Query<T>()
-		{
-			return new RootQuery(this, typeof(T));
-		}
+		///// <summary>
+		/////     Creates a Strong typed query that awaits a Result
+		///// </summary>
+		///// <returns></returns>
+		//public RootQuery Query<T>()
+		//{
+		//	return new RootQuery(this, typeof(T));
+		//}
 
 		/// <summary>
 		///     Creates a new Instance based on possible Ctor's and the given
@@ -412,6 +412,8 @@ namespace JPB.DataAccess.Manager
 #pragma warning restore 618
 		}
 
+		private static readonly Assembly MsCoreLibAssembly = typeof(string).Assembly;
+
 		/// <summary>
 		///     Creates an instance based on a Ctor injection or Reflection loading
 		/// </summary>
@@ -421,6 +423,12 @@ namespace JPB.DataAccess.Manager
 			out bool fullLoaded,
 			DbAccessType? accessType = null)
 		{
+			if (classInfo.Type.Assembly == MsCoreLibAssembly && reader.FieldCount == 1)
+			{
+				fullLoaded = true;
+				return reader.GetValue(0);
+			}
+
 			if (classInfo.Factory != null)
 			{
 				fullLoaded = classInfo.FullFactory;

@@ -86,40 +86,66 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\JPB.DataAccess.Tests\DbAccessLayerTests\CheckWrapperBaseTests.cs">
-      <Link>DbAccessLayerTests\CheckWrapperBaseTests.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\DataMigrationHelper.cs">
+      <Link>Overwrite\DataMigrationHelper.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\DbCollectionTests\DbCollection.cs">
-      <Link>DbCollectionTests\DbCollection.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs">
+      <Link>Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\Manager.cs">
-      <Link>Manager.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\DbCollectionTests\DbCollection.cs">
+      <Link>Overwrite\DbCollectionTests\DbCollection.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\MetaApiTests\MetaApiTest.cs">
-      <Link>MetaApiTests\MetaApiTest.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\LocalDbTests\DatabaseSerializerTest.cs">
+      <Link>Overwrite\LocalDbTests\DatabaseSerializerTest.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\MsSqlManager.cs">
-      <Link>MsSqlManager.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\LocalDbTests\LocalDbTest.cs">
+      <Link>Overwrite\LocalDbTests\LocalDbTest.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\PagerTests\PagerConstraintTests.cs">
-      <Link>PagerTests\PagerConstraintTests.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\LocalDbTests\LocalDbTransactionalTest.cs">
+      <Link>Overwrite\LocalDbTests\LocalDbTransactionalTest.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs">
-      <Link>PocoPkEquallityTests\PocoPkEqualityComparerTest.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\LocalDbTests\LocalDbTriggerTestInReplication.cs">
+      <Link>Overwrite\LocalDbTests\LocalDbTriggerTestInReplication.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\SqLiteManager.cs">
-      <Link>SqLiteManager.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\LocalDbTests\LocalDbTriggerTestNotInReplication.cs">
+      <Link>Overwrite\LocalDbTests\LocalDbTriggerTestNotInReplication.cs</Link>
     </Compile>
-    <Compile Include="..\JPB.DataAccess.Tests\XmlDataRecordTests\XmlDataRecordTest.cs">
-      <Link>XmlDataRecordTests\XmlDataRecordTest.cs</Link>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\LocalDbTests\LocalDbWithConstraintsTest.cs">
+      <Link>Overwrite\LocalDbTests\LocalDbWithConstraintsTest.cs</Link>
     </Compile>
-    <Compile Include="LocalDbTests\DatabaseSerializerTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbTransactionalTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbTriggerTestInReplication.cs" />
-    <Compile Include="LocalDbTests\LocalDbTriggerTestNotInReplication.cs" />
-    <Compile Include="LocalDbTests\LocalDbWithConstraintsTest.cs" />
-    <Compile Include="LocalDbTests\LocalDbWithFkTest.cs" />
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\LocalDbTests\LocalDbWithFkTest.cs">
+      <Link>Overwrite\LocalDbTests\LocalDbWithFkTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\Manager.cs">
+      <Link>Overwrite\Manager.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\MetaApiTests\MetaApiSpeedTest.cs">
+      <Link>Overwrite\MetaApiTests\MetaApiSpeedTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\MetaApiTests\MetaApiTest.cs">
+      <Link>Overwrite\MetaApiTests\MetaApiTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\MsSqlManager.cs">
+      <Link>Overwrite\MsSqlManager.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\PagerTests\PagerConstraintTests.cs">
+      <Link>Overwrite\PagerTests\PagerConstraintTests.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\PagerTests\PagerUnitTest.cs">
+      <Link>Overwrite\PagerTests\PagerUnitTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs">
+      <Link>Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\QueryBuilderTests\QueryBuilderTests.cs">
+      <Link>Overwrite\QueryBuilderTests\QueryBuilderTests.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\SqLiteManager.cs">
+      <Link>Overwrite\SqLiteManager.cs</Link>
+    </Compile>
+    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\XmlDataRecordTests\XmlDataRecordTest.cs">
+      <Link>Overwrite\XmlDataRecordTests\XmlDataRecordTest.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -316,6 +316,39 @@ namespace JPB.DataAccess.Query
 		//	return query.QueryText("COUNT(" + what + ")");
 		//}
 
+		public static ElementProducer<long> Count<TPoco>(this RootQuery query)
+		{
+			return new ElementProducer<long>(query.QueryText("SELECT COUNT(1) FROM [{0}]", query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName));
+		}
+
+		public static ElementProducer<long> CountLong<TPoco>(this IElementProducer<TPoco> query)
+		{
+			return query.Count<TPoco, long>();
+		}
+
+		public static ElementProducer<int> CountInt<TPoco>(this IElementProducer<TPoco> query)
+		{
+			return query.Count<TPoco, int>();
+		}
+
+		public static ElementProducer<short> CountShort<TPoco>(this IElementProducer<TPoco> query)
+		{
+			return query.Count<TPoco, short>();
+		}
+
+		public static ElementProducer<TOut> Count<TPoco, TOut>(this IElementProducer<TPoco> query)
+		{
+			var cteName = "countCte" + query.ContainerObject.GetNextParameterId();
+			return new ElementProducer<TOut>(new RootQuery(query.ContainerObject.AccessLayer)
+				.WithCte(cteName, (f) =>
+				{
+					foreach (var genericQueryPart in query.ContainerObject.Parts)
+					{
+						f.Add(genericQueryPart);
+					}
+				}).QueryText("SELECT COUNT(1) FROM " + cteName));
+		}
+
 		public static ConditionalQuery<TPoco> OrderBy<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
 			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over));
