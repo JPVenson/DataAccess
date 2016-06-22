@@ -15,10 +15,28 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Contacts.Pager
 {
+	public interface IDataPagerInfo
+	{
+		/// <summary>
+		///     Id of Current page beween 1 and MaxPage
+		/// </summary>
+		long CurrentPage { get; set; }
+
+		/// <summary>
+		///     The last possible Page
+		/// </summary>
+		long MaxPage { get; }
+
+		/// <summary>
+		///     Items to load on one page
+		/// </summary>
+		int PageSize { get; set; }
+	}
+
 	/// <summary>
 	///     Base pager
 	/// </summary>
-	public interface IDataPager : IDisposable
+	public interface IDataPager : IDisposable, IDataPagerInfo
 	{
 		/// <summary>
 		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
@@ -40,21 +58,6 @@ namespace JPB.DataAccess.Contacts.Pager
 		///     Commands that are sequencely attached to the main pager command
 		/// </summary>
 		List<IDbCommand> AppendedComands { get; set; }
-
-		/// <summary>
-		///     Id of Current page beween 1 and MaxPage
-		/// </summary>
-		long CurrentPage { get; set; }
-
-		/// <summary>
-		///     The last possible Page
-		/// </summary>
-		long MaxPage { get; }
-
-		/// <summary>
-		///     Items to load on one page
-		/// </summary>
-		int PageSize { get; set; }
 
 		/// <summary>
 		///     Additional Commands to append to the base load command
