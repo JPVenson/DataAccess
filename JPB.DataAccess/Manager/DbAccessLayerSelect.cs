@@ -243,28 +243,28 @@ namespace JPB.DataAccess.Manager
 				}
 			}
 
-			return GenericQueryCreation<SelectFactoryMethodAttribute>(type, (e, f) => _CreateSelect(type, Database), null, parameter);
+			return GenericQueryCreation<SelectFactoryMethodAttribute>(type, (e, f) => CreateSelect(type, Database), null, parameter);
 		}
 
 		internal IDbCommand CreateInsertQueryFactory(DbClassInfoCache type,
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => _CreateInsert(type, e), entity);
+			return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => DbAccessLayer.CreateInsert(Database, type, e), entity);
 		}
 
 		internal IDbCommand CreateUpdateQueryFactory(DbClassInfoCache type,
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<UpdateFactoryMethodAttribute>(type, (e, f) => _CreateUpdate(type, e), entity);
+			return GenericQueryCreation<UpdateFactoryMethodAttribute>(type, (e, f) => DbAccessLayer.CreateUpdate(Database, type, e), entity);
 		}
 
 		internal IDbCommand CreateDeleteQueryFactory(DbClassInfoCache type,
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => _CreateDelete(type, e), entity);
+			return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => DbAccessLayer.CreateDelete(Database, type, e), entity);
 		}
 
 		internal IDbCommand GenericQueryCreation<TE>(
@@ -504,14 +504,14 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public IDbCommand CreateSelect<T>()
 		{
-			return _CreateSelect(Config.GetOrCreateClassInfoCache(typeof(T)), Database);
+			return CreateSelect(Config.GetOrCreateClassInfoCache(typeof(T)), Database);
 		}
 
 		/// <summary>
 		///     Creates a Select by using a Factory mehtod or auto generated querys
 		/// </summary>
 		/// <returns></returns>
-		private static IDbCommand _CreateSelect(DbClassInfoCache type, IDatabase db)
+		private static IDbCommand CreateSelect(DbClassInfoCache type, IDatabase db)
 		{
 			return db.CreateCommand(CreateSelect(type));
 		}

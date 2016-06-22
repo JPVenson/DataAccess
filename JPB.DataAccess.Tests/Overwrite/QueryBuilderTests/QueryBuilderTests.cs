@@ -31,6 +31,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		public void Init()
 		{
 			DbAccessLayer = new Manager().GetWrapper();
+			DataMigrationHelper.ClearDb(DbAccessLayer);
 		}
 
 		public DbAccessLayer DbAccessLayer { get; set; }
@@ -118,6 +119,57 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				Assert.That(forResult, Is.Not.Empty);
 				Assert.That(forResult.Count, Is.EqualTo(countOfImages));
 			}
+		}
+		[Category("MsSQL")]
+#if SqLite
+		[Ignore("MsSQL only")]
+#endif
+		[Test]
+		public void Pager()
+		{
+			var maxItems = 250;
+
+			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
+
+
+			var basePager = DbAccessLayer.Database.CreatePager<Users>();
+			basePager.PageSize = 10;
+			basePager.LoadPage(DbAccessLayer);
+
+			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
+			Assert.That(basePager.MaxPage, Is.EqualTo(maxItems / basePager.PageSize));
+
+			var queryPager = DbAccessLayer.Query().Select<Users>().ForPagedResult();
+			queryPager.LoadPage(DbAccessLayer);
+
+			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
+			Assert.That(basePager.MaxPage, Is.EqualTo(queryPager.MaxPage));
+		}
+
+		[Category("MsSQL")]
+#if SqLite
+		[Ignore("MsSQL only")]
+#endif
+		[Test]
+		public void PagerWithCondtion()
+		{
+			var maxItems = 250;
+			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
+
+
+			var basePager = DbAccessLayer.Database.CreatePager<Users>();
+			basePager.BaseQuery = DbAccessLayer.CreateSelect<Users>(" WHERE User_ID < 25");
+			basePager.PageSize = 10;
+			basePager.LoadPage(DbAccessLayer);
+
+			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
+			Assert.That(basePager.MaxPage, Is.EqualTo(Math.Ceiling(25F / basePager.PageSize)));
+
+			var queryPager = DbAccessLayer.Query().Select<Users>().Where().Column(f => f.UserID).IsQueryOperatorValue("< 25").ForPagedResult();
+			queryPager.LoadPage(DbAccessLayer);
+
+			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
+			Assert.That(basePager.MaxPage, Is.EqualTo(queryPager.MaxPage));
 		}
 	}
 }

@@ -180,21 +180,20 @@ namespace JPB.DataAccess
 		///     <paramref name="propertyInfos" />
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateCommandWithParameterValues(this DbAccessLayer db, Type type, string query,
+		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, DbClassInfoCache type, string query,
 			string[] propertyInfos, object entry)
 		{
-			var classInfo = db.GetClassInfo(type);
 			var propertyvalues =
 				propertyInfos.Select(
 					propertyInfo =>
 					{
 						DbPropertyInfoCache property;
-						classInfo.Propertys.TryGetValue(propertyInfo, out property);
+						type.Propertys.TryGetValue(propertyInfo, out property);
 						var val = property.GetConvertedValue(entry);
 						var dataValue = val ?? DBNull.Value;
 						return new Tuple<Type, object>(property.PropertyType, dataValue);
 					}).ToArray();
-			return db.Database.CreateCommandWithParameterValues(query, propertyvalues);
+			return db.CreateCommandWithParameterValues(query, propertyvalues);
 		}
 
 		/// <summary>
@@ -225,7 +224,7 @@ namespace JPB.DataAccess
 		public static IDbCommand CreateCommandWithParameterValues<T>(this DbAccessLayer db, string query, string[] propertyInfos,
 			T entry)
 		{
-			return db.CreateCommandWithParameterValues(typeof(T), query, propertyInfos, entry);
+			return db.Database.CreateCommandWithParameterValues(db.GetClassInfo(typeof(T)), query, propertyInfos, entry);
 		}
 
 		/// <summary>

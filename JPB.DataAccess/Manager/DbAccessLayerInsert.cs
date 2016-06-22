@@ -116,7 +116,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="entry" />
 		/// </summary>
 		/// <returns></returns>
-		public IDbCommand _CreateInsert(DbClassInfoCache classInfo, object entry)
+		public static IDbCommand CreateInsert(IDatabase db, DbClassInfoCache classInfo, object entry)
 		{
 			var ignore =
 				classInfo
@@ -144,9 +144,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var orignialProps = classInfo.GetPropertysViaRefection(ignore).ToArray();
-
-			ValidateEntity(entry);
-			return this.CreateCommandWithParameterValues(classInfo.Type, query, orignialProps, entry);
+			return db.CreateCommandWithParameterValues(classInfo, query, orignialProps, entry);
 		}
 
 		/// <summary>

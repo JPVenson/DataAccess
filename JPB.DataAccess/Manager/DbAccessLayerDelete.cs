@@ -28,14 +28,14 @@ namespace JPB.DataAccess.Manager
 			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}
 
-		internal IDbCommand _CreateDelete(DbClassInfoCache classInfo, object entry)
+		public static IDbCommand CreateDelete(IDatabase db, DbClassInfoCache classInfo, object entry)
 		{
 			if (classInfo.PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.Name));
 
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
-			return Database.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
+			return db.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
 		}
 
 		/// <summary>

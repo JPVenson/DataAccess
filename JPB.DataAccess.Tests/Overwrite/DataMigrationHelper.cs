@@ -11,31 +11,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 {
 	public static class DataMigrationHelper
 	{
-		public static void CreateTableStructureDb()
-		{
-			var mgr = new Manager().GetWrapper();
-			mgr.Config.Dispose();
-			DbConfig.Clear();
-			if (mgr.DbAccessType == DbAccessType.MsSql)
-			{
-				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", BookMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", ImageMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", BookMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", ImageMeta.TableName), null);
-			}
-
-			if (mgr.DbAccessType == DbAccessType.SqLite)
-			{
-				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("VACUUM"), null);
-				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", BookMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("VACUUM"), null);
-				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", ImageMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("VACUUM"), null);
-			}
-		}
+		
 
 		public static void ClearDb(DbAccessLayer mgr)
 		{
@@ -44,10 +20,9 @@ namespace JPB.DataAccess.Tests.Overwrite
 			if (mgr.DbAccessType == DbAccessType.MsSql)
 			{
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", BookMeta.TableName), null);
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", ImageMeta.TableName), null);
+				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", BookMeta.TableName), null);
 				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", BookMeta.TableName), null);
 				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", ImageMeta.TableName), null);
 			}
 

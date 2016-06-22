@@ -272,7 +272,7 @@ namespace JPB.DataAccess.DbCollection
 						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key);
 						break;
 					case CollectionStates.Removed:
-						tempCommand = _layer._CreateDelete(_layer.GetClassInfo(typeof(T)), pair.Key);
+						tempCommand = DbAccessLayer.CreateDelete(_layer.Database, _layer.GetClassInfo(typeof(T)), pair.Key);
 						removed.Add(pair.Key);
 						break;
 					case CollectionStates.Unchanged:

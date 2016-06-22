@@ -47,10 +47,10 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			return new UpdateQuery<T>(this
 			.QueryCommand(
-				this
+				DbAccessLayer
+				.CreateUpdate(this
 				.ContainerObject
-				.AccessLayer
-				._CreateUpdate(this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
+				.AccessLayer.Database, this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
 		}
 
 		public RootQuery(DbAccessLayer database, Type type) : base(database, type)

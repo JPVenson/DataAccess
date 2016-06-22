@@ -260,23 +260,26 @@ namespace JPB.DataAccess.Query
 		///     Adds a LEFT JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static RootQuery Join<T, TE>(this ElementProducer<T> query, string mode = null)
+		public static ElementProducer<TAggregation> Join<TLeft, TRight, TAggregation>(this ElementProducer<TLeft> query, string mode = null)
 		{
+			if (mode == null)
+				mode = "";
+
 			var accessLayer = query.ContainerObject.AccessLayer;
-			var sourcePK = typeof(T).GetFK(typeof(TE), query.ContainerObject.AccessLayer.Config);
-			var targetPK = accessLayer.GetClassInfo(typeof(TE)).GetPK(query.ContainerObject.AccessLayer.Config);
-			var targetTable = accessLayer.GetClassInfo(typeof(TE)).TableName;
-			var sourceTable = accessLayer.GetClassInfo(typeof(T)).TableName;
-			return new RootQuery(query.QueryText("JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable));
+			var sourcePK = typeof(TLeft).GetFK(typeof(TRight), query.ContainerObject.AccessLayer.Config);
+			var targetPK = accessLayer.GetClassInfo(typeof(TRight)).GetPK(query.ContainerObject.AccessLayer.Config);
+			var targetTable = accessLayer.GetClassInfo(typeof(TRight)).TableName;
+			var sourceTable = accessLayer.GetClassInfo(typeof(TLeft)).TableName;
+			return new ElementProducer<TAggregation>(query.QueryText("{4} JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable, mode));
 		}
 
 		/// <summary>
 		///     Adds a JOIN to the Statement
 		/// </summary>
 		/// <returns></returns>
-		public static RootQuery Join<T, TE>(this ElementProducer<T> query, JoinMode mode)
+		public static ElementProducer<TAggregation> Join<T, TE, TAggregation>(this ElementProducer<T> query, JoinMode mode)
 		{
-			return Join<T, TE>(query, mode.JoinType);
+			return Join<T, TE, TAggregation>(query, mode.JoinType);
 		}
 
 		/// <summary>

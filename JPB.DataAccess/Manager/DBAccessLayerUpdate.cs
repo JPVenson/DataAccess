@@ -153,7 +153,7 @@ namespace JPB.DataAccess.Manager
 			return CreateUpdateQueryFactory(this.GetClassInfo(entry.GetType()), entry, parameter);
 		}
 
-		internal IDbCommand _CreateUpdate(DbClassInfoCache classInfo, object entry)
+		public static IDbCommand CreateUpdate(IDatabase database, DbClassInfoCache classInfo, object entry)
 		{
 			var pkProperty = classInfo.PrimaryKeyProperty;
 			if (pkProperty == null)
@@ -194,7 +194,7 @@ namespace JPB.DataAccess.Manager
 
 			sb.Append(string.Format("WHERE {0} = @pkValue ", pk));
 
-			return Database.CreateCommandWithParameterValues(sb.ToString(), para);
+			return database.CreateCommandWithParameterValues(sb.ToString(), para);
 		}
 
 		/// <summary>

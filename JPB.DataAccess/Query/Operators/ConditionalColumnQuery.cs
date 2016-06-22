@@ -62,6 +62,15 @@ namespace JPB.DataAccess.Query.Operators
 		/// <summary>
 		/// Prepaires an Conditional Query
 		/// </summary>
+		public ConditionalEvalQuery<TPoco> IsQueryOperatorValue(string value)
+		{
+			return new ConditionalEvalQuery<TPoco>(this
+				.QueryQ(value));
+		}
+
+		/// <summary>
+		/// Prepaires an Conditional Query
+		/// </summary>
 		public ConditionalEvalQuery<TPoco> IsQueryValue(string value)
 		{
 			return new ConditionalEvalQuery<TPoco>(this
