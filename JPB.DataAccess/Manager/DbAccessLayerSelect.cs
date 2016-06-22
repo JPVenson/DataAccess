@@ -472,16 +472,18 @@ namespace JPB.DataAccess.Manager
 		{
 			return CreateSelect(GetClassInfo(type));
 		}
-
+		
 		/// <summary>
 		///     Creates a Plain Select statement by using
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public static string CreateSelect(DbClassInfoCache classType)
+		public static string CreateSelect(DbClassInfoCache classType, string prefix = null)
 		{
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
+			if (prefix != null)
+				sb.Append(prefix);
 			sb.Append(classType.CreatePropertyCsv(
 				classType
 					.Propertys

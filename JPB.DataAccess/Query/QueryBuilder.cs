@@ -67,6 +67,15 @@ namespace JPB.DataAccess.Query
 			return new QueryBuilderX(this.ContainerObject);
 		}
 
+		public QueryBuilderX Append(QueryBuilderX right)
+		{
+			foreach (var part in right.ContainerObject.Parts)
+			{
+				this.Add(part);
+			}
+			return this;
+		}
+
 		public IQueryContainer ContainerObject { get; private set; }
 
 		/// <summary>

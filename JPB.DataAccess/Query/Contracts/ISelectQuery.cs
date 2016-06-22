@@ -31,6 +31,11 @@ namespace JPB.DataAccess.Query.Contracts
 
 	}
 
+	public interface IConditionalOperatorQuery<out T> : IQueryElement
+	{
+
+	}
+
 	public interface IConditionalEvalQuery<out T> : IQueryElement
 	{
 

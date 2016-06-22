@@ -247,6 +247,7 @@
     <Compile Include="Query\InternalContainerContainer.cs" />
     <Compile Include="Query\Operators\ConditionalColumnQuery.cs" />
     <Compile Include="Query\Operators\ConditionalEvalQuery.cs" />
+    <Compile Include="Query\Operators\ConditionalOperatorQuery.cs" />
     <Compile Include="Query\Operators\ConditionalQuery.cs" />
     <Compile Include="Query\Operators\ElementProducer.cs" />
     <Compile Include="Query\Operators\QueryElement.cs" />

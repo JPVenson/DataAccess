@@ -32,9 +32,10 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
-		public SelectQuery<T> Select<T>(IQueryBuilder query)
+		public SelectQuery<T> Distinct<T>()
 		{
-			return new SelectQuery<T>(query.QueryText("SELECT"));
+			var cmd = DbAccessLayer.CreateSelect(this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "DISTINCT");
+			return new SelectQuery<T>(this.QueryText(cmd));
 		}
 
 		/// <summary>

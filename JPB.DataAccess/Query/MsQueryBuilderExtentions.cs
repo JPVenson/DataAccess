@@ -134,6 +134,27 @@ namespace JPB.DataAccess.Query
 
 
 		/// <summary>
+		///     Creates a Common Table Expression that selects a Specific type
+		/// </summary>
+		public static ElementProducer<TN> AsCte<T, TN>(this ElementProducer<T> query,
+			string cteName,
+			bool subCte = false)
+		{
+			var cp = new RootQuery(query.ContainerObject.AccessLayer);
+			var prefix = string.Format("WITH {0} AS (", cteName);
+			cp.QueryText(prefix);
+			foreach (var genericQueryPart in query.ContainerObject.Parts)
+			{
+				cp.Add(genericQueryPart);
+			}
+
+			cp.Add(new CteQueryPart(")"));
+			return new ElementProducer<TN>(cp.QueryText(string.Format("SELECT {1} FROM {0}", cteName, 
+				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TN)).GetSchemaMapping().Aggregate((e, f) => e + ", " + f))));
+		}
+
+
+		/// <summary>
 		///    Creates an closed sub select
 		/// </summary>
 		/// <returns></returns>

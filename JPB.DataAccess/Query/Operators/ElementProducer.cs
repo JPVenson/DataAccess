@@ -10,7 +10,7 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators
 {
-	public class ElementProducer<TPoco> : QueryBuilderX, IElementProducer<TPoco>
+	public class ElementProducer<TPoco> : QueryBuilderX, IElementProducer<TPoco>, IEnumerable<TPoco>
 	{
 		public ElementProducer(DbAccessLayer database, Type type) : base(database, type)
 		{
@@ -70,6 +70,23 @@ namespace JPB.DataAccess.Query.Operators
 			return pager;
 		}
 
+
+		/// <summary>
+		///     Executes the Current QueryBuilder by setting the type
+		/// </summary>
+		/// <typeparam name="E"></typeparam>
+		/// <returns></returns>
+		public IDataPager<TPoco> ForPagedResult(int page, int pageSize)
+		{
+			var command = this.ContainerObject.Compile();
+			var pager = base.ContainerObject.AccessLayer.Database.CreatePager<TPoco>();
+			pager.BaseQuery = command;
+			pager.PageSize = pageSize;
+			pager.CurrentPage = page;
+			pager.LoadPage(this.ContainerObject.AccessLayer);
+			return pager;
+		}
+
 		/// <summary>
 		///     Adds a SQL WHERE statement
 		///		does not emit any conditional statement
@@ -79,6 +96,11 @@ namespace JPB.DataAccess.Query.Operators
 		public ConditionalQuery<TPoco> Where()
 		{
 			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"));
+		}
+
+		public IEnumerator<TPoco> GetEnumerator()
+		{
+			return base.GetEnumerator<TPoco>();
 		}
 	}
 }

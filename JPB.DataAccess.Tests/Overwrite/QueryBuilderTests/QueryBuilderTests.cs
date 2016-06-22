@@ -171,5 +171,19 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
 			Assert.That(basePager.MaxPage, Is.EqualTo(queryPager.MaxPage));
 		}
+
+
+		[Category("MsSQL")]
+#if SqLite
+		[Ignore("MsSQL only")]
+#endif
+		[Test]
+		public void AsCte()
+		{
+			var maxItems = 250;
+			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
+			var elementProducer = DbAccessLayer.Query().Select<Users>().AsCte<Users, Users>("cte");
+			var query = elementProducer.ContainerObject.Compile();
+		}
 	}
 }
