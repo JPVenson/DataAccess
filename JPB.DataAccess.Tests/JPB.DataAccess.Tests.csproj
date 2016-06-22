@@ -81,6 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersMeta.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs" />
     <Compile Include="Overwrite\DbCollectionTests\DbCollection.cs" />

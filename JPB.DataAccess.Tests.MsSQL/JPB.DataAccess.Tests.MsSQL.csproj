@@ -81,9 +81,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\JPB.DataAccess.Tests\Overwrite\DataMigrationHelper.cs">
-      <Link>Overwrite\DataMigrationHelper.cs</Link>
-    </Compile>
     <Compile Include="..\JPB.DataAccess.Tests\Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs">
       <Link>Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs</Link>
     </Compile>

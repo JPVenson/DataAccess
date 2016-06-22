@@ -18,12 +18,12 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
-		public SelectQuery<T> Select<T>()
+		public SelectQuery<T> Select<T>(params object[] argumentsForFactory)
 		{
 			var cmd = ContainerObject
 				.AccessLayer
 				.CreateSelectQueryFactory(
-					this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)));
+					this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), argumentsForFactory);
 			return new SelectQuery<T>(this.QueryCommand(cmd));
 		}
 

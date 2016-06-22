@@ -4,7 +4,7 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators
 {
-	public class UpdateQuery<TPoco> : ElementProducer<TPoco>, IUpdateQuery<TPoco>
+	public class UpdateQuery<TPoco> : QueryBuilderX, IUpdateQuery<TPoco>
 	{
 		public UpdateQuery(DbAccessLayer database, Type type) : base(database, type)
 		{
@@ -24,6 +24,17 @@ namespace JPB.DataAccess.Query.Operators
 
 		public UpdateQuery(DbAccessLayer database) : base(database)
 		{
+		}
+
+		/// <summary>
+		///     Adds a SQL WHERE statement
+		///		does not emit any conditional statement
+		///		should be followed by Column()
+		/// </summary>
+		/// <returns></returns>
+		public ConditionalQuery<TPoco> Where()
+		{
+			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"));
 		}
 	}
 }

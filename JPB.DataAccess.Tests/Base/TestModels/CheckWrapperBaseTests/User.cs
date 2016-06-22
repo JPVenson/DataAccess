@@ -14,15 +14,7 @@ using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 {
-	public class UsersMeta
-	{
-		public const string UserTable = "Users";
-		public const string SelectStatement = "SELECT * FROM " + UserTable;
-		public const string UserIDCol = "User_ID";
-		public const string UserNameCol = "UserName";
-	}
-
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class Users_Col : INotifyPropertyChanged
 	{
 		private long _userId;
@@ -61,7 +53,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 	}
 
 	[AutoGenerateCtor(CtorGeneratorMode = CtorGeneratorMode.FactoryMethod)]
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class UsersWithoutProperties
 	{
 		[PrimaryKey]
@@ -78,7 +70,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 	}
 
 	[AutoGenerateCtor]
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public sealed class UsersAutoGenerateConstructor
 	{
 		[PrimaryKey]
@@ -88,7 +80,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 	}
 
 	[AutoGenerateCtor]
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class UsersAutoGenerateNullableConstructor
 	{
 		[PrimaryKey]
@@ -98,7 +90,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 	}
 
 	[AutoGenerateCtor]
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public sealed class UsersAutoGenerateConstructorWithSingleXml
 	{
 		[PrimaryKey]
@@ -112,7 +104,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 	}
 
 	[AutoGenerateCtor]
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public sealed class UsersAutoGenerateConstructorWithMultiXml
 	{
 		[PrimaryKey]
@@ -207,10 +199,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		{
 			configBase.SetConfig<ConfigLessUserInplaceConfig>(f =>
 			{
-				f.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
+				f.SetClassAttribute(new ForModelAttribute(UsersMeta.TableName));
 				f.SetPrimaryKey(e => e.PropertyA);
-				f.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
-				f.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);
+				f.SetForModelKey(e => e.PropertyA, UsersMeta.PrimaryKeyName);
+				f.SetForModelKey(e => e.PropertyB, UsersMeta.ContentName);
 			});
 		}
 	}
@@ -223,10 +215,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		[ConfigMehtod]
 		public static void Config(ConfigurationResolver<ConfigLessUserInplaceConfig> configBase)
 		{
-			configBase.SetClassAttribute(new ForModelAttribute(UsersMeta.UserTable));
+			configBase.SetClassAttribute(new ForModelAttribute(UsersMeta.TableName));
 			configBase.SetPrimaryKey(e => e.PropertyA);
-			configBase.SetForModelKey(e => e.PropertyA, UsersMeta.UserIDCol);
-			configBase.SetForModelKey(e => e.PropertyB, UsersMeta.UserNameCol);
+			configBase.SetForModelKey(e => e.PropertyA, UsersMeta.PrimaryKeyName);
+			configBase.SetForModelKey(e => e.PropertyB, UsersMeta.ContentName);
 		}
 	}
 
@@ -238,17 +230,17 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		[InsertFactoryMethod(TargetDatabase = DbAccessType.MsSql)]
 		public string Insert()
 		{
-			return string.Format("INSERT INTO {0} VALUES ('{1}')", UsersMeta.UserTable, UserName);
+			return string.Format("INSERT INTO {0} VALUES ('{1}')", UsersMeta.TableName, UserName);
 		}
 
 		[InsertFactoryMethod(TargetDatabase = DbAccessType.SqLite)]
 		public string InsertSqLite()
 		{
-			return string.Format("INSERT INTO {0} VALUES (0, '{1}')", UsersMeta.UserTable, UserName);
+			return string.Format("INSERT INTO {0} VALUES (0, '{1}')", UsersMeta.TableName, UserName);
 		}
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class Users_PK
 	{
 		[PrimaryKey]
@@ -257,59 +249,59 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class Users_PK_UFM
 	{
 		[PrimaryKey]
 		public long User_ID { get; set; }
 
-		[ForModel(UsersMeta.UserNameCol)]
+		[ForModel(UsersMeta.ContentName)]
 		public string UserName { get; set; }
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class Users_PK_IDFM
 	{
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class Users_PK_IDFM_CTORSEL
 	{
 		public Users_PK_IDFM_CTORSEL(IDataRecord rec)
 		{
-			UserName = (string)rec[UsersMeta.UserNameCol];
-			UserId = (long)rec[UsersMeta.UserIDCol];
+			UserName = (string)rec[UsersMeta.ContentName];
+			UserId = (long)rec[UsersMeta.PrimaryKeyName];
 		}
 
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	[SelectFactory(UsersMeta.SelectStatement)]
 	public class Users_PK_IDFM_CLASSEL
 	{
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	[SelectFactory(UsersMeta.SelectStatement)]
 	public class Users_PK_IDFM_FUNCSELECT
 	{
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }
@@ -321,12 +313,12 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		}
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	[SelectFactory(UsersMeta.SelectStatement)]
 	public class Users_PK_IDFM_FUNCSELECTFAC
 	{
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }
@@ -338,12 +330,12 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		}
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	[SelectFactory(UsersMeta.SelectStatement)]
 	public class Users_PK_IDFM_FUNCSELECTFACWITHPARAM
 	{
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }
@@ -351,16 +343,16 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		[SelectFactoryMethod]
 		public static IQueryFactoryResult GetSelectStatement(int whereID)
 		{
-			return new QueryFactoryResult(UsersMeta.SelectStatement + " WHERE " + UsersMeta.UserIDCol + " = @paramA",
+			return new QueryFactoryResult(UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
 				new QueryParameter("paramA", whereID));
 		}
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class Users_StaticQueryFactoryForSelect
 	{
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }
@@ -372,11 +364,11 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		}
 	}
 
-	[ForModel(UsersMeta.UserTable)]
+	[ForModel(UsersMeta.TableName)]
 	public class Users_StaticQueryFactoryForSelectWithArugments
 	{
 		[PrimaryKey]
-		[ForModel(UsersMeta.UserIDCol)]
+		[ForModel(UsersMeta.PrimaryKeyName)]
 		public long UserId { get; set; }
 
 		public string UserName { get; set; }

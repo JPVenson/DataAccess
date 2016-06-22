@@ -30,12 +30,9 @@ namespace JPB.DataAccess.Tests
 				File.Delete(sqlLiteFileName);
 			File.Create(sqlLiteFileName).Close();
 			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, sqlLiteFileName));
-			expectWrapper.ExecuteGenericCommand(
-				expectWrapper.Database.CreateCommand(
-					string.Format(
-						"CREATE TABLE {0}({1} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, {2} TEXT);",
-						UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
-		
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
 			return expectWrapper;
 		}
 	}

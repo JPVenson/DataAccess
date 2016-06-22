@@ -30,5 +30,41 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			
 		}
+
+		/// <summary>
+		/// Retuns a collection of all Entites that are referenced by element 
+		/// Needs a proper ForginKeyDeclartaion
+		/// </summary>
+		/// <typeparam name="TEPoco"></typeparam>
+		/// <param name="element"></param>
+		/// <returns></returns>
+		public ElementProducer<TPoco> In<TEPoco>(TEPoco element)
+		{
+			var teCache = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
+			var pkValue = teCache.PrimaryKeyProperty.Getter.Invoke(element);
+			return In<TEPoco>(pkValue);
+		}
+
+
+		/// <summary>
+		/// Retuns a collection of all Entites that are referenced by element 
+		/// Needs a proper ForginKeyDeclartaion
+		/// </summary>
+		/// <typeparam name="TEPoco"></typeparam>
+		/// <returns></returns>
+		public ElementProducer<TPoco> In<TEPoco>(object id)
+		{
+			var teCache = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
+			var fkPropertie = Cache.Propertys
+				.FirstOrDefault(s =>
+					s.Value.ForginKeyDeclarationAttribute != null &&
+					s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == teCache.TableName)
+					.Value;
+
+			if (fkPropertie == null)
+				throw new NotSupportedException(string.Format("No matching Column was found for Forgin key declaration for table {0}", teCache.TableName));
+
+			return new ElementProducer<TPoco>(this.Where().Column(fkPropertie.DbName).Is(id));
+		}
 	}
 }

@@ -21,6 +21,12 @@ namespace JPB.DataAccess.Contacts.Pager
 	public interface IDataPager : IDisposable
 	{
 		/// <summary>
+		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
+		///     of it
+		/// </summary>
+		IDbCommand BaseQuery { get; set; }
+
+		/// <summary>
 		///     Not Implimented
 		/// </summary>
 		bool Cache { get; set; }
@@ -82,14 +88,10 @@ namespace JPB.DataAccess.Contacts.Pager
 	public interface IDataPager<T> : IDataPager
 	{
 		/// <summary>
-		///     Additional Commands to append to the base load command
+		///     Typed list of all Elements
 		/// </summary>
 		new ICollection<T> CurrentPageItems { get; }
 
-		/// <summary>
-		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
-		///     of it
-		/// </summary>
-		IDbCommand BaseQuery { get; set; }
+
 	}
 }

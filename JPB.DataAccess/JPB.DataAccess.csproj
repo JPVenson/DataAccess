@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
+    <Compile Include="AdoWrapper\DefaultTransactionScope.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
     <Compile Include="AdoWrapper\ObjectDataRecord.cs" />
     <Compile Include="Contacts\ILocalDbCheckConstraint.cs" />

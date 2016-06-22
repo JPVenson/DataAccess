@@ -33,7 +33,7 @@ namespace JPB.DataAccess.Tests.PagerTests
 #endif
 		public void PagerCall()
 		{
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
+			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
 			int upperCountTestUsers = 100;
 			var testUers = new List<Users>();
@@ -48,7 +48,7 @@ namespace JPB.DataAccess.Tests.PagerTests
 			expectWrapper.InsertRange(testUers);
 
 			object refSelect =
-				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.UserTable)));
+				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			Assert.That(testUers.Count, Is.EqualTo(refSelect));
 
 			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())
@@ -108,8 +108,8 @@ namespace JPB.DataAccess.Tests.PagerTests
 #endif
 		public void PagerConditionalCall()
 		{
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.UserTable), null);
-			expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.UserTable), null);
+			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
 
 			int upperCountTestUsers = 100;
 			var testUers = new List<Users>();
@@ -124,7 +124,7 @@ namespace JPB.DataAccess.Tests.PagerTests
 			expectWrapper.InsertRange(testUers);
 
 			object refSelect =
-				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.UserTable)));
+				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			Assert.That(testUers.Count, Is.EqualTo(refSelect));
 
 			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())

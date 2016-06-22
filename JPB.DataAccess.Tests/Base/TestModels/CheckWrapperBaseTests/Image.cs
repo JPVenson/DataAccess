@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public string Text { get; set; }
 
 		[ForeignKeyDeclaration("BookId", typeof(Book))]
-		public Nullable<int> IdBook { get; set; }
+		public int? IdBook { get; set; }
 	}
 
 	public class Book

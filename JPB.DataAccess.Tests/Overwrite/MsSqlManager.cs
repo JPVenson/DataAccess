@@ -59,11 +59,9 @@ namespace JPB.DataAccess.Tests
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
 
 			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString + "Initial Catalog={0};", dbname));
-			expectWrapper.ExecuteGenericCommand(
-				expectWrapper.Database.CreateCommand(
-					string.Format(
-						"CREATE TABLE {0} ( {1} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL, {2} NVARCHAR(MAX));",
-						UsersMeta.UserTable, UsersMeta.UserIDCol, UsersMeta.UserNameCol)));
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateMsSql));
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateMsSQl));
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
 
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
 			                                                                         "AS BEGIN " +
