@@ -38,9 +38,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private bool _isMigrating;
 		private bool _keepOriginalObject;
 
-		private
-			ITriggerForTableCollectionInternalUsage<TEntity>
-			_triggers;
+		private ITriggerForTableCollectionInternalUsage<TEntity> _triggers;
 
 		private DbClassInfoCache _typeInfo;
 		protected internal IDictionary<object, TEntity> Base;
@@ -67,6 +65,34 @@ namespace JPB.DataAccess.Helper.LocalDb
 			Init(typeof(TEntity), keyGenerator, config, useOrignalObjectInMemory);
 		}
 
+
+		/// <summary>
+		///     Creates a new Instance that is bound to &lt;paramref name="type"/&gt; and uses &lt;paramref name="keyGenerator"/
+		///     &gt; for generation of PrimaryKeys
+		///     Must created inside an DatabaseScope
+		/// </summary>
+		/// <param name="keyGenerator">The Strategy to generate an uniqe PrimaryKey that matches the PrimaryKey Property</param>
+		/// <param name="containedType">The type that overwrites the Generic type. Must use object as Generic type arugment</param>
+		/// <param name="config">The Config store to use</param>
+		/// <param name="useOrignalObjectInMemory">
+		///     If enabled the given object referance will be used (Top performance).
+		///     if Disabled each object has to be define an Valid Ado.Net constructor to allow a copy (Can be slow)
+		/// </param>
+		/// <param name="triggerProto">The given trigger collection</param>
+		public LocalDbRepository(
+			Type containedType,
+			DbConfig config,
+			bool useOrignalObjectInMemory = true,
+			ILocalDbPrimaryKeyConstraint keyGenerator = null)
+		{
+			if (typeof(TEntity) != typeof(object))
+			{
+				throw new InvalidOperationException("When using an contained type argument you must use object as generic type");
+			}
+
+			Init(containedType, keyGenerator, config, useOrignalObjectInMemory);
+		}
+
 		/// <summary>
 		///     Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
@@ -91,9 +117,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
-		private
-			ITriggerForTableCollectionInternalUsage<TEntity>
-			TriggersUsage
+		private ITriggerForTableCollectionInternalUsage<TEntity> TriggersUsage
 		{
 			get { return _triggers; }
 		}
@@ -101,8 +125,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Contains acccess to INSERT/DELETE/UPDATE(WIP) Triggers
 		/// </summary>
-		public virtual ITriggerForTableCollection<TEntity>
-			Triggers
+		public virtual ITriggerForTableCollection<TEntity> Triggers
 		{
 			get { return _triggers; }
 		}

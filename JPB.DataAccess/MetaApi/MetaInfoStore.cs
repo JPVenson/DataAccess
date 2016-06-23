@@ -276,6 +276,45 @@ namespace JPB.DataAccess.MetaApi
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(params Type[] t)
+		{
+			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
+			try
+			{
+				if (isThreadSave)
+				{
+					Monitor.Enter(SClassInfoCaches);
+				}
+				foreach (var type in t)
+				{
+					var element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
+					if (element == null)
+					{
+						element = new TClass();
+						if (!type.IsAnonymousType())
+							SClassInfoCaches.Add(element);
+						element.Init(type, type.IsAnonymousType());
+					}
+				}
+			}
+			finally
+			{
+				if (isThreadSave)
+				{
+					Monitor.Exit(SClassInfoCaches);
+				}
+			}
+			return this;
+		}
+
+		/// <summary>
+		///     Append
+		///     as an Optimistic input to the store.
+		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
+		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(TClass existingItem)
 		{
 			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;

@@ -116,6 +116,8 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				pager.LoadPage(expectWrapper);
 
+				Console.WriteLine(pager.BaseQuery.CommandText);
+
 				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
 				Assert.That(triggeredNewPageLoaded, Is.False);
 				Assert.That(triggeredNewPageLoading, Is.False);

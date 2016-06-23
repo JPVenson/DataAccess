@@ -60,6 +60,8 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				Parallel.For(0, 999, d =>
 				{
+					var enumerator = _users.GetEnumerator();
+					enumerator.MoveNext();
 					var i = 0;
 					foreach (var userse in _users)
 					{

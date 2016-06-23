@@ -93,14 +93,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// If you try to use the tables before calling dispose on the returned Scope an InvalidOperationException will be thrown
 		/// </summary>
 		/// <returns></returns>
-		public DatabaseScope Alter()
+		public EditDatabaseScope Alter()
 		{
 			_mappings.Clear();
 			foreach (var localDbReposetoryBase in _database)
 			{
 				localDbReposetoryBase.Value.ReposetoryCreated = false;
 			}
-			return new DatabaseScope(Scope);
+			return new EditDatabaseScope(this);
 		}
 
 		/// <summary>

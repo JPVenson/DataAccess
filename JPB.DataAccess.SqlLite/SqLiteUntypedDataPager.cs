@@ -147,7 +147,7 @@ namespace JPB.DataAccess.SqLite
 					.QueryText("ORDER BY " + pk)
 					.QueryD("ASC LIMIT @PageSize OFFSET @PagedRows", new
 					{
-						PagedRows = CurrentPage * PageSize,
+						PagedRows = (CurrentPage - 1) * PageSize,
 						PageSize
 					})
 					.ContainerObject
