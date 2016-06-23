@@ -11,6 +11,14 @@ namespace JPB.DataAccess.Query.Contracts
 	{
 	}
 
+	public interface IOrderdElementProducer<out T> : IQueryElement
+	{
+	}
+
+	public interface IOrderdColumnElementProducer<out T> : IQueryElement
+	{
+	}
+
 	public interface IJoinQuery : IQueryElement
 	{
 

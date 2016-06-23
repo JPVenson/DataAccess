@@ -99,134 +99,132 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		void IDataPager.LoadPage(DbAccessLayer dbAccess)
 		{
 			T[] selectWhere = null;
-			dbAccess.Database.RunInTransaction(s =>
+			IDbCommand finalAppendCommand;
+			if (AppendedComands.Any())
 			{
-				IDbCommand finalAppendCommand;
-				if (AppendedComands.Any())
+				if (BaseQuery == null)
 				{
-					if (BaseQuery == null)
-					{
-						BaseQuery = dbAccess.CreateSelect<T>();
-					}
-
-					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
-						(current, comand) => s.MergeTextToParameters(current, comand, false, 1, true, false));
-				}
-				else
-				{
-					if (BaseQuery == null)
-					{
-						BaseQuery = dbAccess.CreateSelect<T>();
-					}
-
-					finalAppendCommand = BaseQuery;
+					BaseQuery = dbAccess.CreateSelect<T>();
 				}
 
-				if (string.IsNullOrEmpty(SqlVersion))
+				finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
+					(current, comand) => dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
+			}
+			else
+			{
+				if (BaseQuery == null)
 				{
-					SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+					BaseQuery = dbAccess.CreateSelect<T>();
 				}
 
-				SyncHelper(CurrentPageItems.Clear);
+				finalAppendCommand = BaseQuery;
+			}
 
-				var pk = TargetType.GetPK(dbAccess.Config);
+			if (string.IsNullOrEmpty(SqlVersion))
+			{
+				SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+			}
 
-				var selectMaxCommand = dbAccess
+			SyncHelper(CurrentPageItems.Clear);
+
+			var pk = TargetType.GetPK(dbAccess.Config);
+
+			var selectMaxCommand = dbAccess
+				.Query()
+				.QueryText("WITH CTE AS")
+				.InBracket(query => query.QueryCommand(finalAppendCommand))
+				.QueryText("SELECT COUNT(1) FROM CTE")
+				.ContainerObject
+				.Compile();
+
+			////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
+
+			//if (finalAppendCommand != null)
+			//    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
+
+			var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
+			if (maxItems != null)
+			{
+				long parsedCount;
+				long.TryParse(maxItems.ToString(), out parsedCount);
+				MaxPage = (long)Math.Ceiling((decimal)parsedCount / PageSize);
+			}
+
+			//Check select strategy
+			//IF version is or higher then 11.0.2100.60 we can use OFFSET and FETCH
+			//esle we need to do it the old way
+
+			RaiseNewPageLoading();
+			IDbCommand command;
+
+			if (CheckVersionForFetch())
+			{
+				command = dbAccess
 					.Query()
-					.QueryText("WITH CTE AS")
-					.InBracket(query => query.QueryCommand(finalAppendCommand))
-					.QueryText("SELECT COUNT(1) FROM CTE")
+					.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
+					.QueryText("SELECT * FROM")
+					.QueryText("CTE")
+					.QueryText("ORDER BY")
+					.QueryD(pk)
+					.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
+					{
+						PagedRows = (CurrentPage - 1) * PageSize,
+						PageSize
+					})
 					.ContainerObject
 					.Compile();
-
-				////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
-
-				//if (finalAppendCommand != null)
-				//    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
-
-				var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
-				if (maxItems != null)
-				{
-					long parsedCount;
-					long.TryParse(maxItems.ToString(), out parsedCount);
-					MaxPage = (long)Math.Ceiling((decimal)parsedCount / PageSize);
-				}
-
-				//Check select strategy
-				//IF version is or higher then 11.0.2100.60 we can use OFFSET and FETCH
-				//esle we need to do it the old way
-
-				RaiseNewPageLoading();
-				IDbCommand command;
-
-				if (CheckVersionForFetch())
-				{
-					command = dbAccess
-						.Query()
-						.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
-						.QueryText("SELECT * FROM")
-						.QueryText("CTE")
-						.QueryText("ORDER BY")
-						.QueryD(pk)
-						.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
+			}
+			else
+			{
+				// ReSharper disable ConvertToLambdaExpression
+				var selectQuery = dbAccess.Query()
+					.WithCte("BASECTE", baseCte =>
+					{
+						if (BaseQuery != null)
 						{
-							PagedRows = (CurrentPage - 1) * PageSize,
-							PageSize
-						})
-						.ContainerObject
-						.Compile();
-				}
-				else
-				{
-					// ReSharper disable ConvertToLambdaExpression
-					var selectQuery = dbAccess.Query()
-						.WithCte("BASECTE", baseCte =>
+							baseCte.Select<T>();
+						}
+						else
 						{
-							if (BaseQuery != null)
+							baseCte.QueryCommand(finalAppendCommand);
+						}
+					})
+					.WithCte("CTE", cte =>
+					{
+						cte.QueryText("SELECT * FROM (")
+								.Select<T>()
+								.RowNumberOrder("@pk")
+								.WithParamerters(new { Pk = pk })
+								.QueryText("AS RowNr")
+								.QueryText(", BASECTE.* FROM BASECTE")
+							.QueryText(")")
+							.As("TBL")
+							.Where()
+							.Column("RowNr")
+							.Is()
+							.Between(page =>
 							{
-								baseCte.Select<T>();
-							}
-							else
-							{
-								baseCte.QueryCommand(finalAppendCommand);
-							}
-						})
-						.WithCte("CTE", cte =>
-						{
-							cte.QueryText("SELECT * FROM (")
-									.Select<T>()
-									.RowNumberOrder("@pk")
-									.WithParamerters(new { Pk = pk })
-									.QueryText("AS RowNr")
-									.QueryText(", BASECTE.* FROM BASECTE")
-								.QueryText(")")
-								.As("TBL")
-								.Where()
-								.Column("RowNr")
-								.Between(page =>
-								{
-									page.QueryText("@PagedRows * @PageSize + 1")
-										.WithParamerters(new
-										{
-											PagedRows = (CurrentPage - 1),
-											PageSize
-										});
-								},
-									maxPage =>
+								page.QueryText("@PagedRows * @PageSize + 1")
+									.WithParamerters(new
 									{
-										maxPage
-											.InBracket(calc => { calc.QueryText("@PagedRows + 1"); })
-											.QueryText("* @PageSize");
-									}
-								);
-						}, true)
-						.QueryText("SELECT * FROM CTE");
+										PagedRows = (CurrentPage - 1),
+										PageSize
+									});
+							},
+								maxPage =>
+								{
+									maxPage
+										.InBracket(calc => { calc.QueryText("@PagedRows + 1"); })
+										.QueryText("* @PageSize");
+								}
+							);
+					}, true)
+					.QueryText("SELECT * FROM CTE");
 
-					command = selectQuery.ContainerObject.Compile();
-				}
-				//cannot cast to T[] 
-				selectWhere = dbAccess.SelectNative(TargetType, command, true).Cast<T>().ToArray();
-			});
+				command = selectQuery.ContainerObject.Compile();
+			}
+			//cannot cast to T[] 
+			selectWhere = dbAccess.SelectNative(TargetType, command, true).Cast<T>().ToArray();
 
 			foreach (T item in selectWhere)
 			{

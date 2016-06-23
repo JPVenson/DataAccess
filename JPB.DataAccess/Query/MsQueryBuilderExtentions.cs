@@ -25,6 +25,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Query.Operators.Conditional;
 
 namespace JPB.DataAccess.Query
 {
@@ -33,11 +34,6 @@ namespace JPB.DataAccess.Query
 	/// </summary>
 	public static class MsQueryBuilderExtentions
 	{
-		public static ConditionalEvalQuery<T> Like<T>(this ConditionalColumnQuery<T> query, string value)
-		{
-			return new ConditionalEvalQuery<T>(query.QueryD("LIKE @arg", new { arg = value }));
-		}
-
 		/// <summary>
 		///		Sets an Variable to the given value
 		/// </summary>
@@ -180,18 +176,7 @@ namespace JPB.DataAccess.Query
 		{
 			return new SelectQuery<T>(query.QueryText("SELECT * FROM " + query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)).TableName));
 		}
-
-		/// <summary>
-		///     Adds a Between statement followed by anything added from the action
-		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="from"></param>
-		/// <returns></returns>
-		public static ConditionalEvalQuery<T> Between<T>(this ConditionalColumnQuery<T> query)
-		{
-			return new ConditionalEvalQuery<T>(query.QueryText("BETWEEN"));
-		}
-
+		
 		/// <summary>
 		///     Adds a between statement followed by a query defined in <paramref name="valueA" /> folowed by an and statement and
 		///     an secound query defined in the <paramref name="valueB" />
@@ -201,35 +186,16 @@ namespace JPB.DataAccess.Query
 		/// <param name="valueB"></param>
 		/// <returns></returns>
 		public static ConditionalEvalQuery<T> Between<T>(
-			this ConditionalColumnQuery<T> query,
-			object valA,
-			object valB)
-		{
-			return new ConditionalEvalQuery<T>(query.Between()
-				.QueryQ("@bet_valA", new QueryParameter("@bet_valA", valA, valA.GetType()))
-				.And()
-				.QueryQ("@bet_valB", new QueryParameter("@bet_valB", valA, valA.GetType())));
-		}
-
-		/// <summary>
-		///     Adds a between statement followed by a query defined in <paramref name="valueA" /> folowed by an and statement and
-		///     an secound query defined in the <paramref name="valueB" />
-		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="valueA"></param>
-		/// <param name="valueB"></param>
-		/// <returns></returns>
-		public static ConditionalEvalQuery<T> Between<T>(
-			this ConditionalColumnQuery<T> query,
+			this ConditionalOperatorQuery<T> query,
 			Action<RootQuery> valA,
 			Action<RootQuery> valB)
 		{
-			var condtion = query.Between();
+			var condtion = query.QueryText("BETWEEN");
 			valA(new RootQuery(condtion));
-			condtion.And();
+			condtion.QueryText("AND");
 			valA(new RootQuery(condtion));
 
-			return new ConditionalEvalQuery<T>(condtion);
+			return new ConditionalEvalQuery<T>(condtion, query.State);
 		}
 
 		public static RootQuery Apply(this RootQuery query,
@@ -265,7 +231,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ConditionalEvalQuery<T> Contains<T>(this ConditionalColumnQuery<T> query, object alias)
 		{
-			return new ConditionalEvalQuery<T>(query.QueryQ("CONTAINS (@Cont_A{0})", new QueryParameter("@Cont_A", alias, alias.GetType())));
+			return new ConditionalEvalQuery<T>(query.QueryQ("CONTAINS (@Cont_A{0})", new QueryParameter("@Cont_A", alias, alias.GetType())), query.State);
 		}
 
 		/// <summary>
@@ -307,31 +273,17 @@ namespace JPB.DataAccess.Query
 		///     Inserts a TOP statement
 		/// </summary>
 		/// <returns></returns>
-		public static ElementProducer<T> Top<T>(this ElementProducer<T> query, uint top)
+		public static ElementProducer<T> Top<T>(this RootQuery query, uint top)
 		{
 			switch (query.ContainerObject.AccessLayer.Database.TargetDatabase)
 			{
 				case DbAccessType.MsSql:
-					{
-						var index = -1;
-						var select = "SELECT";
-						var part =
-							query.ContainerObject.Parts.LastOrDefault(s => (index = s.Prefix.ToUpper().IndexOf(@select, StringComparison.Ordinal)) != -1);
-
-						if (index == -1 || part == null)
-							throw new NotSupportedException("Please create a Select Statement befor calling this");
-
-						part.Prefix = part.Prefix.Insert(index + @select.Length, " TOP " + top);
-					}
-					break;
-				case DbAccessType.MySql:
-					return query.QueryText("LIMIT BY {0}", top);
+					return new SelectQuery<T>(query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "TOP " + top)));
 				case DbAccessType.SqLite:
-					return query.QueryText("LIMIT {0}", top);
+					return new SelectQuery<T>(query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T))) + " LIMIT {0} ", top));
 				default:
 					throw new NotSupportedException("For the Selected DB type is no Top implementations Available");
 			}
-			return query;
 		}
 
 		//public static IQueryBuilder<T> Count<T>(this IQueryBuilder<T> query, string what)
@@ -375,22 +327,22 @@ namespace JPB.DataAccess.Query
 
 		public static ConditionalQuery<TPoco> OrderBy<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over), new CondtionBuilderState());
 		}
 
 		public static ConditionalQuery<TPoco> OrderBy<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState());
 		}
 
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over), new CondtionBuilderState());
 		}
 
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState());
 		}
 
 		/// <summary>

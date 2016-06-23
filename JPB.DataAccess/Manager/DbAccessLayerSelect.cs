@@ -483,7 +483,7 @@ namespace JPB.DataAccess.Manager
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
 			if (prefix != null)
-				sb.Append(prefix);
+				sb.Append(prefix + " ");
 			sb.Append(classType.CreatePropertyCsv(
 				classType
 					.Propertys
@@ -788,7 +788,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public T[] SelectNative<T>(string query) where T : class
+		public T[] SelectNative<T>(string query)
 		{
 			return SelectNative(typeof(T), query).Cast<T>().ToArray();
 		}

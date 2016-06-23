@@ -21,6 +21,17 @@ namespace JPB.DataAccess.Manager
 		///     Creates and Executes a Standart SQL delete statement based on the Entry
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
+		public void Delete<T>()
+		{
+			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(typeof(T)), null);
+			RaiseDelete(null, deleteCommand);
+			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
+		}
+
+		/// <summary>
+		///     Creates and Executes a Standart SQL delete statement based on the Entry
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(T entry)
 		{
 			var deleteCommand = CreateDeleteQueryFactory(this.GetClassInfo(entry.GetType()), entry);
@@ -30,9 +41,13 @@ namespace JPB.DataAccess.Manager
 
 		public static IDbCommand CreateDelete(IDatabase db, DbClassInfoCache classInfo, object entry)
 		{
+			if (entry == null)
+			{
+				return db.CreateCommand("DELETE FROM " + classInfo.TableName);
+			}
+
 			if (classInfo.PrimaryKeyProperty == null)
 				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.Name));
-
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
 			return db.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));

@@ -7,32 +7,14 @@ using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Conditional;
+using JPB.DataAccess.Query.Operators.Orders;
 
 namespace JPB.DataAccess.Query.Operators
 {
 	public class ElementProducer<TPoco> : QueryBuilderX, IElementProducer<TPoco>, IEnumerable<TPoco>
 	{
-		public ElementProducer(DbAccessLayer database, Type type) : base(database, type)
-		{
-			SetCache();
-		}
-
-		public ElementProducer(IQueryContainer database) : base(database)
-		{
-			SetCache();
-		}
-
 		public ElementProducer(IQueryBuilder database) : base(database)
-		{
-			SetCache();
-		}
-
-		public ElementProducer(IQueryBuilder database, Type type) : base(database, type)
-		{
-			SetCache();
-		}
-
-		public ElementProducer(DbAccessLayer database) : base(database)
 		{
 			SetCache();
 		}
@@ -95,7 +77,16 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> Where()
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"));
+			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState());
+		}
+
+		/// <summary>
+		///    Adds an SQL ORDER BY Statement
+		/// </summary>
+		/// <returns></returns>
+		public OrderStatementQuery<TPoco> Order()
+		{
+			return new OrderStatementQuery<TPoco>(this.QueryText("ORDER BY"));
 		}
 
 		public IEnumerator<TPoco> GetEnumerator()

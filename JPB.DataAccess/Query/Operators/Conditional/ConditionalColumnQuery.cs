@@ -1,34 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.Helper;
-using JPB.DataAccess.Manager;
+﻿using JPB.DataAccess.Helper;
 using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Query.Operators
+namespace JPB.DataAccess.Query.Operators.Conditional
 {
 	public class ConditionalColumnQuery<TPoco> : QueryBuilderX, IConditionalColumnQuery<TPoco>
 	{
-		public ConditionalColumnQuery(DbAccessLayer database, Type type) : base(database, type)
-		{
-		}
+		public readonly CondtionBuilderState State;
 
-		public ConditionalColumnQuery(IQueryContainer database) : base(database)
+		public ConditionalColumnQuery(IQueryBuilder database, CondtionBuilderState state) : base(database)
 		{
-		}
-
-		public ConditionalColumnQuery(IQueryBuilder database) : base(database)
-		{
-		}
-
-		public ConditionalColumnQuery(IQueryBuilder database, Type type) : base(database, type)
-		{
-		}
-
-		public ConditionalColumnQuery(DbAccessLayer database) : base(database)
-		{
+			State = state;
 		}
 
 		/// <summary>
@@ -36,7 +17,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		public ConditionalOperatorQuery<TPoco> Is()
 		{
-			return new ConditionalOperatorQuery<TPoco>(this, Operator.Is);
+			return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Is));
 		}
 
 		/// <summary>
@@ -46,7 +27,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			if (value == null)
 			{
-				return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"));
+				return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
 			}
 
 			return QueryOperatorValue("=", value);
@@ -59,7 +40,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			if (value == null)
 			{
-				return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"));
+				return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"), State);
 			}
 			return QueryOperatorValue("<>", value);
 		}
@@ -70,7 +51,7 @@ namespace JPB.DataAccess.Query.Operators
 		public ConditionalEvalQuery<TPoco> IsQueryOperatorValue(string value)
 		{
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ(value));
+				.QueryQ(value), State);
 		}
 
 		/// <summary>
@@ -80,7 +61,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			var nextParameterId = this.ContainerObject.GetNextParameterId();
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ(string.Format("{1} @m_val{0}", nextParameterId, operators), new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)));
+				.QueryQ(string.Format("{1} @m_val{0}", nextParameterId, operators), new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)), State);
 		}
 
 		/// <summary>
@@ -89,7 +70,7 @@ namespace JPB.DataAccess.Query.Operators
 		public ConditionalEvalQuery<TPoco> IsQueryValue(string value)
 		{
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ("= " + value));
+				.QueryQ("= " + value), State);
 		}
 
 		/// <summary>
@@ -98,7 +79,7 @@ namespace JPB.DataAccess.Query.Operators
 		public ConditionalEvalQuery<TPoco> NotQueryValue(string value)
 		{
 			return new ConditionalEvalQuery<TPoco>(this
-					.QueryQ("<> " + value));
+					.QueryQ("<> " + value), State);
 		}
 	}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Overwrite;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
@@ -27,29 +28,13 @@ namespace JPB.DataAccess.Tests.PagerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-#if SqLite
-		[Ignore("MsSQL only")]
-#endif
 		public void PagerCall()
 		{
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-
-			int upperCountTestUsers = 100;
-			var testUers = new List<Users>();
-
-			string insGuid = Guid.NewGuid().ToString();
-
-			for (int i = 0; i < upperCountTestUsers; i++)
-			{
-				testUers.Add(new Users { UserName = insGuid });
-			}
-
-			expectWrapper.InsertRange(testUers);
+			var testUsers = DataMigrationHelper.AddUsers(250, expectWrapper);
 
 			object refSelect =
 				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
-			Assert.That(testUers.Count, Is.EqualTo(refSelect));
+			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
 			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())
 			{
@@ -102,34 +87,17 @@ namespace JPB.DataAccess.Tests.PagerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-#if SqLite
-		[Ignore("MsSQL only")]
-#endif
 		public void PagerConditionalCall()
 		{
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-			expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-
-			int upperCountTestUsers = 100;
-			var testUers = new List<Users>();
-
-			string insGuid = Guid.NewGuid().ToString();
-
-			for (int i = 0; i < upperCountTestUsers; i++)
-			{
-				testUers.Add(new Users { UserName = insGuid });
-			}
-
-			expectWrapper.InsertRange(testUers);
+			var testUsers = DataMigrationHelper.AddUsers(250, expectWrapper);
 
 			object refSelect =
 				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
-			Assert.That(testUers.Count, Is.EqualTo(refSelect));
+			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
 			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())
 			{
-				pager.AppendedComands.Add(expectWrapper.Database.CreateCommand("WHERE User_ID = 1"));
+				pager.AppendedComands.Add(expectWrapper.Database.CreateCommand(string.Format("WHERE User_ID = {0}", testUsers[0])));
 
 				Assert.That(pager, Is.Not.Null);
 

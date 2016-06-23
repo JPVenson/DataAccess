@@ -1,37 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.Manager;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Query.Operators
+namespace JPB.DataAccess.Query.Operators.Conditional
 {
 	public class ConditionalQuery<TPoco> : QueryBuilderX, IConditionalQuery<TPoco>
 	{
-		public ConditionalQuery(DbAccessLayer database, Type type) : base(database, type)
+		public readonly CondtionBuilderState State;
+
+		public ConditionalQuery(IQueryBuilder queryText, CondtionBuilderState state) : base(queryText)
 		{
+			State = state;
 		}
 
-		public ConditionalQuery(IQueryContainer database) : base(database)
+		/// <summary>
+		/// Opens a new Logical combined Query
+		/// </summary>
+		/// <returns></returns>
+		public ConditionalQuery<TPoco> Parenthesis()
 		{
+			return new ConditionalQuery<TPoco>(this.QueryText("("), State.ToInBreaket(true));
 		}
 
-		public ConditionalQuery(IQueryBuilder database) : base(database)
-		{
-		}
-
-		public ConditionalQuery(IQueryBuilder database, Type type) : base(database, type)
-		{
-		}
-
-		public ConditionalQuery(DbAccessLayer database) : base(database)
-		{
-		}
-		
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
@@ -41,7 +32,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public ConditionalColumnQuery<TPoco> Column(string columnName)
 		{
-			return new ConditionalColumnQuery<TPoco>(this.QueryText(columnName));
+			return new ConditionalColumnQuery<TPoco>(this.QueryText(columnName), State);
 		}
 
 		/// <summary>
@@ -56,7 +47,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			var member = columnName.GetPropertyInfoFromLabda();
 			var propName = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
-			return new ConditionalColumnQuery<TPoco>(this.QueryText(propName.DbName));
+			return Column(propName.DbName);
 		}
 	}
 }

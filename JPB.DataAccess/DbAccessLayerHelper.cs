@@ -85,7 +85,18 @@ namespace JPB.DataAccess
 			return db.CreateCommandWithParameterValues(commandText, parameter);
 		}
 
-		internal static IDbCommand MergeTextToParameters(this IDatabase db,
+		/// <summary>
+		/// Merges 2 Commands into one single New Command by optionaly renaming and Delimiter insert
+		/// </summary>
+		/// <param name="db"></param>
+		/// <param name="base"></param>
+		/// <param name="last"></param>
+		/// <param name="autoRename"></param>
+		/// <param name="seed"></param>
+		/// <param name="pessimistic"></param>
+		/// <param name="insertDelimiter"></param>
+		/// <returns></returns>
+		public static IDbCommand MergeTextToParameters(this IDatabase db,
 			IDbCommand @base,
 			IDbCommand last,
 			bool autoRename = false,

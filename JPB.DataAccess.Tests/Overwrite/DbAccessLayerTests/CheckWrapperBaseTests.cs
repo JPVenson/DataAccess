@@ -8,6 +8,7 @@ using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Overwrite;
 using NUnit.Framework;
 using NUnit.Framework.Compatibility;
 using Users = JPB.DataAccess.Tests.Base.Users;
@@ -33,29 +34,48 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[TestFixture]
 	public class CheckWrapperBaseTests
 	{
-		private DbAccessLayer expectWrapper;
+		private DbAccessLayer DbAccess;
 
 		[OneTimeSetUp]
 		public void Init()
 		{
-			expectWrapper = new Manager().GetWrapper();
+			DbAccess = new Manager().GetWrapper();
 		}
 
 		[SetUp]
 		public void Clear()
 		{
-			expectWrapper.Config.Dispose();
+			DbAccess.Config.Dispose();
 			DbConfig.Clear();
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-			if (expectWrapper.DbAccessType == DbAccessType.MsSql)
-				expectWrapper.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			if (DbAccess.DbAccessType == DbAccessType.MsSql)
+				DbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
 		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void TransactionTest()
+		{
+			DataMigrationHelper.AddUsers(250, DbAccess);
+			var count = DbAccess.SelectNative<int>("SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+
+			DbAccess.Database.RunInTransaction(dd =>
+			{
+				DbAccess.Delete<Users>();
+				dd.TransactionRollback();
+			});
+
+			var countAfter = DbAccess.SelectNative<int>("SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			Assert.That(count, Is.EqualTo(countAfter));
+		}
+
 		[Test]
 		[Category("MsSQL")]
 		[Category("SqLite")]
 		public void InsertPropertyLessPoco()
 		{
-			Assert.That(() => expectWrapper.Insert(new UsersWithoutProperties()), Throws.Nothing);
+			Assert.That(() => DbAccess.Insert(new UsersWithoutProperties()), Throws.Nothing);
 		}
 
 		[Test]
@@ -64,7 +84,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectPropertyLessPoco()
 		{
 			InsertPropertyLessPoco();
-			Assert.That(() => expectWrapper.Select<UsersWithoutProperties>(), Is.Not.Null.And.Not.Empty);
+			Assert.That(() => DbAccess.Select<UsersWithoutProperties>(), Is.Not.Null.And.Not.Empty);
 		}
 
 		[Test]
@@ -73,15 +93,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void CheckFactory()
 		{
 			InsertTest();
-			Assert.That(() => expectWrapper.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
+			Assert.That(() => DbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_StaticQueryFactoryForSelect testUser = null;
-			Assert.That(() => testUser = expectWrapper.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
+			Assert.That(() => testUser = DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
 				Is.Not.Null
 				.And.Property("UserId").Not.EqualTo(0));
 
-			var selTestUser = expectWrapper.Select<Users_StaticQueryFactoryForSelect>(testUser.UserId);
+			var selTestUser = DbAccess.Select<Users_StaticQueryFactoryForSelect>(testUser.UserId);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserId, testUser.UserId);
 		}
@@ -92,16 +112,16 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void CheckFactoryWithArguments()
 		{
 			InsertTest();
-			Assert.That(() => expectWrapper.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
+			Assert.That(() => DbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_StaticQueryFactoryForSelect testUser = null;
-			Assert.That(() => testUser = expectWrapper.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
+			Assert.That(() => testUser = DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
 						Is.Not.Null
 						.And.Property("UserId").Not.EqualTo(0));
 
 			var selTestUser =
-				expectWrapper.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId })
+				DbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId })
 					.FirstOrDefault();
 			Assert.That(selTestUser, Is.Not.Null
 				.And.Property("UserName").EqualTo(testUser.UserName)
@@ -115,11 +135,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			var insGuid = Guid.NewGuid().ToString();
 
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 			
 			DbConfig.Clear();
 
-			expectWrapper.Config.SetConfig<ConfigLessUser>(f =>
+			DbAccess.Config.SetConfig<ConfigLessUser>(f =>
 			{
 				f.SetClassAttribute(new ForModelAttribute(UsersMeta.TableName));
 				f.SetPrimaryKey(e => e.PropertyA);
@@ -127,13 +147,13 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				f.SetForModelKey(e => e.PropertyB, UsersMeta.ContentName);
 			});
 
-			expectWrapper.Insert(new ConfigLessUser { PropertyB = insGuid });
+			DbAccess.Insert(new ConfigLessUser { PropertyB = insGuid });
 
-			var elements = expectWrapper.Select<ConfigLessUser>();
+			var elements = DbAccess.Select<ConfigLessUser>();
 			Assert.AreEqual(elements.Length, 1);
 
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
@@ -148,9 +168,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbConfig.Clear();
 			var insGuid = Guid.NewGuid().ToString();
 
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-			expectWrapper.Config.SetConfig<ConfigLessUser>(f =>
+			DbAccess.Config.SetConfig<ConfigLessUser>(f =>
 			{
 				f.SetClassAttribute(new ForModelAttribute(UsersMeta.TableName));
 				f.SetPrimaryKey(e => e.PropertyA);
@@ -169,7 +189,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			Assert.That(() =>
 			{
-				expectWrapper.Insert(new ConfigLessUser { PropertyB = insGuid });
+				DbAccess.Insert(new ConfigLessUser { PropertyB = insGuid });
 			}, Throws.Exception);
 		}
 
@@ -180,8 +200,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			DbConfig.Clear();
 
-			expectWrapper.Insert(new UsersAutoGenerateNullableConstructor());
-			var elements = expectWrapper.Select<UsersAutoGenerateNullableConstructor>();
+			DbAccess.Insert(new UsersAutoGenerateNullableConstructor());
+			var elements = DbAccess.Select<UsersAutoGenerateNullableConstructor>();
 			Assert.IsNotNull(elements);
 			Assert.IsNotEmpty(elements);
 		}
@@ -193,8 +213,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			DbConfig.Clear();
 
-			expectWrapper.Insert(new GeneratedUsers());
-			var elements = expectWrapper.Select<GeneratedUsers>();
+			DbAccess.Insert(new GeneratedUsers());
+			var elements = DbAccess.Select<GeneratedUsers>();
 			Assert.IsNotNull(elements);
 			Assert.IsNotEmpty(elements);
 		}
@@ -206,8 +226,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			DbConfig.Clear();
 
-			expectWrapper.Insert(new UsersAutoGenerateConstructor());
-			var elements = expectWrapper.Select<UsersAutoGenerateConstructor>();
+			DbAccess.Insert(new UsersAutoGenerateConstructor());
+			var elements = DbAccess.Select<UsersAutoGenerateConstructor>();
 			Assert.IsNotNull(elements);
 			Assert.IsNotEmpty(elements);
 		}
@@ -216,14 +236,14 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void AutoGenFactoryTestXmlSingle()
 		{
-			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
 
 			DbConfig.Clear();
 
-			expectWrapper.Insert(new UsersAutoGenerateConstructorWithSingleXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 
-			var query = expectWrapper.Query()
+			var query = DbAccess.Query()
 					.QueryText("SELECT")
 					.QueryText("res." + UsersMeta.PrimaryKeyName)
 					.QueryText(",res." + UsersMeta.ContentName)
@@ -248,15 +268,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void AutoGenFactoryTestXmlMulti()
 		{
-			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
 			DbConfig.Clear();
 
-			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
-			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
-			expectWrapper.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 
-			var elements = expectWrapper.Query()
+			var elements = DbAccess.Query()
 				.QueryText("SELECT")
 				.QueryText("res." + UsersMeta.PrimaryKeyName)
 				.QueryText(",res." + UsersMeta.ContentName)
@@ -282,15 +302,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbConfig.Clear();
 			var insGuid = Guid.NewGuid().ToString();
 
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-			expectWrapper.Insert(new ConfigLessUserInplaceConfig { PropertyB = insGuid });
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.Insert(new ConfigLessUserInplaceConfig { PropertyB = insGuid });
 
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
 
-			var elements = expectWrapper.Select<ConfigLessUserInplaceConfig>();
+			var elements = DbAccess.Select<ConfigLessUserInplaceConfig>();
 			Assert.AreEqual(elements.Length, 1);
 			DbConfig.Clear();
 		}
@@ -300,13 +320,13 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void ExecuteGenericCommand()
 		{
-			var resultSelect1 = expectWrapper.ExecuteGenericCommand("Select 10", null);
+			var resultSelect1 = DbAccess.ExecuteGenericCommand("Select 10", null);
 			Assert.AreEqual(resultSelect1, -1);
 
-			resultSelect1 = expectWrapper.ExecuteGenericCommand("SELECT @test", new { test = 10 });
+			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test", new { test = 10 });
 			Assert.AreEqual(resultSelect1, -1);
 
-			resultSelect1 = expectWrapper.ExecuteGenericCommand("SELECT @test",
+			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test",
 				new List<QueryParameter> { new QueryParameter("test", 10) });
 			Assert.AreEqual(resultSelect1, -1);
 		}
@@ -318,12 +338,12 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			var insGuid = Guid.NewGuid().ToString();
 
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-			expectWrapper.IsMultiProviderEnvironment = true;
-			expectWrapper.Insert(new UsersWithStaticInsert { UserName = insGuid });
-			expectWrapper.IsMultiProviderEnvironment = false;
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.IsMultiProviderEnvironment = true;
+			DbAccess.Insert(new UsersWithStaticInsert { UserName = insGuid });
+			DbAccess.IsMultiProviderEnvironment = false;
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
@@ -337,9 +357,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var insGuid = Guid.NewGuid().ToString();
 
 
-			expectWrapper.Insert(new Users { UserName = insGuid });
+			DbAccess.Insert(new Users { UserName = insGuid });
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
@@ -360,12 +380,12 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
-			expectWrapper.InsertRange(containingList);
+			DbAccess.InsertRange(containingList);
 			stopWatch.Stop();
 			//Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
 
 			var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName);
-			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, 10000);
@@ -384,15 +404,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				containingList.Add(new Users() { UserName = Guid.NewGuid().ToString("N") });
 			}
 
-			expectWrapper.RangerInsertPation = 1;
+			DbAccess.RangerInsertPation = 1;
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
-			expectWrapper.InsertRange(containingList);
+			DbAccess.InsertRange(containingList);
 			stopWatch.Stop();
 			//Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
 
 			var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName);
-			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, 10000);
@@ -410,9 +430,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 					conf.SetPropertyAttribute(s => s.UserName, new IgnoreReflectionAttribute());
 				});
 			
-			expectWrapper.Insert(new Users());
+			DbAccess.Insert(new Users());
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-			var selectTest = expectWrapper.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, DBNull.Value);
@@ -424,7 +444,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void InsertWithSelect()
 		{
 			var val = new Users { UserName = "test" };
-			var refSelect = expectWrapper.InsertWithSelect(val);
+			var refSelect = DbAccess.InsertWithSelect(val);
 
 			Assert.AreEqual(refSelect.UserName, val.UserName);
 			Assert.AreNotEqual(refSelect.UserID, val.UserID);
@@ -437,9 +457,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			var insGuid = Guid.NewGuid().ToString();
 
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-			var expectedUser = expectWrapper.InsertWithSelect(new Users { UserName = insGuid });
+			var expectedUser = DbAccess.InsertWithSelect(new Users { UserName = insGuid });
 			Assert.IsNotNull(expectedUser);
 			Assert.AreEqual(expectedUser.UserName, insGuid);
 			Assert.AreNotEqual(expectedUser.UserID, default(long));
@@ -452,9 +472,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			var insGuid = Guid.NewGuid().ToString();
 
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-			var expectedUser = expectWrapper.InsertWithSelect(new Users { UserName = insGuid });
+			var expectedUser = DbAccess.InsertWithSelect(new Users { UserName = insGuid });
 			Assert.IsNotNull(expectedUser);
 			Assert.AreEqual(expectedUser.UserName, insGuid);
 			Assert.AreNotEqual(expectedUser.UserID, default(long));
@@ -467,14 +487,14 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			RangeInsertTest();
 
-			var baseQuery = expectWrapper.Query().Select<Users>();
+			var baseQuery = DbAccess.Query().Select<Users>();
 			var queryA = baseQuery.ContainerObject.Compile();
 			var queryB = baseQuery.ContainerObject.Compile();
 			Assert.IsNotNull(queryA);
 			Assert.IsNotNull(queryB);
 
-			var marsCommand = expectWrapper.Database.MergeCommands(queryA, queryB, true);
-			var returnValue = expectWrapper.ExecuteMARS(marsCommand, typeof(Users), typeof(Users));
+			var marsCommand = DbAccess.Database.MergeCommands(queryA, queryB, true);
+			var returnValue = DbAccess.ExecuteMARS(marsCommand, typeof(Users), typeof(Users));
 			Assert.IsNotNull(returnValue);
 			Assert.AreNotSame(returnValue.Count, 0);
 
@@ -483,7 +503,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.AreNotSame(queryAResult.Count, 0);
 			Assert.AreEqual(queryAResult.Count, queryBResult.Count);
 
-			var refCall = expectWrapper.Select<Users>();
+			var refCall = DbAccess.Select<Users>();
 			Assert.AreEqual(refCall.Length, queryAResult.Count);
 		}
 
@@ -491,16 +511,16 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void ProcedureParamLessTest()
 		{
-			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
 			RangeInsertTest();
-			var expectedUser = expectWrapper.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
+			var expectedUser = DbAccess.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
 			Assert.IsNotNull(expectedUser);
 			Assert.AreNotEqual(expectedUser.Length, 0);
 
 			var refSelect =
-				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.TableName)));
+				DbAccess.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.TableName)));
 			Assert.AreEqual(expectedUser.Length, refSelect);
 		}
 
@@ -508,11 +528,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void ProcedureParamTest()
 		{
-			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
 			RangeInsertTest();
 
-			Assert.That(() => expectWrapper.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
+			Assert.That(() => DbAccess.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams()
 			{
 				Number = 10
 			}), Is.Not.Null.And.Property("Length").EqualTo(9));
@@ -522,11 +542,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("MsSQL")]
 		public void ProcedureDirectParamTest()
 		{
-			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
 			RangeInsertTest();
 
-			Assert.That(() => expectWrapper.Select<TestProcBParamsDirect>(new object[] { 10 }),
+			Assert.That(() => DbAccess.Select<TestProcBParamsDirect>(new object[] { 10 }),
 				Is.Not.Null.And.Property("Length").EqualTo(9));
 		}
 
@@ -535,7 +555,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void RangeInsertTest()
 		{
-			expectWrapper.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
 			var upperCountTestUsers = 100;
 			var testUers = new List<Users>();
@@ -547,10 +567,10 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				testUers.Add(new Users { UserName = insGuid });
 			}
 
-			expectWrapper.InsertRange(testUers);
+			DbAccess.InsertRange(testUers);
 
 			var refSelect =
-				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
+				DbAccess.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			if (refSelect is long)
 				refSelect = Convert.ChangeType(refSelect, typeof(int));
 
@@ -563,10 +583,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Refresh()
 		{
 			InsertTest();
-			var singleEntity = expectWrapper
+			var singleEntity = DbAccess
 				.Query()
-				.Select<Users>()
-				.Top(1)
+				.Top<Users>(1)
 				.ForResult<Users>()
 				.Single();
 
@@ -578,11 +597,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsNotNull(preName);
 
 			singleEntity.UserName = postName;
-			expectWrapper.Update(singleEntity);
+			DbAccess.Update(singleEntity);
 			singleEntity.UserName = null;
 
-			singleEntity = expectWrapper.Refresh(singleEntity);
-			var refEntity = expectWrapper.Select<Users>(id);
+			singleEntity = DbAccess.Refresh(singleEntity);
+			var refEntity = DbAccess.Select<Users>(id);
 
 			Assert.IsNotNull(refEntity);
 			Assert.AreEqual(id, refEntity.UserID);
@@ -596,10 +615,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void RefreshInplace()
 		{
 			InsertTest();
-			var singleEntity = expectWrapper
+			var singleEntity = DbAccess
 				.Query()
-				.Select<Base.TestModels.CheckWrapperBaseTests.Users>()
-				.Top(1)
+				.Top<Base.TestModels.CheckWrapperBaseTests.Users>(1)
 				.ForResult<Users>()
 				.Single();
 			var id = singleEntity.UserID;
@@ -610,11 +628,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsNotNull(preName);
 
 			singleEntity.UserName = postName;
-			expectWrapper.Update(singleEntity);
+			DbAccess.Update(singleEntity);
 			singleEntity.UserName = null;
 
-			expectWrapper.RefreshKeepObject(singleEntity);
-			var refEntity = expectWrapper.Select<Users>(id);
+			DbAccess.RefreshKeepObject(singleEntity);
+			var refEntity = DbAccess.Select<Users>(id);
 
 			Assert.IsNotNull(refEntity);
 			Assert.AreEqual(id, refEntity.UserID);
@@ -628,15 +646,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectBase()
 		{
 			InsertTest();
-			var refSelect = expectWrapper.Select<Users>();
+			var refSelect = DbAccess.Select<Users>();
 			Assert.IsTrue(refSelect.Length > 0);
 
 			var testInsertName = Guid.NewGuid().ToString();
-			var testUser = expectWrapper.InsertWithSelect(new Users { UserName = testInsertName });
+			var testUser = DbAccess.InsertWithSelect(new Users { UserName = testInsertName });
 			Assert.IsNotNull(testUser);
 			Assert.AreNotEqual(testUser.UserID, default(long));
 
-			var selTestUser = expectWrapper.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.UserID);
+			var selTestUser = DbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.UserID);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserId, testUser.UserID);
 		}
@@ -647,15 +665,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectWhereBase()
 		{
 			InsertTest();
-			var refSelect = expectWrapper.SelectWhere<Users>("UserName IS NOT NULL");
+			var refSelect = DbAccess.SelectWhere<Users>("UserName IS NOT NULL");
 			Assert.IsTrue(refSelect.Length > 0);
 
 			var testInsertName = Guid.NewGuid().ToString();
-			var testUser = expectWrapper.InsertWithSelect(new Users { UserName = testInsertName });
+			var testUser = DbAccess.InsertWithSelect(new Users { UserName = testInsertName });
 			Assert.IsNotNull(testUser);
 			Assert.AreNotEqual(testUser.UserID, default(long));
 
-			var selTestUser = expectWrapper.SelectWhere<Users>("User_ID = @id", new { id = testUser.UserID }).FirstOrDefault();
+			var selTestUser = DbAccess.SelectWhere<Users>("User_ID = @id", new { id = testUser.UserID }).FirstOrDefault();
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserID, testUser.UserID);
 		}
@@ -666,15 +684,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectModelsSelect()
 		{
 			RangeInsertTest();
-			var firstAvaibleUser = expectWrapper.Query().Select<Base.TestModels.CheckWrapperBaseTests.Users>().Top(1).ForResult<Users>().First();
+			var firstAvaibleUser = DbAccess.Query().Top<Base.TestModels.CheckWrapperBaseTests.Users>(1).ForResult<Users>().First();
 
-			var refSelect = expectWrapper.Select<Users_PK>(firstAvaibleUser.UserID);
+			var refSelect = DbAccess.Select<Users_PK>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(refSelect);
 
-			var userSelectAlternatingProperty = expectWrapper.Select<Users_PK_IDFM>(firstAvaibleUser.UserID);
+			var userSelectAlternatingProperty = DbAccess.Select<Users_PK_IDFM>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(userSelectAlternatingProperty);
 
-			var userSelectStaticSel = expectWrapper.Select<Users_PK_IDFM_CLASSEL>(firstAvaibleUser.UserID);
+			var userSelectStaticSel = DbAccess.Select<Users_PK_IDFM_CLASSEL>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(userSelectStaticSel);
 		}
 
@@ -686,19 +704,19 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			InsertTest();
 
-			var refSelect = expectWrapper.SelectNative<Users>(UsersMeta.SelectStatement);
+			var refSelect = DbAccess.SelectNative<Users>(UsersMeta.SelectStatement);
 			Assert.IsTrue(refSelect.Any());
 
 			var anyId = refSelect.FirstOrDefault().UserID;
 			Assert.AreNotEqual(anyId, 0);
 
 			refSelect =
-				expectWrapper.SelectNative<Users>(UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
+				DbAccess.SelectNative<Users>(UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
 					new QueryParameter("paramA", anyId));
 			Assert.IsTrue(refSelect.Length > 0);
 
 			refSelect =
-				expectWrapper.SelectNative<Users>(
+				DbAccess.SelectNative<Users>(
 					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA", new { paramA = anyId });
 			Assert.IsTrue(refSelect.Length > 0);
 		}
@@ -709,20 +727,20 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectPrimitivSelect()
 		{
 			InsertTest();
-			var refSelect = expectWrapper.RunPrimetivSelect<long>(UsersMeta.SelectStatement);
+			var refSelect = DbAccess.RunPrimetivSelect<long>(UsersMeta.SelectStatement);
 			Assert.IsTrue(refSelect.Any());
 
 			var anyId = refSelect.FirstOrDefault();
 			Assert.AreNotEqual(anyId, 0);
 
 			refSelect =
-				expectWrapper.RunPrimetivSelect<long>(
+				DbAccess.RunPrimetivSelect<long>(
 					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
 					new QueryParameter("paramA", anyId));
 			Assert.IsTrue(refSelect.Length > 0);
 
 			refSelect =
-				expectWrapper.RunPrimetivSelect<long>(
+				DbAccess.RunPrimetivSelect<long>(
 					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA", new { paramA = anyId });
 			Assert.IsTrue(refSelect.Length > 0);
 		}
@@ -732,12 +750,12 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void SelectPrimitivSelectNullHandling()
 		{
-			if (expectWrapper.DbAccessType != DbAccessType.MsSql)
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
 			InsertTest();
 			Assert.That(() =>
 			{
-				expectWrapper.RunPrimetivSelect<long>(
+				DbAccess.RunPrimetivSelect<long>(
 						UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
 						new QueryParameter("paramA", null));
 			}, Throws.Exception);
@@ -745,7 +763,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(() =>
 			{
 				string n = null;
-				expectWrapper.RunPrimetivSelect<long>(
+				DbAccess.RunPrimetivSelect<long>(
 					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA", new { paramA = n });
 			}, Throws.Exception);
 		}
@@ -759,30 +777,30 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			RangeInsertTest();
 
 			DbCollection<Users_Col> dbCollection = null;
-			Assert.That(() => dbCollection = expectWrapper.CreateDbCollection<Users_Col>(), Throws.Nothing);
+			Assert.That(() => dbCollection = DbAccess.CreateDbCollection<Users_Col>(), Throws.Nothing);
 			Assert.That(dbCollection, Is.Not.Empty);
 			Assert.That(dbCollection.Count, Is.EqualTo(100));
 
 			Assert.That(() => dbCollection.Add(new Users_Col()), Throws.Nothing);
 			Assert.That(dbCollection.Count, Is.EqualTo(101));
 
-			Assert.That(() => dbCollection.SaveChanges(expectWrapper), Throws.Nothing);
-			Assert.That(() => expectWrapper.Select<Users_Col>().Length, Is.EqualTo(101));
+			Assert.That(() => dbCollection.SaveChanges(DbAccess), Throws.Nothing);
+			Assert.That(() => DbAccess.Select<Users_Col>().Length, Is.EqualTo(101));
 
 			Assert.That(() => dbCollection.Remove(dbCollection.First()), Throws.Nothing);
 			Assert.That(dbCollection.Count, Is.EqualTo(100));
 
-			Assert.That(() => dbCollection.SaveChanges(expectWrapper), Throws.Nothing);
-			Assert.That(() => expectWrapper.Select<Users_Col>().Length, Is.EqualTo(100));
+			Assert.That(() => dbCollection.SaveChanges(DbAccess), Throws.Nothing);
+			Assert.That(() => DbAccess.Select<Users_Col>().Length, Is.EqualTo(100));
 
 			var user25 = dbCollection[25];
 			user25.UserName = Guid.NewGuid().ToString();
 
 			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Changed));
-			Assert.That(() => dbCollection.SaveChanges(expectWrapper), Throws.Nothing);
+			Assert.That(() => dbCollection.SaveChanges(DbAccess), Throws.Nothing);
 			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Unchanged));
 
-			Assert.That(() => expectWrapper.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
+			Assert.That(() => DbAccess.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
 				.Property("User_ID").EqualTo(user25.User_ID)
 				.And
 				.Property("UserName").EqualTo(user25.UserName));
@@ -794,10 +812,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Update()
 		{
 			InsertTest();
-			var query = expectWrapper
+			var query = DbAccess
 				.Query()
-				.Select<Users>()
-				.Top(1);
+				.Top<Users>(1);
 			var singleEntity = query
 				.ForResult<Users>()
 				.Single();
@@ -808,9 +825,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsNotNull(preName);
 
 			singleEntity.UserName = postName;
-			expectWrapper.Update(singleEntity);
+			DbAccess.Update(singleEntity);
 
-			var refEntity = expectWrapper.Select<Users>(singleEntity.UserID);
+			var refEntity = DbAccess.Select<Users>(singleEntity.UserID);
 			Assert.IsNotNull(refEntity);
 			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
 			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);

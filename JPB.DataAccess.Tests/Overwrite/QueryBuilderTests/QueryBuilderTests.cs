@@ -89,7 +89,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		}
 
 		[Test]
-		public void In()
+		public void RefIn()
 		{
 			var addBooksWithImage = DataMigrationHelper.AddBooksWithImage(250,2, DbAccessLayer);
 			foreach (var id in addBooksWithImage)
@@ -122,7 +122,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		}
 		[Category("MsSQL")]
 #if SqLite
-		[Ignore("MsSQL only")]
+		//[Ignore("MsSQL only")]
 #endif
 		[Test]
 		public void Pager()
@@ -130,8 +130,6 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			var maxItems = 250;
 
 			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
-
-
 			var basePager = DbAccessLayer.Database.CreatePager<Users>();
 			basePager.PageSize = 10;
 			basePager.LoadPage(DbAccessLayer);
@@ -146,10 +144,6 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(basePager.MaxPage, Is.EqualTo(queryPager.MaxPage));
 		}
 
-		[Category("MsSQL")]
-#if SqLite
-		[Ignore("MsSQL only")]
-#endif
 		[Test]
 		public void PagerWithCondtion()
 		{
@@ -175,7 +169,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 
 		[Category("MsSQL")]
 #if SqLite
-		[Ignore("MsSQL only")]
+		//[Ignore("MsSQL only")]
 #endif
 		[Test]
 		public void AsCte()
@@ -184,6 +178,58 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
 			var elementProducer = DbAccessLayer.Query().Select<Users>().AsCte<Users, Users>("cte");
 			var query = elementProducer.ContainerObject.Compile();
+		}
+
+
+		[Test]
+		public void OrderBy()
+		{
+			var maxItems = 250;
+			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
+			var elementProducer = DbAccessLayer.Query().Select<Users>().Order().By(s => s.UserName).ThenBy(f => f.UserID).ToArray();
+			var directQuery = DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement + " ORDER BY UserName, User_ID");
+
+			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
+
+			for (int index = 0; index < directQuery.Length; index++)
+			{
+				var userse = directQuery[index];
+				var userbe = elementProducer[index];
+				Assert.That(userbe.UserID, Is.EqualTo(userse.UserID));
+				Assert.That(userbe.UserName, Is.EqualTo(userse.UserName));
+			}
+		}
+
+		[Test]
+		public void In()
+		{
+			var maxItems = 250;
+			var addUsers = DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
+
+			var rand = new Random(54541117);
+
+			var elementsToRead = new List<long>();
+
+			for (int i = 0; i < 25; i++)
+			{
+				elementsToRead.Add(addUsers[rand.Next(0, addUsers.Length)]);
+			}
+
+			var elementProducer = DbAccessLayer.Query().Select<Users>().Where().Column(f => f.UserID).Is().In(elementsToRead.ToArray()).ToArray();
+			var directQuery = DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement 
+				+ string.Format(" WHERE User_ID IN ({0})", 
+				elementsToRead.Select(f => f.ToString()).Aggregate((e,f) => e + "," + f)));
+
+			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
+
+			for (int index = 0; index < directQuery.Length; index++)
+			{
+				var userse = directQuery[index];
+				var userbe = elementProducer[index];
+				Assert.That(userbe.UserID, Is.EqualTo(userse.UserID));
+				Assert.That(userbe.UserName, Is.EqualTo(userse.UserName));
+			}
+
 		}
 	}
 }
