@@ -39,15 +39,16 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			var teCache = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
 			var fkPropertie = Cache.Propertys
-				.FirstOrDefault(s =>
+				.SingleOrDefault(s =>
 					s.Value.ForginKeyDeclarationAttribute != null &&
-					s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == teCache.TableName)
+					(s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TEPoco) ||
+					s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == teCache.TableName))
 					.Value;
 
 			if (fkPropertie == null)
 				throw new NotSupportedException(string.Format("No matching Column was found for Forgin key declaration for table {0}", teCache.TableName));
 
-			return new ElementProducer<TPoco>(this.Where().Column(fkPropertie.DbName).Is(id));
+			return new ElementProducer<TPoco>(this.Where().Column(fkPropertie.DbName).Is().EqualsTo(id));
 		}
 	}
 }

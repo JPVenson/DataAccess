@@ -307,7 +307,7 @@ namespace JPB.DataAccess.Manager
 						return DbAccessLayerHelper.CreateCommand(Database, type.SelectFactory.Attribute.Query);
 					}
 				}
-
+				
 				var methods =
 					type.Mehtods
 						.Where(s => s.Attributes.Any(e => e.Attribute is TE && (!IsMultiProviderEnvironment

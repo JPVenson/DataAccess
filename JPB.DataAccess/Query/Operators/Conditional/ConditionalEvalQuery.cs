@@ -4,11 +4,11 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 {
 	public class ConditionalEvalQuery<TPoco> : ElementProducer<TPoco>, IConditionalEvalQuery<TPoco>
 	{
-		private readonly CondtionBuilderState _state;
+		public readonly CondtionBuilderState State;
 
 		public ConditionalEvalQuery(IQueryBuilder database, CondtionBuilderState state) : base(database)
 		{
-			_state = state;
+			State = state;
 		}
 
 		/// <summary>
@@ -20,7 +20,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> And()
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("AND"), _state);
+			return new ConditionalQuery<TPoco>(this.QueryText("AND"), State);
 		}
 
 		/// <summary>
@@ -32,7 +32,18 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> Or()
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("OR"), _state);
+			return new ConditionalQuery<TPoco>(this.QueryText("OR"), State);
+		}
+
+		/// <summary>
+		/// Closes an Parenthesis if any is open. When not leading ( is found noting happens
+		/// </summary>
+		/// <returns></returns>
+		public ConditionalEvalQuery<TPoco> ParenthesisClose()
+		{
+			if (State.InBreaket)
+				return new ConditionalEvalQuery<TPoco>(this.QueryText(")"), State.ToInBreaket(true));
+			return new ConditionalEvalQuery<TPoco>(this, State);
 		}
 	}
 }

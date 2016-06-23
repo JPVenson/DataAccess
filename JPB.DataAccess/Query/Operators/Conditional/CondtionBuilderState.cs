@@ -9,16 +9,33 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 
 		public Operator Operator { get; private set; }
 		public bool InBreaket { get; private set; }
+		private int breaketCounter = 0;
 
-		public CondtionBuilderState ToOperator(Operator op)
+		internal CondtionBuilderState ToOperator(Operator op)
 		{
 			this.Operator = op;
 			return this;
 		}
 
-		public CondtionBuilderState ToInBreaket(bool op)
+		internal CondtionBuilderState ToInBreaket(bool op)
 		{
-			this.InBreaket = op;
+			if (op)
+			{
+				breaketCounter++;
+			}
+			else
+			{
+				breaketCounter--;
+			}
+			if (breaketCounter > 0)
+			{
+				this.InBreaket = false;
+			}
+			else
+			{
+				this.InBreaket = true;
+			}
+
 			return this;
 		}
 	}
