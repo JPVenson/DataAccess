@@ -107,6 +107,12 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		void CloseConnection();
 
+		/// <summary>
+		///     Required
+		///     Closing all Connections that maybe open
+		/// </summary>
+		void CloseAllConnection();
+
 		int ExecuteNonQuery(string strSql, params object[] obj);
 		int ExecuteNonQuery(IDbCommand cmd);
 

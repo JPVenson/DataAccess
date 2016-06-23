@@ -58,7 +58,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void TransactionTest()
 		{
 			DataMigrationHelper.AddUsers(250, DbAccess);
-			var count = DbAccess.SelectNative<int>("SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			var count = DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 
 			DbAccess.Database.RunInTransaction(dd =>
 			{
@@ -66,7 +66,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				dd.TransactionRollback();
 			});
 
-			var countAfter = DbAccess.SelectNative<int>("SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			var countAfter = DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 

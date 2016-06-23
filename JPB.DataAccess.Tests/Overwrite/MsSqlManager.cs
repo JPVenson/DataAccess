@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Tests
 		}
 
 		private static DbAccessLayer expectWrapper;
-		
+
 		public DbAccessType DbAccessType
 		{
 			get { return DbAccessType.MsSql; }
@@ -44,16 +44,18 @@ namespace JPB.DataAccess.Tests
 
 		public DbAccessLayer GetWrapper()
 		{
+			const string dbname = "testDB";
 			if (expectWrapper != null)
-				return expectWrapper;
-
-			string dbname = "testDB";
+			{
+				expectWrapper.Database.CloseAllConnection();
+			}
 
 			var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
 				dbname);
 
 			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
 
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
@@ -64,14 +66,15 @@ namespace JPB.DataAccess.Tests
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
 
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
-			                                                                         "AS BEGIN " +
-			                                                                         "SELECT * FROM Users " +
-			                                                                         "END"));
+																					 "AS BEGIN " +
+																					 "SELECT * FROM Users " +
+																					 "END"));
 
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
-			                                                                         "AS BEGIN " +
-			                                                                         "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
-			                                                                         "END "));
+																					 "AS BEGIN " +
+																					 "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
+																					 "END "));
+
 
 			return expectWrapper;
 		}

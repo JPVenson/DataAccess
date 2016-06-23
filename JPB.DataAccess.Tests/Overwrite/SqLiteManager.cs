@@ -22,7 +22,9 @@ namespace JPB.DataAccess.Tests
 		public DbAccessLayer GetWrapper()
 		{
 			if (expectWrapper != null)
-				return expectWrapper;
+			{
+				expectWrapper.Database.CloseAllConnection();
+			}
 
 			string dbname = "testDB";
 			var sqlLiteFileName = dbname + ".sqlite";

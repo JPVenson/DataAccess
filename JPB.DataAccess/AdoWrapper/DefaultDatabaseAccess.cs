@@ -9,6 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -194,7 +195,37 @@ namespace JPB.DataAccess.AdoWrapper
 				}
 				_trans = null;
 				_conn2.Close();
+				_conn2.Dispose();
+				_conn2 = null;
 			}
+			GC.Collect();
+		}
+
+		public void CloseAllConnection()
+		{
+			Debug.Assert(_handlecounter >= 0);
+
+			//This is not the last call of Close so decrease the counter
+			lock (this)
+			{
+				_handlecounter = 0;
+			}
+
+			if (_conn2 != null && _handlecounter == 0)
+			{
+				if (_trans != null)
+				{
+					_trans.Commit();
+				}
+				_trans = null;
+				_conn2.Close();
+				_conn2.Dispose();
+				_conn2 = null;
+			}
+			GC.Collect();
+
+			//HACK
+			SqlConnection.ClearAllPools();
 		}
 
 		public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
