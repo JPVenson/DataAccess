@@ -9,10 +9,17 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators.Orders
 {
-	public class OrderByColumn<TPoco> : QueryBuilderX, IOrderdColumnElementProducer<TPoco>, IEnumerable<TPoco>
+	public class OrderByColumn<TPoco> : ElementProducer<TPoco>, IOrderdColumnElementProducer<TPoco>, IEnumerable<TPoco>
 	{
 		public OrderByColumn(IQueryBuilder database) : base(database)
 		{
+		}
+
+		public OrderByColumn<TPoco> Order(bool ascending)
+		{
+			if (ascending)
+				return this;
+			return this.Descending();
 		}
 
 		public OrderByColumn<TPoco> Descending()
@@ -38,11 +45,6 @@ namespace JPB.DataAccess.Query.Operators.Orders
 			var member = columnName.GetPropertyInfoFromLabda();
 			var propName = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
 			return ThenBy(propName.DbName);
-		}
-
-		public IEnumerator<TPoco> GetEnumerator()
-		{
-			return base.GetEnumerator<TPoco>();
 		}
 	}
 }

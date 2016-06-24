@@ -54,6 +54,11 @@ namespace JPB.DataAccess.Query.Contracts
 
 	}
 
+	public interface IDbElementSelector : IRootQuery
+	{
+
+	}
+
 	public interface IUpdateQuery<out T> : IElementProducer<T>
 	{
 

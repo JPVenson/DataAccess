@@ -121,9 +121,6 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			}
 		}
 		[Category("MsSQL")]
-#if SqLite
-		//[Ignore("MsSQL only")]
-#endif
 		[Test]
 		public void Pager()
 		{
@@ -168,9 +165,6 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 
 
 		[Category("MsSQL")]
-#if SqLite
-		//[Ignore("MsSQL only")]
-#endif
 		[Test]
 		public void AsCte()
 		{
@@ -229,7 +223,8 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				Assert.That(userbe.UserID, Is.EqualTo(userse.UserID));
 				Assert.That(userbe.UserName, Is.EqualTo(userse.UserName));
 			}
-
 		}
+
+
 	}
 }

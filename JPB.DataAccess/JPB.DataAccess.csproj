@@ -257,6 +257,7 @@
     <Compile Include="Query\Operators\Orders\OrderStatementQuery.cs" />
     <Compile Include="Query\Operators\QueryElement.cs" />
     <Compile Include="Query\Operators\RootQuery.cs" />
+    <Compile Include="Query\Operators\Selection\DatabaseObjectSelector.cs" />
     <Compile Include="Query\Operators\SelectQuery.cs" />
     <Compile Include="Query\Operators\UpdateQuery.cs" />
     <Compile Include="Query\QueryBuilder.cs" />
