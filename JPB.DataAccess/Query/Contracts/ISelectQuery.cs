@@ -26,7 +26,7 @@ namespace JPB.DataAccess.Query.Contracts
 
 	public interface IIdentifyerElementQuery : IQueryElement
 	{
-
+		string CurrentIdentifier { get; }
 	}
 
 	public interface IConditionalQuery<out T> : IElementProducer<T>
@@ -55,6 +55,11 @@ namespace JPB.DataAccess.Query.Contracts
 	}
 
 	public interface IDbElementSelector : IRootQuery
+	{
+
+	}
+
+	public interface IDbColumnSelector : IRootQuery
 	{
 
 	}

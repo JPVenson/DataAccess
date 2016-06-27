@@ -89,6 +89,7 @@ namespace JPB.DataAccess.SqLite
 		public long MaxPage { get; private set; }
 
 		public int PageSize { get; set; }
+		public long TotalItemCount { get; private set; }
 
 		public ICollection<T> CurrentPageItems { get; protected set; }
 
@@ -135,6 +136,7 @@ namespace JPB.DataAccess.SqLite
 			{
 				long parsedCount;
 				long.TryParse(maxItems.ToString(), out parsedCount);
+				TotalItemCount = parsedCount;
 				MaxPage = (long)Math.Ceiling((decimal)parsedCount / PageSize);
 			}
 
@@ -144,7 +146,6 @@ namespace JPB.DataAccess.SqLite
 			command = dbAccess.Query()
 					.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
 					.QueryText("SELECT * FROM CTE")
-					.QueryText("ORDER BY " + pk)
 					.QueryD("ASC LIMIT @PageSize OFFSET @PagedRows", new
 					{
 						PagedRows = (CurrentPage - 1) * PageSize,

@@ -31,6 +31,11 @@ namespace JPB.DataAccess.Contacts.Pager
 		///     Items to load on one page
 		/// </summary>
 		int PageSize { get; set; }
+
+		/// <summary>
+		/// Get the complete ammount of all items listend
+		/// </summary>
+		long TotalItemCount { get; }
 	}
 
 	/// <summary>

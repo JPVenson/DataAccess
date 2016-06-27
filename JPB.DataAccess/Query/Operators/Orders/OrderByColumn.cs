@@ -9,7 +9,7 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators.Orders
 {
-	public class OrderByColumn<TPoco> : ElementProducer<TPoco>, IOrderdColumnElementProducer<TPoco>, IEnumerable<TPoco>
+	public class OrderByColumn<TPoco> : ElementProducer<TPoco>, IOrderdColumnElementProducer<TPoco>
 	{
 		public OrderByColumn(IQueryBuilder database) : base(database)
 		{
@@ -39,8 +39,7 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <param name="query"></param>
 		/// <param name="columnName"></param>
 		/// <returns></returns>
-		public OrderByColumn<TPoco> ThenBy<TA>(
-								Expression<Func<TPoco, TA>> columnName)
+		public OrderByColumn<TPoco> ThenBy<TA>(Expression<Func<TPoco, TA>> columnName)
 		{
 			var member = columnName.GetPropertyInfoFromLabda();
 			var propName = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];

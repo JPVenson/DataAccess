@@ -17,7 +17,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	{
 		public LocalDataPager(LocalDbRepository<T> localDbRepository)
 		{
-			this.localDbRepository = localDbRepository;
+			this._localDbRepository = localDbRepository;
 			this.CurrentPage = 1;
 			SyncHelper = (s) => s();
 			CurrentPageItems = new ObservableCollection<T>();
@@ -53,6 +53,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public long MaxPage { get; private set; }
 
 		public int PageSize { get; set; }
+		public long TotalItemCount { get; private set; }
 
 		public bool RaiseEvents { get; set; }
 
@@ -69,7 +70,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public void LoadPage(DbAccessLayer dbAccess)
 		{
 			SyncHelper(CurrentPageItems.Clear);
-			MaxPage = (long) Math.Ceiling((((decimal)localDbRepository.Count / this.PageSize)));
+			MaxPage = (long) Math.Ceiling((((decimal)_localDbRepository.Count / this.PageSize)));
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoading;
@@ -79,7 +80,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 				}
 			}
 
-			var items = localDbRepository.Skip((int)((this.CurrentPage - 1) * this.PageSize)).Take(this.PageSize).ToArray();
+			TotalItemCount = _localDbRepository.Count;
+
+			var items = _localDbRepository.Skip((int)((this.CurrentPage - 1) * this.PageSize)).Take(this.PageSize).ToArray();
 
 			foreach (var item in items)
 			{
@@ -104,7 +107,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		#region IDisposable Support
 		private bool disposedValue = false; // To detect redundant calls
-		private LocalDbRepository<T> localDbRepository;
+		private readonly LocalDbRepository<T> _localDbRepository;
 
 
 		protected virtual void Dispose(bool disposing)

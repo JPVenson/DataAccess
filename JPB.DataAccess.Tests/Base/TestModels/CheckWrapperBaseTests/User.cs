@@ -341,7 +341,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static IQueryFactoryResult GetSelectStatement(int whereID)
+		public static IQueryFactoryResult GetSelectStatement(long whereID)
 		{
 			return new QueryFactoryResult(UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
 				new QueryParameter("paramA", whereID));

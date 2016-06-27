@@ -57,7 +57,7 @@ namespace JPB.DataAccess.Query
 
 		public IEnumerator GetEnumerator()
 		{
-			return _builder.GetEnumerator();
+			return ((IEnumerable<TPoco>)this).GetEnumerator();
 		}
 	}
 }

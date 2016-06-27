@@ -26,6 +26,7 @@ using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Query.Operators.Conditional;
+using JPB.DataAccess.Query.Operators.Orders;
 
 namespace JPB.DataAccess.Query
 {
@@ -99,7 +100,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ElementProducer<string> ForXml<TPoco>(this ElementProducer<TPoco> query, Type target)
 		{
-			return new ElementProducer<string>(query.QueryText("FOR XML PATH('{0}'),ROOT('ArrayOf{0}'), TYPE", target.Name));
+			return new ElementProducer<string>(query.QueryText("FOR XML PATH('{0}'),ROOT('ArrayOf{0}'), TYPE", target.Name), query.CurrentIdentifier);
 		}
 
 		/// <summary>
@@ -145,8 +146,8 @@ namespace JPB.DataAccess.Query
 			}
 
 			cp.Add(new CteQueryPart(")"));
-			return new ElementProducer<TN>(cp.QueryText(string.Format("SELECT {1} FROM {0}", cteName, 
-				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TN)).GetSchemaMapping().Aggregate((e, f) => e + ", " + f))));
+			return new ElementProducer<TN>(cp.QueryText(string.Format("SELECT {1} FROM {0}", cteName,
+				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TN)).GetSchemaMapping().Aggregate((e, f) => e + ", " + f))), query.CurrentIdentifier);
 		}
 
 
@@ -176,7 +177,7 @@ namespace JPB.DataAccess.Query
 		{
 			return new SelectQuery<T>(query.QueryText("SELECT * FROM " + query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)).TableName));
 		}
-		
+
 		/// <summary>
 		///     Adds a between statement followed by a query defined in <paramref name="valueA" /> folowed by an and statement and
 		///     an secound query defined in the <paramref name="valueB" />
@@ -213,7 +214,7 @@ namespace JPB.DataAccess.Query
 			Action<RootQuery> innerText)
 		{
 			query.QueryText(mode.ApplyType);
-			return new ElementProducer<T>(new RootQuery(query).InBracket(innerText));
+			return new ElementProducer<T>(new RootQuery(query).InBracket(innerText), query.CurrentIdentifier);
 		}
 
 		/// <summary>
@@ -257,7 +258,7 @@ namespace JPB.DataAccess.Query
 			var targetPK = accessLayer.GetClassInfo(typeof(TRight)).GetPK(query.ContainerObject.AccessLayer.Config);
 			var targetTable = accessLayer.GetClassInfo(typeof(TRight)).TableName;
 			var sourceTable = accessLayer.GetClassInfo(typeof(TLeft)).TableName;
-			return new ElementProducer<TAggregation>(query.QueryText("{4} JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable, mode));
+			return new ElementProducer<TAggregation>(query.QueryText("{4} JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable, mode), query.CurrentIdentifier);
 		}
 
 		/// <summary>
@@ -294,7 +295,8 @@ namespace JPB.DataAccess.Query
 
 		public static ElementProducer<long> Count<TPoco>(this RootQuery query)
 		{
-			return new ElementProducer<long>(query.QueryText("SELECT COUNT(1) FROM [{0}]", query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName));
+			return new ElementProducer<long>(query.QueryText("SELECT COUNT(1) FROM [{0}]",
+				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName), null);
 		}
 
 		public static ElementProducer<long> CountLong<TPoco>(this IElementProducer<TPoco> query)
@@ -318,31 +320,46 @@ namespace JPB.DataAccess.Query
 			return new ElementProducer<TOut>(new RootQuery(query.ContainerObject.AccessLayer)
 				.WithCte(cteName, (f) =>
 				{
+					var order = false;
 					foreach (var genericQueryPart in query.ContainerObject.Parts)
 					{
-						f.Add(genericQueryPart);
+						var partType = genericQueryPart.Builder != null ? genericQueryPart.Builder.GetType() : null;
+						if (partType != null && order)
+						{
+							if (partType != typeof(OrderByColumn<TPoco>) && partType != typeof(OrderStatementQuery<TPoco>))
+							{
+								order = false;
+							}
+						}
+
+						if (genericQueryPart.Prefix == "ORDER BY")
+						{
+							order = true;
+						}
+						if (!order)
+							f.Add(genericQueryPart);
 					}
-				}).QueryText("SELECT COUNT(1) FROM " + cteName));
+				}).QueryText("SELECT COUNT(1) FROM " + cteName), cteName);
 		}
 
 		public static ConditionalQuery<TPoco> OrderBy<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over), new CondtionBuilderState());
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		public static ConditionalQuery<TPoco> OrderBy<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState());
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over), new CondtionBuilderState());
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState());
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		/// <summary>

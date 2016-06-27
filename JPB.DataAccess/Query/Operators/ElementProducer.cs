@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,9 +15,16 @@ namespace JPB.DataAccess.Query.Operators
 {
 	public class ElementProducer<TPoco> : QueryBuilderX, IElementProducer<TPoco>, IEnumerable<TPoco>
 	{
+		public ElementProducer(IQueryBuilder database, string currentIdentifier) : base(database)
+		{
+			CurrentIdentifier = currentIdentifier;
+			SetCache();
+		}
+
 		public ElementProducer(IQueryBuilder database) : base(database)
 		{
 			SetCache();
+			CurrentIdentifier = string.Format("{0}_{1}", Cache.TableName, base.ContainerObject.GetNextParameterId());
 		}
 
 		private void SetCache()
@@ -46,12 +54,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public IDataPager<TPoco> ForPagedResult()
 		{
-			var command = this.ContainerObject.Compile();
-			var pager = base.ContainerObject.AccessLayer.Database.CreatePager<TPoco>();
-			pager.BaseQuery = command;
-			return pager;
+			return this.ForPagedResult(1, 25);
 		}
-
 
 		/// <summary>
 		///     Executes the Current QueryBuilder by setting the type
@@ -62,7 +66,15 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			var command = this.ContainerObject.Compile();
 			var pager = base.ContainerObject.AccessLayer.Database.CreatePager<TPoco>();
-			pager.BaseQuery = command;
+			if (pager is AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager<TPoco>)
+			{
+				var msPager = pager as AdoWrapper.MsSqlProvider.MsSqlUntypedDataPager<TPoco>;
+				msPager.CommandQuery = this;
+			}
+			else
+			{
+				pager.BaseQuery = command;
+			}
 			pager.PageSize = pageSize;
 			pager.CurrentPage = page;
 			pager.LoadPage(this.ContainerObject.AccessLayer);
@@ -77,7 +89,18 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> Where()
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState());
+			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier));
+		}
+
+		/// <summary>
+		///     Adds a SQL WHERE statement
+		///		does not emit any conditional statement
+		///		should be followed by Column()
+		/// </summary>
+		/// <returns></returns>
+		public ElementProducer<TPoco> Alias(string alias)
+		{
+			return new ElementProducer<TPoco>(this, alias);
 		}
 
 		/// <summary>
@@ -92,6 +115,13 @@ namespace JPB.DataAccess.Query.Operators
 		public IEnumerator<TPoco> GetEnumerator()
 		{
 			return base.GetEnumerator<TPoco>();
+		}
+
+		public string CurrentIdentifier { get; private set; }
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 }

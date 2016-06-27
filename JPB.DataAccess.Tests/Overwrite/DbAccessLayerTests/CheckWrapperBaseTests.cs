@@ -654,7 +654,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsNotNull(testUser);
 			Assert.AreNotEqual(testUser.UserID, default(long));
 
-			var selTestUser = DbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.UserID);
+			var selTestUser = DbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] { testUser.UserID }).FirstOrDefault();
+			Assert.That(selTestUser, Is.Not.Null);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserId, testUser.UserID);
 		}

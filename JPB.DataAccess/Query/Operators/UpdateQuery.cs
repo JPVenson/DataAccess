@@ -7,24 +7,20 @@ namespace JPB.DataAccess.Query.Operators
 {
 	public class UpdateQuery<TPoco> : QueryBuilderX, IUpdateQuery<TPoco>
 	{
-		public UpdateQuery(DbAccessLayer database, Type type) : base(database, type)
+		public UpdateQuery(IQueryBuilder database, string currentIdentifier) : base(database)
 		{
-		}
-
-		public UpdateQuery(IQueryContainer database) : base(database)
-		{
+			CurrentIdentifier = currentIdentifier;
 		}
 
 		public UpdateQuery(IQueryBuilder database) : base(database)
 		{
+			CurrentIdentifier = string.Format("{0}_{1}", this.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).TableName, base.ContainerObject.GetNextParameterId());
 		}
 
-		public UpdateQuery(IQueryBuilder database, Type type) : base(database, type)
+		public UpdateQuery<TPoco> Alias(string alias)
 		{
-		}
-
-		public UpdateQuery(DbAccessLayer database) : base(database)
-		{
+			if (alias == null) throw new ArgumentNullException("alias");
+			return new UpdateQuery<TPoco>(this, alias);
 		}
 
 		/// <summary>
@@ -35,7 +31,9 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> Where()
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState());
+			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier));
 		}
+
+		public string CurrentIdentifier { get; private set; }
 	}
 }

@@ -160,6 +160,41 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
+		public ConditionalEvalQuery<TPoco> EqualsTo<TGPoco>(ElementProducer<TGPoco> value)
+		{
+			switch (State.Operator)
+			{
+				case Operator.Is:
+					if (value == null)
+					{
+						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
+					}
+					return QueryOperatorValue("=", value);
+				case Operator.Not:
+					if (value == null)
+					{
+						return new ConditionalEvalQuery<TPoco>(this.QueryText("NOT NULL"), State);
+					}
+					return QueryOperatorValue("<>", value);
+				default:
+					throw new NotSupportedException("Invalid value");
+			}
+		}
+
+		/// <summary>
+		/// Prepaires an Conditional Query
+		/// </summary>
+		public ConditionalEvalQuery<TPoco> QueryOperatorValue<TGPoco>(string operators, ElementProducer<TGPoco> sub)
+		{
+			var eval = this.QueryText(operators + "(");
+			foreach (var genericQueryPart in sub.ContainerObject.Parts)
+			{
+				eval = eval.Add(genericQueryPart);
+			}
+			eval = this.QueryText(")");
+			return new ConditionalEvalQuery<TPoco>(eval, State);
+		}
+
 
 		/// <summary>
 		/// Prepaires an Conditional Query

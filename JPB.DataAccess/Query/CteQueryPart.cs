@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Query
 		/// <param name="prefix"></param>
 		/// <param name="parameters"></param>
 		public CteQueryPart(string prefix, IEnumerable<IQueryParameter> parameters)
-			: base(prefix, parameters)
+			: base(prefix, parameters, null)
 		{
 		}
 

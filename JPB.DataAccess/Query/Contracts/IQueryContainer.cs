@@ -7,7 +7,7 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Query.Contracts
 {
-	public interface IQueryContainer : ICloneable
+	public interface IQueryContainer
 	{
 		/// <summary>
 		///		Declares the Return type that is awaited
@@ -55,5 +55,11 @@ namespace JPB.DataAccess.Query.Contracts
 		/// </summary>
 		/// <returns></returns>
 		Tuple<string, IEnumerable<IQueryParameter>> CompileFlat();
+
+		/// <summary>
+		/// Clones this Container
+		/// </summary>
+		/// <returns></returns>
+		IQueryContainer Clone();
 	}
 }

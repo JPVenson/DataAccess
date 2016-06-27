@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query
 {
@@ -22,13 +23,17 @@ namespace JPB.DataAccess.Query
 	/// </summary>
 	public class GenericQueryPart : ICloneable
 	{
+		private readonly IQueryBuilder _builder;
+
 		/// <summary>
 		///     Creates a generic query part that can be used for any query
 		/// </summary>
 		/// <param name="prefix"></param>
 		/// <param name="parameters"></param>
-		public GenericQueryPart(string prefix, IEnumerable<IQueryParameter> parameters)
+		/// <param name="builder">The type of building object</param>
+		public GenericQueryPart(string prefix, IEnumerable<IQueryParameter> parameters, IQueryBuilder builder)
 		{
+			_builder = builder;
 			Debug.Assert(prefix != null, "prefix != null");
 			Prefix = prefix;
 			QueryParameters = parameters;
@@ -55,6 +60,11 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		public IEnumerable<IQueryParameter> QueryParameters { get; set; }
 
+		public IQueryBuilder Builder
+		{
+			get { return _builder; }
+		}
+
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
@@ -67,11 +77,12 @@ namespace JPB.DataAccess.Query
 		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and parameter
 		/// </summary>
 		/// <param name="command"></param>
+		/// <param name="builder"></param>
 		/// <returns></returns>
-		public static GenericQueryPart FromCommand(IDbCommand command)
+		public static GenericQueryPart FromCommand(IDbCommand command, IQueryElement builder)
 		{
 			return new GenericQueryPart(command.CommandText,
-				command.Parameters.Cast<IDataParameter>().Select(s => new QueryParameter(s.ParameterName, s.Value)));
+				command.Parameters.Cast<IDataParameter>().Select(s => new QueryParameter(s.ParameterName, s.Value)), builder);
 		}
 
 		/// <summary>
@@ -95,6 +106,7 @@ namespace JPB.DataAccess.Query
 				.AppendInterlacedLine("new GenericQueryPart {")
 				.Up()
 				.AppendInterlacedLine("QueryCommand = \"{0}\",", Prefix)
+				.AppendInterlacedLine("Builder = \"{0}\",", Builder != null ? Builder.GetType().Name : "{NULL}")
 				.AppendInterlaced("Parameter[{0}] = ", QueryParameters.Count());
 			if (QueryParameters.Any())
 			{

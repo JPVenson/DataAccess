@@ -24,6 +24,17 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		}
 
 		/// <summary>
+		///     Adds a SQL WHERE statement
+		///		does not emit any conditional statement
+		///		should be followed by Column()
+		/// </summary>
+		/// <returns></returns>
+		public ConditionalQuery<TPoco> Alias(string alias)
+		{
+			return new ConditionalQuery<TPoco>(this, State.ToAlias(alias));
+		}
+
+		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
@@ -47,7 +58,14 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			var member = columnName.GetPropertyInfoFromLabda();
 			var propName = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
+			if (CurrentIdentifier != null)
+				return Column(CurrentIdentifier + "." + propName.DbName);
 			return Column(propName.DbName);
+		}
+
+		public string CurrentIdentifier
+		{
+			get { return this.State.Identifier; }
 		}
 	}
 }

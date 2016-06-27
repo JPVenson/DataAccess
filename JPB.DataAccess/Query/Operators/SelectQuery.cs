@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Selection;
 
 namespace JPB.DataAccess.Query.Operators
 {
@@ -12,6 +13,14 @@ namespace JPB.DataAccess.Query.Operators
 	{
 		public SelectQuery(IQueryBuilder database) : base(database)
 		{
+			if (CurrentIdentifier != null)
+				this.QueryText("AS " + CurrentIdentifier);
+		}
+
+		public SelectQuery(IQueryBuilder database, string ident) : base(database, ident)
+		{
+			if (CurrentIdentifier != null)
+				this.QueryText("AS " + CurrentIdentifier);
 		}
 
 		/// <summary>

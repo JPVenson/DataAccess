@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DebuggerHelper;
@@ -45,13 +46,13 @@ namespace JPB.DataAccess.Query
 			AccessLayer = pre.AccessLayer;
 			ForType = pre.ForType;
 			AutoParameterCounter = pre.AutoParameterCounter;
-			Parts = pre.Parts;
+			Parts = pre.Parts.ToList();
 			EnumerationMode = pre.EnumerationMode;
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 		}
 
-		public int AutoParameterCounter { get; set; }
-		public List<GenericQueryPart> Parts { get; set; }
+		public int AutoParameterCounter { get; private set; }
+		public List<GenericQueryPart> Parts { get; private set; }
 		public EnumerationMode EnumerationMode { get; set; }
 		public bool AllowParamterRenaming { get; set; }
 
@@ -193,7 +194,12 @@ namespace JPB.DataAccess.Query
 			return Render();
 		}
 
-		public object Clone()
+		//public object Clone()
+		//{
+		//	return new InternalContainerContainer(this);
+		//}
+
+		public IQueryContainer Clone()
 		{
 			return new InternalContainerContainer(this);
 		}

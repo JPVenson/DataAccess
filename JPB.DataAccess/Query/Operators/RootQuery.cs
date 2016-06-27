@@ -45,7 +45,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public SelectQuery<T> Select<T>(params object[] argumentsForFactory)
 		{
-			return new DatabaseObjectSelector(this).Table<T>();
+			return new DatabaseObjectSelector(this).Table<T>(argumentsForFactory);
 		}
 
 		/// <summary>

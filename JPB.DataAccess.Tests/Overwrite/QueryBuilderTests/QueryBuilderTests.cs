@@ -134,7 +134,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
 			Assert.That(basePager.MaxPage, Is.EqualTo(maxItems / basePager.PageSize));
 
-			var queryPager = DbAccessLayer.Query().Select<Users>().ForPagedResult();
+			var queryPager = DbAccessLayer.Query().Select<Users>().Order().By(f => f.UserID).ForPagedResult();
 			queryPager.LoadPage(DbAccessLayer);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
@@ -156,7 +156,12 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
 			Assert.That(basePager.MaxPage, Is.EqualTo(Math.Ceiling(25F / basePager.PageSize)));
 
-			var queryPager = DbAccessLayer.Query().Select<Users>().Where().Column(f => f.UserID).IsQueryOperatorValue("< 25").ForPagedResult();
+			var queryPager = DbAccessLayer.Query().Select<Users>()
+				.Where()
+				.Column(f => f.UserID)
+				.IsQueryOperatorValue("< 25")
+				.Order().By(f => f.UserID)
+				.ForPagedResult();
 			queryPager.LoadPage(DbAccessLayer);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
@@ -225,6 +230,24 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			}
 		}
 
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void CheckFactory()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(250, DbAccessLayer);
+			Assert.That(() => DbAccessLayer.Query().Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(), Is.Not.Empty);
 
+			var testInsertName = Guid.NewGuid().ToString();
+			Users_PK_IDFM_FUNCSELECTFACWITHPARAM testUser = null;
+			Assert.That(() => testUser = DbAccessLayer.InsertWithSelect(new Users_PK_IDFM_FUNCSELECTFACWITHPARAM { UserName = testInsertName }),
+				Is.Not.Null
+				.And.Property("UserId").Not.EqualTo(0));
+
+			var selTestUser = DbAccessLayer.Query().Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] { testUser.UserId }).FirstOrDefault();
+			Assert.That(selTestUser, Is.Not.Null);
+			Assert.That(selTestUser.UserName, Is.EqualTo(testUser.UserName));
+			Assert.That(selTestUser.UserId, Is.EqualTo(testUser.UserId));
+		}
 	}
 }

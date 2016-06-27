@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
@@ -472,7 +473,7 @@ namespace JPB.DataAccess.Manager
 		{
 			return CreateSelect(GetClassInfo(type));
 		}
-		
+
 		/// <summary>
 		///     Creates a Plain Select statement by using
 		///     <paramref name="type" />
@@ -480,20 +481,31 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public static string CreateSelect(DbClassInfoCache classType, string prefix = null)
 		{
+			return CreateSelectByColumns(classType, classType.CreatePropertyCsv(
+				classType
+					.Propertys
+					.Where(f => f.Value.ForginKeyAttribute != null ||
+					            (
+						            f.Value.FromXmlAttribute != null
+						            && f.Value.FromXmlAttribute.Attribute.LoadStrategy == LoadStrategy.NotIncludeInSelect
+						            ))
+					.Select(f => f.Key)
+					.ToArray()), prefix);
+		}
+
+
+		/// <summary>
+		///     Creates a Plain Select statement by using
+		///     <paramref name="type" />
+		/// </summary>
+		/// <returns></returns>
+		public static string CreateSelectByColumns(DbClassInfoCache classType, string columns, string prefix = null)
+		{
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
 			if (prefix != null)
 				sb.Append(prefix + " ");
-			sb.Append(classType.CreatePropertyCsv(
-				classType
-					.Propertys
-					.Where(f => f.Value.ForginKeyAttribute != null ||
-						(
-							f.Value.FromXmlAttribute != null
-							&& f.Value.FromXmlAttribute.Attribute.LoadStrategy == LoadStrategy.NotIncludeInSelect
-						))
-					.Select(f => f.Key)
-					.ToArray()));
+			sb.Append(columns);
 			sb.Append(" FROM ");
 			sb.Append(classType.TableName);
 			return sb.ToString();

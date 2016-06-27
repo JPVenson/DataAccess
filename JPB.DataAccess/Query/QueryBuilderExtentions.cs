@@ -48,7 +48,7 @@ namespace JPB.DataAccess.Query
 		public static E QueryQ<E>(this E builder, string query, params IQueryParameter[] parameters)
 			where E : IQueryBuilder
 		{
-			return builder.Add(new GenericQueryPart(query, parameters));
+			return builder.Add(new GenericQueryPart(query, parameters, builder));
 		}
 
 		/// <summary>
@@ -61,7 +61,7 @@ namespace JPB.DataAccess.Query
 			if (paramerters != null)
 			{
 				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-				return builder.Add(new GenericQueryPart(query, parameters));
+				return builder.Add(new GenericQueryPart(query, parameters, builder));
 			}
 
 			return builder.Add(new GenericQueryPart(query));
@@ -84,7 +84,7 @@ namespace JPB.DataAccess.Query
 		public static TQuery QueryCommand<TQuery>(this TQuery builder, IDbCommand command)
 			where TQuery: IQueryBuilder
 		{
-			return builder.Add(GenericQueryPart.FromCommand(command));
+			return builder.Add(GenericQueryPart.FromCommand(command, null));
 		}
 		
 		/// <summary>

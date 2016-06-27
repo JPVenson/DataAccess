@@ -64,7 +64,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public QueryBuilderX Clone()
 		{
-			return new QueryBuilderX(this.ContainerObject);
+			return new QueryBuilderX(this.ContainerObject.Clone());
 		}
 
 		public QueryBuilderX Append(QueryBuilderX right)
@@ -88,18 +88,18 @@ namespace JPB.DataAccess.Query
 			return new QueryEnumeratorEx<E>(this);
 		}
 
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerator GetEnumerator()
-		{
-			if (ContainerObject.ForType == null)
-				throw new ArgumentNullException("No type Supplied", new Exception());
+		///// <summary>
+		///// </summary>
+		///// <returns></returns>
+		//public IEnumerator GetEnumerator()
+		//{
+		//	if (ContainerObject.ForType == null)
+		//		throw new ArgumentNullException("No type Supplied", new Exception());
 
-			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
-				return new QueryEagerEnumerator(ContainerObject, ContainerObject.ForType);
-			return new QueryLazyEnumerator(ContainerObject, ContainerObject.ForType);
-		}
+		//	if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+		//		return new QueryEagerEnumerator(ContainerObject, ContainerObject.ForType);
+		//	return new QueryLazyEnumerator(ContainerObject, ContainerObject.ForType);
+		//}
 
 		/// <summary>
 		/// </summary>
