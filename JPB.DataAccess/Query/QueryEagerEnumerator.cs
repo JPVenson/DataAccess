@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -80,6 +80,7 @@ namespace JPB.DataAccess.Query
 			_task = new Task(() =>
 			{
 				var query = _queryContainer.Compile();
+				_queryContainer.AccessLayer.RaiseSelect(query);
 				_enumerateDataRecords = _queryContainer.AccessLayer.EnumerateDataRecords(query);
 			});
 			_task.Start();

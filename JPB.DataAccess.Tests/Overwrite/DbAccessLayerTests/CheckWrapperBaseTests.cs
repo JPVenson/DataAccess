@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.Query;
@@ -10,7 +11,6 @@ using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Overwrite;
 using NUnit.Framework;
-using NUnit.Framework.Compatibility;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 #if SqLite
@@ -36,10 +36,30 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	{
 		private DbAccessLayer DbAccess;
 
-		[OneTimeSetUp]
+		[SetUp]
 		public void Init()
 		{
 			DbAccess = new Manager().GetWrapper();
+			DbAccess.RaiseEvents = true;
+			DbAccess.OnSelect += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
+			};
+
+			DbAccess.OnDelete += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
+			};
+
+			DbAccess.OnInsert += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
+			};
+
+			DbAccess.OnUpdate += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"Update: \r\n{0}", eventArg.QueryDebugger);
+			};
 		}
 
 		[SetUp]
@@ -136,7 +156,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var insGuid = Guid.NewGuid().ToString();
 
 			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-			
+
 			DbConfig.Clear();
 
 			DbAccess.Config.SetConfig<ConfigLessUser>(f =>
@@ -429,7 +449,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				{
 					conf.SetPropertyAttribute(s => s.UserName, new IgnoreReflectionAttribute());
 				});
-			
+
 			DbAccess.Insert(new Users());
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
 			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
@@ -583,6 +603,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Refresh()
 		{
 			InsertTest();
+
 			var singleEntity = DbAccess
 				.Query()
 				.Top<Users>(1)

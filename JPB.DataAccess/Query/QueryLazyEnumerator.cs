@@ -1,5 +1,5 @@
 /*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -31,7 +31,10 @@ namespace JPB.DataAccess.Query
 			_type = queryContainer.AccessLayer.GetClassInfo(type);
 			_accessLayer = new DbAccessLayer(queryContainer.AccessLayer.Database);
 			_accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
-			_executeReader = queryContainer.Compile().ExecuteReader();
+			var command = queryContainer.Compile();
+			queryContainer.AccessLayer.RaiseSelect(command);
+
+			_executeReader = command.ExecuteReader();
 		}
 
 		public void Dispose()

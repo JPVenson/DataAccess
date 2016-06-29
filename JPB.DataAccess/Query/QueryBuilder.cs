@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -48,16 +48,6 @@ namespace JPB.DataAccess.Query
 			this.ContainerObject = new InternalContainerContainer(database);
 		}
 
-
-		/// <summary>
-		/// Wraps the current QueryBuilder into a new Form by setting the Current query type
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public IQueryBuilder<T> ChangeType<T>() where T : IQueryElement
-		{
-			return new QueryBuilder<T>(ContainerObject);
-		}
 
 		/// <summary>
 		/// </summary>
@@ -116,6 +106,7 @@ namespace JPB.DataAccess.Query
 	/// <summary>
 	///     Provides functions that can build SQL Querys
 	/// </summary>
+	[Obsolete("This type of Query builder is obsolete. Use the QueryBuilderX instadt", true)]
 	public class QueryBuilder<Stack> : IQueryBuilder<Stack>
 		where Stack : IQueryElement
 	{
@@ -148,7 +139,7 @@ namespace JPB.DataAccess.Query
 		{
 			this.ContainerObject = new InternalContainerContainer(database);
 		}
-		
+
 
 		/// <summary>
 		/// Wraps the current QueryBuilder into a new Form by setting the Current query type
@@ -159,7 +150,7 @@ namespace JPB.DataAccess.Query
 		{
 			return new QueryBuilder<T>(ContainerObject);
 		}
-		
+
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
@@ -167,7 +158,7 @@ namespace JPB.DataAccess.Query
 		{
 			return new QueryBuilder<Stack>(this.ContainerObject);
 		}
-		
+
 		public IQueryContainer ContainerObject { get; private set; }
 
 		/// <summary>
@@ -205,6 +196,7 @@ namespace JPB.DataAccess.Query
 
 	/// <summary>
 	/// </summary>
+	[Obsolete("This type of Query builder is obsolete. Use the QueryBuilderX instadt", true)]
 	public class QueryBuilder<T, Stack> : QueryBuilder<Stack>
 		where Stack : IQueryElement
 	{

@@ -1,9 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query
 {
+	[Obsolete("This type of Query Enumerator is obsolete. Use the QueryEnumeratorEx instadt", true)]
 	public class QueryEnumerator<TE> : IEnumerable
 		where TE : IQueryElement
 	{
@@ -20,6 +22,7 @@ namespace JPB.DataAccess.Query
 		}
 	}
 
+	[Obsolete("This type of Query Enumerator is obsolete. Use the QueryEnumeratorEx instadt", true)]
 	public class QueryEnumerator<TE, T> : IEnumerable<T>
 		where TE : IQueryElement
 	{

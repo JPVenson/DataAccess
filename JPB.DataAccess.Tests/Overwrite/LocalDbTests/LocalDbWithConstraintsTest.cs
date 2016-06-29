@@ -51,9 +51,26 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		}
 
 		[Test]
-		public void AddCheckConstraint()
+		public void AddObjectCheckConstraint()
 		{
 			var images = TestInit(new[]{new LocalDbCheckConstraint<object>("TestConstraint", s =>
+			{
+				var item = s as Image;
+				return item.IdBook > 0 && item.IdBook < 10;
+			})}, null, null);
+
+			var image = new Image();
+			image.IdBook = 20;
+			Assert.That(() => images.Add(image), Throws.Exception.TypeOf<ConstraintException>());
+			image.IdBook = 9;
+			Assert.That(() => images.Add(image), Throws.Nothing);
+			Assert.That(images.Count, Is.EqualTo(1));
+		}
+
+		[Test]
+		public void AddCheckConstraint()
+		{
+			var images = TestInit(new[]{new LocalDbCheckConstraint<Image>("TestConstraint", s =>
 			{
 				var item = s as Image;
 				return item.IdBook > 0 && item.IdBook < 10;

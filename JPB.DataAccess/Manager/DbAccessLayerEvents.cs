@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -28,41 +28,41 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Should raise Instance bound Events
 		/// </summary>
-		[Obsolete]
 		public bool RaiseEvents { get; set; }
 
 		/// <summary>
 		///     Should raise events (Performace critical!)
 		/// </summary>
+		[Obsolete]
 		public static bool RaiseStaticEvents { get; set; }
 
 		/// <summary>
 		///     Will be triggerd when any DbAccessLayer tries to handle a Delete Statement.
-		///     Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will only be triggerd when setting RaiseEvents to true
 		/// </summary>
 		public event DatabaseActionHandler OnDelete;
 
 		/// <summary>
 		///     Will be triggerd when any DbAccessLayer tries to handle a Select Statement.
-		///     Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will only be triggerd when setting RaiseEvents to true
 		/// </summary>
 		public event DatabaseActionHandler OnSelect;
 
 		/// <summary>
 		///     Will be triggerd when any DbAccessLayer tries to handle a Update Statement.
-		///     Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will only be triggerd when setting RaiseEvents to true
 		/// </summary>
 		public event DatabaseActionHandler OnUpdate;
 
 		/// <summary>
 		///     Will be triggerd when any DbAccessLayer tries to handle a Insert Statement.
-		///     Will only be triggerd when setting RaiseStaticEvents to true
+		///     Will only be triggerd when setting RaiseEvents to true
 		/// </summary>
 		public event DatabaseActionHandler OnInsert;
 
 		internal void RaiseDelete(object sender, IDbCommand query)
 		{
-			if (!RaiseStaticEvents)
+			if (!RaiseEvents)
 				return;
 
 			var handler = OnDelete;
@@ -72,7 +72,7 @@ namespace JPB.DataAccess.Manager
 
 		internal void RaiseSelect(IDbCommand query)
 		{
-			if (!RaiseStaticEvents)
+			if (!RaiseEvents)
 				return;
 			var handler = OnSelect;
 			if (handler != null)
@@ -81,7 +81,7 @@ namespace JPB.DataAccess.Manager
 
 		internal void RaiseUpdate(object sender, IDbCommand query)
 		{
-			if (!RaiseStaticEvents)
+			if (!RaiseEvents)
 				return;
 
 			var handler = OnUpdate;
@@ -91,7 +91,7 @@ namespace JPB.DataAccess.Manager
 
 		internal void RaiseInsert(object sender, IDbCommand query)
 		{
-			if (!RaiseStaticEvents)
+			if (!RaiseEvents)
 				return;
 
 			var handler = OnInsert;

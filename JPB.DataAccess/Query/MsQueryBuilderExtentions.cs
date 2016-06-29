@@ -1,5 +1,5 @@
 /*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -52,7 +52,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///		Declares a new Variable of the Given SQL Type by using its length 
+		///		Declares a new Variable of the Given SQL Type by using its length
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -281,7 +281,9 @@ namespace JPB.DataAccess.Query
 				case DbAccessType.MsSql:
 					return new SelectQuery<T>(query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "TOP " + top)));
 				case DbAccessType.SqLite:
-					return new SelectQuery<T>(query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T))) + " LIMIT {0} ", top));
+					var selectQuery = new SelectQuery<T>(
+						query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)))));
+					return selectQuery.QueryText(" LIMIT {0} ", top);
 				default:
 					throw new NotSupportedException("For the Selected DB type is no Top implementations Available");
 			}

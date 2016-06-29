@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -43,7 +43,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 			SyncHelper = action => action();
 		}
-		
+
 		public bool Cache
 		{
 			get { return _cache; }
@@ -122,9 +122,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			{
 				TotalItemCount = new ElementProducer<T>(this.CommandQuery.Clone()).CountInt().FirstOrDefault();
 				MaxPage = (long)Math.Ceiling((decimal)TotalItemCount / PageSize);
-				
+
 				RaiseNewPageLoading();
-				var elements = new ElementProducer<T>(this.CommandQuery).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
+				var elements = new ElementProducer<T>(this.CommandQuery.Clone()).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
 				{
 					PagedRows = (CurrentPage - 1) * PageSize,
 					PageSize
@@ -313,7 +313,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 			//Target 11.0.2100.60 or higher
 			//      Major Version
-			//      Minor Version 
+			//      Minor Version
 			//      Build Number
 			//      Revision
 

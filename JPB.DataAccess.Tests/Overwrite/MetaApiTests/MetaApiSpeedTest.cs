@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,6 @@ using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
 using NUnit.Framework;
-using NUnit.Framework.Compatibility;
 
 namespace JPB.DataAccess.Tests.MetaApiTests
 #if MsSql

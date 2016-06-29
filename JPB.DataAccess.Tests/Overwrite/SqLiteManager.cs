@@ -26,12 +26,13 @@ namespace JPB.DataAccess.Tests
 				expectWrapper.Database.CloseAllConnection();
 			}
 
-			string dbname = "testDB";
-			var sqlLiteFileName = dbname + ".sqlite";
-			if (File.Exists(sqlLiteFileName))
-				File.Delete(sqlLiteFileName);
-			File.Create(sqlLiteFileName).Close();
-			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, sqlLiteFileName));
+			//string dbname = "testDB";
+			//var sqlLiteFileName = dbname + ".sqlite";
+
+			var tempPath = Path.GetTempFileName();
+
+
+			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, tempPath));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));

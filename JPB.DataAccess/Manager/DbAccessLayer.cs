@@ -1,11 +1,12 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
 http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,7 +23,6 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Logger;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Operators;
 
@@ -31,7 +31,8 @@ namespace JPB.DataAccess.Manager
 	/// <summary>
 	///     Contanins some Helper mehtods for CRUD operation
 	/// </summary>
-	[DebuggerDisplay("DB={DatabaseStrategy}, QueryDebug={Database.LastExecutedQuery ? Database.LastExecutedQuery.DebuggerQuery}")]
+	[DebuggerDisplay(
+		"DB={DatabaseStrategy}, QueryDebug={Database.LastExecutedQuery ? Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
 		[DebuggerStepThrough]
 #endif
@@ -60,10 +61,11 @@ namespace JPB.DataAccess.Manager
 		public static PreDefinedProviderCollection ProviderCollection { get; private set; }
 
 		/// <summary>
-		/// Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the instance. This field overrides 
+		///     Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the
+		///     instance. This field overrides
 		/// </summary>
-		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>")]
-		public object DefaultAssertionObject;
+		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>")] public object
+			DefaultAssertionObject;
 
 		/// <summary>
 		///     if set the created reader of an read operation will be completely stored then the open connection will be closed
@@ -72,7 +74,8 @@ namespace JPB.DataAccess.Manager
 		public bool LoadCompleteResultBeforeMapping { get; set; }
 
 		/// <summary>
-		/// When specifying an Long as DefaultAssertionObject the PocoPkComparer will use instedt the value casted as int when the property is int instedt of Long and vice versa (more Rewrite operations may follow)
+		///     When specifying an Long as DefaultAssertionObject the PocoPkComparer will use instedt the value casted as int when
+		///     the property is int instedt of Long and vice versa (more Rewrite operations may follow)
 		/// </summary>
 		public bool DefaultAssertionObjectRewrite { get; set; }
 
@@ -82,7 +85,8 @@ namespace JPB.DataAccess.Manager
 		public bool Debugger { get; set; }
 
 		/// <summary>
-		///		If set to True a strict check for the Targetdatabase Property on each Factory or provider specific method is done otherwise this Check is skiped 
+		///     If set to True a strict check for the Targetdatabase Property on each Factory or provider specific method is done
+		///     otherwise this Check is skiped
 		/// </summary>
 		public bool IsMultiProviderEnvironment { get; set; }
 
@@ -97,7 +101,7 @@ namespace JPB.DataAccess.Manager
 		public DbAccessType DbAccessType { get; private set; }
 
 		/// <summary>
-		/// The default path for loading external Providers via DbAccessType
+		///     The default path for loading external Providers via DbAccessType
 		/// </summary>
 		public string DefaultLookupPath { get; private set; }
 
@@ -133,18 +137,13 @@ namespace JPB.DataAccess.Manager
 			{
 				_config = config;
 			}
-			this.DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
-			this._logger = logger;
-			if (logger == null)
-			{
-				_logger = new DefaultLogger();
-			}
-
-			this.Debugger = false;
-			this.LoadCompleteResultBeforeMapping = true;
-			this.CheckFactoryArguments = true;
-			this.SelectDbAccessLayer();
-			this.UpdateDbAccessLayer();
+			DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
+			_logger = logger;
+			Debugger = false;
+			LoadCompleteResultBeforeMapping = true;
+			CheckFactoryArguments = true;
+			SelectDbAccessLayer();
+			UpdateDbAccessLayer();
 		}
 
 		/// <summary>
@@ -155,7 +154,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (dbAccessType == DbAccessType.Unknown)
 			{
-				throw new InvalidEnumArgumentException("dbAccessType", (int)DbAccessType.Unknown, typeof(DbAccessType));
+				throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof(DbAccessType));
 			}
 
 			DbAccessType = dbAccessType;
@@ -170,7 +169,8 @@ namespace JPB.DataAccess.Manager
 		///     Create a DbAccessLAyer with exernal Strategy
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection, ILogger logger = null, DbConfig config = null)
+		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection, ILogger logger = null,
+			DbConfig config = null)
 			: this(logger, config)
 		{
 			if (string.IsNullOrEmpty(fullTypeNameToIDatabaseStrategy))
@@ -178,7 +178,7 @@ namespace JPB.DataAccess.Manager
 
 			ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
-			var database = GenerateStrategy(fullTypeNameToIDatabaseStrategy, String.Concat((object)connection));
+			var database = GenerateStrategy(fullTypeNameToIDatabaseStrategy, String.Concat((object) connection));
 
 			Database = new DefaultDatabaseAccess();
 			Database.Attach(database);
@@ -194,7 +194,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (database == null)
 				throw new ArgumentNullException("database");
-			this.DbAccessType = database.SourceDatabase;
+			DbAccessType = database.SourceDatabase;
 			//ResolveDbType(database.GetType().FullName);
 
 			Database = new DefaultDatabaseAccess();
@@ -218,7 +218,7 @@ namespace JPB.DataAccess.Manager
 
 		public DbClassInfoCache GetClassInfo(Type type)
 		{
-			return this.Config.GetOrCreateClassInfoCache(type);
+			return Config.GetOrCreateClassInfoCache(type);
 		}
 
 		internal IDatabaseStrategy GenerateStrategy(string fullValidIdentifyer, string connection)
@@ -271,7 +271,7 @@ namespace JPB.DataAccess.Manager
 					.FirstOrDefault(s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
 			if (ctOfType != null)
 			{
-				return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
+				return ctOfType.Invoke(new object[] {connection}) as IDatabaseStrategy;
 			}
 			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
 			if (instanceOfType == null)
@@ -285,7 +285,7 @@ namespace JPB.DataAccess.Manager
 		{
 			// ReSharper disable once PossibleInvalidOperationException
 			var firstOrDefault =
-				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?)s)
+				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
 					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
 			if (firstOrDefault == null)
 			{
@@ -326,10 +326,10 @@ namespace JPB.DataAccess.Manager
 			var command = DbAccessLayerHelper.CreateCommand(Database, query);
 
 			if (values != null)
-				foreach (IQueryParameter item in values)
+				foreach (var item in values)
 					command.Parameters.AddWithValue(item.Name, item.Value, Database);
 
-			return this.ExecuteGenericCommand(command);
+			return ExecuteGenericCommand(command);
 		}
 
 		/// <summary>
@@ -340,12 +340,12 @@ namespace JPB.DataAccess.Manager
 		{
 			if (paramenter is IEnumerable<IQueryParameter>)
 			{
-				var parm = (IEnumerable<IQueryParameter>)paramenter;
+				var parm = (IEnumerable<IQueryParameter>) paramenter;
 				return ExecuteGenericCommand(query, parm);
 			}
 
 			return ExecuteGenericCommand(query,
-				(IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
+				(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
 		}
 
 		/// <summary>
@@ -403,7 +403,7 @@ namespace JPB.DataAccess.Manager
 			Dictionary<int, DbPropertyInfoCache> mapping)
 		{
 			bool created;
-			object source = CreateInstance(type, reader, out created);
+			var source = CreateInstance(type, reader, out created);
 			if (created)
 				return source;
 
@@ -416,6 +416,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates an instance based on a Ctor injection or Reflection loading
+		///		or when using a MsCoreLib type direct enumeration
 		/// </summary>
 		/// <returns></returns>
 		public static object CreateInstance(DbClassInfoCache classInfo,
@@ -436,14 +437,14 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var objectFactorys = classInfo.Constructors.Where(s =>
-											s.Arguments.Count == 1
-											&& s.Arguments.First().Type == typeof(IDataRecord))
-											.ToArray();
+				s.Arguments.Count == 1
+				&& s.Arguments.First().Type == typeof(IDataRecord))
+				.ToArray();
 
 			var constructor = objectFactorys.FirstOrDefault(s =>
-			s.Attributes.Any(f =>
-				f.Attribute is ObjectFactoryMethodAttribute
-				&& (!accessType.HasValue || ((ObjectFactoryMethodAttribute)f.Attribute).TargetDatabase == accessType.Value)));
+				s.Attributes.Any(f =>
+					f.Attribute is ObjectFactoryMethodAttribute
+					&& (!accessType.HasValue || ((ObjectFactoryMethodAttribute) f.Attribute).TargetDatabase == accessType.Value)));
 
 			if (constructor == null)
 				constructor = objectFactorys.FirstOrDefault();
@@ -455,7 +456,7 @@ namespace JPB.DataAccess.Manager
 				if (constructor.Arguments.Count == 1 && constructor.Arguments.First().Type == typeof(IDataRecord))
 				{
 					classInfo.FullFactory = true;
-					classInfo.Factory = s => constructor.Invoke(new object[] { s });
+					classInfo.Factory = s => constructor.Invoke(new object[] {s});
 					return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 				}
 			}
@@ -478,10 +479,10 @@ namespace JPB.DataAccess.Manager
 							if (returnType != null && returnType.ParameterType == classInfo.Type)
 							{
 								if (factory.Arguments.Count == 1 &&
-									factory.Arguments.First().Type == typeof(IDataRecord))
+								    factory.Arguments.First().Type == typeof(IDataRecord))
 								{
 									classInfo.FullFactory = true;
-									classInfo.Factory = s => factory.Invoke(new object[] { reader });
+									classInfo.Factory = s => factory.Invoke(new object[] {reader});
 									return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 								}
 							}
@@ -494,13 +495,15 @@ namespace JPB.DataAccess.Manager
 
 			if (emptyCtor == null)
 			{
-				throw new NotSupportedException("You have to define ether an ObjectFactoryMethod as static or constructor with and IDataReader or an constructor without any arguments");
+				throw new NotSupportedException(
+					"You have to define ether an ObjectFactoryMethod as static or constructor with and IDataReader or an constructor without any arguments");
 			}
 
 			classInfo.FullFactory = false;
 			classInfo.Factory = s => emptyCtor.Invoke(new object[0]);
 			return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 		}
+
 		/// <summary>
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
@@ -583,27 +586,29 @@ namespace JPB.DataAccess.Manager
 
 							var genericArguments =
 								config.GetOrCreateClassInfoCache(property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault());
-							List<object> enumerableOfItems = xmlDataRecords.Select(s => DbAccessLayerHelper.SetPropertysViaReflection(genericArguments, s, dbAccessType, config)).ToList();
+							var enumerableOfItems =
+								xmlDataRecords.Select(
+									s => DbAccessLayerHelper.SetPropertysViaReflection(genericArguments, s, dbAccessType, config)).ToList();
 							object castedList;
 
 							if (genericArguments.Type.IsClass && genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
 							{
 								var caster =
-									typeof(DbCollection<>).MakeGenericType(genericArguments.Type).GetConstructor(new[] { typeof(IEnumerable) });
+									typeof(DbCollection<>).MakeGenericType(genericArguments.Type).GetConstructor(new[] {typeof(IEnumerable)});
 
 								Debug.Assert(caster != null, "caster != null");
 
-								castedList = caster.Invoke(new object[] { enumerableOfItems });
+								castedList = caster.Invoke(new object[] {enumerableOfItems});
 							}
 							else
 							{
 								var caster =
 									typeof(NonObservableDbCollection<>).MakeGenericType(genericArguments.Type)
-										.GetConstructor(new[] { typeof(IEnumerable) });
+										.GetConstructor(new[] {typeof(IEnumerable)});
 
 								Debug.Assert(caster != null, "caster != null");
 
-								castedList = caster.Invoke(new object[] { enumerableOfItems });
+								castedList = caster.Invoke(new object[] {enumerableOfItems});
 							}
 
 							property.Setter.Invoke(instance, castedList);
@@ -617,13 +622,14 @@ namespace JPB.DataAccess.Manager
 							var xmlDataRecord = XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType, true, config);
 
 							//the t
-							object xmlSerilizedProperty = DbAccessLayerHelper.SetPropertysViaReflection(classInfo, xmlDataRecord, dbAccessType, config);
+							var xmlSerilizedProperty = DbAccessLayerHelper.SetPropertysViaReflection(classInfo, xmlDataRecord, dbAccessType,
+								config);
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
 						}
 					}
 					else if (value is DBNull || value == null)
 					{
-						property.Setter.Invoke(instance, new object[] { null });
+						property.Setter.Invoke(instance, new object[] {null});
 					}
 					else
 					{
@@ -656,7 +662,7 @@ namespace JPB.DataAccess.Manager
 								s => s.Value.Attributes.Any(e => e.Attribute is LoadNotImplimentedDynamicAttribute));
 						if (maybeFallbackProperty.Value != null)
 						{
-							instanceOfFallbackList = (Dictionary<string, object>)maybeFallbackProperty.Value.Getter.Invoke(instance);
+							instanceOfFallbackList = (Dictionary<string, object>) maybeFallbackProperty.Value.Getter.Invoke(instance);
 							if (instanceOfFallbackList == null)
 							{
 								instanceOfFallbackList = new Dictionary<string, object>();

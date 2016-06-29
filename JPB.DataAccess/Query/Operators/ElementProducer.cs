@@ -47,15 +47,6 @@ namespace JPB.DataAccess.Query.Operators
 			return new QueryEnumeratorEx<TPoco>(this);
 		}
 
-		/// <summary>
-		///     Executes the Current QueryBuilder by setting the type
-		/// </summary>
-		/// <typeparam name="E"></typeparam>
-		/// <returns></returns>
-		public IDataPager<TPoco> ForPagedResult()
-		{
-			return this.ForPagedResult(1, 25);
-		}
 
 		/// <summary>
 		///     Executes the Current QueryBuilder by setting the type

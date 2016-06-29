@@ -15,12 +15,5 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <typeparam name="E"></typeparam>
 		/// <returns></returns>
 		IEnumerable<E> ForResult<E>();
-
-		/// <summary>
-		/// Wraps this query type to an new QueryElement
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		IQueryBuilder<T> ChangeType<T>() where T : IQueryElement;
 	}
 }

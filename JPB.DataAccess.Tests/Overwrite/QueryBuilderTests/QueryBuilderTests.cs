@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 	{
 		public QueryBuilderTests()
 		{
-			
+
 		}
 
 		[SetUp]
@@ -109,7 +109,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 					ImageMeta.TableName, ImageMeta.ForgeinKeyName,
 					id))[0];
 				}
-				
+
 				Assert.That(countOfImages, Is.EqualTo(2));
 				var deSelect = DbAccessLayer.SelectNative<Image>(string.Format("{2} AS b WHERE b.{0} = {1}", ImageMeta.ForgeinKeyName, id, ImageMeta.SelectStatement));
 				Assert.That(deSelect, Is.Not.Empty);
@@ -134,7 +134,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
 			Assert.That(basePager.MaxPage, Is.EqualTo(maxItems / basePager.PageSize));
 
-			var queryPager = DbAccessLayer.Query().Select<Users>().Order().By(f => f.UserID).ForPagedResult();
+			var queryPager = DbAccessLayer.Query().Select<Users>().Order().By(f => f.UserID).ForPagedResult(1, basePager.PageSize);
 			queryPager.LoadPage(DbAccessLayer);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
@@ -161,7 +161,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				.Column(f => f.UserID)
 				.IsQueryOperatorValue("< 25")
 				.Order().By(f => f.UserID)
-				.ForPagedResult();
+				.ForPagedResult(1, basePager.PageSize);
 			queryPager.LoadPage(DbAccessLayer);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
@@ -215,8 +215,8 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			}
 
 			var elementProducer = DbAccessLayer.Query().Select<Users>().Where().Column(f => f.UserID).Is().In(elementsToRead.ToArray()).ToArray();
-			var directQuery = DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement 
-				+ string.Format(" WHERE User_ID IN ({0})", 
+			var directQuery = DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement
+				+ string.Format(" WHERE User_ID IN ({0})",
 				elementsToRead.Select(f => f.ToString()).Aggregate((e,f) => e + "," + f)));
 
 			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
