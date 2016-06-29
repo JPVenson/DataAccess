@@ -37,302 +37,299 @@ Create a new Object of DbAccessLayer with a proper connection string Call
  Select<Foo>
 	();
 	```
-	In these 4 steps, you will execute a complete select to the database and then the result will be mapped with Reflection to the Object.
+In these 4 steps, you will execute a complete select to the database and then the result will be mapped with Reflection to the Object.
 
-	```C#
-	public class FooTest
-	{
-	public class Foo
-	{
+```C#
+public class FooTest
+{
+public class Foo
+{
+public long Id_Foo { get; set; }
+public string FooName { get; set; }
+}
+
+public FooTest()
+{
+var accessLayer = new DbAccessLayer(DbTypes.MsSql,
+"Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
+var @select = accessLayer.Select<Foo>
+();
+}
+}
+```
+There are A LOT of overloads of Select, SelectNative, SelectWhere and RunPrimetivSelect. Almost all methods with a Generic Parameter have a corresponding method that accepts a Type instance.
+
+In all examples, when an instance of DbAccessLayer is needed, it will be represented by the variable.
+
+accessLayer
+and in the testing, an MsSQL Db is used and its syntax.
+
+# Creating and Customizing a POCO
+This is primarily an Object Relationship Mapper. That means that this lib always tries to map the output that is returned by a Query into an Object that has multiple properties. You have some attributes that define certain parts and functions of that object.
+
+As seen in the example, you can skip all extra configuration when you follow some rules. To "bypass" these rules like the Rule that a Class must be named the same, then the Table you can set an Attribute.
+
+## ForModel
+
+```C#
+[ForModel("Foo")]
+public class NotFooButSomeStrangeNameYouDoNotLike
+{
+public long Id_Foo { get; set; }
+[ForModel("FooName")]
+public string Metallica4tw { get; set; }
+}
+```
+The ForModel attribute is allowed on Class | Table and on Property | Column level. It gives the Processor the information that the name that is used in the POCO must be mapped to the Table.
+
+## PrimaryKey
+
+```C#
+public class Foo
+{
+[PrimaryKey]
+public long Id_Foo { get; set; }
+public string FooName { get; set; }
+}
+```
+The PrimaryKey attribute marks a Property ... what a wonder, to be an PrimaryKey on the database. With this function, you can call:
+```C#
+accessLayer.Select<Foo>
+(155151 /*This is the PrimaryKey we are looking for*/);
+```
+## InsertIgnore
+
+Marks a Property to be not Automatically included into a InsertStatement. Per default, the PrimaryKey inherits from this attribute.
+
+## ForeignKey (Work In Progress)
+
+Well, some good long day when my work was not so hard, I’d thought that it would be fun, when it would be nice that the Automatic process could load NavigationPropertys too. The Term NavigationProperty is from EF and defined as:
+
+"Represents the navigation from one entity type to another entity type in the conceptual model."
+
+So a NavProperty is not more than an Property that is of the Type that another Object and that Relation is described with an ForeignKey.
+
+```C#
+public class FooTest
+{
+public class Foo
+{
+[PrimaryKey]
+public long Id_Foo { get; set; }
+public string FooName { get; set; }
+
+public long Image_Id { get; set; }
+
+/// <summary>
+/// A Property that is of the type that is referred to
+/// 1 TO 1 relation
+///
+</summary>
+[ForeignKey("Image_Id")]
+public virtual Image img { get; set; }
+
+/// <summary>
+/// A Property that is a List of the type that is referred to
+/// 1 TO Many relation
+///
+</summary>
+[ForeignKey("Image_Id")]
+public virtual IEnumerable<Image>
+imgs { get; set; }
+}
+
+public class Image
+{
+[PrimaryKey]
+public long Id_Image { get; set; }
+public byte[] ImageData { get; set; }
+}
+}
+```
+As written, this is a feature that has its known issues / bugs / problems:
+
+The Select is one time, changes that are made to the collection are not observed by the manager.
+The Foreign POCO must have exactly one PrimaryKey property, when it finds more than one, the first will be taken.
+Only Egar loading is supported. When loading a big object tree, all objects are loaded at once.
+
+## LoadNotImplimentedDynamic
+
+When the Select statement returns more information than build in the POCO, this property
+(must have this signature):
+
+```C#
+[LoadNotImplimentedDynamic]
+public IDictionary<string, object>
+UnresolvedObjects { set; get; }
+```
+(Property Name does not matter) it will be filled with the data (see FactoryMethods).
+
+## IgnoreReflection
+
+Simple: as the XmlIgnore attribute, it marks a Property to not be indexed and accessed by any function of the Mapper. Even if the result contains a Column that matches this property, the property will not be used.
+
+## RowVersion
+
+Defines a RowVersion attribute. When defined, all calls of `accessLayer.Update()` and `accessLayer.Refresh()` will use this Property to check for changes.
+
+### Loading Strategies
+There are 2 ways of loading with factory methods defined inside the POCO or automatically with customization over attributes. The 2nd way will be the fallback when there are no or not the right Factory available.
+
+## Constructor and Method Injection
+
+The manager can detect a method to pull statements from it. For example, how you define a method that creates a Select statement without parameter:
+
+```C#
+public class Foo
+{
+public long Id_Foo { get; set; }
+public string FooName { get; set; }
+
+[SelectFactoryMehtod]
+public static string CreateSelectStatement()
+{
+return "SELECT * FROM Foo";
+}
+}
+```
+When some method is defined, the manager will always use this method to create a Select statement and he will skip any other reflection based creation.
+
+For Selects, this is also possible on Class level:
+
+```C#
+[SelectFactory("SELECT * FROM Foo")]
+public class Foo
+```
+
+But only Selects must be Public and Static. Update, Insert and Delete Factory’s must be Not static. You can return a string OR an instance of IQueryFactoryResult. To prevent SqlInjection, this is the HEAVILY recommended way when you work with parameters.
+
+An example that uses IQueryFactoryResult for Update and Delete and a String for Select:
+
+```C#
+[SelectFactory("SELECT * FROM Foo")]
+public class Foo
+{
 	public long Id_Foo { get; set; }
 	public string FooName { get; set; }
+
+	[DeleteFactoryMethod]
+	public IQueryFactoryResult CreateDeleteStatement()
+	{
+		var result = new QueryFactoryResult("DELETE FROM Foo WHERE Id_Foo = @1",
+		new QueryParameter()
+		{
+		Name = "@1", Value = Id_Foo
+	});
+	return result;
+}
+
+[UpdateFactoryMethod]
+public IQueryFactoryResult CreateSomeKindOfUpdate()
+{
+	var result = new QueryFactoryResult("Update Foo SET FooName = @param WHERE Id_Foo = @1",
+	new QueryParameter()
+	{
+		Name = "@1",
+		Value = Id_Foo
+	},
+	new QueryParameter()
+	{
+		Name = "@param",
+		Value = FooName
+	});
+	return result;    
+}
+```
+It is possible to transfer parameters from the caller to the function. When the caller provides you parameters, they will be given to the function that has the same signature then the parameter. This idea is more or less shamelessly stolen from the ASP.NET MVC approach.
+
+After version 2.0.0.14 you can also use an QueryBuilder or QueryBuilderX on a void Method to create your Statements.
+
+```C#
+public class FooTest
+{
+	public class Foo
+	{
+		public long Id_Foo { get; set; }
+		public string FooName { get; set; }
+
+		[UpdateFactoryMethod]
+		public static IQueryFactoryResult CreateSomeKindOfUpdate(string someExternalInfos)
+		{
+			if (string.IsNullOrEmpty(someExternalInfos))
+			return null; //Noting to do here, use the Automatic loading
+
+			var result = new QueryFactoryResult
+			("SELECT * FROM Foo f WHERE f.FooName = @info", 
+			new QueryParameter()
+			{
+				Value = someExternalInfos,
+				Name = "@info"
+			});
+			return result;
 	}
+
 
 	public FooTest()
 	{
-	var accessLayer = new DbAccessLayer(DbTypes.MsSql,
-	"Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
-	var @select = accessLayer.Select<Foo>
-		();
-		}
-		}
-		```
-		There are A LOT of overloads of Select, SelectNative, SelectWhere and RunPrimetivSelect. Almost all methods with a Generic Parameter have a corresponding method that accepts a Type instance.
+		var access = new DbAccessLayer(DbTypes.MsSql, "Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
+		var @select = access.Select<Foo>("SomeName");
+	}
+}
+```
+The string that we provided to...
 
-		In all examples, when an instance of DbAccessLayer is needed, it will be represented by the variable.
+```C#
+access.Select<Foo>("SomeName");
+```
+...will be given to the Select function to create a statement and this statement will be executed.
 
-		accessLayer
-		and in the testing, an MsSQL Db is used and its syntax.
+It is also possible to control the Loading from a DataRecord to your class by using a Constructor that accepts these parameters:
 
-		# Creating and Customizing a POCO
-		This is primarily an Object Relationship Mapper. That means that this lib always tries to map the output that is returned by a Query into an Object that has multiple properties. You have some attributes that define certain parts and functions of that object.
+```C#
+public class Foo
+{
+	[ObjectFactoryMethod]
+	public Foo(IDataRecord record)
+	{
+		Id_Foo = (long)record["Id_Foo"];
+		FooName = (string)record["FooName"];
+	}
 
-		As seen in the example, you can skip all extra configuration when you follow some rules. To "bypass" these rules like the Rule that a Class must be named the same, then the Table you can set an Attribute.
+	public long Id_Foo { get; set; }
+	public string FooName { get; set; }
+}
+```
+When it is necessary to create a new Instance of that Poco, there is always a IDataRecord to load it from so via Constructor injection, we find this one and provide him the data.
 
-		## ForModel
+## XML Field Loading
+There is a new attribute:
 
-		```C#
-		[ForModel("Foo")]
-		public class NotFooButSomeStrangeNameYouDoNotLike
-		{
-		public long Id_Foo { get; set; }
-		[ForModel("FooName")]
-		public string Metallica4tw { get; set; }
-		}
-		```
-		The ForModel attribute is allowed on Class | Table and on Property | Column level. It gives the Processor the information that the name that is used in the POCO must be mapped to the Table.
+## FromXmlAttribute
+It allows a simple loading of Objects from an XML Serialized Column. The attribute contains two parameters:
 
-		## PrimaryKey
+FieldName [Required]
+LoadStrategy [Optional]
+The first Param has the same effect as the ForModel one.
 
-		```C#
-		public class Foo
-		{
-		[PrimaryKey]
-		public long Id_Foo { get; set; }
-		public string FooName { get; set; }
-		}
-		```
-		The PrimaryKey attribute marks a Property ... what a wonder, to be an PrimaryKey on the database. With this function, you can call:
-		```C#
-		accessLayer.Select<Foo>
-			(155151 /*This is the PrimaryKey we are looking for*/);
-			```
-			## InsertIgnore
+The last Param defines the usage of this Property.
 
-			Marks a Property to be not Automatically included into a InsertStatement. Per default, the PrimaryKey inherits from this attribute.
+Should it be included into a Select Statement => Column exists
 
-			## ForeignKey (Work In Progress)
+Should it be excluded from Select Statement => Column does not exist but will be added by Statement
 
-			Well, some good long day when my work was not so hard, I’d thought that it would be fun, when it would be nice that the Automatic process could load NavigationPropertys too. The Term NavigationProperty is from EF and defined as:
+In both cases, if the Column exists in the result stream, it will be tried to deserialized into the type that the Property defines. If this is an implementation or IEnumerable<T>
+	, the result should also be formatted as list.
 
-			"Represents the navigation from one entity type to another entity type in the conceptual model."
+	# Attributeless Configuration
+	As suggested from user Paulo Zemek, I modified the Reflection only MetaData API to support runtime manipulation of the Metadata.
 
-			So a NavProperty is not more than an Property that is of the Type that another Object and that Relation is described with an ForeignKey.
+	To configurate any object, you have to instantiate a Config class. It acts as an Fassade to the internal API.
 
-			```C#
-			public class FooTest
-			{
-			public class Foo
-			{
-			[PrimaryKey]
-			public long Id_Foo { get; set; }
-			public string FooName { get; set; }
+	To extend the reflection based behavior, you have to call the SetConfig method on any Config instance. In the given callback, you have access to several methods that will add the attribute information like ForModel and so on. All helper methods are using the 3 base methods:
 
-			public long Image_Id { get; set; }
-
-			/// <summary>
-				/// A Property that is of the type that is referred to
-				/// 1 TO 1 relation
-				///
-			</summary>
-			[ForeignKey("Image_Id")]
-			public virtual Image img { get; set; }
-
-			/// <summary>
-				/// A Property that is a List of the type that is referred to
-				/// 1 TO Many relation
-				///
-			</summary>
-			[ForeignKey("Image_Id")]
-			public virtual IEnumerable<Image>
-				imgs { get; set; }
-				}
-
-				public class Image
-				{
-				[PrimaryKey]
-				public long Id_Image { get; set; }
-				public byte[] ImageData { get; set; }
-				}
-				}
-				```
-				As written, this is a feature that has its known issues / bugs / problems:
-
-				The Select is one time, changes that are made to the collection are not observed by the manager.
-				The Foreign POCO must have exactly one PrimaryKey property, when it finds more than one, the first will be taken.
-				Only Egar loading is supported. When loading a big object tree, all objects are loaded at once.
-
-				## LoadNotImplimentedDynamic
-
-				When the Select statement returns more information than build in the POCO, this property
-				(must have this signature):
-
-				```C#
-				[LoadNotImplimentedDynamic]
-				public IDictionary<string, object>
-					UnresolvedObjects { set; get; }
-					```
-					(Property Name does not matter) it will be filled with the data (see FactoryMethods).
-
-					## IgnoreReflection
-
-					Simple: as the XmlIgnore attribute, it marks a Property to not be indexed and accessed by any function of the Mapper. Even if the result contains a Column that matches this property, the property will not be used.
-
-					## RowVersion
-
-					Defines a RowVersion attribute. When defined, all calls of `accessLayer.Update()` and `accessLayer.Refresh()` will use this Property to check for changes.
-
-					### Loading Strategies
-					There are 2 ways of loading with factory methods defined inside the POCO or automatically with customization over attributes. The 2nd way will be the fallback when there are no or not the right Factory available.
-
-					## Constructor and Method Injection
-
-					The manager can detect a method to pull statements from it. For example, how you define a method that creates a Select statement without parameter:
-
-					```C#
-					public class Foo
-					{
-					public long Id_Foo { get; set; }
-					public string FooName { get; set; }
-
-					[SelectFactoryMehtod]
-					public static string CreateSelectStatement()
-					{
-					return "SELECT * FROM Foo";
-					}
-					}
-					```
-					When some method is defined, the manager will always use this method to create a Select statement and he will skip any other reflection based creation.
-
-					For Selects, this is also possible on Class level:
-
-					```C#
-					[SelectFactory("SELECT * FROM Foo")]
-					public class Foo
-					```
-
-					But only Selects must be Public and Static. Update, Insert and Delete Factory’s must be Not static. You can return a string OR an instance of IQueryFactoryResult. To prevent SqlInjection, this is the HEAVILY recommended way when you work with parameters.
-
-					An example that uses IQueryFactoryResult for Update and Delete and a String for Select:
-
-					```C#
-					[SelectFactory("SELECT * FROM Foo")]
-					public class Foo
-					{
-					public long Id_Foo { get; set; }
-					public string FooName { get; set; }
-
-					[DeleteFactoryMethod]
-					public IQueryFactoryResult CreateDeleteStatement()
-					{
-					var result = new QueryFactoryResult("DELETE FROM Foo WHERE Id_Foo = @1",
-					new QueryParameter()
-					{
-					Name = "@1", Value = Id_Foo
-					});
-					return result;
-					}
-
-					[UpdateFactoryMethod]
-					public IQueryFactoryResult CreateSomeKindOfUpdate()
-					{
-					var result = new QueryFactoryResult("Update Foo SET FooName = @param WHERE Id_Foo = @1",
-					new QueryParameter()
-					{
-					Name = "@1",
-					Value = Id_Foo
-					},
-					new QueryParameter()
-					{
-					Name = "@param",
-					Value = FooName
-					});
-					return result;
-					}
-					}
-					```
-					It is possible to transfer parameters from the caller to the function. When the caller provides you parameters, they will be given to the function that has the same signature then the parameter. This idea is more or less shamelessly stolen from the ASP.NET MVC approach.
-
-					After version 2.0.0.14 you can also use an QueryBuilder or QueryBuilderX on a void Method to create your Statements.
-
-					```C#
-					public class FooTest
-					{
-					public class Foo
-					{
-					public long Id_Foo { get; set; }
-					public string FooName { get; set; }
-
-					[UpdateFactoryMethod]
-					public static IQueryFactoryResult CreateSomeKindOfUpdate(string someExternalInfos)
-					{
-					if (string.IsNullOrEmpty(someExternalInfos))
-					return null; //Noting to do here, use the Automatic loading
-
-					var result = new QueryFactoryResult
-					("SELECT * FROM Foo f WHERE f.FooName = @info", new QueryParameter()
-					{
-					Value = someExternalInfos,
-					Name = "@info"
-					});
-					return result;
-					}
-					}
-
-					public FooTest()
-					{
-					var access = new DbAccessLayer(DbTypes.MsSql,
-					"Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
-					var @select = access.Select<Foo>
-						("SomeName");
-						}
-						}
-						```
-						The string that we provided to...
-
-						```C#
-						access.Select<Foo>
-							("SomeName");
-							```
-							...will be given to the Select function to create a statement and this statement will be executed.
-
-							It is also possible to control the Loading from a DataRecord to your class by using a Constructor that accepts these parameters:
-
-							```C#
-							public class Foo
-							{
-							[ObjectFactoryMethod]
-							public Foo(IDataRecord record)
-							{
-							Id_Foo = (long)record["Id_Foo"];
-							FooName = (string)record["FooName"];
-							}
-
-							public long Id_Foo { get; set; }
-							public string FooName { get; set; }
-							}
-							```
-							When it is necessary to create a new Instance of that Poco, there is always a IDataRecord to load it from so via Constructor injection, we find this one and provide him the data.
-
-							## XML Field Loading
-							There is a new attribute:
-
-							## FromXmlAttribute
-							It allows a simple loading of Objects from an XML Serialized Column. The attribute contains two parameters:
-
-							FieldName [Required]
-							LoadStrategy [Optional]
-							The first Param has the same effect as the ForModel one.
-
-							The last Param defines the usage of this Property.
-
-							Should it be included into a Select Statement => Column exists
-
-							Should it be excluded from Select Statement => Column does not exist but will be added by Statement
-
-							In both cases, if the Column exists in the result stream, it will be tried to deserialized into the type that the Property defines. If this is an implementation or IEnumerable<T>
-								, the result should also be formatted as list.
-
-								# Attributeless Configuration
-								As suggested from user Paulo Zemek, I modified the Reflection only MetaData API to support runtime manipulation of the Metadata.
-
-								To configurate any object, you have to instantiate a Config class. It acts as an Fassade to the internal API.
-
-								To extend the reflection based behavior, you have to call the SetConfig method on any Config instance. In the given callback, you have access to several methods that will add the attribute information like ForModel and so on. All helper methods are using the 3 base methods:
-
-								```C#
-								public void SetPropertyAttribute<TProp>
-									(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
+	```C#
+	public void SetPropertyAttribute<TProp>
+		(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 {
 	var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
 	var info = ConfigHelper.GetPropertyInfoFromLabda(exp);
