@@ -40,26 +40,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Init()
 		{
 			DbAccess = new Manager().GetWrapper();
-			DbAccess.RaiseEvents = true;
-			DbAccess.OnSelect += (sender, eventArg) =>
-			{
-				Console.WriteLine(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
-			};
-
-			DbAccess.OnDelete += (sender, eventArg) =>
-			{
-				Console.WriteLine(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
-			};
-
-			DbAccess.OnInsert += (sender, eventArg) =>
-			{
-				Console.WriteLine(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
-			};
-
-			DbAccess.OnUpdate += (sender, eventArg) =>
-			{
-				Console.WriteLine(@"Update: \r\n{0}", eventArg.QueryDebugger);
-			};
 		}
 
 		[SetUp]

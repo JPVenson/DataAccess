@@ -50,6 +50,27 @@ namespace JPB.DataAccess.Tests
 				expectWrapper = new SqLiteManager().GetWrapper();
 			}
 
+			expectWrapper.RaiseEvents = true;
+			expectWrapper.OnSelect += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
+			};
+
+			expectWrapper.OnDelete += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
+			};
+
+			expectWrapper.OnInsert += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
+			};
+
+			expectWrapper.OnUpdate += (sender, eventArg) =>
+			{
+				Console.WriteLine(@"Update: \r\n{0}", eventArg.QueryDebugger);
+			};
+
 			Assert.NotNull(expectWrapper, "This test cannot run as no Database Variable is defined");
 			bool checkDatabase = expectWrapper.CheckDatabase();
 			Assert.IsTrue(checkDatabase);
