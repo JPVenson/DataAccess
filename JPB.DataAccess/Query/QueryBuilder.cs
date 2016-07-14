@@ -59,6 +59,9 @@ namespace JPB.DataAccess.Query
 
 		public QueryBuilderX Append(QueryBuilderX right)
 		{
+		    if (right.ContainerObject == this.ContainerObject)
+		        return this;
+
 			foreach (var part in right.ContainerObject.Parts)
 			{
 				this.Add(part);
