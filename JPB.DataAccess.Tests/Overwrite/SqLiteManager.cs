@@ -38,5 +38,10 @@ namespace JPB.DataAccess.Tests
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
 			return expectWrapper;
 		}
+
+		public void FlushErrorData()
+		{
+
+		}
 	}
 }

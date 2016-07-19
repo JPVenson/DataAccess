@@ -94,7 +94,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 								object contvertedValue = null;
 								if (!isNumm)
 								{
-									contvertedValue = Convert.ChangeType(value, dbPropertyInfoCache.PropertyType);
+									contvertedValue = DataConverterExtensions.ChangeType(value, dbPropertyInfoCache.PropertyType);
 								}
 
 								dbPropertyInfoCache.Setter.Invoke(emptyElement, contvertedValue);
@@ -106,9 +106,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 						reader.ReadEndElement();
 					} while (reader.Name != DatabaseContent);
+					transaction.Complete();
 				}
-
-				transaction.Complete();
 			}
 		}
 

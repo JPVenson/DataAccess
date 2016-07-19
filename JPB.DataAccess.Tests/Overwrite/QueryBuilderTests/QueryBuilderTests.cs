@@ -8,6 +8,7 @@ using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Overwrite;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.QueryBuilderTests
@@ -27,11 +28,30 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 
 		}
 
+		private IManager _mgr;
+
 		[SetUp]
 		public void Init()
 		{
-			DbAccessLayer = new Manager().GetWrapper();
+			_mgr = new Manager();
+			DbAccessLayer = _mgr.GetWrapper();
 			DataMigrationHelper.ClearDb(DbAccessLayer);
+		}
+
+		[TearDown]
+		public void TestTearDown()
+		{
+			// inc. class name
+			var fullNameOfTheMethod = NUnit.Framework.TestContext.CurrentContext.Test.FullName;
+			// method name only
+			var methodName = NUnit.Framework.TestContext.CurrentContext.Test.Name;
+			// the state of the test execution
+			var state = NUnit.Framework.TestContext.CurrentContext.Result.Outcome == ResultState.Failure; // TestState enum
+
+			if (state)
+			{
+				_mgr.FlushErrorData();
+			}
 		}
 
 		public DbAccessLayer DbAccessLayer { get; set; }

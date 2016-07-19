@@ -78,5 +78,10 @@ namespace JPB.DataAccess.Tests
 
 			return expectWrapper;
 		}
+
+		public void FlushErrorData()
+		{
+
+		}
 	}
 }

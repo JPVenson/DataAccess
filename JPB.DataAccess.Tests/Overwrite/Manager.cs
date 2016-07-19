@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
@@ -14,6 +15,7 @@ namespace JPB.DataAccess.Tests
 	public interface IManager
 	{
 		DbAccessLayer GetWrapper();
+		void FlushErrorData();
 	}
 
 	public class Manager : IManager
@@ -50,25 +52,30 @@ namespace JPB.DataAccess.Tests
 				expectWrapper = new SqLiteManager().GetWrapper();
 			}
 
+			_errorData = new StringBuilder();
 			expectWrapper.RaiseEvents = true;
 			expectWrapper.OnSelect += (sender, eventArg) =>
 			{
-				Console.WriteLine(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendFormat(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendLine();
 			};
 
 			expectWrapper.OnDelete += (sender, eventArg) =>
 			{
-				Console.WriteLine(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendFormat(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendLine();
 			};
 
 			expectWrapper.OnInsert += (sender, eventArg) =>
 			{
-				Console.WriteLine(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendFormat(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendLine();
 			};
 
 			expectWrapper.OnUpdate += (sender, eventArg) =>
 			{
-				Console.WriteLine(@"Update: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendFormat(@"Update: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendLine();
 			};
 
 			Assert.NotNull(expectWrapper, "This test cannot run as no Database Variable is defined");
@@ -79,6 +86,14 @@ namespace JPB.DataAccess.Tests
 			expectWrapper.Multipath = true;
 			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
 			return expectWrapper;
+		}
+
+		private StringBuilder _errorData;
+
+		public void FlushErrorData()
+		{
+			Console.WriteLine(_errorData.ToString());
+			_errorData.Clear();
 		}
 	}
 }
