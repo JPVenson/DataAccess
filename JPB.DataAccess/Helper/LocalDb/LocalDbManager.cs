@@ -17,6 +17,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			DefaultPkProvider.Add(typeof(int), new LocalDbIntPkProvider());
 			DefaultPkProvider.Add(typeof(long), new LocalDbLongPkProvider());
 			DefaultPkProvider.Add(typeof(Guid), new LocalDbGuidPkProvider());
+			DefaultPkProvider.Add(typeof(byte), new LocalDbBytePkProvider());
 		}
 
 		internal LocalDbManager()
@@ -89,7 +90,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// allowes to Add or remove tabels from this Database. 
+		/// allowes to Add or remove tabels from this Database.
 		/// If you try to use the tables before calling dispose on the returned Scope an InvalidOperationException will be thrown
 		/// </summary>
 		/// <returns></returns>
@@ -104,7 +105,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Creates a new Class that supportes the <c>IXmlSerializable</c> interface. It is linked to this 
+		/// Creates a new Class that supportes the <c>IXmlSerializable</c> interface. It is linked to this
 		/// database and can be used to read or write all content in this database.
 		/// To Write all elements
 		/// <example>
@@ -114,7 +115,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///		new XmlSerializer(typeof(DataContent)).Serialize(memStream, LocalDbManager.Scope.GetSerializableContent());
 		///		var xml = Encoding.ASCII.GetString(memStream.ToArray());
 		///	}
-		/// </code> 
+		/// </code>
 		/// When reading the data the database creation has to be in progress. You must execute the statement inside the DatabaseScope you want to fill
 		/// <code>
 		/// using (new DatabaseScope())
@@ -126,7 +127,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///			new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
 		///		}
 		///	}
-		/// </code> 
+		/// </code>
 		/// </example>
 		/// </summary>
 		/// <returns></returns>

@@ -119,6 +119,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			var index = 0;
 			foreach (var localDbReposetoryBase in _instance.Database)
 			{
+				if(localDbReposetoryBase.Value.Count == 0)
+					continue;
+
 				writer.WriteStartElement(ReproIncluded);
 				writer.WriteAttributeString("Index", index++.ToString());
 				writer.WriteAttributeString("Type", localDbReposetoryBase.Key.AssemblyQualifiedName);
@@ -130,6 +133,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			index = 0;
 			foreach (var localDbReposetoryBase in _instance.Database)
 			{
+				if (localDbReposetoryBase.Value.Count == 0)
+					continue;
+
 				writer.WriteStartElement(TableContentList);
 				writer.WriteAttributeString("Index", index++.ToString());
 

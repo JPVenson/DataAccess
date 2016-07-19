@@ -14,6 +14,11 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			State = state;
 		}
 
+		public ConditionalQuery(ConditionalQuery<TPoco> queryText) : base(queryText)
+		{
+			State = queryText.State;
+		}
+
 		/// <summary>
 		/// Opens a new Logical combined Query
 		/// </summary>

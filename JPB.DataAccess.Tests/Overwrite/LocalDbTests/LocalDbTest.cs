@@ -156,7 +156,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 				Assert.That(_users.Count, Is.EqualTo(1));
 				Assert.That(_users.ToArray(), Is.Not.Null.And.Property("Length").EqualTo(1));
 			}
-			
+
 			_users.Add(new Users());
 			_users.Add(new Users());
 			_users.Add(new Users());

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using JPB.DataAccess.DbInfoConfig;
@@ -34,7 +35,15 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 					_exp));
 
 			var type = _config.GetOrCreateClassInfoCache(typeof(TEntity));
-			_dbPropertyInfoCache = type.Propertys[propInfo.Name];
+
+			var fod = type.Propertys.FirstOrDefault(f => f.Key == propInfo.Name);
+
+			if (fod.Value == null)
+			{
+				throw new InvalidCastException("The given property name is invalid. When using Nullable types do not use the Value property. Use the Nullable propertie");
+			}
+
+			_dbPropertyInfoCache = fod.Value;
 		}
 
 		public void DefaultValue(TEntity item)

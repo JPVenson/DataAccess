@@ -153,6 +153,7 @@
     <Compile Include="Helper\LocalDb\Constraints\Defaults\LocalDbUniqueConstraint.cs" />
     <Compile Include="Helper\LocalDb\EditDatabaseScope.cs" />
     <Compile Include="Helper\LocalDb\ILocalDbReposetoryBase.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbBytePkProvider.cs" />
     <Compile Include="Helper\LocalDb\Scopes\ReplicationScope.cs" />
     <Compile Include="Helper\LocalDb\Trigger\SequentialToken.cs" />
     <Compile Include="Helper\LocalDb\Trigger\ISequentialToken.cs" />

@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	/// <typeparam name="TProp"></typeparam>
 	/// <typeparam name="TAttr"></typeparam>
@@ -24,17 +24,17 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
 		where TMeth : class, IMethodInfoCache<TAttr, TArg>, new()
-		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new() 
+		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="anon"></param>
 		/// <returns></returns>
 		IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false);
-		
+
 		/// <summary>
 		///     All Propertys
 		/// </summary>
@@ -71,6 +71,6 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		/// <summary>
 		///     The .net Type instance
 		/// </summary>
-		Type Type { get; } 
+		Type Type { get; }
 	}
 }

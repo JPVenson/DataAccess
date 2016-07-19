@@ -1,5 +1,5 @@
 /*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -7,13 +7,15 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
 using System;
+using System.Linq;
+using System.Threading;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 
 namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public class DbConfig : MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
@@ -22,10 +24,10 @@ namespace JPB.DataAccess.DbInfoConfig
 			ConstructorSettings = new FactoryHelperSettings();
 		}
 
-		public DbConfig(bool local = false) 
+		public DbConfig(bool local = false)
 			: base(local)
 		{
-			
+
 		}
 
 		/// <summary>
@@ -50,7 +52,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				val.CheckForConfig(this);
 			return val;
 		}
-		
+
 
 		/// <summary>
 		///     Allows you to alter the MetaInfoStore store that holds <typeparamref name="T"></typeparamref>
@@ -89,7 +91,39 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <returns></returns>
 		public new virtual DbConfig Include(Type t)
 		{
-			GetOrCreateClassInfoCache(t);
+			base.Include(t);
+			return this;
+		}
+
+		public new DbConfig Include(params Type[] t)
+		{
+			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
+			try
+			{
+				if (isThreadSave)
+				{
+					Monitor.Enter(SClassInfoCaches);
+				}
+				foreach (var type in t)
+				{
+					var element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
+					if (element == null)
+					{
+						element = new DbClassInfoCache();
+						if (!type.IsAnonymousType())
+							SClassInfoCaches.Add(element);
+						element.Init(type, type.IsAnonymousType());
+						element.CheckForConfig(this);
+					}
+				}
+			}
+			finally
+			{
+				if (isThreadSave)
+				{
+					Monitor.Exit(SClassInfoCaches);
+				}
+			}
 			return this;
 		}
 	}

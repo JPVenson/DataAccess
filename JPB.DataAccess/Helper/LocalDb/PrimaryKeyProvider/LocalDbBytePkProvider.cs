@@ -1,38 +1,34 @@
 ﻿using System;
-using System.Threading;
 using JPB.DataAccess.Contacts;
 
 namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 {
-	/// <summary>
-	///
-	/// </summary>
-	public class LocalDbLongPkProvider : ILocalDbPrimaryKeyConstraint
+	public class LocalDbBytePkProvider : ILocalDbPrimaryKeyConstraint
 	{
-		public LocalDbLongPkProvider()
+		public LocalDbBytePkProvider()
 		{
 			_counter = 0;
 			Seed = 1;
 			Incriment = 1;
 		}
 
-		public LocalDbLongPkProvider(int seed, int incriment)
+		public LocalDbBytePkProvider(byte seed, int incriment)
 		{
 			_counter = seed;
 			Seed = seed;
 			Incriment = incriment;
 		}
 
-		private long _counter = 1;
+		private byte _counter = 1;
 
 		public Type GeneratingType
 		{
-			get { return typeof(long); }
+			get { return typeof(byte); }
 		}
 
 		public object GetNextValue()
 		{
-			return Interlocked.Add(ref _counter, Incriment);
+			return _counter + 1;
 		}
 
 		public int Seed { get; private set; }
@@ -45,33 +41,35 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 
 		public ILocalDbPrimaryKeyConstraint Clone()
 		{
-			return new LocalDbLongPkProvider();
+			return new LocalDbBytePkProvider();
 		}
 
 		public void UpdateIndex(long index)
 		{
-			Interlocked.Add(ref _counter, index);
+			if(index > Byte.MaxValue)
+				throw new InvalidOperationException("Index must be lower then Byte.MaxValue");
+			_counter = (byte)index;
 		}
 
 		public new bool Equals(object x, object y)
 		{
-			if (x is long && y is long)
+			if (x is byte && y is byte)
 			{
-				return (long)x == (long)y;
+				return (byte)x == (byte)y;
 			}
-			else if (x is long? && y != null)
+			else if (x is byte? && y != null)
 			{
-				var nullableX = (long?)x;
+				var nullableX = (byte?)x;
 				if (y == null)
 				{
 					return nullableX.HasValue && y != null;
 				}
-				return nullableX.Value == (long)y;
+				return nullableX.Value == (byte)y;
 			}
-			else if (y is long?)
+			else if (y is byte?)
 			{
-				var nullableY = (long?)y;
-				return nullableY.Value == ((long?)x).Value;
+				var nullableY = (byte?)y;
+				return nullableY.Value == ((byte?)x).Value;
 			}
 
 			throw new Exception(string.Format("Type could not be determinated X is '{0}' Y is '{1}' ", x.GetType(), y.GetType()));
