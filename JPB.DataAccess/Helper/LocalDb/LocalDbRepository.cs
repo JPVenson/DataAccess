@@ -160,7 +160,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			CheckCreatedElseThrow();
 			if (!Contains(elementToAdd))
 			{
-				AttachTransactionIfSet(elementToAdd,
+				var hasTransaction = AttachTransactionIfSet(elementToAdd,
 					CollectionStates.Added);
 				Constraints.Check.Enforce(elementToAdd);
 				Constraints.Unique.Enforce(elementToAdd);
@@ -169,12 +169,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 				Constraints.Default.Enforce(elementToAdd);
 
 				//Check Data integrity
-
-				var ex = EnforceCheckConstraints(elementToAdd);
-
-				if (ex != null)
+				if (!hasTransaction)
 				{
-					throw ex;
+					var ex = EnforceCheckConstraints(elementToAdd);
+
+					if (ex != null)
+					{
+						throw ex;
+					}
 				}
 
 				if (!_keepOriginalObject)
@@ -229,7 +231,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			CheckCreatedElseThrow();
 			var pk = GetId(item);
-			var local = Base.Contains(new KeyValuePair<object, TEntity>(pk, (TEntity) item));
+			var local = Base.Contains(new KeyValuePair<object, TEntity>(pk, (TEntity)item));
 			return local;
 		}
 
@@ -254,12 +256,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 			var success = true;
 			lock (LockRoot)
 			{
-				AttachTransactionIfSet(item, CollectionStates.Removed);
+				var hasTransaction = AttachTransactionIfSet(item, CollectionStates.Removed);
 				TriggersUsage.For.OnDelete(item);
 				if (!TriggersUsage.InsteadOf.OnDelete(item))
 					success = Base.Remove(id);
 
-				Exception hasInvalidOp = this.EnforceCheckConstraints(item);
+				Exception hasInvalidOp = null;
+				if (!hasTransaction)
+					hasInvalidOp = this.EnforceCheckConstraints(item);
 
 				try
 				{
@@ -289,7 +293,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (_keepOriginalObject)
 					return s;
 				bool fullyLoaded;
-				return (TEntity) DbAccessLayer.CreateInstance(
+				return (TEntity)DbAccessLayer.CreateInstance(
 					_typeInfo,
 					new ObjectDataRecord(s, _config, 0),
 					out fullyLoaded,
@@ -299,7 +303,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public IEnumerator GetEnumerator()
 		{
-			return ((IEnumerable<TEntity>) this).GetEnumerator();
+			return ((IEnumerable<TEntity>)this).GetEnumerator();
 		}
 
 		/// <summary>
@@ -369,12 +373,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public void Add(object item)
 		{
-			Add((TEntity) item);
+			Add((TEntity)item);
 		}
 
 		public virtual bool Contains(object item)
 		{
-			return Contains((TEntity) item);
+			return Contains((TEntity)item);
 		}
 
 		/// <summary>
@@ -399,7 +403,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public virtual bool Remove(object item)
 		{
-			return Remove((TEntity) item);
+			return Remove((TEntity)item);
 		}
 
 		/// <summary>
@@ -409,7 +413,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <returns></returns>
 		public bool Update(object item)
 		{
-			return Update((TEntity) item);
+			return Update((TEntity)item);
 		}
 
 		/// <summary>
@@ -439,14 +443,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (_databaseDatabase == null)
 			{
 				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate" +
-				                                " multibe tables in the same Application");
+												" multibe tables in the same Application");
 			}
 
 			_typeInfo = _config.GetOrCreateClassInfoCache(type);
 			if (_typeInfo.PrimaryKeyProperty == null)
 			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. " +
-				                                              "Type: '{0}'", type.Name));
+															  "Type: '{0}'", type.Name));
 			}
 
 			TypeKeyInfo = _config.GetOrCreateClassInfoCache(_typeInfo.PrimaryKeyProperty.PropertyType);
@@ -454,13 +458,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (TypeKeyInfo == null)
 			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. " +
-				                                              "Type: '{0}'", type.Name));
+															  "Type: '{0}'", type.Name));
 			}
 
 			if (!TypeKeyInfo.Type.IsValueType)
 			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of " +
-				                                              "type of any value type cannot be used. Type: '{0}'", type.Name));
+															  "type of any value type cannot be used. Type: '{0}'", type.Name));
 			}
 
 			if (!_keepOriginalObject)
@@ -489,9 +493,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					throw new NotSupportedException(
 						string.Format("You must specify ether an Primary key that is of one of this types " +
-						              "({1}) " +
-						              "or invoke the ctor with an proper keyGenerator. " +
-						              "Type: '{0}'",
+									  "({1}) " +
+									  "or invoke the ctor with an proper keyGenerator. " +
+									  "Type: '{0}'",
 							type.Name,
 							LocalDbManager
 								.DefaultPkProvider
@@ -516,7 +520,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				foreach (var dbPropertyInfoCach in _typeInfo.Propertys)
 				{
 					if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null &&
-					    dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
+						dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
 					{
 						_databaseDatabase.AddMapping(_typeInfo.Type,
 							dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
@@ -575,7 +579,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 			var exception =
 				new InvalidOperationException(string.Format("Cannot insert explicit value for identity column in table '{0}' " +
-				                                            "when no IdentityInsertScope exists.", _typeInfo.Name));
+															"when no IdentityInsertScope exists.", _typeInfo.Name));
 			throw exception;
 		}
 
@@ -626,8 +630,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return null;
 		}
 
-		private void AttachTransactionIfSet(TEntity changedItem, CollectionStates action,
-			bool throwInstant = false)
+		private bool AttachTransactionIfSet(TEntity changedItem, CollectionStates action)
 		{
 			if (Transaction.Current != null)
 			{
@@ -660,7 +663,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					_transactionalItems.Add(new TransactionalItem<TEntity>(changedItem, action));
 				}
+				return true;
 			}
+			return false;
 		}
 
 		private void _currentTransaction_TransactionCompleted(object sender, TransactionEventArgs e)
@@ -775,7 +780,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					if (_keepOriginalObject)
 						return s;
 					bool fullyLoaded;
-					return (TEntity) DbAccessLayer.CreateInstance(
+					return (TEntity)DbAccessLayer.CreateInstance(
 						_typeInfo,
 						new ObjectDataRecord(s, _config, 0),
 						out fullyLoaded,

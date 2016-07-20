@@ -65,7 +65,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Clear()
 		{
 			_dbAccess.Config.Dispose();
-			DbConfig.Clear();
 			_dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 			if (_dbAccess.DbAccessType == DbAccessType.MsSql)
 				_dbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
@@ -157,9 +156,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var insGuid = Guid.NewGuid().ToString();
 
 			_dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-
-			DbConfig.Clear();
-
 			_dbAccess.Config.SetConfig<ConfigLessUser>(f =>
 			{
 				f.SetClassAttribute(new ForModelAttribute(UsersMeta.TableName));
@@ -178,7 +174,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			Assert.IsNotNull(selectTest);
 			Assert.AreEqual(selectTest, insGuid);
-			DbConfig.Clear();
 		}
 
 		[Test]
@@ -219,7 +214,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void AutoGenFactoryTestNullableSimple()
 		{
-			DbConfig.Clear();
 
 			_dbAccess.Insert(new UsersAutoGenerateNullableConstructor());
 			var elements = _dbAccess.Select<UsersAutoGenerateNullableConstructor>();
@@ -232,7 +226,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void GeneratedTest()
 		{
-			DbConfig.Clear();
 
 			_dbAccess.Insert(new GeneratedUsers());
 			var elements = _dbAccess.Select<GeneratedUsers>();
@@ -245,7 +238,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void AutoGenFactoryTestSimple()
 		{
-			DbConfig.Clear();
 
 			_dbAccess.Insert(new UsersAutoGenerateConstructor());
 			var elements = _dbAccess.Select<UsersAutoGenerateConstructor>();
@@ -260,7 +252,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			if (_dbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
 
-			DbConfig.Clear();
 
 			_dbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 
@@ -291,7 +282,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			if (_dbAccess.DbAccessType != DbAccessType.MsSql)
 				return;
-			DbConfig.Clear();
 
 			_dbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 			_dbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
@@ -320,7 +310,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void ConfigLessInplace()
 		{
-			DbConfig.Clear();
 			var insGuid = Guid.NewGuid().ToString();
 
 			_dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
@@ -333,7 +322,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			var elements = _dbAccess.Select<ConfigLessUserInplaceConfig>();
 			Assert.AreEqual(elements.Length, 1);
-			DbConfig.Clear();
 		}
 
 		[Test]
@@ -444,7 +432,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void InsertDefaultValues()
 		{
-			new DbConfig(false)
+			_dbAccess.Config
 				.Include<Users>()
 				.SetConfig<Users>(conf =>
 				{

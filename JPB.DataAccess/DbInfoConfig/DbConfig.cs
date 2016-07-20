@@ -89,9 +89,9 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public new virtual DbConfig Include(Type t)
+		public new virtual DbConfig Include(Type type)
 		{
-			base.Include(t);
+			this.GetOrCreateClassInfoCache(type);
 			return this;
 		}
 

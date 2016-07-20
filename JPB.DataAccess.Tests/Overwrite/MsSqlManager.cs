@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 
@@ -54,7 +55,7 @@ namespace JPB.DataAccess.Tests
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
 				dbname);
 
-			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
+			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, null, new DbConfig(true));
 			try
 			{
 				expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
