@@ -1,7 +1,24 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace JPB.DataAccess.DbInfoConfig
 {
+	public enum CollisonDetectionMode
+	{
+		/// <summary>
+		/// No detection. Will may cause File access problems in Multithreaded Environments
+		/// </summary>
+		Non,
+		/// <summary>
+		/// Checks for Existing Dlls and tries to load them. If this failes an exception will be thrown
+		/// </summary>
+		Optimistic,
+		/// <summary>
+		/// Does not checks for existing dlls. Will allways create a new DLL
+		/// </summary>
+		Pessimistic,
+	}
+
 	/// <summary>
 	/// </summary>
 	public class FactoryHelperSettings
@@ -9,6 +26,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		public FactoryHelperSettings()
 		{
 			HideSuperCreation = true;
+			TempFileData = new ConcurrentBag<string>();
 		}
 
 		static FactoryHelperSettings()
@@ -24,6 +42,14 @@ namespace JPB.DataAccess.DbInfoConfig
 				"JPB.DataAccess.AdoWrapper",
 			};
 		}
+
+
+		internal ConcurrentBag<string> TempFileData { get; set; }
+
+		/// <summary>
+		///		Checks for precreated poco Elements
+		/// </summary>
+		public CollisonDetectionMode FileCollisonDetection { get; set; }
 
 		/// <summary>
 		///     Check and throw exception if not all propertys can be accessed by the Super class
@@ -48,11 +74,6 @@ namespace JPB.DataAccess.DbInfoConfig
 		///     Include PDB debug infos. Deactivate this during tests beacuse it can cause problems.
 		/// </summary>
 		public bool CreateDebugCode { get; set; }
-
-		/// <summary>
-		/// When a Factory is create inside an dll the factory can be reused. Deactivate this during tests beacuse it can cause problems.
-		/// </summary>
-		public bool ReuseFactorys { get; set; }
 
 		private static readonly string[] _defaultNamespaces;
 

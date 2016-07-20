@@ -7,6 +7,8 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -17,23 +19,20 @@ namespace JPB.DataAccess.DbInfoConfig
 	/// <summary>
 	///
 	/// </summary>
-	public class DbConfig : MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
+	public class DbConfig
+		: MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
-		static DbConfig()
-		{
-			ConstructorSettings = new FactoryHelperSettings();
-		}
-
 		public DbConfig(bool local = false)
 			: base(local)
 		{
+			ConstructorSettings = new FactoryHelperSettings();
 
 		}
 
 		/// <summary>
 		///     The settings that are used to create a DOM ctor
 		/// </summary>
-		public static FactoryHelperSettings ConstructorSettings { get; private set; }
+		public FactoryHelperSettings ConstructorSettings { get; private set; }
 
 		public new DbClassInfoCache GetOrCreateClassInfoCache(Type type)
 		{
@@ -63,7 +62,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			validator(new ConfigurationResolver<T>(this, GetOrCreateClassInfoCache(typeof(T))));
 			var model = GetOrCreateClassInfoCache(typeof(T));
 			model.Refresh(true);
-			model.CheckCtor();
+			model.CheckCtor(this);
 		}
 
 		/// <summary>
@@ -125,6 +124,27 @@ namespace JPB.DataAccess.DbInfoConfig
 				}
 			}
 			return this;
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			//TODO as the file is in use we cannot delete it
+			//while (this.ConstructorSettings.TempFileData.Count > 0)
+			//{
+			//	string item;
+			//	while (this.ConstructorSettings.TempFileData.TryPeek(out item))
+			//	{
+			//		try
+			//		{
+			//			File.Delete(item);
+			//		}
+			//		catch (Exception)
+			//		{
+			//			Trace.WriteLine(string.Format("File delete Failed {0}", item));
+			//		}
+			//	}
+			//}
 		}
 	}
 }

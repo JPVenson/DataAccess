@@ -82,7 +82,8 @@ namespace JPB.DataAccess.Tests
 			bool checkDatabase = expectWrapper.CheckDatabase();
 			Assert.IsTrue(checkDatabase);
 
-			DbConfig.ConstructorSettings.CreateDebugCode = false;
+			expectWrapper.Config.ConstructorSettings.FileCollisonDetection = CollisonDetectionMode.Pessimistic;
+			expectWrapper.Config.ConstructorSettings.CreateDebugCode = false;
 			expectWrapper.Multipath = true;
 			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
 			return expectWrapper;

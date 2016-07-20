@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -25,7 +25,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	public class DbClassInfoCache : ClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -175,12 +175,12 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			CreateSchemaMapping();
 		}
 
-		internal void CheckCtor()
+		internal void CheckCtor(DbConfig config)
 		{
 			var hasAutoGeneratorAttribute = Attributes.Any(f => f.Attribute is AutoGenerateCtorAttribute);
 			if (hasAutoGeneratorAttribute && Factory == null)
 			{
-				CreateFactory();
+				CreateFactory(config);
 			}
 		}
 
@@ -208,13 +208,13 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 				}
 				Refresh(true);
 			}
-			CheckCtor();
+			CheckCtor(config);
 		}
 
-		internal void CreateFactory()
+		internal void CreateFactory(DbConfig config)
 		{
 			if (!FullFactory)
-				Factory = FactoryHelper.CreateFactory(this, DbConfig.ConstructorSettings);
+				Factory = FactoryHelper.CreateFactory(this, config.ConstructorSettings);
 			FullFactory = true;
 		}
 

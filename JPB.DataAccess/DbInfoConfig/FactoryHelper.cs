@@ -9,6 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -406,6 +407,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			return writer.ToString();
 		}
 
+
 		[SecurityCritical]
 		internal static Func<IDataRecord, object> CreateFactory(DbClassInfoCache target, FactoryHelperSettings settings)
 		{
@@ -448,22 +450,38 @@ namespace JPB.DataAccess.DbInfoConfig
 			compiler.Members.Add(codeConstructor);
 
 			cp.GenerateInMemory = true;
-			cp.OutputAssembly =
+			if (settings.FileCollisonDetection == CollisonDetectionMode.Pessimistic)
+			{
+				cp.OutputAssembly =
+				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+				+ @"\"
+				+ Guid.NewGuid().ToString("N")
+				+ "_Poco.dll";
+			}
+			else
+			{
+				cp.OutputAssembly =
 				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
 				+ @"\" + target.Type.FullName
 				+ "_Poco.dll";
+			}
+
+			settings.TempFileData.Add(cp.OutputAssembly);
 
 			Assembly compiledAssembly;
 			ConstructorInfo[] constructorInfos = null;
 			TypeInfo targetType = null;
 
-			if (File.Exists(cp.OutputAssembly) && settings.ReuseFactorys)
+			if (File.Exists(cp.OutputAssembly) && settings.FileCollisonDetection == CollisonDetectionMode.Optimistic)
 			{
 				var bufferAssam = Assembly.Load(cp.OutputAssembly);
 				targetType = target.Type.GetTypeInfo();
 				var type = bufferAssam.DefinedTypes.FirstOrDefault(s => s == targetType);
 				if (targetType != null)
 					constructorInfos = targetType.GetConstructors();
+
+				if(constructorInfos == null)
+					throw new Exception(string.Format("A dll with a matching name for type: {0} was found and the FileCollisonDetection is Optimistic but no matching Constuctors where found", type.Name));
 			}
 
 			if (constructorInfos == null)
