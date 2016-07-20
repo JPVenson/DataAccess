@@ -166,9 +166,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					CollectionStates.Added);
 				Constraints.Check.Enforce(elementToAdd);
 				Constraints.Unique.Enforce(elementToAdd);
-				TriggersUsage.For.OnInsert(elementToAdd);
 				var id = SetNextId(elementToAdd);
-				Constraints.Default.Enforce(elementToAdd);
 
 				//Check Data integrity
 				if (!hasTransaction)
@@ -180,6 +178,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 						throw ex;
 					}
 				}
+				TriggersUsage.For.OnInsert(elementToAdd);
+				Constraints.Default.Enforce(elementToAdd);
 
 				if (!_keepOriginalObject)
 				{
