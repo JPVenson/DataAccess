@@ -9,7 +9,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		new bool ReposetoryCreated { get; set; }
 		bool IsMigrating { get; set; }
 	}
-	
+
 	public interface ILocalDbReposetoryBase : ICollection
 	{
 		LocalDbManager Database { get; }

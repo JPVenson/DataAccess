@@ -161,13 +161,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (!Contains(elementToAdd))
 			{
 				AttachTransactionIfSet(elementToAdd,
-					CollectionStates.Added,
-					true);
+					CollectionStates.Added);
 				Constraints.Check.Enforce(elementToAdd);
 				Constraints.Unique.Enforce(elementToAdd);
 				TriggersUsage.For.OnInsert(elementToAdd);
 				var id = SetNextId(elementToAdd);
 				Constraints.Default.Enforce(elementToAdd);
+
+				//Check Data integrity
+
+				var ex = EnforceCheckConstraints(elementToAdd);
+
+				if (ex != null)
+				{
+					throw ex;
+				}
+
 				if (!_keepOriginalObject)
 				{
 					bool fullyLoaded;
@@ -176,13 +185,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 						new ObjectDataRecord(item, _config, 0),
 						out fullyLoaded,
 						DbAccessType.Unknown);
-					if (!fullyLoaded)
+					if (!fullyLoaded || elementToAdd == null)
 					{
 						throw new InvalidOperationException(string.Format("The given type did not provide a Full ado.net constructor " +
 																		  "and the setting of the propertys did not succeed. " +
 																		  "Type: '{0}'", elementToAdd.GetType()));
 					}
 				}
+
 				if (!TriggersUsage.InsteadOf.OnInsert(elementToAdd))
 				{
 					Base.Add(id, elementToAdd);
@@ -244,22 +254,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 			var success = true;
 			lock (LockRoot)
 			{
+				AttachTransactionIfSet(item, CollectionStates.Removed);
 				TriggersUsage.For.OnDelete(item);
 				if (!TriggersUsage.InsteadOf.OnDelete(item))
 					success = Base.Remove(id);
-				var hasInvalidOp = AttachTransactionIfSet(item, CollectionStates.Removed);
+
+				Exception hasInvalidOp = this.EnforceCheckConstraints(item);
+
 				try
 				{
+					if (hasInvalidOp != null)
+						throw hasInvalidOp;
 					TriggersUsage.After.OnDelete(item);
 				}
 				catch (Exception e)
 				{
-					hasInvalidOp = ExceptionDispatchInfo.Capture(e);
+					hasInvalidOp = e;
 				}
 				if (hasInvalidOp != null)
 				{
 					Base.Add(id, item);
-					hasInvalidOp.Throw();
+					throw hasInvalidOp;
 				}
 				Constraints.Unique.ItemRemoved(item);
 			}
@@ -348,7 +363,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				//try upcasting
 				local = Base.ContainsKey(Convert.ChangeType(fkValueForTableX, _typeInfo.PrimaryKeyProperty.PropertyType));
 			}
-			
+
 			return local;
 		}
 
@@ -611,7 +626,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return null;
 		}
 
-		private ExceptionDispatchInfo AttachTransactionIfSet(TEntity changedItem, CollectionStates action,
+		private void AttachTransactionIfSet(TEntity changedItem, CollectionStates action,
 			bool throwInstant = false)
 		{
 			if (Transaction.Current != null)
@@ -645,18 +660,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					_transactionalItems.Add(new TransactionalItem<TEntity>(changedItem, action));
 				}
-
-				return null;
 			}
-			var ex = EnforceCheckConstraints(changedItem);
-
-			if (throwInstant && ex != null)
-			{
-				throw ex;
-			}
-			if (ex != null)
-				return ExceptionDispatchInfo.Capture(ex);
-			return null;
 		}
 
 		private void _currentTransaction_TransactionCompleted(object sender, TransactionEventArgs e)

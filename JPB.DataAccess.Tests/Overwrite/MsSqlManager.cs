@@ -55,7 +55,14 @@ namespace JPB.DataAccess.Tests
 				dbname);
 
 			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString);
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
+			try
+			{
+				expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
+			}
+			catch (Exception)
+			{
+				Console.WriteLine("Db does not exist");
+			}
 
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
