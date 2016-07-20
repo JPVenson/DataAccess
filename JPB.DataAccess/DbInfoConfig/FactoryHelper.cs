@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -16,9 +16,11 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Security;
+using System.Text;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CSharp;
@@ -517,17 +519,18 @@ namespace JPB.DataAccess.DbInfoConfig
 
 				if (compileAssemblyFromDom.Errors.Count > 0 && !settings.EnforceCreation)
 				{
-					var ex =
-						new InvalidDataException(string.Format("There are {0} errors due compilation. See Data",
+					var sb = new StringBuilder(string.Format("There are {0} errors due compilation.",
 							compileAssemblyFromDom.Errors.Count));
-
-					ex.Data.Add("Object", compileAssemblyFromDom);
 					int errNr = 0;
 					foreach (CompilerError error in compileAssemblyFromDom.Errors)
 					{
-						ex.Data.Add(errNr++ +
-							error.ErrorNumber + ":" + error.Column + "," + error.Line, error.ErrorText);
+						sb.AppendLine(errNr++ + error.ErrorNumber + ":" + error.Column + "," + error.Line + " -> " + error.ErrorText);
 					}
+					var ex =
+						new InvalidDataException(sb.ToString());
+
+					ex.Data.Add("Object", compileAssemblyFromDom);
+
 					throw ex;
 				}
 
