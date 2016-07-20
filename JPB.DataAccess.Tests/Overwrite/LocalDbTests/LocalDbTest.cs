@@ -75,7 +75,8 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 					}
 					else
 					{
-						_users.Remove(firstOrDefault);
+						if (firstOrDefault != null)
+							_users.Remove(firstOrDefault);
 					}
 					foreach (var userse in _users)
 					{
