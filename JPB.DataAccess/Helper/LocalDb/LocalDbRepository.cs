@@ -110,6 +110,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			get
 			{
+				if (primaryKey == null) throw new ArgumentNullException("primaryKey");
 				TEntity value;
 				if (Base.TryGetValue(primaryKey, out value))
 					return value;
@@ -156,6 +157,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <param name="item"></param>
 		public virtual void Add(TEntity item)
 		{
+			if (item == null) throw new ArgumentNullException("item");
 			var elementToAdd = item;
 			CheckCreatedElseThrow();
 			if (!Contains(elementToAdd))
@@ -229,6 +231,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public bool Contains(TEntity item)
 		{
+			if (item == null) throw new ArgumentNullException("item");
 			CheckCreatedElseThrow();
 			var pk = GetId(item);
 			var local = Base.Contains(new KeyValuePair<object, TEntity>(pk, (TEntity)item));
@@ -237,6 +240,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public void CopyTo(TEntity[] array, int arrayIndex)
 		{
+			if (array == null) throw new ArgumentNullException("array");
 			lock (SyncRoot)
 			{
 				var values = ToArray();
@@ -251,6 +255,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <returns></returns>
 		public bool Remove(TEntity item)
 		{
+			if (item == null) throw new ArgumentNullException("item");
+
 			CheckCreatedElseThrow();
 			var success = true;
 			lock (LockRoot)
@@ -339,6 +345,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <param name="index"></param>
 		public virtual void CopyTo(Array array, int index)
 		{
+			if (array == null) throw new ArgumentNullException("array");
 			lock (LockRoot)
 			{
 				lock (SyncRoot)
@@ -361,6 +368,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		public virtual bool ContainsId(object fkValueForTableX)
 		{
+			if (fkValueForTableX == null) throw new ArgumentNullException("fkValueForTableX");
 			var local = Base.ContainsKey(fkValueForTableX);
 			if (!local)
 			{
@@ -434,6 +442,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected virtual void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config,
 			bool useOrignalObjectInMemory)
 		{
+			if (keyGenerator == null) throw new ArgumentNullException("keyGenerator");
+			if (config == null) throw new ArgumentNullException("config");
 			if (_config != null)
 				throw new InvalidOperationException("Multibe calls of Init are not supported");
 
@@ -745,6 +755,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <returns></returns>
 		public virtual bool Update(TEntity item)
 		{
+			if (item == null) throw new ArgumentNullException("item");
 			TriggersUsage.For.OnUpdate(item);
 			Constraints.Check.Enforce(item);
 			Constraints.Unique.Enforce(item);
