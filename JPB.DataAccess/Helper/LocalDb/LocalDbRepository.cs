@@ -442,7 +442,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected virtual void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config,
 			bool useOrignalObjectInMemory)
 		{
-			if (keyGenerator == null) throw new ArgumentNullException("keyGenerator");
 			if (config == null) throw new ArgumentNullException("config");
 			if (_config != null)
 				throw new InvalidOperationException("Multibe calls of Init are not supported");
