@@ -252,10 +252,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public bool Remove(TEntity item)
 		{
 			CheckCreatedElseThrow();
-			var id = GetId(item);
 			var success = true;
 			lock (LockRoot)
 			{
+				var id = GetId(item);
 				var hasTransaction = AttachTransactionIfSet(item, CollectionStates.Removed);
 				TriggersUsage.For.OnDelete(item);
 				if (!TriggersUsage.InsteadOf.OnDelete(item))
