@@ -1,0 +1,738 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Dataaccess by JPVenson</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Dataaccess</h1>
+        <p>This is Yet another ORM that uses various Technology&#39;s without 3rd Party to Map database output to POCOs. </p>
+        <p class="view"><a href="https://github.com/JPVenson/DataAccess">View the Project on GitHub <small>JPVenson/DataAccess</small></a></p>
+        <ul>
+          <li><a href="https://github.com/JPVenson/DataAccess/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/JPVenson/DataAccess/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/JPVenson/DataAccess">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><a href="https://ci.appveyor.com/project/JPVenson/dataaccess/branch/master"><img src="https://ci.appveyor.com/api/projects/status/vatab1g9oyo6sriq/branch/master?svg=true" alt="Build status"></a></p>
+
+<p>This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit <a href="http://creativecommons.org/licenses/by-sa/4.0/">http://creativecommons.org/licenses/by-sa/4.0/</a>.</p>
+
+<p>You can also contact me on gitter at <a href="https://gitter.im/JPVenson/DataAccess">https://gitter.im/JPVenson/DataAccess</a>.</p>
+
+<h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>This will be a short article about my multi strategy ADO.NET wrapper that uses FactoryMethods,
+Reflection or a combination of both. It is simple to use,
+but a complex and powerful solution for simple and fast (fast in Development and usage) database access.</p>
+
+<p>To be clear, this is designed to be a helper for very simple work. It is not created to be an EF alternative!</p>
+
+<h2>
+<a id="background" class="anchor" href="#background" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Background</h2>
+
+<p>Well, the background of this project was that most of my colleagues worked with a very old and oversized solution that needed a lot of maintenance and changes when we started with a new project and even for simple statements like:</p>
+
+<div class="highlight highlight-source-sql"><pre><span class="pl-k">SELECT</span> <span class="pl-k">*</span> <span class="pl-k">FROM</span> Foo</pre></div>
+
+<p>I was forced to manually open a connection, run the statement and parse the IDataReader. I thought this is absolutely not necessary because: Most of the time, the POCOs are designed like the database with properties that are named like Column names and so on. So, this was a task I’d tried to automate.</p>
+
+<p>I'd like to present my solution and I hope to get some nice ideas from you.</p>
+
+<h1>
+<a id="using-the-code" class="anchor" href="#using-the-code" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using the Code</h1>
+
+<p>The main parts are the IDatabase, IDatabaseStrategy and for the Main Reflection and loading the DbAccessLayer.</p>
+
+<p>IDatabase defines a ínterface that maintains a Connection, this means to open a Connection, keep it open as long as it is necessary and then close it. In IDatabase, there is an IDatabaseStrategy that is used to connect to certain databases like MySQL, MsSql, OleDB and so on. The lib supports MsSQL, Obdc, OleDb from the hood, but in others, in the project included Assemblies, there are also implementations for MySQL and SqLite.</p>
+
+<p>As I mentioned, there are multiple ways to load or submit data from and to a database.</p>
+
+<p>For example: the simple Select from a database. We expect to be a database that is called Northwind and a Table Foo.</p>
+
+<p>Create an Object that is called like your Table (Foo)
+Define properties that are named and of the same type like a Column
+Create a new Object of DbAccessLayer with a proper connection string Call</p>
+
+<div class="highlight highlight-source-cs"><pre> Select&lt;Foo&gt;
+    ();
+    ```
+In these <span class="pl-c1">4</span> steps, you will execute a complete <span class="pl-k">select</span> to the database and then the result will be mapped with Reflection to the Object.
+
+```C#
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">FooTest</span>
+{
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span>
+{
+<span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+<span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">FooName</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}
+
+<span class="pl-k">public</span> <span class="pl-en">FooTest</span>()
+{
+<span class="pl-k">var</span> accessLayer = <span class="pl-k">new</span> DbAccessLayer(DbTypes.MsSql,
+<span class="pl-s"><span class="pl-pds">"</span>Data Source=(localdb)<span class="pl-cce">\\</span>Projects;Initial Catalog=Northwind;Integrated Security=True;<span class="pl-pds">"</span></span>);
+<span class="pl-k">var</span> @select = accessLayer.Select&lt;Foo&gt;
+();
+}
+}</pre></div>
+
+<p>There are A LOT of overloads of Select, SelectNative, SelectWhere and RunPrimetivSelect. Almost all methods with a Generic Parameter have a corresponding method that accepts a Type instance.</p>
+
+<p>In all examples, when an instance of DbAccessLayer is needed, it will be represented by the variable.</p>
+
+<p>accessLayer
+and in the testing, an MsSQL Db is used and its syntax.</p>
+
+<h1>
+<a id="creating-and-customizing-a-poco" class="anchor" href="#creating-and-customizing-a-poco" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating and Customizing a POCO</h1>
+
+<p>This is primarily an Object Relationship Mapper. That means that this lib always tries to map the output that is returned by a Query into an Object that has multiple properties. You have some attributes that define certain parts and functions of that object.</p>
+
+<p>As seen in the example, you can skip all extra configuration when you follow some rules. To "bypass" these rules like the Rule that a Class must be named the same, then the Table you can set an Attribute.</p>
+
+<h2>
+<a id="formodel" class="anchor" href="#formodel" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ForModel</h2>
+
+<div class="highlight highlight-source-cs"><pre>[ForModel(<span class="pl-s"><span class="pl-pds">"</span>Foo<span class="pl-pds">"</span></span>)]
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">NotFooButSomeStrangeNameYouDoNotLike</span>
+{
+<span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+[ForModel(<span class="pl-s"><span class="pl-pds">"</span>FooName<span class="pl-pds">"</span></span>)]
+<span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">Metallica4tw</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}</pre></div>
+
+<p>The ForModel attribute is allowed on Class | Table and on Property | Column level. It gives the Processor the information that the name that is used in the POCO must be mapped to the Table.</p>
+
+<h2>
+<a id="primarykey" class="anchor" href="#primarykey" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>PrimaryKey</h2>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span>
+{
+[PrimaryKey]
+<span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+<span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">FooName</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}</pre></div>
+
+<p>The PrimaryKey attribute marks a Property ... what a wonder, to be an PrimaryKey on the database. With this function, you can call:</p>
+
+<div class="highlight highlight-source-cs"><pre>accessLayer.Select&lt;Foo&gt;
+(<span class="pl-c1">155151</span> <span class="pl-c">/*This is the PrimaryKey we are looking for*/</span>);</pre></div>
+
+<h2>
+<a id="insertignore" class="anchor" href="#insertignore" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>InsertIgnore</h2>
+
+<p>Marks a Property to be not Automatically included into a InsertStatement. Per default, the PrimaryKey inherits from this attribute.</p>
+
+<h2>
+<a id="foreignkey-work-in-progress" class="anchor" href="#foreignkey-work-in-progress" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ForeignKey (Work In Progress)</h2>
+
+<p>Well, some good long day when my work was not so hard, I’d thought that it would be fun, when it would be nice that the Automatic process could load NavigationPropertys too. The Term NavigationProperty is from EF and defined as:</p>
+
+<p>"Represents the navigation from one entity type to another entity type in the conceptual model."</p>
+
+<p>So a NavProperty is not more than an Property that is of the Type that another Object and that Relation is described with an ForeignKey.</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">FooTest</span>
+{
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span>
+{
+[PrimaryKey]
+<span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+<span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">FooName</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+<span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Image_Id</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+<span class="pl-c">/// &lt;<span class="pl-ent">summary</span>&gt;</span>
+<span class="pl-c">/// A Property that is of the type that is referred to</span>
+<span class="pl-c">/// 1 TO 1 relation</span>
+<span class="pl-c">///</span>
+&lt;/summary&gt;
+[ForeignKey(<span class="pl-s"><span class="pl-pds">"</span>Image_Id<span class="pl-pds">"</span></span>)]
+<span class="pl-k">public</span> <span class="pl-k">virtual</span> Image <span class="pl-en">img</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+<span class="pl-c">/// &lt;<span class="pl-ent">summary</span>&gt;</span>
+<span class="pl-c">/// A Property that is a List of the type that is referred to</span>
+<span class="pl-c">/// 1 TO Many relation</span>
+<span class="pl-c">///</span>
+&lt;/summary&gt;
+[ForeignKey(<span class="pl-s"><span class="pl-pds">"</span>Image_Id<span class="pl-pds">"</span></span>)]
+<span class="pl-k">public</span> <span class="pl-k">virtual</span> IEnumerable&lt;Image&gt;
+<span class="pl-en">imgs</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}
+
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Image</span>
+{
+[PrimaryKey]
+<span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Image</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+<span class="pl-k">public</span> <span class="pl-k">byte</span>[] <span class="pl-en">ImageData</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}
+}</pre></div>
+
+<p>As written, this is a feature that has its known issues / bugs / problems:</p>
+
+<p>The Select is one time, changes that are made to the collection are not observed by the manager.
+The Foreign POCO must have exactly one PrimaryKey property, when it finds more than one, the first will be taken.
+Only Egar loading is supported. When loading a big object tree, all objects are loaded at once.</p>
+
+<h2>
+<a id="loadnotimplimenteddynamic" class="anchor" href="#loadnotimplimenteddynamic" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>LoadNotImplimentedDynamic</h2>
+
+<p>When the Select statement returns more information than build in the POCO, this property
+(must have this signature):</p>
+
+<div class="highlight highlight-source-cs"><pre>[LoadNotImplimentedDynamic]
+<span class="pl-k">public</span> IDictionary&lt;<span class="pl-k">string</span>, <span class="pl-k">object</span>&gt;
+UnresolvedObjects { <span class="pl-k">set</span>; <span class="pl-k">get</span>; }</pre></div>
+
+<p>(Property Name does not matter) it will be filled with the data (see FactoryMethods).</p>
+
+<h2>
+<a id="ignorereflection" class="anchor" href="#ignorereflection" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>IgnoreReflection</h2>
+
+<p>Simple: as the XmlIgnore attribute, it marks a Property to not be indexed and accessed by any function of the Mapper. Even if the result contains a Column that matches this property, the property will not be used.</p>
+
+<h2>
+<a id="rowversion" class="anchor" href="#rowversion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>RowVersion</h2>
+
+<p>Defines a RowVersion attribute. When defined, all calls of <code>accessLayer.Update()</code> and <code>accessLayer.Refresh()</code> will use this Property to check for changes.</p>
+
+<h3>
+<a id="loading-strategies" class="anchor" href="#loading-strategies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Loading Strategies</h3>
+
+<p>There are 2 ways of loading with factory methods defined inside the POCO or automatically with customization over attributes. The 2nd way will be the fallback when there are no or not the right Factory available.</p>
+
+<h2>
+<a id="constructor-and-method-injection" class="anchor" href="#constructor-and-method-injection" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Constructor and Method Injection</h2>
+
+<p>The manager can detect a method to pull statements from it. For example, how you define a method that creates a Select statement without parameter:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span>
+{
+<span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+<span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">FooName</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+[SelectFactoryMehtod]
+<span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">string</span> <span class="pl-en">CreateSelectStatement</span>()
+{
+<span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">"</span>SELECT * FROM Foo<span class="pl-pds">"</span></span>;
+}
+}</pre></div>
+
+<p>When some method is defined, the manager will always use this method to create a Select statement and he will skip any other reflection based creation.</p>
+
+<p>For Selects, this is also possible on Class level:</p>
+
+<div class="highlight highlight-source-cs"><pre>[SelectFactory(<span class="pl-s"><span class="pl-pds">"</span>SELECT * FROM Foo<span class="pl-pds">"</span></span>)]
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span></pre></div>
+
+<p>But only Selects must be Public and Static. Update, Insert and Delete Factory’s must be Not static. You can return a string OR an instance of IQueryFactoryResult. To prevent SqlInjection, this is the HEAVILY recommended way when you work with parameters.</p>
+
+<p>An example that uses IQueryFactoryResult for Update and Delete and a String for Select:</p>
+
+<div class="highlight highlight-source-cs"><pre>[SelectFactory(<span class="pl-s"><span class="pl-pds">"</span>SELECT * FROM Foo<span class="pl-pds">"</span></span>)]
+<span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span>
+{
+    <span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+    <span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">FooName</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+    [DeleteFactoryMethod]
+    <span class="pl-k">public</span> IQueryFactoryResult <span class="pl-en">CreateDeleteStatement</span>()
+    {
+        <span class="pl-k">var</span> result = <span class="pl-k">new</span> QueryFactoryResult(<span class="pl-s"><span class="pl-pds">"</span>DELETE FROM Foo WHERE Id_Foo = @1<span class="pl-pds">"</span></span>,
+        <span class="pl-k">new</span> QueryParameter()
+        {
+        Name = <span class="pl-s"><span class="pl-pds">"</span>@1<span class="pl-pds">"</span></span>, Value = Id_Foo
+    });
+    <span class="pl-k">return</span> result;
+}
+
+[UpdateFactoryMethod]
+<span class="pl-k">public</span> IQueryFactoryResult <span class="pl-en">CreateSomeKindOfUpdate</span>()
+{
+    <span class="pl-k">var</span> result = <span class="pl-k">new</span> QueryFactoryResult(<span class="pl-s"><span class="pl-pds">"</span>Update Foo SET FooName = @param WHERE Id_Foo = @1<span class="pl-pds">"</span></span>,
+    <span class="pl-k">new</span> QueryParameter()
+    {
+        Name = <span class="pl-s"><span class="pl-pds">"</span>@1<span class="pl-pds">"</span></span>,
+        Value = Id_Foo
+    },
+    <span class="pl-k">new</span> QueryParameter()
+    {
+        Name = <span class="pl-s"><span class="pl-pds">"</span>@param<span class="pl-pds">"</span></span>,
+        Value = FooName
+    });
+    <span class="pl-k">return</span> result;    
+}</pre></div>
+
+<p>It is possible to transfer parameters from the caller to the function. When the caller provides you parameters, they will be given to the function that has the same signature then the parameter. This idea is more or less shamelessly stolen from the ASP.NET MVC approach.</p>
+
+<p>After version 2.0.0.14 you can also use an QueryBuilder or QueryBuilderX on a void Method to create your Statements.</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">FooTest</span>
+{
+    <span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span>
+    {
+        <span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+        <span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">FooName</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+        [UpdateFactoryMethod]
+        <span class="pl-k">public</span> <span class="pl-k">static</span> IQueryFactoryResult <span class="pl-en">CreateSomeKindOfUpdate</span>(<span class="pl-k">string</span> <span class="pl-smi">someExternalInfos</span>)
+        {
+            <span class="pl-k">if</span> (<span class="pl-k">string</span>.IsNullOrEmpty(someExternalInfos))
+            <span class="pl-k">return</span> <span class="pl-c1">null</span>; <span class="pl-c">//Noting to do here, use the Automatic loading</span>
+
+            <span class="pl-k">var</span> result = <span class="pl-k">new</span> QueryFactoryResult
+            (<span class="pl-s"><span class="pl-pds">"</span>SELECT * FROM Foo f WHERE f.FooName = @info<span class="pl-pds">"</span></span>, 
+            <span class="pl-k">new</span> QueryParameter()
+            {
+                Value = someExternalInfos,
+                Name = <span class="pl-s"><span class="pl-pds">"</span>@info<span class="pl-pds">"</span></span>
+            });
+            <span class="pl-k">return</span> result;
+    }
+
+
+    <span class="pl-k">public</span> <span class="pl-en">FooTest</span>()
+    {
+        <span class="pl-k">var</span> access = <span class="pl-k">new</span> DbAccessLayer(DbTypes.MsSql, <span class="pl-s"><span class="pl-pds">"</span>Data Source=(localdb)<span class="pl-cce">\\</span>Projects;Initial Catalog=Northwind;Integrated Security=True;<span class="pl-pds">"</span></span>);
+        <span class="pl-k">var</span> @select = access.Select&lt;Foo&gt;(<span class="pl-s"><span class="pl-pds">"</span>SomeName<span class="pl-pds">"</span></span>);
+    }
+}</pre></div>
+
+<p>The string that we provided to...</p>
+
+<div class="highlight highlight-source-cs"><pre>access.Select&lt;Foo&gt;(<span class="pl-s"><span class="pl-pds">"</span>SomeName<span class="pl-pds">"</span></span>);</pre></div>
+
+<p>...will be given to the Select function to create a statement and this statement will be executed.</p>
+
+<p>It is also possible to control the Loading from a DataRecord to your class by using a Constructor that accepts these parameters:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">Foo</span>
+{
+    [ObjectFactoryMethod]
+    <span class="pl-k">public</span> <span class="pl-en">Foo</span>(<span class="pl-k">IDataRecord</span> <span class="pl-smi">record</span>)
+    {
+        Id_Foo = (<span class="pl-k">long</span>)record[<span class="pl-s"><span class="pl-pds">"</span>Id_Foo<span class="pl-pds">"</span></span>];
+        FooName = (<span class="pl-k">string</span>)record[<span class="pl-s"><span class="pl-pds">"</span>FooName<span class="pl-pds">"</span></span>];
+    }
+
+    <span class="pl-k">public</span> <span class="pl-k">long</span> <span class="pl-en">Id_Foo</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+    <span class="pl-k">public</span> <span class="pl-k">string</span> <span class="pl-en">FooName</span> { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}</pre></div>
+
+<p>When it is necessary to create a new Instance of that Poco, there is always a IDataRecord to load it from so via Constructor injection, we find this one and provide him the data.</p>
+
+<h2>
+<a id="xml-field-loading" class="anchor" href="#xml-field-loading" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>XML Field Loading</h2>
+
+<p>There is a new attribute:</p>
+
+<h2>
+<a id="fromxmlattribute" class="anchor" href="#fromxmlattribute" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>FromXmlAttribute</h2>
+
+<p>It allows a simple loading of Objects from an XML Serialized Column. The attribute contains two parameters:</p>
+
+<p>FieldName [Required]
+LoadStrategy [Optional]
+The first Param has the same effect as the ForModel one.</p>
+
+<p>The last Param defines the usage of this Property.</p>
+
+<p>Should it be included into a Select Statement =&gt; Column exists</p>
+
+<p>Should it be excluded from Select Statement =&gt; Column does not exist but will be added by Statement</p>
+
+<p>In both cases, if the Column exists in the result stream, it will be tried to deserialized into the type that the Property defines. If this is an implementation or IEnumerable
+    , the result should also be formatted as list.</p>
+
+<pre><code># Attributeless Configuration
+As suggested from user Paulo Zemek, I modified the Reflection only MetaData API to support runtime manipulation of the Metadata.
+
+To configurate any object, you have to instantiate a Config class. It acts as an Fassade to the internal API.
+
+To extend the reflection based behavior, you have to call the SetConfig method on any Config instance. In the given callback, you have access to several methods that will add the attribute information like ForModel and so on. All helper methods are using the 3 base methods:
+
+```C#
+public void SetPropertyAttribute&lt;TProp&gt;
+    (Expression&lt;Func&lt;T, TProp&gt;&gt; exp, DataAccessAttribute attribute)
+</code></pre>
+
+<p>{
+    var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
+    var info = ConfigHelper.GetPropertyInfoFromLabda(exp);
+    var fod = classInfo.GetOrCreatePropertyCache(info);
+    fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+}</p>
+
+<pre><code>
+```C#
+public void SetMethodAttribute&lt;TProp&gt;(Expression&lt;Func&lt;T, TProp&gt;&gt; exp, DataAccessAttribute attribute)
+{
+    var classInfo = config.GetOrCreateClassInfoCache(typeof(T));
+    var info = ConfigHelper.GetMehtodInfoFromLabda(exp);
+    var fod = classInfo.MethodInfoCaches.First(s =&gt; s.MethodName == info);
+    fod.AttributeInfoCaches.Add(new AttributeInfoCache(attribute));
+}
+</code></pre>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">void</span> SetClassAttribute(DataAccessAttribute attribute)
+{
+    <span class="pl-k">var</span> classInfo = config.GetOrCreateClassInfoCache(<span class="pl-k">typeof</span>(T));
+    classInfo.AttributeInfoCaches.Add(<span class="pl-k">new</span> AttributeInfoCache(attribute));
+}</pre></div>
+
+<p>You could use these methods directly to add data to the internal ConfigStore or the helper one:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">void</span> SetForModelKey&lt;TProp&gt;(Expression&lt;Func&lt;T, TProp&gt;&gt; exp, <span class="pl-k">string</span> <span class="pl-k">value</span>)
+{
+    SetPropertyAttribute(exp, <span class="pl-k">new</span> ForModel(<span class="pl-k">value</span>));
+}</pre></div>
+
+<p>In one of the next releases, I will provide you a way for loading and store all these data in XML. All type information can be accessed by using the static methods in the Config class. That would allow you to reuse the type information.</p>
+
+<p>All type access parts as ThreadSave.</p>
+
+<p>There are two ways in managing configs:</p>
+
+<ul>
+<li>From Outside</li>
+</ul>
+
+<p>You can call anywhere in your code:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">new</span> Config().SetConfig&lt;T&gt;(s =&gt; { ... })</pre></div>
+
+<p>This allows you to configurate a well known POCO in all ways. The generated information will be added to the LocalConfig Store.</p>
+
+<ul>
+<li>From Inside</li>
+</ul>
+
+<p>Hurray! A new Attribute is there! The ConfigMehtodAttribute. You can decorate a static method with its attribute that will take a Config instance and then it allows you to configurate yourself inside the class itself.</p>
+
+<h3>
+<a id="speed-test" class="anchor" href="#speed-test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Speed Test</h3>
+
+<p>Lately, I was evaluating YAORM against other ORM's with Frans Bouma's RawBencher. I recognize that the current version has some extremely critical problems with some ... let's call it "Non optimal POCO" usage. As YAORM depends heavily on a ADO.NET conform constructor and only uses Reflection as some kind of fallback method, this way was extremely slow. In its test, it took about 6,000 ms to enumerate all 31465 entries. That was darn slow compared to EntityFramework, and don't even mention Dapper ;-).</p>
+
+<p>So I made some major improvements to these POCOs that are not self containing and ADO.NET Constructor.</p>
+
+<blockquote>
+<p>ADO.NET Constructor:</p>
+
+<p>I was talking about an Ado.net conform Ctor. This kind of Constructor is defined by an POCO and takes an instance of IDataReader | IDataRecord and reads all necessary fields from the result set and then sets and/or converts these values to its properties.</p>
+</blockquote>
+
+<p>After I made the changes to the existing code, including auto code creation due Runtime and the usage of compiled lambdas instead of the heavy usage of the reflection API, I was extremely surprised. From 6,000 ms down to 320 ms. With this test, I also made some improvements and changes to the new Config API like:</p>
+
+<h3>
+<a id="static-factory-setting" class="anchor" href="#static-factory-setting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Static Factory setting</h3>
+
+<p>Multibe pre-defined setter for Attributes on Properties
+Control over the InMemory ADO.NET Ctor creation</p>
+
+<h1>
+<a id="internal-reflection" class="anchor" href="#internal-reflection" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Internal Reflection</h1>
+
+<p>The ORM uses an Internal Reflection/IL/Expressions/CodeDom provider to generate most of the needed code due runtime.</p>
+
+<p>There is a mixture of these technologys because some parts where just to timeconsuming to be implimented in IL. That is true for the CodeDOM part which are used to generate an Constructor due Runtime to load entitys. This was first used only by the EntityCreator but then also modifyed to be called due runtime. All reflection based work is located inside the MetaAPI and derived for the ORM.</p>
+
+<blockquote>
+<p>The MetaAPI uses IL and Expressions to compile accessors for Propertys and Methods. Methods are wrapped into an IL DynamicMethod and propertys are wrapped in Expressions</p>
+</blockquote>
+
+<p>In future the basic Reflection API (MetaAPI) will may be moved to an very own Assambly because it is desgined to be generic. The most basic store to access everything is the </p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> MetaInfoStore&lt;TClass, TProp, TAttr, TMeth, TCtor, TArg&gt; : 
+    IDisposable
+    <span class="pl-k">where</span> TClass : <span class="pl-k">class</span>, IClassInfoCache&lt;TProp, TAttr, TMeth, TCtor, TArg&gt;, <span class="pl-k">new</span>()
+    <span class="pl-k">where</span> TProp  : <span class="pl-k">class</span>, IPropertyInfoCache&lt;TAttr&gt;, <span class="pl-k">new</span>()
+    <span class="pl-k">where</span> TAttr  : <span class="pl-k">class</span>, IAttributeInfoCache, <span class="pl-k">new</span>()
+    <span class="pl-k">where</span> TMeth  : <span class="pl-k">class</span>, IMethodInfoCache&lt;TAttr, TArg&gt;, <span class="pl-k">new</span>()
+    <span class="pl-k">where</span> TCtor  : <span class="pl-k">class</span>, IConstructorInfoCache&lt;TAttr, TArg&gt;, <span class="pl-k">new</span>() 
+    <span class="pl-k">where</span> TArg   : <span class="pl-k">class</span>, IMethodArgsInfoCache&lt;TAttr&gt;, <span class="pl-k">new</span>()</pre></div>
+
+<p>As is said it is desgined to be generic and reusable. It contains a class to convert an Type instance to an instance of TClass by using the GetOrCreateClassInfoCache method. This method is of course also Recusiv and aware of that, it will ether give you an instance from the local store or enumerates all "Most used Infos". That means it will enumerate throu all Propertys, Methods, Arguments, Constructors and Attributes on each of them and store them. This class is optional ThreadSave by using the EnableThreadSafety property. This optional property was introduced to ensure a maximum of Performance.</p>
+
+<p>This class can be ether Global or InstanceLocal. By using the constructor</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> MetaInfoStore(<span class="pl-k">bool</span> isGlobal)</pre></div>
+
+<p>You can spezify that. To ensure a maximum of Performance you can also Impliment for example the IPropertyInfoCache and override the Init mehtod to define new Attributes that are common accessed. This brings a huge performance advance because otherwise you have to loop through the collection of all Attributes to find the desired one what, of course is timeconsuming. Take a look into the DbPropertyInfoCache to see examples.</p>
+
+<p>An other good reason to use this, is the advantage of adding "fake" propertys and Attributes due Runtime by simply adding them to the collections. This feature is used by the ConfigAttribute to extend POCOs. Each part of the YAORM is using this Store and if you add a new Property to it, it will find it. For example the MethodInfoCache is implimenting an Constructor:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">internal</span> MethodInfoCache(Func&lt;<span class="pl-k">object</span>, <span class="pl-k">object</span>[], <span class="pl-k">object</span>&gt; fakeMehtod, <span class="pl-k">string</span> name = <span class="pl-c1">null</span>, params TAtt[] attributes)</pre></div>
+
+<p>This allows you to add each method you want to each class without using .net Tricks such as dynamic's.</p>
+
+<h1>
+<a id="localdbrepository" class="anchor" href="#localdbrepository" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>LocalDbRepository</h1>
+
+<p>Its an Collection that will enforce ForginKeyDeclarationsAttributes in future also ForginKeyAttributes. With this class you can define local Databases inside a scope. All "tables" inside this scope will be validates if you add any object to it and if you try to add an Entity to it which would violate ForeignKey's an exception is thrown.</p>
+
+<p>First you have to setup an DatabaseScope</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">using</span> (new DatabaseScope())
+{
+
+}</pre></div>
+
+<p>This scope will be an Container and validates multibe Tables that are defined inside the Scope. This syntax was takes from the TransactionScope that exists within the .netFramework. Then you have to define tables by creating them inside the scope</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">using</span> (new DatabaseScope())
+{
+    _books = <span class="pl-k">new</span> LocalDbReposetory&lt;Book&gt;();
+    _images = <span class="pl-k">new</span> LocalDbReposetory&lt;Image&gt;();
+}</pre></div>
+
+<p>The defintion for Book and Image is folloring:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> Image
+{
+    [PrimaryKey]
+    <span class="pl-k">public</span> <span class="pl-k">long</span> ImageId { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+    <span class="pl-k">public</span> <span class="pl-k">string</span> Text { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+    [ForeignKeyDeclaration(<span class="pl-s"><span class="pl-pds">"</span>BookId<span class="pl-pds">"</span></span>, <span class="pl-k">typeof</span>(Book))]
+    <span class="pl-k">public</span> <span class="pl-k">int</span> IdBook { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}</pre></div>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">class</span> Book
+{
+    [PrimaryKey]
+    <span class="pl-k">public</span> <span class="pl-k">int</span> BookId { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+
+    <span class="pl-k">public</span> <span class="pl-k">string</span> BookName { <span class="pl-k">get</span>; <span class="pl-k">set</span>; }
+}</pre></div>
+
+<p>It is important to decorate an PrimaryKeyAttribute and also an ForeignKeyDeclarationAttribute to define valid connections between both Tables. You can ether use Attributes or an Config method (s.a). The first argument on the ForgeinKeyDeclarationAttribute will be soon obsolete. You can use the Constructor of the LocalDbReposetory to define an PrimaryKey generator if you use PrimaryKeys that are not of type of Long, Int, Guid or if you want to define other Autoincriment by 1 and starting with 1.</p>
+
+<h2>
+<a id="version-20180" class="anchor" href="#version-20180" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Version 2.0.180</h2>
+
+<h3>
+<a id="trigger" class="anchor" href="#trigger" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Trigger</h3>
+
+<p>In the latest version you can hook all DDL triggers (MsSQL) on a local collection. Supported are:</p>
+
+<ul>
+<li>WITH REPLICATION</li>
+<li>WITHOUT REPLICATION</li>
+</ul>
+
+<p>Then on both</p>
+
+<ul>
+<li>AFTER</li>
+<li>BEFORE</li>
+<li>INSTEAD OF</li>
+</ul>
+
+<p>Then on all</p>
+
+<ul>
+<li>INSERT</li>
+<li>UPDATE</li>
+<li>DELETE</li>
+</ul>
+
+<p>From LocalDbTriggerTestNotInReplication:</p>
+
+<div class="highlight highlight-source-cs"><pre>LocalDbRepository&lt;Users&gt; repro;
+<span class="pl-k">using</span> (var db = new DatabaseScope())
+{
+    repro = <span class="pl-k">new</span> LocalDbRepository&lt;Users&gt;(<span class="pl-k">new</span> DbConfig());
+}
+<span class="pl-k">var</span> orderFlag = <span class="pl-c1">false</span>;
+repro.Triggers.NotForReplication.For.Insert += (sender, token) =&gt;
+{
+    Assert.That(orderFlag, Is.False);
+    orderFlag = <span class="pl-c1">true</span>;
+};
+repro.Triggers.NotForReplication.After.Insert += (sender, token) =&gt;
+{
+    token.Cancel(<span class="pl-s"><span class="pl-pds">"</span>AFTER<span class="pl-pds">"</span></span>);
+};
+Assert.That(orderFlag, Is.False);
+Assert.That(() =&gt;
+{
+    repro.Add(<span class="pl-k">new</span> Users());
+}, Throws.Exception.InstanceOf&lt;ITriggerException&gt;().With.Property(<span class="pl-s"><span class="pl-pds">"</span>Reason<span class="pl-pds">"</span></span>).EqualTo(<span class="pl-s"><span class="pl-pds">"</span>AFTER<span class="pl-pds">"</span></span>));
+Assert.That(orderFlag, Is.True);
+Assert.That(repro.Count, Is.EqualTo(<span class="pl-c1">0</span>));</pre></div>
+
+<h2>
+<a id="constraints" class="anchor" href="#constraints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Constraints</h2>
+
+<p>As there are trigger there are also Constraints you can add to any Table.</p>
+
+<p>All Contraints have to be added due creation of an database. That means you must use the example code in the DatabaseScope. This restriction was made to enforce that all Entities always match the given constrains.</p>
+
+<p>There is support for:</p>
+
+<ul>
+<li>Check
+
+<ul>
+<li>Adds a check that will be enforced when an Item is Inserted or Updated</li>
+</ul>
+</li>
+<li>Unique
+
+<ul>
+<li>Adds a check that will be enforced when an Item is Inserted or Updated</li>
+</ul>
+</li>
+<li>Defaults
+
+<ul>
+<li>Adds a check that will be enforced when an Item is Inserted or Updated</li>
+</ul>
+</li>
+</ul>
+
+<p>From LocalDbWithConstraintsTest:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> LocalDbRepository&lt;Image&gt; TestInit(IEnumerable&lt;ILocalDbCheckConstraint&lt;Image&gt;&gt; checks,
+            IEnumerable&lt;ILocalDbUniqueConstraint&lt;Image&gt;&gt; unique,
+            IEnumerable&lt;ILocalDbDefaultConstraint&lt;Image&gt;&gt; defaults)
+{
+    LocalDbRepository&lt;Image&gt; images;
+    <span class="pl-k">using</span> (<span class="pl-k">new</span> DatabaseScope())
+    {
+        images = <span class="pl-k">new</span> LocalDbRepository&lt;Image&gt;(<span class="pl-k">new</span> DbConfig());
+        <span class="pl-k">if</span> (checks != <span class="pl-c1">null</span>)
+            <span class="pl-k">foreach</span> (<span class="pl-k">var</span> localDbCheckConstraint <span class="pl-k">in</span> checks)
+            {
+                images.Constraints.Check.Add(localDbCheckConstraint);
+            }
+        <span class="pl-k">if</span> (unique != <span class="pl-c1">null</span>)
+            <span class="pl-k">foreach</span> (<span class="pl-k">var</span> localDbCheckConstraint <span class="pl-k">in</span> unique)
+            {
+                images.Constraints.Unique.Add(localDbCheckConstraint);
+            }
+        <span class="pl-k">if</span> (defaults != <span class="pl-c1">null</span>)
+            <span class="pl-k">foreach</span> (<span class="pl-k">var</span> localDbCheckConstraint <span class="pl-k">in</span> defaults)
+            {
+                images.Constraints.Default.Add(localDbCheckConstraint);
+            }
+    }
+    <span class="pl-k">return</span> images;
+}
+
+[Test]
+<span class="pl-k">public</span> <span class="pl-k">void</span> AddCheckConstraint()
+{
+    <span class="pl-k">var</span> images = TestInit(<span class="pl-k">new</span>[]{<span class="pl-k">new</span> LocalDbCheckConstraint&lt;Image&gt;(<span class="pl-s"><span class="pl-pds">"</span>TestConstraint<span class="pl-pds">"</span></span>, s =&gt;
+    {
+        <span class="pl-k">var</span> item = s;
+        <span class="pl-k">return</span> item.IdBook &gt; <span class="pl-c1">0</span> &amp;&amp; item.IdBook &lt; <span class="pl-c1">10</span>;
+    })}, <span class="pl-c1">null</span>, <span class="pl-c1">null</span>);
+
+    <span class="pl-k">var</span> image = <span class="pl-k">new</span> Image();
+    image.IdBook = <span class="pl-c1">20</span>;
+    Assert.That(() =&gt; images.Add(image), Throws.Exception.TypeOf&lt;ConstraintException&gt;());
+    image.IdBook = <span class="pl-c1">9</span>;
+    Assert.That(() =&gt; images.Add(image), Throws.Nothing);
+    Assert.That(images.Count, Is.EqualTo(<span class="pl-c1">1</span>));
+}</pre></div>
+
+<p>Note:
+There are implementations for all 3 constraints. For the Default constraint there are 2:</p>
+
+<ul>
+<li>LocalDbDefaultConstraint</li>
+<li>LocalDbDefaultConstraintEx</li>
+</ul>
+
+<p>LocalDbDefaultConstraint: Will always update the value no matter what value was inside the entitie</p>
+
+<p>LocalDbDefaultConstraintEx: Will check the value for its Default(by using C# default() operator) and if its not equals the default value it will set an predefined value</p>
+
+<h1>
+<a id="entity-creator" class="anchor" href="#entity-creator" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Entity Creator</h1>
+
+<p>The lib now contains a Console Application that will be possible to create Entities based on a database. At the Current state (01.Nov.2014), only MsSql databases are supported and the testing is very basic.</p>
+
+<p>The usage is simple in its basic component but has a lot of potential. And also, the idea here is to re-write the current CommandoLine tool to support complete parameterised works.</p>
+
+<p>After you start the program, it will ask you for a Target directory (where the generated files will be stored) and a connection string.</p>
+
+<p>After that, you will see some information from that database including Tables, StoredProcedures and Views. Views are handled the same as Tables are because the calling syntax is pretty much the same.</p>
+
+<p>With typing a Number of a Table, Sp or View, you can alter the settings of that object. Other commands are:</p>
+
+<p>\compile
+\autoGenNames
+\add
+You start the process:</p>
+
+<p>Starts the compiling of all Tables, SPs and views that are not excluded
+Starts a simple renaming process that will Save Remove all '_',' ' chars from the database names and replacing them with C# Conform names
+Not implemented (In future, it will be possible to add static loader constructors. This will dramatically increase the selecting performance. But due to the newest feature (XML based loading), this is not completely implemented).
+Changes in Version 2.0</p>
+
+<p>More Unit tests (yeeea)</p>
+
+<ul>
+<li>Mapping from DB fields to Class properties is now stored inside the ClassInfoCache and is persisted</li>
+<li>The Reflection API now uses HashSets instead of lists</li>
+<li>DataConverterExtentions are reduced</li>
+<li>PropertyInfoCache is now used to access Properties directly by using dynamic compiled Lambdas</li>
+<li>A Static factory method Delegate on ClassInfoCache level is now taking care of the creation of POCOs</li>
+<li>Some methods from the EntityCreator are moved from the EXE to the DataAccess.dll</li>
+<li>A new class "FactoryHelper" is now capable of creating ADO.NET Ctor due Runtime by using the improved methods of the EntityCreator
+Major improvements in ctor creation the EntityCreator and the Runtime creator are now capable of constructors for:
+
+<ul>
+<li>(Single)XML</li>
+<li>(List)XML</li>
+<li>(Single)ForginKey</li>
+<li>(List)ForginKey</li>
+<li>ValueConverter</li>
+<li>Null Values</li>
+<li>(Possible)Null Values</li>
+<li>ForModel</li>
+<li>Added Multibe Comments</li>
+<li>Removed the Linq Provider completely</li>
+<li>Replaced the ReposetoryCollection with the DbCollection</li>
+<li>Bug fixing</li>
+</ul>
+</li>
+</ul>
+
+<h1>
+<a id="points-of-interest" class="anchor" href="#points-of-interest" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Points of Interest</h1>
+
+<p>This project has brought me a lot of fun and one or two sleepless nights and I guess they will not be the last I had because of this. The lib contains a small Linq Provider that is marked as obsolete because, due to the implementation and development, I was ... let's say I was annoyed by Linq.</p>
+
+<p>I expect from this project to have some ideas and more to improve my work.</p>
+
+<p>Thanks to everyone that took the time to read this. Thanks also to my trainer Christian H. for his impressions and help.</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/JPVenson">JPVenson</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
