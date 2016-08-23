@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -151,7 +151,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		/// <typeparam name="TE">Type of the Property</typeparam>
 		/// <typeparam name="T">Type where the Static Property should be mapped to</typeparam>
-		public void CreateStaticProperty<TE, T>(string name, params AttributeInfoCache[] attributes)
+		public void CreateStaticProperty<TE>(string name, params AttributeInfoCache[] attributes)
 		{
 			if (name == null)
 				throw new ArgumentNullException("name");
@@ -193,7 +193,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		//{
 		//	private readonly Func<object, Type, object, CultureInfo, object> _convertFrom;
 		//	private readonly Func<object, Type, object, CultureInfo, object> _convertTo;
-		//	public RuntimeConverter(Func<object, Type, object, CultureInfo, object> convertFrom, 
+		//	public RuntimeConverter(Func<object, Type, object, CultureInfo, object> convertFrom,
 		//		Func<object, Type, object, CultureInfo, object> convertTo)
 		//	{
 		//		_convertFrom = convertFrom;
@@ -287,7 +287,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		///// <summary>
-		///// Set the Primary key 
+		///// Set the Primary key
 		///// </summary>
 		//
 		//

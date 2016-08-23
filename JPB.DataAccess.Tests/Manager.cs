@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -7,15 +7,17 @@ using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 using NUnit.Framework;
 
-namespace JPB.DataAccess.Tests
+#if SqLite
+using System.IO;
+#endif
+
+namespace JPB.DataAccess.Tests.Common
 {
 	public class Manager : IManager
 	{
 		static Manager()
 		{
 			_managers = new Dictionary<DbAccessType, IManager>();
-			_managers.Add(DbAccessType.MsSql, new MsSqlManager());
-			_managers.Add(DbAccessType.SqLite, new SqLiteManager());
 		}
 
 		private static Dictionary<DbAccessType, IManager> _managers;
@@ -44,12 +46,12 @@ namespace JPB.DataAccess.Tests
 			return DbAccessType.Unknown;
 		}
 
-		public DbAccessLayer GetWrapper(DbAccessType type)
+		public DbAccessLayer GetWrapper()
 		{
 			DbAccessLayer expectWrapper = null;
 			var elementType = GetElementType();
 
-			expectWrapper = _managers[type].GetWrapper(type);
+			expectWrapper = _managers[elementType].GetWrapper();
 
 			//if (elementType == DbAccessType.MsSql)
 			//{
@@ -96,9 +98,6 @@ namespace JPB.DataAccess.Tests
 			QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
 			return expectWrapper;
 		}
-
-		public DbAccessType DbAccessType { get; }
-		public string ConnectionString { get; }
 
 		private StringBuilder _errorData;
 

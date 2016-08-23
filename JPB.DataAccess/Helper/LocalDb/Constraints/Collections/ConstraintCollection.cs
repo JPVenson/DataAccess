@@ -3,7 +3,7 @@ using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
-	public class ConstraintCollection<TEntity>
+	public class ConstraintCollection<TEntity> : IConstraintCollection<TEntity>
 	{
 		private readonly LocalDbRepository<TEntity> _localDbRepository;
 
@@ -76,29 +76,29 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 	//	public ILocalDbPrimaryKeyConstraint PrimaryKey { get; private set; }
 	//}
 
-	//public class ConstraintCollectionImpl<TEntity> 
-	//	: ConstraintCollection<IUniqueConstrains<TEntity>, IDefaultConstraints<TEntity>, ICheckConstraints<TEntity>, TEntity> 
+	//public class ConstraintCollectionImpl<TEntity>
+	//	: ConstraintCollection<IUniqueConstrains<TEntity>, IDefaultConstraints<TEntity>, ICheckConstraints<TEntity>, TEntity>
 	//{
 	//	public ConstraintCollectionImpl(LocalDbReposetoryBase localDbReposetoryBase,
-	//	ILocalDbPrimaryKeyConstraint primaryKey) 
-	//		: base(localDbReposetoryBase, 
-	//			  new UniqueConstrains<TEntity>(localDbReposetoryBase), 
-	//			  new DefaultConstraints<TEntity>(localDbReposetoryBase), 
-	//			  new CheckConstraints<TEntity>(localDbReposetoryBase), 
+	//	ILocalDbPrimaryKeyConstraint primaryKey)
+	//		: base(localDbReposetoryBase,
+	//			  new UniqueConstrains<TEntity>(localDbReposetoryBase),
+	//			  new DefaultConstraints<TEntity>(localDbReposetoryBase),
+	//			  new CheckConstraints<TEntity>(localDbReposetoryBase),
 	//			  primaryKey)
 	//	{
 	//	}
 	//}
 
-	//public class ConstraintCollection 
-	//	: ConstraintCollection<IUniqueConstrains<object>, IDefaultConstraints<object>, ICheckConstraints<object>, object> 
+	//public class ConstraintCollection
+	//	: ConstraintCollection<IUniqueConstrains<object>, IDefaultConstraints<object>, ICheckConstraints<object>, object>
 	//{
-	//	public ConstraintCollection(LocalDbReposetoryBase localDbReposetoryBase, 
-	//		ILocalDbPrimaryKeyConstraint primaryKey) 
-	//		: base(localDbReposetoryBase, 
-	//			  new UniqueConstrains<object>(localDbReposetoryBase), 
-	//			  new DefaultConstraints<object>(localDbReposetoryBase), 
-	//			  new CheckConstraints<object>(localDbReposetoryBase), 
+	//	public ConstraintCollection(LocalDbReposetoryBase localDbReposetoryBase,
+	//		ILocalDbPrimaryKeyConstraint primaryKey)
+	//		: base(localDbReposetoryBase,
+	//			  new UniqueConstrains<object>(localDbReposetoryBase),
+	//			  new DefaultConstraints<object>(localDbReposetoryBase),
+	//			  new CheckConstraints<object>(localDbReposetoryBase),
 	//			  primaryKey)
 	//	{
 	//	}

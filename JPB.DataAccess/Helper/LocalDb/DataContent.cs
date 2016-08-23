@@ -47,7 +47,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 			reader.ReadStartElement(ReprosIncluded);
 
 			var elements = new Dictionary<string, Type>();
-			var index = 0;
 			do
 			{
 				var indexOfElementString = reader.GetAttribute("Index");

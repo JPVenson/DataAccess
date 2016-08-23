@@ -9,32 +9,25 @@ using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
-using JPB.DataAccess.Tests.Overwrite;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
-#if SqLite
-using System.Data.SQLite;
-#endif
-
-#if MsSql
-
-#endif
-
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
-#if MsSql
-.MsSQL
-#endif
 
-#if SqLite
-.SqLite
-#endif
 {
-	[TestFixture]
+	[TestFixture(DbAccessType.MsSql)]
+	[TestFixture(DbAccessType.SqLite)]
 	public class CheckWrapperBaseTests
 	{
+		private readonly DbAccessType _type;
+
+		public CheckWrapperBaseTests(DbAccessType type)
+		{
+			_type = type;
+		}
+
 		private DbAccessLayer _dbAccess;
 		private IManager _mgr;
 
@@ -42,7 +35,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void Init()
 		{
 			_mgr = new Manager();
-			_dbAccess = _mgr.GetWrapper();
+			_dbAccess = _mgr.GetWrapper(_type);
 		}
 
 		[TearDown]

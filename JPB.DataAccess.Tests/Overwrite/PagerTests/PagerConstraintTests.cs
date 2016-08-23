@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 
@@ -15,18 +11,31 @@ namespace JPB.DataAccess.Tests.PagerTests
 .SqLite
 #endif
 {
-	[TestFixture]
+	[TestFixture(DbAccessType.MsSql)]
+	[TestFixture(DbAccessType.SqLite)]
 	public class PagerConstraintTests
 	{
-		public PagerConstraintTests()
-		{
+		private readonly DbAccessType _type;
 
+		public PagerConstraintTests(DbAccessType type)
+		{
+			_type = type;
+		}
+
+		private DbAccessLayer _dbAccess;
+		private IManager _mgr;
+
+		[SetUp]
+		public void Init()
+		{
+			_mgr = new Manager();
+			_dbAccess = _mgr.GetWrapper(_type);
 		}
 
 		[Test]
 		public void CurrentPageBiggerOrEqualsOne()
 		{
-			var dataPager = new Manager().GetWrapper().Database.CreatePager<Users>();
+			var dataPager = _dbAccess.Database.CreatePager<Users>();
 			Assert.That(() => dataPager.CurrentPage, Is.GreaterThanOrEqualTo(1));
 			Assert.That(() => dataPager.PageSize, Is.GreaterThanOrEqualTo(1));
 			Assert.That(() => dataPager.CurrentPage = 0, Throws.Exception);

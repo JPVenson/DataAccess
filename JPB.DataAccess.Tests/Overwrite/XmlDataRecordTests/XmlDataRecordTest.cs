@@ -4,7 +4,6 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.XmlDataRecordTest;
 using NUnit.Framework;
 

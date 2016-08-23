@@ -1,41 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
-using JPB.DataAccess.Tests.Overwrite;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.QueryBuilderTests
-#if MsSql
-.MsSQL
-#endif
-
-#if SqLite
-.SqLite
-#endif
 {
-	[TestFixture]
+	[TestFixture(DbAccessType.MsSql)]
+	[TestFixture(DbAccessType.SqLite)]
 	public class QueryBuilderTests
 	{
-		public QueryBuilderTests()
-		{
+		private readonly DbAccessType _type;
 
+		public QueryBuilderTests(DbAccessType type)
+		{
+			_type = type;
+			Init();
 		}
 
+		private DbAccessLayer _dbAccess;
 		private IManager _mgr;
 
 		[SetUp]
 		public void Init()
 		{
 			_mgr = new Manager();
-			DbAccessLayer = _mgr.GetWrapper();
-			DataMigrationHelper.ClearDb(DbAccessLayer);
+			_dbAccess = _mgr.GetWrapper(_type);
 		}
 
 		[TearDown]
@@ -54,7 +48,10 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			}
 		}
 
-		public DbAccessLayer DbAccessLayer { get; set; }
+		public DbAccessLayer DbAccessLayer
+		{
+			get { return _dbAccess; }
+		}
 
 		[Test]
 		public void Select()

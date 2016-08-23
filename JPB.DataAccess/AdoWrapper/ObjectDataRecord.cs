@@ -19,7 +19,6 @@ namespace JPB.DataAccess.AdoWrapper
 		private readonly object _poco;
 		private readonly DbConfig _config;
 		private DbClassInfoCache _classTypeCache;
-		private IDictionary<string, DbPropertyInfoCache> _inveredCache;
 
 		public ObjectDataRecord(object poco, DbConfig config, int depth)
 		{
@@ -213,7 +212,7 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		/// <summary>
-		/// Returns a table that 
+		/// Returns a table that
 		/// </summary>
 		/// <returns></returns>
 		public DataTable GetSchemaTable()

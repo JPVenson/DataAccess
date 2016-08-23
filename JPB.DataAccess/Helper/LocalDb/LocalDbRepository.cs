@@ -134,7 +134,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Access to a collection of Constraints valid for this Table
 		/// </summary>
-		public virtual ConstraintCollection<TEntity> Constraints { get; private set; }
+		public virtual IConstraintCollection<TEntity> Constraints { get; private set; }
 
 		public DbConfig Config
 		{
@@ -442,7 +442,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		protected virtual void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config,
 			bool useOrignalObjectInMemory)
 		{
-			if (config == null) throw new ArgumentNullException("config");
+			if (config == null)
+				throw new ArgumentNullException("config");
 			if (_config != null)
 				throw new InvalidOperationException("Multibe calls of Init are not supported");
 

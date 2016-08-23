@@ -157,6 +157,10 @@
       <Project>{de42f7ed-51b5-4118-831b-05efeeecd7ac}</Project>
       <Name>JPB.DataAccess.SqLite</Name>
     </ProjectReference>
+    <ProjectReference Include="..\JPB.DataAccess.Tests.Common\JPB.DataAccess.Tests.Common.csproj">
+      <Project>{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}</Project>
+      <Name>JPB.DataAccess.Tests.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess.Tests\JPB.DataAccess.Tests.csproj">
       <Project>{33ACDF31-634C-4183-BBD9-F3B25AC1F601}</Project>
       <Name>JPB.DataAccess.Tests</Name>

@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 
-namespace JPB.DataAccess.Tests.Overwrite
+namespace JPB.DataAccess.Tests
 {
 	public static class DataMigrationHelper
 	{

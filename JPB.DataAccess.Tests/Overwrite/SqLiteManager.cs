@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Tests
 			get { return SConnectionString; }
 		}
 
-		public DbAccessLayer GetWrapper()
+		public DbAccessLayer GetWrapper(DbAccessType type)
 		{
 			if (expectWrapper != null)
 			{

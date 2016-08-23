@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess", "JPB.DataAccess\JPB.DataAccess.csproj", "{46E06D7F-F55A-4B10-978D-13607BE17CB9}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Tests.MsSQL", "JPB.DataAccess.Tests.MsSQL\JPB.DataAccess.Tests.MsSQL.csproj", "{E2B693F3-AB5A-4E96-831A-DCB06861C89F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Tests.SqLite", "JPB.DataAccess.Tests.SqLite\JPB.DataAccess.Tests.SqLite.csproj", "{82780128-6610-479B-8BED-4E35580DE520}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Tests.Common", "JPB.DataAccess.Tests.Common\JPB.DataAccess.Tests.Common.csproj", "{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +87,18 @@ Global
 		{82780128-6610-479B-8BED-4E35580DE520}.Release|x64.Build.0 = Release|x64
 		{82780128-6610-479B-8BED-4E35580DE520}.Release|x86.ActiveCfg = Release|x86
 		{82780128-6610-479B-8BED-4E35580DE520}.Release|x86.Build.0 = Release|x86
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Debug|x64.Build.0 = Debug|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Debug|x86.Build.0 = Debug|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|x64.ActiveCfg = Release|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|x64.Build.0 = Release|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|x86.ActiveCfg = Release|Any CPU
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,5 +107,6 @@ Global
 		{33ACDF31-634C-4183-BBD9-F3B25AC1F601} = {456F719E-2DB1-4D01-82E8-01E4175492B6}
 		{E2B693F3-AB5A-4E96-831A-DCB06861C89F} = {456F719E-2DB1-4D01-82E8-01E4175492B6}
 		{82780128-6610-479B-8BED-4E35580DE520} = {456F719E-2DB1-4D01-82E8-01E4175492B6}
+		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B} = {456F719E-2DB1-4D01-82E8-01E4175492B6}
 	EndGlobalSection
 EndGlobal

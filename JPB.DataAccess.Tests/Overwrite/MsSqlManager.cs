@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Configuration;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
@@ -43,7 +41,7 @@ namespace JPB.DataAccess.Tests
 			}
 		}
 
-		public DbAccessLayer GetWrapper()
+		public DbAccessLayer GetWrapper(DbAccessType type)
 		{
 			const string dbname = "testDB";
 			if (expectWrapper != null)
@@ -92,4 +90,18 @@ namespace JPB.DataAccess.Tests
 
 		}
 	}
+
+	public interface IManager
+	{
+		DbAccessLayer GetWrapper(DbAccessType type);
+		DbAccessType DbAccessType { get; }
+
+		string ConnectionString { get; }
+		void FlushErrorData();
+	}
+}
+
+
+namespace JPB.DataAccess.Tests.Common
+{
 }

@@ -1,0 +1,10 @@
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\bin\Debug\JPB.DataAccess.Tests.Common.dll
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\bin\Debug\JPB.DataAccess.Tests.Common.pdb
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\bin\Debug\JPB.DataAccess.dll
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\bin\Debug\JPB.DataAccess.pdb
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\bin\Debug\JPB.DataAccess.xml
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\obj\Debug\JPB.DataAccess.Tests.Common.csprojResolveAssemblyReference.cache
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\obj\Debug\JPB.DataAccess.Tests.Common.dll
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\obj\Debug\JPB.DataAccess.Tests.Common.pdb
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\bin\Debug\nunit.framework.dll
+C:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests.Common\bin\Debug\nunit.framework.xml

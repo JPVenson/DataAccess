@@ -1,30 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
-using JPB.DataAccess.Tests.Overwrite;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.PagerTests
-#if MsSql
-.MsSQL
-#endif
-
-#if SqLite
-.SqLite
-#endif
 {
-	[TestFixture]
+	[TestFixture(DbAccessType.MsSql)]
+	[TestFixture(DbAccessType.SqLite)]
 	public class PagerUnitTest
 	{
+		private readonly DbAccessType _type;
+
+		public PagerUnitTest(DbAccessType type)
+		{
+			_type = type;
+		}
+
 		private DbAccessLayer expectWrapper;
 
 		[SetUp]
 		public void Init()
 		{
-			expectWrapper = new Manager().GetWrapper();
+			expectWrapper = new Manager().GetWrapper(_type);
 		}
 
 		[Test]

@@ -142,6 +142,7 @@
     <Compile Include="Helper\LocalDb\Constraints\Collections\CheckConstraints.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\ConstraintCollection.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\ICheckConstraints.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\Collections\IConstraintCollection.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\IDefaultConstraints.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\IUniqueConstrains.cs" />
     <Compile Include="Helper\LocalDb\Constraints\ConstraintException.cs" />
