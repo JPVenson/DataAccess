@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.Operators.Selection;
 
 namespace JPB.DataAccess.Query.Operators
@@ -24,13 +25,13 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
-		/// Retuns a collection of all Entites that are referenced by element 
+		/// Retuns a collection of all Entites that are referenced by element
 		/// Needs a proper ForginKeyDeclartaion
 		/// </summary>
 		/// <typeparam name="TEPoco"></typeparam>
 		/// <param name="element"></param>
 		/// <returns></returns>
-		public ElementProducer<TPoco> In<TEPoco>(TEPoco element)
+		public ConditionalEvalQuery<TPoco> In<TEPoco>(TEPoco element)
 		{
 			var teCache = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
 			var pkValue = teCache.PrimaryKeyProperty.Getter.Invoke(element);
@@ -39,12 +40,12 @@ namespace JPB.DataAccess.Query.Operators
 
 
 		/// <summary>
-		/// Retuns a collection of all Entites that are referenced by element 
+		/// Retuns a collection of all Entites that are referenced by element
 		/// Needs a proper ForginKeyDeclartaion
 		/// </summary>
 		/// <typeparam name="TEPoco"></typeparam>
 		/// <returns></returns>
-		public ElementProducer<TPoco> In<TEPoco>(object id)
+		public ConditionalEvalQuery<TPoco> In<TEPoco>(object id)
 		{
 			var teCache = this.ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
 			var fkPropertie = Cache.Propertys
@@ -57,7 +58,7 @@ namespace JPB.DataAccess.Query.Operators
 			if (fkPropertie == null)
 				throw new NotSupportedException(string.Format("No matching Column was found for Forgin key declaration for table {0}", teCache.TableName));
 
-			return new ElementProducer<TPoco>(this.Where().Column(fkPropertie.DbName).Is().EqualsTo(id));
+			return this.Where().Column(fkPropertie.DbName).Is().EqualsTo(id);
 		}
 	}
 }
