@@ -1,5 +1,5 @@
 /*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -32,6 +32,15 @@ namespace JPB.DataAccess.MetaApi
 			return type.Namespace == null;
 		}
 
+		/// <summary>
+		/// Gets the property information from labda.
+		/// </summary>
+		/// <typeparam name="TSource">The type of the source.</typeparam>
+		/// <typeparam name="TProperty">The type of the property.</typeparam>
+		/// <param name="propertyLambda">The property lambda.</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException">
+		/// </exception>
 		public static string GetPropertyInfoFromLabda<TSource, TProperty>(
 			this Expression<Func<TSource, TProperty>> propertyLambda)
 		{
@@ -73,6 +82,15 @@ namespace JPB.DataAccess.MetaApi
 		//	return type.Propertys[propInfo.Name];
 		//}
 
+		/// <summary>
+		/// Gets the mehtod information from labda.
+		/// </summary>
+		/// <typeparam name="TSource">The type of the source.</typeparam>
+		/// <typeparam name="TProperty">The type of the property.</typeparam>
+		/// <param name="propertyLambda">The property lambda.</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException">
+		/// </exception>
 		public static string GetMehtodInfoFromLabda<TSource, TProperty>(
 			this Expression<Func<TSource, TProperty>> propertyLambda)
 		{

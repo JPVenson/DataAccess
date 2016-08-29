@@ -12,23 +12,45 @@ using JPB.DataAccess.Manager;
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
-	///     Wrapps MsSQL spezifc data
+	/// Wrapps MsSQL spezifc data
 	/// </summary>
+	/// <seealso cref="JPB.DataAccess.Contacts.IDatabaseStrategy" />
 	public class MsSql : IDatabaseStrategy
 	{
+		/// <summary>
+		/// The template MSSQL untrusted
+		/// </summary>
 		private const string TEMPLATE_MSSQL_UNTRUSTED =
 			"server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
 
+		/// <summary>
+		/// The template MSSQL trusted
+		/// </summary>
 		private const string TEMPLATE_MSSQL_TRUSTED =
 			"server={0};database={1};Connect Timeout=100;Min Pool Size=5;trusted_connection=true";
 
+		/// <summary>
+		/// The connection string
+		/// </summary>
 		private string _connStr = string.Empty;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MsSql"/> class.
+		/// </summary>
+		/// <param name="strServer">The string server.</param>
+		/// <param name="strDatabase">The string database.</param>
 		public MsSql(string strServer, string strDatabase)
 		{
 			_connStr = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MsSql"/> class.
+		/// </summary>
+		/// <param name="strServer">The string server.</param>
+		/// <param name="strDatabase">The string database.</param>
+		/// <param name="strLogin">The string login.</param>
+		/// <param name="strPassword">The string password.</param>
 		public MsSql(string strServer, string strDatabase, string strLogin, string strPassword)
 		{
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
@@ -40,6 +62,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MsSql"/> class.
+		/// </summary>
+		/// <param name="strConnStr">The string connection string.</param>
 		public MsSql(string strConnStr)
 		{
 			_connStr = strConnStr;
@@ -47,22 +73,35 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 		#region IDatabaseStrategy Members
 
+		/// <summary>
+		/// Defines the database type this Strategy is used for
+		/// </summary>
 		public DbAccessType SourceDatabase
 		{
 			get { return DbAccessType.MsSql; }
 		}
 
+		/// <summary>
+		/// An Valid Connection string for the given Strategy
+		/// </summary>
 		public string ConnectionString
 		{
 			get { return _connStr; }
 			set { _connStr = value; }
 		}
 
+		/// <summary>
+		/// Optional used when connecting to a Local file
+		/// </summary>
+		/// <exception cref="Exception">The method or operation is not implemented.</exception>
 		public string DatabaseFile
 		{
 			get { throw new Exception("The method or operation is not implemented."); }
 		}
 
+		/// <summary>
+		/// Should return the current database if availibe
+		/// </summary>
 		public string ServerName
 		{
 			get
@@ -72,12 +111,22 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// Creates a new Provider specific Connection that will held open until all actors want to close it
+		/// </summary>
+		/// <returns></returns>
 		public IDbConnection CreateConnection()
 		{
 			var sqlConnection = new SqlConnection(_connStr);
 			return sqlConnection;
 		}
 
+		/// <summary>
+		/// Creates a command.
+		/// </summary>
+		/// <param name="strSql">The string SQL.</param>
+		/// <param name="conn">The connection.</param>
+		/// <returns></returns>
 		public IDbCommand CreateCommand(string strSql, IDbConnection conn)
 		{
 			var cmd = new SqlCommand(strSql);
@@ -85,6 +134,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			return cmd;
 		}
 
+		/// <summary>
+		/// Creates a command.
+		/// </summary>
+		/// <param name="strSql">The string SQL.</param>
+		/// <param name="conn">The connection.</param>
+		/// <param name="fields">The fields.</param>
+		/// <returns></returns>
 		public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
 		{
 			var cmd = (SqlCommand) CreateCommand(strSql, conn);
@@ -97,11 +153,22 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			return cmd;
 		}
 
+		/// <summary>
+		/// Creates a query parameter.
+		/// </summary>
+		/// <param name="strName">Name of the string.</param>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
 		public IDataParameter CreateParameter(string strName, object value)
 		{
 			return new SqlParameter(strName, value);
 		}
 
+		/// <summary>
+		/// Creates the data adapter.
+		/// </summary>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
 		public IDbDataAdapter CreateDataAdapter(IDbCommand cmd)
 		{
 			var adapter = new SqlDataAdapter();
@@ -109,6 +176,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			return adapter;
 		}
 
+		/// <summary>
+		/// Creates a data table.
+		/// </summary>
+		/// <param name="name">The name.</param>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
 		public DataTable CreateDataTable(string name, IDbCommand cmd)
 		{
 			using (var adapter = new SqlDataAdapter())
@@ -125,52 +198,106 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// Getlasts a inserted identifier command.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <returns></returns>
 		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
 		{
 			//return this.CreateCommand("SELECT SCOPE_IDENTITY() as Value", conn);
 			return CreateCommand("SELECT SCOPE_IDENTITY() as Value", conn);
 		}
 
+		/// <summary>
+		/// Creates a data pager.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public IDataPager<T> CreatePager<T>()
 		{
 			return new MsSqlDataPager<T>();
 		}
 
+		/// <summary>
+		/// Creates the a pager that can convert each item.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TE">The type of the e.</typeparam>
+		/// <returns></returns>
 		public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
 		{
 			return new MsSqlDataConverterPager<T, TE>();
 		}
 
+		/// <summary>
+		/// Formarts a Command into a QueryCommand after the Strategy rules
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
 		public string FormartCommandToQuery(IDbCommand command)
 		{
 			return CommandAsMsSql(command);
 		}
 
+		/// <summary>
+		/// Converts the Generic SourceDbType to the Specific represntation
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
 		public string ConvertParameter(DbType type)
 		{
 			return new SqlParameter {DbType = type}.SqlDbType.ToString();
 		}
 
+		/// <summary>
+		/// Creates a new object that is a copy of the current instance.
+		/// </summary>
+		/// <returns>
+		/// A new object that is a copy of this instance.
+		/// </returns>
 		public object Clone()
 		{
 			return new MsSql(_connStr);
 		}
 
+		/// <summary>
+		/// Compacts the database.
+		/// </summary>
+		/// <param name="strSource">The string source.</param>
+		/// <param name="strDest">The string dest.</param>
+		/// <exception cref="NotImplementedException">The method or operation is not implemented.</exception>
 		public void CompactDatabase(string strSource, string strDest)
 		{
 			throw new NotImplementedException("The method or operation is not implemented.");
 		}
 
+		/// <summary>
+		/// Shrinks the database.
+		/// </summary>
+		/// <param name="strConnectionString">The string connection string.</param>
+		/// <exception cref="NotImplementedException">The method or operation is not implemented.</exception>
 		public void ShrinkDatabase(string strConnectionString)
 		{
 			throw new NotImplementedException("The method or operation is not implemented.");
 		}
 
+		/// <summary>
+		/// Prepares the query.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <param name="strSql">The string SQL.</param>
+		/// <exception cref="NotImplementedException">The method or operation is not implemented.</exception>
 		public void PrepareQuery(IDbConnection conn, string strSql)
 		{
 			throw new NotImplementedException("The method or operation is not implemented.");
 		}
 
+		/// <summary>
+		/// Imports the specified dt.
+		/// </summary>
+		/// <param name="dt">The dt.</param>
+		/// <param name="cmd">The command.</param>
 		public void Import(DataTable dt, IDbCommand cmd)
 		{
 			using (var adapter = new SqlDataAdapter())
@@ -184,11 +311,20 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// Gets the time stamp.
+		/// </summary>
+		/// <returns></returns>
 		public string GetTimeStamp()
 		{
 			return GetTimeStamp(DateTime.Now);
 		}
 
+		/// <summary>
+		/// Gets the time stamp.
+		/// </summary>
+		/// <param name="dtValue">The dt value.</param>
+		/// <returns></returns>
 		public string GetTimeStamp(DateTime dtValue)
 		{
 			var dt = dtValue;
@@ -199,6 +335,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				dt.Hour, dt.Minute, dt.Second);
 		}
 
+		/// <summary>
+		/// Gets the tables.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <param name="strFilter">The string filter.</param>
+		/// <returns></returns>
 		public string[] GetTables(IDbConnection conn, String strFilter)
 		{
 			const string sql = "select NAME from SYSOBJECTS where TYPE = 'U' AND NAME <> 'dtproperties' order by NAME";
@@ -212,6 +354,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// Gets the table columns.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <param name="strTableName">Name of the string table.</param>
+		/// <param name="exclude">The exclude.</param>
+		/// <returns></returns>
 		public string[] GetTableColumns(IDbConnection conn, string strTableName, params object[] exclude)
 		{
 			var sql = string.Format(
@@ -227,6 +376,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// Drops the table.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <param name="strTableName">Name of the string table.</param>
+		/// <returns></returns>
 		public int DropTable(IDbConnection conn, String strTableName)
 		{
 			var sql = String.Format("DROP TABLE {0}", strTableName);
@@ -234,16 +389,32 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				return cmd.ExecuteNonQuery();
 		}
 
+		/// <summary>
+		/// Gets the views SQL.
+		/// </summary>
+		/// <param name="strName">Name of the string.</param>
+		/// <returns></returns>
 		public string GetViewsSql(String strName)
 		{
 			return string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
 		}
 
+		/// <summary>
+		/// Gets the stored procedure SQL.
+		/// </summary>
+		/// <param name="strName">Name of the string.</param>
+		/// <returns></returns>
 		public string GetStoredProcedureSql(String strName)
 		{
 			return string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
 		}
 
+		/// <summary>
+		/// Supportses the view.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <param name="strName">Name of the string.</param>
+		/// <returns></returns>
 		public bool SupportsView(IDbConnection conn, String strName)
 		{
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
@@ -252,6 +423,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				return (dr.Read());
 		}
 
+		/// <summary>
+		/// Supportses the stored procedure.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <param name="strName">Name of the string.</param>
+		/// <returns></returns>
 		public bool SupportsStoredProcedure(IDbConnection conn, String strName)
 		{
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
@@ -261,7 +438,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
+		/// Commands as ms SQL.
 		/// </summary>
+		/// <param name="sc">The sc.</param>
 		/// <returns></returns>
 		public static String CommandAsMsSql(IDbCommand sc)
 		{
@@ -341,6 +520,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			return sql.ToString();
 		}
 
+		/// <summary>
+		/// Parameters the value.
+		/// </summary>
+		/// <param name="sp">The sp.</param>
+		/// <returns></returns>
 		public static String ParameterValue(SqlParameter sp)
 		{
 			var retval = "";

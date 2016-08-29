@@ -47,8 +47,9 @@ namespace JPB.DataAccess.Tests
 		public DbAccessLayer GetWrapper(DbAccessType type)
 		{
 			DbAccessLayer expectWrapper = null;
-			var elementType = GetElementType();
-
+			Console.WriteLine("---------------------------------------------");
+			Console.WriteLine("Element type Lookup");
+			Console.WriteLine("Found " + type);
 			expectWrapper = _managers[type].GetWrapper(type);
 
 			//if (elementType == DbAccessType.MsSql)

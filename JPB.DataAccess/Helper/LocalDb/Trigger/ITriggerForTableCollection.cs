@@ -1,12 +1,28 @@
 ﻿namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
-	public interface ITriggerForTableCollection<TEntity> 
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TEntity">The type of the entity.</typeparam>
+	public interface ITriggerForTableCollection<TEntity>
 	{
+		/// <summary>
+		/// Gets trigger Collections for the not for replication mode.
+		/// </summary>
+		/// <value>
+		/// The not for replication.
+		/// </value>
 		IReplicationNode<TEntity> NotForReplication { get; }
+		/// <summary>
+		/// Gets trigger Collections for replication mode
+		/// </summary>
+		/// <value>
+		/// The with replication.
+		/// </value>
 		IReplicationNode<TEntity> WithReplication { get; }
 	}
 
-	public interface ITriggerForTableCollectionInternalUsage<TEntity>
+	internal interface ITriggerForTableCollectionInternalUsage<TEntity>
 			: ITriggerForTableCollection<TEntity>
 	{
 		ISequentialTriggerCollection<TEntity> For { get; }

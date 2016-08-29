@@ -31,14 +31,16 @@ using JPB.DataAccess.Query.Operators.Orders;
 namespace JPB.DataAccess.Query
 {
 	/// <summary>
-	///     Provieds A set of extentions for Microsoft SQL Serve
+	/// Provieds A set of extentions for Microsoft SQL Serve
 	/// </summary>
 	public static class MsQueryBuilderExtentions
 	{
 		/// <summary>
-		///		Sets an Variable to the given value
+		/// Sets an Variable to the given value
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="name">The name.</param>
+		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		public static RootQuery SetVariable(this RootQuery query, string name, object value)
 		{
@@ -52,9 +54,13 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///		Declares a new Variable of the Given SQL Type by using its length
+		/// Declares a new Variable of the Given SQL Type by using its length
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="name">The name.</param>
+		/// <param name="type">The type.</param>
+		/// <param name="length">The length.</param>
+		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		public static RootQuery DeclareVariable(this RootQuery query, string name, SqlDbType type, int length = int.MaxValue, object value = null)
 		{
@@ -74,8 +80,12 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Creates a Common Table Expression that selects a Specific type
+		/// Creates a Common Table Expression that selects a Specific type
 		/// </summary>
+		/// <param name="query">The query.</param>
+		/// <param name="target">The target.</param>
+		/// <param name="cteName">Name of the cte.</param>
+		/// <param name="useStarOperator">if set to <c>true</c> [use star operator].</param>
 		/// <returns></returns>
 		public static RootQuery WithCteForType(this RootQuery query, Type target, string cteName,
 			bool useStarOperator = false)
@@ -95,8 +105,9 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
 		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="target"></param>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="target">The target.</param>
 		/// <returns></returns>
 		public static ElementProducer<string> ForXml<TPoco>(this ElementProducer<TPoco> query, Type target)
 		{
@@ -104,8 +115,13 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Creates a Common Table Expression that selects a Specific type
+		/// Creates a Common Table Expression that selects a Specific type
 		/// </summary>
+		/// <param name="query">The query.</param>
+		/// <param name="cteName">Name of the cte.</param>
+		/// <param name="cteAction">The cte action.</param>
+		/// <param name="subCte">if set to <c>true</c> [sub cte].</param>
+		/// <returns></returns>
 		public static RootQuery WithCte(this RootQuery query,
 			string cteName,
 			Action<RootQuery> cteAction,
@@ -131,8 +147,14 @@ namespace JPB.DataAccess.Query
 
 
 		/// <summary>
-		///     Creates a Common Table Expression that selects a Specific type
+		/// Creates a Common Table Expression that selects a Specific type
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TN">The type of the n.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="cteName">Name of the cte.</param>
+		/// <param name="subCte">if set to <c>true</c> [sub cte].</param>
+		/// <returns></returns>
 		public static ElementProducer<TN> AsCte<T, TN>(this ElementProducer<T> query,
 			string cteName,
 			bool subCte = false)
@@ -152,8 +174,11 @@ namespace JPB.DataAccess.Query
 
 
 		/// <summary>
-		///    Creates an closed sub select
+		/// Creates an closed sub select
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="subSelect">The sub select.</param>
 		/// <returns></returns>
 		public static SelectQuery<T> SubSelect<T>(this RootQuery query,
 			Action<SelectQuery<T>> subSelect)
@@ -168,10 +193,10 @@ namespace JPB.DataAccess.Query
 
 
 		/// <summary>
-		///     Creates a QueryCommand that uses the * Operator to select all date from the inner query
+		/// Creates a QueryCommand that uses the * Operator to select all date from the inner query
 		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="from"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
 		/// <returns></returns>
 		public static SelectQuery<T> SelectStar<T>(this RootQuery query)
 		{
@@ -179,12 +204,13 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Adds a between statement followed by a query defined in <paramref name="valueA" /> folowed by an and statement and
-		///     an secound query defined in the <paramref name="valueB" />
+		/// Adds a between statement followed by a query defined in <paramref name="valA" /> folowed by an and statement and
+		/// an secound query defined in the <paramref name="valB" />
 		/// </summary>
-		/// <param name="query"></param>
-		/// <param name="valueA"></param>
-		/// <param name="valueB"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="valA">The value a.</param>
+		/// <param name="valB">The value b.</param>
 		/// <returns></returns>
 		public static ConditionalEvalQuery<T> Between<T>(
 			this ConditionalOperatorQuery<T> query,
@@ -199,6 +225,13 @@ namespace JPB.DataAccess.Query
 			return new ConditionalEvalQuery<T>(condtion, query.State);
 		}
 
+		/// <summary>
+		/// Creates an TSQL Apply statement
+		/// </summary>
+		/// <param name="query">The query.</param>
+		/// <param name="mode">The mode.</param>
+		/// <param name="innerText">The inner text.</param>
+		/// <returns></returns>
 		public static RootQuery Apply(this RootQuery query,
 			ApplyMode mode,
 			Action<RootQuery> innerText)
@@ -209,6 +242,14 @@ namespace JPB.DataAccess.Query
 			return new RootQuery(query);
 		}
 
+		/// <summary>
+		/// Creates an TSQL Apply statement
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="mode">The mode.</param>
+		/// <param name="innerText">The inner text.</param>
+		/// <returns></returns>
 		public static ElementProducer<T> Apply<T>(this ElementProducer<T> query,
 			ApplyMode mode,
 			Action<RootQuery> innerText)
@@ -218,8 +259,11 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Append an AS part
+		/// Append an AS part
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="alias">The alias.</param>
 		/// <returns></returns>
 		public static ElementProducer<T> As<T>(this ElementProducer<T> query, string alias)
 		{
@@ -227,8 +271,11 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Append an Contains part
+		/// Append an Contains part
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="alias">The alias.</param>
 		/// <returns></returns>
 		public static ConditionalEvalQuery<T> Contains<T>(this ConditionalColumnQuery<T> query, object alias)
 		{
@@ -236,8 +283,12 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Append an RowNumberOrder part
+		/// Append an RowNumberOrder part
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="over">The over.</param>
+		/// <param name="desc">if set to <c>true</c> [desc].</param>
 		/// <returns></returns>
 		public static ElementProducer<T> RowNumberOrder<T>(this ElementProducer<T> query, string over, bool desc = false)
 		{
@@ -245,8 +296,13 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Adds a LEFT JOIN to the Statement
+		/// Adds a LEFT JOIN to the Statement
 		/// </summary>
+		/// <typeparam name="TLeft">The type of the left.</typeparam>
+		/// <typeparam name="TRight">The type of the right.</typeparam>
+		/// <typeparam name="TAggregation">The type of the aggregation.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="mode">The mode.</param>
 		/// <returns></returns>
 		public static ElementProducer<TAggregation> Join<TLeft, TRight, TAggregation>(this ElementProducer<TLeft> query, string mode = null)
 		{
@@ -262,8 +318,13 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Adds a JOIN to the Statement
+		/// Adds a JOIN to the Statement
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TE">The type of the e.</typeparam>
+		/// <typeparam name="TAggregation">The type of the aggregation.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="mode">The mode.</param>
 		/// <returns></returns>
 		public static ElementProducer<TAggregation> Join<T, TE, TAggregation>(this ElementProducer<T> query, JoinMode mode)
 		{
@@ -271,9 +332,13 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Inserts a TOP statement
+		/// Inserts a TOP statement
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="top">The top.</param>
 		/// <returns></returns>
+		/// <exception cref="NotSupportedException">For the Selected DB type is no Top implementations Available</exception>
 		public static ElementProducer<T> Top<T>(this RootQuery query, uint top)
 		{
 			switch (query.ContainerObject.AccessLayer.Database.TargetDatabase)
@@ -295,27 +360,59 @@ namespace JPB.DataAccess.Query
 		//	return query.QueryText("COUNT(" + what + ")");
 		//}
 
+		/// <summary>
+		/// Creates an TSQL Count(1) statement
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
 		public static ElementProducer<long> Count<TPoco>(this RootQuery query)
 		{
 			return new ElementProducer<long>(query.QueryText("SELECT COUNT(1) FROM [{0}]",
 				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName), null);
 		}
 
+
+		/// <summary>
+		/// Creates an TSQL Count(1) statement
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
 		public static ElementProducer<long> CountLong<TPoco>(this IElementProducer<TPoco> query)
 		{
 			return query.Count<TPoco, long>();
 		}
 
+		/// <summary>
+		/// Creates an TSQL Count(1) statement
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
 		public static ElementProducer<int> CountInt<TPoco>(this IElementProducer<TPoco> query)
 		{
 			return query.Count<TPoco, int>();
 		}
 
+		/// <summary>
+		/// Creates an TSQL Count(1) statement
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
 		public static ElementProducer<short> CountShort<TPoco>(this IElementProducer<TPoco> query)
 		{
 			return query.Count<TPoco, short>();
 		}
 
+		/// <summary>
+		/// Creates an TSQL Count(1) statement
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <typeparam name="TOut">The type of the out.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
 		public static ElementProducer<TOut> Count<TPoco, TOut>(this IElementProducer<TPoco> query)
 		{
 			var cteName = "countCte" + query.ContainerObject.GetNextParameterId();
@@ -344,51 +441,101 @@ namespace JPB.DataAccess.Query
 				}).QueryText("SELECT COUNT(1) FROM " + cteName), cteName);
 		}
 
+		/// <summary>
+		/// Creates an TSQL OrderBy statment
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="over">The over.</param>
+		/// <returns></returns>
 		public static ConditionalQuery<TPoco> OrderBy<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
 			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
+		/// <summary>
+		/// Creates an TSQL OrderBy statment
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <typeparam name="TE">The type of the e.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="columnName">Name of the column.</param>
+		/// <param name="desc">if set to <c>true</c> [desc].</param>
+		/// <returns></returns>
 		public static ConditionalQuery<TPoco> OrderBy<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
 			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
+		/// <summary>
+		/// Creates an TSQL OrderBy statment
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="over">The over.</param>
+		/// <returns></returns>
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
 			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
+		/// <summary>
+		/// Creates an TSQL OrderBy statment
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <typeparam name="TE">The type of the e.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="columnName">Name of the column.</param>
+		/// <param name="desc">if set to <c>true</c> [desc].</param>
+		/// <returns></returns>
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
 			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		/// <summary>
+		///
 		/// </summary>
 		public abstract class JoinMode
 		{
+			/// <summary>
+			/// Initializes a new instance of the <see cref="JoinMode" /> class.
+			/// </summary>
+			/// <param name="joinType">Type of the join.</param>
 			internal JoinMode(string joinType)
 			{
 				JoinType = joinType;
 			}
 
 			/// <summary>
-			///     QueryCommand string
+			/// QueryCommand string
 			/// </summary>
+			/// <value>
+			/// The type of the join.
+			/// </value>
 			public string JoinType { get; private set; }
 		}
 
+		/// <summary>
+		///
+		/// </summary>
 		public abstract class ApplyMode
 		{
+			/// <summary>
+			/// Initializes a new instance of the <see cref="ApplyMode" /> class.
+			/// </summary>
+			/// <param name="applyType">Type of the apply.</param>
 			internal ApplyMode(string applyType)
 			{
 				ApplyType = applyType;
 			}
 
 			/// <summary>
-			///     QueryCommand string
+			/// QueryCommand string
 			/// </summary>
+			/// <value>
+			/// The type of the apply.
+			/// </value>
 			public string ApplyType { get; private set; }
 		}
 	}

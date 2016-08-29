@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -212,7 +212,7 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		/// Actives a check when any user arguments Provided via any overload that takes an 
+		/// Actives a check when any user arguments Provided via any overload that takes an
 		/// <c>params object[]</c>
 		/// that should be used for Factory Injections. If enabled and Factory arguments are provided but could not match to any Factory an
 		/// <c>InvalidOperationExcpetion</c>
@@ -308,7 +308,7 @@ namespace JPB.DataAccess.Manager
 						return DbAccessLayerHelper.CreateCommand(Database, type.SelectFactory.Attribute.Query);
 					}
 				}
-				
+
 				var methods =
 					type.Mehtods
 						.Where(s => s.Attributes.Any(e => e.Attribute is TE && (!IsMultiProviderEnvironment
@@ -416,7 +416,7 @@ namespace JPB.DataAccess.Manager
 			}
 		}
 
-		private static void ThrowNoFactoryFoundException<TE>(List<object> arguments) 
+		private static void ThrowNoFactoryFoundException<TE>(List<object> arguments)
 			where TE : DbAccessTypeAttribute
 		{
 			var invalidOperationException = new InvalidOperationException("CheckFactoryArguments is activated and arguments are provided but no factory machtes the given arguments");
@@ -476,7 +476,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Plain Select statement by using
-		///     <paramref name="type" />
+		///     <paramref name="classType" />
 		/// </summary>
 		/// <returns></returns>
 		public static string CreateSelect(DbClassInfoCache classType, string prefix = null)
@@ -496,7 +496,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Plain Select statement by using
-		///     <paramref name="type" />
+		///     <paramref name="classType" />
 		/// </summary>
 		/// <returns></returns>
 		public static string CreateSelectByColumns(DbClassInfoCache classType, string columns, string prefix = null)
@@ -626,7 +626,7 @@ namespace JPB.DataAccess.Manager
 		{
 			return RunSelect(typeof(T), query, paramenter).Cast<T>().ToArray();
 		}
-		
+
 		#endregion
 
 		#region SelectWhereCommands
@@ -842,7 +842,7 @@ namespace JPB.DataAccess.Manager
 
 			/*
 			 * Due the fact that you are not able to anylse the QueryCommand in a way to ensure its will not effect the query self we
-			 * are loading the result an then loading based on that the items             
+			 * are loading the result an then loading based on that the items
 			 */
 
 			var sel = RunSelect(type, command);

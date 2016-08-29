@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace JPB.DataAccess.Contacts
 {
+	/// <summary>
+	/// Creates a new Strong Typed Constraint
+	/// </summary>
+	/// <typeparam name="TEntity">The type of the entity.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Contacts.ILocalDbConstraint" />
 	public interface ILocalDbCheckConstraint<in TEntity> : ILocalDbConstraint
 	{
 
@@ -18,6 +23,9 @@ namespace JPB.DataAccess.Contacts
 		bool CheckConstraint(TEntity item);
 	}
 
+	/// <summary>
+	/// Defines a new Constraint that can be applyed to a Database
+	/// </summary>
 	public interface ILocalDbConstraint
 	{
 		/// <summary>

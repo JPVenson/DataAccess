@@ -1,5 +1,5 @@
 /*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -13,6 +13,10 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Contacts
 {
+	/// <summary>
+	/// A Strategy for accessing a Database Provider
+	/// </summary>
+	/// <seealso cref="System.ICloneable" />
 	public interface IDatabaseStrategy : ICloneable
 	{
 		/// <summary>
@@ -41,18 +45,64 @@ namespace JPB.DataAccess.Contacts
 		/// <returns></returns>
 		IDbConnection CreateConnection();
 
+		/// <summary>
+		/// Creates a command.
+		/// </summary>
+		/// <param name="strSql">The string SQL.</param>
+		/// <param name="conn">The connection.</param>
+		/// <returns></returns>
 		IDbCommand CreateCommand(string strSql, IDbConnection conn);
+		/// <summary>
+		/// Creates a command.
+		/// </summary>
+		/// <param name="strSql">The string SQL.</param>
+		/// <param name="conn">The connection.</param>
+		/// <param name="fields">The fields.</param>
+		/// <returns></returns>
 		IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields);
+		/// <summary>
+		/// Creates a query parameter.
+		/// </summary>
+		/// <param name="strName">Name of the string.</param>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
 		IDataParameter CreateParameter(string strName, object value);
 
+		/// <summary>
+		/// Creates the data adapter.
+		/// </summary>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
 		IDbDataAdapter CreateDataAdapter(IDbCommand cmd);
 
+		/// <summary>
+		/// Creates a data table.
+		/// </summary>
+		/// <param name="name">The name.</param>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
 		DataTable CreateDataTable(string name, IDbCommand cmd);
 
+		/// <summary>
+		/// Getlasts a inserted identifier command.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <returns></returns>
 		IDbCommand GetlastInsertedID_Cmd(IDbConnection conn);
 
+		/// <summary>
+		/// Creates a data pager.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		IDataPager<T> CreatePager<T>();
 
+		/// <summary>
+		/// Creates the a pager that can convert each item.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TE">The type of the e.</typeparam>
+		/// <returns></returns>
 		IWrapperDataPager<T, TE> CreateConverterPager<T, TE>();
 
 		/// <summary>

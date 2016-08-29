@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -171,13 +171,14 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Gets the Primary key of
-		///     <typeparamref name="T"></typeparamref>
-		///     and convert it the
-		///     <typeparamref name="E"></typeparamref>
+		/// Gets the Primary key of
+		/// <typeparamref name="T"></typeparamref>
+		/// and convert it the
+		/// <typeparamref name="E"></typeparamref>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
-		/// <typeparam name="E"></typeparam>
+		/// <param name="source">The source.</param>
+		/// <param name="config">The configuration.</param>
 		/// <returns></returns>
 		internal static object GetPK<T>(this T source, DbConfig config)
 		{

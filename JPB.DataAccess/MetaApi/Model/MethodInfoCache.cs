@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -20,7 +20,7 @@ using JPB.DataAccess.MetaApi.Model.Equatable;
 namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
-	///     Infos about the Method on an Class. The given Delegate to the Function is not stored. 
+	///     Infos about the Method on an Class. The given Delegate to the Function is not stored.
 	///		This IL Body will be extracted and a new Function will be created on runtime for each calling function.
 	///		Use the <code>FakeMethodInfoCache</code> to create a direct delgate cache that will reuse the delegate pointer and the declaring class
 	/// </summary>
@@ -132,7 +132,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			_createMethod = new Lazy<Func<object, object[], object>>(() => Wrap((MethodInfo)mehtodInfo, sourceType));
 			return this;
 		}
-		
+
 		static Func<object, object[], object> Wrap(MethodBase method, Type declaringType)
 		{
 			var dm = new DynamicMethod(method.Name, typeof(object), new[] { typeof(object), typeof(object[]) }, declaringType, true);
@@ -225,16 +225,36 @@ namespace JPB.DataAccess.MetaApi.Model
 			return MethodInfo.Invoke(target, param);
 		}
 
+		/// <summary>
+		/// Indicates whether the current object is equal to another object of the same type.
+		/// </summary>
+		/// <param name="other">An object to compare with this object.</param>
+		/// <returns>
+		/// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+		/// </returns>
 		public bool Equals(IMethodInfoCache<TAtt, TArg> other)
 		{
 			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().Equals(this, other);
 		}
 
+		/// <summary>
+		/// Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+		/// </summary>
+		/// <param name="other">An object to compare with this instance.</param>
+		/// <returns>
+		/// A value that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance precedes <paramref name="other" /> in the sort order.  Zero This instance occurs in the same position in the sort order as <paramref name="other" />. Greater than zero This instance follows <paramref name="other" /> in the sort order.
+		/// </returns>
 		public int CompareTo(IMethodInfoCache<TAtt, TArg> other)
 		{
 			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().Compare(this, other);
 		}
 
+		/// <summary>
+		/// Returns a hash code for this instance.
+		/// </summary>
+		/// <returns>
+		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+		/// </returns>
 		public override int GetHashCode()
 		{
 			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().GetHashCode(this);

@@ -5,10 +5,23 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators.Conditional
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TPoco">The type of the poco.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
+	/// <seealso cref="JPB.DataAccess.Query.Contracts.IConditionalOperatorQuery{TPoco}" />
 	public class ConditionalOperatorQuery<TPoco> : QueryBuilderX, IConditionalOperatorQuery<TPoco>
 	{
+#pragma warning disable 1591
 		public readonly CondtionBuilderState State;
+#pragma warning restore 1591
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ConditionalOperatorQuery{TPoco}"/> class.
+		/// </summary>
+		/// <param name="builder">The builder.</param>
+		/// <param name="state">The state.</param>
 		public ConditionalOperatorQuery(IQueryBuilder builder, CondtionBuilderState state) : base(builder)
 		{
 			State = state;
@@ -22,6 +35,13 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Not));
 		}
 
+		/// <summary>
+		/// Adds an IN or NOT BEWEEN statement for the given collection of values
+		/// </summary>
+		/// <typeparam name="TValue">The type of the value.</typeparam>
+		/// <param name="values">The values.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> In<TValue>(params TValue[] values)
 		{
 			var prefix = "";
@@ -51,6 +71,13 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			return new ConditionalEvalQuery<TPoco>(prefixElement, State);
 		}
 
+		/// <summary>
+		/// Creates a BETWEEN or NOT BETWEEN statement for <paramref name="valueA"/> and <paramref name="valueB"/>
+		/// </summary>
+		/// <param name="valueA">The value a.</param>
+		/// <param name="valueB">The value b.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> Between(object valueA, object valueB)
 		{
 			var prefix = "";
@@ -74,6 +101,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 				new QueryParameter(string.Format("@m_val{0}", valBId), valBId)), State);
 		}
 
+		/// <summary>
+		/// Creates a LIKE statement with an full whildcard %value%
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> Like(string value)
 		{
 			switch (State.Operator)
@@ -87,6 +120,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
+		/// <summary>
+		/// Creates a LIKE statement with an ending whildcard value%
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> EndWith(string value)
 		{
 			switch (State.Operator)
@@ -100,6 +139,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
+		/// <summary>
+		/// Creates a LIKE statement with a starting whildcard %value
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> StartWith(string value)
 		{
 			switch (State.Operator)
@@ -113,6 +158,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
+		/// <summary>
+		/// Creates a Conditonal Bigger or Smaller as Statement
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> BiggerThen(object value)
 		{
 			switch (State.Operator)
@@ -126,6 +177,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
+		/// <summary>
+		/// Creates a Conditonal Bigger or Smaller as Statement
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> SmallerThen(object value)
 		{
 			switch (State.Operator)
@@ -139,6 +196,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
+		/// <summary>
+		/// Creates a statement that will check the Column for equality or not
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> EqualsTo(object value)
 		{
 			switch (State.Operator)
@@ -160,6 +223,13 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
+		/// <summary>
+		/// Creates an Equal to statement by using a subquery
+		/// </summary>
+		/// <typeparam name="TGPoco">The type of the g poco.</typeparam>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> EqualsTo<TGPoco>(ElementProducer<TGPoco> value)
 		{
 			switch (State.Operator)

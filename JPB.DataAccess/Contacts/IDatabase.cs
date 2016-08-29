@@ -1,5 +1,5 @@
 /*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -76,6 +76,9 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		void Attach(IDatabaseStrategy strategy);
 
+		/// <summary>
+		/// Detaches this instance.
+		/// </summary>
 		void Detach();
 
 		/// <summary>
@@ -99,6 +102,9 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		void Connect(IsolationLevel? levl = null);
 
+		/// <summary>
+		/// rollback the current Transaction.
+		/// </summary>
 		void TransactionRollback();
 
 		/// <summary>
@@ -113,7 +119,18 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		void CloseAllConnection();
 
+		/// <summary>
+		/// Executes a Query that returns no data
+		/// </summary>
+		/// <param name="strSql">The SQL.</param>
+		/// <param name="obj">Arguments</param>
+		/// <returns></returns>
 		int ExecuteNonQuery(string strSql, params object[] obj);
+		/// <summary>
+		/// Executes a Query that returns no data
+		/// </summary>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
 		int ExecuteNonQuery(IDbCommand cmd);
 
 		/// <summary>
@@ -121,15 +138,33 @@ namespace JPB.DataAccess.Contacts
 		///     Return the last inserted id based on the Strategy
 		/// </summary>
 		/// <returns></returns>
-		object GetlastInsertedID();
+		object GetlastInsertedId();
 
+		/// <summary>
+		/// Gets the data reader for the given Sql Statement.
+		/// </summary>
+		/// <param name="strSql">The SQL.</param>
+		/// <param name="obj">Arguments.</param>
+		/// <returns></returns>
 		IDataReader GetDataReader(string strSql, params object[] obj);
 
+		/// <summary>
+		/// Gets a single Value from the Query
+		/// </summary>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
 		object GetSkalar(IDbCommand cmd);
+
+		/// <summary>
+		/// Gets a single Value from the Query
+		/// </summary>
+		/// <param name="strSql">The string SQL.</param>
+		/// <param name="obj">The object.</param>
+		/// <returns></returns>
 		object GetSkalar(string strSql, params object[] obj);
 
-		DataTable GetDataTable(string name, string strSql);
-		DataSet GetDataSet(string strSql);
+		//DataTable GetDataTable(string name, string strSql);
+		//DataSet GetDataSet(string strSql);
 
 		/// <summary>
 		///     Required
@@ -191,7 +226,16 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		T RunInTransaction<T>(Func<IDatabase, T> func);
 
+		/// <summary>
+		/// Clones this instance.
+		/// </summary>
+		/// <returns></returns>
 		IDatabase Clone();
+
+		/// <summary>
+		/// Getlasts the inserted identifier command.
+		/// </summary>
+		/// <returns></returns>
 		IDbCommand GetlastInsertedIdCommand();
 
 		/// <summary>

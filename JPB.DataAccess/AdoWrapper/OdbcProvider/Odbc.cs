@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -20,6 +20,7 @@ namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 	/// <summary>
 	/// Default UNTESTED impl
 	/// </summary>
+#pragma warning disable 1591
 	public class Obdc : IDatabaseStrategy
 	{
 		private const string TEMPLATE_MSSQL_UNTRUSTED =
@@ -146,3 +147,4 @@ namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 		}
 	}
 }
+#pragma warning restore 1591

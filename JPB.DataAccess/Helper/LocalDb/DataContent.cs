@@ -19,6 +19,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 	{
 		private readonly LocalDbManager _instance;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DataContent"/> class.
+		/// </summary>
 		public DataContent()
 		{
 
@@ -35,11 +38,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private const string DatabaseContent = "Tables";
 		private const string TableContentList = "Table";
 
+		/// <summary>
+		/// Gets the schema.
+		/// </summary>
+		/// <returns></returns>
 		public XmlSchema GetSchema()
 		{
 			return null;
 		}
 
+		/// <summary>
+		/// Reads the XML.
+		/// </summary>
+		/// <param name="reader">The reader.</param>
+		/// <exception cref="InvalidDataException">
+		/// Invalid XML document for Db import. index is unset
+		/// or
+		/// Invalid XML document for Db import. type is unset
+		/// or
+		/// or
+		/// Invalid XML document for Db import. index for a table is unset
+		/// </exception>
 		public void ReadXml(XmlReader reader)
 		{
 			reader.Read();
@@ -110,6 +129,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
+		/// <summary>
+		/// Writes the XML.
+		/// </summary>
+		/// <param name="writer">The writer.</param>
 		public void WriteXml(XmlWriter writer)
 		{
 			writer.WriteStartElement(DatabaseName);

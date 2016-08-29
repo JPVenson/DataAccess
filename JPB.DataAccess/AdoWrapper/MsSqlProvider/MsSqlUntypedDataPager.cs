@@ -22,17 +22,35 @@ using JPB.DataAccess.Query.Operators.Orders;
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
+	///
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
+	/// <seealso cref="JPB.DataAccess.Contacts.Pager.IDataPager{T}" />
 	public class MsSqlUntypedDataPager<T> : IDataPager<T>
 	{
+		/// <summary>
+		/// The SQL version
+		/// </summary>
 		protected string SqlVersion;
+		/// <summary>
+		/// The cache
+		/// </summary>
 		private bool _cache;
+		/// <summary>
+		/// The check run
+		/// </summary>
 		private bool? _checkRun;
+		/// <summary>
+		/// The current page
+		/// </summary>
 		private long _currentPage;
+		/// <summary>
+		/// The synchronize helper
+		/// </summary>
 		private Action<Action> _syncHelper;
 
 		/// <summary>
+		/// Initializes a new instance of the <see cref="MsSqlUntypedDataPager{T}"/> class.
 		/// </summary>
 		public MsSqlUntypedDataPager()
 		{
@@ -44,6 +62,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			SyncHelper = action => action();
 		}
 
+		/// <summary>
+		/// Not Implimented
+		/// </summary>
+		/// <exception cref="Exception">To be supported ... sory</exception>
 		public bool Cache
 		{
 			get { return _cache; }
@@ -56,29 +78,42 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Base query to get a collection of <typeparamref name="T"/> Can NOT contain an Order Statement. Please use the CommandQuery property for this
+		/// Base query to get a collection of <typeparamref name="T" /> Can NOT contain an Order Statement. Please use the CommandQuery property for this
 		/// </summary>
 		public IDbCommand BaseQuery { get; set; }
 
 		/// <summary>
 		/// For Advanced querys including Order statements
 		/// </summary>
+		/// <value>
+		/// The command query.
+		/// </value>
 		public ElementProducer<T> CommandQuery { get; set; }
 
+		/// <summary>
+		/// Should raise Events
+		/// </summary>
 		public bool RaiseEvents { get; set; }
 
 		/// <summary>
-		///     Raised if new Page is loading
+		/// Raised if new Page is loading
 		/// </summary>
 		public event Action NewPageLoading;
 
 		/// <summary>
-		///     Raised if new page is Loaded
+		/// Raised if new page is Loaded
 		/// </summary>
 		public event Action NewPageLoaded;
 
+		/// <summary>
+		/// Commands that are sequencely attached to the main pager command
+		/// </summary>
 		public List<IDbCommand> AppendedComands { get; set; }
 
+		/// <summary>
+		/// Id of Current page beween 1 and MaxPage
+		/// </summary>
+		/// <exception cref="InvalidOperationException">The current page must be bigger or equals 1</exception>
 		public long CurrentPage
 		{
 			get { return _currentPage; }
@@ -95,15 +130,34 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// The pk
+		/// </summary>
 		string pk;
 
+		/// <summary>
+		/// The last possible Page
+		/// </summary>
 		public long MaxPage { get; private set; }
 
+		/// <summary>
+		/// Items to load on one page
+		/// </summary>
 		public int PageSize { get; set; }
+		/// <summary>
+		/// Get the complete ammount of all items listend
+		/// </summary>
 		public long TotalItemCount { get; private set; }
 
+		/// <summary>
+		/// Typed list of all Elements
+		/// </summary>
 		public ICollection<T> CurrentPageItems { get; protected set; }
 
+		/// <summary>
+		/// Loads the PageSize into CurrentPageItems
+		/// </summary>
+		/// <param name="dbAccess"></param>
 		void IDataPager.LoadPage(DbAccessLayer dbAccess)
 		{
 			T[] selectWhere = null;
@@ -267,6 +321,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 		}
 
+		/// <summary>
+		/// Typed list of all Elements
+		/// </summary>
 		IEnumerable IDataPager.CurrentPageItems
 		{
 			get { return CurrentPageItems; }
@@ -285,6 +342,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
+		/// Raises the new page loaded.
 		/// </summary>
 		protected virtual void RaiseNewPageLoaded()
 		{
@@ -295,6 +353,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
+		/// Raises the new page loading.
 		/// </summary>
 		protected virtual void RaiseNewPageLoading()
 		{
@@ -304,6 +363,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			if (handler != null) handler();
 		}
 
+		/// <summary>
+		/// Checks the version for fetch.
+		/// </summary>
+		/// <returns></returns>
 		private bool CheckVersionForFetch()
 		{
 			if (_checkRun != null)
@@ -355,6 +418,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			return _checkRun != null && _checkRun.Value;
 		}
 
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
 		public void Dispose()
 		{
 			BaseQuery.Dispose();

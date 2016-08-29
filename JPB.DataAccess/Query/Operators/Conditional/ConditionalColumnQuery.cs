@@ -3,10 +3,24 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators.Conditional
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TPoco">The type of the poco.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
+	/// <seealso cref="JPB.DataAccess.Query.Contracts.IConditionalColumnQuery{TPoco}" />
 	public class ConditionalColumnQuery<TPoco> : QueryBuilderX, IConditionalColumnQuery<TPoco>
 	{
+		/// <summary>
+		/// The state of the current bilder
+		/// </summary>
 		public readonly CondtionBuilderState State;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ConditionalColumnQuery{TPoco}"/> class.
+		/// </summary>
+		/// <param name="database">The database.</param>
+		/// <param name="state">The state.</param>
 		public ConditionalColumnQuery(IQueryBuilder database, CondtionBuilderState state) : base(database)
 		{
 			State = state;

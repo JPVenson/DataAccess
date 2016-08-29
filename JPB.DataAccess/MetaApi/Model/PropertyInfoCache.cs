@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -81,6 +81,13 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 		}
 
+		/// <summary>
+		/// Internal use Only
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		/// <param name="anon"></param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException">The object is already Initialed. A Change is not allowed</exception>
 		public virtual IPropertyInfoCache<TAtt> Init(PropertyInfo propertyInfo, bool anon)
 		{
 			if (!string.IsNullOrEmpty(PropertyName))
@@ -183,7 +190,7 @@ namespace JPB.DataAccess.MetaApi.Model
 								.MakeGenericMethod(SetterDelegate)
 								.Invoke(null, new object[]
 						{
-							Expression.Block(setter, returnMaybeValueType,retunLabel), 
+							Expression.Block(setter, returnMaybeValueType,retunLabel),
 							new[] {thisRef, valueRef}
 						}) as dynamic;
 
@@ -252,16 +259,36 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// </summary>
 		public HashSet<TAtt> Attributes { get; protected internal set; }
 
+		/// <summary>
+		/// Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+		/// </summary>
+		/// <param name="other">An object to compare with this instance.</param>
+		/// <returns>
+		/// A value that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance precedes <paramref name="other" /> in the sort order.  Zero This instance occurs in the same position in the sort order as <paramref name="other" />. Greater than zero This instance follows <paramref name="other" /> in the sort order.
+		/// </returns>
 		public int CompareTo(IPropertyInfoCache<TAtt> other)
 		{
 			return new PropertyEquatableComparer<TAtt>().Compare(this, other);
 		}
 
+		/// <summary>
+		/// Indicates whether the current object is equal to another object of the same type.
+		/// </summary>
+		/// <param name="other">An object to compare with this object.</param>
+		/// <returns>
+		/// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+		/// </returns>
 		public bool Equals(IPropertyInfoCache<TAtt> other)
 		{
 			return new PropertyEquatableComparer<TAtt>().Equals(this, other);
 		}
 
+		/// <summary>
+		/// Returns a hash code for this instance.
+		/// </summary>
+		/// <returns>
+		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+		/// </returns>
 		public override int GetHashCode()
 		{
 			return new PropertyEquatableComparer<TAtt>().GetHashCode(this);

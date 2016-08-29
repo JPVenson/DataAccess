@@ -25,7 +25,13 @@ namespace JPB.DataAccess.DebuggerHelper
 	[DebuggerDisplay("QueryCommand : {DebuggerQuery}", Name = "QueryCommand")]
 	public class QueryDebugger
 	{
+		/// <summary>
+		/// The start value part
+		/// </summary>
 		public const string StartValuePart = @" {{";
+		/// <summary>
+		/// The end value part
+		/// </summary>
 		public const string EndValuePart = @"}} ";
 		private static readonly Assembly Assembly;
 		private bool _loaded;
@@ -155,8 +161,11 @@ namespace JPB.DataAccess.DebuggerHelper
 			return sql.ToString();
 		}
 
+
 		/// <summary>
+		/// Formats the sp to string by using the DbType
 		/// </summary>
+		/// <param name="sp">The sp.</param>
 		/// <returns></returns>
 		public static String ParameterValue(IDataParameter sp)
 		{
@@ -202,6 +211,12 @@ namespace JPB.DataAccess.DebuggerHelper
 				.AppendInterlacedLine("}");
 		}
 
+		/// <summary>
+		/// Returns a <see cref="System.String" /> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String" /> that represents this instance.
+		/// </returns>
 		public override string ToString()
 		{
 			var sb = new StringBuilderInterlaced();

@@ -3,8 +3,20 @@ using System.Transactions;
 
 namespace JPB.DataAccess.Helper.LocalDb.Scopes
 {
+	/// <summary>
+	/// Defines a scope where a Replication can be done. This will disable all Trigger and Constraints and will reinvoke them when the scope is closed
+	/// </summary>
+	/// <seealso cref="System.IDisposable" />
 	public class ReplicationScope : IDisposable
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ReplicationScope"/> class.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">
+		/// Nested Identity Scopes are not supported
+		/// or
+		/// Has to be executed inside a valid TransactionScope
+		/// </exception>
 		public ReplicationScope()
 		{
 			if (Current != null)
@@ -23,11 +35,20 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		[ThreadStatic]
 		private static ReplicationScope _current;
 
+		/// <summary>
+		/// Gets the current Scope.
+		/// </summary>
+		/// <value>
+		/// The current.
+		/// </value>
 		public static ReplicationScope Current
 		{
 			get { return _current; }
 		}
 
+		/// <summary>
+		/// Submits all pending changes
+		/// </summary>
 		public void Dispose()
 		{
 			foreach (var localDbReposetoryBase in LocalDbManager.Scope.Database)

@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -45,6 +45,11 @@ namespace JPB.DataAccess.DbCollection
 			}
 		}
 
+		/// <summary>
+		/// Creates a DbCollection that contains the XML elements
+		/// </summary>
+		/// <param name="xml">The XML.</param>
+		/// <returns></returns>
 		public static NonObservableDbCollection<T> FromXml(string xml)
 		{
 			return new NonObservableDbCollection<T>(
@@ -55,12 +60,22 @@ namespace JPB.DataAccess.DbCollection
 						.GetClassInfo()
 						.SetPropertysViaReflection(item)));
 		}
-
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>
+		/// An enumerator that can be used to iterate through the collection.
+		/// </returns>
 		public IEnumerator<T> GetEnumerator()
 		{
 			return _base.GetEnumerator();
 		}
-
+		/// <summary>
+		/// Returns an enumerator that iterates through a collection.
+		/// </summary>
+		/// <returns>
+		/// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+		/// </returns>
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return _base.GetEnumerator();
@@ -242,13 +257,13 @@ namespace JPB.DataAccess.DbCollection
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
 		public CollectionStates GetEntryState(T item)
 		{
-			CollectionStates entry;			
+			CollectionStates entry;
 
 			if (!_internalCollection.TryGetValue(item, out entry))
 				return CollectionStates.Unknown;
@@ -292,7 +307,7 @@ namespace JPB.DataAccess.DbCollection
 			}
 
 			var results = _layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
-			//Added 
+			//Added
 			var added = _internalCollection.Where(s => s.Value == CollectionStates.Added).ToArray();
 			for (var i = 0; i < added.Length; i++)
 			{

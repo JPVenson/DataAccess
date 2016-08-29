@@ -2,16 +2,49 @@ using System;
 
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	public interface ITriggerInsteadtOfCollection<TEntity>
 	{
+		/// <summary>
+		/// Occurs when [insert] is trigged.
+		/// </summary>
 		event EventHandler<IInsteadtOfActionToken<TEntity>> Insert;
+		/// <summary>
+		/// Occurs when [update] is trigged.
+		/// </summary>
 		event EventHandler<IInsteadtOfActionToken<TEntity>> Update;
+		/// <summary>
+		/// Occurs when [delete] is trigged.
+		/// </summary>
 		event EventHandler<IInsteadtOfActionToken<TEntity>> Delete;
+		/// <summary>
+		/// Called when an inserd is called.
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		/// <returns>True if the Obj is handeld</returns>
 		bool OnInsert(TEntity obj);
+		/// <summary>
+		/// Called when [update].
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		/// <returns>True if the Obj is handeld</returns>
 		bool OnUpdate(TEntity obj);
+		/// <summary>
+		/// Called when [delete].
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		/// <returns>True if the Obj is handeld</returns>
 		bool OnDelete(TEntity obj);
 	}
 
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TEntity">The type of the entity.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Trigger.ITriggerInsteadtOfCollection{TEntity}" />
 	public class TriggerInsteadtOfCollection<TEntity> : ITriggerInsteadtOfCollection<TEntity>
 	{
 		private readonly LocalDbRepository<TEntity> _tabel;
@@ -27,11 +60,20 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		{
 		}
 
+		/// <summary>
+		/// Occurs when [insert].
+		/// </summary>
 		private event EventHandler<IInsteadtOfActionToken<TEntity>> _insert;
+		/// <summary>
+		/// Occurs when [update].
+		/// </summary>
 		private event EventHandler<IInsteadtOfActionToken<TEntity>> _update;
+		/// <summary>
+		/// Occurs when [delete].
+		/// </summary>
 		private event EventHandler<IInsteadtOfActionToken<TEntity>> _delete;
 
-		public virtual event EventHandler<IInsteadtOfActionToken<TEntity>> Insert
+		public event EventHandler<IInsteadtOfActionToken<TEntity>> Insert
 		{
 			add
 			{
@@ -50,7 +92,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		/// <summary>
 		/// Will be invoked when an Entity is updated
 		/// </summary>
-		public virtual event EventHandler<IInsteadtOfActionToken<TEntity>> Update
+		public event EventHandler<IInsteadtOfActionToken<TEntity>> Update
 		{
 			add
 			{
@@ -69,7 +111,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		/// <summary>
 		/// Will be invoked when the Remove function is called
 		/// </summary>
-		public virtual event EventHandler<IInsteadtOfActionToken<TEntity>> Delete
+		public event EventHandler<IInsteadtOfActionToken<TEntity>> Delete
 		{
 			add
 			{
@@ -85,6 +127,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			}
 		}
 
+		/// <summary>
+		/// Used to allow chained actions.
+		/// </summary>
 		[ThreadStatic]
 		internal static bool AsInsteadtOf;
 
@@ -110,21 +155,46 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			return false;
 		}
 
-		public virtual bool OnInsert(TEntity obj)
+		/// <summary>
+		/// Called when an inserd is called.
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		/// <returns>
+		/// True if the Obj is handeld
+		/// </returns>
+		public bool OnInsert(TEntity obj)
 		{
 			return InvokeTrigger(_insert, obj);
 		}
 
-		public virtual bool OnUpdate(TEntity obj)
+		/// <summary>
+		/// Called when [update].
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		/// <returns>
+		/// True if the Obj is handeld
+		/// </returns>
+		public bool OnUpdate(TEntity obj)
 		{
 			return InvokeTrigger(_update, obj);
 		}
 
-		public virtual bool OnDelete(TEntity obj)
+		/// <summary>
+		/// Called when [delete].
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		/// <returns>
+		/// True if the Obj is handeld
+		/// </returns>
+		public bool OnDelete(TEntity obj)
 		{
 			return InvokeTrigger(_delete, obj);
 		}
 
+		/// <summary>
+		/// Returns an Empty trigger collection
+		/// </summary>
+		/// <returns></returns>
 		public static TriggerInsteadtOfCollection<TEntity> Empty()
 		{
 			return new TriggerInsteadtOfCollection<TEntity>();

@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace JPB.DataAccess.Query.Contracts
 {
+	/// <summary>
+	///
+	/// </summary>
 	public interface IQueryBuilder
 	{
 		/// <summary>
@@ -10,10 +13,10 @@ namespace JPB.DataAccess.Query.Contracts
 		IQueryContainer ContainerObject { get; }
 
 		/// <summary>
-		/// Enumerates the current query for a type <typeparamref name="E"/>
+		/// Enumerates the current query for a type <typeparamref name="TE" />
 		/// </summary>
-		/// <typeparam name="E"></typeparam>
+		/// <typeparam name="TE"></typeparam>
 		/// <returns></returns>
-		IEnumerable<E> ForResult<E>();
+		IEnumerable<TE> ForResult<TE>();
 	}
 }

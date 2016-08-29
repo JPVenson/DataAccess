@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace JPB.DataAccess.DbInfoConfig
 {
+	/// <summary>
+	/// How to handle existing created Poco.Dlls
+	/// </summary>
 	public enum CollisonDetectionMode
 	{
 		/// <summary>
@@ -23,6 +26,9 @@ namespace JPB.DataAccess.DbInfoConfig
 	/// </summary>
 	public class FactoryHelperSettings
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FactoryHelperSettings"/> class.
+		/// </summary>
 		public FactoryHelperSettings()
 		{
 			HideSuperCreation = true;

@@ -39,11 +39,15 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		/// Is this instance mapped to the global Cache or does it only maintain its informations as long as it exists
 		/// </summary>
+		/// <value>
+		///   <c>true</c> if this instance is global; otherwise, <c>false</c>.
+		/// </value>
 		public bool IsGlobal { get; private set; }
 
 		/// <summary>
 		/// Creates a new Instance for storing class informations. Allows you to define if this is ether the global config store or a local one
 		/// </summary>
+		/// <param name="local">if set to <c>true</c> [local].</param>
 		public MetaInfoStore(bool local)
 		{
 			IsGlobal = !local;
@@ -60,7 +64,7 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///
+		/// Initializes the <see cref="MetaInfoStore{TClass, TProp, TAttr, TMeth, TCtor, TArg}"/> class.
 		/// </summary>
 		static MetaInfoStore()
 		{
@@ -68,7 +72,7 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     For Internal use Only
+		/// For Internal use Only
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -83,6 +87,9 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		/// Global or local Cache
 		/// </summary>
+		/// <value>
+		/// The s class information caches.
+		/// </value>
 		protected internal virtual HashSet<TClass> SClassInfoCaches
 		{
 			get
@@ -93,12 +100,19 @@ namespace JPB.DataAccess.MetaApi
 			}
 		}
 
+		/// <summary>
+		/// The class information caches
+		/// </summary>
 		private static readonly HashSet<TClass> ClassInfoCaches;
+		/// <summary>
+		/// The class information caches
+		/// </summary>
 		private readonly HashSet<TClass> _classInfoCaches;
 
 		/// <summary>
-		///     Gets an Cache object if exists or creats one
+		/// Gets an Cache object if exists or creats one
 		/// </summary>
+		/// <param name="type">The type.</param>
 		/// <returns></returns>
 		protected internal virtual TClass GetOrCreateClassInfoCache(Type type)
 		{
@@ -107,9 +121,12 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Gets an Cache object if exists or creats one
+		/// Gets an Cache object if exists or creats one
 		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="newCreated">if set to <c>true</c> [new created].</param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentNullException">type</exception>
 		protected internal virtual TClass GetOrCreateClassInfoCache(Type type, out bool newCreated)
 		{
 			if (type == null) throw new ArgumentNullException("type");
@@ -144,12 +161,13 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///		Gets an Cache object of exists or creats one
-		///		Return value can be null
+		/// Gets an Cache object of exists or creats one
+		/// Return value can be null
 		/// </summary>
-		/// <param name="typeName"></param>
-		/// <param name="newCreated"></param>
+		/// <param name="typeName">Name of the type.</param>
+		/// <param name="newCreated">if set to <c>true</c> [new created].</param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentException">Value cannot be null or empty.;typeName</exception>
 		protected internal virtual TClass GetOrCreateClassInfoCache(string typeName, out bool newCreated)
 		{
 			if (string.IsNullOrEmpty(typeName))
@@ -191,8 +209,10 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		/// Creates a new Runtime Fake type that can be filled with propertys
 		/// </summary>
-		/// <exception cref="InvalidOperationException">If type exists in store this exception</exception>
+		/// <param name="typeName">Name of the type.</param>
 		/// <returns></returns>
+		/// <exception cref="ArgumentException">Value cannot be null or empty.;typeName</exception>
+		/// <exception cref="InvalidOperationException">If type exists in store this exception</exception>
 		protected internal virtual TClass GetFake(string typeName)
 		{
 			if (string.IsNullOrEmpty(typeName))
@@ -231,8 +251,9 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Gets an Cache object if exists or creats one
+		/// Gets an Cache object if exists or creats one
 		/// </summary>
+		/// <param name="type">The type.</param>
 		/// <returns></returns>
 		protected internal virtual TMeth GetOrCreateMethodInfoCache(MethodInfo type)
 		{
@@ -242,10 +263,10 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Append
-		///     as an Optimistic input to the store.
-		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
-		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+		/// Append
+		/// as an Optimistic input to the store.
+		/// This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
+		/// This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -255,12 +276,12 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Append
-		///     as an Optimistic input to the store.
-		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
-		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+		/// Append
+		/// as an Optimistic input to the store.
+		/// This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
+		/// This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <param name="t">The t.</param>
 		/// <returns></returns>
 		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(Type t)
 		{
@@ -269,12 +290,12 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Append
-		///     as an Optimistic input to the store.
-		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
-		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+		/// Append
+		/// as an Optimistic input to the store.
+		/// This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
+		/// This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <param name="t">The t.</param>
 		/// <returns></returns>
 		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(params Type[] t)
 		{
@@ -308,12 +329,12 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     Append
-		///     as an Optimistic input to the store.
-		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
-		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
+		/// Append
+		/// as an Optimistic input to the store.
+		/// This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
+		/// This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <param name="existingItem">The existing item.</param>
 		/// <returns></returns>
 		public virtual MetaInfoStore<TClass, TProp, TAttr, TMeth, TCtor, TArg> Include(TClass existingItem)
 		{
@@ -338,15 +359,24 @@ namespace JPB.DataAccess.MetaApi
 		}
 
 		/// <summary>
-		///     If Enabled the GetOrCreateClassInfoCache mehtod will be locked due usage
+		/// If Enabled the GetOrCreateClassInfoCache mehtod will be locked due usage
 		/// </summary>
+		/// <value>
+		/// <c>true</c> if [enable global thread safety]; otherwise, <c>false</c>.
+		/// </value>
 		public static bool EnableGlobalThreadSafety { get; set; }
 
 		/// <summary>
-		///		if Enabled this can overwrite the EnableGlobalThreadSafety property
+		/// if Enabled this can overwrite the EnableGlobalThreadSafety property
 		/// </summary>
+		/// <value>
+		/// <c>true</c> if [enable instance thread safety]; otherwise, <c>false</c>.
+		/// </value>
 		public bool EnableInstanceThreadSafety { get; set; }
 
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
 		public virtual void Dispose()
 		{
 			SClassInfoCaches.Clear();

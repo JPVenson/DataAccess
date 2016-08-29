@@ -34,7 +34,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 	//	public virtual ITriggerAfterCollection<ForActionCancelToken, object> After { get; private set; }
 
 	//	/// <summary>
-	//	/// Will be invoked after <c>For</c> and bevor <c>After</c> and replaces the internal Add/Remove/Update call. 
+	//	/// Will be invoked after <c>For</c> and bevor <c>After</c> and replaces the internal Add/Remove/Update call.
 	//	/// If you still want to Add/Remove/Update the Entity you have to call Add/Remove/Update again
 	//	/// </summary>
 	//	public virtual ITriggerInsteadtOfCollection<InsteadtOfActionToken, object> InsteadOf { get; private set; }
@@ -45,27 +45,29 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 	//	}
 	//}
 
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TEntity">The type of the entity.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Trigger.IReplicationNode{TEntity}" />
 	public class ReplicationNode<TEntity> : IReplicationNode<TEntity>
 	{
-		private readonly LocalDbRepository<TEntity> _table;
-		private readonly IReplicationNode<TEntity> _duplication;
-
 		internal ReplicationNode(LocalDbRepository<TEntity> table, IReplicationNode<TEntity> duplication = null)
 		{
-			_table = table;
-			_duplication = duplication;
+			var table1 = table;
+			var duplication1 = duplication;
 
 			if (duplication != null)
 			{
-				For = new SequentialSequentialTriggerCollection<TEntity>(_table, _duplication.For);
-				After = new SequentialSequentialTriggerCollection<TEntity>(_table, _duplication.After);
-				InsteadOf = new TriggerInsteadtOfCollection<TEntity>(_table, _duplication.InsteadOf);
+				For = new SequentialSequentialTriggerCollection<TEntity>(table1, duplication1.For);
+				After = new SequentialSequentialTriggerCollection<TEntity>(table1, duplication1.After);
+				InsteadOf = new TriggerInsteadtOfCollection<TEntity>(table1, duplication1.InsteadOf);
 			}
 			else
 			{
-				For = new SequentialSequentialTriggerCollection<TEntity>(_table);
-				After = new SequentialSequentialTriggerCollection<TEntity>(_table);
-				InsteadOf = new TriggerInsteadtOfCollection<TEntity>(_table);
+				For = new SequentialSequentialTriggerCollection<TEntity>(table1);
+				After = new SequentialSequentialTriggerCollection<TEntity>(table1);
+				InsteadOf = new TriggerInsteadtOfCollection<TEntity>(table1);
 			}
 		}
 
@@ -80,7 +82,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		public virtual ISequentialTriggerCollection<TEntity> After { get; private set; }
 
 		/// <summary>
-		/// Will be invoked after <c>For</c> and bevor <c>After</c> and replaces the internal Add/Remove/Update call. 
+		/// Will be invoked after <c>For</c> and bevor <c>After</c> and replaces the internal Add/Remove/Update call.
 		/// If you still want to Add/Remove/Update the Entity you have to call Add/Remove/Update again
 		/// </summary>
 		public virtual ITriggerInsteadtOfCollection<TEntity> InsteadOf { get; private set; }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
@@ -18,18 +19,20 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 {
 	public abstract class ElementCompiler
 	{
+		private readonly ILogger _logger;
+
 		static ElementCompiler()
 		{
 			Provider = new CSharpCodeProvider();
 		}
 
-		public ElementCompiler(string targetDir, string targetCsName)
+		protected ElementCompiler(string targetDir, string targetCsName, ILogger logger)
 		{
+			_logger = logger;
 			_base = new CodeTypeDeclaration(targetCsName);
 			TargetCsName = targetCsName;
 			TargetDir = targetDir;
 		}
-
 
 		public const string GitURL = "https://github.com/JPVenson/DataAccess";
 		public const string AttrbuteHeader = "JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator";
@@ -76,7 +79,8 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			var writer = new StringWriter();
 			writer.NewLine = Environment.NewLine;
 
-			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions {
+			new CSharpCodeProvider().GenerateCodeFromCompileUnit(cp, writer, new CodeGeneratorOptions
+			{
 				BlankLinesBetweenMembers = false,
 				VerbatimOrder = true,
 				ElseOnClosing = true
@@ -210,7 +214,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 					cp.ReferencedAssemblies.Add("System.Xml.dll");
 					cp.ReferencedAssemblies.Add("System.Xml.Linq.dll");
 					cp.ReferencedAssemblies.Add("JPB.DataAccess.dll");
-					
+
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
 					importNameSpace.Imports.Add(new CodeNamespaceImport("System.CodeDom.Compiler"));
@@ -220,7 +224,8 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 					importNameSpace.Types.Add(_base);
 					compileUnit.Namespaces.Add(importNameSpace);
 
-					Provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions() {
+					Provider.GenerateCodeFromCompileUnit(compileUnit, writer, new CodeGeneratorOptions()
+					{
 						BlankLinesBetweenMembers = false,
 						BracingStyle = "C",
 						IndentString = "	",
@@ -228,11 +233,11 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 						ElseOnClosing = true
 					});
 
-					Console.WriteLine("Generated class" + _base.Name);
+					_logger.WriteLine("Generated class" + _base.Name);
 					writer.Flush();
 				}
 
-				Console.WriteLine("Compute changes");
+				_logger.WriteLine("Compute changes");
 				//check if hascodes are diverent
 				var hasher = MD5.Create();
 				var neuHash = hasher.ComputeHash(memStream.ToArray());
@@ -244,7 +249,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 						var exisitingHash = hasher.ComputeHash(fileStream);
 						if (!exisitingHash.SequenceEqual(neuHash))
 						{
-							Console.WriteLine("Class changed. Old file will be kept and new contnt will be written");
+							_logger.WriteLine("Class changed. Old file will be kept and new contnt will be written");
 							fileStream.SetLength(0);
 							fileStream.Flush();
 							fileStream.Seek(0, SeekOrigin.Begin);
@@ -253,14 +258,13 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 							fileStream.Flush();
 						}
 					}
-					
 				}
 				else
 				{
 					var exisitingHash = hasher.ComputeHash(to);
 					if (WriteAllways || !exisitingHash.SequenceEqual(neuHash))
 					{
-						Console.WriteLine("Class changed. Old file will be kept and new contnt will be written");
+						_logger.WriteLine("Class changed. Old file will be kept and new contnt will be written");
 						to.SetLength(0);
 						to.Flush();
 						to.Seek(0, SeekOrigin.Begin);
@@ -278,7 +282,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 			var configArgument = string.Format("ConfigurationResolver<{0}>", TargetCsName);
 
-			importNameSpace.Imports.Add(new CodeNamespaceImport(typeof (ConfigurationResolver<>).Namespace));
+			importNameSpace.Imports.Add(new CodeNamespaceImport(typeof(ConfigurationResolver<>).Namespace));
 
 			string[] eventNames = new string[]
 			{
@@ -298,7 +302,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			var configMethod = new CodeMemberMethod();
 			configMethod.Attributes = MemberAttributes.Static | MemberAttributes.Public;
 
-			configMethod.CustomAttributes.Add(new CodeAttributeDeclaration(typeof (ConfigMehtodAttribute).Name));
+			configMethod.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ConfigMehtodAttribute).Name));
 			configMethod.Name = "Config" + TargetCsName;
 			configMethod.Parameters.Add(new CodeParameterDeclarationExpression(configArgument, configArgumentName));
 			var configRef = new CodeVariableReferenceExpression(configArgumentName);
@@ -312,7 +316,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			{
 				var setNewTablenameOnConfig = new CodeMethodInvokeExpression(configRef,
 					"SetClassAttribute",
-					new CodeObjectCreateExpression(typeof (ForModelAttribute).Name,
+					new CodeObjectCreateExpression(typeof(ForModelAttribute).Name,
 						new CodePrimitiveExpression(TableName)));
 				configMethod.Statements.Add(setNewTablenameOnConfig);
 			}
@@ -345,7 +349,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 					var ctor = member as CodeConstructor;
 					if (
 						ctor.CustomAttributes.Cast<CodeAttributeDeclaration>()
-							.Any(f => f.Name == typeof (ObjectFactoryMethodAttribute).Name))
+							.Any(f => f.Name == typeof(ObjectFactoryMethodAttribute).Name))
 					{
 						var dbInfos = ColumninfosToInfoCache(columnInfos);
 

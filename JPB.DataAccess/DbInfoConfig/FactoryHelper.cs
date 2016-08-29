@@ -78,7 +78,6 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// Generates a Function with a Full ado.net constructor beavior.
 		/// It Creates a new Instance of <param name="target"></param> and then fills all public properties
 		/// </summary>
-		/// <param name="target"></param>
 		/// <param name="settings"></param>
 		/// <param name="importNameSpace"></param>
 		/// <returns></returns>
@@ -100,6 +99,12 @@ namespace JPB.DataAccess.DbInfoConfig
 			return codeFactory;
 		}
 
+		/// <summary>
+		/// Creates the short code type reference.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="imports">The imports.</param>
+		/// <returns></returns>
 		public static CodeTypeReference CreateShortCodeTypeReference(Type type, CodeNamespaceImportCollection imports)
 		{
 			var result = new CodeTypeReference(type);
@@ -109,6 +114,12 @@ namespace JPB.DataAccess.DbInfoConfig
 			return result;
 		}
 
+		/// <summary>
+		/// Shortifies the specified type reference.
+		/// </summary>
+		/// <param name="typeReference">The type reference.</param>
+		/// <param name="type">The type.</param>
+		/// <param name="imports">The imports.</param>
 		public static void Shortify(CodeTypeReference typeReference, Type type, CodeNamespaceImportCollection imports)
 		{
 			if (typeReference.ArrayRank > 0)
@@ -375,6 +386,14 @@ namespace JPB.DataAccess.DbInfoConfig
 			}
 		}
 
+		/// <summary>
+		/// Generates a C# DOM body for an IDataReader loader.
+		/// </summary>
+		/// <param name="sourceType">Type of the source.</param>
+		/// <param name="settings">The settings.</param>
+		/// <param name="importNameSpace">The import name space.</param>
+		/// <param name="container">The container.</param>
+		/// <param name="target">The target.</param>
 		public static void GenerateBody(DbClassInfoCache sourceType,
 			FactoryHelperSettings settings,
 			CodeNamespace importNameSpace,
@@ -384,6 +403,12 @@ namespace JPB.DataAccess.DbInfoConfig
 			GenerateBody(sourceType.Propertys, settings, importNameSpace, container, target);
 		}
 
+		/// <summary>
+		/// Generates a type constructor by using the <see cref="GenerateBody(Dictionary{string,DbPropertyInfoCache},FactoryHelperSettings,CodeNamespace,CodeMemberMethod,CodeExpression)"/>.
+		/// </summary>
+		/// <param name="propertyToDbColumn">The property to database column.</param>
+		/// <param name="altNamespace">The alt namespace.</param>
+		/// <returns></returns>
 		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<DbPropertyInfoCache> propertyToDbColumn, string altNamespace)
 		{
 			var codeConstructor = GenerateTypeConstructor();

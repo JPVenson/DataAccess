@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -13,7 +13,14 @@ using System.Reflection;
 
 namespace JPB.DataAccess.Contacts.MetaApi
 {
-	public interface IMethodInfoCache<TAtt, TArg> : 
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TAtt">The type of the att.</typeparam>
+	/// <typeparam name="TArg">The type of the argument.</typeparam>
+	/// <seealso cref="IMethodInfoCache{TAtt,TArg}" />
+	/// <seealso cref="IMethodInfoCache{TAtt,TArg}" />
+	public interface IMethodInfoCache<TAtt, TArg> :
 		IComparable<IMethodInfoCache<TAtt, TArg>>,
 		IEquatable<IMethodInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new()
@@ -49,7 +56,19 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		/// </summary>
 		bool UseILWrapper { get; set; }
 
+		/// <summary>
+		/// For internal Usage only
+		/// </summary>
+		/// <param name="info">The information.</param>
+		/// <returns></returns>
 		IMethodInfoCache<TAtt, TArg> Init(MethodBase info);
+
+		/// <summary>
+		/// For internal Usage only
+		/// </summary>
+		/// <param name="mehtodInfo"></param>
+		/// <param name="sourceType"></param>
+		/// <returns></returns>
 		IMethodInfoCache<TAtt, TArg> Init(MethodBase mehtodInfo, Type sourceType);
 
 		/// <summary>

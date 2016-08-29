@@ -2,10 +2,24 @@
 
 namespace JPB.DataAccess.Query.Operators.Conditional
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TPoco">The type of the poco.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Query.Operators.ElementProducer{TPoco}" />
+	/// <seealso cref="JPB.DataAccess.Query.Contracts.IConditionalEvalQuery{TPoco}" />
 	public class ConditionalEvalQuery<TPoco> : ElementProducer<TPoco>, IConditionalEvalQuery<TPoco>
 	{
+		/// <summary>
+		/// The current query state
+		/// </summary>
 		public readonly CondtionBuilderState State;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ConditionalEvalQuery{TPoco}"/> class.
+		/// </summary>
+		/// <param name="database">The database.</param>
+		/// <param name="state">The state.</param>
 		public ConditionalEvalQuery(IQueryBuilder database, CondtionBuilderState state) : base(database)
 		{
 			State = state;
@@ -14,9 +28,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="query"></param>
-		/// <param name="columnName"></param>
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> And()
 		{
@@ -26,9 +37,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="query"></param>
-		/// <param name="columnName"></param>
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> Or()
 		{

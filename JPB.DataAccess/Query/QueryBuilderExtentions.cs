@@ -12,6 +12,9 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query
 {
+	/// <summary>
+	///
+	/// </summary>
 	public static class QueryBuilderExtentions
 	{
 		/// <summary>
@@ -86,7 +89,7 @@ namespace JPB.DataAccess.Query
 		{
 			return builder.Add(GenericQueryPart.FromCommand(command, null));
 		}
-		
+
 		/// <summary>
 		///     Adds a QueryCommand part to <paramref name="builder" />
 		/// </summary>
@@ -127,7 +130,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Wraps the Existing command into a DataPager for the underlying Database     
+		///     Wraps the Existing command into a DataPager for the underlying Database
 		///     <example>
 		///     </example>
 		/// </summary>

@@ -18,12 +18,12 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CS1591</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
-    <NoWarn>CS1591</NoWarn>
+    <DocumentationFile>bin\Debug\JPB.DataAccess.XML</DocumentationFile>
+    <NoWarn>
+    </NoWarn>
     <LangVersion>5</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
@@ -141,10 +141,10 @@
     <Compile Include="Helper\EnumMemberConverter.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\CheckConstraints.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\ConstraintCollection.cs" />
-    <Compile Include="Helper\LocalDb\Constraints\Collections\ICheckConstraints.cs" />
-    <Compile Include="Helper\LocalDb\Constraints\Collections\IConstraintCollection.cs" />
-    <Compile Include="Helper\LocalDb\Constraints\Collections\IDefaultConstraints.cs" />
-    <Compile Include="Helper\LocalDb\Constraints\Collections\IUniqueConstrains.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\Contracts\ICheckConstraints.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\Contracts\IConstraintCollection.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\Contracts\IDefaultConstraints.cs" />
+    <Compile Include="Helper\LocalDb\Constraints\Contracts\IUniqueConstrains.cs" />
     <Compile Include="Helper\LocalDb\Constraints\ConstraintException.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\DefaultConstraints.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Contracts\ILocalDbDefaultConstraint.cs" />

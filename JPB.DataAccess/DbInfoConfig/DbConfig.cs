@@ -22,6 +22,10 @@ namespace JPB.DataAccess.DbInfoConfig
 	public class DbConfig
 		: MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DbConfig"/> class.
+		/// </summary>
+		/// <param name="local"></param>
 		public DbConfig(bool local = false)
 			: base(local)
 		{
@@ -34,6 +38,11 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		public FactoryHelperSettings ConstructorSettings { get; private set; }
 
+		/// <summary>
+		/// Gets an Cache object if exists or creats one
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
 		public new DbClassInfoCache GetOrCreateClassInfoCache(Type type)
 		{
 			bool isNewCreated;
@@ -43,6 +52,11 @@ namespace JPB.DataAccess.DbInfoConfig
 			return val;
 		}
 
+		/// <summary>
+		/// Gets the or create class information cache.
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns></returns>
 		public DbClassInfoCache GetOrCreateClassInfoCache(string type)
 		{
 			bool isNewCreated;
@@ -80,13 +94,11 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
-		///     Append
-		///     <typeparamref name="T" />
+		///     Append the type
 		///     as an Optimistic input to the store.
 		///     This allows you to explicit control when the MetaInfoStore store will enumerate the type object.
 		///     This will be implicit called when GetOrCreateClassInfoCache is called and the type is not known
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		public new virtual DbConfig Include(Type type)
 		{
@@ -94,6 +106,11 @@ namespace JPB.DataAccess.DbInfoConfig
 			return this;
 		}
 
+		/// <summary>
+		/// Includes the specified types.
+		/// </summary>
+		/// <param name="t">The type.</param>
+		/// <returns></returns>
 		public new DbConfig Include(params Type[] t)
 		{
 			var isThreadSave = EnableGlobalThreadSafety || EnableGlobalThreadSafety;
@@ -126,6 +143,9 @@ namespace JPB.DataAccess.DbInfoConfig
 			return this;
 		}
 
+		/// <summary>
+		/// Releases unmanaged and - optionally - managed resources.
+		/// </summary>
 		public override void Dispose()
 		{
 			base.Dispose();

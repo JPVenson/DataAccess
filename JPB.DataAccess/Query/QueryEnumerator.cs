@@ -5,44 +5,44 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query
 {
-	[Obsolete("This type of Query Enumerator is obsolete. Use the QueryEnumeratorEx instadt", true)]
-	public class QueryEnumerator<TE> : IEnumerable
-		where TE : IQueryElement
-	{
-		private QueryBuilder<TE> _builder;
+	//[Obsolete("This type of Query Enumerator is obsolete. Use the QueryEnumeratorEx instadt", true)]
+	//public class QueryEnumerator<TE> : IEnumerable
+	//	where TE : IQueryElement
+	//{
+	//	private QueryBuilder<TE> _builder;
 
-		public QueryEnumerator(QueryBuilder<TE> builder)
-		{
-			_builder = builder.Clone() as QueryBuilder<TE>;
-		}
+	//	public QueryEnumerator(QueryBuilder<TE> builder)
+	//	{
+	//		_builder = builder.Clone() as QueryBuilder<TE>;
+	//	}
 
-		public IEnumerator GetEnumerator()
-		{
-			return _builder.GetEnumerator();
-		}
-	}
+	//	public IEnumerator GetEnumerator()
+	//	{
+	//		return _builder.GetEnumerator();
+	//	}
+	//}
 
-	[Obsolete("This type of Query Enumerator is obsolete. Use the QueryEnumeratorEx instadt", true)]
-	public class QueryEnumerator<TE, T> : IEnumerable<T>
-		where TE : IQueryElement
-	{
-		private QueryBuilder<T, TE> _builder;
+	//[Obsolete("This type of Query Enumerator is obsolete. Use the QueryEnumeratorEx instadt", true)]
+	//public class QueryEnumerator<TE, T> : IEnumerable<T>
+	//	where TE : IQueryElement
+	//{
+	//	private QueryBuilder<T, TE> _builder;
 
-		public QueryEnumerator(QueryBuilder<T, TE> builder)
-		{
-			_builder = builder.Clone() as QueryBuilder<T, TE>;
-		}
+	//	public QueryEnumerator(QueryBuilder<T, TE> builder)
+	//	{
+	//		_builder = builder.Clone() as QueryBuilder<T, TE>;
+	//	}
 
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			return _builder.GetEnumerator();
-		}
+	//	IEnumerator<T> IEnumerable<T>.GetEnumerator()
+	//	{
+	//		return _builder.GetEnumerator();
+	//	}
 
-		public IEnumerator GetEnumerator()
-		{
-			return _builder.GetEnumerator();
-		}
-	}
+	//	public IEnumerator GetEnumerator()
+	//	{
+	//		return _builder.GetEnumerator();
+	//	}
+	//}
 
 	public class QueryEnumeratorEx<TPoco> : IEnumerable<TPoco>
 	{

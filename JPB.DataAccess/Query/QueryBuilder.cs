@@ -16,6 +16,10 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <seealso cref="JPB.DataAccess.Query.Contracts.IQueryBuilder" />
 	public class QueryBuilderX : IQueryBuilder
 	{
 		internal QueryBuilderX(DbAccessLayer database, Type type)
@@ -57,6 +61,11 @@ namespace JPB.DataAccess.Query
 			return new QueryBuilderX(this.ContainerObject.Clone());
 		}
 
+		/// <summary>
+		/// Appends the specified query Builder.
+		/// </summary>
+		/// <param name="right">The right.</param>
+		/// <returns></returns>
 		public QueryBuilderX Append(QueryBuilderX right)
 		{
 		    if (right.ContainerObject == this.ContainerObject)
@@ -69,6 +78,9 @@ namespace JPB.DataAccess.Query
 			return this;
 		}
 
+		/// <summary>
+		/// The interal value holder
+		/// </summary>
 		public IQueryContainer ContainerObject { get; private set; }
 
 		/// <summary>
@@ -106,136 +118,136 @@ namespace JPB.DataAccess.Query
 	}
 
 
-	/// <summary>
-	///     Provides functions that can build SQL Querys
-	/// </summary>
-	[Obsolete("This type of Query builder is obsolete. Use the QueryBuilderX instadt", true)]
-	public class QueryBuilder<Stack> : IQueryBuilder<Stack>
-		where Stack : IQueryElement
-	{
-		internal QueryBuilder(DbAccessLayer database, Type type)
-		{
-			this.ContainerObject = new InternalContainerContainer(database, type);
-		}
+	///// <summary>
+	/////     Provides functions that can build SQL Querys
+	///// </summary>
+	//[Obsolete("This type of Query builder is obsolete. Use the QueryBuilderX instadt", true)]
+	//public class QueryBuilder<Stack> : IQueryBuilder<Stack>
+	//	where Stack : IQueryElement
+	//{
+	//	internal QueryBuilder(DbAccessLayer database, Type type)
+	//	{
+	//		this.ContainerObject = new InternalContainerContainer(database, type);
+	//	}
 
-		internal QueryBuilder(IQueryContainer database)
-		{
-			this.ContainerObject = database;
-		}
+	//	internal QueryBuilder(IQueryContainer database)
+	//	{
+	//		this.ContainerObject = database;
+	//	}
 
-		internal QueryBuilder(IQueryBuilder<Stack> database)
-		{
-			this.ContainerObject = database.ContainerObject;
-		}
+	//	internal QueryBuilder(IQueryBuilder<Stack> database)
+	//	{
+	//		this.ContainerObject = database.ContainerObject;
+	//	}
 
-		internal QueryBuilder(IQueryBuilder<Stack> database, Type type)
-		{
-			this.ContainerObject = database.ContainerObject;
-			this.ContainerObject.ForType = type;
-		}
+	//	internal QueryBuilder(IQueryBuilder<Stack> database, Type type)
+	//	{
+	//		this.ContainerObject = database.ContainerObject;
+	//		this.ContainerObject.ForType = type;
+	//	}
 
-		/// <summary>
-		/// Creates a new Query
-		/// </summary>
-		/// <param name="database"></param>
-		public QueryBuilder(DbAccessLayer database)
-		{
-			this.ContainerObject = new InternalContainerContainer(database);
-		}
+	//	/// <summary>
+	//	/// Creates a new Query
+	//	/// </summary>
+	//	/// <param name="database"></param>
+	//	public QueryBuilder(DbAccessLayer database)
+	//	{
+	//		this.ContainerObject = new InternalContainerContainer(database);
+	//	}
 
 
-		/// <summary>
-		/// Wraps the current QueryBuilder into a new Form by setting the Current query type
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public IQueryBuilder<T> ChangeType<T>() where T : IQueryElement
-		{
-			return new QueryBuilder<T>(ContainerObject);
-		}
+	//	/// <summary>
+	//	/// Wraps the current QueryBuilder into a new Form by setting the Current query type
+	//	/// </summary>
+	//	/// <typeparam name="T"></typeparam>
+	//	/// <returns></returns>
+	//	public IQueryBuilder<T> ChangeType<T>() where T : IQueryElement
+	//	{
+	//		return new QueryBuilder<T>(ContainerObject);
+	//	}
 
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public object Clone()
-		{
-			return new QueryBuilder<Stack>(this.ContainerObject);
-		}
+	//	/// <summary>
+	//	/// </summary>
+	//	/// <returns></returns>
+	//	public object Clone()
+	//	{
+	//		return new QueryBuilder<Stack>(this.ContainerObject);
+	//	}
 
-		public IQueryContainer ContainerObject { get; private set; }
+	//	public IQueryContainer ContainerObject { get; private set; }
 
-		/// <summary>
-		///     Executes the Current QueryBuilder by setting the type
-		/// </summary>
-		/// <typeparam name="E"></typeparam>
-		/// <returns></returns>
-		public IEnumerable<E> ForResult<E>()
-		{
-			return new QueryEnumerator<Stack, E>(new QueryBuilder<E, Stack>(this));
-		}
+	//	/// <summary>
+	//	///     Executes the Current QueryBuilder by setting the type
+	//	/// </summary>
+	//	/// <typeparam name="E"></typeparam>
+	//	/// <returns></returns>
+	//	public IEnumerable<E> ForResult<E>()
+	//	{
+	//		return new QueryEnumerator<Stack, E>(new QueryBuilder<E, Stack>(this));
+	//	}
 
-		/// <summary>
-		///		Executes the current QueryBuilder
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable ForResult()
-		{
-			return new QueryEnumerator<Stack>(this);
-		}
+	//	/// <summary>
+	//	///		Executes the current QueryBuilder
+	//	/// </summary>
+	//	/// <returns></returns>
+	//	public IEnumerable ForResult()
+	//	{
+	//		return new QueryEnumerator<Stack>(this);
+	//	}
 
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerator GetEnumerator()
-		{
-			if (ContainerObject.ForType == null)
-				throw new ArgumentNullException("No type Supplied", new Exception());
+	//	/// <summary>
+	//	/// </summary>
+	//	/// <returns></returns>
+	//	public IEnumerator GetEnumerator()
+	//	{
+	//		if (ContainerObject.ForType == null)
+	//			throw new ArgumentNullException("No type Supplied", new Exception());
 
-			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
-				return new QueryEagerEnumerator(ContainerObject, ContainerObject.ForType);
-			return new QueryLazyEnumerator(ContainerObject, ContainerObject.ForType);
-		}
-	}
+	//		if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+	//			return new QueryEagerEnumerator(ContainerObject, ContainerObject.ForType);
+	//		return new QueryLazyEnumerator(ContainerObject, ContainerObject.ForType);
+	//	}
+	//}
 
-	/// <summary>
-	/// </summary>
-	[Obsolete("This type of Query builder is obsolete. Use the QueryBuilderX instadt", true)]
-	public class QueryBuilder<T, Stack> : QueryBuilder<Stack>
-		where Stack : IQueryElement
-	{
-		/// <summary>
-		///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
-		/// </summary>
-		public QueryBuilder(DbAccessLayer database)
-			: base(database, typeof(T))
-		{
-		}
+	///// <summary>
+	///// </summary>
+	//[Obsolete("This type of Query builder is obsolete. Use the QueryBuilderX instadt", true)]
+	//public class QueryBuilder<T, Stack> : QueryBuilder<Stack>
+	//	where Stack : IQueryElement
+	//{
+	//	/// <summary>
+	//	///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
+	//	/// </summary>
+	//	public QueryBuilder(DbAccessLayer database)
+	//		: base(database, typeof(T))
+	//	{
+	//	}
 
-		internal QueryBuilder(IQueryBuilder<Stack> source)
-			: base(source, typeof(T))
-		{
+	//	internal QueryBuilder(IQueryBuilder<Stack> source)
+	//		: base(source, typeof(T))
+	//	{
 
-		}
+	//	}
 
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public new object Clone()
-		{
-			return new QueryBuilder<T, Stack>(this);
-		}
+	//	/// <summary>
+	//	/// </summary>
+	//	/// <returns></returns>
+	//	public new object Clone()
+	//	{
+	//		return new QueryBuilder<T, Stack>(this);
+	//	}
 
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public new IEnumerator<T> GetEnumerator()
-		{
-			if (ContainerObject.ForType == null)
-				throw new ArgumentNullException("No type Supplied", new Exception());
+	//	/// <summary>
+	//	/// </summary>
+	//	/// <returns></returns>
+	//	public new IEnumerator<T> GetEnumerator()
+	//	{
+	//		if (ContainerObject.ForType == null)
+	//			throw new ArgumentNullException("No type Supplied", new Exception());
 
-			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
-				return new QueryEagerEnumerator<T>(ContainerObject, ContainerObject.ForType);
-			return new QueryLazyEnumerator<T>(ContainerObject, ContainerObject.ForType);
-		}
-	}
+	//		if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+	//			return new QueryEagerEnumerator<T>(ContainerObject, ContainerObject.ForType);
+	//		return new QueryLazyEnumerator<T>(ContainerObject, ContainerObject.ForType);
+	//	}
+	//}
 }

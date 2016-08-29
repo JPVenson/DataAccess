@@ -45,6 +45,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 			private set { _current = value; }
 		}
 
+		/// <summary>
+		/// Occurs when [on identity insert completed].
+		/// </summary>
 		public event EventHandler OnIdentityInsertCompleted;
 
 		internal void OnOnIdentityInsertCompleted()
@@ -54,6 +57,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 				handler(this, EventArgs.Empty);
 		}
 
+		/// <summary>
+		///		Ends the Identity Insert and will trigger all indexes and ForgeinKey checks
+		/// </summary>
 		public void Dispose()
 		{
 			OnOnIdentityInsertCompleted();

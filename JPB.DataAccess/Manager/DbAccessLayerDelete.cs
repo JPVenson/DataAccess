@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -39,6 +39,14 @@ namespace JPB.DataAccess.Manager
 			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
 		}
 
+		/// <summary>
+		///		Creates a Delete statement for the given entry
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="classInfo">The class information.</param>
+		/// <param name="entry">The entry.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException"></exception>
 		public static IDbCommand CreateDelete(IDatabase db, DbClassInfoCache classInfo, object entry)
 		{
 			if (entry == null)

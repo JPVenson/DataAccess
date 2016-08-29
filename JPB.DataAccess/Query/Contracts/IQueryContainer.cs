@@ -7,6 +7,9 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Query.Contracts
 {
+	/// <summary>
+	///
+	/// </summary>
 	public interface IQueryContainer
 	{
 		/// <summary>

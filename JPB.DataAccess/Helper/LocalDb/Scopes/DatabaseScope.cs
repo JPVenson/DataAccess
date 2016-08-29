@@ -3,7 +3,7 @@
 namespace JPB.DataAccess.Helper.LocalDb.Scopes
 {
 	/// <summary>
-	/// Provides a logical scope for defining databases. All DbCollections within this scope are logicly combined. 
+	/// Provides a logical scope for defining databases. All DbCollections within this scope are logicly combined.
 	/// Use the Using keyword to ensure correctness
 	/// </summary>
 	public class DatabaseScope : IDisposable
@@ -36,6 +36,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 			remove { LocalDbManager.Scope.SetupDone -= value; }
 		}
 
+		/// <summary>
+		///		Ends the creation of this Database and compile all Data
+		/// </summary>
 		public void Dispose()
 		{
 			LocalDbManager.Scope.OnSetupDone();

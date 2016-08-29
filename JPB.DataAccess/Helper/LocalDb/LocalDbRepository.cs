@@ -22,15 +22,17 @@ using JPB.DataAccess.Manager;
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	///     Maintains a local collection of entitys simulating a basic DB Bevavior by setting PrimaryKeys in an General way.
-	///     Starting with 0 incriment by 1.
+	///     Maintains a local collection of entitys simulating a basic DB Bevavior
 	///     When enumerating the Repro you will only receive the Current state as it is designed to be thread save
 	/// </summary>
+	/// <remarks>
+	/// All Static and Instance member are Thread Save
+	/// </remarks>
 	[Serializable]
-	public class LocalDbRepository<TEntity> : ICollection<TEntity>, ILocalDbReposetoryBaseInternalUsage
+	public sealed class LocalDbRepository<TEntity> : ICollection<TEntity>, ILocalDbReposetoryBaseInternalUsage
 	{
 		private readonly List<TransactionalItem<TEntity>> _transactionalItems = new List<TransactionalItem<TEntity>>();
-		protected internal readonly object LockRoot = new object();
+		internal readonly object LockRoot = new object();
 		private DbConfig _config;
 		private IdentityInsertScope _currentIdentityInsertScope;
 		private Transaction _currentTransaction;
@@ -41,8 +43,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private ITriggerForTableCollectionInternalUsage<TEntity> _triggers;
 
 		private DbClassInfoCache _typeInfo;
-		protected internal IDictionary<object, TEntity> Base;
-		protected internal DbClassInfoCache TypeKeyInfo;
+		internal IDictionary<object, TEntity> Base;
+		internal DbClassInfoCache TypeKeyInfo;
 
 
 		/// <summary>
@@ -56,7 +58,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     If enabled the given object referance will be used (Top performance).
 		///     if Disabled each object has to be define an Valid Ado.Net constructor to allow a copy (Can be slow)
 		/// </param>
-		/// <param name="triggerProto">The given trigger collection</param>
 		public LocalDbRepository(
 			DbConfig config,
 			bool useOrignalObjectInMemory = true,
@@ -78,7 +79,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     If enabled the given object referance will be used (Top performance).
 		///     if Disabled each object has to be define an Valid Ado.Net constructor to allow a copy (Can be slow)
 		/// </param>
-		/// <param name="triggerProto">The given trigger collection</param>
 		public LocalDbRepository(
 			Type containedType,
 			DbConfig config,
@@ -126,7 +126,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Contains acccess to INSERT/DELETE/UPDATE(WIP) Triggers
 		/// </summary>
-		public virtual ITriggerForTableCollection<TEntity> Triggers
+		public ITriggerForTableCollection<TEntity> Triggers
 		{
 			get { return _triggers; }
 		}
@@ -134,19 +134,33 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Access to a collection of Constraints valid for this Table
 		/// </summary>
-		public virtual IConstraintCollection<TEntity> Constraints { get; private set; }
+		public IConstraintCollection<TEntity> Constraints { get; private set; }
 
+		/// <summary>
+		/// The used Config Store
+		/// </summary>
+		/// <value>
+		/// The configuration.
+		/// </value>
 		public DbConfig Config
 		{
 			get { return _config; }
 		}
-
-		public virtual bool IsReadOnly
+		/// <summary>
+		/// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
+		/// </summary>
+		/// <value>
+		/// Allways false
+		/// </value>
+		public bool IsReadOnly
 		{
 			get { return false; }
 		}
 
-		public virtual int Count
+		/// <summary>
+		/// Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
+		/// </summary>
+		public int Count
 		{
 			get { return Base.Count; }
 		}
@@ -155,7 +169,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     Adds a new Item to the Table
 		/// </summary>
 		/// <param name="item"></param>
-		public virtual void Add(TEntity item)
+		public void Add(TEntity item)
 		{
 			if (item == null) throw new ArgumentNullException("item");
 			var elementToAdd = item;
@@ -217,7 +231,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Removes all items from this Table
 		/// </summary>
-		public virtual void Clear()
+		public void Clear()
 		{
 			CheckCreatedElseThrow();
 			lock (LockRoot)
@@ -229,6 +243,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
+		/// <summary>
+		/// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
+		/// </summary>
+		/// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
+		/// <returns>
+		/// true if <paramref name="item" /> is found in the <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">item</exception>
 		public bool Contains(TEntity item)
 		{
 			if (item == null) throw new ArgumentNullException("item");
@@ -238,6 +260,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return local;
 		}
 
+		/// <summary>
+		/// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1" /> to an <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.
+		/// </summary>
+		/// <param name="array">The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1" />. The <see cref="T:System.Array" /> must have zero-based indexing.</param>
+		/// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
+		/// <exception cref="ArgumentNullException">array</exception>
 		public void CopyTo(TEntity[] array, int arrayIndex)
 		{
 			if (array == null) throw new ArgumentNullException("array");
@@ -291,6 +319,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return success;
 		}
 
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>
+		/// An enumerator that can be used to iterate through the collection.
+		/// </returns>
 		IEnumerator<TEntity> IEnumerable<TEntity>.GetEnumerator()
 		{
 			CheckCreatedElseThrow();
@@ -307,6 +341,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}).GetEnumerator();
 		}
 
+		/// <summary>
+		/// Returns an enumerator that iterates through a collection.
+		/// </summary>
+		/// <returns>
+		/// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+		/// </returns>
 		public IEnumerator GetEnumerator()
 		{
 			return ((IEnumerable<TEntity>)this).GetEnumerator();
@@ -327,11 +367,23 @@ namespace JPB.DataAccess.Helper.LocalDb
 			set { ReposetoryCreated = value; }
 		}
 
+		/// <summary>
+		/// Gets the database attached to this Reposetory.
+		/// </summary>
+		/// <value>
+		/// The database.
+		/// </value>
 		public LocalDbManager Database
 		{
 			get { return _databaseDatabase; }
 		}
 
+		/// <summary>
+		/// Gets or sets a value indicating whether this instance is migrating.
+		/// </summary>
+		/// <value>
+		/// <c>true</c> if this instance is migrating; otherwise, <c>false</c>.
+		/// </value>
 		public bool IsMigrating
 		{
 			get { return _isMigrating; }
@@ -343,7 +395,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="array"></param>
 		/// <param name="index"></param>
-		public virtual void CopyTo(Array array, int index)
+		public void CopyTo(Array array, int index)
 		{
 			if (array == null) throw new ArgumentNullException("array");
 			lock (LockRoot)
@@ -356,17 +408,31 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 		}
 
-		public virtual object SyncRoot
+		/// <summary>
+		/// Gets an object that can be used to synchronize access to the <see cref="T:System.Collections.ICollection" />.
+		/// </summary>
+		public object SyncRoot
 		{
 			get { return LockRoot; }
 		}
 
-		public virtual bool IsSynchronized
+		/// <summary>
+		/// Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection" /> is synchronized (thread safe).
+		/// </summary>
+		public bool IsSynchronized
 		{
 			get { return Monitor.IsEntered(LockRoot); }
 		}
 
-		public virtual bool ContainsId(object fkValueForTableX)
+		/// <summary>
+		/// Determines whether the specified fk value for table x contains identifier.
+		/// </summary>
+		/// <param name="fkValueForTableX">The fk value for table x.</param>
+		/// <returns>
+		///   <c>true</c> if the specified fk value for table x contains identifier; otherwise, <c>false</c>.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">fkValueForTableX</exception>
+		public bool ContainsId(object fkValueForTableX)
 		{
 			if (fkValueForTableX == null) throw new ArgumentNullException("fkValueForTableX");
 			var local = Base.ContainsKey(fkValueForTableX);
@@ -379,12 +445,23 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return local;
 		}
 
+		/// <summary>
+		/// Adds the specified item.
+		/// </summary>
+		/// <param name="item">The item.</param>
 		public void Add(object item)
 		{
 			Add((TEntity)item);
 		}
 
-		public virtual bool Contains(object item)
+		/// <summary>
+		/// Determines whether [contains] [the specified item].
+		/// </summary>
+		/// <param name="item">The item.</param>
+		/// <returns>
+		///   <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
+		/// </returns>
+		public bool Contains(object item)
 		{
 			return Contains((TEntity)item);
 		}
@@ -394,7 +471,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		public virtual bool Contains(long item)
+		public bool Contains(long item)
 		{
 			return ContainsId(item);
 		}
@@ -404,12 +481,17 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		public virtual bool Contains(int item)
+		public bool Contains(int item)
 		{
 			return ContainsId(item);
 		}
 
-		public virtual bool Remove(object item)
+		/// <summary>
+		/// Removes the specified item.
+		/// </summary>
+		/// <param name="item">The item.</param>
+		/// <returns></returns>
+		public bool Remove(object item)
 		{
 			return Remove((TEntity)item);
 		}
@@ -439,7 +521,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <param name="keyGenerator"></param>
 		/// <param name="config"></param>
 		/// <param name="useOrignalObjectInMemory"></param>
-		protected virtual void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config,
+		private void Init(Type type, ILocalDbPrimaryKeyConstraint keyGenerator, DbConfig config,
 			bool useOrignalObjectInMemory)
 		{
 			if (config == null)
@@ -726,16 +808,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 					foreach (var transactionalItem in _transactionalItems)
 					{
 						var checkEnforceConstraints = EnforceCheckConstraints(transactionalItem.Item);
-						if (checkEnforceConstraints != null)
+						if (checkEnforceConstraints == null)
+							continue;
+						try
 						{
-							try
-							{
-								throw checkEnforceConstraints;
-							}
-							finally
-							{
-								_currentTransaction_Rollback();
-							}
+							throw checkEnforceConstraints;
+						}
+						finally
+						{
+							_currentTransaction_Rollback();
 						}
 					}
 
@@ -753,7 +834,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
-		public virtual bool Update(TEntity item)
+		public bool Update(TEntity item)
 		{
 			if (item == null) throw new ArgumentNullException("item");
 			TriggersUsage.For.OnUpdate(item);
@@ -763,7 +844,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (getElement == null)
 				return false;
 			if (ReferenceEquals(item, getElement))
-				return true;
+				return false;
 			if (!TriggersUsage.InsteadOf.OnUpdate(item))
 			{
 				DataConverterExtensions.CopyPropertys(item, getElement, _config);
@@ -773,6 +854,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 			return true;
 		}
 
+		/// <summary>
+		/// Creates a pager object that can be used to page this collection
+		/// </summary>
+		/// <returns></returns>
 		public IDataPager<TEntity> CreatePager()
 		{
 			return new LocalDataPager<TEntity>(this);

@@ -10,14 +10,29 @@ using JPB.DataAccess.Query.Operators.Selection;
 
 namespace JPB.DataAccess.Query.Operators
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TPoco">The type of the poco.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Query.Operators.ElementProducer{TPoco}" />
+	/// <seealso cref="JPB.DataAccess.Query.Contracts.ISelectQuery{TPoco}" />
 	public class SelectQuery<TPoco> : ElementProducer<TPoco>, ISelectQuery<TPoco>
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SelectQuery{TPoco}"/> class.
+		/// </summary>
+		/// <param name="database">The database.</param>
 		public SelectQuery(IQueryBuilder database) : base(database)
 		{
 			if (CurrentIdentifier != null)
 				this.QueryText("AS " + CurrentIdentifier);
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SelectQuery{TPoco}"/> class.
+		/// </summary>
+		/// <param name="database">The database.</param>
+		/// <param name="ident">The ident.</param>
 		public SelectQuery(IQueryBuilder database, string ident) : base(database, ident)
 		{
 			if (CurrentIdentifier != null)

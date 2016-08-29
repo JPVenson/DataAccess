@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -16,9 +16,9 @@ namespace JPB.DataAccess.Contacts.MetaApi
 	/// Contains all Infos about an Attribute
 	/// </summary>
 	public interface IAttributeInfoCache
-		: IEquatable<IAttributeInfoCache>, 
+		: IEquatable<IAttributeInfoCache>,
 		IComparable<AttributeInfoCache>
-	{	
+	{
 		/// <summary>
 		///		Direct Reflection
 		/// </summary>

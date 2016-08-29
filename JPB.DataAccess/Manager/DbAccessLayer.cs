@@ -48,8 +48,14 @@ namespace JPB.DataAccess.Manager
 
 		private ILogger _logger;
 
-		private DbConfig _config;
+		private readonly DbConfig _config;
 
+		/// <summary>
+		/// Gets the current Config store this instance is attached to.
+		/// </summary>
+		/// <value>
+		/// The configuration.
+		/// </value>
 		public DbConfig Config
 		{
 			get { return _config; }
@@ -216,6 +222,11 @@ namespace JPB.DataAccess.Manager
 			Database = database;
 		}
 
+		/// <summary>
+		/// Quick access to the underlying Config store
+		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <returns></returns>
 		public DbClassInfoCache GetClassInfo(Type type)
 		{
 			return Config.GetOrCreateClassInfoCache(type);

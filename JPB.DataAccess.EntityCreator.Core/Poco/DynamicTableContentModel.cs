@@ -3,6 +3,7 @@ using System.Data;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.EntityCreator.Core.Poco
 {
@@ -20,9 +21,9 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		}
 
 		[SelectFactoryMethod]
-		public static void SelectFromTable(IQueryBuilder<IRootQuery> queryBuilder, string tableName)
+		public static void SelectFromTable(RootQuery queryBuilder, string tableName)
 		{
-			queryBuilder.SelectStar().QueryD(tableName);
+			queryBuilder.QueryD("SELECT * FROM " + tableName);
 		}
 
 		[JPB.DataAccess.ModelsAnotations.LoadNotImplimentedDynamic]

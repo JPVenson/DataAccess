@@ -2,15 +2,23 @@ using System;
 
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TEntity">The type of the entity.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialTriggerCollection{TEntity}" />
 	public class SequentialSequentialTriggerCollection<TEntity>
 		: ISequentialTriggerCollection<TEntity>
 	{
 		protected readonly LocalDbRepository<TEntity> Tabel;
+		/// <summary>
+		/// The Collection that should be mirrored
+		/// </summary>
 		protected readonly ISequentialTriggerCollection<TEntity> Duplication;
 
-		protected virtual event EventHandler<ISequentialToken<TEntity>> _insert;
-		protected virtual event EventHandler<ISequentialToken<TEntity>> _update;
-		protected virtual event EventHandler<ISequentialToken<TEntity>> _delete;
+		private event EventHandler<ISequentialToken<TEntity>> _insert;
+		private event EventHandler<ISequentialToken<TEntity>> _update;
+		private event EventHandler<ISequentialToken<TEntity>> _delete;
 
 		internal SequentialSequentialTriggerCollection(LocalDbRepository<TEntity> tabel, ISequentialTriggerCollection<TEntity> duplication = null)
 		{

@@ -3,6 +3,7 @@ using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.EntityCreator.Core.Poco
 {
@@ -15,7 +16,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		}
 
 		[SelectFactoryMethod]
-		public static void Callup(IQueryBuilder<IRootQuery> builder, string tableName, string database)
+		public static void Callup(RootQuery builder, string tableName, string database)
 		{
 			builder.QueryText("SELECT ccu.column_name AS SourceColumn ,kcu.table_name AS TargetTable ,kcu.column_name AS TargetColumn")
 				.QueryText("FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu")

@@ -13,6 +13,10 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query
 {
+	/// <summary>
+	/// Stores the Query data produced by an QueryBuilder element
+	/// </summary>
+	/// <seealso cref="JPB.DataAccess.Query.Contracts.IQueryContainer" />
 	public class InternalContainerContainer : IQueryContainer
 	{
 		/// <summary>
@@ -51,9 +55,21 @@ namespace JPB.DataAccess.Query
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 		}
 
+		/// <summary>
+		/// Gets the current number of used SQL Parameter. This value is used for Autogeneration
+		/// </summary>
 		public int AutoParameterCounter { get; private set; }
+		/// <summary>
+		/// Defines all elements added by the Add Method
+		/// </summary>
 		public List<GenericQueryPart> Parts { get; private set; }
+		/// <summary>
+		/// Defines the Way how the Data will be loaded
+		/// </summary>
 		public EnumerationMode EnumerationMode { get; set; }
+		/// <summary>
+		/// If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
+		/// </summary>
 		public bool AllowParamterRenaming { get; set; }
 
 		/// <summary>
@@ -75,6 +91,10 @@ namespace JPB.DataAccess.Query
 		}
 
 
+		/// <summary>
+		/// Will concat all QueryParts into a statement and will check for Spaces
+		/// </summary>
+		/// <returns></returns>
 		public IDbCommand Compile()
 		{
 			var query = CompileFlat();
@@ -110,6 +130,10 @@ namespace JPB.DataAccess.Query
 			return this;
 		}
 
+		/// <summary>
+		/// Compiles the QueryCommand into a String|IEnumerable of Paramameter
+		/// </summary>
+		/// <returns></returns>
 		public Tuple<string, IEnumerable<IQueryParameter>> CompileFlat()
 		{
 			var sb = new StringBuilder();
@@ -139,6 +163,10 @@ namespace JPB.DataAccess.Query
 		}
 
 
+		/// <summary>
+		/// Increment the counter +1 and return the value
+		/// </summary>
+		/// <returns></returns>
 		public int GetNextParameterId()
 		{
 			return ++AutoParameterCounter;
@@ -189,6 +217,12 @@ namespace JPB.DataAccess.Query
 				.AppendInterlaced("}");
 		}
 
+		/// <summary>
+		/// Returns a <see cref="System.String" /> that represents this instance.
+		/// </summary>
+		/// <returns>
+		/// A <see cref="System.String" /> that represents this instance.
+		/// </returns>
 		public override string ToString()
 		{
 			return Render();
@@ -199,6 +233,10 @@ namespace JPB.DataAccess.Query
 		//	return new InternalContainerContainer(this);
 		//}
 
+		/// <summary>
+		/// Clones this Container
+		/// </summary>
+		/// <returns></returns>
 		public IQueryContainer Clone()
 		{
 			return new InternalContainerContainer(this);

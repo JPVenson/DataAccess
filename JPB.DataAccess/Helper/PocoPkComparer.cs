@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -28,7 +28,15 @@ namespace JPB.DataAccess.Helper
 		: IEqualityComparer<T>, IComparer<T>
 		where T : class
 	{
+		/// <summary>
+		/// The default assertion object that will be used to compare to when no other element is used
+		/// </summary>
+		// ReSharper disable once StaticMemberInGenericType
 		public static object DefaultAssertionObject;
+		/// <summary>
+		/// Should a cast tried
+		/// </summary>
+		// ReSharper disable once StaticMemberInGenericType
 		public static bool DefaultRewrite;
 
 		/// <summary>
@@ -44,12 +52,20 @@ namespace JPB.DataAccess.Helper
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PocoPkComparer{T}"/> class.
+		/// </summary>
+		/// <param name="assertNotDatabaseMember">The assert not database member.</param>
 		public PocoPkComparer(int assertNotDatabaseMember)
 			: this((object)assertNotDatabaseMember, new DbConfig(), true)
 		{
 
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PocoPkComparer{T}"/> class.
+		/// </summary>
+		/// <param name="assertNotDatabaseMember">The assert not database member.</param>
 		public PocoPkComparer(string assertNotDatabaseMember)
 			: this((object)assertNotDatabaseMember, new DbConfig(), true)
 		{
@@ -57,6 +73,10 @@ namespace JPB.DataAccess.Helper
 		}
 
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PocoPkComparer{T}"/> class.
+		/// </summary>
+		/// <param name="assertNotDatabaseMember">The assert not database member.</param>
 		public PocoPkComparer(long assertNotDatabaseMember)
 			: this((object)assertNotDatabaseMember, new DbConfig(), true)
 		{
@@ -71,12 +91,22 @@ namespace JPB.DataAccess.Helper
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PocoPkComparer{T}"/> class.
+		/// </summary>
+		/// <param name="assertNotDatabaseMember">The assert not database member.</param>
+		/// <param name="config">The configuration.</param>
 		public PocoPkComparer(int assertNotDatabaseMember, DbConfig config)
 			: this((object)assertNotDatabaseMember, config, true)
 		{
 
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PocoPkComparer{T}"/> class.
+		/// </summary>
+		/// <param name="assertNotDatabaseMember">The assert not database member.</param>
+		/// <param name="config">The configuration.</param>
 		public PocoPkComparer(string assertNotDatabaseMember, DbConfig config)
 			: this((object)assertNotDatabaseMember, config, true)
 		{
@@ -84,6 +114,11 @@ namespace JPB.DataAccess.Helper
 		}
 
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PocoPkComparer{T}"/> class.
+		/// </summary>
+		/// <param name="assertNotDatabaseMember">The assert not database member.</param>
+		/// <param name="config">The configuration.</param>
 		public PocoPkComparer(long assertNotDatabaseMember, DbConfig config)
 			: this((object)assertNotDatabaseMember, config, true)
 		{
@@ -91,9 +126,9 @@ namespace JPB.DataAccess.Helper
 		}
 
 		internal PocoPkComparer(
-			object assertNotDatabaseMember, 
+			object assertNotDatabaseMember,
 			DbConfig config,
-			bool useAssertion = false, 
+			bool useAssertion = false,
 			string propertyName = null)
 		{
 			if (assertNotDatabaseMember == null && PocoPkComparer<T>.DefaultAssertionObject != null)
@@ -119,8 +154,8 @@ namespace JPB.DataAccess.Helper
 		}
 
 		private void Init(
-			object assertNotDatabaseMember, 
-			bool useAssertion, 
+			object assertNotDatabaseMember,
+			bool useAssertion,
 			DbConfig config,
 			string property = null)
 		{
@@ -266,7 +301,7 @@ namespace JPB.DataAccess.Helper
 		/// Checks if both arguments are ReferenceEquals
 		/// Checks if Left is null = 1
 		/// Checks if Right is null = -1
-		/// Calls the 
+		/// Calls the
 		/// </summary>
 		/// <param name="left"></param>
 		/// <param name="right"></param>

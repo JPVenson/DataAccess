@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -22,7 +22,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		internal DbPropertyInfoCache(string name, Action<dynamic, TE> setter = null, Func<dynamic, TE> getter = null,
 			params AttributeInfoCache[] attributes)
 		{
-			if (name == null) 
+			if (name == null)
 				throw new ArgumentNullException("name");
 			if (attributes == null)
 				throw new ArgumentNullException("attributes");
@@ -76,11 +76,16 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbPropertyInfoCache : PropertyInfoCache<DbAttributeInfoCache>
 	{
+
 #if !DEBUG
 		[DebuggerHidden]
 #endif
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DbPropertyInfoCache"/> class.
+		/// </summary>
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
+
 		public DbPropertyInfoCache()
 		{
 			base.Attributes = new HashSet<DbAttributeInfoCache>();

@@ -7,11 +7,33 @@ using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.Core.Compiler;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
-using JPB.DataAccess.Logger;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.EntityCreator.Core
 {
+	class DefaultLogger : ILogger
+	{
+		/// <summary>
+		/// Writes one or more chars to the output by using string.Format
+		/// </summary>
+		/// <param name="content"></param>
+		/// <param name="arguments"></param>
+		public void Write(string content, params object[] arguments)
+		{
+			Console.Write(content, arguments);
+		}
+
+		/// <summary>
+		/// Writes one or more chars to the output by using string.Format followed by an Enviroment.NewLine
+		/// </summary>
+		/// <param name="content"></param>
+		/// <param name="arguments"></param>
+		public void WriteLine(string content = null, params object[] arguments)
+		{
+			Console.WriteLine(content, arguments);
+		}
+	}
+
 	public static class SharedMethods
 	{
 		public static ILogger Logger = new DefaultLogger();

@@ -150,7 +150,6 @@ namespace JPB.DataAccess.DbInfoConfig
 		///     Adds a Fake property to the class getter and setter will be invoked like normal ones
 		/// </summary>
 		/// <typeparam name="TE">Type of the Property</typeparam>
-		/// <typeparam name="T">Type where the Static Property should be mapped to</typeparam>
 		public void CreateStaticProperty<TE>(string name, params AttributeInfoCache[] attributes)
 		{
 			if (name == null)

@@ -1,5 +1,5 @@
 /*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -24,6 +24,12 @@ namespace JPB.DataAccess.Manager
 			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite"},
 		};
 
+		/// <summary>
+		/// Returns an enumerator that iterates through the collection.
+		/// </summary>
+		/// <returns>
+		/// An enumerator that can be used to iterate through the collection.
+		/// </returns>
 		public IEnumerator<KeyValuePair<DbAccessType, string>> GetEnumerator()
 		{
 			return _preDefinedProvider.GetEnumerator();
@@ -34,6 +40,9 @@ namespace JPB.DataAccess.Manager
 			return GetEnumerator();
 		}
 
+		/// <summary>
+		/// Gets the number of elements in the collection.
+		/// </summary>
 		public int Count
 		{
 			get { return _preDefinedProvider.Count; }

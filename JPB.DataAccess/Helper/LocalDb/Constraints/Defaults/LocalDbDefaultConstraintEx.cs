@@ -8,6 +8,12 @@ using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 {
+	/// <summary>
+	///
+	/// </summary>
+	/// <typeparam name="TEntity">The type of the entity.</typeparam>
+	/// <typeparam name="TValue">The type of the value.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Constraints.Contracts.ILocalDbDefaultConstraint{TEntity}" />
 	public class LocalDbDefaultConstraintEx<TEntity, TValue> : ILocalDbDefaultConstraint<TEntity>
 	{
 		private readonly DbConfig _config;
@@ -15,6 +21,16 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 		private readonly Expression<Func<TEntity, TValue>> _exp;
 		private DbPropertyInfoCache _dbPropertyInfoCache;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LocalDbDefaultConstraintEx{TEntity, TValue}"/> class.
+		/// </summary>
+		/// <param name="config">The configuration.</param>
+		/// <param name="name">The name.</param>
+		/// <param name="generateValue">The generate value.</param>
+		/// <param name="column">The column.</param>
+		/// <exception cref="ArgumentException">
+		/// </exception>
+		/// <exception cref="InvalidCastException">The given property name is invalid. When using Nullable types do not use the Value property. Use the Nullable propertie</exception>
 		public LocalDbDefaultConstraintEx(DbConfig config, string name, Func<TValue> generateValue, Expression<Func<TEntity, TValue>> column)
 		{
 			_config = config;
@@ -46,6 +62,10 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			_dbPropertyInfoCache = fod.Value;
 		}
 
+		/// <summary>
+		/// Defaults the value.
+		/// </summary>
+		/// <param name="item">The item.</param>
 		public void DefaultValue(TEntity item)
 		{
 			var value = _generateValue();
@@ -57,6 +77,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			}
 		}
 
+		/// <summary>
+		/// The name of this Constraint
+		/// </summary>
 		public string Name { get; private set; }
 	}
 }

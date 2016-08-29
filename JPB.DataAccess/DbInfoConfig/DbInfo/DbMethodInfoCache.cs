@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -23,18 +23,29 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbMethodInfoCache : MethodInfoCache<DbAttributeInfoCache, DbMethodArgument>
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DbMethodInfoCache"/> class.
+		/// </summary>
+		/// <param name="mehtodInfo">The mehtod information.</param>
 		public DbMethodInfoCache(MethodInfo mehtodInfo)
 			: base(mehtodInfo)
 		{
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DbMethodInfoCache"/> class.
+		/// </summary>
+		/// <param name="fakeMehtod">The fake mehtod.</param>
+		/// <param name="declaringType">Type of the declaring.</param>
+		/// <param name="name">The name.</param>
+		/// <param name="attributes">The attributes.</param>
 		public DbMethodInfoCache(Func<object, object[], object> fakeMehtod, Type declaringType, string name = null, params DbAttributeInfoCache[] attributes)
 			: base(fakeMehtod, declaringType, name, attributes)
 		{
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -50,6 +61,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// </summary>
 		public DbClassInfoCache DeclaringClass { get; protected internal set; }
 
+		/// <summary>
+		/// For Internal use Only
+		/// </summary>
+		/// <param name="mehtodInfo"></param>
+		/// <returns></returns>
 		public override IMethodInfoCache<DbAttributeInfoCache, DbMethodArgument> Init(MethodBase mehtodInfo)
 		{
 			Arguments = new HashSet<DbMethodArgument>(Arguments.Where(f => f.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
