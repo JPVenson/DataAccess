@@ -533,40 +533,40 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="name">The name.</param>
 		/// <param name="strSql">The string SQL.</param>
 		/// <returns></returns>
-		public DataTable GetDataTable(string name, string strSql)
-		{
-			lock (this)
-			{
-				using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-				{
-					if (_trans != null)
-						cmd.Transaction = _trans;
-					LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
+		//public DataTable GetDataTable(string name, string strSql)
+		//{
+		//	lock (this)
+		//	{
+		//		using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
+		//		{
+		//			if (_trans != null)
+		//				cmd.Transaction = _trans;
+		//			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 
-					return _strategy.CreateDataTable(name, cmd);
-				}
-			}
-		}
+		//			return _strategy.CreateDataTable(name, cmd);
+		//		}
+		//	}
+		//}
 		/// <summary>
 		/// Gets the data set.
 		/// </summary>
 		/// <param name="strSql">The string SQL.</param>
 		/// <returns></returns>
-		public DataSet GetDataSet(string strSql)
-		{
-			lock (this)
-			{
-				using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-				{
-					IDataAdapter da = _strategy.CreateDataAdapter(cmd); //todo//
-					LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
+		//public DataSet GetDataSet(string strSql)
+		//{
+		//	lock (this)
+		//	{
+		//		using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
+		//		{
+		//			IDataAdapter da = _strategy.CreateDataAdapter(cmd); //todo//
+		//			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 
-					var ds = new DataSet();
-					da.Fill(ds);
-					return ds;
-				}
-			}
-		}
+		//			var ds = new DataSet();
+		//			da.Fill(ds);
+		//			return ds;
+		//		}
+		//	}
+		//}
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>

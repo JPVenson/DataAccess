@@ -50,13 +50,6 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <param name="strSql">The string SQL.</param>
 		/// <param name="conn">The connection.</param>
-		/// <returns></returns>
-		IDbCommand CreateCommand(string strSql, IDbConnection conn);
-		/// <summary>
-		/// Creates a command.
-		/// </summary>
-		/// <param name="strSql">The string SQL.</param>
-		/// <param name="conn">The connection.</param>
 		/// <param name="fields">The fields.</param>
 		/// <returns></returns>
 		IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields);
@@ -73,7 +66,7 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <param name="cmd">The command.</param>
 		/// <returns></returns>
-		IDbDataAdapter CreateDataAdapter(IDbCommand cmd);
+		//IDbDataAdapter CreateDataAdapter(IDbCommand cmd);
 
 		/// <summary>
 		/// Creates a data table.
@@ -81,7 +74,7 @@ namespace JPB.DataAccess.Contacts
 		/// <param name="name">The name.</param>
 		/// <param name="cmd">The command.</param>
 		/// <returns></returns>
-		DataTable CreateDataTable(string name, IDbCommand cmd);
+		//DataTable CreateDataTable(string name, IDbCommand cmd);
 
 		/// <summary>
 		/// Getlasts a inserted identifier command.

@@ -231,21 +231,6 @@
             <param name="obj"></param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetDataTable(System.String,System.String)">
-            <summary>
-            Gets the data table.
-            </summary>
-            <param name="name">The name.</param>
-            <param name="strSql">The string SQL.</param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetDataSet(System.String)">
-            <summary>
-            Gets the data set.
-            </summary>
-            <param name="strSql">The string SQL.</param>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.Dispose">
             <summary>
             Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -2462,14 +2447,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.CreateCommand(System.String,System.Data.IDbConnection)">
-            <summary>
-            Creates a command.
-            </summary>
-            <param name="strSql">The string SQL.</param>
-            <param name="conn">The connection.</param>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.CreateCommand(System.String,System.Data.IDbConnection,System.Data.IDataParameter[])">
             <summary>
             Creates a command.
@@ -2485,21 +2462,6 @@
             </summary>
             <param name="strName">Name of the string.</param>
             <param name="value">The value.</param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.CreateDataAdapter(System.Data.IDbCommand)">
-            <summary>
-            Creates the data adapter.
-            </summary>
-            <param name="cmd">The command.</param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.CreateDataTable(System.String,System.Data.IDbCommand)">
-            <summary>
-            Creates a data table.
-            </summary>
-            <param name="name">The name.</param>
-            <param name="cmd">The command.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.GetlastInsertedID_Cmd(System.Data.IDbConnection)">
