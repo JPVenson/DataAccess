@@ -41,7 +41,7 @@ using JPB.DataAccess.ModelsAnotations;
 namespace JPB.DataAccess
 {
 	/// <summary>
-	///     Helper Extentions for Maintaining Value
+	/// Helper Extentions for Maintaining Value
 	/// </summary>
 #if !DEBUG
 	[DebuggerStepThrough]
@@ -49,7 +49,10 @@ namespace JPB.DataAccess
 	public static class DataConverterExtensions
 	{
 		/// <summary>
+		/// Creates the query debugger.
 		/// </summary>
+		/// <param name="command">The command.</param>
+		/// <param name="source">The source.</param>
 		/// <returns></returns>
 		public static QueryDebugger CreateQueryDebugger(this IDbCommand command, IDatabase source = null)
 		{
@@ -57,8 +60,9 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Gets the Value or DB null
+		/// Gets the Value or DB null
 		/// </summary>
+		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		internal static object GetDataValue(object value)
 		{
@@ -66,10 +70,17 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Gets the Value from a Paramter with Conversion if Nessesary
+		/// Gets the Value from a Paramter with Conversion if Nessesary
 		/// </summary>
+		/// <param name="source">The source.</param>
+		/// <param name="config">The configuration.</param>
+		/// <param name="name">The name.</param>
 		/// <returns></returns>
-		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="ArgumentNullException">
+		/// source
+		/// or
+		/// name
+		/// </exception>
 		internal static object GetParamaterValue(this object source, DbConfig config, string name)
 		{
 			if (source == null)
@@ -83,8 +94,10 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Get and Convert the found PK name into Database name
+		/// Get and Convert the found PK name into Database name
 		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="config">The configuration.</param>
 		/// <returns></returns>
 		public static string GetPK(this Type type, DbConfig config)
 		{
@@ -92,8 +105,10 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Returns All forgin keys of the given type
+		/// Returns All forgin keys of the given type
 		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="config">The configuration.</param>
 		/// <returns></returns>
 		public static DbPropertyInfoCache[] GetFKs(this Type type, DbConfig config)
 		{
@@ -101,8 +116,11 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Gets the first Forgin key that is of type <paramref name="fkType" />
+		/// Gets the first Forgin key that is of type <paramref name="fkType" />
 		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="fkType">Type of the fk.</param>
+		/// <param name="config">The configuration.</param>
 		/// <returns></returns>
 		public static string GetFK(this Type type, Type fkType, DbConfig config)
 		{
@@ -117,9 +135,12 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Get the forgin key based that contains the
-		///     <paramref name="databaseName" />
+		/// Get the forgin key based that contains the
+		/// <paramref name="databaseName" />
 		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="databaseName">Name of the database.</param>
+		/// <param name="config">The configuration.</param>
 		/// <returns></returns>
 		public static string GetFK(this Type type, string databaseName, DbConfig config)
 		{
@@ -127,6 +148,13 @@ namespace JPB.DataAccess
 			return classInfo.GetDbToLocalSchemaMapping(databaseName);
 		}
 
+		/// <summary>
+		/// Copies the propertys.
+		/// </summary>
+		/// <param name="base">The base.</param>
+		/// <param name="newObject">The new object.</param>
+		/// <param name="config">The configuration.</param>
+		/// <returns></returns>
 		internal static bool CopyPropertys(object @base, object newObject, DbConfig config)
 		{
 			var updated = false;
@@ -155,6 +183,12 @@ namespace JPB.DataAccess
 			return null;
 		}
 
+		/// <summary>
+		/// Gets the converted value.
+		/// </summary>
+		/// <param name="source">The source.</param>
+		/// <param name="instance">The instance.</param>
+		/// <returns></returns>
 		internal static object GetConvertedValue(this DbPropertyInfoCache source, object instance)
 		{
 			var converterAttributeModel =
@@ -170,16 +204,6 @@ namespace JPB.DataAccess
 			return source.Getter.Invoke(instance);
 		}
 
-		/// <summary>
-		/// Gets the Primary key of
-		/// <typeparamref name="T"></typeparamref>
-		/// and convert it the
-		/// <typeparamref name="E"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="source">The source.</param>
-		/// <param name="config">The configuration.</param>
-		/// <returns></returns>
 		internal static object GetPK<T>(this T source, DbConfig config)
 		{
 			string pk = config.GetOrCreateClassInfoCache(typeof(T)).PrimaryKeyProperty.PropertyName;
@@ -189,8 +213,9 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Checks the info declaring type to be an List
+		/// Checks the info declaring type to be an List
 		/// </summary>
+		/// <param name="info">The information.</param>
 		/// <returns></returns>
 		public static bool CheckForListInterface(this PropertyInfo info)
 		{
@@ -202,8 +227,9 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Checks the info declaring type to be an List
+		/// Checks the info declaring type to be an List
 		/// </summary>
+		/// <param name="info">The information.</param>
 		/// <returns></returns>
 		public static bool CheckForListInterface(this DbPropertyInfoCache info)
 		{
@@ -215,8 +241,9 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Checks the object instance to be an List
+		/// Checks the object instance to be an List
 		/// </summary>
+		/// <param name="info">The information.</param>
 		/// <returns></returns>
 		internal static bool CheckForListInterface(this object info)
 		{
@@ -226,8 +253,10 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     returns all propertys that are marked as Forgin keys
+		/// returns all propertys that are marked as Forgin keys
 		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="config">The configuration.</param>
 		/// <returns></returns>
 		public static DbPropertyInfoCache[] GetNavigationProps(this Type type, DbConfig config)
 		{
@@ -235,34 +264,15 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     returns all propertys that are marked as Forgin keys
+		/// returns all propertys that are marked as Forgin keys
 		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="config">The configuration.</param>
 		/// <returns></returns>
 		internal static DbPropertyInfoCache[] GetNavigationProps<T>(DbConfig config)
 		{
 			return GetNavigationProps(typeof(T), config);
 		}
-
-		/// <summary>
-		///     Sets the infomations from the
-		///     <paramref name="reader" />
-		///     into the given object
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		//public static T ReflectionPropertySet<T>(DbClassInfoCache info, IDataRecord reader)
-		//	where T : class
-		//{
-		//	return (T)info.ReflectionPropertySet(reader);
-		//}
-
-		/// <summary>
-		///     Factory
-		///     Will enumerate the
-		///     <paramref name="rec" />
-		///     and wrapps all infos into a Egar record
-		/// </summary>
-		/// <returns></returns>
 
 		internal static object ChangeType(object value, Type conversion)
 		{
@@ -319,8 +329,10 @@ namespace JPB.DataAccess
 
 
 		/// <summary>
-		///     Returns all Cached Propertys from a <paramref name="type" />
+		/// Returns all Cached Propertys from a <paramref name="type" />
 		/// </summary>
+		/// <param name="type">The type.</param>
+		/// <param name="ignore">The ignore.</param>
 		/// <returns></returns>
 		public static IEnumerable<string> GetPropertysViaRefection(this DbClassInfoCache type, params string[] ignore)
 		{

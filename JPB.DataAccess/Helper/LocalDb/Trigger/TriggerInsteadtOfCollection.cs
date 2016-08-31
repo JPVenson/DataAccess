@@ -73,6 +73,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		/// </summary>
 		private event EventHandler<IInsteadtOfActionToken<TEntity>> _delete;
 
+		/// <summary>
+		/// Occurs when [insert] is trigged.
+		/// </summary>
 		public event EventHandler<IInsteadtOfActionToken<TEntity>> Insert
 		{
 			add

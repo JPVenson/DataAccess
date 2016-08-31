@@ -96,7 +96,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
-		protected LocalDbRepository()
+		public LocalDbRepository()
 			: this(new DbConfig())
 		{
 		}

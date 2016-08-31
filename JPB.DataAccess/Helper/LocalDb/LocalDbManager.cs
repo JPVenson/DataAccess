@@ -9,6 +9,9 @@ using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
+	/// <summary>
+	///
+	/// </summary>
 	public class LocalDbManager
 	{
 		static LocalDbManager()

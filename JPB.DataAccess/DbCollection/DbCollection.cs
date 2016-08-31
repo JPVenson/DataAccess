@@ -273,9 +273,9 @@ namespace JPB.DataAccess.DbCollection
 		/// <summary>
 		///     Sync the Changes to this Collection to the Database
 		/// </summary>
-		public void SaveChanges(DbAccessLayer _layer)
+		public void SaveChanges(DbAccessLayer layer)
 		{
-			var bulk = _layer.Database.CreateCommand("");
+			var bulk = layer.Database.CreateCommand("");
 			var removed = new List<T>();
 
 			foreach (var pair in _internalCollection)
@@ -284,17 +284,17 @@ namespace JPB.DataAccess.DbCollection
 				switch (pair.Value)
 				{
 					case CollectionStates.Added:
-						tempCommand = _layer.CreateInsertWithSelectCommand(typeof(T), pair.Key);
+						tempCommand = layer.CreateInsertWithSelectCommand(typeof(T), pair.Key);
 						break;
 					case CollectionStates.Removed:
-						tempCommand = DbAccessLayer.CreateDelete(_layer.Database, _layer.GetClassInfo(typeof(T)), pair.Key);
+						tempCommand = DbAccessLayer.CreateDelete(layer.Database, layer.GetClassInfo(typeof(T)), pair.Key);
 						removed.Add(pair.Key);
 						break;
 					case CollectionStates.Unchanged:
 						tempCommand = null;
 						break;
 					case CollectionStates.Changed:
-						tempCommand = _layer.CreateUpdate(pair.Key, _layer.Database);
+						tempCommand = layer.CreateUpdate(pair.Key, layer.Database);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -302,18 +302,18 @@ namespace JPB.DataAccess.DbCollection
 
 				if (tempCommand != null)
 				{
-					bulk = _layer.Database.MergeCommands(bulk, tempCommand, true);
+					bulk = layer.Database.MergeCommands(bulk, tempCommand, true);
 				}
 			}
 
-			var results = _layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
+			var results = layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
 			//Added
 			var added = _internalCollection.Where(s => s.Value == CollectionStates.Added).ToArray();
 			for (var i = 0; i < added.Length; i++)
 			{
 				var addedOne = added[i];
 				var newId = results[i];
-				DataConverterExtensions.CopyPropertys(addedOne.Value, newId, _layer.Config);
+				DataConverterExtensions.CopyPropertys(addedOne.Value, newId, layer.Config);
 			}
 
 			//Removed

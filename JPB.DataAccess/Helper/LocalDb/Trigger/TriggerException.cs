@@ -35,6 +35,12 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		public string Reason { get; private set; }
 
 
+		/// <summary>
+		/// Gets the attached table to this exception.
+		/// </summary>
+		/// <value>
+		/// The table.
+		/// </value>
 		public LocalDbRepository<TEntity> Table
 		{
 			get { return _table; }

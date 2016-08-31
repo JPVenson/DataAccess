@@ -227,6 +227,12 @@ namespace JPB.DataAccess.Contacts
 		T RunInTransaction<T>(Func<IDatabase, T> func);
 
 		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction);
+
+		/// <summary>
 		/// Clones this instance.
 		/// </summary>
 		/// <returns></returns>

@@ -2400,6 +2400,12 @@
                 Opens a Connection or reuse an existing one and then execute the action
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Contacts.IDatabase.RunInTransaction``1(System.Func{JPB.DataAccess.Contacts.IDatabase,``0},System.Data.IsolationLevel)">
+            <summary>
+                Required
+                Opens a Connection or reuse an existing one and then execute the action
+            </summary>
+        </member>
         <member name="M:JPB.DataAccess.Contacts.IDatabase.Clone">
             <summary>
             Clones this instance.
@@ -3301,6 +3307,35 @@
             <summary>
             A Collection that includes all Namespaces that are used by default to create new Factorys
             </summary>
+        </member>
+        <member name="T:JPB.DataAccess.Helper.EnumMemberConverter">
+             <summary>
+            
+             </summary>
+             <seealso cref="T:JPB.DataAccess.Contacts.IValueConverter" />
+        </member>
+        <member name="M:JPB.DataAccess.Helper.EnumMemberConverter.Convert(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            Converts a value from a DB to a C# object
+            </summary>
+            <param name="value"></param>
+            <param name="targetType"></param>
+            <param name="parameter"></param>
+            <param name="culture"></param>
+            <returns>
+            C# object that is of type of property
+            </returns>
+            <exception cref="T:System.InvalidCastException">No enum member Provided</exception>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.EnumMemberConverter.ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+            Converts a value from a C# object to the proper DB eqivaluent
+            </summary>
+            <param name="value"></param>
+            <param name="targetType"></param>
+            <param name="parameter"></param>
+            <param name="culture"></param>
+            <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.Constraints.Collections.CheckConstraints`1">
              <summary>
@@ -4630,6 +4665,49 @@
             	Ends the Identity Insert and will trigger all indexes and ForgeinKey checks
             </summary>
         </member>
+        <member name="T:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialToken`1">
+             <summary>
+            
+             </summary>
+             <typeparam name="TEntity">The type of the entity.</typeparam>
+             <seealso cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialToken`1" />
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialToken`1.Item">
+            <summary>
+            Gets the item.
+            </summary>
+            <value>
+            The item.
+            </value>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialToken`1.Canceled">
+            <summary>
+            Gets a value indicating whether this <see cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialToken`1" /> is canceled.
+            </summary>
+            <value>
+            <c>true</c> if canceled; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialToken`1.Reason">
+            <summary>
+            Gets the reason.
+            </summary>
+            <value>
+            The reason.
+            </value>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialToken`1.#ctor(`0)">
+            <summary>
+            Initializes a new instance of the <see cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialToken`1"/> class.
+            </summary>
+            <param name="item">The item.</param>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialToken`1.Cancel(System.String)">
+            <summary>
+            Cancels with the specified reason.
+            </summary>
+            <param name="reason">The reason.</param>
+        </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialToken`1">
              <summary>
             
@@ -4868,6 +4946,14 @@
             The reason or null.
             </value>
         </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerException`1.Table">
+            <summary>
+            Gets the attached table to this exception.
+            </summary>
+            <value>
+            The table.
+            </value>
+        </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1">
              <summary>
             
@@ -4875,10 +4961,37 @@
              <typeparam name="TEntity">The type of the entity.</typeparam>
              <seealso cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialTriggerCollection`1" />
         </member>
+        <member name="F:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.Tabel">
+            <summary>
+            The tabel
+            </summary>
+        </member>
         <member name="F:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.Duplication">
             <summary>
             The Collection that should be mirrored
             </summary>
+        </member>
+        <member name="E:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1._insert">
+            <summary>
+            Occurs when [insert].
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1._update">
+            <summary>
+            Occurs when [update].
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1._delete">
+            <summary>
+            Occurs when [delete].
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.#ctor(JPB.DataAccess.Helper.LocalDb.LocalDbRepository{`0},JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialTriggerCollection{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1"/> class.
+            </summary>
+            <param name="tabel">The tabel.</param>
+            <param name="duplication">The duplication.</param>
         </member>
         <member name="E:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.Insert">
             <summary>
@@ -4895,15 +5008,89 @@
             Will be invoked when the Remove function is called
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.InvokeTrigger(System.EventHandler{JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialToken{`0}},`0)">
+            <summary>
+            Invokes the trigger.
+            </summary>
+            <param name="trigger">The trigger.</param>
+            <param name="obj">The object.</param>
+            <exception cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerException`1"></exception>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.OnInsert(`0)">
+            <summary>
+            Called when [insert] is invoked.
+            </summary>
+            <param name="obj">The object.</param>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.OnUpdate(`0)">
+            <summary>
+            Called when [update] is invoked.
+            </summary>
+            <param name="obj">The object.</param>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.SequentialSequentialTriggerCollection`1.OnDelete(`0)">
+            <summary>
+            Called when [delete] is invoked.
+            </summary>
+            <param name="obj">The object.</param>
+        </member>
+        <member name="T:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1">
+             <summary>
+            
+             </summary>
+             <typeparam name="TEntity">The type of the entity.</typeparam>
+             <seealso cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.ITriggerForTableCollectionInternalUsage`1" />
+        </member>
+        <member name="F:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1._table">
+            <summary>
+            The table
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1.#ctor(JPB.DataAccess.Helper.LocalDb.LocalDbRepository{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1"/> class.
+            </summary>
+            <param name="table">The table.</param>
+        </member>
         <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1.WithReplication">
             <summary>
             Should the trigger also trigger when a XML set is loaded
             </summary>
+            <value>
+            The with replication.
+            </value>
         </member>
         <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1.NotForReplication">
             <summary>
             Should the trigger only trigger due to normal usage
             </summary>
+            <value>
+            The not for replication.
+            </value>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1.For">
+            <summary>
+            Gets for.
+            </summary>
+            <value>
+            For.
+            </value>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1.After">
+            <summary>
+            Gets the after.
+            </summary>
+            <value>
+            The after.
+            </value>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerForTableCollection`1.InsteadOf">
+            <summary>
+            Gets the instead of collection.
+            </summary>
+            <value>
+            The instead of.
+            </value>
         </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.Trigger.ITriggerInsteadtOfCollection`1">
              <summary>
@@ -4967,6 +5154,11 @@
         <member name="E:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerInsteadtOfCollection`1._delete">
             <summary>
             Occurs when [delete].
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerInsteadtOfCollection`1.Insert">
+            <summary>
+            Occurs when [insert] is trigged.
             </summary>
         </member>
         <member name="E:JPB.DataAccess.Helper.LocalDb.Trigger.TriggerInsteadtOfCollection`1.Update">
@@ -5059,6 +5251,116 @@
             Provides LINQ paged access to an LocalDbReporsetory
             </summary>
             <typeparam name="T"></typeparam>
+            <seealso cref="T:JPB.DataAccess.Contacts.Pager.IDataPager`1" />
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.#ctor(JPB.DataAccess.Helper.LocalDb.LocalDbRepository{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1" /> class.
+            </summary>
+            <param name="localDbRepository">The local database repository.</param>
+        </member>
+        <member name="F:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1._currentPage">
+            <summary>
+            The current page
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.AppendedComands">
+            <summary>
+            Commands that are sequencely attached to the main pager command
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.BaseQuery">
+            <summary>
+            The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
+            of it
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.Cache">
+            <summary>
+            Not Implimented
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.CurrentPage">
+            <summary>
+            Id of Current page beween 1 and MaxPage
+            </summary>
+            <exception cref="T:System.InvalidOperationException">The current page must be bigger or equals 1</exception>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.CurrentPageItems">
+            <summary>
+            Typed list of all Elements
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.MaxPage">
+            <summary>
+            The last possible Page
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.PageSize">
+            <summary>
+            Items to load on one page
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.TotalItemCount">
+            <summary>
+            Get the complete ammount of all items listend
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.RaiseEvents">
+            <summary>
+            Should raise Events
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.SyncHelper">
+            <summary>
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.JPB#DataAccess#Contacts#Pager#IDataPager#CurrentPageItems">
+            <summary>
+            Typed list of all Elements
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.NewPageLoaded">
+            <summary>
+            Raised if new Page is loaded
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.NewPageLoading">
+            <summary>
+            Raised if new Page is loading
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.LoadPage(JPB.DataAccess.Manager.DbAccessLayer)">
+            <summary>
+            Loads the PageSize into CurrentPageItems
+            </summary>
+            <param name="dbAccess"></param>
+        </member>
+        <member name="F:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.disposedValue">
+            <summary>
+            The disposed value
+            </summary>
+        </member>
+        <member name="F:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1._localDbRepository">
+            <summary>
+            The local database repository
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.Dispose(System.Boolean)">
+            <summary>
+            Releases unmanaged and - optionally - managed resources.
+            </summary>
+            <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDataPager`1.Dispose">
+            <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+        </member>
+        <member name="T:JPB.DataAccess.Helper.LocalDb.LocalDbManager">
+             <summary>
+            
+             </summary>
         </member>
         <member name="P:JPB.DataAccess.Helper.LocalDb.LocalDbManager.Scope">
             <summary>
@@ -5514,12 +5816,102 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.#ctor(System.Boolean,System.UInt32)">
+        <member name="M:JPB.DataAccess.Helper.QueryParameter.ToString">
             <summary>
-            
+            Returns a <see cref="T:System.String" /> that represents this instance.
             </summary>
-            <param name="transformInterlaced">If true an level will be displaced as <paramref name="intedtSize"/> spaces</param>
-            <param name="intedtSize">ammount of spaces for each level</param> 
+            <returns>
+            A <see cref="T:System.String" /> that represents this instance.
+            </returns>
+        </member>
+        <member name="T:JPB.DataAccess.Helper.StringBuilderInterlaced">
+            <summary>
+            Allows building of strings in a interlaced way
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.#ctor(System.Boolean,System.UInt32)">
+             <summary>
+            
+             </summary>
+             <param name="transformInterlaced">If true an level will be displaced as <paramref name="intedtSize"/> spaces</param>
+             <param name="intedtSize">ammount of spaces for each level</param>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.Up">
+            <summary>
+            Each append call will be interlaced by 1
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.Down">
+            <summary>
+            Each append call will be interlaced by -1
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.AppendInterlacedLine">
+            <summary>
+            Appends the interlaced line.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.AppendInterlacedLine(System.String)">
+            <summary>
+            Appends the interlaced line.
+            </summary>
+            <param name="value">The value.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.AppendInterlaced(System.String)">
+            <summary>
+            Appends the interlaced.
+            </summary>
+            <param name="value">The value.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.Insert(System.Action{JPB.DataAccess.Helper.StringBuilderInterlaced})">
+            <summary>
+            Inserts the specified string builder.
+            </summary>
+            <param name="del">The delete.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.Append(System.String)">
+            <summary>
+            Appends the specified value.
+            </summary>
+            <param name="value">The value.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.AppendLine(System.String)">
+            <summary>
+            Appends the line.
+            </summary>
+            <param name="value">The value.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.AppendInterlacedLine(System.String,System.Object[])">
+            <summary>
+            Appends the interlaced line.
+            </summary>
+            <param name="value">The value.</param>
+            <param name="values">The values.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.AppendInterlaced(System.String,System.Object[])">
+            <summary>
+            Appends the interlaced.
+            </summary>
+            <param name="value">The value.</param>
+            <param name="values">The values.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.StringBuilderInterlaced.ToString">
+            <summary>
+            Returns a <see cref="T:System.String" /> that represents this instance.
+            </summary>
+            <returns>
+            A <see cref="T:System.String" /> that represents this instance.
+            </returns>
         </member>
         <member name="T:JPB.DataAccess.MetaApi.Model.AttributeInfoCache">
             <summary>
@@ -6187,107 +6579,133 @@
         </member>
         <member name="T:JPB.DataAccess.DataConverterExtensions">
             <summary>
-                Helper Extentions for Maintaining Value
+            Helper Extentions for Maintaining Value
             </summary>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.CreateQueryDebugger(System.Data.IDbCommand,JPB.DataAccess.Contacts.IDatabase)">
             <summary>
+            Creates the query debugger.
             </summary>
+            <param name="command">The command.</param>
+            <param name="source">The source.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetDataValue(System.Object)">
             <summary>
-                Gets the Value or DB null
+            Gets the Value or DB null
             </summary>
+            <param name="value">The value.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetParamaterValue(System.Object,JPB.DataAccess.DbInfoConfig.DbConfig,System.String)">
             <summary>
-                Gets the Value from a Paramter with Conversion if Nessesary
+            Gets the Value from a Paramter with Conversion if Nessesary
             </summary>
+            <param name="source">The source.</param>
+            <param name="config">The configuration.</param>
+            <param name="name">The name.</param>
             <returns></returns>
-            <exception cref="T:System.ArgumentNullException"></exception>
+            <exception cref="T:System.ArgumentNullException">
+            source
+            or
+            name
+            </exception>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetPK(System.Type,JPB.DataAccess.DbInfoConfig.DbConfig)">
             <summary>
-                Get and Convert the found PK name into Database name
+            Get and Convert the found PK name into Database name
             </summary>
+            <param name="type">The type.</param>
+            <param name="config">The configuration.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetFKs(System.Type,JPB.DataAccess.DbInfoConfig.DbConfig)">
             <summary>
-                Returns All forgin keys of the given type
+            Returns All forgin keys of the given type
             </summary>
+            <param name="type">The type.</param>
+            <param name="config">The configuration.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetFK(System.Type,System.Type,JPB.DataAccess.DbInfoConfig.DbConfig)">
             <summary>
-                Gets the first Forgin key that is of type <paramref name="fkType" />
+            Gets the first Forgin key that is of type <paramref name="fkType" />
             </summary>
+            <param name="type">The type.</param>
+            <param name="fkType">Type of the fk.</param>
+            <param name="config">The configuration.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetFK(System.Type,System.String,JPB.DataAccess.DbInfoConfig.DbConfig)">
             <summary>
-                Get the forgin key based that contains the
-                <paramref name="databaseName" />
+            Get the forgin key based that contains the
+            <paramref name="databaseName" />
             </summary>
+            <param name="type">The type.</param>
+            <param name="databaseName">Name of the database.</param>
+            <param name="config">The configuration.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.GetPK``1(``0,JPB.DataAccess.DbInfoConfig.DbConfig)">
+        <member name="M:JPB.DataAccess.DataConverterExtensions.CopyPropertys(System.Object,System.Object,JPB.DataAccess.DbInfoConfig.DbConfig)">
             <summary>
-            Gets the Primary key of
-            <typeparamref name="T"></typeparamref>
-            and convert it the
-            <typeparamref name="E"></typeparamref>
+            Copies the propertys.
             </summary>
-            <typeparam name="T"></typeparam>
-            <param name="source">The source.</param>
+            <param name="base">The base.</param>
+            <param name="newObject">The new object.</param>
             <param name="config">The configuration.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.DataConverterExtensions.GetConvertedValue(JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache,System.Object)">
+            <summary>
+            Gets the converted value.
+            </summary>
+            <param name="source">The source.</param>
+            <param name="instance">The instance.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.CheckForListInterface(System.Reflection.PropertyInfo)">
             <summary>
-                Checks the info declaring type to be an List
+            Checks the info declaring type to be an List
             </summary>
+            <param name="info">The information.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.CheckForListInterface(JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache)">
             <summary>
-                Checks the info declaring type to be an List
+            Checks the info declaring type to be an List
             </summary>
+            <param name="info">The information.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.CheckForListInterface(System.Object)">
             <summary>
-                Checks the object instance to be an List
+            Checks the object instance to be an List
             </summary>
+            <param name="info">The information.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetNavigationProps(System.Type,JPB.DataAccess.DbInfoConfig.DbConfig)">
             <summary>
-                returns all propertys that are marked as Forgin keys
+            returns all propertys that are marked as Forgin keys
             </summary>
+            <param name="type">The type.</param>
+            <param name="config">The configuration.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetNavigationProps``1(JPB.DataAccess.DbInfoConfig.DbConfig)">
             <summary>
-                returns all propertys that are marked as Forgin keys
+            returns all propertys that are marked as Forgin keys
             </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DataConverterExtensions.ChangeType(System.Object,System.Type)">
-            <summary>
-                Factory
-                Will enumerate the
-                <paramref name="rec" />
-                and wrapps all infos into a Egar record
-            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="config">The configuration.</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DataConverterExtensions.GetPropertysViaRefection(JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache,System.String[])">
             <summary>
-                Returns all Cached Propertys from a <paramref name="type" />
+            Returns all Cached Propertys from a <paramref name="type" />
             </summary>
+            <param name="type">The type.</param>
+            <param name="ignore">The ignore.</param>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.DbAccessLayerHelper">
