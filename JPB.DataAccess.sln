@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Tests", "JPB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Tests.Common", "JPB.DataAccess.Tests.Common\JPB.DataAccess.Tests.Common.csproj", "{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj", "{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,18 @@ Global
 		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|x64.Build.0 = Release|Any CPU
 		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|x86.ActiveCfg = Release|Any CPU
 		{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}.Release|x86.Build.0 = Release|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|x64.Build.0 = Debug|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Debug|x86.Build.0 = Debug|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|x64.ActiveCfg = Release|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|x64.Build.0 = Release|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|x86.ActiveCfg = Release|Any CPU
+		{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

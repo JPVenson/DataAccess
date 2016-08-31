@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -9,15 +9,11 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
-using System.Data.Common;
 using System.Linq;
-using System.Text;
+using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Pager.Contracts;
-using MySql.Data.MySqlClient;
 
 namespace JPB.DataAccess.MySql
 {
@@ -73,74 +69,74 @@ namespace JPB.DataAccess.MySql
 
 		public virtual void LoadPage(DbAccessLayer dbAccess)
 		{
-			RaiseNewPageLoading();
-			SyncHelper(() => CurrentPageItems.Clear());
+			throw new NotImplementedException();
+	//		RaiseNewPageLoading();
+	//		SyncHelper(() => CurrentPageItems.Clear());
 
-			var pk = TargetType.GetPK();
+	//		var pk = TargetType.GetPK();
 
-			var targetQuery = BaseQuery;
-			if (targetQuery == null)
-			{
-				targetQuery = dbAccess.Database.CreateCommand(TargetType.GetClassInfo().TableName);
-			}
+	//		var targetQuery = BaseQuery;
+	//		if (targetQuery == null)
+	//		{
+	//			targetQuery = dbAccess.Database.CreateCommand(TargetType.GetClassInfo().TableName);
+	//		}
 
-			IDbCommand FirstIdCommand = targetQuery;
-			if (AppendedComands.Any())
-			{
-				FirstIdCommand = this.AppendedComands.Aggregate(FirstIdCommand,
-					(e, f) => DbAccessLayer.ConcatCommands(dbAccess.Database, e, f));
-			}
+	//		IDbCommand FirstIdCommand = targetQuery;
+	//		if (AppendedComands.Any())
+	//		{
+	//			FirstIdCommand = this.AppendedComands.Aggregate(FirstIdCommand,
+	//				(e, f) => dbAccess.ConcatCommands(dbAccess.Database, e, f));
+	//		}
 
 
-			if (FirstID == -1 || LastID == -1)
-			{
+	//		if (FirstID == -1 || LastID == -1)
+	//		{
+	//			var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long),
+	//				dbAccess.Create(dbAccess.Database,
+	//					("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
+	//			if (firstOrDefault != null)
+	//				FirstID = (long)firstOrDefault;
 
-				var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long),
-					DbAccessLayer.InsertCommands(dbAccess.Database,
-						("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
-				if (firstOrDefault != null)
-					FirstID = (long)firstOrDefault;
+	//			var lastId = dbAccess.RunPrimetivSelect(typeof(long),
+	//				dbAccess.InsertCommands(dbAccess.Database,
+	//				("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " DESC LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
+	//			if (lastId != null)
+	//				LastID = (long)lastId;
+	//		}
 
-				var lastId = dbAccess.RunPrimetivSelect(typeof(long),
-					DbAccessLayer.InsertCommands(dbAccess.Database,
-					("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " DESC LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
-				if (lastId != null)
-					LastID = (long)lastId;
-			}
+	//		var maxItems = dbAccess.RunPrimetivSelect(typeof(long),
+	//DbAccessLayer.InsertCommands(dbAccess.Database,
+	//("SELECT COUNT( * ) AS NR FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
 
-			var maxItems = dbAccess.RunPrimetivSelect(typeof(long),
-	DbAccessLayer.InsertCommands(dbAccess.Database,
-	("SELECT COUNT( * ) AS NR FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
+	//		if (maxItems != null)
+	//		{
+	//			long parsedCount;
+	//			long.TryParse(maxItems.ToString(), out parsedCount);
+	//			MaxPage = ((long)parsedCount) / PageSize;
+	//		}
 
-			if (maxItems != null)
-			{
-				long parsedCount;
-				long.TryParse(maxItems.ToString(), out parsedCount);
-				MaxPage = ((long)parsedCount) / PageSize;
-			}
+	//		var realSelect = DbAccessLayer.InsertCommands(dbAccess.Database,
+	//			("SELECT * FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand);
 
-			var realSelect = DbAccessLayer.InsertCommands(dbAccess.Database,
-				("SELECT * FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand);
+	//		var selectWhere = dbAccess.SelectNative(this.TargetType, realSelect, new
+	//		{
+	//			PagedRows = CurrentPage * PageSize,
+	//			PageSize
+	//		});
 
-			var selectWhere = dbAccess.SelectNative(this.TargetType, realSelect, new
-			{
-				PagedRows = CurrentPage * PageSize,
-				PageSize
-			});
+	//		//var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
+	//		//{
+	//		//    PagedRows = CurrentPage * PageSize,
+	//		//    PageSize
+	//		//});
 
-			//var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
-			//{
-			//    PagedRows = CurrentPage * PageSize,
-			//    PageSize
-			//});
+	//		foreach (var item in selectWhere)
+	//		{
+	//			dynamic item1 = item;
+	//			SyncHelper(() => CurrentPageItems.Add(item1));
+	//		}
 
-			foreach (var item in selectWhere)
-			{
-				dynamic item1 = item;
-				SyncHelper(() => CurrentPageItems.Add(item1));
-			}
-
-			RaiseNewPageLoaded();
+	//		RaiseNewPageLoaded();
 		}
 
 		IEnumerable IDataPager.CurrentPageItems
@@ -163,6 +159,14 @@ namespace JPB.DataAccess.MySql
 			{
 				if (value != null)
 					_syncHelper = value;
+			}
+		}
+
+		public long TotalItemCount
+		{
+			get
+			{
+				throw new NotImplementedException();
 			}
 		}
 

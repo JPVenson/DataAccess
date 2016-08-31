@@ -46,8 +46,6 @@ namespace JPB.DataAccess.Manager
 
 		private IDatabase _database;
 
-		private ILogger _logger;
-
 		private readonly DbConfig _config;
 
 		/// <summary>
@@ -70,7 +68,7 @@ namespace JPB.DataAccess.Manager
 		///     Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the
 		///     instance. This field overrides
 		/// </summary>
-		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>")] public object
+		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>", true)] public object
 			DefaultAssertionObject;
 
 		/// <summary>
@@ -133,7 +131,7 @@ namespace JPB.DataAccess.Manager
 			}
 		}
 
-		internal DbAccessLayer(ILogger logger = null, DbConfig config = null)
+		internal DbAccessLayer(DbConfig config = null)
 		{
 			if (config == null)
 			{
@@ -144,7 +142,6 @@ namespace JPB.DataAccess.Manager
 				_config = config;
 			}
 			DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
-			_logger = logger;
 			Debugger = false;
 			LoadCompleteResultBeforeMapping = true;
 			CheckFactoryArguments = true;
@@ -155,8 +152,8 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Create a DbAccessLayer that uses a Predefined type and Connection string
 		/// </summary>
-		public DbAccessLayer(DbAccessType dbAccessType, string connection, ILogger logger = null, DbConfig config = null)
-			: this(logger, config)
+		public DbAccessLayer(DbAccessType dbAccessType, string connection, DbConfig config = null)
+			: this(config)
 		{
 			if (dbAccessType == DbAccessType.Unknown)
 			{
@@ -175,9 +172,8 @@ namespace JPB.DataAccess.Manager
 		///     Create a DbAccessLAyer with exernal Strategy
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection, ILogger logger = null,
-			DbConfig config = null)
-			: this(logger, config)
+		public DbAccessLayer(string fullTypeNameToIDatabaseStrategy, string connection, DbConfig config = null)
+			: this(config)
 		{
 			if (string.IsNullOrEmpty(fullTypeNameToIDatabaseStrategy))
 				throw new ArgumentNullException("fullTypeNameToIDatabaseStrategy");
@@ -195,8 +191,8 @@ namespace JPB.DataAccess.Manager
 		///     Create a DbAccessLayer with a new Database
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public DbAccessLayer(IDatabaseStrategy database, ILogger logger = null, DbConfig config = null)
-			: this(logger, config)
+		public DbAccessLayer(IDatabaseStrategy database, DbConfig config = null)
+			: this(config)
 		{
 			if (database == null)
 				throw new ArgumentNullException("database");
@@ -212,8 +208,8 @@ namespace JPB.DataAccess.Manager
 		///     Creates a DbAccessLayer with a new Database
 		///     dbAccessType will be Guessed
 		/// </summary>
-		public DbAccessLayer(IDatabase database, ILogger logger = null, DbConfig config = null)
-			: this(logger, config)
+		public DbAccessLayer(IDatabase database, DbConfig config = null)
+			: this(config)
 		{
 			if (database == null)
 				throw new ArgumentNullException("database");
