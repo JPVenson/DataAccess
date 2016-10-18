@@ -15,10 +15,10 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
-
 {
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]
+	//[TestFixture(DbAccessType.MySql)]
 	public class CheckWrapperBaseTests
 	{
 		private readonly DbAccessType _type;

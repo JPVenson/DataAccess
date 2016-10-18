@@ -19,6 +19,15 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			sb.AppendLine(string.Format("{0} TEXT", ContentName));
 			sb.AppendLine(")");
 			CreateSqLite = sb.ToString();
+
+			sb = new StringBuilder();
+			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
+			sb.AppendLine(string.Format("{0} BIGINT NOT NULL AUTO_INCREMENT,", PrimaryKeyName));
+			sb.AppendLine(string.Format("{0} VARCHAR(350) NULL,", ContentName));
+			sb.AppendLine(string.Format("PRIMARY KEY ({0})", PrimaryKeyName));
+			sb.AppendLine(")");
+			sb.AppendLine(";");
+			CreateMySql = sb.ToString();
 		}
 
 		public const string TableName = "Users";
@@ -27,6 +36,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public const string ContentName = "UserName";
 		public static readonly string CreateMsSql;
 		public static readonly string CreateSqLite;
+		public static readonly string CreateMySql;
 
 	}
 
@@ -51,10 +61,21 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			sb.AppendLine(string.Format(" FOREIGN KEY ({0}) REFERENCES {1}({2})", ForgeinKeyName, BookMeta.TableName, BookMeta.PrimaryKeyName));
 			sb.AppendLine(");");
 			CreateSqLite = sb.ToString();
+
+			sb = new StringBuilder();
+			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
+			sb.AppendLine(string.Format(" {0} BIGINT NOT NULL AUTO_INCREMENT,", PrimaryKeyName));
+			sb.AppendLine(string.Format(" {0} text NOT NULL,", ContentName));
+			sb.AppendLine(string.Format(" {0} BIGINT NOT NULL,", ForgeinKeyName));
+			sb.AppendLine(string.Format(" PRIMARY KEY ({0}),", PrimaryKeyName));
+			sb.AppendLine(string.Format(" FOREIGN KEY ({0}) REFERENCES {1}({2})", ForgeinKeyName, BookMeta.TableName, BookMeta.PrimaryKeyName));
+			sb.AppendLine(")");
+			CreateMySql = sb.ToString();
 		}
 
 		public static readonly string CreateMsSQl;
 		public static readonly string CreateSqLite;
+		public static readonly string CreateMySql;
 
 		public const string TableName = "Image";
 		public const string SelectStatement = "SELECT * FROM " + TableName;
@@ -75,15 +96,24 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			CreateMsSQl = sb.ToString();
 
 			sb = new StringBuilder();
-			sb.AppendLine(string.Format("CREATE TABLE {0}", TableName));
-			sb.AppendLine(string.Format("({0} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ", PrimaryKeyName));
-			sb.AppendLine(string.Format("{0} TEXT", ContentName));
+			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
+			sb.AppendLine(string.Format(" {0} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ", PrimaryKeyName));
+			sb.AppendLine(string.Format(" {0} TEXT", ContentName));
 			sb.AppendLine(")");
 			CreateSqLite = sb.ToString();
+
+			sb = new StringBuilder();
+			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
+			sb.AppendLine(string.Format(" {0} BIGINT NOT NULL AUTO_INCREMENT,", PrimaryKeyName));
+			sb.AppendLine(string.Format(" {0} varchar(350) NULL,", ContentName));
+			sb.AppendLine(string.Format(" PRIMARY KEY ({0})", PrimaryKeyName));
+			sb.AppendLine(")");
+			CreateMySql = sb.ToString();
 		}
 
 		public static readonly string CreateMsSQl;
 		public static readonly string CreateSqLite;
+		public static readonly string CreateMySql;
 
 		public const string TableName = "Book";
 		public const string SelectStatement = "SELECT * FROM " + TableName;

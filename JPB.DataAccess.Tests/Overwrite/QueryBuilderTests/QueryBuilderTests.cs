@@ -12,6 +12,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 {
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]
+	//[TestFixture(DbAccessType.MySql)]
 	public class QueryBuilderTests
 	{
 		private readonly DbAccessType _type;
@@ -67,6 +68,10 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			{
 				runPrimetivSelect = (int)DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
 			}
+			if (DbAccessLayer.DbAccessType == DbAccessType.MySql)
+			{
+				runPrimetivSelect = (int)DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
+			}
 			var deSelect = DbAccessLayer.Select<Users>();
 			var forResult = DbAccessLayer.Query().Select<Users>().ForResult().ToArray();
 
@@ -90,6 +95,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			int runPrimetivSelect = -1;
 			int forResult = -1;
 			var deSelect = DbAccessLayer.Select<Users>();
+
 			if (DbAccessLayer.DbAccessType == DbAccessType.MsSql)
 			{
 				runPrimetivSelect = DbAccessLayer.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
@@ -99,6 +105,11 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			{
 				runPrimetivSelect = (int)DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
 				forResult = (int)DbAccessLayer.Query().Select<Users>().CountLong().ForResult().FirstOrDefault();
+			}
+			if (DbAccessLayer.DbAccessType == DbAccessType.MySql)
+			{
+				runPrimetivSelect = (int)DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
+				forResult = (int) DbAccessLayer.Query().Count<Users>().ForResult<long>().FirstOrDefault();
 			}
 
 			Assert.That(runPrimetivSelect, Is.EqualTo(forResult));

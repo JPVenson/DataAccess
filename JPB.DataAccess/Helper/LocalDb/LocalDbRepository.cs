@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </param>
 		public LocalDbRepository(
 			DbConfig config,
-			bool useOrignalObjectInMemory = true,
+			bool useOrignalObjectInMemory = false,
 			ILocalDbPrimaryKeyConstraint keyGenerator = null)
 		{
 			Init(typeof(TEntity), keyGenerator, config, useOrignalObjectInMemory);
@@ -82,7 +82,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public LocalDbRepository(
 			Type containedType,
 			DbConfig config,
-			bool useOrignalObjectInMemory = true,
+			bool useOrignalObjectInMemory = false,
 			ILocalDbPrimaryKeyConstraint keyGenerator = null)
 		{
 			if (typeof(TEntity) != typeof(object))
@@ -563,8 +563,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				if (!TypeInfo.FullFactory)
 				{
-					throw new NotSupportedException(string.Format("The given type did not provide a Full ado.net constructor " +
-																			  "Type: '{0}'", TypeInfo));
+					TypeInfo.CreateFactory(config);
+					if (!TypeInfo.FullFactory)
+						throw new NotSupportedException(string.Format("The given type did not provide a Full ado.net constructor " +
+																				  "Type: '{0}'", TypeInfo));
 				}
 			}
 

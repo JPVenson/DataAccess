@@ -46,7 +46,7 @@
     <Compile Include="MySqlDataConverterPager.cs" />
     <Compile Include="MySqlDataPager.cs" />
     <Compile Include="MySqlUntypedDataPager.cs" />
-    <Compile Include="Mysql.cs" />
+    <Compile Include="MySql.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

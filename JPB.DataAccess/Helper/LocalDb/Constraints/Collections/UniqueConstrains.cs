@@ -214,6 +214,26 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
+		/// Gets the initializer for this Constraint.
+		/// It can be used to store the internal state
+		/// </summary>
+		/// <returns></returns>
+		public object GetInitializer()
+		{
+			return this._constraints;
+		}
+
+		/// <summary>
+		/// Gets the initializer for this Constraint.
+		/// It can be used to restore the internal state
+		/// </summary>
+		/// <returns></returns>
+		public void SetInitializer(object initializerValue)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
 		/// Enforces the specified item.
 		/// </summary>
 		/// <param name="item">The item.</param>

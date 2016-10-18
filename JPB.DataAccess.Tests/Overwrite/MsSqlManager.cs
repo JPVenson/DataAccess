@@ -53,7 +53,7 @@ namespace JPB.DataAccess.Tests
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
 				dbname);
 
-			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, null, new DbConfig(true));
+			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
 			try
 			{
 				expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
@@ -90,18 +90,4 @@ namespace JPB.DataAccess.Tests
 
 		}
 	}
-
-	public interface IManager
-	{
-		DbAccessLayer GetWrapper(DbAccessType type);
-		DbAccessType DbAccessType { get; }
-
-		string ConnectionString { get; }
-		void FlushErrorData();
-	}
-}
-
-
-namespace JPB.DataAccess.Tests.Common
-{
 }

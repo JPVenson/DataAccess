@@ -436,9 +436,12 @@ namespace JPB.DataAccess.DbInfoConfig
 		[SecurityCritical]
 		internal static Func<IDataRecord, object> CreateFactory(DbClassInfoCache target, FactoryHelperSettings settings)
 		{
-			var classCtorAttr =
-				target.Attributes.First(s => s.Attribute is AutoGenerateCtorAttribute).Attribute as
-					AutoGenerateCtorAttribute;
+			var configAttrCtorAtt = target.Attributes.FirstOrDefault(s => s.Attribute is AutoGenerateCtorAttribute);
+			AutoGenerateCtorAttribute classCtorAttr = null;
+			if (configAttrCtorAtt != null)
+			{
+				classCtorAttr = configAttrCtorAtt.Attribute as AutoGenerateCtorAttribute;
+			}
 
 			CodeNamespace importNameSpace;
 			importNameSpace = new CodeNamespace(target.Type.Namespace);
@@ -447,7 +450,8 @@ namespace JPB.DataAccess.DbInfoConfig
 			var compiler = new CodeTypeDeclaration();
 			compiler.IsClass = true;
 
-			var generateFactory = target.Type.IsSealed || classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod;
+			bool generateFactory = classCtorAttr != null &&
+				classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod || target.Type.IsSealed;
 
 			CodeMemberMethod codeConstructor;
 			var codeName = target.Name.Split('.').Last();
@@ -546,7 +550,7 @@ namespace JPB.DataAccess.DbInfoConfig
 					importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
 				}
 
-				if (classCtorAttr.FullSateliteImport)
+				if (classCtorAttr != null && classCtorAttr.FullSateliteImport)
 				{
 					foreach (var referencedAssembly in target.Type.Assembly.GetReferencedAssemblies())
 					{

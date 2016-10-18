@@ -62,21 +62,6 @@ namespace JPB.DataAccess.Contacts
 		IDataParameter CreateParameter(string strName, object value);
 
 		/// <summary>
-		/// Creates the data adapter.
-		/// </summary>
-		/// <param name="cmd">The command.</param>
-		/// <returns></returns>
-		//IDbDataAdapter CreateDataAdapter(IDbCommand cmd);
-
-		/// <summary>
-		/// Creates a data table.
-		/// </summary>
-		/// <param name="name">The name.</param>
-		/// <param name="cmd">The command.</param>
-		/// <returns></returns>
-		//DataTable CreateDataTable(string name, IDbCommand cmd);
-
-		/// <summary>
 		/// Getlasts a inserted identifier command.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
@@ -103,7 +88,6 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <returns></returns>
 		string FormartCommandToQuery(IDbCommand command);
-
 
 		/// <summary>
 		///     Converts the Generic SourceDbType to the Specific represntation

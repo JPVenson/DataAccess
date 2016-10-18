@@ -96,6 +96,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DbLoaderResouces.resx</DependentUpon>
     </Compile>
+    <Compile Include="Overwrite\IManager.cs" />
     <Compile Include="Overwrite\LocalDbTests\DatabaseSerializerTest.cs" />
     <Compile Include="Overwrite\LocalDbTests\LocalDbTest.cs" />
     <Compile Include="Overwrite\LocalDbTests\LocalDbTransactionalTest.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="Overwrite\MetaApiTests\MetaApiSpeedTest.cs" />
     <Compile Include="Overwrite\MetaApiTests\MetaApiTest.cs" />
     <Compile Include="Overwrite\MsSqlManager.cs" />
+    <Compile Include="Overwrite\MySqlManager.cs" />
     <Compile Include="Overwrite\PagerTests\PagerConstraintTests.cs" />
     <Compile Include="Overwrite\PagerTests\PagerUnitTest.cs" />
     <Compile Include="Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
@@ -124,6 +126,10 @@
     <Compile Include="Overwrite\XmlDataRecordTests\XmlDataRecordTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj">
+      <Project>{3aa3990d-ffa4-4ee5-82be-e30970ffd0fa}</Project>
+      <Name>JPB.DataAccess.MySql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess.SqlLite\JPB.DataAccess.SqLite.csproj">
       <Project>{de42f7ed-51b5-4118-831b-05efeeecd7ac}</Project>
       <Name>JPB.DataAccess.SqLite</Name>
@@ -138,7 +144,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Base\packages.config" />
     <None Include="packages.config" />
   </ItemGroup>

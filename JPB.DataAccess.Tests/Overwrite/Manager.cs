@@ -16,6 +16,7 @@ namespace JPB.DataAccess.Tests
 			_managers = new Dictionary<DbAccessType, IManager>();
 			_managers.Add(DbAccessType.MsSql, new MsSqlManager());
 			_managers.Add(DbAccessType.SqLite, new SqLiteManager());
+			_managers.Add(DbAccessType.MySql, new MySqlManager());
 		}
 
 		private static Dictionary<DbAccessType, IManager> _managers;
@@ -83,7 +84,7 @@ namespace JPB.DataAccess.Tests
 
 			expectWrapper.OnUpdate += (sender, eventArg) =>
 			{
-				_errorData.AppendFormat(@"Update: \r\n{0}", eventArg.QueryDebugger);
+				_errorData.AppendFormat(@"UPDATE: \r\n{0}", eventArg.QueryDebugger);
 				_errorData.AppendLine();
 			};
 
