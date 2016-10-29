@@ -44,10 +44,17 @@ namespace JPB.DataAccess.Query
 	//	}
 	//}
 
+	/// <summary>
+	/// Wrapes the QueryBuilderX element for an IEnumerable that is strongly typed
+	/// </summary>
+	/// <typeparam name="TPoco"></typeparam>
 	public class QueryEnumeratorEx<TPoco> : IEnumerable<TPoco>
 	{
-		private QueryBuilderX _builder;
+		private readonly QueryBuilderX _builder;
 
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public QueryEnumeratorEx(QueryBuilderX builder)
 		{
 			_builder = builder.Clone();
@@ -58,6 +65,9 @@ namespace JPB.DataAccess.Query
 			return _builder.GetEnumerator<TPoco>();
 		}
 
+		/// <summary>
+		/// Returns an enumerator that contains all elements in the given QueryBuilderX
+		/// </summary>
 		public IEnumerator GetEnumerator()
 		{
 			return ((IEnumerable<TPoco>)this).GetEnumerator();

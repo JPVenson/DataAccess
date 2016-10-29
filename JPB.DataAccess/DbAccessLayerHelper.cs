@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -58,9 +58,9 @@ namespace JPB.DataAccess
 #pragma warning restore 618
 		}
 
-		/// <summary>		
+		/// <summary>
 		///     Not Connection save
-		///     Must be executed inside a Valid Connection 
+		///     Must be executed inside a Valid Connection
 		/// </summary>
 		/// <param name="db"></param>
 		/// <param name="base">left part of the query</param>
@@ -89,12 +89,12 @@ namespace JPB.DataAccess
 		/// Merges 2 Commands into one single New Command by optionaly renaming and Delimiter insert
 		/// </summary>
 		/// <param name="db"></param>
-		/// <param name="base"></param>
-		/// <param name="last"></param>
-		/// <param name="autoRename"></param>
-		/// <param name="seed"></param>
-		/// <param name="pessimistic"></param>
-		/// <param name="insertDelimiter"></param>
+		/// <param name="base">The left part of the query</param>
+		/// <param name="last">The right part of the query</param>
+		/// <param name="autoRename">if the merge will find some conflics in arguments, shout it provide a new name or throw an extention<value>true</value>Rename and continue<value>fale</value>throw an exception</param>
+		/// <param name="seed">For optimation</param>
+		/// <param name="pessimistic"><value>true</value>you will expect that there are conflics<value>false</value>you expect no conflics</param>
+		/// <param name="insertDelimiter">insert the SQL Delimiter between base and last or not</param>
 		/// <returns></returns>
 		public static IDbCommand MergeTextToParameters(this IDatabase db,
 			IDbCommand @base,

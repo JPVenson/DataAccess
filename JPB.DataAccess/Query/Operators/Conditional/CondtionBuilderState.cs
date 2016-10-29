@@ -1,16 +1,29 @@
 namespace JPB.DataAccess.Query.Operators.Conditional
 {
+	/// <summary>
+	/// Holds informations about the current query state. No historical data.
+	/// For Internal Usage only
+	/// </summary>
 	public class CondtionBuilderState
 	{
 		//internal CondtionBuilderState()
 		//{
-			
+
 		//}
 
+		/// <summary>
+		/// If Used the last Identifier for Tables or columns
+		/// </summary>
 		public string Identifier { get; private set; }
+		/// <summary>
+		/// If currently build, the Operator for the Conditional Query
+		/// </summary>
 		public Operator Operator { get; private set; }
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public bool InBreaket { get; private set; }
-		private int breaketCounter = 0;
+		private int _breaketCounter = 0;
 
 		internal CondtionBuilderState(string currentIdentifier)
 		{
@@ -27,13 +40,13 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			if (op)
 			{
-				breaketCounter++;
+				_breaketCounter++;
 			}
 			else
 			{
-				breaketCounter--;
+				_breaketCounter--;
 			}
-			if (breaketCounter > 0)
+			if (_breaketCounter > 0)
 			{
 				this.InBreaket = false;
 			}
@@ -45,6 +58,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			return this;
 		}
 
+		/// <summary>
+		/// Changes the current used Alias. Does not update the alias in other query elements
+		/// For Internal Usage only
+		/// </summary>
+		/// <param name="alias"></param>
+		/// <returns></returns>
 		public CondtionBuilderState ToAlias(string @alias)
 		{
 			Identifier = alias;

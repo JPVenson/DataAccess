@@ -89,7 +89,6 @@ namespace JPB.DataAccess.Query.Operators
 		/// Counts all elements from a table
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
-		/// <typeparam name="TA">The type of a.</typeparam>
 		/// <param name="columnName">Name of the column.</param>
 		/// <returns></returns>
 		public ElementProducer<int> Column<TPoco>(string columnName)
@@ -108,7 +107,6 @@ namespace JPB.DataAccess.Query.Operators
 		/// <summary>
 		/// Counts all elements from a table
 		/// </summary>
-		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <returns></returns>
 		public CountElementsObjectSelector Distinct()
 		{
@@ -196,23 +194,33 @@ namespace JPB.DataAccess.Query.Operators
 				.ContainerObject
 				.AccessLayer.Database, this.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
 		}
-
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public RootQuery(DbAccessLayer database, Type type) : base(database, type)
 		{
 		}
-
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public RootQuery(IQueryContainer database) : base(database)
 		{
 		}
-
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public RootQuery(IQueryBuilder database) : base(database)
 		{
 		}
-
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public RootQuery(IQueryBuilder database, Type type) : base(database, type)
 		{
 		}
-
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public RootQuery(DbAccessLayer database) : base(database)
 		{
 		}

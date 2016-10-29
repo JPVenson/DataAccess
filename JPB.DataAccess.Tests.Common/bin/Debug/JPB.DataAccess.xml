@@ -9374,6 +9374,30 @@
             Prepaires an Conditional Query
             </summary>
         </member>
+        <member name="T:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1">
+            <summary>
+            Creates an Conditional Query that allows you to filter the Previus query
+            </summary>
+            <typeparam name="TPoco"></typeparam>
+        </member>
+        <member name="F:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.State">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.#ctor(JPB.DataAccess.Query.Contracts.IQueryBuilder,JPB.DataAccess.Query.Operators.Conditional.CondtionBuilderState)">
+            <summary>
+            Creates a new Instance based on the previus query
+            </summary>
+            <param name="queryText"></param>
+            <param name="state"></param>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.#ctor(JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery{`0})">
+             <summary>
+            Creates a new Instance based on the previus query
+             </summary>
+             <param name="queryText"></param>
+        </member>
         <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.Parenthesis">
             <summary>
             Opens a new Logical combined Query
@@ -9392,8 +9416,6 @@
             <summary>
             Prepaires an Conditional Query that targets an single Column
             </summary>
-            <typeparam name="T"></typeparam>
-            <param name="query"></param>
             <param name="columnName"></param>
             <returns></returns>
         </member>
@@ -9401,9 +9423,41 @@
             <summary>
             Prepaires an Conditional Query that targets an single Column
             </summary>
-            <typeparam name="T"></typeparam>
-            <param name="query"></param>
             <param name="columnName"></param>
+            <returns></returns>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.CurrentIdentifier">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="T:JPB.DataAccess.Query.Operators.Conditional.CondtionBuilderState">
+            <summary>
+            Holds informations about the current query state. No historical data.
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.CondtionBuilderState.Identifier">
+            <summary>
+            If Used the last Identifier for Tables or columns
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.CondtionBuilderState.Operator">
+            <summary>
+            If currently build, the Operator for the Conditional Query
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.CondtionBuilderState.InBreaket">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.Conditional.CondtionBuilderState.ToAlias(System.String)">
+            <summary>
+            Changes the current used Alias. Does not update the alias in other query elements
+            For Internal Usage only
+            </summary>
+            <param name="alias"></param>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Query.Operators.Conditional.Operator">
@@ -9585,6 +9639,36 @@
             <param name="columnName">Name of the column.</param>
             <returns></returns>
         </member>
+        <member name="T:JPB.DataAccess.Query.Operators.QueryElement">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.QueryElement.#ctor(JPB.DataAccess.Manager.DbAccessLayer,System.Type)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.QueryElement.#ctor(JPB.DataAccess.Query.Contracts.IQueryContainer)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.QueryElement.#ctor(JPB.DataAccess.Query.Contracts.IQueryBuilder)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.QueryElement.#ctor(JPB.DataAccess.Query.Contracts.IQueryBuilder,System.Type)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.QueryElement.#ctor(JPB.DataAccess.Manager.DbAccessLayer)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
         <member name="T:JPB.DataAccess.Query.Operators.CountElementsObjectSelector">
              <summary>
             
@@ -9639,7 +9723,6 @@
             Counts all elements from a table
             </summary>
             <typeparam name="TPoco">The type of the poco.</typeparam>
-            <typeparam name="TA">The type of a.</typeparam>
             <param name="columnName">Name of the column.</param>
             <returns></returns>
         </member>
@@ -9647,7 +9730,6 @@
             <summary>
             Counts all elements from a table
             </summary>
-            <typeparam name="TPoco">The type of the poco.</typeparam>
             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Query.Operators.RootQuery">
@@ -9699,6 +9781,31 @@
             </summary>
             <typeparam name="T"></typeparam>
             <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.#ctor(JPB.DataAccess.Manager.DbAccessLayer,System.Type)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.#ctor(JPB.DataAccess.Query.Contracts.IQueryContainer)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.#ctor(JPB.DataAccess.Query.Contracts.IQueryBuilder)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.#ctor(JPB.DataAccess.Query.Contracts.IQueryBuilder,System.Type)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.#ctor(JPB.DataAccess.Manager.DbAccessLayer)">
+            <summary>
+            For Internal Usage only
+            </summary>
         </member>
         <member name="T:JPB.DataAccess.Query.Operators.Selection.ColumnChooser`1">
              <summary>
@@ -9977,6 +10084,22 @@
         <member name="M:JPB.DataAccess.Query.QueryEagerEnumerator.Load">
             <summary>
                 Mehtod for async loading this will bring us some m secs
+            </summary>
+        </member>
+        <member name="T:JPB.DataAccess.Query.QueryEnumeratorEx`1">
+            <summary>
+            Wrapes the QueryBuilderX element for an IEnumerable that is strongly typed
+            </summary>
+            <typeparam name="TPoco"></typeparam>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryEnumeratorEx`1.#ctor(JPB.DataAccess.Query.QueryBuilderX)">
+            <summary>
+            For Internal Usage only
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.QueryEnumeratorEx`1.GetEnumerator">
+            <summary>
+            Returns an enumerator that contains all elements in the given QueryBuilderX
             </summary>
         </member>
         <member name="T:JPB.DataAccess.Query.QueryLazyEnumerator">

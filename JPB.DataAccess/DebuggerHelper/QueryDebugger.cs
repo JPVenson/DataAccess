@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
@@ -23,7 +24,7 @@ namespace JPB.DataAccess.DebuggerHelper
 	/// <summary>
 	/// </summary>
 	[DebuggerDisplay("QueryCommand : {DebuggerQuery}", Name = "QueryCommand")]
-	public class QueryDebugger
+	public class QueryDebugger : IDisposable
 	{
 		/// <summary>
 		/// The start value part
@@ -37,6 +38,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		private bool _loaded;
 		private string _stackTracer;
 		private Task _wokerTask;
+		private CancellationTokenSource _cancellationToken;
 
 		static QueryDebugger()
 		{
@@ -104,6 +106,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		private void Init()
 		{
 			var frames = new StackTrace().GetFrames();
+			_cancellationToken = new CancellationTokenSource();
 			//This call is a bit of work so kick it off to a Task and let it run
 			//we have to do it here because inside of the task this info is lost
 			_wokerTask = new Task(stack =>
@@ -137,7 +140,7 @@ namespace JPB.DataAccess.DebuggerHelper
 				{
 					_loaded = true;
 				}
-			}, frames, TaskCreationOptions.PreferFairness);
+			}, frames, _cancellationToken.Token, TaskCreationOptions.PreferFairness);
 			_wokerTask.Start();
 		}
 
@@ -222,6 +225,14 @@ namespace JPB.DataAccess.DebuggerHelper
 			var sb = new StringBuilderInterlaced();
 			this.Render(sb);
 			return sb.ToString();
+		}
+
+		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+		public void Dispose()
+		{
+			_cancellationToken.Cancel();
+			this.DebuggerQuery = null;
+			this._wokerTask.Dispose();
 		}
 	}
 }

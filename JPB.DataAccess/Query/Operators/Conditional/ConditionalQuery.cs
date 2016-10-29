@@ -5,15 +5,31 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators.Conditional
 {
+	/// <summary>
+	/// Creates an Conditional Query that allows you to filter the Previus query
+	/// </summary>
+	/// <typeparam name="TPoco"></typeparam>
 	public class ConditionalQuery<TPoco> : QueryBuilderX, IConditionalQuery<TPoco>
 	{
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public readonly CondtionBuilderState State;
 
+		/// <summary>
+		/// Creates a new Instance based on the previus query
+		/// </summary>
+		/// <param name="queryText"></param>
+		/// <param name="state"></param>
 		public ConditionalQuery(IQueryBuilder queryText, CondtionBuilderState state) : base(queryText)
 		{
 			State = state;
 		}
 
+		/// <summary>
+		///Creates a new Instance based on the previus query
+		/// </summary>
+		/// <param name="queryText"></param>
 		public ConditionalQuery(ConditionalQuery<TPoco> queryText) : base(queryText)
 		{
 			State = queryText.State;
@@ -42,8 +58,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="query"></param>
 		/// <param name="columnName"></param>
 		/// <returns></returns>
 		public ConditionalColumnQuery<TPoco> Column(string columnName)
@@ -54,8 +68,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="query"></param>
 		/// <param name="columnName"></param>
 		/// <returns></returns>
 		public ConditionalColumnQuery<TPoco> Column<TA>(
@@ -68,6 +80,9 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			return Column(propName.DbName);
 		}
 
+		/// <summary>
+		/// For Internal Usage only
+		/// </summary>
 		public string CurrentIdentifier
 		{
 			get { return this.State.Identifier; }
