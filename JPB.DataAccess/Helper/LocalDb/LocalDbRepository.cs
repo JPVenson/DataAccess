@@ -245,6 +245,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		/// <summary>
 		/// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
+		/// Does not work if <c>useOrignalObjectInMemory</c> was used to create this Reposetory
 		/// </summary>
 		/// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
 		/// <returns>

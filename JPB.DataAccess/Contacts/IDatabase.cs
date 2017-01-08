@@ -77,24 +77,12 @@ namespace JPB.DataAccess.Contacts
 		void Attach(IDatabaseStrategy strategy);
 
 		/// <summary>
-		/// Detaches this instance.
-		/// </summary>
-		void Detach();
-
-		/// <summary>
 		///     Required
 		///     Is used to create an new Connection based on the Strategy and
 		///     keep it
 		/// </summary>
 		/// <returns></returns>
 		IDbConnection GetConnection();
-
-		/// <summary>
-		///     Required
-		///     Is used to create an new Transaction based on the Strategy
-		/// </summary>
-		/// <returns></returns>
-		IDbTransaction GetTransaction();
 
 		/// <summary>
 		///     Required
@@ -132,13 +120,6 @@ namespace JPB.DataAccess.Contacts
 		/// <param name="cmd">The command.</param>
 		/// <returns></returns>
 		int ExecuteNonQuery(IDbCommand cmd);
-
-		/// <summary>
-		///     Required
-		///     Return the last inserted id based on the Strategy
-		/// </summary>
-		/// <returns></returns>
-		object GetlastInsertedId();
 
 		/// <summary>
 		/// Gets the data reader for the given Sql Statement.
@@ -179,22 +160,6 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <returns></returns>
 		IDataParameter CreateParameter(string strName, object value);
-
-		/// <summary>
-		///     Required
-		///     Execute a QueryCommand and map the result that is created with the func
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		IEnumerable<T> GetEntitiesList<T>(string strQuery, Func<IDataRecord, T> func, bool bHandleConnection);
-
-		/// <summary>
-		///     Required
-		///     Execute a QueryCommand and map the result that is created with the func
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		IEnumerable<T> GetEntitiesList<T>(IDbCommand cmd, Func<IDataRecord, T> func);
 
 		/// <summary>
 		///     Required

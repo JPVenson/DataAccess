@@ -30,20 +30,23 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// </summary>
 		/// <param name="ascending">if set to <c>true</c> [ascending].</param>
 		/// <returns></returns>
-		public OrderByColumn<TPoco> Order(bool ascending)
+		public OrderByColumn<TPoco> OrderBy(bool ascending)
 		{
 			if (ascending)
 				return this;
-			return this.Descending();
+			return this.Descending;
 		}
 
 		/// <summary>
 		/// returns an Descending orderd collection
 		/// </summary>
 		/// <returns></returns>
-		public OrderByColumn<TPoco> Descending()
+		public OrderByColumn<TPoco> Descending
 		{
-			return new OrderByColumn<TPoco>(this.QueryText("DESC"));
+			get
+			{
+				return new OrderByColumn<TPoco>(this.QueryText("DESC"));
+			}
 		}
 
 		/// <summary>

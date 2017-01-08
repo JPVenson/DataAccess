@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 			_columns = columns;
 		}
 
-		private readonly List<string> _columns;
+		internal readonly List<string> _columns;
 
 		/// <summary>
 		/// Selectes a column based on a Propertie
@@ -66,18 +66,21 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		/// Creates a Select statement that only query the columns that are previusly collected
 		/// </summary>
 		/// <returns></returns>
-		public SelectQuery<TPoco> From()
+		public SelectQuery<TPoco> From
 		{
-			string selectQuery;
-			if (_columns.Any())
+			get
 			{
-				selectQuery = DbAccessLayer.CreateSelectByColumns(base.Cache, _columns.Aggregate((e, f) => e + ", " + f));
+				string selectQuery;
+				if (_columns.Any())
+				{
+					selectQuery = DbAccessLayer.CreateSelectByColumns(base.Cache, _columns.Aggregate((e, f) => e + ", " + f));
+				}
+				else
+				{
+					selectQuery = DbAccessLayer.CreateSelect(base.Cache);
+				}
+				return new SelectQuery<TPoco>(this.QueryText(selectQuery));
 			}
-			else
-			{
-				selectQuery = DbAccessLayer.CreateSelect(base.Cache);
-			}
-			return new SelectQuery<TPoco>(this.QueryText(selectQuery));
 		}
 	}
 }

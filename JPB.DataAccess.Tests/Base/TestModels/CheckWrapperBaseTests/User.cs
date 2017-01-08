@@ -361,7 +361,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		[SelectFactoryMethod]
 		public static void GetSelectStatement(RootQuery builder)
 		{
-			builder.Select<Users_StaticQueryFactoryForSelect>();
+			builder.Select.Table<Users_StaticQueryFactoryForSelect>();
 		}
 	}
 
@@ -377,10 +377,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		[SelectFactoryMethod]
 		public static void GetSelectStatement(RootQuery builder, long whereId)
 		{
-			builder.Select<Users_StaticQueryFactoryForSelectWithArugments>()
-				.Where()
+			builder.Select.Table<Users_StaticQueryFactoryForSelectWithArugments>()
+				.Where
 				.Column(s => s.UserId)
-				.Is(whereId);
+				.Is.EqualsTo(whereId);
 		}
 	}
 }

@@ -17,7 +17,7 @@ namespace JPB.DataAccess.AdoWrapper
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Contacts.IDatabase" />
 	[DebuggerDisplay("OpenRuns {_handlecounter}, IsConnectionOpen {_conn2 != null}, IsTransactionOpen {_trans != null}")]
-	public sealed class DefaultDatabaseAccess : IDatabase
+	public sealed partial class DefaultDatabaseAccess : IDatabase
 	{
 		private IDbConnection _conn2;
 		private volatile int _handlecounter;
@@ -64,21 +64,6 @@ namespace JPB.DataAccess.AdoWrapper
 			return db;
 		}
 
-		private int DoExecuteNonQuery(string strSql)
-		{
-			if (null == GetConnection())
-				throw new Exception("DB2.ExecuteNonQuery: void connection");
-
-			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-			{
-				if (_trans != null)
-					cmd.Transaction = _trans;
-				LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
-
-				return cmd.ExecuteNonQuery();
-			}
-		}
-
 		private int DoExecuteNonQuery(string strSql, params object[] param)
 		{
 			if (null == GetConnection())
@@ -120,34 +105,6 @@ namespace JPB.DataAccess.AdoWrapper
 				LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
 				return cmd.ExecuteScalar();
 			}
-		}
-
-		/// <summary>
-		/// Opens the and close database.
-		/// </summary>
-		public void OpenAndCloseDatabase()
-		{
-			Connect();
-			CloseConnection();
-		}
-
-		/// <summary>
-		///     Will change the object to DBNull if it is C# null
-		/// </summary>
-		/// <returns></returns>
-		public static object Dbcast(IDataRecord dr, string strFieldName, object objFallThru)
-		{
-			var obj = dr[strFieldName];
-			return null == obj || obj is DBNull ? objFallThru : obj;
-		}
-
-		/// <summary>
-		///     Will change the object to DBNull if it is C# null
-		/// </summary>
-		/// <returns></returns>
-		public static object Dbcast(object obj, object objFallThru)
-		{
-			return null == obj || obj is DBNull ? objFallThru : obj;
 		}
 
 		#region IDatabase Members
@@ -194,15 +151,6 @@ namespace JPB.DataAccess.AdoWrapper
 		public void Attach(IDatabaseStrategy strategy)
 		{
 			_strategy = strategy;
-			CloseConnection();
-		}
-
-		/// <summary>
-		///     Detaches this instance.
-		/// </summary>
-		public void Detach()
-		{
-			_strategy = null;
 			CloseConnection();
 		}
 
@@ -268,16 +216,6 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDbConnection GetConnection()
 		{
 			return _conn2 ?? (_conn2 = _strategy.CreateConnection());
-		}
-
-		/// <summary>
-		/// Required
-		/// Is used to create an new Transaction based on the Strategy
-		/// </summary>
-		/// <returns></returns>
-		public IDbTransaction GetTransaction()
-		{
-			return _trans;
 		}
 
 		/// <summary>
@@ -364,13 +302,18 @@ namespace JPB.DataAccess.AdoWrapper
 
 			if (_conn2 != null && _handlecounter == 0)
 			{
-				if (_trans != null)
+				using (_conn2)
 				{
-					_trans.Commit();
+					if (_trans != null)
+					{
+						using (_trans)
+						{
+							_trans.Commit();
+						}
+					}
+					_trans = null;
+					_conn2.Close();
 				}
-				_trans = null;
-				_conn2.Close();
-				_conn2.Dispose();
 				_conn2 = null;
 			}
 			//GC.Collect();
@@ -389,21 +332,24 @@ namespace JPB.DataAccess.AdoWrapper
 				_handlecounter = 0;
 			}
 
-			if (_conn2 != null && _handlecounter == 0)
+			if (_conn2 != null)
 			{
-				if (_trans != null)
+				using (_conn2)
 				{
-					_trans.Commit();
+					if (_trans != null)
+					{
+						using (_trans)
+						{
+							_trans.Commit();
+						}
+					}
+					_trans = null;
+					_conn2.Close();
 				}
-				_trans = null;
-				_conn2.Close();
-				_conn2.Dispose();
 				_conn2 = null;
 			}
-			GC.Collect();
 
-			//HACK
-			SqlConnection.ClearAllPools();
+			_strategy.CloseAllConnections();
 		}
 		/// <summary>
 		/// Required
@@ -485,16 +431,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			return _strategy.ConvertParameter(type);
 		}
-		/// <summary>
-		/// Required
-		/// Return the last inserted id based on the Strategy
-		/// </summary>
-		/// <returns></returns>
-		public object GetlastInsertedId()
-		{
-			using (var cmd = GetlastInsertedIdCommand())
-				return GetSkalar(cmd);
-		}
+
 		/// <summary>
 		/// Gets the data reader for the given Sql Statement.
 		/// </summary>
@@ -551,53 +488,6 @@ namespace JPB.DataAccess.AdoWrapper
 
 		#region QueryCommand Helper
 
-		/// <summary>
-		/// Required
-		/// Execute a QueryCommand and map the result that is created with the func
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="strQuery"></param>
-		/// <param name="func"></param>
-		/// <param name="bHandleConnection"></param>
-		/// <returns></returns>
-		public IEnumerable<T> GetEntitiesList<T>(string strQuery, Func<IDataRecord, T> func, bool bHandleConnection)
-		{
-			if (bHandleConnection)
-				Connect();
-
-			try
-			{
-				using (var dr = GetDataReader(strQuery))
-				{
-					while (dr.Read())
-						yield return func(dr);
-					dr.Close();
-				}
-			}
-			finally
-			{
-				if (bHandleConnection)
-					CloseConnection();
-			}
-		}
-		/// <summary>
-		/// Required
-		/// Execute a QueryCommand and map the result that is created with the func
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="cmd"></param>
-		/// <param name="func"></param>
-		/// <returns></returns>
-		public IEnumerable<T> GetEntitiesList<T>(IDbCommand cmd, Func<IDataRecord, T> func)
-		{
-			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
-			using (var dr = cmd.ExecuteReader())
-			{
-				while (dr.Read())
-					yield return func(dr);
-				dr.Close();
-			}
-		}
 		/// <summary>
 		/// Required
 		/// Opens a Connection or reuse an existing one and then execute the action
@@ -711,235 +601,12 @@ namespace JPB.DataAccess.AdoWrapper
 				CloseConnection();
 			}
 		}
-		/// <summary>
-		/// Processes the entities list.
-		/// </summary>
-		/// <param name="strQuery">The string query.</param>
-		/// <param name="action">The action.</param>
-		/// <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-		public void ProcessEntitiesList(string strQuery, Action<IDataRecord> action, bool bHandleConnection)
-		{
-			if (bHandleConnection)
-				Connect();
-
-			try
-			{
-				using (var dr = GetDataReader(strQuery))
-				{
-					while (dr.Read())
-						action(dr);
-					dr.Close();
-				}
-			}
-			finally
-			{
-				if (bHandleConnection)
-					CloseConnection();
-			}
-		}
-		/// <summary>
-		/// Tries the on entities list.
-		/// </summary>
-		/// <param name="strQuery">The string query.</param>
-		/// <param name="action">The action.</param>
-		/// <param name="strMessageOnEmpty">The string message on empty.</param>
-		/// <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-		/// <returns></returns>
-		public Exception TryOnEntitiesList(string strQuery, Action<IDataRecord> action, string strMessageOnEmpty,
-			bool bHandleConnection)
-		{
-			if (bHandleConnection)
-				Connect();
-
-			try
-			{
-				using (var dr = GetDataReader(strQuery))
-				{
-					if (false == dr.Read()) return new Exception(strMessageOnEmpty);
-
-					action(dr);
-
-					dr.Close();
-
-					return null;
-				}
-			}
-			catch (Exception ex)
-			{
-				return ex;
-			}
-			finally
-			{
-				if (bHandleConnection)
-					CloseConnection();
-			}
-		}
-		/// <summary>
-		/// Gets the index of the entities list with.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="strQuery">The string query.</param>
-		/// <param name="func">The function.</param>
-		/// <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-		/// <returns></returns>
-		public IEnumerable<T> GetEntitiesListWithIndex<T>(string strQuery, Func<long, IDataRecord, T> func,
-			bool bHandleConnection)
-		{
-			if (bHandleConnection)
-				Connect();
-
-			try
-			{
-				using (var dr = GetDataReader(strQuery))
-				{
-					long index = -1;
-					while (dr.Read())
-					{
-						index++;
-						yield return func(index, dr);
-					}
-					dr.Close();
-				}
-			}
-			finally
-			{
-				if (bHandleConnection)
-					CloseConnection();
-			}
-		}
-		/// <summary>
-		/// Gets the entities dictionary.
-		/// </summary>
-		/// <typeparam name="K"></typeparam>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="strQuery">The string query.</param>
-		/// <param name="func">The function.</param>
-		/// <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-		/// <param name="strExceptionMessage">The string exception message.</param>
-		/// <returns></returns>
-		/// <exception cref="ApplicationException"></exception>
-		public IDictionary<K, V> GetEntitiesDictionary<K, V>(string strQuery, Func<IDataRecord, KeyValuePair<K, V>> func,
-			bool bHandleConnection, string strExceptionMessage = null)
-		{
-			var htRes = new Dictionary<K, V>();
-
-			if (bHandleConnection)
-				Connect();
-
-			try
-			{
-				using (var dr = GetDataReader(strQuery))
-				{
-					while (dr.Read())
-					{
-						var kvp = func(dr);
-						try
-						{
-							htRes.Add(kvp.Key, kvp.Value);
-						}
-						catch (Exception)
-						{
-							if (strExceptionMessage != null)
-								throw new ApplicationException(strExceptionMessage + ", " + kvp.Key);
-							else throw;
-						}
-					}
-					dr.Close();
-				}
-
-				return htRes;
-			}
-			finally
-			{
-				if (bHandleConnection)
-					CloseConnection();
-			}
-		}
-		/// <summary>
-		/// Gets the entities dictionary.
-		/// </summary>
-		/// <typeparam name="K"></typeparam>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="cmd">The command.</param>
-		/// <param name="func">The function.</param>
-		/// <returns></returns>
-		public IDictionary<K, V> GetEntitiesDictionary<K, V>(IDbCommand cmd, Func<IDataRecord, KeyValuePair<K, V>> func)
-		{
-			var htRes = new Dictionary<K, V>();
-			LastExecutedQuery = CreateQueryDebuggerAuto(cmd);
-
-			using (var dr = cmd.ExecuteReader())
-			{
-				while (dr.Read())
-				{
-					var kvp = func(dr);
-
-					htRes.Add(kvp.Key, kvp.Value);
-				}
-				dr.Close();
-			}
-
-			return htRes;
-		}
-		/// <summary>
-		/// Gets the next paging step.
-		/// </summary>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="strQuery">The string query.</param>
-		/// <param name="func">The function.</param>
-		/// <param name="iPageSize">Size of the i page.</param>
-		/// <param name="default">The default.</param>
-		/// <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-		/// <param name="strExceptionMessage">The string exception message.</param>
-		/// <returns></returns>
-		/// <exception cref="ApplicationException"></exception>
-		public V GetNextPagingStep<V>(string strQuery, Func<IDataRecord, V> func, long iPageSize, V @default,
-			bool bHandleConnection, string strExceptionMessage = null)
-		{
-			if (bHandleConnection)
-				Connect();
-
-			IDataReader dr = null;
-			try
-			{
-				long index = -1;
-				long rotate = -1;
-				dr = GetDataReader(strQuery);
-				while (dr.Read())
-				{
-					index += 1;
-					rotate += 1;
-					if (rotate == iPageSize - 1)
-						rotate = -1;
-
-					try
-					{
-						if (0 == rotate)
-							return func(dr);
-					}
-					catch (Exception)
-					{
-						if (strExceptionMessage != null)
-							throw new ApplicationException(strExceptionMessage + ", " + index);
-						else throw;
-					}
-				}
-
-				return @default;
-			}
-			finally
-			{
-				if (dr != null)
-				{
-					dr.Close();
-					dr.Dispose();
-				}
-
-				if (bHandleConnection)
-					CloseConnection();
-			}
-		}
 
 		#endregion QueryCommand Helper
+	}
+
+	public sealed partial class DefaultDatabaseAccess
+	{
+
 	}
 }

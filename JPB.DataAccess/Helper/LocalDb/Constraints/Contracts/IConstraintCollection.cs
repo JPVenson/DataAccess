@@ -5,8 +5,16 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 	/// <summary>
 	///
 	/// </summary>
+	public interface IConstraintCollectionInternal
+	{
+
+	}
+
+	/// <summary>
+	///
+	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
-	public interface IConstraintCollection<TEntity>
+	public interface IConstraintCollection<TEntity> : IConstraintCollectionInternal
 	{
 		/// <summary>
 		/// Gets the check constraints.

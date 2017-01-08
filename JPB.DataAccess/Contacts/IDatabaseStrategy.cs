@@ -94,5 +94,10 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <returns></returns>
 		string ConvertParameter(DbType type);
+
+		/// <summary>
+		/// Calls the API to close all open Connections and free the Database
+		/// </summary>
+		void CloseAllConnections();
 	}
 }

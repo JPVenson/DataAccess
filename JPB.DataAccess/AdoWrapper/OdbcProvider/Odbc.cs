@@ -145,6 +145,11 @@ namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 		{
 			return type.ToString();
 		}
+
+		public void CloseAllConnections()
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
 #pragma warning restore 1591

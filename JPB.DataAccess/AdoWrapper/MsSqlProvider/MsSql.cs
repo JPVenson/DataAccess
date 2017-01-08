@@ -578,6 +578,18 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			return retval;
 		}
 
+		/// <summary>
+		/// Calls the API to close all open Connections and free the Database
+		/// </summary>
+		public void CloseAllConnections()
+		{
+
+			GC.Collect();
+
+			//HACK
+			SqlConnection.ClearAllPools();
+		}
+
 		#endregion
 	}
 }

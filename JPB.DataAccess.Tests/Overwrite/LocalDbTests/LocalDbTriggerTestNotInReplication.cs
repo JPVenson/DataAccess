@@ -218,9 +218,9 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				Assert.That(orderFlag, Is.True);
 				deleted = true;
-				Assert.That(token.Table.Contains(token.Item), Is.True);
+				Assert.That(token.Table.Contains(token.Item.UserID), Is.True);
 				token.Table.Remove(token.Item);
-				Assert.That(token.Table.Contains(token.Item), Is.False);
+				Assert.That(token.Table.Contains(token.Item.UserID), Is.False);
 			};
 			Assert.That(orderFlag, Is.False);
 			repro.Add(new Users());

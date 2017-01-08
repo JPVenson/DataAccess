@@ -254,7 +254,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 					.QueryText(",res." + UsersMeta.ContentName)
 					.QueryText(",")
 				.InBracket(s =>
-				s.Select<UsersAutoGenerateConstructorWithSingleXml>()
+				s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
 				.ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
 					.QueryText("AS Sub")
 					.QueryText("FROM")
@@ -285,7 +285,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				.QueryText("res." + UsersMeta.PrimaryKeyName)
 				.QueryText(",res." + UsersMeta.ContentName)
 				.QueryText(",")
-				.InBracket(s => s.Select<UsersAutoGenerateConstructorWithMultiXml>().ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+				.InBracket(s => s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>().ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
 				.QueryText("AS Subs")
 				.QueryText("FROM")
 				.QueryText(UsersMeta.TableName)
@@ -489,7 +489,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			RangeInsertTest();
 
-			var baseQuery = _dbAccess.Query().Select<Users>();
+			var baseQuery = _dbAccess.Query().Select.Table<Users>();
 			var queryA = baseQuery.ContainerObject.Compile();
 			var queryB = baseQuery.ContainerObject.Compile();
 			Assert.IsNotNull(queryA);

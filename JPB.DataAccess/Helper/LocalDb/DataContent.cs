@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Transactions;
 using System.Xml;
 using System.Xml.Schema;
@@ -48,6 +49,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public XmlSchema GetSchema()
 		{
 			return null;
+		}
+
+		/// <summary>
+		/// Returns the current Databases in this scope as an XML string inside an MemoryStream
+		/// </summary>
+		/// <returns></returns>
+		public MemoryStream ReadAsXml()
+		{
+			var ms = new MemoryStream();
+			var xmlSerilzer = new XmlSerializer(GetType());
+			xmlSerilzer.Serialize(ms, this);
+			return ms;
+		}
+
+		/// <summary>
+		/// Returns the current Databases in this scope as an XML string
+		/// </summary>
+		/// <returns></returns>
+		public string ReadAsXmlString()
+		{
+			return Encoding.UTF8.GetString(ReadAsXml().ToArray());
 		}
 
 		/// <summary>
@@ -195,11 +217,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 				//write indexer
 				writer.WriteStartElement(IndexerIncluded);
-
-				foreach (var VARIABLE in localDbReposetoryBase.Value)
-				{
-
-				}
 
 				//end write indexer
 				writer.WriteEndElement();

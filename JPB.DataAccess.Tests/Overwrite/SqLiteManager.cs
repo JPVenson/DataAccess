@@ -19,6 +19,8 @@ namespace JPB.DataAccess.Tests
 			get { return SConnectionString; }
 		}
 
+		string tempPath;
+
 		public DbAccessLayer GetWrapper(DbAccessType type)
 		{
 			if (expectWrapper != null)
@@ -29,8 +31,7 @@ namespace JPB.DataAccess.Tests
 			//string dbname = "testDB";
 			//var sqlLiteFileName = dbname + ".sqlite";
 
-			var tempPath = Path.GetTempFileName();
-
+			tempPath = Path.GetTempFileName();
 
 			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, tempPath));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
@@ -42,6 +43,14 @@ namespace JPB.DataAccess.Tests
 		public void FlushErrorData()
 		{
 
+		}
+
+		public void Clear()
+		{
+			expectWrapper.Database.CloseAllConnection();
+
+			if (File.Exists(tempPath))
+				File.Delete(tempPath);
 		}
 	}
 }

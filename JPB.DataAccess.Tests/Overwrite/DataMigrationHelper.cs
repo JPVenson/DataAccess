@@ -9,8 +9,6 @@ namespace JPB.DataAccess.Tests
 {
 	public static class DataMigrationHelper
 	{
-		
-
 		public static void ClearDb(DbAccessLayer mgr)
 		{
 			mgr.Config.Dispose();

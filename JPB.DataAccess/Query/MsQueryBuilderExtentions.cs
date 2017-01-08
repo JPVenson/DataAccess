@@ -185,7 +185,7 @@ namespace JPB.DataAccess.Query
 		{
 			var q = query
 				.QueryText("(")
-				.Select<T>();
+				.Select.Table<T>();
 			subSelect(q);
 			return q.QueryText(")");
 		}

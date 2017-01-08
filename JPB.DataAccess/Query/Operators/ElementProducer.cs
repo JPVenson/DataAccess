@@ -97,9 +97,12 @@ namespace JPB.DataAccess.Query.Operators
 		/// should be followed by Column()
 		/// </summary>
 		/// <returns></returns>
-		public ConditionalQuery<TPoco> Where()
+		public ConditionalQuery<TPoco> Where
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier));
+			get
+			{
+				return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier));
+			}
 		}
 
 		/// <summary>
@@ -118,9 +121,12 @@ namespace JPB.DataAccess.Query.Operators
 		/// Adds an SQL ORDER BY Statement
 		/// </summary>
 		/// <returns></returns>
-		public OrderStatementQuery<TPoco> Order()
+		public OrderStatementQuery<TPoco> Order
 		{
-			return new OrderStatementQuery<TPoco>(this.QueryText("ORDER BY"));
+			get
+			{
+				return new OrderStatementQuery<TPoco>(this.QueryText("ORDER BY"));
+			}
 		}
 
 		/// <summary>

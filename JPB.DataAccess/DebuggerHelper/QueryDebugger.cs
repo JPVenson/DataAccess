@@ -22,6 +22,8 @@ using JPB.DataAccess.Helper;
 namespace JPB.DataAccess.DebuggerHelper
 {
 	/// <summary>
+	/// Generates a easy debuggable object that contains all infos about the Generated Query.
+	/// <b>Hint</b>: This class consumes a lot of time to load. Disable it in Production.
 	/// </summary>
 	[DebuggerDisplay("QueryCommand : {DebuggerQuery}", Name = "QueryCommand")]
 	public class QueryDebugger : IDisposable
@@ -186,6 +188,7 @@ namespace JPB.DataAccess.DebuggerHelper
 				case DbType.Xml:
 				case DbType.Date:
 				case DbType.DateTime:
+				case DbType.Guid:
 				case DbType.DateTime2:
 				case DbType.DateTimeOffset:
 					retval = "'" + sp.Value.ToString().Replace("'", "''") + "'";
@@ -195,6 +198,19 @@ namespace JPB.DataAccess.DebuggerHelper
 					retval = (sp.Value is bool && (bool) sp.Value) ? "1" : "0";
 					break;
 
+				case DbType.Binary:
+				case DbType.Byte:
+				case DbType.Double:
+				case DbType.Int16:
+				case DbType.Int32:
+				case DbType.Int64:
+				case DbType.SByte:
+				case DbType.Single:
+				case DbType.UInt16:
+				case DbType.UInt32:
+				case DbType.UInt64:
+				case DbType.StringFixedLength:
+					return sp.Value.ToString();
 				default:
 					retval = sp.Value.ToString().Replace("'", "''");
 					break;

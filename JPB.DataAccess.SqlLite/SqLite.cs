@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
@@ -74,8 +75,10 @@ namespace JPB.DataAccess.SqLite
 		{
 			get
 			{
-				var cn = (SQLiteConnection)CreateConnection();
-				return cn.DataSource;
+				using (var cn = (SQLiteConnection) CreateConnection())
+				{
+					return cn.DataSource;
+				}
 			}
 		}
 
@@ -496,6 +499,13 @@ namespace JPB.DataAccess.SqLite
 		public static String ParameterValue(SQLiteParameter sp)
 		{
 			return sp.DbType.ToString().ToUpper();
+		}
+
+		public void CloseAllConnections()
+		{
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
 		}
 
 		#endregion

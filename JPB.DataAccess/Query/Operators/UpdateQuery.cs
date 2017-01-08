@@ -50,10 +50,18 @@ namespace JPB.DataAccess.Query.Operators
 		///		should be followed by Column()
 		/// </summary>
 		/// <returns></returns>
-		public ConditionalQuery<TPoco> Where()
+		public ConditionalQuery<TPoco> Where
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier));
+			get
+			{
+				return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier));
+			}
 		}
+
+		//public ConditionalQuery<TPoco> Where()
+		//{
+		//	return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier));
+		//}
 
 		/// <summary>
 		/// Gets the current identifier.

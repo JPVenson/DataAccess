@@ -27,23 +27,6 @@
             <param name="strategy">The strategy.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.OpenAndCloseDatabase">
-            <summary>
-            Opens the and close database.
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.Dbcast(System.Data.IDataRecord,System.String,System.Object)">
-            <summary>
-                Will change the object to DBNull if it is C# null
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.Dbcast(System.Object,System.Object)">
-            <summary>
-                Will change the object to DBNull if it is C# null
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.CreatePager``2">
             <summary>
                 Get database specific converter Datapager
@@ -68,11 +51,6 @@
             <summary>
                 Required
                 Is used to attach a Strategy that handles certain kinds of Databases
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.Detach">
-            <summary>
-                Detaches this instance.
             </summary>
         </member>
         <member name="P:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.TargetDatabase">
@@ -110,13 +88,6 @@
             Required
             Is used to create an new Connection based on the Strategy and
             keep it
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetTransaction">
-            <summary>
-            Required
-            Is used to create an new Transaction based on the Strategy
             </summary>
             <returns></returns>
         </member>
@@ -201,13 +172,6 @@
             <param name="type"></param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetlastInsertedId">
-            <summary>
-            Required
-            Return the last inserted id based on the Strategy
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetDataReader(System.String,System.Object[])">
             <summary>
             Gets the data reader for the given Sql Statement.
@@ -240,27 +204,6 @@
             <summary>
             Clones this instance.
             </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetEntitiesList``1(System.String,System.Func{System.Data.IDataRecord,``0},System.Boolean)">
-            <summary>
-            Required
-            Execute a QueryCommand and map the result that is created with the func
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="strQuery"></param>
-            <param name="func"></param>
-            <param name="bHandleConnection"></param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetEntitiesList``1(System.Data.IDbCommand,System.Func{System.Data.IDataRecord,``0})">
-            <summary>
-            Required
-            Execute a QueryCommand and map the result that is created with the func
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="cmd"></param>
-            <param name="func"></param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.Run(System.Action{JPB.DataAccess.Contacts.IDatabase})">
@@ -310,71 +253,6 @@
             <param name="func">The function.</param>
             <param name="transaction">The transaction.</param>
             <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.ProcessEntitiesList(System.String,System.Action{System.Data.IDataRecord},System.Boolean)">
-            <summary>
-            Processes the entities list.
-            </summary>
-            <param name="strQuery">The string query.</param>
-            <param name="action">The action.</param>
-            <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.TryOnEntitiesList(System.String,System.Action{System.Data.IDataRecord},System.String,System.Boolean)">
-            <summary>
-            Tries the on entities list.
-            </summary>
-            <param name="strQuery">The string query.</param>
-            <param name="action">The action.</param>
-            <param name="strMessageOnEmpty">The string message on empty.</param>
-            <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetEntitiesListWithIndex``1(System.String,System.Func{System.Int64,System.Data.IDataRecord,``0},System.Boolean)">
-            <summary>
-            Gets the index of the entities list with.
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="strQuery">The string query.</param>
-            <param name="func">The function.</param>
-            <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetEntitiesDictionary``2(System.String,System.Func{System.Data.IDataRecord,System.Collections.Generic.KeyValuePair{``0,``1}},System.Boolean,System.String)">
-            <summary>
-            Gets the entities dictionary.
-            </summary>
-            <typeparam name="K"></typeparam>
-            <typeparam name="V"></typeparam>
-            <param name="strQuery">The string query.</param>
-            <param name="func">The function.</param>
-            <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-            <param name="strExceptionMessage">The string exception message.</param>
-            <returns></returns>
-            <exception cref="T:System.ApplicationException"></exception>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetEntitiesDictionary``2(System.Data.IDbCommand,System.Func{System.Data.IDataRecord,System.Collections.Generic.KeyValuePair{``0,``1}})">
-            <summary>
-            Gets the entities dictionary.
-            </summary>
-            <typeparam name="K"></typeparam>
-            <typeparam name="V"></typeparam>
-            <param name="cmd">The command.</param>
-            <param name="func">The function.</param>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.DefaultDatabaseAccess.GetNextPagingStep``1(System.String,System.Func{System.Data.IDataRecord,``0},System.Int64,``0,System.Boolean,System.String)">
-            <summary>
-            Gets the next paging step.
-            </summary>
-            <typeparam name="V"></typeparam>
-            <param name="strQuery">The string query.</param>
-            <param name="func">The function.</param>
-            <param name="iPageSize">Size of the i page.</param>
-            <param name="default">The default.</param>
-            <param name="bHandleConnection">if set to <c>true</c> [b handle connection].</param>
-            <param name="strExceptionMessage">The string exception message.</param>
-            <returns></returns>
-            <exception cref="T:System.ApplicationException"></exception>
         </member>
         <member name="T:JPB.DataAccess.AdoWrapper.DefaultTransactionScope">
             <summary>
@@ -1014,6 +892,11 @@
             </summary>
             <param name="sp">The sp.</param>
             <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql.CloseAllConnections">
+            <summary>
+            Calls the API to close all open Connections and free the Database
+            </summary>
         </member>
         <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSqlDataConverterPager`2">
             <summary>
@@ -1927,23 +1810,11 @@
                 Is used to attach a Strategy that handles certain kinds of Databases
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabase.Detach">
-            <summary>
-            Detaches this instance.
-            </summary>
-        </member>
         <member name="M:JPB.DataAccess.Contacts.IDatabase.GetConnection">
             <summary>
                 Required
                 Is used to create an new Connection based on the Strategy and
                 keep it
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabase.GetTransaction">
-            <summary>
-                Required
-                Is used to create an new Transaction based on the Strategy
             </summary>
             <returns></returns>
         </member>
@@ -1985,13 +1856,6 @@
             <param name="cmd">The command.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabase.GetlastInsertedId">
-            <summary>
-                Required
-                Return the last inserted id based on the Strategy
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.Contacts.IDatabase.GetDataReader(System.String,System.Object[])">
             <summary>
             Gets the data reader for the given Sql Statement.
@@ -2027,22 +1891,6 @@
                 Required
                 Creates a Parameter based on the Strategy
             </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabase.GetEntitiesList``1(System.String,System.Func{System.Data.IDataRecord,``0},System.Boolean)">
-            <summary>
-                Required
-                Execute a QueryCommand and map the result that is created with the func
-            </summary>
-            <typeparam name="T"></typeparam>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabase.GetEntitiesList``1(System.Data.IDbCommand,System.Func{System.Data.IDataRecord,``0})">
-            <summary>
-                Required
-                Execute a QueryCommand and map the result that is created with the func
-            </summary>
-            <typeparam name="T"></typeparam>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Contacts.IDatabase.Run(System.Action{JPB.DataAccess.Contacts.IDatabase})">
@@ -2187,6 +2035,11 @@
                 Converts the Generic SourceDbType to the Specific represntation
             </summary>
             <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.CloseAllConnections">
+            <summary>
+            Calls the API to close all open Connections and free the Database
+            </summary>
         </member>
         <member name="T:JPB.DataAccess.Contacts.ILoadFromXmlStrategy">
             <summary>
@@ -2826,9 +2679,9 @@
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DbAccessLayerHelper.MergeCommands(JPB.DataAccess.Contacts.IDatabase,System.Data.IDbCommand,System.Data.IDbCommand,System.Boolean)">
-            <summary>		
+            <summary>
                 Not Connection save
-                Must be executed inside a Valid Connection 
+                Must be executed inside a Valid Connection
             </summary>
             <param name="db"></param>
             <param name="base">left part of the query</param>
@@ -2841,12 +2694,12 @@
             Merges 2 Commands into one single New Command by optionaly renaming and Delimiter insert
             </summary>
             <param name="db"></param>
-            <param name="base"></param>
-            <param name="last"></param>
-            <param name="autoRename"></param>
-            <param name="seed"></param>
-            <param name="pessimistic"></param>
-            <param name="insertDelimiter"></param>
+            <param name="base">The left part of the query</param>
+            <param name="last">The right part of the query</param>
+            <param name="autoRename">if the merge will find some conflics in arguments, shout it provide a new name or throw an extention<value>true</value>Rename and continue<value>fale</value>throw an exception</param>
+            <param name="seed">For optimation</param>
+            <param name="pessimistic"><value>true</value>you will expect that there are conflics<value>false</value>you expect no conflics</param>
+            <param name="insertDelimiter">insert the SQL Delimiter between base and last or not</param>
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.DbAccessLayerHelper.CreateDbCollection``1(JPB.DataAccess.Manager.DbAccessLayer)">
@@ -3265,6 +3118,11 @@
             Initializes a new instance of the <see cref="T:JPB.DataAccess.DbInfoConfig.DbConfig"/> class.
             </summary>
             <param name="local"></param>
+        </member>
+        <member name="M:JPB.DataAccess.DbInfoConfig.DbConfig.Clear">
+            <summary>
+            For Internal use Only
+            </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbConfig.ConstructorSettings">
             <summary>
@@ -3729,6 +3587,8 @@
         </member>
         <member name="T:JPB.DataAccess.DebuggerHelper.QueryDebugger">
             <summary>
+            Generates a easy debuggable object that contains all infos about the Generated Query.
+            <b>Hint</b>: This class consumes a lot of time to load. Disable it in Production.
             </summary>
         </member>
         <member name="F:JPB.DataAccess.DebuggerHelper.QueryDebugger.StartValuePart">
@@ -3781,6 +3641,9 @@
             <returns>
             A <see cref="T:System.String" /> that represents this instance.
             </returns>
+        </member>
+        <member name="M:JPB.DataAccess.DebuggerHelper.QueryDebugger.Dispose">
+            <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.EnumMemberConverter">
              <summary>
@@ -4271,6 +4134,11 @@
             </summary>
             <param name="item">The item.</param>
         </member>
+        <member name="T:JPB.DataAccess.Helper.LocalDb.Constraints.Collections.IConstraintCollectionInternal">
+             <summary>
+            
+             </summary>
+        </member>
         <member name="T:JPB.DataAccess.Helper.LocalDb.Constraints.Collections.IConstraintCollection`1">
              <summary>
             
@@ -4643,6 +4511,18 @@
         <member name="M:JPB.DataAccess.Helper.LocalDb.DataContent.GetSchema">
             <summary>
             Gets the schema.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.DataContent.ReadAsXml">
+            <summary>
+            Returns the current Databases in this scope as an XML string inside an MemoryStream
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.LocalDb.DataContent.ReadAsXmlString">
+            <summary>
+            Returns the current Databases in this scope as an XML string
             </summary>
             <returns></returns>
         </member>
@@ -5052,6 +4932,7 @@
         <member name="M:JPB.DataAccess.Helper.LocalDb.LocalDbRepository`1.Contains(`0)">
             <summary>
             Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
+            Does not work if <c>useOrignalObjectInMemory</c> was used to create this Reposetory
             </summary>
             <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
             <returns>
@@ -6677,6 +6558,22 @@
                 Creates and Executes a Standart SQL delete statement based on the Entry
             </summary>
             <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:JPB.DataAccess.Manager.DbAccessLayer.Delete``1(System.Object)">
+            <summary>
+                Creates and Executes a Standart SQL delete statement based on the Entry
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:JPB.DataAccess.Manager.DbAccessLayer.CreateDeleteSimple(JPB.DataAccess.Contacts.IDatabase,JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache,System.Object)">
+            <summary>
+            	Creates a Delete statement for the given entry
+            </summary>
+            <param name="db">The database.</param>
+            <param name="classInfo">The class information.</param>
+            <param name="entry">The entry.</param>
+            <returns></returns>
+            <exception cref="T:System.NotSupportedException"></exception>
         </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.CreateDelete(JPB.DataAccess.Contacts.IDatabase,JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache,System.Object)">
             <summary>
@@ -8322,6 +8219,11 @@
             <param name="foreignKey"></param>
             <param name="foreignTable"></param>
         </member>
+        <member name="M:JPB.DataAccess.ModelsAnotations.ForeignKeyDeclarationAttribute.#ctor(System.Type)">
+            <summary>
+            Adds a new Foreign key based an a table by using its Primarykey
+            </summary>
+        </member>
         <member name="T:JPB.DataAccess.ModelsAnotations.PrimaryKeyAttribute">
             <summary>
                 Indicates that this property is a Primary key
@@ -9196,19 +9098,9 @@
             <param name="database">The database.</param>
             <param name="state">The state.</param>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalColumnQuery`1.Is">
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.ConditionalColumnQuery`1.Is">
             <summary>
             Prepaires an Conditional Query that targets an single Column
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalColumnQuery`1.Is(System.Object)">
-            <summary>
-            Prepaires an Conditional Query that targets an single Column
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalColumnQuery`1.Not(System.Object)">
-            <summary>
-            Defines an condition that should be inverted
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalColumnQuery`1.IsQueryOperatorValue(System.String)">
@@ -9251,19 +9143,19 @@
             <param name="database">The database.</param>
             <param name="state">The state.</param>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery`1.And">
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery`1.And">
             <summary>
             Prepaires an Conditional Query that targets an single Column
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery`1.Or">
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery`1.Or">
             <summary>
             Prepaires an Conditional Query that targets an single Column
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery`1.ParenthesisClose">
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery`1.ParenthesisClose">
             <summary>
             Closes an Parenthesis if any is open. When not leading ( is found noting happens
             </summary>
@@ -9284,7 +9176,7 @@
             <param name="builder">The builder.</param>
             <param name="state">The state.</param>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalOperatorQuery`1.Not">
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.ConditionalOperatorQuery`1.Not">
             <summary>
             Defines an condition that should be inverted
             </summary>
@@ -9398,7 +9290,7 @@
              </summary>
              <param name="queryText"></param>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.Parenthesis">
+        <member name="P:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.Parenthesis">
             <summary>
             Opens a new Logical combined Query
             </summary>
@@ -9521,7 +9413,7 @@
             <param name="pageSize">Size of the page.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.ElementProducer`1.Where">
+        <member name="P:JPB.DataAccess.Query.Operators.ElementProducer`1.Where">
             <summary>
             Adds a SQL WHERE statement
             does not emit any conditional statement
@@ -9538,7 +9430,7 @@
             <param name="alias">The alias.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.ElementProducer`1.Order">
+        <member name="P:JPB.DataAccess.Query.Operators.ElementProducer`1.Order">
             <summary>
             Adds an SQL ORDER BY Statement
             </summary>
@@ -9582,14 +9474,14 @@
             </summary>
             <param name="database">The database.</param>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Orders.OrderByColumn`1.Order(System.Boolean)">
+        <member name="M:JPB.DataAccess.Query.Operators.Orders.OrderByColumn`1.OrderBy(System.Boolean)">
             <summary>
             Creates an Order By statement that is ether Ascending or Descending
             </summary>
             <param name="ascending">if set to <c>true</c> [ascending].</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Orders.OrderByColumn`1.Descending">
+        <member name="P:JPB.DataAccess.Query.Operators.Orders.OrderByColumn`1.Descending">
             <summary>
             returns an Descending orderd collection
             </summary>
@@ -9726,7 +9618,7 @@
             <param name="columnName">Name of the column.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.CountElementsObjectSelector.Distinct">
+        <member name="P:JPB.DataAccess.Query.Operators.CountElementsObjectSelector.Distinct">
             <summary>
             Counts all elements from a table
             </summary>
@@ -9746,21 +9638,21 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.Select">
+        <member name="P:JPB.DataAccess.Query.Operators.RootQuery.Select">
             <summary>
                 Adds a Select - Statement
                 Uses reflection or a Factory mehtod to create
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.Count">
+        <member name="P:JPB.DataAccess.Query.Operators.RootQuery.Count">
             <summary>
                 Adds a Select - Statement
                 Uses reflection or a Factory mehtod to create
             </summary>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.Select``1(System.Object[])">
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.SelectFactory``1(System.Object[])">
             <summary>
                 Adds a Select - Statement
                 Uses reflection or a Factory mehtod to create
@@ -9838,7 +9730,7 @@
             <param name="columnName">Name of the column.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Selection.ColumnChooser`1.From">
+        <member name="P:JPB.DataAccess.Query.Operators.Selection.ColumnChooser`1.From">
             <summary>
             Creates a Select statement that only query the columns that are previusly collected
             </summary>
@@ -9955,7 +9847,7 @@
             <returns></returns>
             <exception cref="T:System.ArgumentNullException">alias</exception>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.UpdateQuery`1.Where">
+        <member name="P:JPB.DataAccess.Query.Operators.UpdateQuery`1.Where">
             <summary>
                 Adds a SQL WHERE statement
             	does not emit any conditional statement

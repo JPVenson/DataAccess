@@ -9,5 +9,6 @@ namespace JPB.DataAccess.Tests
 
 		string ConnectionString { get; }
 		void FlushErrorData();
+		void Clear();
 	}
 }

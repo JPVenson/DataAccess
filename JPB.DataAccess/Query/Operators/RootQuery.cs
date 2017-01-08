@@ -108,12 +108,15 @@ namespace JPB.DataAccess.Query.Operators
 		/// Counts all elements from a table
 		/// </summary>
 		/// <returns></returns>
-		public CountElementsObjectSelector Distinct()
+		public CountElementsObjectSelector Distinct
 		{
-			return new CountElementsObjectSelector(this)
+			get
 			{
-				DistinctMode = true
-			};
+				return new CountElementsObjectSelector(this)
+				{
+					DistinctMode = true
+				};
+			}
 		}
 	}
 
@@ -143,9 +146,12 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
-		public DatabaseObjectSelector Select()
+		public DatabaseObjectSelector Select
 		{
-			return new DatabaseObjectSelector(this);
+			get
+			{
+				return new DatabaseObjectSelector(this);
+			}
 		}
 
 		/// <summary>
@@ -153,9 +159,12 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
-		public CountElementsObjectSelector Count()
+		public CountElementsObjectSelector Count
 		{
-			return new CountElementsObjectSelector(this);
+			get
+			{
+				return new CountElementsObjectSelector(this);
+			}
 		}
 
 		/// <summary>
@@ -163,7 +172,7 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
-		public SelectQuery<T> Select<T>(params object[] argumentsForFactory)
+		public SelectQuery<T> SelectFactory<T>(params object[] argumentsForFactory)
 		{
 			return new DatabaseObjectSelector(this).Table<T>(argumentsForFactory);
 		}

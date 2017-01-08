@@ -29,35 +29,38 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
-		public ConditionalOperatorQuery<TPoco> Is()
+		public ConditionalOperatorQuery<TPoco> Is
 		{
-			return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Is));
-		}
-
-		/// <summary>
-		/// Prepaires an Conditional Query that targets an single Column
-		/// </summary>
-		public ConditionalEvalQuery<TPoco> Is(object value)
-		{
-			if (value == null)
+			get
 			{
-				return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
+				return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Is));
 			}
-
-			return QueryOperatorValue("=", value);
 		}
 
-		/// <summary>
-		/// Defines an condition that should be inverted
-		/// </summary>
-		public ConditionalEvalQuery<TPoco> Not(object value)
-		{
-			if (value == null)
-			{
-				return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"), State);
-			}
-			return QueryOperatorValue("<>", value);
-		}
+		///// <summary>
+		///// Prepaires an Conditional Query that targets an single Column
+		///// </summary>
+		//public ConditionalEvalQuery<TPoco> Is(object value)
+		//{
+		//	if (value == null)
+		//	{
+		//		return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
+		//	}
+
+		//	return QueryOperatorValue("=", value);
+		//}
+
+		///// <summary>
+		///// Defines an condition that should be inverted
+		///// </summary>
+		//public ConditionalEvalQuery<TPoco> Not(object value)
+		//{
+		//	if (value == null)
+		//	{
+		//		return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"), State);
+		//	}
+		//	return QueryOperatorValue("<>", value);
+		//}
 
 		/// <summary>
 		/// Prepaires an Conditional Query

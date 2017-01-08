@@ -29,29 +29,38 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
 		/// <returns></returns>
-		public ConditionalQuery<TPoco> And()
+		public ConditionalQuery<TPoco> And
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("AND"), State);
+			get
+			{
+				return new ConditionalQuery<TPoco>(this.QueryText("AND"), State);
+			}
 		}
 
 		/// <summary>
 		/// Prepaires an Conditional Query that targets an single Column
 		/// </summary>
 		/// <returns></returns>
-		public ConditionalQuery<TPoco> Or()
+		public ConditionalQuery<TPoco> Or
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("OR"), State);
+			get
+			{
+				return new ConditionalQuery<TPoco>(this.QueryText("OR"), State);
+			}
 		}
 
 		/// <summary>
 		/// Closes an Parenthesis if any is open. When not leading ( is found noting happens
 		/// </summary>
 		/// <returns></returns>
-		public ConditionalEvalQuery<TPoco> ParenthesisClose()
+		public ConditionalEvalQuery<TPoco> ParenthesisClose
 		{
-			if (State.InBreaket)
-				return new ConditionalEvalQuery<TPoco>(this.QueryText(")"), State.ToInBreaket(true));
-			return new ConditionalEvalQuery<TPoco>(this, State);
+			get
+			{
+				if (State.InBreaket)
+					return new ConditionalEvalQuery<TPoco>(this.QueryText(")"), State.ToInBreaket(true));
+				return new ConditionalEvalQuery<TPoco>(this, State);
+			}
 		}
 	}
 }

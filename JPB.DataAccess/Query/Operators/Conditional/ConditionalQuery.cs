@@ -39,9 +39,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// Opens a new Logical combined Query
 		/// </summary>
 		/// <returns></returns>
-		public ConditionalQuery<TPoco> Parenthesis()
+		public ConditionalQuery<TPoco> Parenthesis
 		{
-			return new ConditionalQuery<TPoco>(this.QueryText("("), State.ToInBreaket(true));
+			get
+			{
+				return new ConditionalQuery<TPoco>(this.QueryText("("), State.ToInBreaket(true));
+			}
 		}
 
 		/// <summary>

@@ -73,7 +73,7 @@ namespace JPB.DataAccess.Query.Operators
 			if (fkPropertie == null)
 				throw new NotSupportedException(string.Format("No matching Column was found for Forgin key declaration for table {0}", teCache.TableName));
 
-			return this.Where().Column(fkPropertie.DbName).Is().EqualsTo(id);
+			return this.Where.Column(fkPropertie.DbName).Is.EqualsTo(id);
 		}
 	}
 }

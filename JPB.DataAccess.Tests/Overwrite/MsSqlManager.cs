@@ -89,5 +89,13 @@ namespace JPB.DataAccess.Tests
 		{
 
 		}
+
+		public void Clear()
+		{
+			if (expectWrapper != null)
+			{
+				expectWrapper.Database.CloseAllConnection();
+			}
+		}
 	}
 }

@@ -268,7 +268,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						{
 							if (BaseQuery != null)
 							{
-								baseCte.Select<T>();
+								baseCte.Select.Table<T>();
 							}
 							else
 							{
@@ -278,16 +278,16 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						.WithCte("CTE", cte =>
 						{
 							cte.QueryText("SELECT * FROM (")
-									.Select<T>()
+									.Select.Table<T>()
 									.RowNumberOrder("@pk")
 									.WithParamerters(new { Pk = pk })
 									.QueryText("AS RowNr")
 									.QueryText(", BASECTE.* FROM BASECTE")
 								.QueryText(")")
 								.As("TBL")
-								.Where()
+								.Where
 								.Column("RowNr")
-								.Is()
+								.Is
 								.Between(page =>
 								{
 									page.QueryText("@PagedRows * @PageSize + 1")

@@ -19,7 +19,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 	/// <typeparam name="TArg">The type of the argument.</typeparam>
 	/// <seealso cref="Contacts.MetaApi.IMethodInfoCache{TAtt, TArg}" />
 	/// <seealso cref="Contacts.MetaApi.IMethodInfoCache{TAtt, TArg}" />
-	public class MethodInfoCacheEquatableComparer<TAtt, TArg>
+	internal class MethodInfoCacheEquatableComparer<TAtt, TArg>
 		: IComparer<IMethodInfoCache<TAtt, TArg>>,
 			IEqualityComparer<IMethodInfoCache<TAtt, TArg>>
 		where TAtt : class, IAttributeInfoCache, new() where TArg : class, IMethodArgsInfoCache<TAtt>, new()

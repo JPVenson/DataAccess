@@ -45,13 +45,16 @@ namespace JPB.DataAccess.Tests
 			return DbAccessType.Unknown;
 		}
 
+		private IManager _selectedMgr;
+
 		public DbAccessLayer GetWrapper(DbAccessType type)
 		{
 			DbAccessLayer expectWrapper = null;
 			Console.WriteLine("---------------------------------------------");
 			Console.WriteLine("Element type Lookup");
 			Console.WriteLine("Found " + type);
-			expectWrapper = _managers[type].GetWrapper(type);
+			DbConfig.Clear();
+			expectWrapper = (_selectedMgr = _managers[type]).GetWrapper(type);
 
 			//if (elementType == DbAccessType.MsSql)
 			//{
@@ -108,6 +111,11 @@ namespace JPB.DataAccess.Tests
 		{
 			Console.WriteLine(_errorData.ToString());
 			_errorData.Clear();
+		}
+
+		public void Clear()
+		{
+			_selectedMgr.Clear();
 		}
 	}
 }

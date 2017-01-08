@@ -90,6 +90,7 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersMeta.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\EventTest.cs" />
     <Compile Include="Overwrite\DbCollectionTests\DbCollection.cs" />
     <Compile Include="Base\DbLoaderResouces.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -112,6 +113,7 @@
     <Compile Include="Overwrite\PagerTests\PagerConstraintTests.cs" />
     <Compile Include="Overwrite\PagerTests\PagerUnitTest.cs" />
     <Compile Include="Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
+    <Compile Include="Overwrite\QueryBuilderTests\ColumChooserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Overwrite\QueryBuilderTests\QueryBuilderTests.cs" />
     <Compile Include="Overwrite\SqLiteManager.cs" />

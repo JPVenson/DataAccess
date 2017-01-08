@@ -47,6 +47,8 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			{
 				_mgr.FlushErrorData();
 			}
+
+			_mgr.Clear();
 		}
 
 		public DbAccessLayer DbAccessLayer
@@ -73,7 +75,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				runPrimetivSelect = (int)DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
 			}
 			var deSelect = DbAccessLayer.Select<Users>();
-			var forResult = DbAccessLayer.Query().Select<Users>().ForResult().ToArray();
+			var forResult = DbAccessLayer.Query().Select.Table<Users>().ForResult().ToArray();
 
 			Assert.That(runPrimetivSelect, Is.EqualTo(forResult.Count()));
 			Assert.That(deSelect.Length, Is.EqualTo(forResult.Count()));
@@ -99,12 +101,12 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			if (DbAccessLayer.DbAccessType == DbAccessType.MsSql)
 			{
 				runPrimetivSelect = DbAccessLayer.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
-				forResult = DbAccessLayer.Query().Select<Users>().CountInt().ForResult().FirstOrDefault();
+				forResult = DbAccessLayer.Query().Select.Table<Users>().CountInt().ForResult().FirstOrDefault();
 			}
 			if (DbAccessLayer.DbAccessType == DbAccessType.SqLite)
 			{
 				runPrimetivSelect = (int)DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))[0];
-				forResult = (int)DbAccessLayer.Query().Select<Users>().CountLong().ForResult().FirstOrDefault();
+				forResult = (int)DbAccessLayer.Query().Select.Table<Users>().CountLong().ForResult().FirstOrDefault();
 			}
 			if (DbAccessLayer.DbAccessType == DbAccessType.MySql)
 			{
@@ -143,7 +145,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				Assert.That(deSelect, Is.Not.Empty);
 				Assert.That(deSelect.Length, Is.EqualTo(countOfImages));
 				var book = DbAccessLayer.Select<Book>(id);
-				var forResult = DbAccessLayer.Query().Select<Image>().In(book).ForResult().ToArray();
+				var forResult = DbAccessLayer.Query().Select.Table<Image>().In(book).ForResult().ToArray();
 				Assert.That(forResult, Is.Not.Empty);
 				Assert.That(forResult.Count, Is.EqualTo(countOfImages));
 			}
@@ -162,7 +164,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
 			Assert.That(basePager.MaxPage, Is.EqualTo(maxItems / basePager.PageSize));
 
-			var queryPager = DbAccessLayer.Query().Select<Users>().Order().By(f => f.UserID).ForPagedResult(1, basePager.PageSize);
+			var queryPager = DbAccessLayer.Query().Select.Table<Users>().Order.By(f => f.UserID).ForPagedResult(1, basePager.PageSize);
 			queryPager.LoadPage(DbAccessLayer);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
@@ -184,11 +186,11 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
 			Assert.That(basePager.MaxPage, Is.EqualTo(Math.Ceiling(25F / basePager.PageSize)));
 
-			var queryPager = DbAccessLayer.Query().Select<Users>()
-				.Where()
+			var queryPager = DbAccessLayer.Query().Select.Table<Users>()
+				.Where
 				.Column(f => f.UserID)
 				.IsQueryOperatorValue("< 25")
-				.Order().By(f => f.UserID)
+				.Order.By(f => f.UserID)
 				.ForPagedResult(1, basePager.PageSize);
 			queryPager.LoadPage(DbAccessLayer);
 
@@ -203,7 +205,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		{
 			var maxItems = 250;
 			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
-			var elementProducer = DbAccessLayer.Query().Select<Users>().AsCte<Users, Users>("cte");
+			var elementProducer = DbAccessLayer.Query().Select.Table<Users>().AsCte<Users, Users>("cte");
 			var query = elementProducer.ContainerObject.Compile();
 		}
 
@@ -213,7 +215,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		{
 			var maxItems = 250;
 			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
-			var elementProducer = DbAccessLayer.Query().Select<Users>().Order().By(s => s.UserName).ThenBy(f => f.UserID).ToArray();
+			var elementProducer = DbAccessLayer.Query().Select.Table<Users>().Order.By(s => s.UserName).ThenBy(f => f.UserID).ToArray();
 			var directQuery = DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement + " ORDER BY UserName, User_ID");
 
 			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
@@ -242,7 +244,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				elementsToRead.Add(addUsers[rand.Next(0, addUsers.Length)]);
 			}
 
-			var elementProducer = DbAccessLayer.Query().Select<Users>().Where().Column(f => f.UserID).Is().In(elementsToRead.ToArray()).ToArray();
+			var elementProducer = DbAccessLayer.Query().Select.Table<Users>().Where.Column(f => f.UserID).Is.In(elementsToRead.ToArray()).ToArray();
 			var directQuery = DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement
 				+ string.Format(" WHERE User_ID IN ({0})",
 				elementsToRead.Select(f => f.ToString()).Aggregate((e,f) => e + "," + f)));
@@ -264,7 +266,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		public void CheckFactory()
 		{
 			var addUsers = DataMigrationHelper.AddUsers(250, DbAccessLayer);
-			Assert.That(() => DbAccessLayer.Query().Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(), Is.Not.Empty);
+			Assert.That(() => DbAccessLayer.Query().Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_PK_IDFM_FUNCSELECTFACWITHPARAM testUser = null;
@@ -272,7 +274,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				Is.Not.Null
 				.And.Property("UserId").Not.EqualTo(0));
 
-			var selTestUser = DbAccessLayer.Query().Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] { testUser.UserId }).FirstOrDefault();
+			var selTestUser = DbAccessLayer.Query().Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] { testUser.UserId }).FirstOrDefault();
 			Assert.That(selTestUser, Is.Not.Null);
 			Assert.That(selTestUser.UserName, Is.EqualTo(testUser.UserName));
 			Assert.That(selTestUser.UserId, Is.EqualTo(testUser.UserId));

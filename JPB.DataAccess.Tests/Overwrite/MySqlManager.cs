@@ -83,7 +83,14 @@ namespace JPB.DataAccess.Tests
 
 		public void FlushErrorData()
 		{
-			throw new System.NotImplementedException();
+		}
+
+		public void Clear()
+		{
+			if (_expectWrapper != null)
+			{
+				_expectWrapper.Database.CloseAllConnection();
+			}
 		}
 	}
 }

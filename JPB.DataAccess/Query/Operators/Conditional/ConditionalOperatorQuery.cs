@@ -30,9 +30,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		/// Defines an condition that should be inverted
 		/// </summary>
-		public ConditionalOperatorQuery<TPoco> Not()
+		public ConditionalOperatorQuery<TPoco> Not
 		{
-			return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Not));
+			get
+			{
+				return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Not));
+			}
 		}
 
 		/// <summary>

@@ -7,6 +7,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -31,6 +32,19 @@ namespace JPB.DataAccess.DbInfoConfig
 		{
 			ConstructorSettings = new FactoryHelperSettings();
 
+		}
+
+		/// <summary>
+		/// For Internal use Only
+		/// </summary>
+#if !DEBUG
+		[DebuggerHidden]
+#endif
+		[Browsable(false)]
+		[EditorBrowsable(EditorBrowsableState.Never)]
+		public static void Clear()
+		{
+			MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>.Clear();
 		}
 
 		/// <summary>

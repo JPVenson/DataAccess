@@ -18,7 +18,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 	/// <summary>
 	/// Defines methods for compareing two Property Cache instances on its Name and location
 	/// </summary>
-	public class PropertyEquatableComparer<TAtt>
+	internal class PropertyEquatableComparer<TAtt>
 		: IEqualityComparer<IPropertyInfoCache<TAtt>>,
 		IComparer<IPropertyInfoCache<TAtt>>
 		where TAtt : class, IAttributeInfoCache, new()

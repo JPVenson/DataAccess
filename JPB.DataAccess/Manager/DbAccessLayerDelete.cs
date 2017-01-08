@@ -40,6 +40,39 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
+		///     Creates and Executes a Standart SQL delete statement based on the Entry
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		public void Delete<T>(object primaryKey)
+		{
+			var deleteCommand = CreateDeleteSimple(Database, GetClassInfo(typeof(T)), primaryKey);
+			RaiseDelete(null, deleteCommand);
+			Database.Run(s => { s.ExecuteNonQuery(deleteCommand); });
+		}
+
+		/// <summary>
+		///		Creates a Delete statement for the given entry
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="classInfo">The class information.</param>
+		/// <param name="entry">The entry.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException"></exception>
+		public static IDbCommand CreateDeleteSimple(IDatabase db, DbClassInfoCache classInfo, object primaryKey)
+		{
+			if (primaryKey == null)
+			{
+				return db.CreateCommand("DELETE FROM " + classInfo.TableName);
+			}
+
+			if (classInfo.PrimaryKeyProperty == null)
+				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported", classInfo.Name));
+			var proppk = classInfo.PrimaryKeyProperty.DbName;
+			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
+			return db.CreateCommandWithParameterValues(query, new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, primaryKey));
+		}
+
+		/// <summary>
 		///		Creates a Delete statement for the given entry
 		/// </summary>
 		/// <param name="db">The database.</param>

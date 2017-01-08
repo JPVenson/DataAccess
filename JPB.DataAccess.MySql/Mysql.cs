@@ -241,5 +241,10 @@ namespace JPB.DataAccess.MySql
 		{
 			return new MySql(ConnectionString);
 		}
+
+		public void CloseAllConnections()
+		{
+			MySqlConnection.ClearAllPools();
+		}
 	}
 }
