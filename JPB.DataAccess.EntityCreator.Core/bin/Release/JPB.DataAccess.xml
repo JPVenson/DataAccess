@@ -2990,10 +2990,6 @@
             If enabled the QueryDebugger that contains the QueryCommand
             </summary>
         </member>
-        <member name="T:JPB.DataAccess.DbInfoConfig.DbConfigHelper">
-            <summary>
-            </summary>
-        </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbConfigHelper.IsAnonymousType(JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache)">
             <summary>
                 Anonymous type check by naming convention
@@ -3377,11 +3373,6 @@
         <member name="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache">
             <summary>
                 Infos about the Property
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache"/> class.
             </summary>
         </member>
         <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbPropertyInfoCache.#ctor(System.Reflection.PropertyInfo,System.Boolean)">

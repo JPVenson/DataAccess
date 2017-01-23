@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
@@ -27,6 +28,8 @@ namespace JPB.DataAccess.Tests
 		private static string _connectionString;
 		public string ConnectionType { get; set; }
 
+		private StringBuilder _errorText = new StringBuilder();
+
 		public string ConnectionString
 		{
 			get
@@ -34,9 +37,9 @@ namespace JPB.DataAccess.Tests
 				if (_connectionString != null)
 					return _connectionString;
 				_connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
-				Console.WriteLine("-------------------------------------------");
-				Console.WriteLine("Connection String");
-				Console.WriteLine(_connectionString);
+				_errorText.AppendLine("-------------------------------------------");
+				_errorText.AppendLine("Connection String");
+				_errorText.AppendLine(_connectionString);
 				return _connectionString;
 			}
 		}
@@ -60,7 +63,7 @@ namespace JPB.DataAccess.Tests
 			}
 			catch (Exception)
 			{
-				Console.WriteLine("Db does not exist");
+				_errorText.AppendLine("Db does not exist");
 			}
 
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
@@ -87,7 +90,8 @@ namespace JPB.DataAccess.Tests
 
 		public void FlushErrorData()
 		{
-
+			Console.WriteLine(_errorText.ToString());
+			_errorText.Clear();
 		}
 
 		public void Clear()

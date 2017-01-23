@@ -9,11 +9,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JPB.DataAccess.EntityCreator.UI</RootNamespace>
     <AssemblyName>JPB.DataAccess.EntityCreator.UI</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -131,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="MsSQL\ViewModel\ChangeListener\ObjectChangeListener.cs" />
     <Compile Include="MsSQL\ViewModel\ClassPreviewViewModel.cs" />
     <Compile Include="MsSQL\ViewModel\ClassPreviewViewModelErrorProvider.cs" />
     <Compile Include="MsSQL\ViewModel\Comparer\ColumnComparer.cs" />
@@ -186,7 +188,7 @@
       <Name>JPB.DataAccess.EntityCreator.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
+      <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
       <Name>JPB.DataAccess</Name>
     </ProjectReference>
   </ItemGroup>

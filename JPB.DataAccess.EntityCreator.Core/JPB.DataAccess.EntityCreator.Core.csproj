@@ -75,7 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
+      <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
       <Name>JPB.DataAccess</Name>
     </ProjectReference>
   </ItemGroup>

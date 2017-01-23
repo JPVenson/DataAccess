@@ -28,20 +28,20 @@ namespace JPB.DataAccess.Tests
 
 		public DbAccessType GetElementType()
 		{
-			Console.WriteLine("---------------------------------------------");
-			Console.WriteLine("Element type Lookup");
+			_errorData.AppendLine("---------------------------------------------");
+			_errorData.AppendLine("Element type Lookup");
 			var customAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<CategoryAttribute>();
 			if (customAttribute.Name == "MsSQL")
 			{
-				Console.WriteLine("Found MsSQL");
+				_errorData.AppendLine("Found MsSQL");
 				return DbAccessType.MsSql;
 			}
 			else if (customAttribute.Name == "SqLite")
 			{
-				Console.WriteLine("Found SqLite");
+				_errorData.AppendLine("Found SqLite");
 				return DbAccessType.SqLite;
 			}
-			Console.WriteLine("Found NON ERROR");
+			_errorData.AppendLine("Found NON ERROR");
 			return DbAccessType.Unknown;
 		}
 
@@ -50,9 +50,8 @@ namespace JPB.DataAccess.Tests
 		public DbAccessLayer GetWrapper(DbAccessType type)
 		{
 			DbAccessLayer expectWrapper = null;
-			Console.WriteLine("---------------------------------------------");
-			Console.WriteLine("Element type Lookup");
-			Console.WriteLine("Found " + type);
+			_errorData.AppendLine("---------------------------------------------");
+			_errorData.AppendLine("Found " + type);
 			DbConfig.Clear();
 			expectWrapper = (_selectedMgr = _managers[type]).GetWrapper(type);
 
@@ -111,6 +110,8 @@ namespace JPB.DataAccess.Tests
 		{
 			Console.WriteLine(_errorData.ToString());
 			_errorData.Clear();
+
+			this._selectedMgr.FlushErrorData();
 		}
 
 		public void Clear()

@@ -12,7 +12,6 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			: base(fakeMehtod, typeof(FakeMethodInfoCache), name)
 		{
 			_fakeMehtod = fakeMehtod;
-			Console.WriteLine();
 		}
 
 		public override object Invoke(object target, params object[] param)
