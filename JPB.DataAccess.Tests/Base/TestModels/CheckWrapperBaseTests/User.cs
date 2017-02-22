@@ -213,7 +213,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public string PropertyB { get; set; }
 
 		[ConfigMehtod]
-		public static void Config(ConfigurationResolver<ConfigLessUserInplaceConfig> configBase)
+		public static void Config(ConfigurationResolver<ConfigLessUserInplaceDirectConfig> configBase)
 		{
 			configBase.SetClassAttribute(new ForModelAttribute(UsersMeta.TableName));
 			configBase.SetPrimaryKey(e => e.PropertyA);

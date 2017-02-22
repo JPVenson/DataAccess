@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -152,6 +152,19 @@ namespace JPB.DataAccess.MetaApi.Model
 
 			return this;
 		}
+
+        /// <summary>
+        /// Creates a new Object or a Default value
+        /// </summary>
+        /// <returns></returns>
+	    public object New()
+	    {
+	        if (DefaultFactory != null)
+	        {
+	            return DefaultFactory();
+	        }
+	        return Expression.Lambda(Expression.Default(Type)).Compile().DynamicInvoke();
+	    }
 
 		/// <summary>
 		/// The default constructor that takes no arguments if known

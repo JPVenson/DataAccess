@@ -81,13 +81,13 @@ namespace JPB.DataAccess.Manager
 
             uint toke = 0;
             int tokeAll = 0;
-            var type = typeof(T);
+            var type = this.GetClassInfo(typeof(T));
 
             var compiledRange = RangerInsertPation == 0 ? 0.1 * entrys.Length : (int)RangerInsertPation;
 
             for (var i = 0; i < entrys.Count(); i++)
             {
-                var singelCommand = CreateInsert(type, entrys[i]);
+                var singelCommand = CreateInsertQueryFactory(type, entrys[i]);
                 singelCommand = Database.AppendSuffix(singelCommand, "_" + i);
 
                 if (insertRange == null)
@@ -180,7 +180,7 @@ namespace JPB.DataAccess.Manager
         /// </summary>
         public void Insert(Type type, object entry, IDatabase db)
         {
-            var query = CreateInsert(db, this.GetClassInfo(type), entry);
+            var query = CreateInsertQueryFactory(this.GetClassInfo(type), entry);
             Database.PrepaireRemoteExecution(query);
             db.Run(s => { s.ExecuteNonQuery(query); });
         }
@@ -191,7 +191,7 @@ namespace JPB.DataAccess.Manager
         /// <returns></returns>
         public IDbCommand CreateInsertWithSelectCommand(Type type, object entry)
         {
-            var dbCommand = CreateInsert(type, entry);
+            var dbCommand = CreateInsertQueryFactory(this.GetClassInfo(type), entry);
             return Database.MergeCommands(dbCommand, Database.GetlastInsertedIdCommand());
         }
 

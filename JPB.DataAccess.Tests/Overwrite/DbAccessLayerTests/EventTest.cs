@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.Manager;
+﻿using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
-namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
+namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]

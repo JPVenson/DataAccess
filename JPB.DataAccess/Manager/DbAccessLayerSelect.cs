@@ -251,21 +251,21 @@ namespace JPB.DataAccess.Manager
             object entity,
             params object[] parameter)
         {
-            return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => DbAccessLayer.CreateInsert(Database, type, e), entity);
+            return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => CreateInsert(Database, type, e), entity);
         }
 
         internal IDbCommand CreateUpdateQueryFactory(DbClassInfoCache type,
             object entity,
             params object[] parameter)
         {
-            return GenericQueryCreation<UpdateFactoryMethodAttribute>(type, (e, f) => DbAccessLayer.CreateUpdate(Database, type, e), entity);
+            return GenericQueryCreation<UpdateFactoryMethodAttribute>(type, (e, f) => CreateUpdate(Database, type, e), entity);
         }
 
         internal IDbCommand CreateDeleteQueryFactory(DbClassInfoCache type,
             object entity,
             params object[] parameter)
         {
-            return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => DbAccessLayer.CreateDelete(Database, type, e), entity);
+            return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => CreateDelete(Database, type, e), entity);
         }
 
         internal IDbCommand GenericQueryCreation<TE>(

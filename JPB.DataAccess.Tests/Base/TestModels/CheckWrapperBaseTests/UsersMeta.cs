@@ -48,7 +48,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
 			sb.AppendLine(string.Format(" {0} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,", PrimaryKeyName));
 			sb.AppendLine(string.Format(" {0} NVARCHAR(MAX),", ContentName));
-			sb.AppendLine(string.Format(" {0} INT NOT NULL,", ForgeinKeyName));
+			sb.AppendLine(string.Format(" {0} BIGINT NULL,", ForgeinKeyName));
 			sb.AppendLine(string.Format(" CONSTRAINT [ImageToBook] FOREIGN KEY ({0}) REFERENCES {1}({2})", ForgeinKeyName, BookMeta.TableName, BookMeta.PrimaryKeyName));
 			sb.AppendLine(");");
 			CreateMsSQl = sb.ToString();
@@ -57,7 +57,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
 			sb.AppendLine(string.Format(" {0} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,", PrimaryKeyName));
 			sb.AppendLine(string.Format(" {0} TEXT,", ContentName));
-			sb.AppendLine(string.Format(" {0} INTEGER NOT NULL,", ForgeinKeyName));
+			sb.AppendLine(string.Format(" {0} INTEGER NULL,", ForgeinKeyName));
 			sb.AppendLine(string.Format(" FOREIGN KEY ({0}) REFERENCES {1}({2})", ForgeinKeyName, BookMeta.TableName, BookMeta.PrimaryKeyName));
 			sb.AppendLine(");");
 			CreateSqLite = sb.ToString();
@@ -66,7 +66,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
 			sb.AppendLine(string.Format(" {0} BIGINT NOT NULL AUTO_INCREMENT,", PrimaryKeyName));
 			sb.AppendLine(string.Format(" {0} text NOT NULL,", ContentName));
-			sb.AppendLine(string.Format(" {0} BIGINT NOT NULL,", ForgeinKeyName));
+			sb.AppendLine(string.Format(" {0} BIGINT NULL,", ForgeinKeyName));
 			sb.AppendLine(string.Format(" PRIMARY KEY ({0}),", PrimaryKeyName));
 			sb.AppendLine(string.Format(" FOREIGN KEY ({0}) REFERENCES {1}({2})", ForgeinKeyName, BookMeta.TableName, BookMeta.PrimaryKeyName));
 			sb.AppendLine(")");
@@ -90,7 +90,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		{
 			var sb = new StringBuilder();
 			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
-			sb.AppendLine(string.Format(" {0} INT PRIMARY KEY IDENTITY(1,1) NOT NULL,", PrimaryKeyName));
+			sb.AppendLine(string.Format(" {0} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,", PrimaryKeyName));
 			sb.AppendLine(string.Format(" {0} NVARCHAR(MAX)", ContentName));
 			sb.AppendLine(");");
 			CreateMsSQl = sb.ToString();

@@ -370,6 +370,15 @@ namespace JPB.DataAccess.Manager
         }
 
         /// <summary>
+        ///     Execute a QueryCommand without Paramters
+        /// </summary>
+        /// <returns></returns>
+        public int ExecuteGenericCommand(string query)
+        {
+            return ExecuteGenericCommand(DbAccessLayerHelper.CreateCommand(Database, query));
+        }
+
+        /// <summary>
         ///     Creates a Strong typed query that awaits no Result
         /// </summary>
         /// <returns></returns>

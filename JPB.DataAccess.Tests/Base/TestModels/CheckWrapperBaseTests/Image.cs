@@ -13,6 +13,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public int IdBook { get; set; }
 	}
 
+    [ForModel("Image")]
 	public class ImageNullable
 	{
 		[PrimaryKey]

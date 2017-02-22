@@ -6528,6 +6528,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:JPB.DataAccess.Manager.DbAccessLayer.ExecuteGenericCommand(System.String)">
+            <summary>
+                Execute a QueryCommand without Paramters
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.Query">
             <summary>
                 Creates a Strong typed query that awaits no Result
@@ -7612,6 +7618,12 @@
             </summary>
             <param name="type"></param>
             <param name="anon"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5.New">
+            <summary>
+            Creates a new Object or a Default value
+            </summary>
             <returns></returns>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.ClassInfoCache`5.DefaultFactory">

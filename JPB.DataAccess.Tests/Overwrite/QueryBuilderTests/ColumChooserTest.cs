@@ -1,21 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.AdoWrapper;
-using JPB.DataAccess.Contacts;
+﻿using System.Collections.Generic;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Query.Operators.Selection;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
-namespace JPB.DataAccess.Tests.Overwrite.QueryBuilderTests
+namespace JPB.DataAccess.Tests.QueryBuilderTests
 {
 	[TestFixture()]
 	public class ColumChooserTest
