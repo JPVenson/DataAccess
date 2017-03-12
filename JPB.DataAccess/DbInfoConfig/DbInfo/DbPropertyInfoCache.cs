@@ -92,7 +92,10 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		}
 
 		/// <summary>
+		///
 		/// </summary>
+		/// <param name="propertyInfo"></param>
+		/// <param name="anon"></param>
 		internal DbPropertyInfoCache(PropertyInfo propertyInfo, bool anon)
 			: base(propertyInfo, anon)
 		{
@@ -176,11 +179,18 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public DbAttributeInfoCache<IgnoreReflectionAttribute> IgnoreAnyAttribute { get; private set; }
 
 		/// <summary>
+		///     If known the Generator that will mask this Property
+		/// </summary>
+		public DbAttributeInfoCache<AnonymousObjectGenerationAttribute> AnonymousObjectGenerationAttribute { get; set; }
+
+		/// <summary>
 		///     For internal Usage only
 		/// </summary>
 		public void Refresh()
 		{
-			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(PrimaryKeyAttribute)));
+			PrimaryKeyAttribute =
+				DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(
+					Attributes.FirstOrDefault(f => f.Attribute is PrimaryKeyAttribute));
 			InsertIgnore = Attributes.Any(f => f.Attribute is InsertIgnoreAttribute);
 			if (Getter != null && Getter.MethodInfo != null)
 			{
@@ -188,20 +198,31 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 				{
 					ForginKeyAttribute =
 						DbAttributeInfoCache<ForeignKeyAttribute>.WrapperOrNull(
-							Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyAttribute)));
+							Attributes.FirstOrDefault(f => f.Attribute is ForeignKeyAttribute));
 				}
 				else
 				{
 					ForginKeyAttribute = null;
 				}
 			}
+			AnonymousObjectGenerationAttribute =
+				DbAttributeInfoCache<AnonymousObjectGenerationAttribute>.WrapperOrNull(
+					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(AnonymousObjectGenerationAttribute)));
 			RowVersionAttribute =
 				DbAttributeInfoCache<RowVersionAttribute>.WrapperOrNull(
 					Attributes.FirstOrDefault(s => s.Attribute is RowVersionAttribute));
-			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(FromXmlAttribute)));
-			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
-			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
-			ForginKeyDeclarationAttribute = DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyDeclarationAttribute)));
+			FromXmlAttribute =
+				DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(
+					Attributes.FirstOrDefault(f => f.Attribute is FromXmlAttribute));
+			ForModelAttribute =
+				DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(
+					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
+			IgnoreAnyAttribute =
+				DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(
+					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
+			ForginKeyDeclarationAttribute =
+				DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(
+					Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyDeclarationAttribute)));
 		}
 
 		//internal static PropertyInfoCache Logical(string info)
