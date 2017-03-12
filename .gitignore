@@ -3,37 +3,50 @@
 ################################################################################
 
 /TestResults
-/JPB.DataAccess/bin
-/JPB.DataAccess/obj
 /JPB.DataAccess/packages
-/JPB.DataAccess/TestResults
-/JPB.DataAccess.EntryCreator/bin
-/JPB.DataAccess.EntryCreator/obj
-/JPB.DataAccess.MySql/obj/Debug
-/JPB.DataAccess.MySql/obj/Release
-/JPB.DataAccess.UnitTests/bin
-/JPB.DataAccess.UnitTests/obj
 /packages
-/JPB.DataAccess.Tests/obj
-/JPB.DataAccess.Tests/bin
 *.pdb
 *.exe
 *.dll
-/JPB.DataAccess.SqlLite/obj
-/JPB.DataAccess.SqlLite/bin
-/JPB.DataAccess.Tests.MsSQL/obj
-/JPB.DataAccess.Tests.MsSQL/bin
-/JPB.DataAccess.Tests.SqLite/obj
-/JPB.DataAccess.Tests.SqLite/bin
-/JPB.DataAccess.EntryCreator/JPB.DataAccess.EntityCreator.csproj.user
-/JPB.DataAccess/JPB.DataAccess.v12.suo
-/.vs/JPB.DataAccess/v14/.suo
-/JPB.DataAccess.EntityCreator.Core/bin/Debug
-/JPB.DataAccess.EntityCreator.Core/obj/Debug
-/JPB.DataAccess.EntityCreator.UI/bin/Debug
-/JPB.DataAccess.EntityCreator.UI/obj/Debug
-/_ReSharper.Caches/ReSharperPlatformVs147.JPB.DataAccess.00
-/JPB.DataAccess.EntityCreator.Core/obj/Release
-/JPB.DataAccess.EntityCreator.UI/bin/Release
-/JPB.DataAccess.EntityCreator.UI/obj/Release
-/_ReSharper.Caches/ReSharperPlatformVs147.JPB.DataAccess.EntityCreator.00
+*.cache
+*.suo
+*.sqlite
+*/**/bin/Debug
+*/**/bin/Release
+*/**/obj/Debug
+*/**/obj/Release
+
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+**/packages/*
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+#!**/packages/repositories.config
+# NuGet v3's project.json files produces more ignorable files
+*.nuget.props
+*.nuget.targets
+/_ReSharper.Caches
