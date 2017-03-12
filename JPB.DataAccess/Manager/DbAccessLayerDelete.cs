@@ -53,14 +53,14 @@ namespace JPB.DataAccess.Manager
             Database.Run(s => { s.ExecuteNonQuery(query); });
         }
 
-        /// <summary>
-        ///		Creates a Delete statement for the given entry
-        /// </summary>
-        /// <param name="db">The database.</param>
-        /// <param name="classInfo">The class information.</param>
-        /// <param name="entry">The entry.</param>
+        ///  <summary>
+        /// 		Creates a Delete statement for the given entry
+        ///  </summary>
+        ///  <param name="db">The database.</param>
+        ///  <param name="classInfo">The class information.</param>
+        /// <param name="primaryKey"></param>
         /// <returns></returns>
-        /// <exception cref="NotSupportedException"></exception>
+        ///  <exception cref="NotSupportedException"></exception>
         public static IDbCommand CreateDeleteSimple(IDatabase db, DbClassInfoCache classInfo, object primaryKey)
         {
             if (primaryKey == null)

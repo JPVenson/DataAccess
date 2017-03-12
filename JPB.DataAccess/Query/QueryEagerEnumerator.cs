@@ -62,7 +62,6 @@ namespace JPB.DataAccess.Query
             catch (Exception)
             {
                 throw;
-                return false;
             }
         }
 

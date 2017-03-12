@@ -34,18 +34,18 @@ namespace JPB.DataAccess.DbInfoConfig
 
 		}
 
-		/// <summary>
-		/// For Internal use Only
-		/// </summary>
-#if !DEBUG
-		[DebuggerHidden]
-#endif
-		[Browsable(false)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static void Clear()
-		{
-			MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>.Clear();
-		}
+//		/// <summary>
+//		/// For Internal use Only
+//		/// </summary>
+//#if !DEBUG
+//		[DebuggerHidden]
+//#endif
+//		[Browsable(false)]
+//		[EditorBrowsable(EditorBrowsableState.Never)]
+//		public static void Clear()
+//		{
+//			MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>.Clear();
+//		}
 
 		/// <summary>
 		///     The settings that are used to create a DOM ctor

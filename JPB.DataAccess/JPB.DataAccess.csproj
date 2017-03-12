@@ -133,6 +133,11 @@
     <Compile Include="AdoWrapper\OdbcProvider\Odbc.cs" />
     <Compile Include="AdoWrapper\OleDBProvider\OleDb.cs" />
     <Compile Include="AdoWrapper\XmlDataRecord.cs" />
+    <Compile Include="Anonymous\AnonymousClass.cs" />
+    <Compile Include="Anonymous\AnonymousObject.cs" />
+    <Compile Include="Anonymous\AnonymousObjectGenerator.cs" />
+    <Compile Include="Anonymous\AnonymousPocoManager.cs" />
+    <Compile Include="Anonymous\IAnonymousObjectGenerator.cs" />
     <Compile Include="Contacts\IDatabase.cs" />
     <Compile Include="Contacts\IDatabaseStrategy.cs" />
     <Compile Include="Contacts\ILoadFromXmlStrategy.cs" />

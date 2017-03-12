@@ -246,7 +246,9 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		{
 			throw new NotImplementedException();
 		}
-
+        /// <summary>
+        /// NotImplementedException
+        /// </summary>
 		public void CloseAllConnections()
 		{
 			throw new NotImplementedException();

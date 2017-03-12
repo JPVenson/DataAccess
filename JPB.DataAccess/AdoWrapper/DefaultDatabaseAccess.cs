@@ -129,6 +129,10 @@ namespace JPB.DataAccess.AdoWrapper
         //    return null;
         //}
 
+        /// <summary>
+        /// The Hock point for Adding the QueryDebugger to the Database
+        /// </summary>
+        /// <param name="cmd"></param>
         public void AttachQueryDebugger(IDbCommand cmd)
         {
             if (Debugger)

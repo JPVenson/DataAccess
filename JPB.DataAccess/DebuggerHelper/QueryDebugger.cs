@@ -250,6 +250,9 @@ namespace JPB.DataAccess.DebuggerHelper
             this._wokerTask.Dispose();
         }
 
+        /// <summary>
+        /// Refreshes all internal Members
+        /// </summary>
         public void Refresh()
         {
             var debugquery = new StringBuilder(this._command.CommandText);

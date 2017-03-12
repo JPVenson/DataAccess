@@ -182,7 +182,8 @@ namespace JPB.DataAccess.Manager
         {
             var query = CreateInsertQueryFactory(this.GetClassInfo(type), entry);
             Database.PrepaireRemoteExecution(query);
-            db.Run(s => { s.ExecuteNonQuery(query); });
+			RaiseInsert(entry, query);
+			db.Run(s => { s.ExecuteNonQuery(query); });
         }
 
         /// <summary>
