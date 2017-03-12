@@ -10,52 +10,11 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    [TestFixture(DbAccessType.MsSql)]
-    [TestFixture(DbAccessType.SqLite)]
-#if MySqlTests
-    [TestFixture(DbAccessType.MySql)]
-#endif
-    public class SelectionTests
+    public class SelectionTests : BaseTest
     {
-        [SetUp]
-        public void Init()
+        public SelectionTests(DbAccessType type) : base(type)
         {
-            _mgr = new Manager();
-            _dbAccess = _mgr.GetWrapper(_type);
         }
-
-        [TearDown]
-        public void TestTearDown()
-        {
-            // inc. class name
-            var fullNameOfTheMethod = TestContext.CurrentContext.Test.FullName;
-            // method name only
-            var methodName = TestContext.CurrentContext.Test.Name;
-            // the state of the test execution
-            var state = TestContext.CurrentContext.Result.Outcome == ResultState.Failure; // TestState enum
-
-            if (state)
-                _mgr.FlushErrorData();
-        }
-
-        [SetUp]
-        public void Clear()
-        {
-            _dbAccess.Config.Dispose();
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-            if (_dbAccess.DbAccessType == DbAccessType.MsSql)
-                _dbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-        }
-
-        private readonly DbAccessType _type;
-
-        public SelectionTests(DbAccessType type)
-        {
-            _type = type;
-        }
-
-        private DbAccessLayer _dbAccess;
-        private IManager _mgr;
 
         [Test]
         [Category("MsSQL")]
@@ -63,16 +22,16 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
         public void SelectBase()
         {
             DataMigrationHelper.AddUsers(1, _dbAccess);
-            var refSelect = _dbAccess.Select<Base.Users>();
+            var refSelect = _dbAccess.Select<Users>();
             Assert.IsTrue(refSelect.Length > 0);
 
             var testInsertName = Guid.NewGuid().ToString();
-            var testUser = _dbAccess.InsertWithSelect(new Base.Users { UserName = testInsertName });
+            var testUser = _dbAccess.InsertWithSelect(new Users {UserName = testInsertName});
             Assert.IsNotNull(testUser);
             Assert.AreNotEqual(testUser.UserID, default(long));
 
             var selTestUser =
-                _dbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] { testUser.UserID }).FirstOrDefault();
+                _dbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] {testUser.UserID}).FirstOrDefault();
             Assert.That(selTestUser, Is.Not.Null);
             Assert.AreEqual(selTestUser.UserName, testUser.UserName);
             Assert.AreEqual(selTestUser.UserId, testUser.UserID);
@@ -85,7 +44,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
         {
             DataMigrationHelper.AddUsers(100, _dbAccess);
             var firstAvaibleUser =
-                _dbAccess.Query().Top<Base.TestModels.CheckWrapperBaseTests.Users>(1).ForResult<Base.Users>().First();
+                _dbAccess.Query().Top<Base.TestModels.CheckWrapperBaseTests.Users>(1).ForResult<Users>().First();
 
             var refSelect = _dbAccess.Select<Users_PK>(firstAvaibleUser.UserID);
             Assert.IsNotNull(refSelect);
@@ -105,22 +64,22 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
         {
             DataMigrationHelper.AddUsers(1, _dbAccess);
 
-            var refSelect = _dbAccess.SelectNative<Base.Users>(UsersMeta.SelectStatement);
+            var refSelect = _dbAccess.SelectNative<Users>(UsersMeta.SelectStatement);
             Assert.IsTrue(refSelect.Any());
 
             var anyId = refSelect.FirstOrDefault().UserID;
             Assert.AreNotEqual(anyId, 0);
 
             refSelect =
-                _dbAccess.SelectNative<Base.Users>(
+                _dbAccess.SelectNative<Users>(
                     UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
                     new QueryParameter("paramA", anyId));
             Assert.IsTrue(refSelect.Length > 0);
 
             refSelect =
-                _dbAccess.SelectNative<Base.Users>(
+                _dbAccess.SelectNative<Users>(
                     UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-                    new { paramA = anyId });
+                    new {paramA = anyId});
             Assert.IsTrue(refSelect.Length > 0);
         }
 
@@ -145,7 +104,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
             refSelect =
                 _dbAccess.RunPrimetivSelect<long>(
                     UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-                    new { paramA = anyId });
+                    new {paramA = anyId});
             Assert.IsTrue(refSelect.Length > 0);
         }
 
@@ -168,7 +127,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
             {
                 string n = null;
                 _dbAccess.RunPrimetivSelect<long>(
-                    UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA", new { paramA = n });
+                    UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA", new {paramA = n});
             }, Throws.Exception);
         }
 
@@ -187,17 +146,28 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
         public void SelectWhereBase()
         {
             DataMigrationHelper.AddUsers(1, _dbAccess);
-            var refSelect = _dbAccess.SelectWhere<Base.Users>("UserName IS NOT NULL");
+            var refSelect = _dbAccess.SelectWhere<Users>("UserName IS NOT NULL");
             Assert.IsTrue(refSelect.Length > 0);
 
             var testInsertName = Guid.NewGuid().ToString();
-            var testUser = _dbAccess.InsertWithSelect(new Base.Users { UserName = testInsertName });
+            var testUser = _dbAccess.InsertWithSelect(new Users {UserName = testInsertName});
             Assert.IsNotNull(testUser);
             Assert.AreNotEqual(testUser.UserID, default(long));
 
-            var selTestUser = _dbAccess.SelectWhere<Users>("User_ID = @id", new { id = testUser.UserID }).FirstOrDefault();
+            var selTestUser = _dbAccess.SelectWhere<Users>("User_ID = @id", new {id = testUser.UserID}).FirstOrDefault();
             Assert.AreEqual(selTestUser.UserName, testUser.UserName);
             Assert.AreEqual(selTestUser.UserID, testUser.UserID);
+        }
+
+        [Test]
+        [Category("MsSQL")]
+        [Category("SqLite")]
+        public void SelectAnonymous()
+        {
+            DataMigrationHelper.AddEntity<Users, long>(_dbAccess, 5, f => f.UserName = "Test");
+            var usersUsernameAnonymouses = _dbAccess.Select<Users_UsernameAnonymous>();
+            Assert.That(usersUsernameAnonymouses,
+                Is.All.Property(UsersMeta.ContentName).Not.Null.And.Not.EqualTo("Test"));
         }
     }
 }

@@ -6,52 +6,11 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    [TestFixture(DbAccessType.MsSql)]
-    [TestFixture(DbAccessType.SqLite)]
-#if MySqlTests
-    [TestFixture(DbAccessType.MySql)]
-#endif
-    public class ProcedureTests
+    public class ProcedureTests : BaseTest
     {
-        [SetUp]
-        public void Init()
+        public ProcedureTests(DbAccessType type) : base(type)
         {
-            _mgr = new Manager();
-            _dbAccess = _mgr.GetWrapper(_type);
         }
-
-        [TearDown]
-        public void TestTearDown()
-        {
-            // inc. class name
-            var fullNameOfTheMethod = TestContext.CurrentContext.Test.FullName;
-            // method name only
-            var methodName = TestContext.CurrentContext.Test.Name;
-            // the state of the test execution
-            var state = TestContext.CurrentContext.Result.Outcome == ResultState.Failure; // TestState enum
-
-            if (state)
-                _mgr.FlushErrorData();
-        }
-
-        [SetUp]
-        public void Clear()
-        {
-            _dbAccess.Config.Dispose();
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-            if (_dbAccess.DbAccessType == DbAccessType.MsSql)
-                _dbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-        }
-
-        private readonly DbAccessType _type;
-
-        public ProcedureTests(DbAccessType type)
-        {
-            _type = type;
-        }
-
-        private DbAccessLayer _dbAccess;
-        private IManager _mgr;
 
         [Test]
         [Category("MsSQL")]
@@ -61,7 +20,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
                 return;
             DataMigrationHelper.AddUsers(100, _dbAccess);
 
-            Assert.That(() => _dbAccess.Select<TestProcBParamsDirect>(new object[] { 10 }),
+            Assert.That(() => _dbAccess.Select<TestProcBParamsDirect>(new object[] {10}),
                 Is.Not.Null.And.Property("Length").EqualTo(9));
         }
 
@@ -72,7 +31,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
             if (_dbAccess.DbAccessType != DbAccessType.MsSql)
                 return;
             DataMigrationHelper.AddUsers(100, _dbAccess);
-            var expectedUser = _dbAccess.ExecuteProcedure<TestProcAParams, Base.Users>(new TestProcAParams());
+            var expectedUser = _dbAccess.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
             Assert.IsNotNull(expectedUser);
             Assert.AreNotEqual(expectedUser.Length, 0);

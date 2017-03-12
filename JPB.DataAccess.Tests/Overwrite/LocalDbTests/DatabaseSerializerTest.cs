@@ -12,132 +12,126 @@ using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.LocalDbTests
-#if MsSql
-.MsSQL
-#endif
-
-#if SqLite
-.SqLite
-#endif
 {
-	[TestFixture]
-	public class DatabaseSerializerTest
-	{
-		[Test]
-		public void WriteUsers()
-		{
-			LocalDbRepository<Users> users;
-			using (new DatabaseScope())
-			{
-				users = new LocalDbRepository<Users>(new DbConfig());
-			}
+    [TestFixture]
+    public class DatabaseSerializerTest
+    {
+        private void Scope_SetupDone1(object sender, EventArgs e)
+        {
+            using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes(DbLoaderResouces.UsersInDatabaseDump)))
+            {
+                new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
+            }
+        }
 
-			users.Add(new Users());
-			users.Add(new Users());
-			users.Add(new Users());
+        private void Scope_SetupDone(object sender, EventArgs e)
+        {
+            using (
+                var memStream = new MemoryStream(Encoding.ASCII.GetBytes(DbLoaderResouces.BooksWithImagesDatabaseDump)))
+            {
+                new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
+            }
+        }
 
-			var serializableContent = users.Database.GetSerializableContent();
-			var xmlSer = new XmlSerializer(typeof(DataContent));
-			using (var memStream = new MemoryStream())
-			{
-				xmlSer.Serialize(memStream, serializableContent);
-				var content = Encoding.ASCII.GetString(memStream.ToArray());
-				Assert.That(content, Is.Not.Null.And.Not.Empty);
-			}
-		}
+        [Test]
+        public void ReadBooksWithImages()
+        {
+            LocalDbRepository<Book> books;
+            LocalDbRepository<Image> images;
+            using (var scope = new DatabaseScope())
+            {
+                books = new LocalDbRepository<Book>(new DbConfig());
+                images = new LocalDbRepository<Image>(new DbConfig());
 
-		[Test]
-		public void ReadUsers()
-		{
-			LocalDbRepository<Users> users;
-			using (var scope = new DatabaseScope())
-			{
-				users = new LocalDbRepository<Users>(new DbConfig());
+                scope.SetupDone += Scope_SetupDone;
+            }
 
-				scope.SetupDone += Scope_SetupDone1;
-			}
+            Assert.That(books.Count, Is.EqualTo(3));
+            Assert.That(images.Count, Is.EqualTo(3));
+            CollectionAssert.AllItemsAreInstancesOfType(books, typeof(Book));
+            CollectionAssert.AllItemsAreNotNull(books);
+            CollectionAssert.AllItemsAreUnique(books);
 
-			Assert.That(users.Count, Is.EqualTo(3));
-			Assert.That(users.ElementAt(0), Is.Not.Null.And.Property("UserID").EqualTo(1));
-			Assert.That(users.ElementAt(1), Is.Not.Null.And.Property("UserID").EqualTo(2));
-			Assert.That(users.ElementAt(2), Is.Not.Null.And.Property("UserID").EqualTo(3));
-		}
+            CollectionAssert.AllItemsAreInstancesOfType(images, typeof(Image));
+            CollectionAssert.AllItemsAreNotNull(images);
+            CollectionAssert.AllItemsAreUnique(images);
+            Assert.That(books, Is.All.Property("BookId").Not.EqualTo(0).And.All.Property("BookName").Null);
+            Assert.That(images, Is.All.Property("ImageId").Not.EqualTo(0)
+                .And.All.Property("Text").Null
+                .And.All.Property("IdBook").Not.EqualTo(0));
+        }
 
-		private void Scope_SetupDone1(object sender, EventArgs e)
-		{
-			using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes(DbLoaderResouces.UsersInDatabaseDump)))
-			{
-				new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
-			}
-		}
+        [Test]
+        public void ReadUsers()
+        {
+            LocalDbRepository<Users> users;
+            using (var scope = new DatabaseScope())
+            {
+                users = new LocalDbRepository<Users>(new DbConfig());
 
-		[Test]
-		public void WriteBooksWithImages()
-		{
-			LocalDbRepository<Book> books;
-			LocalDbRepository<Image> images;
-			using (new DatabaseScope())
-			{
-				books = new LocalDbRepository<Book>(new DbConfig());
-				images = new LocalDbRepository<Image>(new DbConfig());
-				Assert.IsFalse(books.ReposetoryCreated);
-				Assert.IsFalse(images.ReposetoryCreated);
-			}
+                scope.SetupDone += Scope_SetupDone1;
+            }
 
-			for (int i = 0; i < 3; i++)
-			{
-				var book = new Book();
-				books.Add(book);
+            Assert.That(users.Count, Is.EqualTo(3));
+            Assert.That(users.ElementAt(0), Is.Not.Null.And.Property("UserID").EqualTo(1));
+            Assert.That(users.ElementAt(1), Is.Not.Null.And.Property("UserID").EqualTo(2));
+            Assert.That(users.ElementAt(2), Is.Not.Null.And.Property("UserID").EqualTo(3));
+        }
 
-				var image = new Image();
-				image.IdBook = book.BookId;
-				images.Add(image);
-			}
+        [Test]
+        public void WriteBooksWithImages()
+        {
+            LocalDbRepository<Book> books;
+            LocalDbRepository<Image> images;
+            using (new DatabaseScope())
+            {
+                books = new LocalDbRepository<Book>(new DbConfig());
+                images = new LocalDbRepository<Image>(new DbConfig());
+                Assert.IsFalse(books.ReposetoryCreated);
+                Assert.IsFalse(images.ReposetoryCreated);
+            }
 
-			var serializableContent = books.Database.GetSerializableContent();
-			var xmlSer = new XmlSerializer(typeof(DataContent));
-			using (var memStream = new MemoryStream())
-			{
-				xmlSer.Serialize(memStream, serializableContent);
-				var content = Encoding.ASCII.GetString(memStream.ToArray());
-				Assert.That(content, Is.Not.Null.And.Not.Empty);
-			}
-		}
+            for (var i = 0; i < 3; i++)
+            {
+                var book = new Book();
+                books.Add(book);
 
-		[Test]
-		public void ReadBooksWithImages()
-		{
-			LocalDbRepository<Book> books;
-			LocalDbRepository<Image> images;
-			using (var scope = new DatabaseScope())
-			{
-				books = new LocalDbRepository<Book>(new DbConfig());
-				images = new LocalDbRepository<Image>(new DbConfig());
+                var image = new Image();
+                image.IdBook = book.BookId;
+                images.Add(image);
+            }
 
-				scope.SetupDone += Scope_SetupDone;
-			}
+            var serializableContent = books.Database.GetSerializableContent();
+            var xmlSer = new XmlSerializer(typeof(DataContent));
+            using (var memStream = new MemoryStream())
+            {
+                xmlSer.Serialize(memStream, serializableContent);
+                var content = Encoding.ASCII.GetString(memStream.ToArray());
+                Assert.That(content, Is.Not.Null.And.Not.Empty);
+            }
+        }
 
-			Assert.That(books.Count, Is.EqualTo(3));
-			Assert.That(images.Count, Is.EqualTo(3));
-			CollectionAssert.AllItemsAreInstancesOfType(books, typeof(Book));
-			CollectionAssert.AllItemsAreNotNull(books);
-			CollectionAssert.AllItemsAreUnique(books);
+        [Test]
+        public void WriteUsers()
+        {
+            LocalDbRepository<Users> users;
+            using (new DatabaseScope())
+            {
+                users = new LocalDbRepository<Users>(new DbConfig());
+            }
 
-			CollectionAssert.AllItemsAreInstancesOfType(images, typeof(Image));
-			CollectionAssert.AllItemsAreNotNull(images);
-			CollectionAssert.AllItemsAreUnique(images);
-			Assert.That(books, Is.All.Property("BookId").Not.EqualTo(0).And.All.Property("BookName").Null);
-			Assert.That(images, Is.All.Property("ImageId").Not.EqualTo(0)
-				.And.All.Property("Text").Null
-				.And.All.Property("IdBook").Not.EqualTo(0));
-		}
+            users.Add(new Users());
+            users.Add(new Users());
+            users.Add(new Users());
 
-		private void Scope_SetupDone(object sender, EventArgs e)
-		{
-			using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes(DbLoaderResouces.BooksWithImagesDatabaseDump)))
-			{
-				new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
-			}
-		}
-	}
+            var serializableContent = users.Database.GetSerializableContent();
+            var xmlSer = new XmlSerializer(typeof(DataContent));
+            using (var memStream = new MemoryStream())
+            {
+                xmlSer.Serialize(memStream, serializableContent);
+                var content = Encoding.ASCII.GetString(memStream.ToArray());
+                Assert.That(content, Is.Not.Null.And.Not.Empty);
+            }
+        }
+    }
 }

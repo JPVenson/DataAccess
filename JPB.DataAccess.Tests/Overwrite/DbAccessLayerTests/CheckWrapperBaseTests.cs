@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using JPB.DataAccess.DbCollection;
-using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
@@ -15,50 +12,11 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    [TestFixture(DbAccessType.MsSql)]
-    [TestFixture(DbAccessType.SqLite)]
-    //[TestFixture(DbAccessType.MySql)]
-    public class CheckWrapperBaseTests
+    public class CheckWrapperBaseTests : BaseTest
     {
-        [SetUp]
-        public void Init()
+        public CheckWrapperBaseTests(DbAccessType type) : base(type)
         {
-            _mgr = new Manager();
-            _dbAccess = _mgr.GetWrapper(_type);
         }
-
-        [TearDown]
-        public void TestTearDown()
-        {
-            // inc. class name
-            var fullNameOfTheMethod = TestContext.CurrentContext.Test.FullName;
-            // method name only
-            var methodName = TestContext.CurrentContext.Test.Name;
-            // the state of the test execution
-            var state = TestContext.CurrentContext.Result.Outcome == ResultState.Failure; // TestState enum
-
-            if (state)
-                _mgr.FlushErrorData();
-        }
-
-        [SetUp]
-        public void Clear()
-        {
-            _dbAccess.Config.Dispose();
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-            if (_dbAccess.DbAccessType == DbAccessType.MsSql)
-                _dbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-        }
-
-        private readonly DbAccessType _type;
-
-        public CheckWrapperBaseTests(DbAccessType type)
-        {
-            _type = type;
-        }
-
-        private DbAccessLayer _dbAccess;
-        private IManager _mgr;
 
         [Test]
         [Category("MsSQL")]

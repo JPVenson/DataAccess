@@ -2,13 +2,13 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Tests
 {
-	public interface IManager
-	{
-		DbAccessLayer GetWrapper(DbAccessType type);
-		DbAccessType DbAccessType { get; }
+    public interface IManager
+    {
+        DbAccessType DbAccessType { get; }
 
-		string ConnectionString { get; }
-		void FlushErrorData();
-		void Clear();
-	}
+        string ConnectionString { get; }
+        DbAccessLayer GetWrapper(DbAccessType type);
+        void FlushErrorData();
+        void Clear();
+    }
 }

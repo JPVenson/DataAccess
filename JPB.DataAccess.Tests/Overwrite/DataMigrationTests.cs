@@ -3,7 +3,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
-using Users = JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Users;
+using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests
 {
@@ -54,11 +54,11 @@ namespace JPB.DataAccess.Tests
         private DbAccessLayer _dbAccess;
         private IManager _mgr;
 
-        [Test()]
-        [TestCase(UsersMeta.TableName, typeof(Base.Users))]
+        [Test]
+        [TestCase(UsersMeta.TableName, typeof(Users))]
         [TestCase(UsersMeta.TableName, typeof(Users_Col))]
         [TestCase(UsersMeta.TableName, typeof(UsersWithoutProperties))]
-        [TestCase(UsersMeta.TableName, typeof(Users))]
+        [TestCase(UsersMeta.TableName, typeof(Base.TestModels.CheckWrapperBaseTests.Users))]
         [TestCase(UsersMeta.TableName, typeof(UsersAutoGenerateConstructor))]
         [TestCase(UsersMeta.TableName, typeof(UsersAutoGenerateNullableConstructor))]
         [TestCase(UsersMeta.TableName, typeof(GeneratedUsers))]
@@ -77,56 +77,73 @@ namespace JPB.DataAccess.Tests
             Assert.That(() => DataMigrationHelper.ClearDb(_dbAccess), Throws.Nothing);
             Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)), Is.Zero);
             Assert.That(DataMigrationHelper.AddEntity(_dbAccess, 200, type), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)), Is.EqualTo(200));
-            Assert.That( DataMigrationHelper.AddEntity(_dbAccess, 200, type), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)), Is.EqualTo(400));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)),
+                Is.EqualTo(200));
+            Assert.That(DataMigrationHelper.AddEntity(_dbAccess, 200, type), Is.Not.Empty.And.Unique);
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)),
+                Is.EqualTo(400));
         }
 
-        [Test()]
+        [Test]
         public void AddUserTest()
         {
             Assert.That(() => DataMigrationHelper.ClearDb(_dbAccess), Throws.Nothing);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + UsersMeta.TableName)), Is.Zero);
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + UsersMeta.TableName)),
+                Is.Zero);
             Assert.That(DataMigrationHelper.AddUsers(200, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + UsersMeta.TableName)), Is.EqualTo(200));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + UsersMeta.TableName)),
+                Is.EqualTo(200));
             Assert.That(DataMigrationHelper.AddUsers(200, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + UsersMeta.TableName)), Is.EqualTo(400));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + UsersMeta.TableName)),
+                Is.EqualTo(400));
         }
 
-        [Test()]
+        [Test]
         public void AddBooksTest()
         {
             Assert.That(() => DataMigrationHelper.ClearDb(_dbAccess), Throws.Nothing);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)), Is.Zero);
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)),
+                Is.Zero);
             Assert.That(DataMigrationHelper.AddBooks(200, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)), Is.EqualTo(200));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)),
+                Is.EqualTo(200));
             Assert.That(DataMigrationHelper.AddBooks(200, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)), Is.EqualTo(400));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)),
+                Is.EqualTo(400));
         }
 
-        [Test()]
+        [Test]
         public void AddImagesTest()
         {
             Assert.That(() => DataMigrationHelper.ClearDb(_dbAccess), Throws.Nothing);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)), Is.Zero);
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)),
+                Is.Zero);
             Assert.That(DataMigrationHelper.AddImages(200, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)), Is.EqualTo(200));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)),
+                Is.EqualTo(200));
             Assert.That(DataMigrationHelper.AddImages(200, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)), Is.EqualTo(400));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)),
+                Is.EqualTo(400));
         }
 
-        [Test()]
+        [Test]
         public void AddBooksWithImage()
         {
             Assert.That(() => DataMigrationHelper.ClearDb(_dbAccess), Throws.Nothing);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)), Is.Zero);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)), Is.Zero);
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)),
+                Is.Zero);
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)),
+                Is.Zero);
             Assert.That(DataMigrationHelper.AddBooksWithImage(200, 5, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)), Is.EqualTo(200));
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)), Is.EqualTo(200 * 5));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)),
+                Is.EqualTo(200));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)),
+                Is.EqualTo(200 * 5));
             Assert.That(DataMigrationHelper.AddBooksWithImage(200, 5, _dbAccess), Is.Not.Empty.And.Unique);
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)), Is.EqualTo(400));
-            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)), Is.EqualTo(400 * 5));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + BookMeta.TableName)),
+                Is.EqualTo(400));
+            Assert.That(() => _dbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + ImageMeta.TableName)),
+                Is.EqualTo(400 * 5));
         }
     }
 }

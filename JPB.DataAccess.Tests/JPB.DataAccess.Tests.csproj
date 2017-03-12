@@ -87,9 +87,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUser.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceConfig.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceDirectConfig.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\GeneratedUsers.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructor.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructorWithMultiXml.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructorWithSingleXml.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateNullableConstructor.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersMeta.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersWithoutProperties.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersWithStaticInsert.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_CLASSEL.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_CTORSEL.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_FUNCSELECT.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_FUNCSELECTFAC.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_FUNCSELECTFACWITHPARAM.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_UFM.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_StaticQueryFactoryForSelect.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_StaticQueryFactoryForSelectWithArugments.cs" />
+    <Compile Include="Overwrite\AllTestContextHelper.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
     <Compile Include="Overwrite\DataMigrationTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\BaseTest.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\ConfigurationTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\EventTest.cs" />
@@ -127,7 +150,7 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Image.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcA.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcAResult.cs" />
-    <Compile Include="Base\TestModels\CheckWrapperBaseTests\User.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_Col.cs" />
     <Compile Include="Base\TestModels\MetaAPI\StructCreating.cs" />
     <Compile Include="Base\TestModels\XmlDataRecordTest\InstanceMock.cs" />
     <Compile Include="Base\Users.cs" />

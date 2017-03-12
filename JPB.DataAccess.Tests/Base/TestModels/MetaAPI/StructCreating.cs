@@ -1,44 +1,31 @@
 ﻿namespace JPB.DataAccess.Tests.Base.TestModels.MetaAPI
 {
-	public struct StructCreating
-	{
-		private string _propString;
+    public struct StructCreating
+    {
+        public StructCreating(string propString)
+        {
+            PropString = propString;
+        }
 
-		public StructCreating(string propString)
-		{
-			_propString = propString;
-		}
+        public string PropString { get; private set; }
+    }
 
-		public string PropString
-		{
-			get { return _propString; }
-			private set { _propString = value; }
-		}
-	}
+    public class ClassCreating
+    {
+    }
 
-	public class ClassCreating
-	{
-		public ClassCreating()
-		{
-		}
-	}
+    public class ClassCreatingWithArguments
+    {
+        public ClassCreatingWithArguments(string propString)
+        {
+            PropString = propString;
+        }
 
-	public class ClassCreatingWithArguments
-	{
-		public ClassCreatingWithArguments(string propString)
-		{
-			PropString = propString;
-		}
+        public string PropString { get; set; }
+    }
 
-		public string PropString { get; set; }
-	}
-
-	public class ClassSpeedMeasurement
-	{
-		public ClassSpeedMeasurement()
-		{
-		}
-
-		public string PropString { get; set; }
-	}
+    public class ClassSpeedMeasurement
+    {
+        public string PropString { get; set; }
+    }
 }

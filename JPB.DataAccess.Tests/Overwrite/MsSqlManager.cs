@@ -7,99 +7,99 @@ using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 
 namespace JPB.DataAccess.Tests
 {
-	public class MsSqlManager : IManager
-	{
-		public MsSqlManager()
-		{
-			ConnectionType = "DefaultConnection";
-			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
-			{
-				ConnectionType = "CiConnection";
-			}
-		}
+    public class MsSqlManager : IManager
+    {
+        private static DbAccessLayer expectWrapper;
 
-		private static DbAccessLayer expectWrapper;
+        private static string _connectionString;
 
-		public DbAccessType DbAccessType
-		{
-			get { return DbAccessType.MsSql; }
-		}
+        private readonly StringBuilder _errorText = new StringBuilder();
 
-		private static string _connectionString;
-		public string ConnectionType { get; set; }
+        public MsSqlManager()
+        {
+            ConnectionType = "DefaultConnection";
+            if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
+                ConnectionType = "CiConnection";
+        }
 
-		private StringBuilder _errorText = new StringBuilder();
+        public string ConnectionType { get; set; }
 
-		public string ConnectionString
-		{
-			get
-			{
-				if (_connectionString != null)
-					return _connectionString;
-				_connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
-				_errorText.AppendLine("-------------------------------------------");
-				_errorText.AppendLine("Connection String");
-				_errorText.AppendLine(_connectionString);
-				return _connectionString;
-			}
-		}
+        public DbAccessType DbAccessType
+        {
+            get { return DbAccessType.MsSql; }
+        }
 
-		public DbAccessLayer GetWrapper(DbAccessType type)
-		{
-			const string dbname = "testDB";
-			if (expectWrapper != null)
-			{
-				expectWrapper.Database.CloseAllConnection();
-			}
+        public string ConnectionString
+        {
+            get
+            {
+                if (_connectionString != null)
+                    return _connectionString;
+                _connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
+                _errorText.AppendLine("-------------------------------------------");
+                _errorText.AppendLine("Connection String");
+                _errorText.AppendLine(_connectionString);
+                return _connectionString;
+            }
+        }
 
-			var redesginDatabase = string.Format(
-				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-				dbname);
+        public DbAccessLayer GetWrapper(DbAccessType type)
+        {
+            const string dbname = "testDB";
+            if (expectWrapper != null)
+                expectWrapper.Database.CloseAllConnection();
 
-			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
-			try
-			{
-				expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
-			}
-			catch (Exception)
-			{
-				_errorText.AppendLine("Db does not exist");
-			}
+            var redesginDatabase = string.Format(
+                "IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
+                dbname);
 
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
+            expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
+            try
+            {
+                expectWrapper.ExecuteGenericCommand(
+                    expectWrapper.Database.CreateCommand(
+                        string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
+            }
+            catch (Exception)
+            {
+                _errorText.AppendLine("Db does not exist");
+            }
 
-			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString + "Initial Catalog={0};", dbname));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateMsSql));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateMsSQl));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
+            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
+            expectWrapper.ExecuteGenericCommand(
+                expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
 
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
-																					 "AS BEGIN " +
-																					 "SELECT * FROM Users " +
-																					 "END"));
+            expectWrapper = new DbAccessLayer(DbAccessType,
+                string.Format(ConnectionString + "Initial Catalog={0};", dbname));
+            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateMsSql));
+            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateMsSQl));
+            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
 
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
-																					 "AS BEGIN " +
-																					 "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
-																					 "END "));
+            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
+                                                                                     "AS BEGIN " +
+                                                                                     "SELECT * FROM Users " +
+                                                                                     "END"));
+
+            expectWrapper.ExecuteGenericCommand(
+                expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
+                                                     "AS BEGIN " +
+                                                     "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
+                                                     "END "));
 
 
-			return expectWrapper;
-		}
+            return expectWrapper;
+        }
 
-		public void FlushErrorData()
-		{
-			Console.WriteLine(_errorText.ToString());
-			_errorText.Clear();
-		}
+        public void FlushErrorData()
+        {
+            Console.WriteLine(_errorText.ToString());
+            _errorText.Clear();
+        }
 
-		public void Clear()
-		{
-			if (expectWrapper != null)
-			{
-				expectWrapper.Database.CloseAllConnection();
-			}
-		}
-	}
+        public void Clear()
+        {
+            if (expectWrapper != null)
+                expectWrapper.Database.CloseAllConnection();
+        }
+    }
 }

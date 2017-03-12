@@ -6,135 +6,126 @@ using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.MetaApiTests
-#if MsSql
-.MsSQL
-#endif
 
-#if SqLite
-.SqLite
-#endif
 {
-	[TestFixture]
-	public class MetaApiTest
-	{
-		[Test]
-		public void ClassCreating()
-		{
-			var cache = new DbConfig(true);
-			cache.Include<ClassCreating>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
-		}
+    [TestFixture]
+    public class MetaApiTest
+    {
+        [Test]
+        public void ClassCreating()
+        {
+            var cache = new DbConfig(true);
+            cache.Include<ClassCreating>();
+            Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
+        }
 
-		[Test]
-		public void TestStructCreating()
-		{
-			var cache = new DbConfig(true);
-			cache.Include<StructCreating>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
-		}
+        [Test]
+        public void ClassCreatingWithArguments()
+        {
+            var cache = new DbConfig(true);
+            cache.Include<ClassCreatingWithArguments>();
+            Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Throws.Exception);
+        }
 
-		[Test]
-		public void ClassCreatingWithArguments()
-		{
-			var cache = new DbConfig(true);
-			cache.Include<ClassCreatingWithArguments>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Throws.Exception);
-		}
+        [Test]
+        public void FakeClassComplexProperty()
+        {
+            var cache = new DbConfig(true);
+            Assert.That(() =>
+            {
+                var fakeType = cache.GetFake("FakeType");
 
-		[Test]
-		public void FakeCreation()
-		{
-			var cache = new DbConfig(true);
-			Assert.That(() =>
-			{
-				var fakeType = cache.GetFake("FakeType");
-				Assert.That(fakeType.Name, Is.Not.Null.And.EqualTo("FakeType"));
-				Assert.That(fakeType.Propertys, Is.Empty);
-				Assert.That(fakeType.Mehtods.Count, Is.EqualTo(6));
-				Assert.That(fakeType.Attributes, Is.Empty);
-			}, Throws.Nothing);
-		}
+                fakeType.Propertys.Add("Test", new DbAutoStaticPropertyInfoCache<Users>("Test", fakeType.Type));
 
-		[Test]
-		public void FakeClassStructProperty()
-		{
-			var cache = new DbConfig(true);
-			Assert.That(() =>
-			{
-				var fakeType = cache.GetFake("FakeType");
+                Assert.That(fakeType.Propertys.Count, Is.EqualTo(1));
+                Assert.That(fakeType.Mehtods.Count, Is.EqualTo(6));
+                Assert.That(fakeType.Attributes, Is.Empty);
 
-				fakeType.Propertys.Add("Test", new DbAutoStaticPropertyInfoCache<long>("Test", fakeType.Type));
+                var refElement = fakeType.DefaultFactory();
+                var originalValue = new Users();
 
-				Assert.That(fakeType.Propertys.Count, Is.EqualTo(1));
-				Assert.That(fakeType.Mehtods.Count, Is.EqualTo(6));
-				Assert.That(fakeType.Attributes, Is.Empty);
+                Assert.That(refElement, Is.Not.Null.And.TypeOf(fakeType.Type));
 
-				var refElement = fakeType.DefaultFactory();
-				var originalValue = 12L;
+                var propTest = fakeType.Propertys["Test"];
+                Assert.That(propTest, Is.Not.Null);
+                propTest.Setter.Invoke(refElement, originalValue);
+                var propValue = propTest.Getter.Invoke(refElement);
+                Assert.That(propValue, Is.Not.Null.And.EqualTo(originalValue));
+            }, Throws.Nothing);
+        }
 
-				Assert.That(refElement, Is.Not.Null.And.TypeOf(fakeType.Type));
+        [Test]
+        public void FakeClassFunction()
+        {
+            var cache = new DbConfig(true);
+            Assert.That(() =>
+            {
+                var fakeType = cache.GetFake("FakeType");
 
-				var propTest = fakeType.Propertys["Test"];
-				Assert.That(propTest, Is.Not.Null);
-				propTest.Setter.Invoke(refElement, originalValue);
-				var propValue = propTest.Getter.Invoke(refElement);
-				Assert.That(propValue, Is.Not.Null.And.EqualTo(originalValue));
-			}, Throws.Nothing);
-		}
+                fakeType.Mehtods.Add(new FakeMethodInfoCache((e, g) => { return g[0] + (string) g[1]; }, "TestMethod"));
 
-		[Test]
-		public void FakeClassComplexProperty()
-		{
-			var cache = new DbConfig(true);
-			Assert.That(() =>
-			{
-				var fakeType = cache.GetFake("FakeType");
+                Assert.That(fakeType.Propertys, Is.Empty);
+                Assert.That(fakeType.Mehtods.Count, Is.EqualTo(7));
+                Assert.That(fakeType.Attributes, Is.Empty);
 
-				fakeType.Propertys.Add("Test", new DbAutoStaticPropertyInfoCache<Users>("Test", fakeType.Type));
+                var refElement = fakeType.DefaultFactory();
 
-				Assert.That(fakeType.Propertys.Count, Is.EqualTo(1));
-				Assert.That(fakeType.Mehtods.Count, Is.EqualTo(6));
-				Assert.That(fakeType.Attributes, Is.Empty);
+                Assert.That(refElement, Is.Not.Null.And.TypeOf(fakeType.Type));
 
-				var refElement = fakeType.DefaultFactory();
-				var originalValue = new Users();
+                var propTest = (FakeMethodInfoCache) fakeType.Mehtods.FirstOrDefault(s => s.MethodName == "TestMethod");
+                Assert.That(propTest, Is.Not.Null);
+                var invoke = propTest.Invoke(refElement, "This is ", "an Test");
+                Assert.That(invoke, Is.Not.Null.And.EqualTo("This is an Test"));
+            }, Throws.Nothing);
+        }
 
-				Assert.That(refElement, Is.Not.Null.And.TypeOf(fakeType.Type));
+        [Test]
+        public void FakeClassStructProperty()
+        {
+            var cache = new DbConfig(true);
+            Assert.That(() =>
+            {
+                var fakeType = cache.GetFake("FakeType");
 
-				var propTest = fakeType.Propertys["Test"];
-				Assert.That(propTest, Is.Not.Null);
-				propTest.Setter.Invoke(refElement, originalValue);
-				var propValue = propTest.Getter.Invoke(refElement);
-				Assert.That(propValue, Is.Not.Null.And.EqualTo(originalValue));
-			}, Throws.Nothing);
-		}
+                fakeType.Propertys.Add("Test", new DbAutoStaticPropertyInfoCache<long>("Test", fakeType.Type));
 
-		[Test]
-		public void FakeClassFunction()
-		{
-			var cache = new DbConfig(true);
-			Assert.That(() =>
-			{
-				var fakeType = cache.GetFake("FakeType");
+                Assert.That(fakeType.Propertys.Count, Is.EqualTo(1));
+                Assert.That(fakeType.Mehtods.Count, Is.EqualTo(6));
+                Assert.That(fakeType.Attributes, Is.Empty);
 
-				fakeType.Mehtods.Add(new FakeMethodInfoCache((e, g) =>
-				{
-					return g[0] + (string) g[1];
-				}, "TestMethod"));
+                var refElement = fakeType.DefaultFactory();
+                var originalValue = 12L;
 
-				Assert.That(fakeType.Propertys, Is.Empty);
-				Assert.That(fakeType.Mehtods.Count, Is.EqualTo(7));
-				Assert.That(fakeType.Attributes, Is.Empty);
+                Assert.That(refElement, Is.Not.Null.And.TypeOf(fakeType.Type));
 
-				var refElement = fakeType.DefaultFactory();
+                var propTest = fakeType.Propertys["Test"];
+                Assert.That(propTest, Is.Not.Null);
+                propTest.Setter.Invoke(refElement, originalValue);
+                var propValue = propTest.Getter.Invoke(refElement);
+                Assert.That(propValue, Is.Not.Null.And.EqualTo(originalValue));
+            }, Throws.Nothing);
+        }
 
-				Assert.That(refElement, Is.Not.Null.And.TypeOf(fakeType.Type));
+        [Test]
+        public void FakeCreation()
+        {
+            var cache = new DbConfig(true);
+            Assert.That(() =>
+            {
+                var fakeType = cache.GetFake("FakeType");
+                Assert.That(fakeType.Name, Is.Not.Null.And.EqualTo("FakeType"));
+                Assert.That(fakeType.Propertys, Is.Empty);
+                Assert.That(fakeType.Mehtods.Count, Is.EqualTo(6));
+                Assert.That(fakeType.Attributes, Is.Empty);
+            }, Throws.Nothing);
+        }
 
-				FakeMethodInfoCache propTest = (FakeMethodInfoCache)fakeType.Mehtods.FirstOrDefault(s => s.MethodName == "TestMethod");
-				Assert.That(propTest, Is.Not.Null);
-				var invoke = propTest.Invoke(refElement, "This is ", "an Test");
-				Assert.That(invoke, Is.Not.Null.And.EqualTo("This is an Test"));
-			}, Throws.Nothing);
-		}
-	}
+        [Test]
+        public void TestStructCreating()
+        {
+            var cache = new DbConfig(true);
+            cache.Include<StructCreating>();
+            Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
+        }
+    }
 }

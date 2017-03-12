@@ -11,6 +11,12 @@ namespace JPB.DataAccess.Tests
 {
     public class Manager : IManager
     {
+        private static readonly Dictionary<DbAccessType, IManager> _managers;
+
+        private StringBuilder _errorData;
+
+        private IManager _selectedMgr;
+
         static Manager()
         {
             _managers = new Dictionary<DbAccessType, IManager>();
@@ -23,34 +29,6 @@ namespace JPB.DataAccess.Tests
         {
             _errorData = new StringBuilder();
         }
-
-        private static Dictionary<DbAccessType, IManager> _managers;
-
-        public static void AddManager(DbAccessType type, IManager manager)
-        {
-            _managers.Add(type, manager);
-        }
-
-        public DbAccessType GetElementType()
-        {
-            _errorData.AppendLine("---------------------------------------------");
-            _errorData.AppendLine("Element type Lookup");
-            var customAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<CategoryAttribute>();
-            if (customAttribute.Name == "MsSQL")
-            {
-                _errorData.AppendLine("Found MsSQL");
-                return DbAccessType.MsSql;
-            }
-            else if (customAttribute.Name == "SqLite")
-            {
-                _errorData.AppendLine("Found SqLite");
-                return DbAccessType.SqLite;
-            }
-            _errorData.AppendLine("Found NON ERROR");
-            return DbAccessType.Unknown;
-        }
-
-        private IManager _selectedMgr;
 
         public DbAccessLayer GetWrapper(DbAccessType type)
         {
@@ -96,7 +74,7 @@ namespace JPB.DataAccess.Tests
             };
 
             Assert.NotNull(expectWrapper, "This test cannot run as no Database Variable is defined");
-            bool checkDatabase = expectWrapper.CheckDatabase();
+            var checkDatabase = expectWrapper.CheckDatabase();
             Assert.IsTrue(checkDatabase);
 
             expectWrapper.Config.ConstructorSettings.FileCollisonDetection = CollisonDetectionMode.Pessimistic;
@@ -109,19 +87,41 @@ namespace JPB.DataAccess.Tests
         public DbAccessType DbAccessType { get; }
         public string ConnectionString { get; }
 
-        private StringBuilder _errorData;
-
         public void FlushErrorData()
         {
             Console.WriteLine(_errorData.ToString());
             _errorData.Clear();
 
-            this._selectedMgr.FlushErrorData();
+            _selectedMgr.FlushErrorData();
         }
 
         public void Clear()
         {
             _selectedMgr.Clear();
+        }
+
+        public static void AddManager(DbAccessType type, IManager manager)
+        {
+            _managers.Add(type, manager);
+        }
+
+        public DbAccessType GetElementType()
+        {
+            _errorData.AppendLine("---------------------------------------------");
+            _errorData.AppendLine("Element type Lookup");
+            var customAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<CategoryAttribute>();
+            if (customAttribute.Name == "MsSQL")
+            {
+                _errorData.AppendLine("Found MsSQL");
+                return DbAccessType.MsSql;
+            }
+            if (customAttribute.Name == "SqLite")
+            {
+                _errorData.AppendLine("Found SqLite");
+                return DbAccessType.SqLite;
+            }
+            _errorData.AppendLine("Found NON ERROR");
+            return DbAccessType.Unknown;
         }
     }
 }
