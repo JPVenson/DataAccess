@@ -124,6 +124,7 @@
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\DefaultTransactionScope.cs" />
+    <Compile Include="AdoWrapper\EagarDataReader.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSql.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataConverterPager.cs" />
@@ -240,6 +241,7 @@
     <Compile Include="MetaApi\Model\AttributeInfoCache.cs" />
     <Compile Include="MetaApi\Model\ClassInfoCache.cs" />
     <Compile Include="MetaApi\Model\ConstructorInfoCache.cs" />
+    <Compile Include="MetaApi\Model\ConstructorStructFakeInfoCache.cs" />
     <Compile Include="MetaApi\Model\Equatable\AttributeEquatableComparer.cs" />
     <Compile Include="MetaApi\Model\Equatable\ClassInfoEquatableComparer.cs" />
     <Compile Include="MetaApi\Model\Equatable\ConstructorInfoCacheEquatableComparer.cs" />
@@ -247,6 +249,7 @@
     <Compile Include="MetaApi\Model\Equatable\PropertyEquatableComparer.cs" />
     <Compile Include="MetaApi\Model\MethodArgsInfoCache.cs" />
     <Compile Include="MetaApi\Model\MethodInfoCache.cs" />
+    <Compile Include="MetaApi\Model\PropertyHelper.cs" />
     <Compile Include="MetaApi\Model\PropertyInfoCache.cs" />
     <Compile Include="ModelsAnotations\ModelAnotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -266,6 +269,8 @@
     <Compile Include="Query\Operators\Conditional\ConditionalQuery.cs" />
     <Compile Include="Query\Operators\Conditional\CondtionBuilderState.cs" />
     <Compile Include="Query\Operators\Conditional\Operator.cs" />
+    <Compile Include="Query\Operators\CountElementsObjectSelector.cs" />
+    <Compile Include="Query\Operators\DeleteQuery.cs" />
     <Compile Include="Query\Operators\ElementProducer.cs" />
     <Compile Include="Query\Operators\Orders\OrderByColumn.cs" />
     <Compile Include="Query\Operators\Orders\OrderStatementQuery.cs" />

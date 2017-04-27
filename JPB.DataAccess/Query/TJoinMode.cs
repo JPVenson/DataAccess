@@ -1,15 +1,10 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+#region
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
+#endregion
 
 namespace JPB.DataAccess.Query
 {
@@ -19,18 +14,6 @@ namespace JPB.DataAccess.Query
 	// ReSharper disable once InconsistentNaming
 	public class TJoinMode : MsQueryBuilderExtentions.JoinMode
 	{
-#pragma warning disable 1591
-		public static readonly TJoinMode Left = new TJoinMode("LEFT");
-		public static readonly TJoinMode LeftOuter = new TJoinMode("LEFT OUTER");
-		public static readonly TJoinMode Right = new TJoinMode("RIGHT");
-		public static readonly TJoinMode RightOuter = new TJoinMode("RIGHT OUTER");
-		public static readonly TJoinMode Inner = new TJoinMode("INNER");
-		public static readonly TJoinMode Outer = new TJoinMode("OUTER");
-		public static readonly TJoinMode Cross = new TJoinMode("CROSS");
-		public static readonly TJoinMode Full = new TJoinMode("FULL");
-		public static readonly TJoinMode FullOuter = new TJoinMode("FULL OUTER");
-		public static readonly TJoinMode Self = new TJoinMode("SELF");
-#pragma warning restore 1591
 		private static IEnumerable<TJoinMode> _joints;
 
 		private TJoinMode(string joinType)
@@ -54,25 +37,38 @@ namespace JPB.DataAccess.Query
 					.Cast<TJoinMode>();
 			return _joints;
 		}
+#pragma warning disable 1591
+		public static readonly TJoinMode Left = new TJoinMode("LEFT");
+		public static readonly TJoinMode LeftOuter = new TJoinMode("LEFT OUTER");
+		public static readonly TJoinMode Right = new TJoinMode("RIGHT");
+		public static readonly TJoinMode RightOuter = new TJoinMode("RIGHT OUTER");
+		public static readonly TJoinMode Inner = new TJoinMode("INNER");
+		public static readonly TJoinMode Outer = new TJoinMode("OUTER");
+		public static readonly TJoinMode Cross = new TJoinMode("CROSS");
+		public static readonly TJoinMode Full = new TJoinMode("FULL");
+		public static readonly TJoinMode FullOuter = new TJoinMode("FULL OUTER");
+		public static readonly TJoinMode Self = new TJoinMode("SELF");
+#pragma warning restore 1591
 	}
 
 	/// <summary>
-	/// Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the QueryCommand Builder
+	///     Apply modes for TSQL. This is an helper method that can be used to create APPLYs by using the QueryCommand Builder
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Query.MsQueryBuilderExtentions.ApplyMode" />
 	public class TApplyMode : MsQueryBuilderExtentions.ApplyMode
 	{
 		/// <summary>
-		/// Defines an TSQL Outer Apply statement
+		///     Defines an TSQL Outer Apply statement
 		/// </summary>
 		public static readonly TApplyMode Outer = new TApplyMode("OUTER APPLY");
+
 		/// <summary>
-		/// Defines an TSQL Cross Apply statement
+		///     Defines an TSQL Cross Apply statement
 		/// </summary>
 		public static readonly TApplyMode Cross = new TApplyMode("CROSS APPLY");
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TApplyMode"/> class.
+		///     Initializes a new instance of the <see cref="TApplyMode" /> class.
 		/// </summary>
 		/// <param name="applyType">Type of the apply.</param>
 		public TApplyMode(string applyType)

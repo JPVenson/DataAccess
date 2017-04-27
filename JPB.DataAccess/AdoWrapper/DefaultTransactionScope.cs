@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region
+
+using System;
 using JPB.DataAccess.Contacts;
+
+#endregion
 
 namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
-	/// Defines a new Transaction Scope where all changes to a local DB can be Rejected and Reverted
+	///     Defines a new Transaction Scope where all changes to a local DB can be Rejected and Reverted
 	/// </summary>
 	/// <seealso cref="System.IDisposable" />
 	public class DefaultTransactionScope : IDisposable
@@ -16,7 +16,7 @@ namespace JPB.DataAccess.AdoWrapper
 		private readonly IDatabase _db;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultTransactionScope"/> class.
+		///     Initializes a new instance of the <see cref="DefaultTransactionScope" /> class.
 		/// </summary>
 		/// <param name="db">The database.</param>
 		public DefaultTransactionScope(IDatabase db)
@@ -25,7 +25,7 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>
 		public void Dispose()
 		{

@@ -1,8 +1,12 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model;
+
+#endregion
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
@@ -22,7 +26,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			var argAdd = new List<object>();
 			argAdd.Add(target);
-			argAdd.AddRange(new object[] { param.ToArray() });
+			argAdd.AddRange(new object[] {param.ToArray()});
 			var argList = argAdd.ToArray();
 			return base.Invoke(_property, argList);
 		}

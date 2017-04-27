@@ -1,24 +1,12 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+#region
 
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
-using JPB.DataAccess.Contacts;
-using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -28,15 +16,17 @@ using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.Operators.Orders;
 
+#endregion
+
 namespace JPB.DataAccess.Query
 {
 	/// <summary>
-	/// Provieds A set of extentions for Microsoft SQL Serve
+	///     Provieds A set of extentions for Microsoft SQL Serve
 	/// </summary>
 	public static class MsQueryBuilderExtentions
 	{
 		/// <summary>
-		/// Sets an Variable to the given value
+		///     Sets an Variable to the given value
 		/// </summary>
 		/// <param name="query">The query.</param>
 		/// <param name="name">The name.</param>
@@ -54,7 +44,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Declares a new Variable of the Given SQL Type by using its length
+		///     Declares a new Variable of the Given SQL Type by using its length
 		/// </summary>
 		/// <param name="query">The query.</param>
 		/// <param name="name">The name.</param>
@@ -62,16 +52,15 @@ namespace JPB.DataAccess.Query
 		/// <param name="length">The length.</param>
 		/// <param name="value">The value.</param>
 		/// <returns></returns>
-		public static RootQuery DeclareVariable(this RootQuery query, string name, SqlDbType type, int length = int.MaxValue, object value = null)
+		public static RootQuery DeclareVariable(this RootQuery query, string name, SqlDbType type, int length = int.MaxValue,
+			object value = null)
 		{
 			var sqlName = name;
 			if (!sqlName.StartsWith("@"))
 				sqlName = "@" + sqlName;
 			var typeName = type.ToString();
 			if (new SqlParameter("xxx", type).Size > 0)
-			{
 				typeName = "(MAX)";
-			}
 
 			query.QueryText("DECLARE {0} {1};", sqlName, typeName);
 			if (value != null)
@@ -80,7 +69,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates a Common Table Expression that selects a Specific type
+		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
 		/// <param name="query">The query.</param>
 		/// <param name="target">The target.</param>
@@ -103,7 +92,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
+		///     Creates a FOR XML statement that uses the name of the given type to allow the .net XML Serilizer to read the output
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="query">The query.</param>
@@ -111,11 +100,12 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ElementProducer<string> ForXml<TPoco>(this ElementProducer<TPoco> query, Type target)
 		{
-			return new ElementProducer<string>(query.QueryText("FOR XML PATH('{0}'),ROOT('ArrayOf{0}'), TYPE", target.Name), query.CurrentIdentifier);
+			return new ElementProducer<string>(query.QueryText("FOR XML PATH('{0}'),ROOT('ArrayOf{0}'), TYPE", target.Name),
+				query.CurrentIdentifier);
 		}
 
 		/// <summary>
-		/// Creates a Common Table Expression that selects a Specific type
+		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
 		/// <param name="query">The query.</param>
 		/// <param name="cteName">Name of the cte.</param>
@@ -131,13 +121,9 @@ namespace JPB.DataAccess.Query
 			var prefix = string.Empty;
 
 			if (lod is CteQueryPart || subCte)
-			{
 				prefix = string.Format(", {0} AS", cteName);
-			}
 			else
-			{
 				prefix = string.Format("WITH {0} AS ", cteName);
-			}
 
 			query.Add(new GenericQueryPart(prefix));
 			query.InBracket(cteAction);
@@ -147,7 +133,7 @@ namespace JPB.DataAccess.Query
 
 
 		/// <summary>
-		/// Creates a Common Table Expression that selects a Specific type
+		///     Creates a Common Table Expression that selects a Specific type
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <typeparam name="TN">The type of the n.</typeparam>
@@ -163,18 +149,18 @@ namespace JPB.DataAccess.Query
 			var prefix = string.Format("WITH {0} AS (", cteName);
 			cp.QueryText(prefix);
 			foreach (var genericQueryPart in query.ContainerObject.Parts)
-			{
 				cp.Add(genericQueryPart);
-			}
 
 			cp.Add(new CteQueryPart(")"));
 			return new ElementProducer<TN>(cp.QueryText(string.Format("SELECT {1} FROM {0}", cteName,
-				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TN)).GetSchemaMapping().Aggregate((e, f) => e + ", " + f))), query.CurrentIdentifier);
+				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TN))
+					.GetSchemaMapping()
+					.Aggregate((e, f) => e + ", " + f))), query.CurrentIdentifier);
 		}
 
 
 		/// <summary>
-		/// Creates an closed sub select
+		///     Creates an closed sub select
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
@@ -191,21 +177,22 @@ namespace JPB.DataAccess.Query
 		}
 
 
-
 		/// <summary>
-		/// Creates a QueryCommand that uses the * Operator to select all date from the inner query
+		///     Creates a QueryCommand that uses the * Operator to select all date from the inner query
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
 		/// <returns></returns>
 		public static SelectQuery<T> SelectStar<T>(this RootQuery query)
 		{
-			return new SelectQuery<T>(query.QueryText("SELECT * FROM " + query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)).TableName));
+			return
+				new SelectQuery<T>(
+					query.QueryText("SELECT * FROM " + query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)).TableName));
 		}
 
 		/// <summary>
-		/// Adds a between statement followed by a query defined in <paramref name="valA" /> folowed by an and statement and
-		/// an secound query defined in the <paramref name="valB" />
+		///     Adds a between statement followed by a query defined in <paramref name="valA" /> folowed by an and statement and
+		///     an secound query defined in the <paramref name="valB" />
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
@@ -226,7 +213,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates an TSQL Apply statement
+		///     Creates an TSQL Apply statement
 		/// </summary>
 		/// <param name="query">The query.</param>
 		/// <param name="mode">The mode.</param>
@@ -243,7 +230,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates an TSQL Apply statement
+		///     Creates an TSQL Apply statement
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
@@ -259,7 +246,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Append an AS part
+		///     Append an AS part
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
@@ -271,7 +258,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Append an Contains part
+		///     Append an Contains part
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
@@ -279,11 +266,13 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ConditionalEvalQuery<T> Contains<T>(this ConditionalColumnQuery<T> query, object alias)
 		{
-			return new ConditionalEvalQuery<T>(query.QueryQ("CONTAINS (@Cont_A{0})", new QueryParameter("@Cont_A", alias, alias.GetType())), query.State);
+			return
+				new ConditionalEvalQuery<T>(
+					query.QueryQ("CONTAINS (@Cont_A{0})", new QueryParameter("@Cont_A", alias, alias.GetType())), query.State);
 		}
 
 		/// <summary>
-		/// Append an RowNumberOrder part
+		///     Append an RowNumberOrder part
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
@@ -296,7 +285,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Adds a LEFT JOIN to the Statement
+		///     Adds a LEFT JOIN to the Statement
 		/// </summary>
 		/// <typeparam name="TLeft">The type of the left.</typeparam>
 		/// <typeparam name="TRight">The type of the right.</typeparam>
@@ -304,7 +293,8 @@ namespace JPB.DataAccess.Query
 		/// <param name="query">The query.</param>
 		/// <param name="mode">The mode.</param>
 		/// <returns></returns>
-		public static ElementProducer<TAggregation> Join<TLeft, TRight, TAggregation>(this ElementProducer<TLeft> query, string mode = null)
+		public static ElementProducer<TAggregation> Join<TLeft, TRight, TAggregation>(this ElementProducer<TLeft> query,
+			string mode = null)
 		{
 			if (mode == null)
 				mode = "";
@@ -314,11 +304,14 @@ namespace JPB.DataAccess.Query
 			var targetPK = accessLayer.GetClassInfo(typeof(TRight)).GetPK(query.ContainerObject.AccessLayer.Config);
 			var targetTable = accessLayer.GetClassInfo(typeof(TRight)).TableName;
 			var sourceTable = accessLayer.GetClassInfo(typeof(TLeft)).TableName;
-			return new ElementProducer<TAggregation>(query.QueryText("{4} JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable, mode), query.CurrentIdentifier);
+			return
+				new ElementProducer<TAggregation>(
+					query.QueryText("{4} JOIN {0} ON {0}.{1} = {3}.{2}", targetTable, targetPK, sourcePK, sourceTable, mode),
+					query.CurrentIdentifier);
 		}
 
 		/// <summary>
-		/// Adds a JOIN to the Statement
+		///     Adds a JOIN to the Statement
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <typeparam name="TE">The type of the e.</typeparam>
@@ -332,7 +325,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Inserts a TOP statement
+		///     Inserts a TOP statement
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="query">The query.</param>
@@ -344,7 +337,10 @@ namespace JPB.DataAccess.Query
 			switch (query.ContainerObject.AccessLayer.Database.TargetDatabase)
 			{
 				case DbAccessType.MsSql:
-					return new SelectQuery<T>(query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "TOP " + top)));
+					return
+						new SelectQuery<T>(
+							query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
+								"TOP " + top)));
 				case DbAccessType.SqLite:
 				case DbAccessType.MySql:
 					var selectQuery = new SelectQuery<T>(
@@ -362,7 +358,7 @@ namespace JPB.DataAccess.Query
 		//}
 
 		/// <summary>
-		/// Creates an TSQL Count(1) statement
+		///     Creates an TSQL Count(1) statement
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="query">The query.</param>
@@ -374,7 +370,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates an TSQL Count(1) statement
+		///     Creates an TSQL Count(1) statement
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="query">The query.</param>
@@ -385,7 +381,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates an TSQL Count(1) statement
+		///     Creates an TSQL Count(1) statement
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="query">The query.</param>
@@ -396,7 +392,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates an TSQL Count(1) statement
+		///     Creates an TSQL Count(1) statement
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="query">The query.</param>
@@ -407,7 +403,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates an TSQL Count(1) statement
+		///     Creates an TSQL Count(1) statement
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <typeparam name="TOut">The type of the out.</typeparam>
@@ -417,24 +413,18 @@ namespace JPB.DataAccess.Query
 		{
 			var cteName = "countCte" + query.ContainerObject.GetNextParameterId();
 			return new ElementProducer<TOut>(new RootQuery(query.ContainerObject.AccessLayer)
-				.WithCte(cteName, (f) =>
+				.WithCte(cteName, f =>
 				{
 					var order = false;
 					foreach (var genericQueryPart in query.ContainerObject.Parts)
 					{
 						var partType = genericQueryPart.Builder != null ? genericQueryPart.Builder.GetType() : null;
 						if (partType != null && order)
-						{
 							if (partType != typeof(OrderByColumn<TPoco>) && partType != typeof(OrderStatementQuery<TPoco>))
-							{
 								order = false;
-							}
-						}
 
 						if (genericQueryPart.Prefix == "ORDER BY")
-						{
 							order = true;
-						}
 						if (!order)
 							f.Add(genericQueryPart);
 					}
@@ -442,7 +432,7 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Creates an TSQL OrderBy statment
+		///     Creates an TSQL OrderBy statment
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="query">The query.</param>
@@ -450,11 +440,12 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ConditionalQuery<TPoco> OrderBy<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over), new CondtionBuilderState(query.CurrentIdentifier));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", over),
+				new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		/// <summary>
-		/// Creates an TSQL OrderBy statment
+		///     Creates an TSQL OrderBy statment
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <typeparam name="TE">The type of the e.</typeparam>
@@ -462,13 +453,15 @@ namespace JPB.DataAccess.Query
 		/// <param name="columnName">Name of the column.</param>
 		/// <param name="desc">if set to <c>true</c> [desc].</param>
 		/// <returns></returns>
-		public static ConditionalQuery<TPoco> OrderBy<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
+		public static ConditionalQuery<TPoco> OrderBy<TPoco, TE>(this ElementProducer<TPoco> query,
+			Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState(query.CurrentIdentifier));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()),
+				new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		/// <summary>
-		/// Creates an TSQL OrderBy statment
+		///     Creates an TSQL OrderBy statment
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="query">The query.</param>
@@ -476,11 +469,12 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco>(this ElementProducer<TPoco> query, string over)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over), new CondtionBuilderState(query.CurrentIdentifier));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", over),
+				new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		/// <summary>
-		/// Creates an TSQL OrderBy statment
+		///     Creates an TSQL OrderBy statment
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <typeparam name="TE">The type of the e.</typeparam>
@@ -488,18 +482,19 @@ namespace JPB.DataAccess.Query
 		/// <param name="columnName">Name of the column.</param>
 		/// <param name="desc">if set to <c>true</c> [desc].</param>
 		/// <returns></returns>
-		public static ConditionalQuery<TPoco> OrderByDesc<TPoco, TE>(this ElementProducer<TPoco> query, Expression<Func<TPoco, TE>> columnName, bool desc = false)
+		public static ConditionalQuery<TPoco> OrderByDesc<TPoco, TE>(this ElementProducer<TPoco> query,
+			Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()), new CondtionBuilderState(query.CurrentIdentifier));
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()),
+				new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
 		/// <summary>
-		///
 		/// </summary>
 		public abstract class JoinMode
 		{
 			/// <summary>
-			/// Initializes a new instance of the <see cref="JoinMode" /> class.
+			///     Initializes a new instance of the <see cref="JoinMode" /> class.
 			/// </summary>
 			/// <param name="joinType">Type of the join.</param>
 			internal JoinMode(string joinType)
@@ -508,21 +503,20 @@ namespace JPB.DataAccess.Query
 			}
 
 			/// <summary>
-			/// QueryCommand string
+			///     QueryCommand string
 			/// </summary>
 			/// <value>
-			/// The type of the join.
+			///     The type of the join.
 			/// </value>
 			public string JoinType { get; private set; }
 		}
 
 		/// <summary>
-		///
 		/// </summary>
 		public abstract class ApplyMode
 		{
 			/// <summary>
-			/// Initializes a new instance of the <see cref="ApplyMode" /> class.
+			///     Initializes a new instance of the <see cref="ApplyMode" /> class.
 			/// </summary>
 			/// <param name="applyType">Type of the apply.</param>
 			internal ApplyMode(string applyType)
@@ -531,10 +525,10 @@ namespace JPB.DataAccess.Query
 			}
 
 			/// <summary>
-			/// QueryCommand string
+			///     QueryCommand string
 			/// </summary>
 			/// <value>
-			/// The type of the apply.
+			///     The type of the apply.
 			/// </value>
 			public string ApplyType { get; private set; }
 		}

@@ -1,11 +1,4 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+#region
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +8,8 @@ using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Query.Contracts;
+
+#endregion
 
 namespace JPB.DataAccess.Query
 {
@@ -61,10 +56,10 @@ namespace JPB.DataAccess.Query
 		public IEnumerable<IQueryParameter> QueryParameters { get; set; }
 
 		/// <summary>
-		/// Gets the Query builder element.
+		///     Gets the Query builder element.
 		/// </summary>
 		/// <value>
-		/// The builder.
+		///     The builder.
 		/// </value>
 		public IQueryBuilder Builder
 		{
@@ -80,7 +75,8 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and parameter
+		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and
+		///     parameter
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="builder"></param>
@@ -118,7 +114,7 @@ namespace JPB.DataAccess.Query
 			{
 				sb.AppendInterlacedLine("{")
 					.Up();
-				foreach (QueryParameter queryParameter in QueryParameters.Cast<QueryParameter>())
+				foreach (var queryParameter in QueryParameters.Cast<QueryParameter>())
 				{
 					queryParameter.Render(sb);
 					sb.AppendLine(",");

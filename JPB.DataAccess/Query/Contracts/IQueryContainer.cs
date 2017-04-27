@@ -1,29 +1,31 @@
-﻿using System;
-using System.Collections;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Manager;
 
+#endregion
+
 namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
-	///
 	/// </summary>
 	public interface IQueryContainer
 	{
 		/// <summary>
-		///		Declares the Return type that is awaited
+		///     Declares the Return type that is awaited
 		/// </summary>
 		Type ForType { get; set; }
 
 		/// <summary>
-		///		Gets the current number of used SQL Arguments
+		///     Gets the current number of used SQL Arguments
 		/// </summary>
 		int AutoParameterCounter { get; }
 
 		/// <summary>
-		///		Defines all elements added by the Add Method
+		///     Defines all elements added by the Add Method
 		/// </summary>
 		List<GenericQueryPart> Parts { get; }
 
@@ -38,7 +40,7 @@ namespace JPB.DataAccess.Query.Contracts
 		bool AllowParamterRenaming { get; set; }
 
 		/// <summary>
-		///		Access to the underlying AccessLayer
+		///     Access to the underlying AccessLayer
 		/// </summary>
 		DbAccessLayer AccessLayer { get; }
 
@@ -47,6 +49,7 @@ namespace JPB.DataAccess.Query.Contracts
 		/// </summary>
 		/// <returns></returns>
 		IDbCommand Compile();
+
 		/// <summary>
 		///     Increment the counter +1 and return the value
 		/// </summary>
@@ -60,7 +63,7 @@ namespace JPB.DataAccess.Query.Contracts
 		Tuple<string, IEnumerable<IQueryParameter>> CompileFlat();
 
 		/// <summary>
-		/// Clones this Container
+		///     Clones this Container
 		/// </summary>
 		/// <returns></returns>
 		IQueryContainer Clone();

@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.DbCollection;
@@ -7,260 +9,244 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using Users = JPB.DataAccess.Tests.Base.Users;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    public class CheckWrapperBaseTests : BaseTest
-    {
-        public CheckWrapperBaseTests(DbAccessType type) : base(type)
-        {
-        }
+	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	public class CheckWrapperBaseTests : BaseTest
+	{
+		public CheckWrapperBaseTests(DbAccessType type) : base(type)
+		{
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void AutoGenFactoryTestNullableSimple()
-        {
-            _dbAccess.Insert(new UsersAutoGenerateNullableConstructor());
-            var elements = _dbAccess.Select<UsersAutoGenerateNullableConstructor>();
-            Assert.IsNotNull(elements);
-            Assert.IsNotEmpty(elements);
-        }
+		[Test]
+		public void AutoGenFactoryTestNullableSimple()
+		{
+			DbAccess.Insert(new UsersAutoGenerateNullableConstructor());
+			var elements = DbAccess.Select<UsersAutoGenerateNullableConstructor>();
+			Assert.IsNotNull(elements);
+			Assert.IsNotEmpty(elements);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void AutoGenFactoryTestSimple()
-        {
-            _dbAccess.Insert(new UsersAutoGenerateConstructor());
-            var elements = _dbAccess.Select<UsersAutoGenerateConstructor>();
-            Assert.IsNotNull(elements);
-            Assert.IsNotEmpty(elements);
-        }
+		[Test]
+		public void AutoGenFactoryTestSimple()
+		{
+			DbAccess.Insert(new UsersAutoGenerateConstructor());
+			var elements = DbAccess.Select<UsersAutoGenerateConstructor>();
+			Assert.IsNotNull(elements);
+			Assert.IsNotEmpty(elements);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        public void AutoGenFactoryTestXmlMulti()
-        {
-            if (_dbAccess.DbAccessType != DbAccessType.MsSql)
-                return;
+		[Test]
+		public void AutoGenFactoryTestXmlMulti()
+		{
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+				return;
 
-            _dbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
-            _dbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
-            _dbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 
-            var elements = _dbAccess.Query()
-                .QueryText("SELECT")
-                .QueryText("res." + UsersMeta.PrimaryKeyName)
-                .QueryText(",res." + UsersMeta.ContentName)
-                .QueryText(",")
-                .InBracket(
-                    s =>
-                        s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
-                            .ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
-                .QueryText("AS Subs")
-                .QueryText("FROM")
-                .QueryText(UsersMeta.TableName)
-                .QueryText("AS res")
-                .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
+			var elements = DbAccess.Query()
+				.QueryText("SELECT")
+				.QueryText("res." + UsersMeta.PrimaryKeyName)
+				.QueryText(",res." + UsersMeta.ContentName)
+				.QueryText(",")
+				.InBracket(
+					s =>
+						s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
+							.ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+				.QueryText("AS Subs")
+				.QueryText("FROM")
+				.QueryText(UsersMeta.TableName)
+				.QueryText("AS res")
+				.ForResult<UsersAutoGenerateConstructorWithMultiXml>();
 
-            var result = elements.ToArray();
+			var result = elements.ToArray();
 
-            Assert.IsNotNull(result);
-            Assert.IsNotEmpty(result);
-        }
+			Assert.IsNotNull(result);
+			Assert.IsNotEmpty(result);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        public void AutoGenFactoryTestXmlSingle()
-        {
-            if (_dbAccess.DbAccessType != DbAccessType.MsSql)
-                return;
+		[Test]
+		public void AutoGenFactoryTestXmlSingle()
+		{
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+				return;
 
 
-            _dbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 
-            var query = _dbAccess.Query()
-                .QueryText("SELECT")
-                .QueryText("res." + UsersMeta.PrimaryKeyName)
-                .QueryText(",res." + UsersMeta.ContentName)
-                .QueryText(",")
-                .InBracket(s =>
-                    s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
-                        .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
-                .QueryText("AS Sub")
-                .QueryText("FROM")
-                .QueryText(UsersMeta.TableName)
-                .QueryText("AS res");
-            var elements =
-                query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
+			var query = DbAccess.Query()
+				.QueryText("SELECT")
+				.QueryText("res." + UsersMeta.PrimaryKeyName)
+				.QueryText(",res." + UsersMeta.ContentName)
+				.QueryText(",")
+				.InBracket(s =>
+					s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
+						.ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+				.QueryText("AS Sub")
+				.QueryText("FROM")
+				.QueryText(UsersMeta.TableName)
+				.QueryText("AS res");
+			var elements =
+				query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
 
-            var result = elements.ToArray();
+			var result = elements.ToArray();
 
-            Assert.IsNotNull(result);
-            Assert.IsNotEmpty(result);
-        }
+			Assert.IsNotNull(result);
+			Assert.IsNotEmpty(result);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void CheckFactory()
-        {
-            DataMigrationHelper.AddUsers(1, _dbAccess);
-            Assert.That(() => _dbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
+		[Test]
+		public void CheckFactory()
+		{
+			DataMigrationHelper.AddUsers(1, DbAccess);
+			Assert.That(() => DbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
-            var testInsertName = Guid.NewGuid().ToString();
-            Users_StaticQueryFactoryForSelect testUser = null;
-            Assert.That(
-                () =>
-                    testUser =
-                        _dbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect {UserName = testInsertName}),
-                Is.Not.Null
-                    .And.Property("UserId").Not.EqualTo(0));
+			var testInsertName = Guid.NewGuid().ToString();
+			Users_StaticQueryFactoryForSelect testUser = null;
+			Assert.That(
+				() =>
+					testUser =
+						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect {UserName = testInsertName}),
+				Is.Not.Null
+					.And.Property("UserId").Not.EqualTo(0));
 
-            var selTestUser = _dbAccess.Select<Users_StaticQueryFactoryForSelect>(testUser.UserId);
-            Assert.AreEqual(selTestUser.UserName, testUser.UserName);
-            Assert.AreEqual(selTestUser.UserId, testUser.UserId);
-        }
+			var selTestUser = DbAccess.Select<Users_StaticQueryFactoryForSelect>(testUser.UserId);
+			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
+			Assert.AreEqual(selTestUser.UserId, testUser.UserId);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void CheckFactoryWithArguments()
-        {
-            DataMigrationHelper.AddUsers(1, _dbAccess);
-            Assert.That(() => _dbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
+		[Test]
+		public void CheckFactoryWithArguments()
+		{
+			DataMigrationHelper.AddUsers(1, DbAccess);
+			Assert.That(() => DbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
-            var testInsertName = Guid.NewGuid().ToString();
-            Users_StaticQueryFactoryForSelect testUser = null;
-            Assert.That(
-                () =>
-                    testUser =
-                        _dbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect {UserName = testInsertName}),
-                Is.Not.Null
-                    .And.Property("UserId").Not.EqualTo(0));
+			var testInsertName = Guid.NewGuid().ToString();
+			Users_StaticQueryFactoryForSelect testUser = null;
+			Assert.That(
+				() =>
+					testUser =
+						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect {UserName = testInsertName}),
+				Is.Not.Null
+					.And.Property("UserId").Not.EqualTo(0));
 
-            var selTestUser =
-                _dbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] {testUser.UserId})
-                    .FirstOrDefault();
-            Assert.That(selTestUser, Is.Not.Null
-                .And.Property("UserName").EqualTo(testUser.UserName)
-                .And.Property("UserId").EqualTo(testUser.UserId));
-        }
+			var selTestUser =
+				DbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] {testUser.UserId})
+					.FirstOrDefault();
+			Assert.That(selTestUser, Is.Not.Null
+				.And.Property("UserName").EqualTo(testUser.UserName)
+				.And.Property("UserId").EqualTo(testUser.UserId));
+		}
 
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void ExecuteGenericCommand()
-        {
-            var resultSelect1 = _dbAccess.ExecuteGenericCommand("Select 10", null);
-            Assert.AreEqual(resultSelect1, -1);
+		[Test]
+		public void ExecuteGenericCommand()
+		{
+			var resultSelect1 = DbAccess.ExecuteGenericCommand("Select 10", null);
+			Assert.AreEqual(resultSelect1, -1);
 
-            resultSelect1 = _dbAccess.ExecuteGenericCommand("SELECT @test", new {test = 10});
-            Assert.AreEqual(resultSelect1, -1);
+			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test", new {test = 10});
+			Assert.AreEqual(resultSelect1, -1);
 
-            resultSelect1 = _dbAccess.ExecuteGenericCommand("SELECT @test",
-                new List<QueryParameter> {new QueryParameter("test", 10)});
-            Assert.AreEqual(resultSelect1, -1);
-        }
+			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test",
+				new List<QueryParameter> {new QueryParameter("test", 10)});
+			Assert.AreEqual(resultSelect1, -1);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void GeneratedTest()
-        {
-            _dbAccess.Insert(new GeneratedUsers());
-            var elements = _dbAccess.Select<GeneratedUsers>();
-            Assert.IsNotNull(elements);
-            Assert.IsNotEmpty(elements);
-        }
+		[Test]
+		public void GeneratedTest()
+		{
+			DbAccess.Insert(new GeneratedUsers());
+			var elements = DbAccess.Select<GeneratedUsers>();
+			Assert.IsNotNull(elements);
+			Assert.IsNotEmpty(elements);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void MarsTest()
-        {
-            DataMigrationHelper.AddUsers(100, _dbAccess);
+		[Test]
+		public void MarsTest()
+		{
+			DataMigrationHelper.AddUsers(100, DbAccess);
 
-            var baseQuery = _dbAccess.Query().Select.Table<Users>();
-            var queryA = baseQuery.ContainerObject.Compile();
-            var queryB = baseQuery.ContainerObject.Compile();
-            Assert.IsNotNull(queryA);
-            Assert.IsNotNull(queryB);
+			var baseQuery = DbAccess.Query().Select.Table<Users>();
+			var queryA = baseQuery.ContainerObject.Compile();
+			var queryB = baseQuery.ContainerObject.Compile();
+			Assert.IsNotNull(queryA);
+			Assert.IsNotNull(queryB);
 
-            var marsCommand = _dbAccess.Database.MergeCommands(queryA, queryB, true);
-            var returnValue = _dbAccess.ExecuteMARS(marsCommand, typeof(Users), typeof(Users));
-            Assert.IsNotNull(returnValue);
-            Assert.AreNotSame(returnValue.Count, 0);
+			var marsCommand = DbAccess.Database.MergeCommands(queryA, queryB, true);
+			var returnValue = DbAccess.ExecuteMARS(marsCommand, typeof(Users), typeof(Users));
+			Assert.IsNotNull(returnValue);
+			Assert.AreNotSame(returnValue.Count, 0);
 
-            var queryAResult = returnValue.ElementAt(0);
-            var queryBResult = returnValue.ElementAt(1);
-            Assert.AreNotSame(queryAResult.Count, 0);
-            Assert.AreEqual(queryAResult.Count, queryBResult.Count);
+			var queryAResult = returnValue.ElementAt(0);
+			var queryBResult = returnValue.ElementAt(1);
+			Assert.AreNotSame(queryAResult.Count, 0);
+			Assert.AreEqual(queryAResult.Count, queryBResult.Count);
 
-            var refCall = _dbAccess.Select<Users>();
-            Assert.AreEqual(refCall.Length, queryAResult.Count);
-        }
+			var refCall = DbAccess.Select<Users>();
+			Assert.AreEqual(refCall.Length, queryAResult.Count);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void SyncCollectionTest()
-        {
-            DataMigrationHelper.AddUsers(100, _dbAccess);
+		[Test]
+		public void SyncCollectionTest()
+		{
+			DataMigrationHelper.AddUsers(100, DbAccess);
 
-            DbCollection<Users_Col> dbCollection = null;
-            Assert.That(() => dbCollection = _dbAccess.CreateDbCollection<Users_Col>(), Throws.Nothing);
-            Assert.That(dbCollection, Is.Not.Empty);
-            Assert.That(dbCollection.Count, Is.EqualTo(100));
+			DbCollection<Users_Col> dbCollection = null;
+			Assert.That(() => dbCollection = DbAccess.CreateDbCollection<Users_Col>(), Throws.Nothing);
+			Assert.That(dbCollection, Is.Not.Empty);
+			Assert.That(dbCollection.Count, Is.EqualTo(100));
 
-            Assert.That(() => dbCollection.Add(new Users_Col()), Throws.Nothing);
-            Assert.That(dbCollection.Count, Is.EqualTo(101));
+			Assert.That(() => dbCollection.Add(new Users_Col()), Throws.Nothing);
+			Assert.That(dbCollection.Count, Is.EqualTo(101));
 
-            Assert.That(() => dbCollection.SaveChanges(_dbAccess), Throws.Nothing);
-            Assert.That(() => _dbAccess.Select<Users_Col>().Length, Is.EqualTo(101));
+			Assert.That(() => dbCollection.SaveChanges(DbAccess), Throws.Nothing);
+			Assert.That(() => DbAccess.Select<Users_Col>().Length, Is.EqualTo(101));
 
-            Assert.That(() => dbCollection.Remove(dbCollection.First()), Throws.Nothing);
-            Assert.That(dbCollection.Count, Is.EqualTo(100));
+			Assert.That(() => dbCollection.Remove(dbCollection.First()), Throws.Nothing);
+			Assert.That(dbCollection.Count, Is.EqualTo(100));
 
-            Assert.That(() => dbCollection.SaveChanges(_dbAccess), Throws.Nothing);
-            Assert.That(() => _dbAccess.Select<Users_Col>().Length, Is.EqualTo(100));
+			Assert.That(() => dbCollection.SaveChanges(DbAccess), Throws.Nothing);
+			Assert.That(() => DbAccess.Select<Users_Col>().Length, Is.EqualTo(100));
 
-            var user25 = dbCollection[25];
-            user25.UserName = Guid.NewGuid().ToString();
+			var user25 = dbCollection[25];
+			user25.UserName = Guid.NewGuid().ToString();
 
-            Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Changed));
-            Assert.That(() => dbCollection.SaveChanges(_dbAccess), Throws.Nothing);
-            Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Unchanged));
+			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Changed));
+			Assert.That(() => dbCollection.SaveChanges(DbAccess), Throws.Nothing);
+			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Unchanged));
 
-            Assert.That(() => _dbAccess.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
-                .Property("User_ID").EqualTo(user25.User_ID)
-                .And
-                .Property("UserName").EqualTo(user25.UserName));
-        }
+			Assert.That(() => DbAccess.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
+				.Property("User_ID").EqualTo(user25.User_ID)
+				.And
+				.Property("UserName").EqualTo(user25.UserName));
+		}
 
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void TransactionTest()
-        {
-            DataMigrationHelper.AddUsers(250, _dbAccess);
-            var count =
-                _dbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+		[Test]
+		public void TransactionTest()
+		{
+			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
-            _dbAccess.Database.RunInTransaction(dd =>
-            {
-                _dbAccess.Delete<Users>();
-                dd.TransactionRollback();
-            });
+			DataMigrationHelper.AddUsers(250, DbAccess);
+			var count =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 
-            var countAfter =
-                _dbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
-            Assert.That(count, Is.EqualTo(countAfter));
-        }
-    }
+			DbAccess.Database.RunInTransaction(dd =>
+			{
+				DbAccess.Delete<Users>();
+				dd.TransactionRollback();
+			});
+
+			var countAfter =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			Assert.That(count, Is.EqualTo(countAfter));
+		}
+	}
 }

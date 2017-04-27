@@ -1,7 +1,6 @@
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Trigger.ITriggerForTableCollectionInternalUsage{TEntity}" />
@@ -9,12 +8,12 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		: ITriggerForTableCollectionInternalUsage<TEntity>
 	{
 		/// <summary>
-		/// The table
+		///     The table
 		/// </summary>
 		private readonly LocalDbRepository<TEntity> _table;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TriggerForTableCollection{TEntity}"/> class.
+		///     Initializes a new instance of the <see cref="TriggerForTableCollection{TEntity}" /> class.
 		/// </summary>
 		/// <param name="table">The table.</param>
 		internal TriggerForTableCollection(LocalDbRepository<TEntity> table)
@@ -25,26 +24,26 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		}
 
 		/// <summary>
-		/// Should the trigger also trigger when a XML set is loaded
+		///     Should the trigger also trigger when a XML set is loaded
 		/// </summary>
 		/// <value>
-		/// The with replication.
+		///     The with replication.
 		/// </value>
 		public IReplicationNode<TEntity> WithReplication { get; private set; }
 
 		/// <summary>
-		/// Should the trigger only trigger due to normal usage
+		///     Should the trigger only trigger due to normal usage
 		/// </summary>
 		/// <value>
-		/// The not for replication.
+		///     The not for replication.
 		/// </value>
 		public IReplicationNode<TEntity> NotForReplication { get; private set; }
 
 		/// <summary>
-		/// Gets for.
+		///     Gets for.
 		/// </summary>
 		/// <value>
-		/// For.
+		///     For.
 		/// </value>
 		public ISequentialTriggerCollection<TEntity> For
 		{
@@ -57,10 +56,10 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		}
 
 		/// <summary>
-		/// Gets the after.
+		///     Gets the after.
 		/// </summary>
 		/// <value>
-		/// The after.
+		///     The after.
 		/// </value>
 		public virtual ISequentialTriggerCollection<TEntity> After
 		{
@@ -73,10 +72,10 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		}
 
 		/// <summary>
-		/// Gets the instead of collection.
+		///     Gets the instead of collection.
 		/// </summary>
 		/// <value>
-		/// The instead of.
+		///     The instead of.
 		/// </value>
 		public virtual ITriggerInsteadtOfCollection<TEntity> InsteadOf
 		{
@@ -86,9 +85,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 					return TriggerInsteadtOfCollection<TEntity>.Empty();
 
 				if (_table.IsMigrating)
-				{
 					return WithReplication.InsteadOf;
-				}
 				return NotForReplication.InsteadOf;
 			}
 		}

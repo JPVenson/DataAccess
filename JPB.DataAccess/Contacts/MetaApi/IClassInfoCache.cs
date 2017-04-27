@@ -1,19 +1,13 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+﻿#region
 
 using System;
 using System.Collections.Generic;
 
+#endregion
+
 namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TProp"></typeparam>
 	/// <typeparam name="TAttr"></typeparam>
@@ -27,14 +21,6 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="anon"></param>
-		/// <returns></returns>
-		IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false);
-
 		/// <summary>
 		///     All Propertys
 		/// </summary>
@@ -54,10 +40,17 @@ namespace JPB.DataAccess.Contacts.MetaApi
 		///     All Constructors
 		/// </summary>
 		HashSet<TCtor> Constructors { get; }
+
+		/// <summary>
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="anon"></param>
+		/// <returns></returns>
+		IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false);
 	}
 
 	/// <summary>
-	/// Defines the most basic infos about an class
+	///     Defines the most basic infos about an class
 	/// </summary>
 	public interface IClassInfoCache : IEquatable<IClassInfoCache>,
 		IComparable<IClassInfoCache>,

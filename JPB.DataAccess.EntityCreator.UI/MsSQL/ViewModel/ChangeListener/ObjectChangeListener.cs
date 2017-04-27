@@ -5,17 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using JPB.ErrorValidation;
+using JPB.ErrorValidation.ViewModelProvider;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.ChangeListener
 {
-    public class ObjectChangeListener<T, TE> : DataErrorBase<T, TE> where TE : class, IErrorInfoProvider<T>, new() where T : class
+    public class ObjectChangeListener<T, TE> : AsyncErrorProviderBase<TE> where TE : class, IErrorCollectionBase, new()
     {
         public ObjectChangeListener()
-        {
-            this.Init();
-        }
-
-        public ObjectChangeListener(Dispatcher dispatcher) : base(dispatcher)
         {
             this.Init();
         }

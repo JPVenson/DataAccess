@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,26 +8,28 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 
+#endregion
+
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Constraints.Collections.IDefaultConstraints{TEntity}" />
 	public class DefaultConstraints<TEntity> : IDefaultConstraints<TEntity>
 	{
 		/// <summary>
-		/// The local database repository
+		///     The local database repository
 		/// </summary>
 		private readonly LocalDbRepository<TEntity> _localDbRepository;
+
 		/// <summary>
-		/// The constraints
+		///     The constraints
 		/// </summary>
 		private HashSet<ILocalDbDefaultConstraint<TEntity>> _constraints;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultConstraints{TEntity}"/> class.
+		///     Initializes a new instance of the <see cref="DefaultConstraints{TEntity}" /> class.
 		/// </summary>
 		/// <param name="localDbRepository">The local database repository.</param>
 		public DefaultConstraints(LocalDbRepository<TEntity> localDbRepository)
@@ -35,10 +39,10 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Returns an enumerator that iterates through the collection.
+		///     Returns an enumerator that iterates through the collection.
 		/// </summary>
 		/// <returns>
-		/// An enumerator that can be used to iterate through the collection.
+		///     An enumerator that can be used to iterate through the collection.
 		/// </returns>
 		public IEnumerator<ILocalDbDefaultConstraint<TEntity>> GetEnumerator()
 		{
@@ -46,18 +50,18 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
+		///     Returns an enumerator that iterates through a collection.
 		/// </summary>
 		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+		///     An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
 		/// </returns>
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return ((IEnumerable)_constraints).GetEnumerator();
+			return ((IEnumerable) _constraints).GetEnumerator();
 		}
 
 		/// <summary>
-		/// Adds an item to the <see cref="T:System.Collections.Generic.ICollection`1" />.
+		///     Adds an item to the <see cref="T:System.Collections.Generic.ICollection`1" />.
 		/// </summary>
 		/// <param name="item">The object to add to the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
 		/// <exception cref="InvalidOperationException">Missing Alter or Setup statement of table</exception>
@@ -69,7 +73,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Adds the specified name.
+		///     Adds the specified name.
 		/// </summary>
 		/// <typeparam name="TValue">The type of the value.</typeparam>
 		/// <param name="name">The name.</param>
@@ -84,7 +88,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Adds the specified configuration.
+		///     Adds the specified configuration.
 		/// </summary>
 		/// <typeparam name="TValue">The type of the value.</typeparam>
 		/// <param name="config">The configuration.</param>
@@ -92,7 +96,8 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		/// <param name="generateValue">The generate value.</param>
 		/// <param name="column">The column.</param>
 		/// <exception cref="InvalidOperationException">Missing Alter or Setup statement of table</exception>
-		public void Add<TValue>(DbConfig config, string name, Func<TValue> generateValue, Expression<Func<TEntity, TValue>> column)
+		public void Add<TValue>(DbConfig config, string name, Func<TValue> generateValue,
+			Expression<Func<TEntity, TValue>> column)
 		{
 			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
@@ -100,7 +105,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Adds the specified name.
+		///     Adds the specified name.
 		/// </summary>
 		/// <typeparam name="TValue">The type of the value.</typeparam>
 		/// <param name="name">The name.</param>
@@ -111,11 +116,12 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		{
 			if (_localDbRepository.ReposetoryCreated)
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
-			_constraints.Add(new LocalDbDefaultConstraintEx<TEntity, TValue>(_localDbRepository.Config, name, generateValue, column));
+			_constraints.Add(new LocalDbDefaultConstraintEx<TEntity, TValue>(_localDbRepository.Config, name, generateValue,
+				column));
 		}
 
 		/// <summary>
-		/// Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.
+		///     Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">Missing Alter or Setup statement of table</exception>
 		public void Clear()
@@ -126,11 +132,12 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
+		///     Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
 		/// </summary>
 		/// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
 		/// <returns>
-		/// true if <paramref name="item" /> is found in the <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false.
+		///     true if <paramref name="item" /> is found in the <see cref="T:System.Collections.Generic.ICollection`1" />;
+		///     otherwise, false.
 		/// </returns>
 		public bool Contains(ILocalDbDefaultConstraint<TEntity> item)
 		{
@@ -138,9 +145,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1" /> to an <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.
+		///     Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1" /> to an
+		///     <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.
 		/// </summary>
-		/// <param name="array">The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1" />. The <see cref="T:System.Array" /> must have zero-based indexing.</param>
+		/// <param name="array">
+		///     The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied
+		///     from <see cref="T:System.Collections.Generic.ICollection`1" />. The <see cref="T:System.Array" /> must have
+		///     zero-based indexing.
+		/// </param>
 		/// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
 		public void CopyTo(ILocalDbDefaultConstraint<TEntity>[] array, int arrayIndex)
 		{
@@ -148,11 +160,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Removes the first occurrence of a specific object from the <see cref="T:System.Collections.Generic.ICollection`1" />.
+		///     Removes the first occurrence of a specific object from the
+		///     <see cref="T:System.Collections.Generic.ICollection`1" />.
 		/// </summary>
 		/// <param name="item">The object to remove from the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
 		/// <returns>
-		/// true if <paramref name="item" /> was successfully removed from the <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false. This method also returns false if <paramref name="item" /> is not found in the original <see cref="T:System.Collections.Generic.ICollection`1" />.
+		///     true if <paramref name="item" /> was successfully removed from the
+		///     <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false. This method also returns false if
+		///     <paramref name="item" /> is not found in the original <see cref="T:System.Collections.Generic.ICollection`1" />.
 		/// </returns>
 		/// <exception cref="InvalidOperationException">Missing Alter or Setup statement of table</exception>
 		public bool Remove(ILocalDbDefaultConstraint<TEntity> item)
@@ -163,7 +178,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
+		///     Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
 		/// </summary>
 		public int Count
 		{
@@ -171,7 +186,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
+		///     Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
 		/// </summary>
 		public bool IsReadOnly
 		{
@@ -179,15 +194,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		}
 
 		/// <summary>
-		/// Enforces all Contrains on the element
+		///     Enforces all Contrains on the element
 		/// </summary>
 		/// <param name="elementToAdd">The element to add.</param>
 		public void Enforce(TEntity elementToAdd)
 		{
 			foreach (var localDbDefaultConstraint in _constraints)
-			{
 				localDbDefaultConstraint.DefaultValue(elementToAdd);
-			}
 		}
 	}
 }

@@ -10,26 +10,27 @@ using JPB.DataAccess.EntityCreator.Core.Poco;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models;
 using JPB.ErrorValidation;
+using JPB.ErrorValidation.ViewModelProvider;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	public class TableInfoViewModel : DataErrorBase<TableInfoViewModel, TableInfoModelErrorProvider>, ITableInfoModel
+	public class TableInfoViewModel : AsyncErrorProviderBase<TableInfoModelErrorProvider>, ITableInfoModel
 	{
 		private readonly SqlEntityCreatorViewModel _compilerOptions;
 		public ITableInfoModel SourceElement { get; set; }
 
-		public TableInfoViewModel(ITableInfoModel sourceElement, SqlEntityCreatorViewModel compilerOptions) : base(App.Current.Dispatcher)
+		public TableInfoViewModel(ITableInfoModel sourceElement, SqlEntityCreatorViewModel compilerOptions)
 		{
 			_compilerOptions = compilerOptions;
 			SourceElement = sourceElement;
-			ColumnInfoModels = new ThreadSaveObservableCollection<ColumnInfoViewModel>(
-				SourceElement.ColumnInfos.Select(f => new ColumnInfoViewModel(f)));
 			CreatePreviewCommand = new DelegateCommand(CreatePreviewExecute, CanCreatePreviewExecute);
 			AddColumnCommand = new DelegateCommand(AddColumnExecute, CanAddColumnExecute);
 			RemoveColumnCommand = new DelegateCommand(RemoveColumnExecute, CanRemoveColumnExecute);
+			ColumnInfoModels = new ThreadSaveObservableCollection<ColumnInfoViewModel>();
+			this.Refresh();
 		}
 
 		[ExpandableObject]
@@ -185,6 +186,16 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private bool CanCreatePreviewExecute(object sender)
 		{
 			return this._compilerOptions.SelectedTable != null;
+		}
+
+		public void Refresh()
+		{
+			ColumnInfoModels.Clear();
+			foreach (var result in SourceElement.ColumnInfos.Select(f => new ColumnInfoViewModel(f)))
+			{
+				ColumnInfoModels.Add(result);
+			}
+			SendPropertyChanged(string.Empty);
 		}
 	}
 }

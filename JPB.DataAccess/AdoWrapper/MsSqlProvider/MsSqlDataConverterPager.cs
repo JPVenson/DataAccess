@@ -1,16 +1,11 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+﻿#region
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using JPB.DataAccess.Contacts.Pager;
+
+#endregion
 
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
@@ -28,7 +23,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		public MsSqlDataConverterPager()
 		{
 			SyncHelper = action => action();
-			base.NewPageLoaded += OnNewPageLoaded;
+			NewPageLoaded += OnNewPageLoaded;
 			base.RaiseEvents = true;
 			CurrentPageItems = new ObservableCollection<TE>();
 		}
@@ -40,15 +35,17 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			get { return true; }
 			set { }
 		}
+
 		/// <summary>
-		/// Function to convert all items from T to TE
+		///     Function to convert all items from T to TE
 		/// </summary>
 		public Func<T, TE> Converter { get; set; }
+
 		/// <summary>
-		/// Gets or sets the current page items.
+		///     Gets or sets the current page items.
 		/// </summary>
 		/// <value>
-		/// The current page items.
+		///     The current page items.
 		/// </value>
 		public new ICollection<TE> CurrentPageItems { get; protected set; }
 
@@ -56,10 +53,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		{
 			CurrentPageItems.Clear();
 
-			foreach (T currentPageItem in base.CurrentPageItems)
-			{
+			foreach (var currentPageItem in base.CurrentPageItems)
 				CurrentPageItems.Add(Converter(currentPageItem));
-			}
 		}
 	}
 }

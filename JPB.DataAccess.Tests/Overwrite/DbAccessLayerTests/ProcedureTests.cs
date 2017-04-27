@@ -1,58 +1,62 @@
-﻿using JPB.DataAccess.Manager;
+﻿#region
+
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using Users = JPB.DataAccess.Tests.Base.Users;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    public class ProcedureTests : BaseTest
-    {
-        public ProcedureTests(DbAccessType type) : base(type)
-        {
-        }
+	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	public class ProcedureTests : BaseTest
+	{
+		public ProcedureTests(DbAccessType type) : base(type)
+		{
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        public void ProcedureDirectParamTest()
-        {
-            if (_dbAccess.DbAccessType != DbAccessType.MsSql)
-                return;
-            DataMigrationHelper.AddUsers(100, _dbAccess);
+		[Test]
+		[Category("MsSQL")]
+		public void ProcedureDirectParamTest()
+		{
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+				return;
+			DataMigrationHelper.AddUsers(100, DbAccess);
 
-            Assert.That(() => _dbAccess.Select<TestProcBParamsDirect>(new object[] {10}),
-                Is.Not.Null.And.Property("Length").EqualTo(9));
-        }
+			Assert.That(() => DbAccess.Select<TestProcBParamsDirect>(new object[] {10}),
+				Is.Not.Null.And.Property("Length").EqualTo(9));
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        public void ProcedureParamLessTest()
-        {
-            if (_dbAccess.DbAccessType != DbAccessType.MsSql)
-                return;
-            DataMigrationHelper.AddUsers(100, _dbAccess);
-            var expectedUser = _dbAccess.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
+		[Test]
+		[Category("MsSQL")]
+		public void ProcedureParamLessTest()
+		{
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+				return;
+			DataMigrationHelper.AddUsers(100, DbAccess);
+			var expectedUser = DbAccess.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
-            Assert.IsNotNull(expectedUser);
-            Assert.AreNotEqual(expectedUser.Length, 0);
+			Assert.IsNotNull(expectedUser);
+			Assert.AreNotEqual(expectedUser.Length, 0);
 
-            var refSelect =
-                _dbAccess.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.TableName)));
-            Assert.AreEqual(expectedUser.Length, refSelect);
-        }
+			var refSelect =
+				DbAccess.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT (*) FROM {0}", UsersMeta.TableName)));
+			Assert.AreEqual(expectedUser.Length, refSelect);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        public void ProcedureParamTest()
-        {
-            if (_dbAccess.DbAccessType != DbAccessType.MsSql)
-                return;
-            DataMigrationHelper.AddUsers(100, _dbAccess);
+		[Test]
+		[Category("MsSQL")]
+		public void ProcedureParamTest()
+		{
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+				return;
+			DataMigrationHelper.AddUsers(100, DbAccess);
 
-            Assert.That(() => _dbAccess.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams
-            {
-                Number = 10
-            }), Is.Not.Null.And.Property("Length").EqualTo(9));
-        }
-    }
+			Assert.That(() => DbAccess.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams
+			{
+				Number = 10
+			}), Is.Not.Null.And.Property("Length").EqualTo(9));
+		}
+	}
 }

@@ -1,53 +1,64 @@
+#region
+
 using System.IO;
+using System.IO.MemoryMappedFiles;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 
+#endregion
+
 namespace JPB.DataAccess.Tests
 {
-    public class SqLiteManager : IManager
-    {
-        public const string SConnectionString = "Data Source={0};";
-        private static DbAccessLayer expectWrapper;
+	public class SqLiteManager : IManagerImplementation
+	{
+		public const string SConnectionString = "Data Source=:memory:;";
+		private DbAccessLayer expectWrapper;
 
-        private string tempPath;
+		private string tempPath;
 
-        public DbAccessType DbAccessType
-        {
-            get { return DbAccessType.SqLite; }
-        }
+		public DbAccessType DbAccessType
+		{
+			get { return DbAccessType.SqLite; }
+		}
 
-        public string ConnectionString
-        {
-            get { return SConnectionString; }
-        }
+		public string ConnectionString
+		{
+			get { return SConnectionString; }
+		}
 
-        public DbAccessLayer GetWrapper(DbAccessType type)
-        {
-            if (expectWrapper != null)
-                expectWrapper.Database.CloseAllConnection();
+		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
+		{
+			if (expectWrapper != null)
+				expectWrapper.Database.CloseAllConnection();
 
-            //string dbname = "testDB";
-            //var sqlLiteFileName = dbname + ".sqlite";
+			//string dbname = "testDB";
+			//var sqlLiteFileName = dbname + ".sqlite";
+			var dbname = string.Format("YAORM_SqLite_{0}", testName);
+			tempPath = string.Format(ConnectionString, dbname);
 
-            tempPath = Path.GetTempFileName();
+			//var file = MemoryMappedFile.CreateNew(dbname, 10000, MemoryMappedFileAccess.ReadWrite);
 
-            expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, tempPath));
-            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
-            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
-            expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
-            return expectWrapper;
-        }
+			//tempPath = Path.GetTempFileName() + dbname + "sqLite";
 
-        public void FlushErrorData()
-        {
-        }
+			expectWrapper = new DbAccessLayer(DbAccessType, tempPath, new DbConfig(true));
+			expectWrapper.Database.Connect();
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
+			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
+			return expectWrapper;
+		}
 
-        public void Clear()
-        {
-            expectWrapper.Database.CloseAllConnection();
+		public void FlushErrorData()
+		{
+		}
 
-            if (File.Exists(tempPath))
-                File.Delete(tempPath);
-        }
-    }
+		public void Clear()
+		{
+			expectWrapper.Database.CloseAllConnection();
+
+			if (File.Exists(tempPath))
+				File.Delete(tempPath);
+		}
+	}
 }

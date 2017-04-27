@@ -1,11 +1,4 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+#region
 
 using System;
 using System.Data;
@@ -14,28 +7,30 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 
+#endregion
+
 namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 {
 	/// <summary>
-	/// Default UNTESTED impl
+	///     Default UNTESTED impl
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Contacts.IDatabaseStrategy" />
 	public class OleDb : IDatabaseStrategy
 	{
 		/// <summary>
-		/// The template MSSQL untrusted
+		///     The template MSSQL untrusted
 		/// </summary>
 		private const string TEMPLATE_MSSQL_UNTRUSTED =
 			"server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
 
 		/// <summary>
-		/// The template MSSQL trusted
+		///     The template MSSQL trusted
 		/// </summary>
 		private const string TEMPLATE_MSSQL_TRUSTED =
 			"server={0};database={1};Connect Timeout=100;Min Pool Size=5;trusted_connection=true";
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="OleDb"/> class.
+		///     Initializes a new instance of the <see cref="OleDb" /> class.
 		/// </summary>
 		/// <param name="strServer">The string server.</param>
 		/// <param name="strDatabase">The string database.</param>
@@ -45,7 +40,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="OleDb"/> class.
+		///     Initializes a new instance of the <see cref="OleDb" /> class.
 		/// </summary>
 		/// <param name="strServer">The string server.</param>
 		/// <param name="strDatabase">The string database.</param>
@@ -56,14 +51,12 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
 				ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
 			else
-			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
 					strLogin.Trim(), strPassword.Trim());
-			}
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="OleDb"/> class.
+		///     Initializes a new instance of the <see cref="OleDb" /> class.
 		/// </summary>
 		/// <param name="strConnStr">The string connection string.</param>
 		public OleDb(string strConnStr)
@@ -72,7 +65,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Formarts a Command into a QueryCommand after the Strategy rules
+		///     Formarts a Command into a QueryCommand after the Strategy rules
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
@@ -82,7 +75,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Converts the Generic SourceDbType to the Specific represntation
+		///     Converts the Generic SourceDbType to the Specific represntation
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -92,10 +85,10 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Creates a new object that is a copy of the current instance.
+		///     Creates a new object that is a copy of the current instance.
 		/// </summary>
 		/// <returns>
-		/// A new object that is a copy of this instance.
+		///     A new object that is a copy of this instance.
 		/// </returns>
 		public object Clone()
 		{
@@ -103,7 +96,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Defines the database type this Strategy is used for
+		///     Defines the database type this Strategy is used for
 		/// </summary>
 		public DbAccessType SourceDatabase
 		{
@@ -111,16 +104,17 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// An Valid Connection string for the given Strategy
+		///     An Valid Connection string for the given Strategy
 		/// </summary>
 		public string ConnectionString { get; set; }
+
 		/// <summary>
-		/// Optional used when connecting to a Local file
+		///     Optional used when connecting to a Local file
 		/// </summary>
 		public string DatabaseFile { get; private set; }
 
 		/// <summary>
-		/// Should return the current database if availibe
+		///     Should return the current database if availibe
 		/// </summary>
 		public string ServerName
 		{
@@ -132,7 +126,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Creates a new Provider specific Connection that will held open until all actors want to close it
+		///     Creates a new Provider specific Connection that will held open until all actors want to close it
 		/// </summary>
 		/// <returns></returns>
 		public IDbConnection CreateConnection()
@@ -141,18 +135,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Creates a command.
-		/// </summary>
-		/// <param name="strSql">The string SQL.</param>
-		/// <param name="conn">The connection.</param>
-		/// <returns></returns>
-		public IDbCommand CreateCommand(string strSql, IDbConnection conn)
-		{
-			return new OleDbCommand(strSql, (OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
-		}
-
-		/// <summary>
-		/// Creates a command.
+		///     Creates a command.
 		/// </summary>
 		/// <param name="strSql">The string SQL.</param>
 		/// <param name="conn">The connection.</param>
@@ -163,15 +146,13 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 			var oleDbCommand = new OleDbCommand(strSql,
 				(OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
 
-			foreach (IDataParameter dbDataParameter in fields)
-			{
+			foreach (var dbDataParameter in fields)
 				oleDbCommand.Parameters.AddWithValue(dbDataParameter.ParameterName, dbDataParameter.Value);
-			}
 			return oleDbCommand;
 		}
 
 		/// <summary>
-		/// Creates a query parameter.
+		///     Creates a query parameter.
 		/// </summary>
 		/// <param name="strName">Name of the string.</param>
 		/// <param name="value">The value.</param>
@@ -182,7 +163,60 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Creates the data adapter.
+		///     Getlasts a inserted identifier command.
+		/// </summary>
+		/// <param name="conn">The connection.</param>
+		/// <returns></returns>
+		/// <exception cref="NotImplementedException"></exception>
+		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///     Creates a data pager.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="NotImplementedException"></exception>
+		public IDataPager<T> CreatePager<T>()
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///     Creates the a pager that can convert each item.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TE">The type of the e.</typeparam>
+		/// <returns></returns>
+		/// <exception cref="NotImplementedException"></exception>
+		public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///     NotImplementedException
+		/// </summary>
+		public void CloseAllConnections()
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		///     Creates a command.
+		/// </summary>
+		/// <param name="strSql">The string SQL.</param>
+		/// <param name="conn">The connection.</param>
+		/// <returns></returns>
+		public IDbCommand CreateCommand(string strSql, IDbConnection conn)
+		{
+			return new OleDbCommand(strSql, (OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
+		}
+
+		/// <summary>
+		///     Creates the data adapter.
 		/// </summary>
 		/// <param name="cmd">The command.</param>
 		/// <returns></returns>
@@ -192,7 +226,7 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		}
 
 		/// <summary>
-		/// Creates a data table.
+		///     Creates a data table.
 		/// </summary>
 		/// <param name="name">The name.</param>
 		/// <param name="cmd">The command.</param>
@@ -211,47 +245,6 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 
 				return table;
 			}
-		}
-
-		/// <summary>
-		/// Getlasts a inserted identifier command.
-		/// </summary>
-		/// <param name="conn">The connection.</param>
-		/// <returns></returns>
-		/// <exception cref="NotImplementedException"></exception>
-		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
-		{
-			throw new NotImplementedException();
-		}
-
-		/// <summary>
-		/// Creates a data pager.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		/// <exception cref="NotImplementedException"></exception>
-		public IDataPager<T> CreatePager<T>()
-		{
-			throw new NotImplementedException();
-		}
-
-		/// <summary>
-		/// Creates the a pager that can convert each item.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <typeparam name="TE">The type of the e.</typeparam>
-		/// <returns></returns>
-		/// <exception cref="NotImplementedException"></exception>
-		public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
-		{
-			throw new NotImplementedException();
-		}
-        /// <summary>
-        /// NotImplementedException
-        /// </summary>
-		public void CloseAllConnections()
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

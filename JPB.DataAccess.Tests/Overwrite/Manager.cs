@@ -1,127 +1,105 @@
+#region
+
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 using NUnit.Framework;
 
+#endregion
+
 namespace JPB.DataAccess.Tests
 {
-    public class Manager : IManager
-    {
-        private static readonly Dictionary<DbAccessType, IManager> _managers;
+	public class Manager : IManager
+	{
+		public Manager()
+		{
+			_errorData = new StringBuilder();
+			_managers = new ConcurrentDictionary<DbAccessType, Func<IManagerImplementation>>();
+			_managers.Add(DbAccessType.MsSql, () => new MsSqlManager());
+			_managers.Add(DbAccessType.SqLite, () => new SqLiteManager());
+			_managers.Add(DbAccessType.MySql, () => new MySqlManager());
+			AllTestContextHelper.TestSetup(null);
+		}
 
-        private StringBuilder _errorData;
+		private readonly IDictionary<DbAccessType, Func<IManagerImplementation>> _managers;
 
-        private IManager _selectedMgr;
+		private StringBuilder _errorData;
 
-        static Manager()
-        {
-            _managers = new Dictionary<DbAccessType, IManager>();
-            _managers.Add(DbAccessType.MsSql, new MsSqlManager());
-            _managers.Add(DbAccessType.SqLite, new SqLiteManager());
-            _managers.Add(DbAccessType.MySql, new MySqlManager());
-        }
+		private IManagerImplementation _selectedMgr;
 
-        public Manager()
-        {
-            _errorData = new StringBuilder();
-        }
+		public DbAccessLayer GetWrapper(DbAccessType type, params object[] additionalArguments)
+		{
+			DbAccessLayer expectWrapper = null;
+			_errorData.AppendLine("---------------------------------------------");
+			_errorData.AppendLine("Found " + type);
 
-        public DbAccessLayer GetWrapper(DbAccessType type)
-        {
-            DbAccessLayer expectWrapper = null;
-            _errorData.AppendLine("---------------------------------------------");
-            _errorData.AppendLine("Found " + type);
-            DbConfig.Clear();
-            expectWrapper = (_selectedMgr = _managers[type]).GetWrapper(type);
+			Assert.That(new DbConfig().SClassInfoCaches, Is.Empty, () => "The Global Class cache is not empty");
+			var testClassName = TestContext.CurrentContext.Test.ClassName.GetHashCode() + "_" +
+			                    TestContext.CurrentContext.Test.MethodName.GetHashCode();
+			var arguments =
+					additionalArguments.Select(
+					                           f =>
+						                           f?.GetHashCode().ToString() ?? TestContext.CurrentContext.Random.NextShort().ToString())
+					                   .ToArray();
 
-            //if (elementType == DbAccessType.MsSql)
-            //{
-            //	expectWrapper = new MsSqlManager().GetWrapper();
-            //}
-            //else if (elementType == DbAccessType.SqLite)
-            //{
-            //	expectWrapper = new SqLiteManager().GetWrapper();
-            //}
+			if (arguments.Any())
+				testClassName = testClassName + "_ARG_" + arguments.Aggregate((e, f) => e + f).GetHashCode();
+			testClassName = new Regex("[^a-zA-Z0-9]").Replace(testClassName, "_");
+			_errorData.AppendLine($"Attach to Database: {testClassName}");
 
-            _errorData = new StringBuilder();
-            expectWrapper.RaiseEvents = true;
-            expectWrapper.OnSelect += (sender, eventArg) =>
-            {
-                _errorData.AppendFormat(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
-                _errorData.AppendLine();
-            };
+			expectWrapper = (_selectedMgr = _managers[type]()).GetWrapper(type, testClassName);
+			expectWrapper.Config.EnableInstanceThreadSafety = true;
 
-            expectWrapper.OnDelete += (sender, eventArg) =>
-            {
-                _errorData.AppendFormat(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
-                _errorData.AppendLine();
-            };
 
-            expectWrapper.OnInsert += (sender, eventArg) =>
-            {
-                _errorData.AppendFormat(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
-                _errorData.AppendLine();
-            };
+			expectWrapper.RaiseEvents = true;
+			expectWrapper.OnSelect += (sender, eventArg) =>
+			                          {
+				                          _errorData.AppendFormat(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
+				                          _errorData.AppendLine();
+			                          };
 
-            expectWrapper.OnUpdate += (sender, eventArg) =>
-            {
-                _errorData.AppendFormat(@"UPDATE: \r\n{0}", eventArg.QueryDebugger);
-                _errorData.AppendLine();
-            };
+			expectWrapper.OnDelete += (sender, eventArg) =>
+			                          {
+				                          _errorData.AppendFormat(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
+				                          _errorData.AppendLine();
+			                          };
 
-            Assert.NotNull(expectWrapper, "This test cannot run as no Database Variable is defined");
-            var checkDatabase = expectWrapper.CheckDatabase();
-            Assert.IsTrue(checkDatabase);
+			expectWrapper.OnInsert += (sender, eventArg) =>
+			                          {
+				                          _errorData.AppendFormat(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
+				                          _errorData.AppendLine();
+			                          };
 
-            expectWrapper.Config.ConstructorSettings.FileCollisonDetection = CollisonDetectionMode.Pessimistic;
-            expectWrapper.Config.ConstructorSettings.CreateDebugCode = false;
-            expectWrapper.Multipath = true;
-            QueryDebugger.UseDefaultDatabase = expectWrapper.DatabaseStrategy;
-            return expectWrapper;
-        }
+			expectWrapper.OnUpdate += (sender, eventArg) =>
+			                          {
+				                          _errorData.AppendFormat(@"UPDATE: \r\n{0}", eventArg.QueryDebugger);
+				                          _errorData.AppendLine();
+			                          };
 
-        public DbAccessType DbAccessType { get; }
-        public string ConnectionString { get; }
+			Assert.NotNull(expectWrapper, "This test cannot run as no Database Variable is defined");
+			var checkDatabase = expectWrapper.CheckDatabase();
+			Assert.IsTrue(checkDatabase);
+			AllTestContextHelper.TestSetup(expectWrapper.Config.ConstructorSettings);
+			expectWrapper.Multipath = true;
+			return expectWrapper;
+		}
 
-        public void FlushErrorData()
-        {
-            Console.WriteLine(_errorData.ToString());
-            _errorData.Clear();
+		public void FlushErrorData()
+		{
+			TestContext.Error.WriteLine(_errorData.ToString());
+			_errorData.Clear();
 
-            _selectedMgr.FlushErrorData();
-        }
+			_selectedMgr.FlushErrorData();
+		}
 
-        public void Clear()
-        {
-            _selectedMgr.Clear();
-        }
-
-        public static void AddManager(DbAccessType type, IManager manager)
-        {
-            _managers.Add(type, manager);
-        }
-
-        public DbAccessType GetElementType()
-        {
-            _errorData.AppendLine("---------------------------------------------");
-            _errorData.AppendLine("Element type Lookup");
-            var customAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<CategoryAttribute>();
-            if (customAttribute.Name == "MsSQL")
-            {
-                _errorData.AppendLine("Found MsSQL");
-                return DbAccessType.MsSql;
-            }
-            if (customAttribute.Name == "SqLite")
-            {
-                _errorData.AppendLine("Found SqLite");
-                return DbAccessType.SqLite;
-            }
-            _errorData.AppendLine("Found NON ERROR");
-            return DbAccessType.Unknown;
-        }
-    }
+		public void Clear()
+		{
+			_selectedMgr.Clear();
+		}
+	}
 }

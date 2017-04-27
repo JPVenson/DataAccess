@@ -1,8 +1,9 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Transactions;
 using System.Xml;
@@ -10,29 +11,16 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 
+#endregion
+
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	/// Provieds the IXmlSerializable interface for an entire database.
-	/// Not thread save
+	///     Provieds the IXmlSerializable interface for an entire database.
+	///     Not thread save
 	/// </summary>
 	public class DataContent : IXmlSerializable
 	{
-		private readonly LocalDbManager _instance;
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DataContent"/> class.
-		/// </summary>
-		public DataContent()
-		{
-
-		}
-
-		internal DataContent(LocalDbManager instance)
-		{
-			_instance = instance;
-		}
-
 		private const string DatabaseName = "DatabaseScope";
 		private const string ReprosIncluded = "Types";
 		private const string ReproIncluded = "Type";
@@ -41,9 +29,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private const string TableContentElementsList = "Items";
 		private const string IndexerIncluded = "Indexer";
 		private const string IndexerValues = "Index";
+		private readonly LocalDbManager _instance;
 
 		/// <summary>
-		/// Gets the schema.
+		///     Initializes a new instance of the <see cref="DataContent" /> class.
+		/// </summary>
+		public DataContent()
+		{
+		}
+
+		internal DataContent(LocalDbManager instance)
+		{
+			_instance = instance;
+		}
+
+		/// <summary>
+		///     Gets the schema.
 		/// </summary>
 		/// <returns></returns>
 		public XmlSchema GetSchema()
@@ -52,37 +53,16 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Returns the current Databases in this scope as an XML string inside an MemoryStream
-		/// </summary>
-		/// <returns></returns>
-		public MemoryStream ReadAsXml()
-		{
-			var ms = new MemoryStream();
-			var xmlSerilzer = new XmlSerializer(GetType());
-			xmlSerilzer.Serialize(ms, this);
-			return ms;
-		}
-
-		/// <summary>
-		/// Returns the current Databases in this scope as an XML string
-		/// </summary>
-		/// <returns></returns>
-		public string ReadAsXmlString()
-		{
-			return Encoding.UTF8.GetString(ReadAsXml().ToArray());
-		}
-
-		/// <summary>
-		/// Reads the XML.
+		///     Reads the XML.
 		/// </summary>
 		/// <param name="reader">The reader.</param>
 		/// <exception cref="InvalidDataException">
-		/// Invalid XML document for Db import. index is unset
-		/// or
-		/// Invalid XML document for Db import. type is unset
-		/// or
-		/// or
-		/// Invalid XML document for Db import. index for a table is unset
+		///     Invalid XML document for Db import. index is unset
+		///     or
+		///     Invalid XML document for Db import. type is unset
+		///     or
+		///     or
+		///     Invalid XML document for Db import. index for a table is unset
 		/// </exception>
 		public void ReadXml(XmlReader reader)
 		{
@@ -104,7 +84,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 				var type = Type.GetType(typeString);
 
 				if (type == null)
-					throw new InvalidDataException(string.Format("Invalid XML document for Db import. type is invalid '{0}'", typeString));
+					throw new InvalidDataException(string.Format("Invalid XML document for Db import. type is invalid '{0}'",
+						typeString));
 
 				elements.Add(indexOfElementString, type);
 			} while (reader.Read() && reader.Name == ReproIncluded);
@@ -121,7 +102,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 							throw new InvalidDataException("Invalid XML document for Db import. index for a table is unset");
 						reader.ReadStartElement(TableContentList);
 						var type = elements[indexOfElementString];
-						var table = LocalDbManager.Scope.Database.First(s => s.Key.AssemblyQualifiedName == type.AssemblyQualifiedName).Value;
+						var table =
+							LocalDbManager.Scope.Database.First(s => s.Key.AssemblyQualifiedName == type.AssemblyQualifiedName).Value;
 						do
 						{
 							object emptyElement = table.TypeInfo.DefaultFactory();
@@ -136,9 +118,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 								object contvertedValue = null;
 								if (!isNumm)
-								{
 									contvertedValue = DataConverterExtensions.ChangeType(value, dbPropertyInfoCache.PropertyType);
-								}
 
 								dbPropertyInfoCache.Setter.Invoke(emptyElement, contvertedValue);
 							} while (reader.Name != table.TypeInfo.TableName);
@@ -155,7 +135,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Writes the XML.
+		///     Writes the XML.
 		/// </summary>
 		/// <param name="writer">The writer.</param>
 		public void WriteXml(XmlWriter writer)
@@ -167,7 +147,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			var index = 0;
 			foreach (var localDbReposetoryBase in _instance.Database)
 			{
-				if(localDbReposetoryBase.Value.Count == 0)
+				if (localDbReposetoryBase.Value.Count == 0)
 					continue;
 
 				writer.WriteStartElement(ReproIncluded);
@@ -204,9 +184,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 						writer.WriteStartElement(dbPropertyInfoCach.DbName);
 						var value = dbPropertyInfoCach.Getter.Invoke(poco);
 						if (value != null)
-						{
 							writer.WriteValue(value);
-						}
 						writer.WriteEndElement();
 					}
 					writer.WriteEndElement();
@@ -228,6 +206,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 			//end write Root
 			writer.WriteEndElement();
+		}
+
+		/// <summary>
+		///     Returns the current Databases in this scope as an XML string inside an MemoryStream
+		/// </summary>
+		/// <returns></returns>
+		public MemoryStream ReadAsXml()
+		{
+			var ms = new MemoryStream();
+			var xmlSerilzer = new XmlSerializer(GetType());
+			xmlSerilzer.Serialize(ms, this);
+			return ms;
+		}
+
+		/// <summary>
+		///     Returns the current Databases in this scope as an XML string
+		/// </summary>
+		/// <returns></returns>
+		public string ReadAsXmlString()
+		{
+			return Encoding.UTF8.GetString(ReadAsXml().ToArray());
 		}
 	}
 }

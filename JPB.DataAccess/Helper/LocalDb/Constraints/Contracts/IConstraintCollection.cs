@@ -1,47 +1,51 @@
-﻿using JPB.DataAccess.Contacts;
+﻿#region
+
+using JPB.DataAccess.Contacts;
+
+#endregion
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
 	/// <summary>
-	///
 	/// </summary>
 	public interface IConstraintCollectionInternal
 	{
-
 	}
 
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	public interface IConstraintCollection<TEntity> : IConstraintCollectionInternal
 	{
 		/// <summary>
-		/// Gets the check constraints.
+		///     Gets the check constraints.
 		/// </summary>
 		/// <value>
-		/// The check.
+		///     The check.
 		/// </value>
 		ICheckConstraints<TEntity> Check { get; }
+
 		/// <summary>
-		/// Gets the default constraints.
+		///     Gets the default constraints.
 		/// </summary>
 		/// <value>
-		/// The default.
+		///     The default.
 		/// </value>
 		IDefaultConstraints<TEntity> Default { get; }
+
 		/// <summary>
-		/// Gets the primary key constraints.
+		///     Gets the primary key constraints.
 		/// </summary>
 		/// <value>
-		/// The primary key.
+		///     The primary key.
 		/// </value>
 		ILocalDbPrimaryKeyConstraint PrimaryKey { get; }
+
 		/// <summary>
-		/// Gets the unique constraints.
+		///     Gets the unique constraints.
 		/// </summary>
 		/// <value>
-		/// The unique.
+		///     The unique.
 		/// </value>
 		IUniqueConstrains<TEntity> Unique { get; }
 	}

@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using ICSharpCode.AvalonEdit.Highlighting;
 using JPB.DataAccess.EntityCreator.Core;
 using JPB.ErrorValidation;
+using JPB.ErrorValidation.ViewModelProvider;
 using JPB.WPFBase.MVVM.ViewModel;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	public class ClassPreviewViewModel : DataErrorBase<ClassPreviewViewModel, ClassPreviewViewModelErrorProvider>
+	public class ClassPreviewViewModel : AsyncErrorProviderBase<ClassPreviewViewModelErrorProvider>
 	{
 		private readonly SqlEntityCreatorViewModel _compilerInfos;
 

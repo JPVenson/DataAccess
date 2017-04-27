@@ -1,19 +1,18 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Helper;
-using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+
+#endregion
 
 namespace JPB.DataAccess.Query
 {
 	/// <summary>
-	///
 	/// </summary>
 	public static class QueryBuilderExtentions
 	{
@@ -25,10 +24,10 @@ namespace JPB.DataAccess.Query
 			where TQuery : IQueryBuilder
 		{
 			if (query.ContainerObject.AllowParamterRenaming)
-			{
 				foreach (var queryParameter in part.QueryParameters)
 				{
-					var fod = query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
+					var fod =
+						query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
 
 					if (fod == null)
 						continue;
@@ -39,7 +38,6 @@ namespace JPB.DataAccess.Query
 					part.Prefix = part.Prefix.Replace(name, newName);
 					queryParameter.Name = newName;
 				}
-			}
 			query.ContainerObject.Parts.Add(part);
 			return query;
 		}
@@ -85,7 +83,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static TQuery QueryCommand<TQuery>(this TQuery builder, IDbCommand command)
-			where TQuery: IQueryBuilder
+			where TQuery : IQueryBuilder
 		{
 			return builder.Add(GenericQueryPart.FromCommand(command, null));
 		}

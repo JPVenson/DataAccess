@@ -1,6 +1,9 @@
-﻿using System;
+﻿#region
+
 using System.Collections;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+
+#endregion
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
@@ -11,89 +14,98 @@ namespace JPB.DataAccess.Helper.LocalDb
 	}
 
 	/// <summary>
-	///
 	/// </summary>
 	/// <seealso cref="System.Collections.ICollection" />
 	public interface ILocalDbReposetoryBase : ICollection
 	{
 		/// <summary>
-		/// Gets the database attached to this Reposetory.
+		///     Gets the database attached to this Reposetory.
 		/// </summary>
 		/// <value>
-		/// The database.
+		///     The database.
 		/// </value>
 		LocalDbManager Database { get; }
+
 		/// <summary>
-		/// Gets a value indicating whether this instance is read only.
+		///     Gets a value indicating whether this instance is read only.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this instance is read only; otherwise, <c>false</c>.
+		///     <c>true</c> if this instance is read only; otherwise, <c>false</c>.
 		/// </value>
 		bool IsReadOnly { get; }
+
 		/// <summary>
-		/// Gets a value indicating whether the reposetory is fully created.
+		///     Gets a value indicating whether the reposetory is fully created.
 		/// </summary>
 		/// <value>
-		///   <c>true</c> if the reposetory is fully created; otherwise, <c>false</c>.
+		///     <c>true</c> if the reposetory is fully created; otherwise, <c>false</c>.
 		/// </value>
 		bool ReposetoryCreated { get; }
+
 		/// <summary>
-		/// Gets the type information for the Entity.
+		///     Gets the type information for the Entity.
 		/// </summary>
 		/// <value>
-		/// The type information.
+		///     The type information.
 		/// </value>
 		DbClassInfoCache TypeInfo { get; }
 
 		/// <summary>
-		/// Adds the specified item.
+		///     Adds the specified item.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		void Add(object item);
+
 		/// <summary>
-		/// Clears this instance.
+		///     Clears this instance.
 		/// </summary>
 		void Clear();
+
 		/// <summary>
-		/// Determines whether [contains] [the specified item].
+		///     Determines whether [contains] [the specified item].
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns>
-		///   <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
+		///     <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
 		/// </returns>
 		bool Contains(object item);
+
 		/// <summary>
-		/// Determines whether [contains] [the specified item].
+		///     Determines whether [contains] [the specified item].
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns>
-		///   <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
+		///     <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
 		/// </returns>
 		bool Contains(long item);
+
 		/// <summary>
-		/// Determines whether [contains] [the specified item].
+		///     Determines whether [contains] [the specified item].
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns>
-		///   <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
+		///     <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
 		/// </returns>
 		bool Contains(int item);
+
 		/// <summary>
-		/// Determines whether the specified fk value for table x contains identifier.
+		///     Determines whether the specified fk value for table x contains identifier.
 		/// </summary>
 		/// <param name="fkValueForTableX">The fk value for table x.</param>
 		/// <returns>
-		///   <c>true</c> if the specified fk value for table x contains identifier; otherwise, <c>false</c>.
+		///     <c>true</c> if the specified fk value for table x contains identifier; otherwise, <c>false</c>.
 		/// </returns>
 		bool ContainsId(object fkValueForTableX);
+
 		/// <summary>
-		/// Removes the specified item.
+		///     Removes the specified item.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns></returns>
 		bool Remove(object item);
+
 		/// <summary>
-		/// Updates the specified item.
+		///     Updates the specified item.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns></returns>

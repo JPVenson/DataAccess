@@ -1,21 +1,28 @@
+#region
+
 using System;
 using System.Transactions;
+
+#endregion
 
 namespace JPB.DataAccess.Helper.LocalDb.Scopes
 {
 	/// <summary>
-	/// Defines a scope where a Replication can be done. This will disable all Trigger and Constraints and will reinvoke them when the scope is closed
+	///     Defines a scope where a Replication can be done. This will disable all Trigger and Constraints and will reinvoke
+	///     them when the scope is closed
 	/// </summary>
 	/// <seealso cref="System.IDisposable" />
 	public class ReplicationScope : IDisposable
 	{
+		[ThreadStatic] private static ReplicationScope _current;
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ReplicationScope"/> class.
+		///     Initializes a new instance of the <see cref="ReplicationScope" /> class.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">
-		/// Nested Identity Scopes are not supported
-		/// or
-		/// Has to be executed inside a valid TransactionScope
+		///     Nested Identity Scopes are not supported
+		///     or
+		///     Has to be executed inside a valid TransactionScope
 		/// </exception>
 		public ReplicationScope()
 		{
@@ -27,19 +34,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 			_current = this;
 
 			foreach (var localDbReposetoryBase in LocalDbManager.Scope.Database)
-			{
 				localDbReposetoryBase.Value.IsMigrating = true;
-			}
 		}
 
-		[ThreadStatic]
-		private static ReplicationScope _current;
-
 		/// <summary>
-		/// Gets the current Scope.
+		///     Gets the current Scope.
 		/// </summary>
 		/// <value>
-		/// The current.
+		///     The current.
 		/// </value>
 		public static ReplicationScope Current
 		{
@@ -47,14 +49,12 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		}
 
 		/// <summary>
-		/// Submits all pending changes
+		///     Submits all pending changes
 		/// </summary>
 		public void Dispose()
 		{
 			foreach (var localDbReposetoryBase in LocalDbManager.Scope.Database)
-			{
 				localDbReposetoryBase.Value.IsMigrating = false;
-			}
 			_current = null;
 		}
 	}

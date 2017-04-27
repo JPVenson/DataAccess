@@ -1,23 +1,27 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+﻿#region
 
 using System;
 using System.Collections.Generic;
 using JPB.DataAccess.Contacts.MetaApi;
 
+#endregion
+
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
 	internal class ClassInfoEquatableComparer
 		: IEqualityComparer<IClassInfoCache>,
-		IEqualityComparer<Type>, 
-		IComparer<IClassInfoCache>
+			IEqualityComparer<Type>,
+			IComparer<IClassInfoCache>
 	{
+		public int Compare(IClassInfoCache x, IClassInfoCache y)
+		{
+			if (x == null)
+				return -1;
+			if (y == null)
+				return +1;
+			return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
+		}
+
 		public bool Equals(IClassInfoCache x, IClassInfoCache y)
 		{
 			if (x == null && y == null)
@@ -34,15 +38,6 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public int GetHashCode(IClassInfoCache obj)
 		{
 			return GetHashCode(obj.Type);
-		}
-
-		public int Compare(IClassInfoCache x, IClassInfoCache y)
-		{
-			if (x == null)
-				return -1;
-			if (y == null)
-				return +1;
-			return System.String.Compare(x.Name, y.Name, System.StringComparison.Ordinal);
 		}
 
 		public bool Equals(Type x, Type y)

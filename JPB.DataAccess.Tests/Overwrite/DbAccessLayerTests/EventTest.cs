@@ -1,55 +1,59 @@
-﻿using JPB.DataAccess.Manager;
+﻿#region
+
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    public class EventTest : BaseTest
-    {
-        public EventTest(DbAccessType type) : base(type)
-        {
-        }
+	[Parallelizable(ParallelScope.None)]
+	public class EventTest : BaseTest
+	{
+		public EventTest(DbAccessType type) : base(type)
+		{
+		}
 
-        [Test]
-        public void TestOnUpdate()
-        {
-            _dbAccess.RaiseEvents = true;
-            var insertWithSelect = _dbAccess.InsertWithSelect(new Users());
+		public void TestOnSelect()
+		{
+			DbAccess.RaiseEvents = true;
+		}
 
-            var riseFlag = false;
-            _dbAccess.OnUpdate += (sender, eventx) => { riseFlag = true; };
-            _dbAccess.Update(insertWithSelect);
-            Assert.True(riseFlag);
-            _dbAccess.RaiseEvents = false;
-            riseFlag = false;
-            _dbAccess.Update(insertWithSelect);
-            Assert.False(riseFlag);
-        }
+		public void TestOnDelete()
+		{
+			DbAccess.RaiseEvents = true;
+		}
 
-        [Test]
-        public void TestOnInsert()
-        {
-            _dbAccess.RaiseEvents = true;
-            var riseFlag = false;
-            _dbAccess.OnInsert += (sender, eventx) => { riseFlag = true; };
-            _dbAccess.Insert(new Users());
-            Assert.True(riseFlag);
+		[Test]
+		public void TestOnInsert()
+		{
+			DbAccess.RaiseEvents = true;
+			var riseFlag = false;
+			DbAccess.OnInsert += (sender, eventx) => { riseFlag = true; };
+			DbAccess.Insert(new Users());
+			Assert.True(riseFlag);
 
-            _dbAccess.RaiseEvents = false;
-            riseFlag = false;
-            _dbAccess.Insert(new Users());
-            Assert.False(riseFlag);
-        }
+			DbAccess.RaiseEvents = false;
+			riseFlag = false;
+			DbAccess.Insert(new Users());
+			Assert.False(riseFlag);
+		}
 
-        public void TestOnSelect()
-        {
-            _dbAccess.RaiseEvents = true;
-        }
+		[Test]
+		public void TestOnUpdate()
+		{
+			DbAccess.RaiseEvents = true;
+			var insertWithSelect = DbAccess.InsertWithSelect(new Users());
 
-        public void TestOnDelete()
-        {
-            _dbAccess.RaiseEvents = true;
-        }
-    }
+			var riseFlag = false;
+			DbAccess.OnUpdate += (sender, eventx) => { riseFlag = true; };
+			DbAccess.Update(insertWithSelect);
+			Assert.True(riseFlag);
+			DbAccess.RaiseEvents = false;
+			riseFlag = false;
+			DbAccess.Update(insertWithSelect);
+			Assert.False(riseFlag);
+		}
+	}
 }

@@ -5,7 +5,7 @@ using JPB.ErrorValidation.ValidationTyps;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	public class TableInfoModelErrorProvider : ValidationRuleBase<TableInfoViewModel>
+	public class TableInfoModelErrorProvider : ErrorCollection<TableInfoViewModel>
 	{
 		public TableInfoModelErrorProvider()
 		{

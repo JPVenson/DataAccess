@@ -46,7 +46,6 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 	//}
 
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Trigger.IReplicationNode{TEntity}" />
@@ -72,18 +71,18 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		}
 
 		/// <summary>
-		/// Will be invoked bevor each operation
+		///     Will be invoked bevor each operation
 		/// </summary>
 		public virtual ISequentialTriggerCollection<TEntity> For { get; private set; }
 
 		/// <summary>
-		/// Will be invoked after the operation and all consistency checks when no exception was thrown
+		///     Will be invoked after the operation and all consistency checks when no exception was thrown
 		/// </summary>
 		public virtual ISequentialTriggerCollection<TEntity> After { get; private set; }
 
 		/// <summary>
-		/// Will be invoked after <c>For</c> and bevor <c>After</c> and replaces the internal Add/Remove/Update call.
-		/// If you still want to Add/Remove/Update the Entity you have to call Add/Remove/Update again
+		///     Will be invoked after <c>For</c> and bevor <c>After</c> and replaces the internal Add/Remove/Update call.
+		///     If you still want to Add/Remove/Update the Entity you have to call Add/Remove/Update again
 		/// </summary>
 		public virtual ITriggerInsteadtOfCollection<TEntity> InsteadOf { get; private set; }
 	}

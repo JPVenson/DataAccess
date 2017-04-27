@@ -1,11 +1,4 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+﻿#region
 
 using System;
 using System.Collections;
@@ -26,6 +19,8 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Operators;
+
+#endregion
 
 namespace JPB.DataAccess.Manager
 {
@@ -136,10 +131,7 @@ namespace JPB.DataAccess.Manager
 
 		internal DbAccessLayer(DbConfig config = null)
 		{
-			if (config == null)
-				_config = new DbConfig();
-			else
-				_config = config;
+			_config = config ?? new DbConfig(true);
 			DefaultLookupPath = AppDomain.CurrentDomain.BaseDirectory;
 			AnonymousPocoManager = new AnonymousPocoManager(_config);
 			LoadCompleteResultBeforeMapping = true;
@@ -288,10 +280,7 @@ namespace JPB.DataAccess.Manager
 			var firstOrDefault =
 				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
 					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
-			if (firstOrDefault == null)
-				DbAccessType = DbAccessType.Unknown;
-			else
-				DbAccessType = firstOrDefault.Value.Key;
+			DbAccessType = firstOrDefault == null ? DbAccessType.Unknown : firstOrDefault.Value.Key;
 		}
 
 		/// <summary>
@@ -338,9 +327,10 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public int ExecuteGenericCommand(string query, dynamic paramenter)
 		{
-			if (paramenter is IEnumerable<IQueryParameter>)
+			var parameters = paramenter as IEnumerable<IQueryParameter>;
+			if (parameters != null)
 			{
-				var parm = (IEnumerable<IQueryParameter>) paramenter;
+				var parm = parameters;
 				return ExecuteGenericCommand(query, parm);
 			}
 
@@ -422,7 +412,7 @@ namespace JPB.DataAccess.Manager
 #pragma warning restore 618
 		}
 
-		private static readonly Assembly MsCoreLibAssembly = typeof(string).Assembly;
+		private static readonly Assembly _msCoreLibAssembly = typeof(string).Assembly;
 
 		/// <summary>
 		///     Creates an instance based on a Ctor injection or Reflection loading
@@ -446,7 +436,7 @@ namespace JPB.DataAccess.Manager
 			out bool fullLoaded,
 			DbAccessType? accessType = null)
 		{
-			if (classInfo.Type.Assembly == MsCoreLibAssembly && reader.FieldCount == 1)
+			if (classInfo.Type.Assembly == _msCoreLibAssembly && reader.FieldCount == 1)
 			{
 				fullLoaded = true;
 				var plainValue = reader.GetValue(0);
@@ -504,7 +494,7 @@ namespace JPB.DataAccess.Manager
 
 							if (returnType != null && returnType.ParameterType == classInfo.Type)
 								if (factory.Arguments.Count == 1 &&
-									factory.Arguments.First().Type == typeof(IDataRecord))
+								    factory.Arguments.First().Type == typeof(IDataRecord))
 								{
 									classInfo.FullFactory = true;
 									classInfo.Factory = s => factory.Invoke(new object[] {reader});
@@ -529,8 +519,8 @@ namespace JPB.DataAccess.Manager
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
 		[Obsolete("This mehtod is replaced by several FASTER equal ones. " +
-				  "It may be replaced, updated or delted. But it will change that is for sure. " +
-				  "legacy support only")]
+		          "It may be replaced, updated or delted. But it will change that is for sure. " +
+		          "legacy support only")]
 		public static object ReflectionPropertySet(
 			DbConfig config,
 			object instance,
@@ -612,7 +602,7 @@ namespace JPB.DataAccess.Manager
 							object castedList;
 
 							if (genericArguments.Type.IsClass &&
-								genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
+							    genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
 							{
 								var caster =
 									typeof(DbCollection<>).MakeGenericType(genericArguments.Type)
@@ -733,9 +723,6 @@ namespace JPB.DataAccess.Manager
 			return Database.Run(
 				s =>
 				{
-					//Skip enumeration and parsing and make a Direct loading
-					//This increeses Performance
-
 					var records = new List<List<IDataRecord>>();
 					using (query)
 					{
@@ -743,12 +730,14 @@ namespace JPB.DataAccess.Manager
 						{
 							try
 							{
+								var typeIndex = 0;
 								do
 								{
 									var resultSet = new List<IDataRecord>();
 									while (dr.Read())
-										resultSet.Add(new EgarDataRecord(dr, this));
+										resultSet.Add(new EgarDataRecord(dr, Config));
 									records.Add(resultSet);
+									typeIndex++;
 								} while (dr.NextResult());
 							}
 							finally
@@ -772,32 +761,30 @@ namespace JPB.DataAccess.Manager
 			return type.SetPropertysViaReflection(reader, DbAccessType, Config);
 		}
 
-		internal IEnumerable EnumerateDirectDataRecords(IDbCommand query,
+		internal ArrayList EnumerateDirectDataRecords(IDbCommand query,
 			DbClassInfoCache info)
 		{
 			Database.PrepaireRemoteExecution(query);
 			return Database.Run(
 				s =>
 				{
-					//Skip enumeration and parsing and make a Direct loading
-					//This increeses Performance
-
 					var records = new ArrayList();
 					using (query)
-					using (var dr = query.ExecuteReader())
 					{
-						try
+						using (var dr = query.ExecuteReader())
 						{
-							do
+							try
 							{
-								while (dr.Read())
-									records.Add(
-										AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(info, dr)));
-							} while (dr.NextResult());
-						}
-						finally
-						{
-							dr.Close();
+								do
+								{
+									while (dr.Read())
+										records.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(info, dr)));
+								} while (dr.NextResult());
+							}
+							finally
+							{
+								dr.Close();
+							}
 						}
 					}
 					return records;

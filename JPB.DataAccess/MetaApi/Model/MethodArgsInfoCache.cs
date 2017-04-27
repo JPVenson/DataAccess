@@ -1,11 +1,5 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+﻿#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,10 +8,12 @@ using System.Linq;
 using System.Reflection;
 using JPB.DataAccess.Contacts.MetaApi;
 
+#endregion
+
 namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
-	/// Infos about Arguments delcared on a Mehtod
+	///     Infos about Arguments delcared on a Mehtod
 	/// </summary>
 	[DebuggerDisplay("{ArgumentName}")]
 	[Serializable]
@@ -26,7 +22,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		where TAtt : class, IAttributeInfoCache, new()
 	{
 		/// <summary>
-		/// For Internal use only
+		///     For Internal use only
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -39,36 +35,36 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MethodArgsInfoCache{TAtt}"/> class.
+		///     Initializes a new instance of the <see cref="MethodArgsInfoCache{TAtt}" /> class.
 		/// </summary>
 		/// <param name="info">The information.</param>
 		public MethodArgsInfoCache(ParameterInfo info)
 		{
-			this.Init(info);
+			Init(info);
 		}
 
 		/// <summary>
-		/// The name of this Param
+		///     The name of this Param
 		/// </summary>
 		public string ArgumentName { get; private set; }
 
 		/// <summary>
-		/// The type of this Param
+		///     The type of this Param
 		/// </summary>
 		public Type Type { get; private set; }
 
 		/// <summary>
-		/// All Attached Attributes
+		///     All Attached Attributes
 		/// </summary>
 		public HashSet<TAtt> Attributes { get; private set; }
 
 		/// <summary>
-		/// Direct reflection
+		///     Direct reflection
 		/// </summary>
 		public ParameterInfo ParameterInfo { get; private set; }
 
 		/// <summary>
-		/// For Internal Usage only
+		///     For Internal Usage only
 		/// </summary>
 		/// <param name="info">The information.</param>
 		/// <returns></returns>
@@ -79,7 +75,7 @@ namespace JPB.DataAccess.MetaApi.Model
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 			ParameterInfo = info;
 			ArgumentName = info.Name;
-			this.Type = info.ParameterType;
+			Type = info.ParameterType;
 			Attributes = new HashSet<TAtt>(ParameterInfo
 				.GetCustomAttributes(true)
 				.Select(s => new TAtt().Init(s as Attribute) as TAtt));
@@ -87,11 +83,15 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+		///     Compares the current instance with another object of the same type and returns an integer that indicates whether
+		///     the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
 		/// </summary>
 		/// <param name="other">An object to compare with this instance.</param>
 		/// <returns>
-		/// A value that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance precedes <paramref name="other" /> in the sort order.  Zero This instance occurs in the same position in the sort order as <paramref name="other" />. Greater than zero This instance follows <paramref name="other" /> in the sort order.
+		///     A value that indicates the relative order of the objects being compared. The return value has these meanings: Value
+		///     Meaning Less than zero This instance precedes <paramref name="other" /> in the sort order.  Zero This instance
+		///     occurs in the same position in the sort order as <paramref name="other" />. Greater than zero This instance follows
+		///     <paramref name="other" /> in the sort order.
 		/// </returns>
 		/// <exception cref="NotImplementedException"></exception>
 		public int CompareTo(IMethodArgsInfoCache<TAtt> other)
@@ -100,11 +100,11 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Indicates whether the current object is equal to another object of the same type.
+		///     Indicates whether the current object is equal to another object of the same type.
 		/// </summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns>
-		/// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+		///     true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
 		/// </returns>
 		/// <exception cref="NotImplementedException"></exception>
 		public bool Equals(IMethodArgsInfoCache<TAtt> other)

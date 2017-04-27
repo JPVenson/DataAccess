@@ -1,11 +1,4 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+﻿#region
 
 using System;
 using System.Collections;
@@ -13,10 +6,12 @@ using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.Manager;
 
+#endregion
+
 namespace JPB.DataAccess.Contacts.Pager
 {
 	/// <summary>
-	/// Defines the Output of an Pager
+	///     Defines the Output of an Pager
 	/// </summary>
 	public interface IDataPagerInfo
 	{
@@ -36,7 +31,7 @@ namespace JPB.DataAccess.Contacts.Pager
 		int PageSize { get; set; }
 
 		/// <summary>
-		/// Get the complete ammount of all items listend
+		///     Get the complete ammount of all items listend
 		/// </summary>
 		long TotalItemCount { get; }
 	}
@@ -47,7 +42,8 @@ namespace JPB.DataAccess.Contacts.Pager
 	public interface IDataPager : IDisposable, IDataPagerInfo
 	{
 		/// <summary>
-		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
+		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be
+		///     aware
 		///     of it
 		/// </summary>
 		IDbCommand BaseQuery { get; set; }
@@ -102,7 +98,5 @@ namespace JPB.DataAccess.Contacts.Pager
 		///     Typed list of all Elements
 		/// </summary>
 		new ICollection<T> CurrentPageItems { get; }
-
-
 	}
 }

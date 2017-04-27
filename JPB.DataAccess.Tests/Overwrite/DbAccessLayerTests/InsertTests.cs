@@ -1,193 +1,197 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using Users = JPB.DataAccess.Tests.Base.Users;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    public class InsertTests : BaseTest
-    {
-        public InsertTests(DbAccessType type) : base(type)
-        {
-        }
+	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	public class InsertTests : BaseTest
+	{
+		public InsertTests(DbAccessType type) : base(type)
+		{
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertDefaultValues()
-        {
-            _dbAccess.Config
-                .Include<Users>()
-                .SetConfig<Users>(
-                    conf => { conf.SetPropertyAttribute(s => s.UserName, new IgnoreReflectionAttribute()); });
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertDefaultValues()
+		{
+			DbAccess.Config
+				.Include<Users>()
+				.SetConfig<Users>(
+					conf => { conf.SetPropertyAttribute(s => s.UserName, new IgnoreReflectionAttribute()); });
 
-            _dbAccess.Insert(new Users());
-            var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-            var selectTest = _dbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			DbAccess.Insert(new Users());
+			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
-            Assert.IsNotNull(selectTest);
-            Assert.AreEqual(selectTest, DBNull.Value);
-        }
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, DBNull.Value);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertFactoryTest()
-        {
-            var insGuid = Guid.NewGuid().ToString();
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertFactoryTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
 
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-            _dbAccess.IsMultiProviderEnvironment = true;
-            _dbAccess.Insert(new UsersWithStaticInsert {UserName = insGuid});
-            _dbAccess.IsMultiProviderEnvironment = false;
-            var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-            var selectTest = _dbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			DbAccess.IsMultiProviderEnvironment = true;
+			DbAccess.Insert(new UsersWithStaticInsert {UserName = insGuid});
+			DbAccess.IsMultiProviderEnvironment = false;
+			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
-            Assert.IsNotNull(selectTest);
-            Assert.AreEqual(selectTest, insGuid);
-        }
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, insGuid);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertPropertyLessPoco()
-        {
-            Assert.That(() => _dbAccess.Insert(new UsersWithoutProperties()), Throws.Nothing);
-        }
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertPropertyLessPoco()
+		{
+			Assert.That(() => DbAccess.Insert(new UsersWithoutProperties()), Throws.Nothing);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertRange10kEachItemTest()
-        {
-            var insGuid = Guid.NewGuid().ToString();
-            var containingList = new List<Users>();
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertRange10kEachItemTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
+			var containingList = new List<Users>();
 
-            for (var i = 0; i < 10000; i++)
-                containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
+			for (var i = 0; i < 10000; i++)
+				containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
 
-            _dbAccess.RangerInsertPation = 1;
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            _dbAccess.InsertRange(containingList);
-            stopWatch.Stop();
-            //Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
+			DbAccess.RangerInsertPation = 1;
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+			DbAccess.InsertRange(containingList);
+			stopWatch.Stop();
+			//Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
 
-            var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName);
-            var selectTest = _dbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName);
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
-            Assert.IsNotNull(selectTest);
-            Assert.AreEqual(selectTest, 10000);
-        }
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, 10000);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertRange10kTest()
-        {
-            var insGuid = Guid.NewGuid().ToString();
-            var containingList = new List<Users>();
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertRange10kTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
+			var containingList = new List<Users>();
 
-            for (var i = 0; i < 10000; i++)
-                containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
+			for (var i = 0; i < 10000; i++)
+				containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            _dbAccess.InsertRange(containingList);
-            stopWatch.Stop();
-            //Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+			DbAccess.InsertRange(containingList);
+			stopWatch.Stop();
+			//Assert.That(stopWatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(7)));
 
-            var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName);
-            var selectTest = _dbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+			var selectUsernameFromWhere = string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName);
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
-            Assert.IsNotNull(selectTest);
-            Assert.AreEqual(selectTest, 10000);
-        }
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, 10000);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertTest()
-        {
-            var insGuid = Guid.NewGuid().ToString();
-            _dbAccess.Insert(new Users {UserName = insGuid});
-            var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
-            var selectTest = _dbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertRangeTest()
+		{
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-            Assert.IsNotNull(selectTest);
-            Assert.AreEqual(selectTest, insGuid);
-        }
+			var upperCountTestUsers = 100;
+			var testUers = new List<Users>();
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertWithSelect()
-        {
-            var val = new Users {UserName = "test"};
-            var refSelect = _dbAccess.InsertWithSelect(val);
+			var insGuid = Guid.NewGuid().ToString();
 
-            Assert.AreEqual(refSelect.UserName, val.UserName);
-            Assert.AreNotEqual(refSelect.UserID, val.UserID);
-        }
+			for (var i = 0; i < upperCountTestUsers; i++)
+				testUers.Add(new Users {UserName = insGuid});
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertWithSelectStringTest()
-        {
-            var insGuid = Guid.NewGuid().ToString();
+			DbAccess.InsertRange(testUers);
 
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			var refSelect =
+				DbAccess.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
+			if (refSelect is long)
+				refSelect = Convert.ChangeType(refSelect, typeof(int));
 
-            var expectedUser = _dbAccess.InsertWithSelect(new Users {UserName = insGuid});
-            Assert.IsNotNull(expectedUser);
-            Assert.AreEqual(expectedUser.UserName, insGuid);
-            Assert.AreNotEqual(expectedUser.UserID, default(long));
-        }
+			Assert.AreEqual(testUers.Count, refSelect);
+		}
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertWithSelectTest()
-        {
-            var insGuid = Guid.NewGuid().ToString();
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
+			DbAccess.Insert(new Users {UserName = insGuid});
+			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
+			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			Assert.IsNotNull(selectTest);
+			Assert.AreEqual(selectTest, insGuid);
+		}
 
-            var expectedUser = _dbAccess.InsertWithSelect(new Users {UserName = insGuid});
-            Assert.IsNotNull(expectedUser);
-            Assert.AreEqual(expectedUser.UserName, insGuid);
-            Assert.AreNotEqual(expectedUser.UserID, default(long));
-        }
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertWithSelect()
+		{
+			var val = new Users {UserName = "test"};
+			var refSelect = DbAccess.InsertWithSelect(val);
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void InsertRangeTest()
-        {
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
+			Assert.AreEqual(refSelect.UserName, val.UserName);
+			Assert.AreNotEqual(refSelect.UserID, val.UserID);
+		}
 
-            var upperCountTestUsers = 100;
-            var testUers = new List<Users>();
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertWithSelectStringTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
 
-            var insGuid = Guid.NewGuid().ToString();
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-            for (var i = 0; i < upperCountTestUsers; i++)
-                testUers.Add(new Users {UserName = insGuid});
+			var expectedUser = DbAccess.InsertWithSelect(new Users {UserName = insGuid});
+			Assert.IsNotNull(expectedUser);
+			Assert.AreEqual(expectedUser.UserName, insGuid);
+			Assert.AreNotEqual(expectedUser.UserID, default(long));
+		}
 
-            _dbAccess.InsertRange(testUers);
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void InsertWithSelectTest()
+		{
+			var insGuid = Guid.NewGuid().ToString();
 
-            var refSelect =
-                _dbAccess.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
-            if (refSelect is long)
-                refSelect = Convert.ChangeType(refSelect, typeof(int));
+			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-            Assert.AreEqual(testUers.Count, refSelect);
-        }
-    }
+			var expectedUser = DbAccess.InsertWithSelect(new Users {UserName = insGuid});
+			Assert.IsNotNull(expectedUser);
+			Assert.AreEqual(expectedUser.UserName, insGuid);
+			Assert.AreNotEqual(expectedUser.UserID, default(long));
+		}
+	}
 }

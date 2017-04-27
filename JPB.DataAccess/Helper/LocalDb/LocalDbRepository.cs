@@ -1,10 +1,11 @@
+#region
+
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Transactions;
 using JPB.DataAccess.AdoWrapper;
@@ -19,6 +20,8 @@ using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Helper.LocalDb.Trigger;
 using JPB.DataAccess.Manager;
 
+#endregion
+
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
@@ -26,7 +29,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	///     When enumerating the Repro you will only receive the Current state as it is designed to be thread save
 	/// </summary>
 	/// <remarks>
-	/// All Static and Instance member are Thread Save
+	///     All Static and Instance member are Thread Save
 	/// </remarks>
 	[Serializable]
 	public sealed class LocalDbRepository<TEntity> : ICollection<TEntity>, ILocalDbReposetoryBaseInternalUsage
@@ -86,9 +89,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			ILocalDbPrimaryKeyConstraint keyGenerator = null)
 		{
 			if (typeof(TEntity) != typeof(object))
-			{
 				throw new InvalidOperationException("When using an contained type argument you must use object as generic type");
-			}
 
 			Init(containedType, keyGenerator, config, useOrignalObjectInMemory);
 		}
@@ -97,7 +98,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     Creates a new, only local Reposetory by using one of the Predefined KeyGenerators
 		/// </summary>
 		public LocalDbRepository()
-			: this(new DbConfig())
+			: this(new DbConfig(true))
 		{
 		}
 
@@ -137,20 +138,21 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public IConstraintCollection<TEntity> Constraints { get; private set; }
 
 		/// <summary>
-		/// The used Config Store
+		///     The used Config Store
 		/// </summary>
 		/// <value>
-		/// The configuration.
+		///     The configuration.
 		/// </value>
 		public DbConfig Config
 		{
 			get { return _config; }
 		}
+
 		/// <summary>
-		/// Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
+		///     Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1" /> is read-only.
 		/// </summary>
 		/// <value>
-		/// Allways false
+		///     Allways false
 		/// </value>
 		public bool IsReadOnly
 		{
@@ -158,7 +160,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
+		///     Gets the number of elements contained in the <see cref="T:System.Collections.Generic.ICollection`1" />.
 		/// </summary>
 		public int Count
 		{
@@ -188,9 +190,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					var ex = EnforceCheckConstraints(elementToAdd);
 
 					if (ex != null)
-					{
 						throw ex;
-					}
 				}
 				TriggersUsage.For.OnInsert(elementToAdd);
 				Constraints.Default.Enforce(elementToAdd);
@@ -198,23 +198,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (!_keepOriginalObject)
 				{
 					bool fullyLoaded;
-					elementToAdd = (TEntity)DbAccessLayer.CreateInstance(
+					elementToAdd = (TEntity) DbAccessLayer.CreateInstance(
 						_typeInfo,
 						new ObjectDataRecord(item, _config, 0),
 						out fullyLoaded,
 						DbAccessType.Unknown);
 					if (!fullyLoaded || elementToAdd == null)
-					{
 						throw new InvalidOperationException(string.Format("The given type did not provide a Full ado.net constructor " +
-																		  "and the setting of the propertys did not succeed. " +
-																		  "Type: '{0}'", elementToAdd.GetType()));
-					}
+						                                                  "and the setting of the propertys did not succeed. " +
+						                                                  "Type: '{0}'", elementToAdd.GetType()));
 				}
 
 				if (!TriggersUsage.InsteadOf.OnInsert(elementToAdd))
-				{
 					Base.Add(id, elementToAdd);
-				}
 				try
 				{
 					TriggersUsage.After.OnInsert(elementToAdd);
@@ -237,19 +233,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 			lock (LockRoot)
 			{
 				foreach (var item in Base)
-				{
 					Remove(item);
-				}
 			}
 		}
 
 		/// <summary>
-		/// Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
-		/// Does not work if <c>useOrignalObjectInMemory</c> was used to create this Reposetory
+		///     Determines whether the <see cref="T:System.Collections.Generic.ICollection`1" /> contains a specific value.
+		///     Does not work if <c>useOrignalObjectInMemory</c> was used to create this Reposetory
 		/// </summary>
 		/// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.ICollection`1" />.</param>
 		/// <returns>
-		/// true if <paramref name="item" /> is found in the <see cref="T:System.Collections.Generic.ICollection`1" />; otherwise, false.
+		///     true if <paramref name="item" /> is found in the <see cref="T:System.Collections.Generic.ICollection`1" />;
+		///     otherwise, false.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">item</exception>
 		public bool Contains(TEntity item)
@@ -257,14 +252,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (item == null) throw new ArgumentNullException("item");
 			CheckCreatedElseThrow();
 			var pk = GetId(item);
-			var local = Base.Contains(new KeyValuePair<object, TEntity>(pk, (TEntity)item));
+			var local = Base.Contains(new KeyValuePair<object, TEntity>(pk, item));
 			return local;
 		}
 
 		/// <summary>
-		/// Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1" /> to an <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.
+		///     Copies the elements of the <see cref="T:System.Collections.Generic.ICollection`1" /> to an
+		///     <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.
 		/// </summary>
-		/// <param name="array">The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1" />. The <see cref="T:System.Array" /> must have zero-based indexing.</param>
+		/// <param name="array">
+		///     The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied
+		///     from <see cref="T:System.Collections.Generic.ICollection`1" />. The <see cref="T:System.Array" /> must have
+		///     zero-based indexing.
+		/// </param>
 		/// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
 		/// <exception cref="ArgumentNullException">array</exception>
 		public void CopyTo(TEntity[] array, int arrayIndex)
@@ -278,7 +278,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Removes the given Item based on its PrimaryKey
+		///     Removes the given Item based on its PrimaryKey
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -298,7 +298,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 				Exception hasInvalidOp = null;
 				if (!hasTransaction)
-					hasInvalidOp = this.EnforceCheckConstraints(item);
+					hasInvalidOp = EnforceCheckConstraints(item);
 
 				try
 				{
@@ -321,10 +321,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Returns an enumerator that iterates through the collection.
+		///     Returns an enumerator that iterates through the collection.
 		/// </summary>
 		/// <returns>
-		/// An enumerator that can be used to iterate through the collection.
+		///     An enumerator that can be used to iterate through the collection.
 		/// </returns>
 		IEnumerator<TEntity> IEnumerable<TEntity>.GetEnumerator()
 		{
@@ -334,7 +334,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (_keepOriginalObject)
 					return s;
 				bool fullyLoaded;
-				return (TEntity)DbAccessLayer.CreateInstance(
+				return (TEntity) DbAccessLayer.CreateInstance(
 					_typeInfo,
 					new ObjectDataRecord(s, _config, 0),
 					out fullyLoaded,
@@ -343,14 +343,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Returns an enumerator that iterates through a collection.
+		///     Returns an enumerator that iterates through a collection.
 		/// </summary>
 		/// <returns>
-		/// An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
+		///     An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.
 		/// </returns>
 		public IEnumerator GetEnumerator()
 		{
-			return ((IEnumerable<TEntity>)this).GetEnumerator();
+			return ((IEnumerable<TEntity>) this).GetEnumerator();
 		}
 
 		/// <summary>
@@ -369,10 +369,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Gets the database attached to this Reposetory.
+		///     Gets the database attached to this Reposetory.
 		/// </summary>
 		/// <value>
-		/// The database.
+		///     The database.
 		/// </value>
 		public LocalDbManager Database
 		{
@@ -380,10 +380,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Gets or sets a value indicating whether this instance is migrating.
+		///     Gets or sets a value indicating whether this instance is migrating.
 		/// </summary>
 		/// <value>
-		/// <c>true</c> if this instance is migrating; otherwise, <c>false</c>.
+		///     <c>true</c> if this instance is migrating; otherwise, <c>false</c>.
 		/// </value>
 		public bool IsMigrating
 		{
@@ -410,7 +410,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Gets an object that can be used to synchronize access to the <see cref="T:System.Collections.ICollection" />.
+		///     Gets an object that can be used to synchronize access to the <see cref="T:System.Collections.ICollection" />.
 		/// </summary>
 		public object SyncRoot
 		{
@@ -418,7 +418,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection" /> is synchronized (thread safe).
+		///     Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection" /> is synchronized
+		///     (thread safe).
 		/// </summary>
 		public bool IsSynchronized
 		{
@@ -426,11 +427,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Determines whether the specified fk value for table x contains identifier.
+		///     Determines whether the specified fk value for table x contains identifier.
 		/// </summary>
 		/// <param name="fkValueForTableX">The fk value for table x.</param>
 		/// <returns>
-		///   <c>true</c> if the specified fk value for table x contains identifier; otherwise, <c>false</c>.
+		///     <c>true</c> if the specified fk value for table x contains identifier; otherwise, <c>false</c>.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">fkValueForTableX</exception>
 		public bool ContainsId(object fkValueForTableX)
@@ -438,33 +439,30 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (fkValueForTableX == null) throw new ArgumentNullException("fkValueForTableX");
 			var local = Base.ContainsKey(fkValueForTableX);
 			if (!local)
-			{
-				//try upcasting
 				local = Base.ContainsKey(Convert.ChangeType(fkValueForTableX, _typeInfo.PrimaryKeyProperty.PropertyType));
-			}
 
 			return local;
 		}
 
 		/// <summary>
-		/// Adds the specified item.
+		///     Adds the specified item.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		public void Add(object item)
 		{
-			Add((TEntity)item);
+			Add((TEntity) item);
 		}
 
 		/// <summary>
-		/// Determines whether [contains] [the specified item].
+		///     Determines whether [contains] [the specified item].
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns>
-		///   <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
+		///     <c>true</c> if [contains] [the specified item]; otherwise, <c>false</c>.
 		/// </returns>
 		public bool Contains(object item)
 		{
-			return Contains((TEntity)item);
+			return Contains((TEntity) item);
 		}
 
 		/// <summary>
@@ -488,27 +486,27 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Removes the specified item.
+		///     Removes the specified item.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		/// <returns></returns>
 		public bool Remove(object item)
 		{
-			return Remove((TEntity)item);
+			return Remove((TEntity) item);
 		}
 
 		/// <summary>
-		/// Updates the Entity in memory. Only applies to LocalDbReposetorys that uses Object copys
+		///     Updates the Entity in memory. Only applies to LocalDbReposetorys that uses Object copys
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
 		public bool Update(object item)
 		{
-			return Update((TEntity)item);
+			return Update((TEntity) item);
 		}
 
 		/// <summary>
-		/// Gets the Generated Type Cache
+		///     Gets the Generated Type Cache
 		/// </summary>
 		public DbClassInfoCache TypeInfo
 		{
@@ -516,7 +514,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Internal Usage
+		///     Internal Usage
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="keyGenerator"></param>
@@ -534,42 +532,32 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_config = config;
 			_databaseDatabase = LocalDbManager.Scope;
 			if (_databaseDatabase == null)
-			{
 				throw new NotSupportedException("Please define a new DatabaseScope that allows to seperate" +
-												" multibe tables in the same Application");
-			}
+				                                " multibe tables of the same type in the same Application");
 
 			_typeInfo = _config.GetOrCreateClassInfoCache(type);
 			if (_typeInfo.PrimaryKeyProperty == null)
-			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. " +
-															  "Type: '{0}'", type.Name));
-			}
+				                                              "Type: '{0}'", type.Name));
 
 			TypeKeyInfo = _config.GetOrCreateClassInfoCache(_typeInfo.PrimaryKeyProperty.PropertyType);
 
 			if (TypeKeyInfo == null)
-			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey are not supported. " +
-															  "Type: '{0}'", type.Name));
-			}
+				                                              "Type: '{0}'", type.Name));
 
 			if (!TypeKeyInfo.Type.IsValueType)
-			{
 				throw new NotSupportedException(string.Format("Entitys without any PrimaryKey that is of " +
-															  "type of any value type cannot be used. Type: '{0}'", type.Name));
-			}
+				                                              "type of any value-type cannot be used. Type: '{0}'", type.Name));
 
 			if (!_keepOriginalObject)
-			{
 				if (!TypeInfo.FullFactory)
 				{
 					TypeInfo.CreateFactory(config);
 					if (!TypeInfo.FullFactory)
 						throw new NotSupportedException(string.Format("The given type did not provide a Full ado.net constructor " +
-																				  "Type: '{0}'", TypeInfo));
+						                                              "Type: '{0}'", TypeInfo));
 				}
-			}
 
 			ILocalDbPrimaryKeyConstraint primaryKeyConstraint;
 
@@ -581,23 +569,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				ILocalDbPrimaryKeyConstraint defaultKeyGen;
 				if (LocalDbManager.DefaultPkProvider.TryGetValue(TypeKeyInfo.Type, out defaultKeyGen))
-				{
-					primaryKeyConstraint = defaultKeyGen.Clone() as ILocalDbPrimaryKeyConstraint;
-				}
+					primaryKeyConstraint = defaultKeyGen.Clone();
 				else
-				{
 					throw new NotSupportedException(
 						string.Format("You must specify ether an Primary key that is of one of this types " +
-									  "({1}) " +
-									  "or invoke the ctor with an proper keyGenerator. " +
-									  "Type: '{0}'",
+						              "({1}) " +
+						              "or invoke the ctor with an proper keyGenerator. " +
+						              "Type: '{0}'",
 							type.Name,
 							LocalDbManager
 								.DefaultPkProvider
 								.Keys
 								.Select(f => f.Name)
 								.Aggregate((e, f) => e + "," + f)));
-				}
 			}
 
 			Constraints = new ConstraintCollection<TEntity>(this, primaryKeyConstraint);
@@ -613,14 +597,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 			lock (LockRoot)
 			{
 				foreach (var dbPropertyInfoCach in _typeInfo.Propertys)
-				{
 					if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null &&
-						dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
-					{
+					    dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
 						_databaseDatabase.AddMapping(_typeInfo.Type,
 							dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
-					}
-				}
 
 				ReposetoryCreated = true;
 			}
@@ -629,29 +609,21 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private void CheckCreatedElseThrow()
 		{
 			if (!ReposetoryCreated && !IsMigrating)
-			{
 				throw new InvalidOperationException("The database must be completly created until this Table is operational");
-			}
 		}
 
 		private object SetNextId(object item)
 		{
 			var idVal = GetId(item);
 			if (IdentityInsertScope.Current != null && _currentIdentityInsertScope == null)
-			{
 				_currentIdentityInsertScope = IdentityInsertScope.Current;
-			}
 
 			if (_currentIdentityInsertScope != null)
 			{
 				if (idVal.Equals(Constraints.PrimaryKey.GetUninitilized()) && !_currentIdentityInsertScope.RewriteDefaultValues)
-				{
 					return idVal;
-				}
 				if (!idVal.Equals(Constraints.PrimaryKey.GetUninitilized()))
-				{
 					return idVal;
-				}
 				lock (LockRoot)
 				{
 					var newId = Constraints.PrimaryKey.GetNextValue();
@@ -662,7 +634,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 			}
 
 			if (idVal.Equals(Constraints.PrimaryKey.GetUninitilized()))
-			{
 				lock (LockRoot)
 				{
 					var newId = Constraints.PrimaryKey.GetNextValue();
@@ -670,11 +641,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 						Convert.ChangeType(newId, _typeInfo.PrimaryKeyProperty.PropertyType));
 					return newId;
 				}
-			}
 
 			var exception =
 				new InvalidOperationException(string.Format("Cannot insert explicit value for identity column in table '{0}' " +
-															"when no IdentityInsertScope exists.", _typeInfo.Name));
+				                                            "when no IdentityInsertScope exists.", _typeInfo.Name));
 			throw exception;
 		}
 
@@ -702,9 +672,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				var fkPropForTypeX =
 					_typeInfo.Propertys.FirstOrDefault(
-						s =>
-							s.Value.ForginKeyDeclarationAttribute != null &&
-							s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == localDbReposetory.TypeInfo.TableName)
+							s =>
+								s.Value.ForginKeyDeclarationAttribute != null &&
+								s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == localDbReposetory.TypeInfo.TableName)
 						.Value;
 
 				if (fkPropForTypeX == null)
@@ -712,7 +682,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 				var fkValueForTableX = fkPropForTypeX.Getter.Invoke(refItem);
 				if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
-				{
 					return new ForginKeyConstraintException(
 						"ForginKey",
 						_typeInfo.TableName,
@@ -720,7 +689,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 						fkValueForTableX,
 						_typeInfo.PrimaryKeyProperty.PropertyName,
 						fkPropForTypeX.PropertyName);
-				}
 			}
 			return null;
 		}
@@ -739,25 +707,18 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (hasElement != null)
 				{
 					if (hasElement.State == CollectionStates.Added)
-					{
 						if (action == CollectionStates.Removed)
-						{
 							_transactionalItems.Remove(hasElement);
-						}
-					}
 
 					if (hasElement.State == CollectionStates.Removed)
-					{
 						if (action == CollectionStates.Added)
-						{
 							hasElement.State = CollectionStates.Unchanged;
-						}
-					}
 				}
 				else
 				{
 					_transactionalItems.Add(new TransactionalItem<TEntity>(changedItem, action));
 				}
+
 				return true;
 			}
 			return false;
@@ -770,20 +731,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 				_currentTransaction = null;
 				_currentIdentityInsertScope = null;
 				if (e.Transaction.TransactionInformation.Status == TransactionStatus.Aborted)
-				{
 					_currentTransaction_Rollback();
-				}
 				else
-				{
 					_currentTransaction_TransactionCompleted();
-				}
 			}
 		}
 
 		private void _currentTransaction_Rollback()
 		{
 			foreach (var transactionalItem in _transactionalItems)
-			{
 				switch (transactionalItem.State)
 				{
 					case CollectionStates.Unknown:
@@ -799,7 +755,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 					default:
 						throw new ArgumentOutOfRangeException();
 				}
-			}
 		}
 
 		private void _currentTransaction_TransactionCompleted()
@@ -833,7 +788,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Updates the Entity in memory. Only applies to LocalDbReposetorys that uses Object copys
+		///     Updates the Entity in memory. Only applies to LocalDbReposetorys that uses Object copys
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -849,16 +804,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (ReferenceEquals(item, getElement))
 				return false;
 			if (!TriggersUsage.InsteadOf.OnUpdate(item))
-			{
 				DataConverterExtensions.CopyPropertys(item, getElement, _config);
-			}
 			TriggersUsage.After.OnUpdate(item);
 			Constraints.Unique.ItemUpdated(item);
 			return true;
 		}
 
 		/// <summary>
-		/// Creates a pager object that can be used to page this collection
+		///     Creates a pager object that can be used to page this collection
 		/// </summary>
 		/// <returns></returns>
 		public IDataPager<TEntity> CreatePager()
@@ -879,7 +832,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					if (_keepOriginalObject)
 						return s;
 					bool fullyLoaded;
-					return (TEntity)DbAccessLayer.CreateInstance(
+					return (TEntity) DbAccessLayer.CreateInstance(
 						_typeInfo,
 						new ObjectDataRecord(s, _config, 0),
 						out fullyLoaded,

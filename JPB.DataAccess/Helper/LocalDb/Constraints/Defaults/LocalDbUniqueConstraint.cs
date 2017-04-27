@@ -1,14 +1,14 @@
+#region
+
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
+
+#endregion
 
 namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
@@ -16,19 +16,31 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 	public class LocalDbUniqueConstraint<TEntity, TKey> : ILocalDbUniqueConstraint<TEntity>
 	{
 		/// <summary>
-		/// The get key
+		///     The get key
 		/// </summary>
 		private readonly Func<TEntity, TKey> _getKey;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="LocalDbUniqueConstraint{TEntity, TKey}" /> class.
+		///     The index
+		/// </summary>
+		private readonly HashSet<TKey> _index;
+
+		/// <summary>
+		///     The lock root
+		/// </summary>
+		private readonly object LockRoot;
+
+		/// <summary>
+		///     Initializes a new instance of the <see cref="LocalDbUniqueConstraint{TEntity, TKey}" /> class.
 		/// </summary>
 		/// <param name="name">The name.</param>
 		/// <param name="getKey">The get key.</param>
 		/// <param name="elementComparer">The element comparer.</param>
-		/// <exception cref="ArgumentNullException">name
-		/// or
-		/// getKey</exception>
+		/// <exception cref="ArgumentNullException">
+		///     name
+		///     or
+		///     getKey
+		/// </exception>
 		public LocalDbUniqueConstraint(
 			string name,
 			Func<TEntity, TKey> getKey,
@@ -41,34 +53,22 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			_getKey = getKey;
 
 			if (elementComparer != null)
-			{
 				_index = new HashSet<TKey>(elementComparer);
-			}
 			else
-			{
 				_index = new HashSet<TKey>();
-			}
 		}
 
 		/// <summary>
-		/// The index
-		/// </summary>
-		private readonly HashSet<TKey> _index;
-		/// <summary>
-		/// The lock root
-		/// </summary>
-		private readonly object LockRoot;
-
-		/// <summary>
-		/// The name of this Constraint
+		///     The name of this Constraint
 		/// </summary>
 		public string Name { get; private set; }
+
 		/// <summary>
-		/// The function that checks if the certain constraint is fulfilled
+		///     The function that checks if the certain constraint is fulfilled
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns>
-		/// True if success false if failed
+		///     True if success false if failed
 		/// </returns>
 		public bool CheckConstraint(TEntity item)
 		{
@@ -81,7 +81,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 		}
 
 		/// <summary>
-		/// Adds the specified item to the Unique Index.
+		///     Adds the specified item to the Unique Index.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		public void Add(TEntity item)
@@ -93,7 +93,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 		}
 
 		/// <summary>
-		/// Deletes the specified item from the Unique Index.
+		///     Deletes the specified item from the Unique Index.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		public void Delete(TEntity item)
@@ -105,7 +105,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 		}
 
 		/// <summary>
-		/// Updates the specified item in the Unique Index.
+		///     Updates the specified item in the Unique Index.
 		/// </summary>
 		/// <param name="item">The item.</param>
 		public void Update(TEntity item)

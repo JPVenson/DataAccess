@@ -1,11 +1,5 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+﻿#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,44 +10,10 @@ using System.Reflection;
 using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model.Equatable;
 
+#endregion
+
 namespace JPB.DataAccess.MetaApi.Model
 {
-	[DebuggerDisplay("{MethodName}")]
-	[Serializable]
-	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>
-		where TAtt : class, IAttributeInfoCache, new()
-	{
-		private dynamic _getter;
-		private dynamic _setter;
-
-		public PropertyHelper(MethodBase accessorMethod)
-		{
-			base.MethodInfo = accessorMethod;
-			base.MethodName = accessorMethod.Name;
-		}
-
-		public void SetGet(dynamic getter)
-		{
-			_getter = getter;
-		}
-
-		public void SetSet(dynamic setter)
-		{
-			_setter = setter;
-		}
-
-		public override object Invoke(dynamic target, params dynamic[] param)
-		{
-			if (_getter != null)
-			{
-				return _getter(target);
-			}
-			var paramOne = param[0];
-			var result = _setter(target, paramOne);
-			return result;
-		}
-	}
-
 	/// <summary>
 	///     Infos about the Property
 	/// </summary>
@@ -70,7 +30,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// For internal use Only
+		///     For internal use Only
 		/// </summary>
 #if !DEBUG
 		[DebuggerHidden]
@@ -82,7 +42,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Internal use Only
+		///     Internal use Only
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <param name="anon"></param>
@@ -123,13 +83,13 @@ namespace JPB.DataAccess.MetaApi.Model
 							var getExpression = builder
 								.MakeGenericMethod(GetterDelegate)
 								.Invoke(null, new object[]
-						{
-							accessField,null
-						}) as dynamic;
+								{
+									accessField, null
+								}) as dynamic;
 
 							var getterDelegate = getExpression.Compile();
 							Getter = new PropertyHelper<TAtt>(getMethod);
-							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
+							((PropertyHelper<TAtt>) Getter).SetGet(getterDelegate);
 						}
 						if (setMethod != null)
 						{
@@ -141,23 +101,24 @@ namespace JPB.DataAccess.MetaApi.Model
 							var setExpression = builder
 								.MakeGenericMethod(SetterDelegate)
 								.Invoke(null, new object[]
-						{
-							setter,
-							new[]
-							{
-								valueRef
-							}
-						}) as dynamic;
+								{
+									setter,
+									new[]
+									{
+										valueRef
+									}
+								}) as dynamic;
 
 							var setterDelegate = setExpression.Compile();
 							Setter = new PropertyHelper<TAtt>(setMethod);
-							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
+							((PropertyHelper<TAtt>) Setter).SetSet(setterDelegate);
 						}
 					}
 					else
 					{
 						GetterDelegate = typeof(Func<,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType);
-						SetterDelegate = typeof(Func<,,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType, propertyInfo.DeclaringType);
+						SetterDelegate = typeof(Func<,,>).MakeGenericType(propertyInfo.DeclaringType, propertyInfo.PropertyType,
+							propertyInfo.DeclaringType);
 						var thisRef = Expression.Parameter(propertyInfo.DeclaringType, "that");
 
 						var accessField = Expression.MakeMemberAccess(thisRef, propertyInfo);
@@ -167,14 +128,14 @@ namespace JPB.DataAccess.MetaApi.Model
 							var getExpression = builder
 								.MakeGenericMethod(GetterDelegate)
 								.Invoke(null, new object[]
-						{
-							accessField,
-							new[] {thisRef}
-						}) as dynamic;
+								{
+									accessField,
+									new[] {thisRef}
+								}) as dynamic;
 
 							var getterDelegate = getExpression.Compile();
 							Getter = new PropertyHelper<TAtt>(getMethod);
-							((PropertyHelper<TAtt>)Getter).SetGet(getterDelegate);
+							((PropertyHelper<TAtt>) Getter).SetGet(getterDelegate);
 						}
 						if (setMethod != null)
 						{
@@ -189,14 +150,14 @@ namespace JPB.DataAccess.MetaApi.Model
 							var setExpression = builder
 								.MakeGenericMethod(SetterDelegate)
 								.Invoke(null, new object[]
-						{
-							Expression.Block(setter, returnMaybeValueType,retunLabel),
-							new[] {thisRef, valueRef}
-						}) as dynamic;
+								{
+									Expression.Block(setter, returnMaybeValueType, retunLabel),
+									new[] {thisRef, valueRef}
+								}) as dynamic;
 
 							var setterDelegate = setExpression.Compile();
 							Setter = new PropertyHelper<TAtt>(setMethod);
-							((PropertyHelper<TAtt>)Setter).SetSet(setterDelegate);
+							((PropertyHelper<TAtt>) Setter).SetSet(setterDelegate);
 						}
 					}
 				}
@@ -260,11 +221,15 @@ namespace JPB.DataAccess.MetaApi.Model
 		public HashSet<TAtt> Attributes { get; protected internal set; }
 
 		/// <summary>
-		/// Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+		///     Compares the current instance with another object of the same type and returns an integer that indicates whether
+		///     the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
 		/// </summary>
 		/// <param name="other">An object to compare with this instance.</param>
 		/// <returns>
-		/// A value that indicates the relative order of the objects being compared. The return value has these meanings: Value Meaning Less than zero This instance precedes <paramref name="other" /> in the sort order.  Zero This instance occurs in the same position in the sort order as <paramref name="other" />. Greater than zero This instance follows <paramref name="other" /> in the sort order.
+		///     A value that indicates the relative order of the objects being compared. The return value has these meanings: Value
+		///     Meaning Less than zero This instance precedes <paramref name="other" /> in the sort order.  Zero This instance
+		///     occurs in the same position in the sort order as <paramref name="other" />. Greater than zero This instance follows
+		///     <paramref name="other" /> in the sort order.
 		/// </returns>
 		public int CompareTo(IPropertyInfoCache<TAtt> other)
 		{
@@ -272,11 +237,11 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Indicates whether the current object is equal to another object of the same type.
+		///     Indicates whether the current object is equal to another object of the same type.
 		/// </summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns>
-		/// true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
+		///     true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
 		/// </returns>
 		public bool Equals(IPropertyInfoCache<TAtt> other)
 		{
@@ -284,10 +249,10 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Returns a hash code for this instance.
+		///     Returns a hash code for this instance.
 		/// </summary>
 		/// <returns>
-		/// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+		///     A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
 		/// </returns>
 		public override int GetHashCode()
 		{
@@ -310,7 +275,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			var propertyGetterExpression = Expression.Property(paramExpression, propertyName);
 			return
 				Expression.Lambda(delegateType, Expression.Assign(propertyGetterExpression, paramExpression2), paramExpression,
-					paramExpression2)
+						paramExpression2)
 					.Compile();
 		}
 	}
@@ -327,18 +292,14 @@ namespace JPB.DataAccess.MetaApi.Model
 			PropertyName = name;
 
 			if (setter != null)
-			{
 				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) =>
 				{
-					setter((T)o, (TE)objects[0]);
+					setter((T) o, (TE) objects[0]);
 					return null;
 				});
-			}
 
 			if (getter != null)
-			{
-				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) => getter((T)o));
-			}
+				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) => getter((T) o));
 		}
 	}
 }
