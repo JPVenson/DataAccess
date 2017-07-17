@@ -225,7 +225,7 @@ namespace JPB.DataAccess.DebuggerHelper
 			return retval;
 		}
 
-		internal void Render(StringBuilderInterlaced obj)
+		internal void Render(IStringBuilderInterlaced<ConsoleColorWrapper> obj)
 		{
 			Refresh();
 			obj.Up()
@@ -245,7 +245,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		/// </returns>
 		public override string ToString()
 		{
-			var sb = new StringBuilderInterlaced();
+			var sb = new ConsoleStringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}

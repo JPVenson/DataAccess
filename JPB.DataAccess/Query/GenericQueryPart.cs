@@ -16,7 +16,7 @@ namespace JPB.DataAccess.Query
 	/// <summary>
 	///     Wrapper for Generic QueryCommand parts
 	/// </summary>
-	public class GenericQueryPart : ICloneable
+	public class GenericQueryPart
 	{
 		private readonly IQueryBuilder _builder;
 
@@ -69,9 +69,9 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public object Clone()
+		public object Clone(IQueryBuilder builder)
 		{
-			return MemberwiseClone();
+			return new GenericQueryPart(Prefix, QueryParameters.Select(e => e.Clone()).ToList(), builder);
 		}
 
 		/// <summary>
@@ -93,7 +93,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public virtual string Render()
 		{
-			var sb = new StringBuilderInterlaced();
+			var sb = new ConsoleStringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}
@@ -102,7 +102,7 @@ namespace JPB.DataAccess.Query
 		///     For display
 		/// </summary>
 		/// <returns></returns>
-		internal virtual void Render(StringBuilderInterlaced sb)
+		internal virtual void Render(ConsoleStringBuilderInterlaced sb)
 		{
 			sb
 				.AppendInterlacedLine("new GenericQueryPart {")

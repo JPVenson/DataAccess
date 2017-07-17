@@ -18,10 +18,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	///     for internal use only
 	/// </summary>
 	public class DbClassInfoCache :
-		ClassInfoCache<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
+			ClassInfoCache
+			<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
 	{
-		private Dictionary<string, string> _invertedSchema;
-
 		/// <summary>
 		/// </summary>
 #if !DEBUG
@@ -40,6 +39,8 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			SchemaMappingValues = new Dictionary<string, string>();
 			Refresh(true);
 		}
+
+		private Dictionary<string, string> _invertedSchema;
 
 		/// <summary>
 		///     If enumerated a method that creats an Instance and then fills all propertys
@@ -85,7 +86,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			get
 			{
 				if (ForModel == null)
+				{
 					return Name.Split('.').Last();
+				}
 				return ForModel.Attribute.AlternatingName;
 			}
 		}
@@ -118,26 +121,33 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <param name="anon"></param>
 		/// <returns></returns>
 		public override
-			IClassInfoCache
-			<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument> Init(
-				Type type, bool anon = false)
+				IClassInfoCache
+				<DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument> Init(
+					Type type, bool anon = false)
 		{
 			var item = base.Init(type, anon);
 			//.ToDictionary(s => s.Key);
 			Propertys = new Dictionary<string, DbPropertyInfoCache>(Propertys
-				.Where(f => f.Value.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute)))
-				.ToDictionary(s => s.Key, f => f.Value));
+					.Where(f => f.Value.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute)))
+					.ToDictionary(s => s.Key, f => f.Value));
 			Mehtods =
-				new HashSet<DbMethodInfoCache>(Mehtods.Where(f => f.Attributes.All(d => !(d.Attribute is IgnoreReflectionAttribute))));
+					new HashSet<DbMethodInfoCache>(
+					Mehtods.Where(f => f.Attributes.All(d => !(d.Attribute is IgnoreReflectionAttribute))));
 			Constructors =
-				new HashSet<DbConstructorInfoCache>(
+					new HashSet<DbConstructorInfoCache>(
 					Constructors.Where(f => f.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
 			foreach (var dbPropertyInfoCach in Propertys)
+			{
 				dbPropertyInfoCach.Value.DeclaringClass = this;
+			}
 			foreach (var dbPropertyInfoCach in Mehtods)
+			{
 				dbPropertyInfoCach.DeclaringClass = this;
+			}
 			foreach (var dbPropertyInfoCach in Constructors)
+			{
 				dbPropertyInfoCach.DeclaringClass = this;
+			}
 
 			Refresh(true);
 			return item;
@@ -150,20 +160,18 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public void Refresh(bool withSubProperty)
 		{
 			if (withSubProperty)
+			{
 				foreach (var propertyInfoCach in Propertys)
+				{
 					propertyInfoCach.Value.Refresh();
+				}
+			}
 
-			ForModel =
-				DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(s => s.Attribute is ForModelAttribute));
-			SelectFactory =
-				DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(s => s.Attribute is SelectFactoryAttribute));
+			ForModel = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes);
+			SelectFactory = DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(Attributes);
 			var preConfig = MethodProxyAttribute == null;
 
-			MethodProxyAttribute =
-				DbAttributeInfoCache<MethodProxyAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(s => s.Attribute is MethodProxyAttribute));
+			MethodProxyAttribute = DbAttributeInfoCache<MethodProxyAttribute>.WrapperOrNull(Attributes);
 
 			HasRelations = Attributes.Any(s => s.Attribute is ForeignKeyAttribute);
 
@@ -177,31 +185,40 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			var hasAutoGeneratorAttribute = Attributes.Any(f => f.Attribute is AutoGenerateCtorAttribute);
 			if (hasAutoGeneratorAttribute && Factory == null)
+			{
 				CreateFactory(config);
+			}
 		}
 
 		internal void CheckForConfig(DbConfig config)
 		{
-			var configMethods = Mehtods
-				.Where(f => f.MethodInfo.IsStatic && f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
+			var targetType = this;
+
+			if (MethodProxyAttribute != null)
+			{
+				targetType = config.GetOrCreateClassInfoCache(MethodProxyAttribute.Attribute.MethodProxy);
+			}
+
+			var configMethods =
+					targetType.Mehtods.Where(f => f.MethodInfo.IsStatic && f.Attributes.Any(e => e.Attribute is ConfigMehtodAttribute)).ToArray();
 			if (configMethods.Any())
 			{
 				foreach (
-					var item in configMethods.Where(f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(DbConfig)))
+				var item in configMethods.Where(f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(DbConfig)))
+				{
 					item.MethodInfo.Invoke(null, new object[] {config});
+				}
 
 				var fod = config.GetOrCreateClassInfoCache(typeof(ConfigurationResolver<>)
-						.MakeGenericType(Type))
-					.Constructors
-					.First();
+						                .MakeGenericType(Type))
+				                .Constructors
+				                .First();
 
-				var resolver = fod
-					.Invoke(null, config, this);
-				foreach (
-					var item in
-					configMethods.Where(
-						f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(ConfigurationResolver<>).MakeGenericType(Type)))
+				var resolver = fod.Invoke(null, config, this);
+				foreach (var item in configMethods.Where(f => f.Arguments.Count == 1 && f.Arguments.First().Type == typeof(ConfigurationResolver<>).MakeGenericType(Type)))
+				{
 					item.MethodInfo.Invoke(null, new[] {resolver});
+				}
 				Refresh(true);
 			}
 			CheckCtor(config);
@@ -210,7 +227,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		internal void CreateFactory(DbConfig config)
 		{
 			if (!FullFactory)
+			{
 				Factory = FactoryHelper.CreateFactory(this, config.ConstructorSettings);
+			}
 			FullFactory = true;
 		}
 
@@ -218,7 +237,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			var mappings = SchemaMappingValues.FirstOrDefault(s => s.Key.Equals(cSharpName));
 			if (mappings.Equals(default(KeyValuePair<string, string>)))
+			{
 				return cSharpName;
+			}
 			return mappings.Value;
 		}
 
@@ -226,7 +247,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			string mappings;
 			if (!_invertedSchema.TryGetValue(databaseName, out mappings))
+			{
 				return databaseName;
+			}
 			return mappings;
 		}
 
@@ -237,7 +260,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			foreach (var item in Propertys)
 			{
 				if (item.Value.IgnoreAnyAttribute != null)
+				{
 					continue;
+				}
 				SchemaMappingValues.Add(item.Value.PropertyName, item.Value.DbName);
 				_invertedSchema.Add(item.Value.DbName, item.Value.PropertyName);
 			}

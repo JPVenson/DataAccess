@@ -20,15 +20,13 @@ namespace JPB.DataAccess.MetaApi.Model
 	[DebuggerDisplay("{Type.Name}")]
 	[Serializable]
 	public abstract class ClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
-		: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
+			: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
 		where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
 		where TMeth : class, IMethodInfoCache<TAttr, TArg>, new()
 		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
-		private Type _type;
-
 		internal ClassInfoCache(Type type, bool anon = false)
 		{
 			//this is ok.
@@ -49,6 +47,8 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 		}
 
+		private Type _type;
+
 		/// <summary>
 		///     The default constructor that takes no arguments if known
 		/// </summary>
@@ -68,30 +68,34 @@ namespace JPB.DataAccess.MetaApi.Model
 		public virtual IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> Init(Type type, bool anon = false)
 		{
 			if (type == null)
+			{
 				throw new ArgumentNullException("type");
+			}
 
 			if (!string.IsNullOrEmpty(Name))
+			{
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
+			}
 
 			Name = type.FullName;
 			Type = type;
 			Attributes = new HashSet<TAttr>(type
-				.GetCustomAttributes(true)
-				.Where(s => s is Attribute)
-				.Select(s => new TAttr().Init(s as Attribute) as TAttr));
+					.GetCustomAttributes(true)
+					.Where(s => s is Attribute)
+					.Select(s => new TAttr().Init(s as Attribute) as TAttr));
 			Propertys = new Dictionary<string, TProp>(type
-				.GetProperties(BindingFlags.Public | BindingFlags.Static |
-				               BindingFlags.NonPublic | BindingFlags.Instance)
-				.Select(s => new TProp().Init(s, anon) as TProp)
-				.ToDictionary(s => s.PropertyName, s => s));
+					.GetProperties(BindingFlags.Public | BindingFlags.Static |
+					               BindingFlags.NonPublic | BindingFlags.Instance)
+					.Select(s => new TProp().Init(s, anon) as TProp)
+					.ToDictionary(s => s.PropertyName, s => s));
 			Mehtods = new HashSet<TMeth>(type
-				.GetMethods(BindingFlags.Public | BindingFlags.Static |
-				            BindingFlags.NonPublic | BindingFlags.Instance)
-				.Select(s => new TMeth().Init(s) as TMeth));
+					.GetMethods(BindingFlags.Public | BindingFlags.Static |
+					            BindingFlags.NonPublic | BindingFlags.Instance)
+					.Select(s => new TMeth().Init(s) as TMeth));
 			Constructors = new HashSet<TCtor>(type
-				.GetConstructors(BindingFlags.Public | BindingFlags.Static |
-				                 BindingFlags.NonPublic | BindingFlags.Instance)
-				.Select(s => new TCtor().Init(s) as TCtor));
+					.GetConstructors(BindingFlags.Public | BindingFlags.Static |
+					                 BindingFlags.NonPublic | BindingFlags.Instance)
+					.Select(s => new TCtor().Init(s) as TCtor));
 			var defaultConstructor = Constructors.FirstOrDefault(f => !f.Arguments.Any());
 
 			//if (type.IsValueType)
@@ -116,22 +120,26 @@ namespace JPB.DataAccess.MetaApi.Model
 				Expression defaultExpression = null;
 
 				if (type.IsValueType)
+				{
 					defaultExpression = Expression.Default(type);
+				}
 				else if (defaultConstructor != null)
+				{
 					defaultExpression = Expression.New(defaultConstructor.MethodInfo as ConstructorInfo);
+				}
 
 				var dynamicAccess = typeof(Expression)
-					.GetMethods()
-					.First(s => s.Name == "Lambda")
-					.MakeGenericMethod(
+						.GetMethods()
+						.First(s => s.Name == "Lambda")
+						.MakeGenericMethod(
 						typeof(Func<>)
-							.MakeGenericType(type)
-					)
-					.Invoke(null, new object[]
-					{
-						defaultExpression, null
-					});
-				var expressionBuilder = dynamicAccess.GetType().GetMethods().FirstOrDefault(s => s.Name == "Compile");
+								.MakeGenericType(type)
+						)
+						.Invoke(null, new object[]
+						{
+							defaultExpression, null
+						});
+				var expressionBuilder = dynamicAccess.GetType().GetMethods().First(s => s.Name == "Compile");
 
 				DefaultFactory = expressionBuilder.Invoke(dynamicAccess, null);
 			}
@@ -180,7 +188,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		public object New()
 		{
 			if (DefaultFactory != null)
+			{
 				return DefaultFactory();
+			}
 			return Expression.Lambda(Expression.Default(Type)).Compile().DynamicInvoke();
 		}
 

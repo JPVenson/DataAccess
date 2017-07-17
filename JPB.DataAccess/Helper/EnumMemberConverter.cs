@@ -27,7 +27,7 @@ namespace JPB.DataAccess.Helper
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			if (targetType.IsEnum)
-				return Enum.ToObject(targetType, value);
+				return Enum.Parse(targetType, value.ToString(), true);
 			throw new InvalidCastException("No enum member Provided");
 		}
 
@@ -41,7 +41,15 @@ namespace JPB.DataAccess.Helper
 		/// <returns></returns>
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			return (int) value;
+			if (targetType == typeof(int))
+			{
+				return (int)value;
+			}
+			if (targetType == typeof(string))
+			{
+				return (string) value;
+			}
+			return value;
 		}
 	}
 }

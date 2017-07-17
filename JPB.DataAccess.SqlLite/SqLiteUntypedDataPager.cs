@@ -1,5 +1,5 @@
 ﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 Please consider to give some Feedback on CodeProject
 
@@ -16,6 +16,7 @@ using System.Linq;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.SqLite
 {
@@ -123,10 +124,7 @@ namespace JPB.DataAccess.SqLite
 
 			var selectMaxCommand = dbAccess
 				.Query()
-				.WithCte("CTE", f =>
-				{
-					f.QueryCommand(finalAppendCommand);
-				})
+				.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
 				.QueryText("SELECT COUNT(*) FROM CTE")
 				.ContainerObject
 				.Compile();
@@ -144,7 +142,7 @@ namespace JPB.DataAccess.SqLite
 			IDbCommand command;
 
 			command = dbAccess.Query()
-					.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
+					.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
 					.QueryText("SELECT * FROM CTE")
 					.QueryD("ASC LIMIT @PageSize OFFSET @PagedRows", new
 					{
@@ -204,7 +202,7 @@ namespace JPB.DataAccess.SqLite
 			var handler = NewPageLoading;
 			if (handler != null) handler();
 		}
-		
+
 		public void Dispose()
 		{
 			BaseQuery.Dispose();

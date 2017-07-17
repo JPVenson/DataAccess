@@ -58,12 +58,12 @@ namespace JPB.DataAccess.Helper
 		/// <returns></returns>
 		public string Render()
 		{
-			var sb = new StringBuilderInterlaced();
+			var sb = new ConsoleStringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}
 
-		internal void Render(StringBuilderInterlaced sb)
+		internal void Render(ConsoleStringBuilderInterlaced sb)
 		{
 			var value = "{Null}";
 			if (Value != null)
@@ -128,6 +128,11 @@ namespace JPB.DataAccess.Helper
 		///     The SQL Type of the Parameter generated from SourceType
 		/// </summary>
 		public DbType SourceDbType { get; set; }
+
+		public IQueryParameter Clone()
+		{
+			return new QueryParameter(Name, Value, SourceDbType);
+		}
 
 		#endregion
 	}

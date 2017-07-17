@@ -69,6 +69,12 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
+		/// Contains the C# Return type of this Instance if known.
+		/// Can Be null
+		/// </summary>
+		public virtual Type ReturnType { get; protected internal set; }
+
+		/// <summary>
 		///     Direct Reflection
 		/// </summary>
 		public virtual MethodBase MethodInfo { get; protected internal set; }
@@ -153,6 +159,11 @@ namespace JPB.DataAccess.MetaApi.Model
 			if (mehtodInfo == null)
 				throw new ArgumentNullException("mehtodInfo");
 			MethodInfo = mehtodInfo;
+			if (mehtodInfo is MethodInfo)
+			{
+				ReturnType = (mehtodInfo as MethodInfo).ReturnType;
+			}
+
 			if (string.IsNullOrEmpty(name))
 				MethodName = mehtodInfo.Name;
 			else

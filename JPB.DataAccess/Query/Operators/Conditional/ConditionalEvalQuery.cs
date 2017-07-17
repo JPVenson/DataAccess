@@ -16,7 +16,26 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		///     The current query state
 		/// </summary>
-		public readonly CondtionBuilderState State;
+		public CondtionBuilderState State { get; private set; }
+
+		/// <summary>
+		///     Initializes a new instance of the <see cref="ConditionalEvalQuery{TPoco}" /> class.
+		/// </summary>
+		/// <param name="database">The database.</param>
+		/// <param name="state">The state.</param>
+		public ConditionalEvalQuery(ConditionalEvalQuery<TPoco> database) : base(database)
+		{
+			State = database.State;
+		}
+
+		public ConditionalEvalQuery(IQueryBuilder builder) : base(builder)
+		{
+			State = new CondtionBuilderState(null);
+			if (builder is IStateQuery)
+			{
+				State = ((IStateQuery)builder).State;
+			}
+		}
 
 		/// <summary>
 		///     Initializes a new instance of the <see cref="ConditionalEvalQuery{TPoco}" /> class.

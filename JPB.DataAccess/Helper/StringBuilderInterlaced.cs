@@ -1,10 +1,13 @@
 ﻿#region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.Threading;
 
 #endregion
 
@@ -13,13 +16,13 @@ namespace JPB.DataAccess.Helper
 	/// <summary>
 	///     Allows building of strings in a interlaced and colored way
 	/// </summary>
-	public class StringBuilderInterlaced
+	public class StringBuilderInterlaced<TColor> : IStringBuilderInterlaced<TColor>, ICollection where TColor : class, new()
 	{
-		private readonly uint _interlacedSpace = 4;
+		private readonly uint _interlacedSpace;
 
-		private readonly List<ColoredString> _source;
+		private readonly List<ITextWithColor<TColor>> _source;
 		private readonly bool _transformInterlaced;
-		private ConsoleColor? _color;
+		private TColor _color;
 		private int _interlacedLevel;
 
 		/// <summary>
@@ -30,15 +33,18 @@ namespace JPB.DataAccess.Helper
 		{
 			_interlacedSpace = intedtSize;
 			_transformInterlaced = transformInterlaced;
-			_source = new List<ColoredString>();
+			_source = new List<ITextWithColor<TColor>>();
+			SyncRoot = new object();
 		}
+
+
 
 		/// <summary>
 		///     Sets the color for all Folloring Text parts
 		/// </summary>
 		/// <param name="color">The color.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced Color(ConsoleColor color)
+		public virtual IStringBuilderInterlaced<TColor> Color(TColor color)
 		{
 			_color = color;
 			return this;
@@ -48,7 +54,7 @@ namespace JPB.DataAccess.Helper
 		///     Reverts the color.
 		/// </summary>
 		/// <returns></returns>
-		public StringBuilderInterlaced RevertColor()
+		public virtual IStringBuilderInterlaced<TColor> RevertColor()
 		{
 			_color = null;
 			return this;
@@ -58,7 +64,7 @@ namespace JPB.DataAccess.Helper
 		///     increases all folloring Text parts by 1
 		/// </summary>
 		/// <returns></returns>
-		public StringBuilderInterlaced Up()
+		public virtual IStringBuilderInterlaced<TColor> Up()
 		{
 			_interlacedLevel++;
 			return this;
@@ -68,7 +74,7 @@ namespace JPB.DataAccess.Helper
 		///     decreases all folloring Text parts by 1
 		/// </summary>
 		/// <returns></returns>
-		public StringBuilderInterlaced Down()
+		public virtual IStringBuilderInterlaced<TColor> Down()
 		{
 			if (_interlacedLevel > 0)
 				_interlacedLevel--;
@@ -79,7 +85,7 @@ namespace JPB.DataAccess.Helper
 		///     Appends the line.
 		/// </summary>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendLine()
+		public virtual IStringBuilderInterlaced<TColor> AppendLine()
 		{
 			return Append(Environment.NewLine);
 		}
@@ -89,12 +95,21 @@ namespace JPB.DataAccess.Helper
 			var text = "";
 			if (_transformInterlaced)
 				for (var i = 0; i < _interlacedLevel; i++)
-				for (var j = 0; j < _interlacedSpace; j++)
-					text += " ";
+					for (var j = 0; j < _interlacedSpace; j++)
+						text += " ";
 			else
 				for (var i = 0; i < _interlacedLevel; i++)
 					text += "\t";
-			_source.Add(new ColoredString(text));
+			Add(new ColoredString(text));
+		}
+
+		private void Add(ITextWithColor<TColor> text)
+		{
+			lock (SyncRoot)
+			{
+				_source.Add(text);
+				Count += text.Text.Length;
+			}
 		}
 
 		/// <summary>
@@ -103,7 +118,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="color">The color.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendInterlacedLine(string value, ConsoleColor? color = null)
+		public virtual IStringBuilderInterlaced<TColor> AppendInterlacedLine(string value, TColor color = null)
 		{
 			ApplyLevel();
 			return AppendLine(value, color);
@@ -115,7 +130,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="color">The color.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendInterlaced(string value, ConsoleColor? color = null)
+		public virtual IStringBuilderInterlaced<TColor> AppendInterlaced(string value, TColor color = null)
 		{
 			ApplyLevel();
 			return Append(value, color);
@@ -126,7 +141,7 @@ namespace JPB.DataAccess.Helper
 		/// </summary>
 		/// <param name="del">The delete.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced Insert(Action<StringBuilderInterlaced> del)
+		public virtual IStringBuilderInterlaced<TColor> Insert(Action<IStringBuilderInterlaced<TColor>> del)
 		{
 			del(this);
 			return this;
@@ -137,10 +152,12 @@ namespace JPB.DataAccess.Helper
 		/// </summary>
 		/// <param name="writer">The writer.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced Insert(StringBuilderInterlaced writer)
+		public virtual IStringBuilderInterlaced<TColor> Insert(IStringBuilderInterlaced<TColor> writer)
 		{
-			foreach (var coloredString in writer._source)
-				_source.Add(coloredString);
+			foreach (var textWithColor in (IEnumerable<ITextWithColor<TColor>>)writer)
+			{
+				Add(textWithColor);
+			}
 			return this;
 		}
 
@@ -150,11 +167,11 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="color">The color.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced Append(string value, ConsoleColor? color = null)
+		public virtual IStringBuilderInterlaced<TColor> Append(string value, TColor color = null)
 		{
 			if (color == null)
 				color = _color;
-			_source.Add(new ColoredString(value, color));
+			Add(new ColoredString(value, color));
 			return this;
 		}
 
@@ -164,7 +181,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="color">The color.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendLine(string value, ConsoleColor? color = null)
+		public virtual IStringBuilderInterlaced<TColor> AppendLine(string value, TColor color = null)
 		{
 			return Append(value + Environment.NewLine, color);
 		}
@@ -175,7 +192,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced Append(string value, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> Append(string value, params object[] values)
 		{
 			return Append(string.Format(value, values));
 		}
@@ -186,7 +203,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendLine(string value, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> AppendLine(string value, params object[] values)
 		{
 			return Append(string.Format(value, values) + Environment.NewLine);
 		}
@@ -197,7 +214,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendInterlacedLine(string value, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> AppendInterlacedLine(string value, params object[] values)
 		{
 			return AppendInterlacedLine(string.Format(value, values));
 		}
@@ -208,7 +225,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="value">The value.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendInterlaced(string value, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> AppendInterlaced(string value, params object[] values)
 		{
 			return AppendInterlaced(string.Format(value, values));
 		}
@@ -220,7 +237,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="color">The color.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced Append(string value, ConsoleColor? color = null, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> Append(string value, TColor color = null, params object[] values)
 		{
 			return Append(string.Format(value, values), color);
 		}
@@ -232,7 +249,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="color">The color.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendLine(string value, ConsoleColor? color = null, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> AppendLine(string value, TColor color = null, params object[] values)
 		{
 			Append(string.Format(value, values) + Environment.NewLine, color);
 			return this;
@@ -245,7 +262,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="color">The color.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendInterlacedLine(string value, ConsoleColor? color = null, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> AppendInterlacedLine(string value, TColor color = null, params object[] values)
 		{
 			return AppendInterlacedLine(string.Format(value, values), color);
 		}
@@ -257,7 +274,7 @@ namespace JPB.DataAccess.Helper
 		/// <param name="color">The color.</param>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		public StringBuilderInterlaced AppendInterlaced(string value, ConsoleColor? color = null, params object[] values)
+		public virtual IStringBuilderInterlaced<TColor> AppendInterlaced(string value, TColor color = null, params object[] values)
 		{
 			return AppendInterlaced(string.Format(value, values), color);
 		}
@@ -268,41 +285,36 @@ namespace JPB.DataAccess.Helper
 		/// <param name="output">The output.</param>
 		/// <param name="changeColor">Color of the change.</param>
 		/// <param name="changeColorBack">The change color back.</param>
-		public void WriteToSteam(TextWriter output, Action<ConsoleColor> changeColor, Action changeColorBack)
+		public virtual void WriteToSteam(TextWriter output, Action<TColor> changeColor, Action changeColorBack)
 		{
-			ConsoleColor? color = null;
+			TColor color = null;
 			var sb = new StringBuilder();
-			foreach (var coloredString in _source)
+			lock (SyncRoot)
 			{
-				var nColor = coloredString.GetColor();
-				if (nColor != color && sb.Length > 0)
+				foreach (var coloredString in _source)
 				{
-					//write buffer to output
-					if (color.HasValue)
-						changeColor(color.Value);
-					output.Write(sb.ToString());
-					if (color.HasValue)
-						changeColorBack();
-					sb.Clear();
+					var nColor = coloredString.Color;
+					if (nColor != color && sb.Length > 0)
+					{
+						//write buffer to output
+						if (color != null)
+							changeColor(color);
+						output.Write(sb.ToString());
+						if (color != null)
+							changeColorBack();
+						sb.Clear();
+					}
+
+					sb.Append(coloredString);
+					color = nColor;
 				}
-
-				sb.Append(coloredString);
-				color = nColor;
 			}
-			if (color.HasValue)
-				changeColor(color.Value);
-			output.Write(sb.ToString());
-			if (color.HasValue)
-				changeColorBack();
-		}
 
-		/// <summary>
-		///     Writes to console.
-		/// </summary>
-		public void WriteToConsole()
-		{
-			WriteToSteam(Console.Out, color => Console.ForegroundColor = color,
-				() => Console.ForegroundColor = ConsoleColor.White);
+			if (color != null)
+				changeColor(color);
+			output.Write(sb.ToString());
+			if (color != null)
+				changeColorBack();
 		}
 
 		/// <summary>
@@ -313,21 +325,55 @@ namespace JPB.DataAccess.Helper
 		/// </returns>
 		public override string ToString()
 		{
-			return _source.Select(f => f.ToString()).Aggregate((e,f) => e + f).ToString();
+			return _source.Select(f => f.ToString()).Aggregate((e, f) => e + f).ToString();
 		}
 
-		struct ColoredString
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			private string _text;
-			private ConsoleColor? _color;
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
 
-			public ColoredString(string text, ConsoleColor? color = null)
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			return this._source.Select(f => f.Text).GetEnumerator();
+		}
+
+		IEnumerator<ITextWithColor<TColor>> IEnumerable<ITextWithColor<TColor>>.GetEnumerator()
+		{
+			return this._source.GetEnumerator();
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			throw new NotImplementedException();
+		}
+		/// <summary>
+		/// return the Count of all Text-String elements
+		/// </summary>
+		public int Count { get; private set; }
+		/// <summary>
+		/// Returns the internal String length
+		/// </summary>
+		public int Length { get; set; }
+		public object SyncRoot { get; private set; }
+
+		public bool IsSynchronized
+		{
+			get { return Monitor.IsEntered(SyncRoot); }
+		}
+
+		struct ColoredString : ITextWithColor<TColor>
+		{
+			private readonly string _text;
+			private readonly TColor _color;
+
+			public ColoredString(string text, TColor color = null)
 			{
 				_color = color;
 				_text = text;
 			}
 
-			public ConsoleColor? GetColor()
+			public TColor GetColor()
 			{
 				return _color;
 			}
@@ -336,6 +382,49 @@ namespace JPB.DataAccess.Helper
 			{
 				return _text;
 			}
+
+			public TColor Color
+			{
+				get
+				{
+					return _color;
+				}
+			}
+
+			public string Text
+			{
+				get
+				{
+					return _text;
+				}
+			}
+		}
+	}
+
+	public class ConsoleStringBuilderInterlaced : StringBuilderInterlaced<ConsoleColorWrapper>
+	{
+		/// <summary>
+		///     Writes to console.
+		/// </summary>
+		public virtual void WriteToConsole()
+		{
+			WriteToSteam(Console.Out, color => Console.ForegroundColor = color,
+				() => Console.ForegroundColor = ConsoleColor.White);
+		}
+	}
+
+	public class ConsoleColorWrapper
+	{
+		public ConsoleColor Value { get; private set; }
+
+		public static implicit operator ConsoleColor(ConsoleColorWrapper wrapper)
+		{
+			return wrapper.Value;
+		}
+
+		public static implicit operator ConsoleColorWrapper(ConsoleColor wrapper)
+		{
+			return new ConsoleColorWrapper() { Value = wrapper };
 		}
 	}
 }

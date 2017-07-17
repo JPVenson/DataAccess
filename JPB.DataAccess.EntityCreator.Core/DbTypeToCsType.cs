@@ -1,11 +1,4 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+#region
 
 using System;
 using System.Collections.Generic;
@@ -16,118 +9,105 @@ using JPB.DataAccess.Contacts;
 using Microsoft.SqlServer.Server;
 using Microsoft.SqlServer.Types;
 
+#endregion
+
 namespace JPB.DataAccess.EntityCreator.Core
 {
-    public class DbTypeToCsType : IValueConverter
-    {
-        static DbTypeToCsType()
-        {
-            var all = typeof(SqlGeography).Assembly.GetTypes();
+	public class DbTypeToCsType : IValueConverter
+	{
+		public static Dictionary<string, Type> UserDefinedTypes { get; } = new Dictionary<string, Type>();
+		public static Dictionary<SqlDbType, Type> SqlDefinedTypes { get; } = new Dictionary<SqlDbType, Type>();
 
-            foreach (var item in all)
-            {
-                var attributes = item.GetCustomAttributes(true);
+		static DbTypeToCsType()
+		{
+			var all = typeof(SqlGeography).Assembly.GetTypes();
 
-                if(attributes.Any(f => f is SqlUserDefinedTypeAttribute))
-                {
-                    _userDefinedTypes.Add(item.Name.Replace("Sql", ""), item);
-                }
-            }
-        }
+			foreach (var item in all)
+			{
+				var attributes = item.GetCustomAttributes(true);
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return GetClrType(value as string);
-        }
+				if (attributes.Any(f => f is SqlUserDefinedTypeAttribute))
+				{
+					UserDefinedTypes.Add(item.Name.Replace("Sql", ""), item);
+				}
+			}
 
-        private static Dictionary<string, Type> _userDefinedTypes = new Dictionary<string, Type>();
+			SqlDefinedTypes.Add(SqlDbType.BigInt, typeof(long));
 
+			SqlDefinedTypes.Add(SqlDbType.Binary, typeof(byte[]));
+			SqlDefinedTypes.Add(SqlDbType.Image, typeof(byte[]));
+			SqlDefinedTypes.Add(SqlDbType.Timestamp, typeof(byte[]));
+			SqlDefinedTypes.Add(SqlDbType.VarBinary, typeof(byte[]));
 
-        public static Type GetClrType(string sqlType)
-        {
-            SqlDbType result;
-            var resultState = Enum.TryParse(sqlType, true, out result);
-            if(!resultState)
-            {
-                return _userDefinedTypes.FirstOrDefault(s => s.Key.ToLower() == sqlType).Value;
-            }           
+			SqlDefinedTypes.Add(SqlDbType.TinyInt, typeof(byte));
 
-            return GetClrType(result);
-        }
+			SqlDefinedTypes.Add(SqlDbType.Bit, typeof(bool));
 
-        public static Type GetClrType(SqlDbType sqlType)
-        {
-            switch (sqlType)
-            {
-                case SqlDbType.BigInt:
-                    return typeof(long);
+			SqlDefinedTypes.Add(SqlDbType.Char, typeof(string));
+			SqlDefinedTypes.Add(SqlDbType.NChar, typeof(string));
+			SqlDefinedTypes.Add(SqlDbType.NText, typeof(string));
+			SqlDefinedTypes.Add(SqlDbType.NVarChar, typeof(string));
+			SqlDefinedTypes.Add(SqlDbType.Text, typeof(string));
+			SqlDefinedTypes.Add(SqlDbType.VarChar, typeof(string));
+			SqlDefinedTypes.Add(SqlDbType.Xml, typeof(string));
 
-                case SqlDbType.Binary:
-                case SqlDbType.Image:
-                case SqlDbType.Timestamp:
-                case SqlDbType.VarBinary:
-                    return typeof(byte[]);
+			SqlDefinedTypes.Add(SqlDbType.DateTime, typeof(DateTime));
+			SqlDefinedTypes.Add(SqlDbType.SmallDateTime, typeof(DateTime));
+			SqlDefinedTypes.Add(SqlDbType.Date, typeof(DateTime));
+			SqlDefinedTypes.Add(SqlDbType.Time, typeof(DateTime));
+			SqlDefinedTypes.Add(SqlDbType.DateTime2, typeof(DateTime));
 
-                case SqlDbType.Bit:
-                    return typeof(bool);
+			SqlDefinedTypes.Add(SqlDbType.Decimal, typeof(decimal));
+			SqlDefinedTypes.Add(SqlDbType.Money, typeof(decimal));
+			SqlDefinedTypes.Add(SqlDbType.SmallMoney, typeof(decimal));
 
-                case SqlDbType.Char:
-                case SqlDbType.NChar:
-                case SqlDbType.NText:
-                case SqlDbType.NVarChar:
-                case SqlDbType.Text:
-                case SqlDbType.VarChar:
-                case SqlDbType.Xml:
-                    return typeof(string);
+			SqlDefinedTypes.Add(SqlDbType.Float, typeof(double));
 
-                case SqlDbType.DateTime:
-                case SqlDbType.SmallDateTime:
-                case SqlDbType.Date:
-                case SqlDbType.Time:
-                case SqlDbType.DateTime2:
-                    return typeof(DateTime?);
+			SqlDefinedTypes.Add(SqlDbType.Int, typeof(int));
 
-                case SqlDbType.Decimal:
-                case SqlDbType.Money:
-                case SqlDbType.SmallMoney:
-                    return typeof(decimal);
+			SqlDefinedTypes.Add(SqlDbType.Real, typeof(float));
 
-                case SqlDbType.Float:
-                    return typeof(double);
+			SqlDefinedTypes.Add(SqlDbType.UniqueIdentifier, typeof(Guid));
 
-                case SqlDbType.Int:
-                    return typeof(int);
+			SqlDefinedTypes.Add(SqlDbType.SmallInt, typeof(short));
 
-                case SqlDbType.Real:
-                    return typeof(float);
+			SqlDefinedTypes.Add(SqlDbType.Variant, typeof(object));
+			SqlDefinedTypes.Add(SqlDbType.Udt, typeof(object));
 
-                case SqlDbType.UniqueIdentifier:
-                    return typeof(Guid);
+			SqlDefinedTypes.Add(SqlDbType.Structured, typeof(DataTable));
+			SqlDefinedTypes.Add(SqlDbType.DateTimeOffset, typeof(DateTimeOffset));
+		}
 
-                case SqlDbType.SmallInt:
-                    return typeof(short);
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return GetClrType(value as string);
+		}
 
-                case SqlDbType.TinyInt:
-                    return typeof(byte);
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			var t = (Type)value;
 
-                case SqlDbType.Variant:
-                case SqlDbType.Udt:
-                    return typeof(object);
+			foreach (var sqlDefinedType in SqlDefinedTypes)
+			{
+				if (sqlDefinedType.Value == t)
+					return sqlDefinedType.Key;
+			}
+			return SqlDbType.Variant;
+		}
 
-                case SqlDbType.Structured:
-                    return typeof(DataTable);
-
-                case SqlDbType.DateTimeOffset:
-                    return typeof(DateTimeOffset?);
-
-                default:
-                    throw new ArgumentOutOfRangeException("sqlType");
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
+		public static Type GetClrType(string sqlType)
+		{
+			SqlDbType result;
+			var resultState = Enum.TryParse(sqlType, true, out result);
+			if (!resultState)
+			{
+				return UserDefinedTypes.FirstOrDefault(s => s.Key.ToLower() == sqlType).Value;
+			}
+			return SqlDefinedTypes[result];
+		}
+		public static Type GetClrType(SqlDbType sqlType)
+		{
+			return SqlDefinedTypes[sqlType];
+		}
+	}
 }

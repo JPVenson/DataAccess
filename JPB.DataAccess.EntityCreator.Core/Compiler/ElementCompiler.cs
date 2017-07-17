@@ -98,8 +98,14 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			{
 				var dbInfoCache = new DbPropertyInfoCache();
 				dic.Add(dbInfoCache);
+				dbInfoCache.Init(null, true);
 				dbInfoCache.PropertyName = item.GetPropertyName();
+
 				dbInfoCache.PropertyType = item.ColumnInfo.TargetType;
+				if (item.ColumnInfo.Nullable && !item.ColumnInfo.TargetType.IsClass)
+				{
+					dbInfoCache.PropertyType = typeof(Nullable<>).MakeGenericType(item.ColumnInfo.TargetType);
+				}
 				if (item.NewColumnName != item.ColumnInfo.ColumnName)
 				{
 					dbInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(item.ColumnInfo.ColumnName)));

@@ -34,7 +34,7 @@ namespace JPB.DataAccess.Query.Contracts
 		///     Clones all items inside the current Builder into a new One
 		/// </summary>
 		/// <returns></returns>
-		IQueryBuilder Clone();
+		//IQueryBuilder Clone();
 
 		/// <summary>
 		///     Gets an enumerator for the Current Query
@@ -42,5 +42,13 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <typeparam name="TPoco"></typeparam>
 		/// <returns></returns>
 		IEnumerator<TPoco> GetEnumerator<TPoco>();
+
+		/// <summary>
+		/// Internal Usage only
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		IQueryBuilder CloneWith<T>(T instance) where T: IQueryBuilder;
 	}
 }

@@ -24,6 +24,16 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// </summary>
 		/// <param name="database">The database.</param>
 		/// <param name="state">The state.</param>
+		public ConditionalColumnQuery(ConditionalColumnQuery<TPoco> database) : base(database)
+		{
+			State = database.State;
+		}
+
+		/// <summary>
+		///     Initializes a new instance of the <see cref="ConditionalColumnQuery{TPoco}" /> class.
+		/// </summary>
+		/// <param name="database">The database.</param>
+		/// <param name="state">The state.</param>
 		public ConditionalColumnQuery(IQueryBuilder database, CondtionBuilderState state) : base(database)
 		{
 			State = state;
@@ -67,8 +77,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// </summary>
 		public ConditionalEvalQuery<TPoco> IsQueryOperatorValue(string value)
 		{
-			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ(value), State);
+			return new ConditionalEvalQuery<TPoco>(this.QueryQ(value), State);
 		}
 
 		/// <summary>

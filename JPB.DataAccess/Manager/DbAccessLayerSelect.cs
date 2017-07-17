@@ -349,8 +349,7 @@ namespace JPB.DataAccess.Manager
 
 					var method = searchMethodWithFittingParams.First();
 					//must be public static if its an Select otherwise it has to be an instance member
-					if (
-						factoryAttribute == typeof(SelectFactoryMethodAttribute)
+					if (factoryAttribute == typeof(SelectFactoryMethodAttribute)
 						&& !method.MethodInfo.IsStatic
 						|| factoryAttribute != typeof(SelectFactoryMethodAttribute)
 						&& method.MethodInfo.IsStatic)
@@ -365,6 +364,11 @@ namespace JPB.DataAccess.Manager
 					IQueryBuilder queryBuilder = null;
 					if (dbMethodArgument != null && dbMethodArgument.Type == typeof(RootQuery))
 					{
+						if (method.ReturnType != typeof(IQueryBuilder))
+						{
+							ThrowNoFactoryFoundException<TE>(arguments);
+						}
+
 						queryBuilder = Query();
 						if (cleanParams == null)
 							cleanParams = new List<object>();
@@ -374,22 +378,29 @@ namespace JPB.DataAccess.Manager
 
 					object invoke;
 					if (cleanParams != null)
+					{
 						invoke = method.Invoke(entity, cleanParams.ToArray());
+					}
 					else
+					{
 						invoke = method.Invoke(entity);
+					}
 					if (invoke != null)
 					{
-						if (invoke is string && !string.IsNullOrEmpty(invoke as string))
+						if (invoke is IQueryBuilder)
+						{
+							return (invoke as IQueryBuilder).ContainerObject.Compile();
+						}
+
+						if (!string.IsNullOrEmpty(invoke as string))
+						{
 							return DbAccessLayerHelper.CreateCommand(Database, invoke as string);
+						}
 						if (invoke is IQueryFactoryResult)
 						{
 							var result = invoke as IQueryFactoryResult;
 							return Database.CreateCommandWithParameterValues(result.Query, result.Parameters);
 						}
-					}
-					else if (queryBuilder != null)
-					{
-						return queryBuilder.ContainerObject.Compile();
 					}
 				}
 				if (CheckFactoryArguments && arguments.Any())

@@ -1,35 +1,29 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+#region
 
 using System;
+using System.Data;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.QueryFactory;
 
+#endregion
+
 namespace JPB.DataAccess.EntityCreator.Core.Poco
 {
 	[Serializable]
 	public class ColumnInfo : IColumnInfo
 	{
-		private string _targetType2;
-
-		[SelectFactoryMethod()]
-		public static IQueryFactoryResult SelectColumns(string tableName, string database)
+		public ColumnInfo()
 		{
-			return new QueryFactoryResult("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND TABLE_CATALOG = @database", new[]
-			{
-				new QueryParameter("@tableName", tableName),
-				new QueryParameter("@database", database)
-			});
+			;
+			;
 		}
+
+		[ForModel("DATA_TYPE")]
+		[ValueConverter(typeof(EnumMemberConverter))]
+		public SqlDbType SqlType { get; set; }
 
 		[ForModel("COLUMN_NAME")]
 		public string ColumnName { get; set; }
@@ -41,24 +35,17 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		[ValueConverter(typeof(NoYesConverter))]
 		public bool Nullable { get; set; }
 
+		[ForModel("DATA_TYPE2")]
+		[ValueConverter(typeof(DbTypeToCsType))]
 		public Type TargetType { get; set; }
 
-		[ForModel("DATA_TYPE")]
-		public string TargetType2
+		[SelectFactoryMethod]
+		public static IQueryFactoryResult SelectColumns(string tableName, string database)
 		{
-			get { return _targetType2; }
-			set
-			{
-				TargetType = DbTypeToCsType.GetClrType(value);
-				if(TargetType == null)
-					return;
-
-				if (Nullable && !TargetType.IsClass && !TargetType.Name.StartsWith("Nullable"))
-				{
-					TargetType = typeof (Nullable<>).MakeGenericType(TargetType);
-				}
-				_targetType2 = value;
-			}
+			return
+					new QueryFactoryResult(
+					"SELECT *, DATA_TYPE AS DATA_TYPE2 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND TABLE_CATALOG = @database",
+					new QueryParameter("@tableName", tableName), new QueryParameter("@database", database));
 		}
 	}
 }

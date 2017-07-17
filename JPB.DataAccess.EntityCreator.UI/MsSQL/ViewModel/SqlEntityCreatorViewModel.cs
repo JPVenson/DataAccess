@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
@@ -14,19 +16,41 @@ using JPB.DataAccess.EntityCreator.Core;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
-using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models;
 using JPB.DataAccess.Manager;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
 using Microsoft.Data.ConnectionUI;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+
+#endregion
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
 	public class SqlEntityCreatorViewModel : AsyncViewModelBase, IMsSqlCreator
 	{
+		public SqlEntityCreatorViewModel()
+		{
+			AdjustNamesCommand = new DelegateCommand(AdjustNamesExecute, CanAdjustNamesExecute);
+			CompileCommand = new DelegateCommand(CompileExecute, CanCompileExecute);
+			ConnectToDatabaseCommand = new DelegateCommand(ConnectToDatabaseExecute, CanConnectToDatabaseExecute);
+			SaveConfigCommand = new DelegateCommand(SaveConfigExecute, CanSaveConfigExecute);
+			LoadConfigCommand = new DelegateCommand(LoadConfigExecute, CanLoadConfigExecute);
+			OpenInfoWindowCommand = new DelegateCommand(OpenInfoWindowExecute);
+			DeleteSelectedTableCommand = new DelegateCommand(DeleteSelectedTableExecute, CanDeleteSelectedTableExecute);
+			AddTableCommand = new DelegateCommand(AddTableExecute, CanAddTableExecute);
+
+			Tables = new ThreadSaveObservableCollection<TableInfoViewModel>();
+			Views = new ThreadSaveObservableCollection<TableInfoViewModel>();
+			StoredProcs = new ThreadSaveObservableCollection<IStoredPrcInfoModel>();
+			Enums = new ThreadSaveObservableCollection<Dictionary<int, string>>();
+			SharedInterfaces = new ThreadSaveObservableCollection<ISharedInterface>();
+
+			SharedMethods.Logger = new DelegateLogger(message => Status = message);
+		}
+
 		private bool _connected;
 
 		private string _connectionString;
@@ -53,25 +77,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private ThreadSaveObservableCollection<TableInfoViewModel> _tables;
 
 		private ThreadSaveObservableCollection<TableInfoViewModel> _views;
-
-		public SqlEntityCreatorViewModel()
-		{
-			AdjustNamesCommand = new DelegateCommand(AdjustNamesExecute, CanAdjustNamesExecute);
-			CompileCommand = new DelegateCommand(CompileExecute, CanCompileExecute);
-			ConnectToDatabaseCommand = new DelegateCommand(ConnectToDatabaseExecute, CanConnectToDatabaseExecute);
-			SaveConfigCommand = new DelegateCommand(SaveConfigExecute, CanSaveConfigExecute);
-			LoadConfigCommand = new DelegateCommand(LoadConfigExecute, CanLoadConfigExecute);
-			OpenInfoWindowCommand = new DelegateCommand(OpenInfoWindowExecute);
-			DeleteSelectedTableCommand = new DelegateCommand(DeleteSelectedTableExecute, CanDeleteSelectedTableExecute);
-			AddTableCommand = new DelegateCommand(AddTableExecute, CanAddTableExecute);
-
-			Tables = new ThreadSaveObservableCollection<TableInfoViewModel>();
-			Views = new ThreadSaveObservableCollection<TableInfoViewModel>();
-			StoredProcs = new ThreadSaveObservableCollection<IStoredPrcInfoModel>();
-			Enums = new ThreadSaveObservableCollection<Dictionary<int, string>>();
-
-			SharedMethods.Logger = new DelegateLogger(message => Status = message);
-		}
 
 		public DelegateCommand OpenInfoWindowCommand { get; set; }
 
@@ -171,9 +176,11 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				if (value == false)
+				{
 					Status =
-						string.Format("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action",
+							string.Format("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action",
 							Tables.Count, Views.Count, StoredProcs.Count);
+				}
 				SendPropertyChanging(() => IsEnumeratingDatabase);
 				_isEnumeratingDatabase = value;
 				SendPropertyChanged(() => IsEnumeratingDatabase);
@@ -217,94 +224,39 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
-			CreateEntrysAsync(connection, outputPath, database);
-		}
-
-		public async Task CreateEntrysAsync(string connection, string outputPath, string database)
-		{
-			Status = "Try to connect";
-			//Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;Database=TestDB;
-			IsEnumeratingDatabase = true;
-			TargetDir = outputPath;
-			Manager = new DbAccessLayer(DbAccessType.MsSql, connection);
-			DbConfig.EnableGlobalThreadSafety = true;
-			try
-			{
-				Connected = Manager.CheckDatabase();
-			}
-			catch (Exception)
-			{
-				IsEnumeratingDatabase = false;
-				Connected = false;
-			}
-
-			if (!Connected)
-			{
-				IsEnumeratingDatabase = false;
-				Status = "Database not accessible. Maybe wrong Connection or no Selected Database?";
-				return;
-			}
-			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
-			if (string.IsNullOrEmpty(databaseName))
-			{
-				IsEnumeratingDatabase = false;
-				Status = "Database not exists. Maybe wrong Connection or no Selected Database?";
-				Connected = false;
-				return;
-			}
-			Status = "Connection OK ... Reading Server Version ...";
-
-			SqlVersion = Manager.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
-			Status = "Reading Tables";
-
-			var counter = 2;
-			var createTables = SimpleWorkWithSyncContinue(() =>
-			{
-				return
-					new DbAccessLayer(DbAccessType.MsSql, connection).Select<TableInformations>()
-						.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
-						.Select(s => new TableInfoViewModel(s, this))
-						.ToList();
-			}, dbInfo =>
-			{
-				foreach (var source in dbInfo)
-					if (Tables.All(f => f.Info.TableName != source.Info.TableName))
-						Tables.Add(source);
-			});
-			var createViews = SimpleWorkWithSyncContinue(() =>
-			{
-				return
-					new DbAccessLayer(DbAccessType.MsSql, connection)
-						.Select<ViewInformation>()
-						.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
-						.ToList();
-			}, dbInfo =>
-			{
-				foreach (var source in dbInfo)
-					if (Views.All(f => f.Info.TableName != source.Info.TableName))
-						Views.Add(source);
-			});
-
-			await createTables;
-			await createViews;
-			SelectedTable = Tables.FirstOrDefault();
-
-			IsEnumeratingDatabase = false;
-			Status = "Done";
+			var entrysAsync = CreateEntrysAsync(connection, outputPath, database);
 		}
 
 		public void Compile()
 		{
-			var dir = new SaveFileDialog();
-			var dirResult = DialogResult.Retry;
-			ThreadSaveAction(() =>
+			var path = "";
+			DialogResult dirResult;
+			dirResult = DialogResult.Retry;
+
+			if (CommonFileDialog.IsPlatformSupported)
 			{
-				dir.FileName = "dummy";
-				dirResult = dir.ShowDialog();
-			});
+				var dialog = new CommonOpenFileDialog();
+				dialog.IsFolderPicker = true;
+				ThreadSaveAction(
+				() => { dirResult = dialog.ShowDialog() == CommonFileDialogResult.Ok ? DialogResult.OK : DialogResult.Abort; });
+				if (dirResult == DialogResult.OK)
+				{
+					path = dialog.FileName;
+				}
+			}
+			else
+			{
+				var dir = new FolderBrowserDialog();
+				ThreadSaveAction(() => { dirResult = dir.ShowDialog(); });
+				if (dirResult == DialogResult.OK)
+				{
+					path = dir.SelectedPath;
+				}
+			}
+
 			if (dirResult == DialogResult.OK)
 			{
-				TargetDir = Path.GetDirectoryName(dir.FileName);
+				TargetDir = path;
 				foreach (var tableInfoModel in Tables)
 				{
 					Status = string.Format("Compiling Table '{0}'", tableInfoModel.GetClassName());
@@ -377,6 +329,92 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
+		public IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
+
+		public async Task CreateEntrysAsync(string connection, string outputPath, string database)
+		{
+			Status = "Try to connect";
+			//Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;Database=TestDB;
+			IsEnumeratingDatabase = true;
+			TargetDir = outputPath;
+			Manager = new DbAccessLayer(DbAccessType.MsSql, connection);
+			DbConfig.EnableGlobalThreadSafety = true;
+			try
+			{
+				Connected = Manager.CheckDatabase();
+			}
+			catch (Exception)
+			{
+				IsEnumeratingDatabase = false;
+				Connected = false;
+			}
+
+			if (!Connected)
+			{
+				IsEnumeratingDatabase = false;
+				Status = "Database not accessible. Maybe wrong Connection or no Selected Database?";
+				return;
+			}
+			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
+			if (string.IsNullOrEmpty(databaseName))
+			{
+				IsEnumeratingDatabase = false;
+				Status = "Database not exists. Maybe wrong Connection or no Selected Database?";
+				Connected = false;
+				return;
+			}
+			Status = "Connection OK ... Reading Server Version ...";
+
+			SqlVersion = Manager.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+			Status = "Reading Tables";
+
+			var counter = 2;
+			var createTables = SimpleWorkWithSyncContinue(() =>
+			{
+				return
+						new DbAccessLayer(DbAccessType.MsSql, connection).Select<TableInformations>()
+						                                                 .Select(
+						                                                 s =>
+							                                                 new TableInfoModel(s, databaseName,
+							                                                 new DbAccessLayer(DbAccessType.MsSql, connection)))
+						                                                 .Select(s => new TableInfoViewModel(s, this))
+						                                                 .ToList();
+			}, dbInfo =>
+			{
+				foreach (var source in dbInfo)
+				{
+					if (Tables.All(f => f.Info.TableName != source.Info.TableName))
+					{
+						Tables.Add(source);
+					}
+				}
+			});
+			var createViews = SimpleWorkWithSyncContinue(() =>
+			{
+				return
+						new DbAccessLayer(DbAccessType.MsSql, connection)
+								.Select<ViewInformation>()
+								.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
+								.ToList();
+			}, dbInfo =>
+			{
+				foreach (var source in dbInfo)
+				{
+					if (Views.All(f => f.Info.TableName != source.Info.TableName))
+					{
+						Views.Add(source);
+					}
+				}
+			});
+
+			await createTables;
+			await createViews;
+			SelectedTable = Tables.FirstOrDefault();
+
+			IsEnumeratingDatabase = false;
+			Status = "Done";
+		}
+
 		public void OpenInfoWindowExecute(object sender)
 		{
 			new InfoWindow().ShowDialog();
@@ -395,6 +433,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				Tables.Clear();
 				Views.Clear();
 				StoredProcs.Clear();
+				SelectedTable = null;
 
 				var binFormatter = new BinaryFormatter();
 				ConfigStore options;
@@ -415,61 +454,63 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				if (new Version(options.Version) != version)
 				{
 					var messageBoxResult = MessageBox.Show(Application.Current.MainWindow,
-						"Warning Version missmatch",
-						string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.",
-							version, options.Version),
-						MessageBoxButton.OKCancel);
+					"Warning Version missmatch",
+					string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.",
+					version, options.Version),
+					MessageBoxButton.OKCancel);
 
 					if (messageBoxResult == MessageBoxResult.Cancel)
+					{
 						return;
+					}
 				}
 
 				if (options.SourceConnectionString != null)
 				{
 					ConnectionString = options.SourceConnectionString;
-					CreateEntrysAsync(ConnectionString, "", string.Empty).ContinueWith((task) =>
+					CreateEntrysAsync(ConnectionString, "", string.Empty).ContinueWith(task =>
 					{
-						var mapper = new AutoMapper.Mapper(new MapperConfiguration((config) =>
+						var mapper = new Mapper(new MapperConfiguration(config =>
 						{
 							config.CreateMissingTypeMaps = true;
 
 							config.CreateMap<TableInfoModel, TableInfoModel>();
 							config.CreateMap<ColumInfoModel, ColumInfoModel>();
-							config.CreateMap<ColumnInfo, ColumnInfo>();
+							config.CreateMap<ColumnInfo, ColumnInfo>().ForMember(f => f.TargetType, f => f.Ignore());
 							config.CreateMap<EnumDeclarationModel, EnumDeclarationModel>();
 							config.CreateMap<ForgeinKeyInfoModel, ForgeinKeyInfoModel>();
 							config.CreateMap<TableInformations, TableInformations>();
-
 							config.CreateMap<StoredPrcInfoModel, StoredPrcInfoModel>();
 						}));
 
 						var defaultContextMapper = mapper.DefaultContext.Mapper;
 
-						foreach (var option in options.Tables)
+						foreach (var fileTable in options.Tables.ToArray())
 						{
-							var itemExisits = Tables.FirstOrDefault(s => s.Info.TableName == option.Info.TableName);
-							if (itemExisits != null)
+							var originalTable = Tables.FirstOrDefault(s => s.Info.TableName == fileTable.Info.TableName);
+							if (originalTable != null)
 							{
-								defaultContextMapper.Map(option, itemExisits.SourceElement);
-								itemExisits.Refresh();
-							}
-							else
-							{
-								Tables.Add(new TableInfoViewModel(option, this));
-							}
-						}
-						foreach (var option in options.Views)
-						{
-							var hasView = Views.FirstOrDefault(f => f.Info.TableName == option.Info.TableName);
+								defaultContextMapper.Map(fileTable, originalTable.SourceElement);
+								foreach (var fileColumn in fileTable.ColumnInfos.ToArray())
+								{
+									var origianlColumn =
+											originalTable.ColumnInfos.FirstOrDefault(f => f.GetPropertyName() == fileColumn.GetPropertyName());
 
-							if (hasView != null)
-							{
-								defaultContextMapper.Map(option, hasView.SourceElement);
-								hasView.Refresh();
+									//if (origianlColumn == null)
+									//{
+									//	originalTable.AddColumn(fileColumn.ColumnInfo);
+									//}
+									//else
+									//{
+									//	defaultContextMapper.Map(fileColumn, origianlColumn);
+									//}
+								}
+
+								originalTable.Refresh();
 							}
 							else
 							{
-								Views.Add(new TableInfoViewModel(option, this));
+								Tables.Add(new TableInfoViewModel(fileTable, this));
 							}
 						}
 						SelectedTable = Tables.FirstOrDefault();
@@ -491,7 +532,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		private bool CanLoadConfigExecute(object sender)
 		{
-			return !Connected;
+			return IsNotWorking;
 		}
 
 		private void SaveConfigExecute(object sender)
@@ -520,10 +561,14 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				options.Version = version.ToString();
 
 				if (ConnectionString != null)
+				{
 					options.SourceConnectionString = ConnectionString;
+				}
 
 				if (File.Exists(fileDialog.FileName))
+				{
 					File.Delete(fileDialog.FileName);
+				}
 				using (var fs = fileDialog.OpenFile())
 				{
 					new BinaryFormatter().Serialize(fs, options);
@@ -544,7 +589,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			if (DataConnectionDialog.Show(dcd) == DialogResult.OK)
 			{
 				if (string.IsNullOrEmpty(dcd.ConnectionString))
+				{
 					return;
+				}
 
 				var sqlConnectionString = new SqlConnectionStringBuilder(dcd.ConnectionString);
 				if (string.IsNullOrEmpty(sqlConnectionString.DataSource))
@@ -554,13 +601,13 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				}
 
 				ConnectionString = dcd.ConnectionString;
-				CreateEntrysAsync(ConnectionString, "C:\\", string.Empty);
+				var entrysAsync = CreateEntrysAsync(ConnectionString, "C:\\", string.Empty);
 			}
 		}
 
 		private bool CanConnectToDatabaseExecute(object sender)
 		{
-			return !Connected && CheckCanExecuteCondition() && !IsEnumeratingDatabase;
+			return CheckCanExecuteCondition() && !IsEnumeratingDatabase;
 		}
 
 		private void AddTableExecute(object sender)
@@ -612,12 +659,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 	public class DelegateLogger : ILogger
 	{
-		private readonly Action<string> _resolve;
-
 		public DelegateLogger(Action<string> resolve)
 		{
 			_resolve = resolve;
 		}
+
+		private readonly Action<string> _resolve;
 
 		public void Write(string content, params object[] arguments)
 		{

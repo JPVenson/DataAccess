@@ -22,8 +22,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <param name="database">The database.</param>
 		public SelectQuery(IQueryBuilder database) : base(database)
 		{
-			if (CurrentIdentifier != null)
-				this.QueryText("AS " + CurrentIdentifier);
+			//if (CurrentIdentifier != null)
+			//	this.ContainerObject.Parts.Add(new GenericQueryPart("AS " + CurrentIdentifier));
 		}
 
 		/// <summary>
@@ -33,8 +33,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <param name="ident">The ident.</param>
 		public SelectQuery(IQueryBuilder database, string ident) : base(database, ident)
 		{
-			if (CurrentIdentifier != null)
-				this.QueryText("AS " + CurrentIdentifier);
+			//if (CurrentIdentifier != null)
+			//	this.ContainerObject.Parts.Add(new GenericQueryPart("AS " + CurrentIdentifier));
 		}
 
 		/// <summary>

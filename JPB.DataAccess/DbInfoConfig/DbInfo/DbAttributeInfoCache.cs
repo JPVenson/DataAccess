@@ -1,7 +1,10 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using JPB.DataAccess.MetaApi.Model;
 
 #endregion
@@ -69,6 +72,16 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 					firstOrDefault.Attribute.GetType().Name));
 
 			return new DbAttributeInfoCache<TAttr>(firstOrDefault);
+		}
+
+		/// <summary>
+		///     Wraps the first occurence of Attribute into an strong typed DbAttribute
+		/// </summary>
+		/// <param name="elements"></param>
+		/// <returns></returns>
+		public static DbAttributeInfoCache<TAttr> WrapperOrNull(IEnumerable<AttributeInfoCache> elements)
+		{
+			return WrapperOrNull(elements.FirstOrDefault(f => f.Attribute.GetType() == typeof(TAttr)));
 		}
 	}
 }

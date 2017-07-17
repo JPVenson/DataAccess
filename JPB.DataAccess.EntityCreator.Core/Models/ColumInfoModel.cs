@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Poco;
 
@@ -13,10 +14,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Models
 
 		}
 
-		public ColumInfoModel(ColumnInfo columnInfo)
+		public ColumInfoModel(IColumnInfo columnInfo)
 		{
 			ColumnInfo = columnInfo;
-			if (columnInfo.TargetType2.ToLower() == "timestamp")
+			if (columnInfo.SqlType == SqlDbType.Timestamp)
 			{
 				IsRowVersion = true;
 			}
@@ -58,13 +59,13 @@ namespace JPB.DataAccess.EntityCreator.Core.Models
 
 		public bool Equals(IColumInfoModel other)
 		{
-			return Equals(ColumnInfo, other.ColumnInfo) 
-				&& string.Equals(NewColumnName, other.NewColumnName) 
-				&& IsRowVersion == other.IsRowVersion 
-				&& PrimaryKey == other.PrimaryKey 
-				&& InsertIgnore == other.InsertIgnore 
-				&& Equals(EnumDeclaration, other.EnumDeclaration) 
-				&& Exclude == other.Exclude 
+			return Equals(ColumnInfo, other.ColumnInfo)
+				&& string.Equals(NewColumnName, other.NewColumnName)
+				&& IsRowVersion == other.IsRowVersion
+				&& PrimaryKey == other.PrimaryKey
+				&& InsertIgnore == other.InsertIgnore
+				&& Equals(EnumDeclaration, other.EnumDeclaration)
+				&& Exclude == other.Exclude
 				&& Equals(ForgeinKeyDeclarations, other.ForgeinKeyDeclarations);
 		}
 

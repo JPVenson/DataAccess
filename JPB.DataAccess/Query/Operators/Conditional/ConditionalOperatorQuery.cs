@@ -32,6 +32,20 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		}
 
 		/// <summary>
+		///     Initializes a new instance of the <see cref="ConditionalOperatorQuery{TPoco}" /> class.
+		/// </summary>
+		/// <param name="builder">The builder.</param>
+		/// <param name="state">The state.</param>
+		public ConditionalOperatorQuery(IQueryBuilder builder) : base(builder)
+		{
+			State = new CondtionBuilderState(null);
+			if (builder is ConditionalOperatorQuery<TPoco>)
+			{
+				State = ((ConditionalOperatorQuery<TPoco>)builder).State;
+			}
+		}
+
+		/// <summary>
 		///     Defines an condition that should be inverted
 		/// </summary>
 		public ConditionalOperatorQuery<TPoco> Not
@@ -71,7 +85,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			foreach (var value in values)
 			{
 				var valId = ContainerObject.GetNextParameterId();
-				prefixElement = this.QueryQ(string.Format("@m_val{0},", valId),
+				prefixElement = prefixElement.QueryQ(string.Format("@m_val{0},", valId),
 					new QueryParameter(string.Format("@m_val{0}", valId), value));
 			}
 
@@ -225,6 +239,44 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 					if (value == null)
 						return new ConditionalEvalQuery<TPoco>(this.QueryText("NOT NULL"), State);
 					return QueryOperatorValue("<>", value);
+				default:
+					throw new NotSupportedException("Invalid value");
+			}
+		}
+
+		/// <summary>
+		///     Creates a statement that will check the Column for equality or not
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
+		public ConditionalEvalQuery<TPoco> True()
+		{
+			switch (State.Operator)
+			{
+				case Operator.Is:
+					return QueryOperatorValue("=", 1);
+				case Operator.Not:
+					return QueryOperatorValue("<>", 0);
+				default:
+					throw new NotSupportedException("Invalid value");
+			}
+		}
+
+		/// <summary>
+		///     Creates a statement that will check the Column for equality or not
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns></returns>
+		/// <exception cref="NotSupportedException">Invalid value</exception>
+		public ConditionalEvalQuery<TPoco> False()
+		{
+			switch (State.Operator)
+			{
+				case Operator.Is:
+					return QueryOperatorValue("=", 0);
+				case Operator.Not:
+					return QueryOperatorValue("<>", 1);
 				default:
 					throw new NotSupportedException("Invalid value");
 			}

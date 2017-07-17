@@ -167,12 +167,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 			if (CommandQuery != null)
 			{
-				TotalItemCount = new ElementProducer<T>(CommandQuery.Clone()).CountInt().FirstOrDefault();
-				MaxPage = (long) Math.Ceiling((decimal) TotalItemCount / PageSize);
+				TotalItemCount = new ElementProducer<T>(CommandQuery).CountInt().FirstOrDefault();
+				MaxPage = (long)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 				RaiseNewPageLoading();
 				var elements =
-					new ElementProducer<T>(CommandQuery.Clone()).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
+					new ElementProducer<T>(CommandQuery).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
 					{
 						PagedRows = (CurrentPage - 1) * PageSize,
 						PageSize
@@ -223,7 +223,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					long parsedCount;
 					long.TryParse(maxItems.ToString(), out parsedCount);
 					TotalItemCount = parsedCount;
-					MaxPage = (long) Math.Ceiling((decimal) parsedCount / PageSize);
+					MaxPage = (long)Math.Ceiling((decimal)parsedCount / PageSize);
 				}
 
 				//Check select strategy
@@ -237,7 +237,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				{
 					command = dbAccess
 						.Query()
-						.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
+						.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
 						.QueryText("SELECT * FROM")
 						.QueryText("CTE")
 						.QueryText("ORDER BY")
@@ -257,39 +257,43 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						.WithCte("BASECTE", baseCte =>
 						{
 							if (BaseQuery != null)
-								baseCte.Select.Table<T>();
+							{
+								return baseCte.Select.Table<T>();
+							}
 							else
-								baseCte.QueryCommand(finalAppendCommand);
+							{
+								return new SelectQuery<T>(baseCte.QueryCommand(finalAppendCommand));
+							}
 						})
 						.WithCte("CTE", cte =>
 						{
-							cte.QueryText("SELECT * FROM (")
-								.Select.Table<T>()
-								.RowNumberOrder("@pk")
-								.WithParamerters(new {Pk = pk})
-								.QueryText("AS RowNr")
-								.QueryText(", BASECTE.* FROM BASECTE")
-								.QueryText(")")
-								.As("TBL")
-								.Where
-								.Column("RowNr")
-								.Is
-								.Between(page =>
-									{
-										page.QueryText("@PagedRows * @PageSize + 1")
-											.WithParamerters(new
-											{
-												PagedRows = CurrentPage - 1,
-												PageSize
-											});
-									},
-									maxPage =>
-									{
-										maxPage
-											.InBracket(calc => { calc.QueryText("@PagedRows + 1"); })
-											.QueryText("* @PageSize");
-									}
-								);
+							return new SelectQuery<T>(cte.QueryText("SELECT * FROM (")
+														 .Select.Table<T>()
+														 .RowNumberOrder("@pk")
+														 .WithParamerters(new { Pk = pk })
+														 .QueryText("AS RowNr")
+														 .QueryText(", BASECTE.* FROM BASECTE")
+														 .QueryText(")")
+														 .As("TBL")
+														 .Where
+														 .Column("RowNr")
+														 .Is
+														 .Between(page =>
+														 {
+															 return page.QueryText("@PagedRows * @PageSize + 1")
+																  .WithParamerters(new
+																  {
+																	  PagedRows = CurrentPage - 1,
+																	  PageSize
+																  });
+														 },
+														 maxPage =>
+														 {
+															 return maxPage
+																	  .InBracket(calc => { return calc.QueryText("@PagedRows + 1"); })
+																	  .QueryText("* @PageSize");
+														 }
+														 ));
 						}, true)
 						.QueryText("SELECT * FROM CTE");
 

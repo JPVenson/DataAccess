@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -115,10 +116,10 @@ namespace JPB.DataAccess
 			var hasFk = config.GetOrCreateClassInfoCache(type)
 				.Propertys
 				.Select(f => f.Value)
-				.Where(f => f.ForginKeyAttribute != null)
-				.FirstOrDefault(f => f.PropertyType == fkType);
+				.Where(f => f.ForginKeyAttribute != null || f.ForginKeyDeclarationAttribute != null)
+				.FirstOrDefault(f => f.PropertyType == fkType || f.ForginKeyDeclarationAttribute != null && f.ForginKeyDeclarationAttribute.Attribute.ForeignType == fkType);
 			if (hasFk != null)
-				return hasFk.PropertyName;
+				return hasFk.DbName;
 			return null;
 		}
 
@@ -276,11 +277,18 @@ namespace JPB.DataAccess
 				t = Nullable.GetUnderlyingType(t);
 			}
 
+			var valueType = value.GetType();
+
+			if (conversion.IsAssignableFrom(valueType))
+			{
+				return value;
+			}
+
 			if (typeof(Enum).IsAssignableFrom(t))
 			{
 				// ReSharper disable once UseIsOperator.1
 				// ReSharper disable once UseMethodIsInstanceOfType
-				if (typeof(long).IsAssignableFrom(value.GetType()))
+				if (typeof(long).IsAssignableFrom(valueType))
 					value = Enum.ToObject(t, value);
 				else if (value is string)
 					value = Enum.Parse(t, value as string, true);

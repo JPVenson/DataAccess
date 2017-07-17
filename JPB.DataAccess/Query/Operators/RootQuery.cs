@@ -52,6 +52,43 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
+		/// Changes the ResultType property in a Fluid syntax
+		/// </summary>
+		/// <param name="resultType"></param>
+		/// <returns></returns>
+		public RootQuery ConfigType(Type resultType)
+		{
+			if (resultType == null)
+			{
+				throw new ArgumentNullException("resultType");
+			}
+			ContainerObject.ForType = resultType;
+			return this;
+		}
+
+		/// <summary>
+		/// Changes how the result is enumerated in a Fluid syntax
+		/// </summary>
+		/// <param name="mode"></param>
+		/// <returns></returns>
+		public RootQuery ConfigEnumerationMode(EnumerationMode mode)
+		{
+			ContainerObject.EnumerationMode = mode;
+			return this;
+		}
+
+		/// <summary>
+		/// Changes the AllowParamterRenaming flag in a Fluid syntax
+		/// </summary>
+		/// <param name="mode"></param>
+		/// <returns></returns>
+		public RootQuery ConfigAllowParamterRenaming(bool mode)
+		{
+			ContainerObject.AllowParamterRenaming = mode;
+			return this;
+		}
+
+		/// <summary>
 		///     Adds a Select - Statement
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>

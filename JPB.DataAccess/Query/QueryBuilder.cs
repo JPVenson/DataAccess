@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
@@ -27,7 +29,7 @@ namespace JPB.DataAccess.Query
 			if (database == null)
 				throw new ArgumentNullException("database", "Please use a valid Database");
 
-			ContainerObject = database;
+			ContainerObject = database.Clone();
 		}
 
 		internal QueryBuilderContainer(IQueryBuilder database)
@@ -35,7 +37,7 @@ namespace JPB.DataAccess.Query
 			if (database == null)
 				throw new ArgumentNullException("database", "Please use a valid Database");
 
-			ContainerObject = database.ContainerObject;
+			ContainerObject = database.ContainerObject.Clone();
 		}
 
 		internal QueryBuilderContainer(IQueryBuilder database, Type type)
@@ -45,7 +47,7 @@ namespace JPB.DataAccess.Query
 			if (database == null)
 				throw new ArgumentNullException("type", "Please use a valid Type");
 
-			ContainerObject = database.ContainerObject;
+			ContainerObject = database.ContainerObject.Clone();
 			ContainerObject.ForType = type;
 		}
 
@@ -88,11 +90,6 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public abstract IQueryBuilder Clone();
-
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
 		public IEnumerator<TPoco> GetEnumerator<TPoco>()
 		{
 			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
@@ -100,9 +97,17 @@ namespace JPB.DataAccess.Query
 			return new QueryLazyEnumerator<TPoco>(ContainerObject);
 		}
 
+		public abstract IQueryBuilder CloneWith<T>(T instance) where T : IQueryBuilder;
+
 		public Task<IEnumerable<TE>> ForAsyncResult<TE>()
 		{
 			throw new NotImplementedException();
+		}
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return ContainerObject.CompileFlat().Item1;
 		}
 	}
 
@@ -146,15 +151,42 @@ namespace JPB.DataAccess.Query
 			if (right.ContainerObject == ContainerObject)
 				return this;
 
+			var builder = this;
 			foreach (var part in right.ContainerObject.Parts)
-				this.Add(part);
-			return this;
+			{
+				builder = builder.Add(part);
+			}
+			return builder;
 		}
 
 		/// <inheritdoc />
-		public override IQueryBuilder Clone()
+		//public override IQueryBuilder Clone()
+		//{
+		//	return new QueryBuilderX(ContainerObject.Clone());
+		//}
+
+		public override IQueryBuilder CloneWith<T>(T instance)
 		{
-			return new QueryBuilderX(ContainerObject.Clone());
+			var t = GetType();
+
+			var ctors = t.GetConstructors()
+						 .FirstOrDefault(f =>
+						 {
+							 var para = f.GetParameters();
+							 if (para.Length > 1)
+								 return false;
+							 var firstOrDefault = para.FirstOrDefault();
+							 return firstOrDefault != null && firstOrDefault.ParameterType.IsAssignableFrom(typeof(T));
+						 });
+
+			if (ctors == null)
+			{
+				throw new NotImplementedException(string.Format("Framework error. The ctor for this type is not Implemented! {0}", typeof(T)));
+			}
+
+			return ctors.Invoke(new object[] { instance }) as IQueryBuilder;
+
+			return Activator.CreateInstance(t, BindingFlags.Default, null, instance as IQueryBuilder) as IQueryBuilder;
 		}
 	}
 }

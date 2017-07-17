@@ -62,9 +62,9 @@ namespace JPB.DataAccess.Query
 			if (new SqlParameter("xxx", type).Size > 0)
 				typeName = "(MAX)";
 
-			query.QueryText("DECLARE {0} {1};", sqlName, typeName);
+			query = query.QueryText("DECLARE {0} {1};", sqlName, typeName);
 			if (value != null)
-				query.SetVariable(sqlName, value);
+				query = query.SetVariable(sqlName, value);
 			return query;
 		}
 
@@ -87,8 +87,7 @@ namespace JPB.DataAccess.Query
 			cteBuilder.Append(") AS (");
 			cteBuilder.Append(query.ContainerObject.AccessLayer.CreateSelect(target));
 			cteBuilder.Append(")");
-			query.Add(new CteQueryPart(cteBuilder.ToString()));
-			return query;
+			return query.Add(new CteQueryPart(cteBuilder.ToString()));
 		}
 
 		/// <summary>
@@ -112,9 +111,9 @@ namespace JPB.DataAccess.Query
 		/// <param name="cteAction">The cte action.</param>
 		/// <param name="subCte">if set to <c>true</c> [sub cte].</param>
 		/// <returns></returns>
-		public static RootQuery WithCte(this RootQuery query,
+		public static RootQuery WithCte<T>(this RootQuery query,
 			string cteName,
-			Action<RootQuery> cteAction,
+			Func<RootQuery, ISelectQuery<T>> cteAction,
 			bool subCte = false)
 		{
 			var lod = query.ContainerObject.Parts.LastOrDefault();
@@ -125,10 +124,7 @@ namespace JPB.DataAccess.Query
 			else
 				prefix = string.Format("WITH {0} AS ", cteName);
 
-			query.Add(new GenericQueryPart(prefix));
-			query.InBracket(cteAction);
-			query.Add(new CteQueryPart(""));
-			return query;
+			return new RootQuery(query.Add(new GenericQueryPart(prefix)).InBracket(cteAction).Add(new CteQueryPart("")));
 		}
 
 
@@ -147,12 +143,13 @@ namespace JPB.DataAccess.Query
 		{
 			var cp = new RootQuery(query.ContainerObject.AccessLayer);
 			var prefix = string.Format("WITH {0} AS (", cteName);
-			cp.QueryText(prefix);
+			cp = cp.QueryText(prefix);
 			foreach (var genericQueryPart in query.ContainerObject.Parts)
-				cp.Add(genericQueryPart);
+			{
+				cp = cp.Add(genericQueryPart);
+			}
 
-			cp.Add(new CteQueryPart(")"));
-			return new ElementProducer<TN>(cp.QueryText(string.Format("SELECT {1} FROM {0}", cteName,
+			return new ElementProducer<TN>(cp.Add(new CteQueryPart(")")).QueryText(string.Format("SELECT {1} FROM {0}", cteName,
 				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TN))
 					.GetSchemaMapping()
 					.Aggregate((e, f) => e + ", " + f))), query.CurrentIdentifier);
@@ -167,12 +164,11 @@ namespace JPB.DataAccess.Query
 		/// <param name="subSelect">The sub select.</param>
 		/// <returns></returns>
 		public static SelectQuery<T> SubSelect<T>(this RootQuery query,
-			Action<SelectQuery<T>> subSelect)
+			Func<SelectQuery<T>, SelectQuery<T>> subSelect)
 		{
-			var q = query
-				.QueryText("(")
-				.Select.Table<T>();
-			subSelect(q);
+			var q = subSelect(query
+					.QueryText("(")
+					.Select.Table<T>());
 			return q.QueryText(")");
 		}
 
@@ -201,13 +197,13 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ConditionalEvalQuery<T> Between<T>(
 			this ConditionalOperatorQuery<T> query,
-			Action<RootQuery> valA,
-			Action<RootQuery> valB)
+			Func<RootQuery, RootQuery> valA,
+			Func<RootQuery, RootQuery> valB)
 		{
-			var condtion = query.QueryText("BETWEEN");
-			valA(new RootQuery(condtion));
-			condtion.QueryText("AND");
-			valA(new RootQuery(condtion));
+			var condtion = new RootQuery(query.QueryText("BETWEEN"));
+			condtion = valA(new RootQuery(condtion));
+			condtion = condtion.QueryText("AND");
+			condtion = valA(new RootQuery(condtion));
 
 			return new ConditionalEvalQuery<T>(condtion, query.State);
 		}
@@ -221,12 +217,9 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static RootQuery Apply(this RootQuery query,
 			ApplyMode mode,
-			Action<RootQuery> innerText)
+			Func<RootQuery, IQueryBuilder> innerText)
 		{
-			query
-				.QueryText(mode.ApplyType);
-			query.InBracket(innerText);
-			return new RootQuery(query);
+			return new RootQuery(query.QueryText(mode.ApplyType).InBracket(innerText));
 		}
 
 		/// <summary>
@@ -239,10 +232,9 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ElementProducer<T> Apply<T>(this ElementProducer<T> query,
 			ApplyMode mode,
-			Action<RootQuery> innerText)
+			Func<RootQuery, IQueryBuilder> innerText)
 		{
-			query.QueryText(mode.ApplyType);
-			return new ElementProducer<T>(new RootQuery(query).InBracket(innerText), query.CurrentIdentifier);
+			return new ElementProducer<T>(new RootQuery(query.QueryText(mode.ApplyType)).InBracket(innerText), query.CurrentIdentifier);
 		}
 
 		/// <summary>
@@ -268,7 +260,7 @@ namespace JPB.DataAccess.Query
 		{
 			return
 				new ConditionalEvalQuery<T>(
-					query.QueryQ("CONTAINS (@Cont_A{0})", new QueryParameter("@Cont_A", alias, alias.GetType())), query.State);
+					query.QueryQ("CONTAINS (@Cont_A)", new QueryParameter("@Cont_A", alias, alias.GetType())), query.State);
 		}
 
 		/// <summary>
@@ -301,7 +293,15 @@ namespace JPB.DataAccess.Query
 
 			var accessLayer = query.ContainerObject.AccessLayer;
 			var sourcePK = typeof(TLeft).GetFK(typeof(TRight), query.ContainerObject.AccessLayer.Config);
-			var targetPK = accessLayer.GetClassInfo(typeof(TRight)).GetPK(query.ContainerObject.AccessLayer.Config);
+			if (sourcePK == null)
+			{
+				throw new ArgumentNullException("No Fk for this Constalation found");
+			}
+			var targetPK = typeof(TRight).GetPK(query.ContainerObject.AccessLayer.Config);
+			if (targetPK == null)
+			{
+				throw new ArgumentNullException("No pk for this Constalation found");
+			}
 			var targetTable = accessLayer.GetClassInfo(typeof(TRight)).TableName;
 			var sourceTable = accessLayer.GetClassInfo(typeof(TLeft)).TableName;
 			return
@@ -426,8 +426,10 @@ namespace JPB.DataAccess.Query
 						if (genericQueryPart.Prefix == "ORDER BY")
 							order = true;
 						if (!order)
-							f.Add(genericQueryPart);
+							f = f.Add(genericQueryPart);
 					}
+
+					return new SelectQuery<TPoco>(f);
 				}).QueryText("SELECT COUNT(1) FROM " + cteName), cteName);
 		}
 

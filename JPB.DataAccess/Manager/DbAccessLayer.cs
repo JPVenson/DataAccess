@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Manager
 	///     Contanins some Helper mehtods for CRUD operation
 	/// </summary>
 	[DebuggerDisplay(
-		"DB={DatabaseStrategy}, QueryDebug={Database.LastExecutedQuery ? Database.LastExecutedQuery.DebuggerQuery}")]
+	"DB={DatabaseStrategy}, QueryDebug={Database.LastExecutedQuery ? Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
 		[DebuggerStepThrough]
 #endif
@@ -64,8 +64,9 @@ namespace JPB.DataAccess.Manager
 		///     Object that is used globaly for each Equallity Comparsion if no other is specifyed ether for the type or the
 		///     instance. This field overrides
 		/// </summary>
-		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>", true)] public object
-			DefaultAssertionObject;
+		[Obsolete("This field is obsolete. Use the DefaultAssertionObject on an Comparerer<T>", true)]
+		public object
+				DefaultAssertionObject;
 
 		/// <summary>
 		///     if set the created reader of an read operation will be completely stored then the open connection will be closed
@@ -122,10 +123,14 @@ namespace JPB.DataAccess.Manager
 			set
 			{
 				if (_database == null)
+				{
 					_database = value;
+				}
 				else
+				{
 					throw new NotSupportedException(
-						"Runtime change of Database is not allowed. Create a new DbAccessLayer object");
+					"Runtime change of Database is not allowed. Create a new DbAccessLayer object");
+				}
 			}
 		}
 
@@ -147,12 +152,14 @@ namespace JPB.DataAccess.Manager
 			: this(config)
 		{
 			if (dbAccessType == DbAccessType.Unknown)
+			{
 				throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof(DbAccessType));
+			}
 
 			DbAccessType = dbAccessType;
 			Database = new DefaultDatabaseAccess();
 			var database =
-				GenerateStrategy(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value, connection);
+					GenerateStrategy(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value, connection);
 			Database.Attach(database);
 			DatabaseStrategy = database;
 		}
@@ -165,7 +172,9 @@ namespace JPB.DataAccess.Manager
 			: this(config)
 		{
 			if (string.IsNullOrEmpty(fullTypeNameToIDatabaseStrategy))
+			{
 				throw new ArgumentNullException("fullTypeNameToIDatabaseStrategy");
+			}
 
 			ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
@@ -184,7 +193,9 @@ namespace JPB.DataAccess.Manager
 			: this(config)
 		{
 			if (database == null)
+			{
 				throw new ArgumentNullException("database");
+			}
 			DbAccessType = database.SourceDatabase;
 			//ResolveDbType(database.GetType().FullName);
 
@@ -201,7 +212,9 @@ namespace JPB.DataAccess.Manager
 			: this(config)
 		{
 			if (database == null)
+			{
 				throw new ArgumentNullException("database");
+			}
 
 			DbAccessType = DbAccessType.Unknown;
 			Database = database;
@@ -220,13 +233,15 @@ namespace JPB.DataAccess.Manager
 		internal IDatabaseStrategy GenerateStrategy(string fullValidIdentifyer, string connection)
 		{
 			if (string.IsNullOrEmpty(fullValidIdentifyer))
+			{
 				throw new ArgumentException("Type was not found");
+			}
 
 			var type = Type.GetType(fullValidIdentifyer);
 			if (type == null)
 			{
 				var parallelQuery = Directory.EnumerateFiles(DefaultLookupPath, "*.dll",
-					SearchOption.TopDirectoryOnly);
+				SearchOption.TopDirectoryOnly);
 
 				//Assembly assam = null;
 
@@ -251,24 +266,32 @@ namespace JPB.DataAccess.Manager
 				});
 
 				if (type == null)
+				{
 					throw new ArgumentException("Type was not found");
+				}
 			}
 
 			//check the type to be a Strategy
 
 			if (!typeof(IDatabaseStrategy).IsAssignableFrom(type))
+			{
 				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
+			}
 
 			//try constructor injection
 			var ctOfType =
-				type.GetConstructors()
-					.FirstOrDefault(
-						s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
+					type.GetConstructors()
+					    .FirstOrDefault(
+					    s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
 			if (ctOfType != null)
+			{
 				return ctOfType.Invoke(new object[] {connection}) as IDatabaseStrategy;
+			}
 			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
 			if (instanceOfType == null)
+			{
 				throw new ArgumentException("Type was found but does not inhert from IDatabaseStrategy");
+			}
 
 			instanceOfType.ConnectionString = connection;
 			return instanceOfType;
@@ -278,8 +301,8 @@ namespace JPB.DataAccess.Manager
 		{
 			// ReSharper disable once PossibleInvalidOperationException
 			var firstOrDefault =
-				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
-					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
+					ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
+					                  .FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
 			DbAccessType = firstOrDefault == null ? DbAccessType.Unknown : firstOrDefault.Value.Key;
 		}
 
@@ -290,7 +313,9 @@ namespace JPB.DataAccess.Manager
 		public bool CheckDatabase()
 		{
 			if (Database == null)
+			{
 				return false;
+			}
 			try
 			{
 				Database.Connect();
@@ -312,11 +337,17 @@ namespace JPB.DataAccess.Manager
 			var command = DbAccessLayerHelper.CreateCommand(Database, query);
 
 			if (values != null)
+			{
 				foreach (var item in values)
+				{
 					command.Parameters.AddWithValue(item.Name, item.Value, Database);
+				}
+			}
 
 			if (Database.LastExecutedQuery != null)
+			{
 				Database.LastExecutedQuery.Refresh();
+			}
 
 			return ExecuteGenericCommand(command);
 		}
@@ -335,7 +366,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			return ExecuteGenericCommand(query,
-				(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
+			(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
 		}
 
 		/// <summary>
@@ -405,7 +436,9 @@ namespace JPB.DataAccess.Manager
 			bool created;
 			var source = CreateInstance(type, reader, out created);
 			if (created)
+			{
 				return source;
+			}
 
 #pragma warning disable 618
 			return ReflectionPropertySet(Config, source, type, reader, mapping, DbAccessType);
@@ -452,9 +485,9 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var objectFactorys = classInfo.Constructors.Where(s =>
-					s.Arguments.Count == 1
-					&& s.Arguments.First().Type == typeof(IDataRecord))
-				.ToArray();
+				                              s.Arguments.Count == 1
+				                              && s.Arguments.First().Type == typeof(IDataRecord))
+			                              .ToArray();
 
 			var constructor = objectFactorys.FirstOrDefault(s =>
 				s.Attributes.Any(f =>
@@ -464,7 +497,9 @@ namespace JPB.DataAccess.Manager
 					 ((ObjectFactoryMethodAttribute) f.Attribute).TargetDatabase == accessType.Value)));
 
 			if (constructor == null)
+			{
 				constructor = objectFactorys.FirstOrDefault();
+			}
 
 			//maybe single ctor with param
 
@@ -481,10 +516,11 @@ namespace JPB.DataAccess.Manager
 			{
 				//check for a Factory mehtod
 				var factory =
-					classInfo.Mehtods
-						.FirstOrDefault(s => s.Attributes.Any(f => f.Attribute is ObjectFactoryMethodAttribute));
+						classInfo.Mehtods
+						         .FirstOrDefault(s => s.Attributes.Any(f => f.Attribute is ObjectFactoryMethodAttribute));
 
 				if (factory != null)
+				{
 					if (factory.MethodInfo.IsStatic)
 					{
 						var methodInfo = factory.MethodInfo as MethodInfo;
@@ -493,6 +529,7 @@ namespace JPB.DataAccess.Manager
 							var returnType = methodInfo.ReturnParameter;
 
 							if (returnType != null && returnType.ParameterType == classInfo.Type)
+							{
 								if (factory.Arguments.Count == 1 &&
 								    factory.Arguments.First().Type == typeof(IDataRecord))
 								{
@@ -500,15 +537,19 @@ namespace JPB.DataAccess.Manager
 									classInfo.Factory = s => factory.Invoke(new object[] {reader});
 									return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 								}
+							}
 						}
 					}
+				}
 			}
 
 			var emptyCtor = classInfo.Constructors.FirstOrDefault(f => !f.Arguments.Any());
 
 			if (emptyCtor == null)
+			{
 				throw new NotSupportedException(
-					"You have to define ether an ObjectFactoryMethod as static or constructor with and IDataReader or an constructor without any arguments");
+				"You have to define ether an ObjectFactoryMethod as static or constructor with and IDataReader or an constructor without any arguments");
+			}
 
 			classInfo.FullFactory = false;
 			classInfo.Factory = s => emptyCtor.Invoke();
@@ -529,10 +570,18 @@ namespace JPB.DataAccess.Manager
 			Dictionary<int, DbPropertyInfoCache> cache,
 			DbAccessType? dbAccessType)
 		{
-			if (instance == null) throw new ArgumentNullException("instance");
-			if (info == null) throw new ArgumentNullException("info");
+			if (instance == null)
+			{
+				throw new ArgumentNullException("instance");
+			}
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
 			if (reader == null)
+			{
 				return instance;
+			}
 
 			//Left c# property name and right the object to read from the reader
 			//var listofpropertys = new Dictionary<string, object>();
@@ -560,7 +609,7 @@ namespace JPB.DataAccess.Manager
 				{
 					var attributes = property.Attributes;
 					var valueConverterAttributeModel =
-						attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
+							attributes.FirstOrDefault(s => s.Attribute is ValueConverterAttribute);
 
 					//Should the SQL value be converted
 					if (valueConverterAttributeModel != null)
@@ -569,11 +618,11 @@ namespace JPB.DataAccess.Manager
 						//Create the converter and then convert the value before everything else
 						var valueConverter = converter.CreateConverter();
 						value = valueConverter.Convert(value, property.PropertyInfo.PropertyType, converter.Parameter,
-							CultureInfo.CurrentCulture);
+						CultureInfo.CurrentCulture);
 					}
 
 					var xmlAttributeModel =
-						attributes.FirstOrDefault(s => s.Attribute is FromXmlAttribute);
+							attributes.FirstOrDefault(s => s.Attribute is FromXmlAttribute);
 
 					//should the Content be considerd as XML text?
 					if (xmlAttributeModel != null)
@@ -581,7 +630,9 @@ namespace JPB.DataAccess.Manager
 						//Get the XML text and check if its null or empty
 						var xmlStream = value.ToString();
 						if (string.IsNullOrEmpty(xmlStream))
+						{
 							continue;
+						}
 
 						//Check for List
 						//if this is a list we are expecting other entrys inside
@@ -590,14 +641,14 @@ namespace JPB.DataAccess.Manager
 							//target Property is of type list
 							//so expect a xml valid list Take the first element and expect the propertys inside this first element
 							var record = XmlDataRecord.TryParse(xmlStream,
-								property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault(), false, config);
+							property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault(), false, config);
 							var xmlDataRecords = record.CreateListOfItems();
 
 							var genericArguments =
-								config.GetOrCreateClassInfoCache(
+									config.GetOrCreateClassInfoCache(
 									property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault());
 							var enumerableOfItems =
-								xmlDataRecords.Select(
+									xmlDataRecords.Select(
 									s => genericArguments.SetPropertysViaReflection(s, dbAccessType, config)).ToList();
 							object castedList;
 
@@ -605,8 +656,8 @@ namespace JPB.DataAccess.Manager
 							    genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
 							{
 								var caster =
-									typeof(DbCollection<>).MakeGenericType(genericArguments.Type)
-										.GetConstructor(new[] {typeof(IEnumerable)});
+										typeof(DbCollection<>).MakeGenericType(genericArguments.Type)
+										                      .GetConstructor(new[] {typeof(IEnumerable)});
 
 								Debug.Assert(caster != null, "caster != null");
 
@@ -615,8 +666,8 @@ namespace JPB.DataAccess.Manager
 							else
 							{
 								var caster =
-									typeof(NonObservableDbCollection<>).MakeGenericType(genericArguments.Type)
-										.GetConstructor(new[] {typeof(IEnumerable)});
+										typeof(NonObservableDbCollection<>).MakeGenericType(genericArguments.Type)
+										                                   .GetConstructor(new[] {typeof(IEnumerable)});
 
 								Debug.Assert(caster != null, "caster != null");
 
@@ -628,15 +679,15 @@ namespace JPB.DataAccess.Manager
 						else
 						{
 							var classInfo = config.GetOrCreateClassInfoCache(property
-								.PropertyInfo
-								.PropertyType);
+									.PropertyInfo
+									.PropertyType);
 
 							var xmlDataRecord = XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType,
-								true, config);
+							true, config);
 
 							//the t
 							var xmlSerilizedProperty = classInfo.SetPropertysViaReflection(xmlDataRecord, dbAccessType,
-								config);
+							config);
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
 						}
 					}
@@ -648,9 +699,13 @@ namespace JPB.DataAccess.Manager
 					{
 						object changedType;
 						if (value.GetType() != property.PropertyInfo.PropertyType)
+						{
 							changedType = DataConverterExtensions.ChangeType(value, property.PropertyInfo.PropertyType);
+						}
 						else
+						{
 							changedType = value;
+						}
 
 						property.Setter.Invoke(instance, changedType);
 					}
@@ -667,12 +722,12 @@ namespace JPB.DataAccess.Manager
 					else
 					{
 						var maybeFallbackProperty =
-							propertys.FirstOrDefault(
+								propertys.FirstOrDefault(
 								s => s.Value.Attributes.Any(e => e.Attribute is LoadNotImplimentedDynamicAttribute));
 						if (maybeFallbackProperty.Value != null)
 						{
 							instanceOfFallbackList =
-								(Dictionary<string, object>) maybeFallbackProperty.Value.Getter.Invoke(instance);
+									(Dictionary<string, object>) maybeFallbackProperty.Value.Getter.Invoke(instance);
 							if (instanceOfFallbackList == null)
 							{
 								instanceOfFallbackList = new Dictionary<string, object>();
@@ -688,7 +743,6 @@ namespace JPB.DataAccess.Manager
 				}
 			}
 
-
 			//foreach (var item in listofpropertys)
 			//{
 			//	var property = propertys.FirstOrDefault(s => s.PropertyName == item.Key);
@@ -696,7 +750,9 @@ namespace JPB.DataAccess.Manager
 			//}
 
 			if (reader is EgarDataRecord)
+			{
 				(reader as IDisposable).Dispose();
+			}
 
 			return instance;
 		}
@@ -704,12 +760,13 @@ namespace JPB.DataAccess.Manager
 		internal IEnumerable EnumerateDataRecords(IDbCommand query, bool direct, DbClassInfoCache type)
 		{
 			if (direct)
+			{
 				return EnumerateDataRecords(query)
-					.Select(f => AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(type, f)))
-					.ToArray();
+						.Select(f => AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(type, f)))
+						.ToArray();
+			}
 			return EnumerateDirectDataRecords(query, type);
 		}
-
 
 		internal List<IDataRecord> EnumerateDataRecords(IDbCommand query)
 		{
@@ -721,34 +778,36 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.PrepaireRemoteExecution(query);
 			return Database.Run(
-				s =>
+			s =>
+			{
+				var records = new List<List<IDataRecord>>();
+				using (query)
 				{
-					var records = new List<List<IDataRecord>>();
-					using (query)
+					using (var dr = query.ExecuteReader())
 					{
-						using (var dr = query.ExecuteReader())
+						try
 						{
-							try
+							var typeIndex = 0;
+							do
 							{
-								var typeIndex = 0;
-								do
+								var resultSet = new List<IDataRecord>();
+								while (dr.Read())
 								{
-									var resultSet = new List<IDataRecord>();
-									while (dr.Read())
-										resultSet.Add(new EgarDataRecord(dr, Config));
-									records.Add(resultSet);
-									typeIndex++;
-								} while (dr.NextResult());
-							}
-							finally
-							{
-								dr.Close();
-							}
+									resultSet.Add(new EgarDataRecord(dr, Config));
+								}
+								records.Add(resultSet);
+								typeIndex++;
+							} while (dr.NextResult());
+						}
+						finally
+						{
+							dr.Close();
 						}
 					}
+				}
 
-					return records;
-				});
+				return records;
+			});
 		}
 
 		/// <summary>
@@ -766,29 +825,31 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.PrepaireRemoteExecution(query);
 			return Database.Run(
-				s =>
+			s =>
+			{
+				var records = new ArrayList();
+				using (query)
 				{
-					var records = new ArrayList();
-					using (query)
+					using (var dr = query.ExecuteReader())
 					{
-						using (var dr = query.ExecuteReader())
+						try
 						{
-							try
+							do
 							{
-								do
+								while (dr.Read())
 								{
-									while (dr.Read())
-										records.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(info, dr)));
-								} while (dr.NextResult());
-							}
-							finally
-							{
-								dr.Close();
-							}
+									records.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(info, dr)));
+								}
+							} while (dr.NextResult());
+						}
+						finally
+						{
+							dr.Close();
 						}
 					}
-					return records;
-				});
+				}
+				return records;
+			});
 		}
 	}
 }

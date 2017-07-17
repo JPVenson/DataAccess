@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		public QueryEnumeratorEx(IQueryBuilder builder)
 		{
-			_builder = builder.Clone();
+			_builder = builder;
 		}
 
 		IEnumerator<TPoco> IEnumerable<TPoco>.GetEnumerator()

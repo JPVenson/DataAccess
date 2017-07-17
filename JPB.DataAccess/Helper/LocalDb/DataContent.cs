@@ -104,6 +104,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 						var type = elements[indexOfElementString];
 						var table =
 							LocalDbManager.Scope.Database.First(s => s.Key.AssemblyQualifiedName == type.AssemblyQualifiedName).Value;
+						if (table == null)
+							throw new InvalidDataException("Invalid Database config for Db import. There is no Table for the type " + type);
 						do
 						{
 							object emptyElement = table.TypeInfo.DefaultFactory();

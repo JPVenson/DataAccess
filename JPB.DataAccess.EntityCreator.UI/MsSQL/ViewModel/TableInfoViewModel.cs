@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
+	[DebuggerDisplay("{GetClassName()}")]
 	public class TableInfoViewModel : AsyncErrorProviderBase<TableInfoModelErrorProvider>, ITableInfoModel
 	{
 		private readonly SqlEntityCreatorViewModel _compilerOptions;
@@ -137,7 +139,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		public string GetClassName()
 		{
-			return ((ITableInfoModel) SourceElement).GetClassName();
+			return SourceElement.GetClassName();
 		}
 
 		public DelegateCommand RemoveColumnCommand { get; private set; }
@@ -159,10 +161,15 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var columnData = new ColumnInfo()
 			{
 				ColumnName = "New Column",
-				TargetType2 = SqlDbType.Binary.ToString()
+				TargetType = typeof(object),
+				//TargetType2 = SqlDbType.Binary.ToString()
 			};
+			AddColumn(columnData);
+		}
 
-			var columnMeta = new ColumInfoModel(columnData);
+		public void AddColumn(IColumnInfo column)
+		{
+			var columnMeta = new ColumInfoModel(column);
 
 			var collumnVm = new ColumnInfoViewModel(columnMeta);
 

@@ -11,7 +11,7 @@ namespace JPB.DataAccess.MetaApi.Model
 {
 	[DebuggerDisplay("{MethodName}")]
 	[Serializable]
-	internal class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>
+	internal sealed class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>
 		where TAtt : class, IAttributeInfoCache, new()
 	{
 		private dynamic _getter;

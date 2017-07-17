@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;

@@ -46,7 +46,7 @@ namespace JPB.DataAccess.Query
 			AccessLayer = pre.AccessLayer;
 			ForType = pre.ForType;
 			AutoParameterCounter = pre.AutoParameterCounter;
-			Parts = pre.Parts.ToList();
+			Parts = pre.Parts.Select(f => f.Clone(null) as GenericQueryPart).ToList();
 			EnumerationMode = pre.EnumerationMode;
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 		}
@@ -112,9 +112,12 @@ namespace JPB.DataAccess.Query
 				//check if the last statement ends with a space or the next will start with one
 				var renderCurrent = queryPart.Prefix;
 				if (prefRender != null)
-					if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) ||
-					    !renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
+				{
+					if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) || !renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
+					{
 						renderCurrent = " " + renderCurrent;
+					}
+				}
 				sb.Append(renderCurrent);
 				param.AddRange(queryPart.QueryParameters);
 				prefRender = renderCurrent;
@@ -205,12 +208,12 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public string Render()
 		{
-			var sb = new StringBuilderInterlaced();
+			var sb = new ConsoleStringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}
 
-		internal void Render(StringBuilderInterlaced sb)
+		internal void Render(ConsoleStringBuilderInterlaced sb)
 		{
 			sb.AppendInterlacedLine("new IQueryContainer {")
 				.Up()
