@@ -37,3 +37,6 @@
 /JPB.DataAccess.EntityCreator.UI/bin/Release
 /JPB.DataAccess.EntityCreator.UI/obj/Release
 /_ReSharper.Caches/ReSharperPlatformVs147.JPB.DataAccess.EntityCreator.00
+/_ReSharper.Caches
+/JPB.DataAccess.Tests/JPB.DataAccess.Tests.csproj.user
+/JPB.DataAccess/.vs/JPB.DataAccess/v14/.suo
