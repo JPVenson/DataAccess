@@ -1,11 +1,5 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+﻿#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
 using System.Data;
 using System.Linq;
@@ -14,6 +8,8 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
+
+#endregion
 
 namespace JPB.DataAccess.DbInfoConfig
 {
@@ -41,7 +37,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <typeparam name="TProp"></typeparam>
 		public void SetPropertyAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
-			var info = MetaInfoStoreExtentions.GetPropertyInfoFromLabda(exp);
+			var info = exp.GetPropertyInfoFromLabda();
 			var fod = ClassInfoCache.Propertys.First(s => s.Key == info).Value;
 			fod.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}
@@ -61,7 +57,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <typeparam name="TProp"></typeparam>
 		public void SetMethodAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
-			var info = MetaInfoStoreExtentions.GetMehtodInfoFromLabda(exp);
+			var info = exp.GetMehtodInfoFromLabda();
 			var fod = ClassInfoCache.Mehtods.First(s => s.MethodName == info);
 			fod.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}
@@ -78,7 +74,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod(string methodName, Func<object, object[], object> methodBody, params DbAttributeInfoCache[] attributes)
+		public void CreateMethod(string methodName, Func<object, object[], object> methodBody,
+			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");
@@ -94,7 +91,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod<Source, Input>(string methodName, Action<Source, Input> methodBody, params DbAttributeInfoCache[] attributes)
+		public void CreateMethod<Source, Input>(string methodName, Action<Source, Input> methodBody,
+			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");
@@ -104,7 +102,7 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
 			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
 			{
-				methodBody((Source)o, (Input)objects[0]);
+				methodBody((Source) o, (Input) objects[0]);
 				return null;
 			}, ClassInfoCache.Type, methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
@@ -113,7 +111,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod<Source, Output>(string methodName, Func<Source, Output> methodBody, params DbAttributeInfoCache[] attributes)
+		public void CreateMethod<Source, Output>(string methodName, Func<Source, Output> methodBody,
+			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
 				throw new ArgumentNullException("methodName");
@@ -121,10 +120,8 @@ namespace JPB.DataAccess.DbInfoConfig
 				throw new ArgumentNullException("methodBody");
 			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
-			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
-			{
-				return methodBody((Source)o);
-			}, ClassInfoCache.Type,  methodName, attributes);
+			var mehtodInfo = new DbMethodInfoCache((o, objects) => { return methodBody((Source) o); }, ClassInfoCache.Type,
+				methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
@@ -285,13 +282,14 @@ namespace JPB.DataAccess.DbInfoConfig
 			SetClassAttribute(new ForModelAttribute(name));
 		}
 
-		///// <summary>
-		///// Set the Primary key
-		///// </summary>
-		//
-		//
-		//public void SetStaticQueryKey(string query)
-		//{
 		//}
+		//{
+		//public void SetStaticQueryKey(string query)
+		//
+		//
+		///// </summary>
+		///// Set the Primary key
+
+		///// <summary>
 	}
 }

@@ -1,33 +1,34 @@
+#region
+
 using System;
 using System.Configuration;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 
+#endregion
+
 namespace JPB.DataAccess.Tests
 {
-	public class MySqlManager : IManager
+	public class MySqlManager : IManagerImplementation
 	{
+		private DbAccessLayer _expectWrapper;
+		private string _connectionString;
+
 		public MySqlManager()
 		{
 			ConnectionType = "DefaultConnectionMySQL";
 			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
-			{
 				ConnectionType = "CiConnectionMySQL";
-			}
 		}
 
-		private static DbAccessLayer _expectWrapper;
-		private static string _connectionString;
 		public string ConnectionType { get; set; }
 
-		public DbAccessLayer GetWrapper(DbAccessType type)
+		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
-			const string dbname = "testDB";
+			var dbname = string.Format("YAORM_TestDb_Test_MySQL_{0}", testName);
 			if (_expectWrapper != null)
-			{
 				_expectWrapper.Database.CloseAllConnection();
-			}
 
 			var redesginDatabase = string.Format(
 				"DROP DATABASE IF EXISTS {0};",
@@ -44,7 +45,8 @@ namespace JPB.DataAccess.Tests
 			//}
 
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(redesginDatabase));
-			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0};", dbname)));
+			_expectWrapper.ExecuteGenericCommand(
+				_expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0};", dbname)));
 			_expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString + "Database={0};", dbname));
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(UsersMeta.CreateMySql));
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(BookMeta.CreateMySql));
@@ -62,13 +64,11 @@ namespace JPB.DataAccess.Tests
 
 		public DbAccessType DbAccessType
 		{
-			get
-			{
-				return DbAccessType.MySql;
-			}
+			get { return DbAccessType.MySql; }
 		}
 
-		public string ConnectionString {
+		public string ConnectionString
+		{
 			get
 			{
 				if (_connectionString != null)
@@ -88,9 +88,7 @@ namespace JPB.DataAccess.Tests
 		public void Clear()
 		{
 			if (_expectWrapper != null)
-			{
 				_expectWrapper.Database.CloseAllConnection();
-			}
 		}
 	}
 }

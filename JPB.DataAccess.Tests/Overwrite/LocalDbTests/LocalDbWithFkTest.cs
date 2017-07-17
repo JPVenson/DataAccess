@@ -1,34 +1,28 @@
-﻿using JPB.DataAccess.DbInfoConfig;
+﻿#region
+
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Constraints;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
-namespace JPB.DataAccess.Tests.LocalDbTests
-#if MsSql
-.MsSQL
-#endif
+#endregion
 
-#if SqLite
-.SqLite
-#endif
+namespace JPB.DataAccess.Tests.LocalDbTests
+
 {
 	[TestFixture]
 	public class LocalDbWithFkTest
 	{
-		private LocalDbRepository<Book> _books;
-		private LocalDbRepository<Image> _images;
-		private LocalDbRepository<ImageNullable> _imagesNullable;
-
 		[SetUp]
 		public void TestInit()
 		{
 			using (new DatabaseScope())
 			{
-				_books = new LocalDbRepository<Book>(new DbConfig());
-				_images = new LocalDbRepository<Image>(new DbConfig());
-				_imagesNullable = new LocalDbRepository<ImageNullable>(new DbConfig());
+				_books = new LocalDbRepository<Book>(new DbConfig(true));
+				_images = new LocalDbRepository<Image>(new DbConfig(true));
+				_imagesNullable = new LocalDbRepository<ImageNullable>(new DbConfig(true));
 				Assert.IsFalse(_books.ReposetoryCreated);
 				Assert.IsFalse(_images.ReposetoryCreated);
 				Assert.IsFalse(_imagesNullable.ReposetoryCreated);
@@ -39,13 +33,16 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			Assert.IsTrue(_imagesNullable.ReposetoryCreated);
 		}
 
+		private LocalDbRepository<Book> _books;
+		private LocalDbRepository<Image> _images;
+		private LocalDbRepository<ImageNullable> _imagesNullable;
+
 		[Test]
 		public void AddChildWithoutParent()
 		{
 			var image = new Image();
 
 			Assert.That(() => _images.Add(image), Throws.Exception.TypeOf<ForginKeyConstraintException>());
-			
 		}
 
 		[Test]

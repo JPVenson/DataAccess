@@ -1,19 +1,18 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Helper;
-using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+
+#endregion
 
 namespace JPB.DataAccess.Query
 {
 	/// <summary>
-	///
 	/// </summary>
 	public static class QueryBuilderExtentions
 	{
@@ -22,26 +21,29 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static TQuery Add<TQuery>(this TQuery query, GenericQueryPart part)
-			where TQuery : IQueryBuilder
+			where TQuery : class, IQueryBuilder
 		{
-			if (query.ContainerObject.AllowParamterRenaming)
+			var clone = query.CloneWith(query) as TQuery;
+			if (clone.ContainerObject.AllowParamterRenaming)
 			{
 				foreach (var queryParameter in part.QueryParameters)
 				{
-					var fod = query.ContainerObject.Parts.SelectMany(s => s.QueryParameters).FirstOrDefault(s => s.Name == queryParameter.Name);
+					var fod =
+							clone.ContainerObject.Parts.SelectMany(s => s.QueryParameters)
+							.FirstOrDefault(s => s.Name == queryParameter.Name && s.Value != queryParameter.Value);
 
 					if (fod == null)
 						continue;
 
 					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the QueryCommand
 					var name = fod.Name;
-					var newName = query.ContainerObject.GetNextParameterId().ToString().CheckParamter();
+					var newName = clone.ContainerObject.GetNextParameterId().ToString().CheckParamter();
 					part.Prefix = part.Prefix.Replace(name, newName);
 					queryParameter.Name = newName;
 				}
 			}
-			query.ContainerObject.Parts.Add(part);
-			return query;
+			clone.ContainerObject.Parts.Add(part);
+			return clone;
 		}
 
 		/// <summary>
@@ -49,7 +51,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static E QueryQ<E>(this E builder, string query, params IQueryParameter[] parameters)
-			where E : IQueryBuilder
+			where E : class, IQueryBuilder
 		{
 			return builder.Add(new GenericQueryPart(query, parameters, builder));
 		}
@@ -59,7 +61,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static TQuery QueryD<TQuery>(this TQuery builder, string query, dynamic paramerters)
-			where TQuery : IQueryBuilder
+			where TQuery : class, IQueryBuilder
 		{
 			if (paramerters != null)
 			{
@@ -75,7 +77,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static TQuery QueryD<TQuery>(this TQuery builder, string query)
-			where TQuery : IQueryBuilder
+			where TQuery : class, IQueryBuilder
 		{
 			return QueryD(builder, query, null);
 		}
@@ -85,7 +87,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static TQuery QueryCommand<TQuery>(this TQuery builder, IDbCommand command)
-			where TQuery: IQueryBuilder
+			where TQuery : class, IQueryBuilder
 		{
 			return builder.Add(GenericQueryPart.FromCommand(command, null));
 		}
@@ -95,7 +97,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static TQuery QueryText<TQuery>(this TQuery builder, string query, params object[] args)
-			where TQuery : IQueryBuilder
+			where TQuery : class, IQueryBuilder
 		{
 			return builder.QueryQ(string.Format(query, args));
 		}
@@ -104,14 +106,13 @@ namespace JPB.DataAccess.Query
 		///     Inserts and Appends brackets after the delegate
 		/// </summary>
 		/// <returns></returns>
-		public static TQuery InBracket<TQuery>(this TQuery query,
-			Action<TQuery> header)
-			where TQuery : IQueryBuilder
+		public static TResult InBracket<TQuery,TResult>(this TQuery query,
+			Func<TQuery, TResult> header)
+			where TQuery : class, IQueryBuilder
+			where TResult : class, IQueryBuilder
 		{
-			query.QueryText("(");
-			header(query);
-			query.QueryText(")");
-			return query;
+			var queryText = query.QueryText("(");
+			return header(queryText).QueryText(")");
 		}
 
 		/// <summary>
@@ -149,11 +150,10 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <returns></returns>
 		public static TQuery WithParamerters<TQuery>(this TQuery query, dynamic paramerters)
-			where TQuery : IQueryBuilder
+			where TQuery : class, IQueryBuilder
 		{
 			IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-			query.QueryQ(string.Empty, parameters.ToArray());
-			return query;
+			return query.QueryQ(string.Empty, parameters.ToArray());
 		}
 	}
 }

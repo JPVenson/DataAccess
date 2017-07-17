@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 
 namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
@@ -8,6 +9,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		int PositionFromTop { get; set; }
 		bool Nullable { get; set; }
 		Type TargetType { get; set; }
-		string TargetType2 { get; set; }
+		SqlDbType SqlType { get; set; }
+		//string TargetType2 { get; set; }
 	}
 }

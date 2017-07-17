@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
@@ -7,19 +9,25 @@ using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 
-namespace JPB.DataAccess.Tests.LocalDbTests
-#if MsSql
-.MsSQL
-#endif
+#endregion
 
-#if SqLite
-.SqLite
-#endif
+namespace JPB.DataAccess.Tests.LocalDbTests
 {
 	[TestFixture(false)]
 	[TestFixture(true)]
 	public class LocalDbTest
 	{
+		[SetUp]
+		public void TestInit()
+		{
+			using (new DatabaseScope())
+			{
+				_users = new LocalDbRepository<Users>(new DbConfig(true), _useObjectCopy, null);
+			}
+
+			Assert.IsTrue(_users.ReposetoryCreated);
+		}
+
 		private readonly bool _useObjectCopy;
 		private LocalDbRepository<Users> _users;
 
@@ -28,27 +36,13 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			_useObjectCopy = useObjectCopy;
 		}
 
-		[SetUp]
-		public void TestInit()
-		{
-			using (new DatabaseScope())
-			{
-				_users = new LocalDbRepository<Users>(new DbConfig(), _useObjectCopy, null);
-			}
-
-			Assert.IsTrue(_users.ReposetoryCreated);
-		}
-
 		[Test]
-		public void SimpleParallelAccess()
+		public void Add()
 		{
-			Assert.That(() =>
-			{
-				Parallel.For(0, 999, d =>
-				{
-					_users.Add(new Users());
-				});
-			}, Throws.Nothing);
+			var user = new Users();
+			_users.Add(user);
+			Assert.That(user, Is.Not.Null);
+			Assert.That(user.UserID, Is.EqualTo(1));
 		}
 
 		[Test]
@@ -86,15 +80,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		}
 
 		[Test]
-		public void Add()
-		{
-			var user = new Users();
-			_users.Add(user);
-			Assert.That(user, Is.Not.Null);
-			Assert.That(user.UserID, Is.EqualTo(1));
-		}
-
-		[Test]
 		public void Contains()
 		{
 			var user = new Users();
@@ -128,17 +113,6 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		}
 
 		[Test]
-		public void Remove()
-		{
-			var user = new Users();
-			_users.Add(user);
-
-			//Add TestMethod
-			Assert.That(_users.Remove(user), Is.True);
-			Assert.That(_users.Count, Is.EqualTo(0));
-		}
-
-		[Test]
 		public void Enumerate()
 		{
 			var user = new Users();
@@ -168,6 +142,23 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 			var userArr = new Users[_users.Count];
 			Assert.That(() => _users.CopyTo(userArr, 0), Throws.Nothing);
+		}
+
+		[Test]
+		public void Remove()
+		{
+			var user = new Users();
+			_users.Add(user);
+
+			//Add TestMethod
+			Assert.That(_users.Remove(user), Is.True);
+			Assert.That(_users.Count, Is.EqualTo(0));
+		}
+
+		[Test]
+		public void SimpleParallelAccess()
+		{
+			Assert.That(() => { Parallel.For(0, 999, d => { _users.Add(new Users()); }); }, Throws.Nothing);
 		}
 	}
 }

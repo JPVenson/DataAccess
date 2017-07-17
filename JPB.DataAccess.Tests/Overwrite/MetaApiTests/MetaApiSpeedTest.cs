@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -7,14 +9,10 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
 using NUnit.Framework;
 
-namespace JPB.DataAccess.Tests.MetaApiTests
-#if MsSql
-.MsSQL
-#endif
+#endregion
 
-#if SqLite
-.SqLite
-#endif
+namespace JPB.DataAccess.Tests.MetaApiTests
+
 {
 	[TestFixture]
 	[SuppressMessage("ReSharper", "LocalizableElement")]
@@ -74,19 +72,10 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 		}
 
 		[Test]
-		public void OverallSpeedEvalPropertyGetAndSetTestOver100K()
+		public void OverallPlainSpeedEvalPropertyGetAndSetTest()
 		{
-			var overallTime = new TimeSpan(0);
-			var dbConfig = new DbConfig();
-			var iterations = 100000;
-			for (int i = 0; i < iterations; i++)
-			{
-				var timeEleapsed = OverallSpeedEvalPropertyGetAndSet(dbConfig);
-				overallTime = new TimeSpan(overallTime.Ticks + timeEleapsed.Ticks);
-				Thread.Sleep(0);
-			}
-
-			Console.WriteLine("Over {0} with average of {1}", iterations, new TimeSpan(overallTime.Ticks / iterations));
+			var timeSpan = Measure(() => OverallPlainSpeedEvalPropertyGetAndSet());
+			Console.WriteLine("Time: {0}", timeSpan);
 		}
 
 		[Test]
@@ -94,7 +83,7 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 		{
 			var overallTime = new TimeSpan(0);
 			var iterations = 100000;
-			for (int i = 0; i < iterations; i++)
+			for (var i = 0; i < iterations; i++)
 			{
 				var timeEleapsed = OverallPlainSpeedEvalPropertyGetAndSet();
 				overallTime = new TimeSpan(overallTime.Ticks + timeEleapsed.Ticks);
@@ -125,9 +114,33 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 		}
 
 		[Test]
-		public void OverallPlainSpeedEvalPropertyGetAndSetTest()
+		public void OverallSpeedEvalPropertyGetAndSetTestOver100K()
 		{
-			var timeSpan = Measure(() => OverallPlainSpeedEvalPropertyGetAndSet());
+			var overallTime = new TimeSpan(0);
+			var dbConfig = new DbConfig(true);
+			var iterations = 100000;
+			for (var i = 0; i < iterations; i++)
+			{
+				var timeEleapsed = OverallSpeedEvalPropertyGetAndSet(dbConfig);
+				overallTime = new TimeSpan(overallTime.Ticks + timeEleapsed.Ticks);
+				Thread.Sleep(0);
+			}
+
+			Console.WriteLine("Over {0} with average of {1}", iterations, new TimeSpan(overallTime.Ticks / iterations));
+		}
+
+		[Test]
+		public void PlainSpeedEvalPropertyGetAndSet()
+		{
+			var timeSpan = Measure(() =>
+			{
+				var type = Measure("Get Type", () => typeof(ClassSpeedMeasurement));
+				var instance = Measure("Object Creation", () => Activator.CreateInstance(type));
+				var propInfo = Measure("Lookup Property",
+					() => type.GetProperties().FirstOrDefault(s => s.Name == "PropString"));
+				Measure("Set Value", () => propInfo.SetValue(instance, "Value"));
+				Measure("Get Value", () => propInfo.GetValue(instance));
+			});
 			Console.WriteLine("Time: {0}", timeSpan);
 		}
 
@@ -138,7 +151,8 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 			var timeSpan = Measure(() =>
 			{
 				dbInfo = Measure("Generate DbConfig", () => new DbConfig(true));
-				var cache = Measure("Generate Class Cache", () => dbInfo.GetOrCreateClassInfoCache(typeof(ClassSpeedMeasurement)));
+				var cache = Measure("Generate Class Cache",
+					() => dbInfo.GetOrCreateClassInfoCache(typeof(ClassSpeedMeasurement)));
 				var dbPropertyInfoCache = Measure("Lookup Property", () => cache.Propertys["PropString"]);
 
 				ClassSpeedMeasurement instance = Measure("Object Creation", () => cache.DefaultFactory());
@@ -150,7 +164,8 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 			var followUp = Measure(() =>
 			{
 				dbInfo = Measure("Generate DbConfig", () => new DbConfig(true));
-				var cache = Measure("Generate Class Cache", () => dbInfo.GetOrCreateClassInfoCache(typeof(ClassSpeedMeasurement)));
+				var cache = Measure("Generate Class Cache",
+					() => dbInfo.GetOrCreateClassInfoCache(typeof(ClassSpeedMeasurement)));
 				var dbPropertyInfoCache = Measure("Lookup Property", () => cache.Propertys["PropString"]);
 
 				ClassSpeedMeasurement instance = Measure("Object Creation", () => cache.DefaultFactory());
@@ -158,20 +173,6 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 				var invoke = Measure("Get Value", () => dbPropertyInfoCache.Getter.Invoke(instance));
 			});
 			Console.WriteLine("Reuse DbInfo Time: {0}", followUp);
-		}
-
-		[Test]
-		public void PlainSpeedEvalPropertyGetAndSet()
-		{
-			var timeSpan = Measure(() =>
-			{
-				var type = Measure("Get Type", () => typeof(ClassSpeedMeasurement));
-				var instance = Measure("Object Creation", () => Activator.CreateInstance(type));
-				var propInfo = Measure("Lookup Property", () => type.GetProperties().FirstOrDefault(s => s.Name == "PropString"));
-				Measure("Set Value", () => propInfo.SetValue(instance, "Value"));
-				Measure("Get Value", () => propInfo.GetValue(instance));
-			});
-			Console.WriteLine("Time: {0}", timeSpan);
 		}
 	}
 }

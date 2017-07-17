@@ -37,7 +37,12 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 		public CodeMemberProperty AddProperty(IColumInfoModel info)
 		{
 			var propertyName = info.GetPropertyName();
-			var targetType = info.ColumnInfo.TargetType.FullName;
+			var targetType = info.ColumnInfo.TargetType;
+			if (info.ColumnInfo.Nullable && !info.ColumnInfo.TargetType.IsClass)
+			{
+				targetType = typeof(Nullable<>).MakeGenericType(targetType);
+			}
+
 			CodeMemberProperty codeMemberProperty;
 			if (info.EnumDeclaration != null)
 			{
@@ -75,7 +80,8 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 		{
 			var property = new CodeMemberProperty();
 
-			property.Attributes = (MemberAttributes)24578; //Public Final
+			property.Attributes = MemberAttributes.Public | MemberAttributes.Final;
+				//(MemberAttributes)24578; //Public Final
 			property.HasGet = true;
 			property.HasSet = true;
 			property.Name = name;

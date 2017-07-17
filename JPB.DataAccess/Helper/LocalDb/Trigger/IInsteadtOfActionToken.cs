@@ -1,23 +1,23 @@
 ﻿namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	public interface IInsteadtOfActionToken<TEntity>
 	{
 		/// <summary>
-		/// Gets the item.
+		///     Gets the item.
 		/// </summary>
 		/// <value>
-		/// The item.
+		///     The item.
 		/// </value>
 		TEntity Item { get; }
+
 		/// <summary>
-		/// Gets the table.
+		///     Gets the table.
 		/// </summary>
 		/// <value>
-		/// The table.
+		///     The table.
 		/// </value>
 		LocalDbRepository<TEntity> Table { get; }
 	}

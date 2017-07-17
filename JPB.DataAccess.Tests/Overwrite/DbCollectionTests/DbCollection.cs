@@ -1,27 +1,24 @@
-﻿using JPB.DataAccess.DbCollection;
+﻿#region
+
+using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 
-namespace JPB.DataAccess.Tests.DbCollectionTests
-#if MsSql
-.MsSQL
-#endif
+#endregion
 
-#if SqLite
-.SqLite
-#endif
+namespace JPB.DataAccess.Tests.DbCollectionTests
 {
 	[TestFixture]
 	public class DbCollection
 	{
-		private DbCollection<Users_Col> _dbCollection;
-
 		[SetUp]
 		public void Init()
 		{
 			_dbCollection = new DbCollection<Users_Col>(new Users_Col[0]);
 			Assert.IsNotNull(_dbCollection);
 		}
+
+		private DbCollection<Users_Col> _dbCollection;
 
 		[Test]
 		public void Add()

@@ -4,6 +4,8 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
 	public interface IMsSqlCreator : IEntryCreator
 	{
+
+		IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
 		IEnumerable<ITableInfoModel> Tables { get; set; }
 		IEnumerable<Dictionary<int, string>> Enums { get; }
 		IEnumerable<ITableInfoModel> Views { get; set; }

@@ -1,12 +1,13 @@
 ﻿using JPB.ErrorValidation;
+using JPB.ErrorValidation.ValidationRules;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	public class ClassPreviewViewModelErrorProvider : ErrorValidation.ValidationRules.ValidationRuleBase<ClassPreviewViewModel>
+	public class ClassPreviewViewModelErrorProvider : ErrorCollection<ClassPreviewViewModel>
 	{
 		public ClassPreviewViewModelErrorProvider()
 		{
-			
+
 		}
 	}
 }

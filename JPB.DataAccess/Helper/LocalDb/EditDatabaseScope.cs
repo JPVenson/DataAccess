@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
+
+#endregion
 
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Scopes.DatabaseScope" />
 	public class EditDatabaseScope : DatabaseScope
@@ -23,23 +23,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 		internal LocalDbManager Scope { get; set; }
 
 		/// <summary>
-		/// Gets the drop command scope.
+		///     Gets the drop command scope.
 		/// </summary>
 		/// <value>
-		/// The drop.
+		///     The drop.
 		/// </value>
 		public DropCommand Drop { get; private set; }
 	}
 
 	/// <summary>
-	///
 	/// </summary>
 	public class DropCommand
 	{
 		private readonly EditDatabaseScope _editDatabaseScope;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DropCommand"/> class.
+		///     Initializes a new instance of the <see cref="DropCommand" /> class.
 		/// </summary>
 		/// <param name="editDatabaseScope">The edit database scope.</param>
 		public DropCommand(EditDatabaseScope editDatabaseScope)
@@ -48,7 +47,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Databases the specified for type.
+		///     Databases the specified for type.
 		/// </summary>
 		/// <param name="forType">For type.</param>
 		public void Database(Type forType)

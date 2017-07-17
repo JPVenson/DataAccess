@@ -1,4 +1,8 @@
+#region
+
 using System;
+
+#endregion
 
 namespace JPB.DataAccess.Helper.LocalDb
 {

@@ -1,14 +1,22 @@
+#region
+
 using System.IO;
+using System.IO.MemoryMappedFiles;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 
+#endregion
+
 namespace JPB.DataAccess.Tests
 {
-	public class SqLiteManager : IManager
+	public class SqLiteManager : IManagerImplementation
 	{
-		private static DbAccessLayer expectWrapper;
+		public const string SConnectionString = "Data Source=:memory:;";
+		private DbAccessLayer expectWrapper;
 
-		public const string SConnectionString = "Data Source={0};";
+		private string tempPath;
+
 		public DbAccessType DbAccessType
 		{
 			get { return DbAccessType.SqLite; }
@@ -19,21 +27,22 @@ namespace JPB.DataAccess.Tests
 			get { return SConnectionString; }
 		}
 
-		string tempPath;
-
-		public DbAccessLayer GetWrapper(DbAccessType type)
+		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
 			if (expectWrapper != null)
-			{
 				expectWrapper.Database.CloseAllConnection();
-			}
 
 			//string dbname = "testDB";
 			//var sqlLiteFileName = dbname + ".sqlite";
+			var dbname = string.Format("YAORM_SqLite_{0}", testName);
+			tempPath = string.Format(ConnectionString, dbname);
 
-			tempPath = Path.GetTempFileName();
+			//var file = MemoryMappedFile.CreateNew(dbname, 10000, MemoryMappedFileAccess.ReadWrite);
 
-			expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString, tempPath));
+			//tempPath = Path.GetTempFileName() + dbname + "sqLite";
+
+			expectWrapper = new DbAccessLayer(DbAccessType, tempPath, new DbConfig(true));
+			expectWrapper.Database.Connect();
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
@@ -42,7 +51,6 @@ namespace JPB.DataAccess.Tests
 
 		public void FlushErrorData()
 		{
-
 		}
 
 		public void Clear()

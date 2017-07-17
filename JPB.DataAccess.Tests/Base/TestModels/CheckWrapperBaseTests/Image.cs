@@ -1,4 +1,8 @@
-﻿using JPB.DataAccess.ModelsAnotations;
+﻿#region
+
+using JPB.DataAccess.ModelsAnotations;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 {
@@ -13,7 +17,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public int IdBook { get; set; }
 	}
 
-    [ForModel("Image")]
+	[ForModel("Image")]
 	public class ImageNullable
 	{
 		[PrimaryKey]

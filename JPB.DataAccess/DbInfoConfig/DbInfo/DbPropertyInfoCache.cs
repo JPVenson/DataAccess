@@ -1,19 +1,15 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+﻿#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
+
+#endregion
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
@@ -23,24 +19,30 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			params AttributeInfoCache[] attributes)
 		{
 			if (name == null)
+			{
 				throw new ArgumentNullException("name");
+			}
 			if (attributes == null)
+			{
 				throw new ArgumentNullException("attributes");
+			}
 
 			PropertyName = name;
 
 			if (setter != null)
 			{
-				Setter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) =>
+				Setter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this,
+				(o, objects) =>
 				{
-					setter(o, (TE)objects[0]);
+					setter(o, (TE) objects[0]);
 					return null;
 				});
 			}
 
 			if (getter != null)
 			{
-				Getter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) => getter(o));
+				Getter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this,
+				(o, objects) => getter(o));
 			}
 		}
 	}
@@ -51,22 +53,26 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			params AttributeInfoCache[] attributes)
 		{
 			if (attributes == null)
+			{
 				throw new ArgumentNullException("attributes");
+			}
 
 			PropertyName = name;
 
 			if (setter != null)
 			{
-				Setter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) =>
+				Setter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this,
+				(o, objects) =>
 				{
-					setter((T)o, (TE)objects[0]);
+					setter((T) o, (TE) objects[0]);
 					return null;
 				});
 			}
 
 			if (getter != null)
 			{
-				Getter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this, (o, objects) => getter((T)o));
+				Getter = new FakePropertyMethodInfoCache<DbAttributeInfoCache, MethodArgsInfoCache<DbAttributeInfoCache>>(this,
+				(o, objects) => getter((T) o));
 			}
 		}
 	}
@@ -76,30 +82,17 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 	/// </summary>
 	public class DbPropertyInfoCache : PropertyInfoCache<DbAttributeInfoCache>
 	{
-
 #if !DEBUG
 		[DebuggerHidden]
 #endif
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DbPropertyInfoCache"/> class.
+		///     Initializes a new instance of the <see cref="DbPropertyInfoCache" /> class.
 		/// </summary>
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-
 		public DbPropertyInfoCache()
 		{
-			base.Attributes = new HashSet<DbAttributeInfoCache>();
-		}
-
-		/// <summary>
-		/// </summary>
-		internal DbPropertyInfoCache(PropertyInfo propertyInfo, bool anon)
-			: base(propertyInfo, anon)
-		{
-			if (propertyInfo != null)
-			{
-				Refresh();
-			}
 		}
 
 		//internal DbPropertyInfoCache(string dbName, string propertyName, Type propertyType)
@@ -111,11 +104,10 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		//	}
 		//}
 
-
 		//public DbClassInfoCache ClassType { get; protected internal set; }
 
 		/// <summary>
-		///		The class that owns this Property
+		///     The class that owns this Property
 		/// </summary>
 		public DbClassInfoCache DeclaringClass { get; protected internal set; }
 
@@ -132,7 +124,8 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		///     if known the ForXml attribute
 		/// </summary>
-		public DbAttributeInfoCache<ForeignKeyDeclarationAttribute> ForginKeyDeclarationAttribute { get; protected internal set; }
+		public DbAttributeInfoCache<ForeignKeyDeclarationAttribute> ForginKeyDeclarationAttribute { get;
+			protected internal set; }
 
 		/// <summary>
 		///     Should this property not be inserterd
@@ -152,56 +145,46 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			get
 			{
 				if (ForModelAttribute != null)
+				{
 					return ForModelAttribute.Attribute.AlternatingName;
+				}
 
 				if (FromXmlAttribute != null)
+				{
 					return FromXmlAttribute.Attribute.FieldName;
+				}
 				return PropertyName;
 			}
 		}
 
 		/// <summary>
-		///		if known the RowVersion Attribute
+		///     if known the RowVersion Attribute
 		/// </summary>
 		public DbAttributeInfoCache<RowVersionAttribute> RowVersionAttribute { get; private set; }
 
 		/// <summary>
-		///		if knwon the PrimaryKey Attribute
+		///     if knwon the PrimaryKey Attribute
 		/// </summary>
 		public DbAttributeInfoCache<PrimaryKeyAttribute> PrimaryKeyAttribute { get; private set; }
 
 		/// <summary>
-		///		if knwon the Ignore Reflection Attribute
+		///     if knwon the Ignore Reflection Attribute
 		/// </summary>
 		public DbAttributeInfoCache<IgnoreReflectionAttribute> IgnoreAnyAttribute { get; private set; }
 
 		/// <summary>
+		///     If known the Generator that will mask this Property
+		/// </summary>
+		public DbAttributeInfoCache<AnonymousObjectGenerationAttribute> AnonymousObjectGenerationAttribute { get; set; }
+
+		/// <summary>
 		///     For internal Usage only
 		/// </summary>
-		public void Refresh()
+		public override IPropertyInfoCache<DbAttributeInfoCache> Init(PropertyInfo propertyInfo, bool anon)
 		{
-			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(PrimaryKeyAttribute)));
-			InsertIgnore = Attributes.Any(f => f.Attribute is InsertIgnoreAttribute);
-			if (Getter != null && Getter.MethodInfo != null)
-			{
-				if (Getter.MethodInfo.IsVirtual)
-				{
-					ForginKeyAttribute =
-						DbAttributeInfoCache<ForeignKeyAttribute>.WrapperOrNull(
-							Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyAttribute)));
-				}
-				else
-				{
-					ForginKeyAttribute = null;
-				}
-			}
-			RowVersionAttribute =
-				DbAttributeInfoCache<RowVersionAttribute>.WrapperOrNull(
-					Attributes.FirstOrDefault(s => s.Attribute is RowVersionAttribute));
-			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(FromXmlAttribute)));
-			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForModelAttribute)));
-			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(IgnoreReflectionAttribute)));
-			ForginKeyDeclarationAttribute = DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(Attributes.FirstOrDefault(f => f.Attribute.GetType() == typeof(ForeignKeyDeclarationAttribute)));
+			base.Init(propertyInfo, anon);
+			Refresh();
+			return this;
 		}
 
 		//internal static PropertyInfoCache Logical(string info)
@@ -211,5 +194,31 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		//        PropertyName = info
 		//    };
 		//}
+
+		/// <summary>
+		///     Refreshes all cached attributes
+		/// </summary>
+		public void Refresh()
+		{
+			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(Attributes);
+			InsertIgnore = Attributes.Any(f => f.Attribute is InsertIgnoreAttribute);
+			if (Getter != null && Getter.MethodInfo != null)
+			{
+				if (Getter.MethodInfo.IsVirtual)
+				{
+					ForginKeyAttribute = DbAttributeInfoCache<ForeignKeyAttribute>.WrapperOrNull(Attributes);
+				}
+				else
+				{
+					ForginKeyAttribute = null;
+				}
+			}
+			AnonymousObjectGenerationAttribute = DbAttributeInfoCache<AnonymousObjectGenerationAttribute>.WrapperOrNull(Attributes);
+			RowVersionAttribute = DbAttributeInfoCache<RowVersionAttribute>.WrapperOrNull(Attributes);
+			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(Attributes);
+			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes);
+			IgnoreAnyAttribute = DbAttributeInfoCache<IgnoreReflectionAttribute>.WrapperOrNull(Attributes);
+			ForginKeyDeclarationAttribute = DbAttributeInfoCache<ForeignKeyDeclarationAttribute>.WrapperOrNull(Attributes);
+		}
 	}
 }

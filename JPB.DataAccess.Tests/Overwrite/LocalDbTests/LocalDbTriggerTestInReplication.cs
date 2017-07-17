@@ -1,3 +1,5 @@
+#region
+
 using System;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
@@ -6,26 +8,23 @@ using JPB.DataAccess.Helper.LocalDb.Trigger;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 
-namespace JPB.DataAccess.Tests.LocalDbTests
-#if MsSql
-.MsSQL
-#endif
+#endregion
 
-#if SqLite
-.SqLite
-#endif
+namespace JPB.DataAccess.Tests.LocalDbTests
+
 {
 	[TestFixture]
 	public class LocalDbTriggerTestInReplication
 	{
 		public class DbScope : IDisposable
 		{
-			public LocalDbRepository<Users> users;
 			public DatabaseScope database;
+			public LocalDbRepository<Users> users;
+
 			public DbScope()
 			{
 				database = new DatabaseScope();
-				users = new LocalDbRepository<Users>(new DbConfig());
+				users = new LocalDbRepository<Users>(new DbConfig(true));
 			}
 
 			public void Dispose()
@@ -50,26 +49,15 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 					Assert.That(orderFlag, Is.False);
 					orderFlag = true;
 				};
-				repro.users.Triggers.WithReplication.After.Insert += (sender, token) =>
-				{
-					token.Cancel("AFTER");
-				};
-				repro.users.Triggers.NotForReplication.For.Insert += (sender, token) =>
-				{
-					Assert.Fail();
-				};
-				repro.users.Triggers.NotForReplication.After.Insert += (sender, token) =>
-				{
-					Assert.Fail();
-				};
+				repro.users.Triggers.WithReplication.After.Insert += (sender, token) => { token.Cancel("AFTER"); };
+				repro.users.Triggers.NotForReplication.For.Insert += (sender, token) => { Assert.Fail(); };
+				repro.users.Triggers.NotForReplication.After.Insert += (sender, token) => { Assert.Fail(); };
 
 				repro.database.SetupDone += (sender, args) =>
 				{
 					Assert.That(orderFlag, Is.False);
-					Assert.That(() =>
-					{
-						repro.users.Add(new Users());
-					}, Throws.Exception.InstanceOf<ITriggerException>().With.Property("Reason").EqualTo("AFTER"));
+					Assert.That(() => { repro.users.Add(new Users()); },
+						Throws.Exception.InstanceOf<ITriggerException>().With.Property("Reason").EqualTo("AFTER"));
 					Assert.That(orderFlag, Is.True);
 					Assert.That(repro.users.Count, Is.EqualTo(0));
 				};
@@ -78,6 +66,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 		//[Test]
 		//public void DeleteTriggerWithCancelAfterOrder()
+
 		//{
 		//	var repro = MockRepro();
 		//	var orderFlag = false;
@@ -317,7 +306,5 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		//	Assert.That(orderFlag, Is.True);
 		//	Assert.That(repro.Count, Is.EqualTo(1));
 		//}
-
-
 	}
 }

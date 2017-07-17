@@ -1,150 +1,112 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Linq;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
-using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
-using Users = JPB.DataAccess.Tests.Base.Users;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-    [TestFixture(DbAccessType.MsSql)]
-    [TestFixture(DbAccessType.SqLite)]
-#if MySqlTests
-    [TestFixture(DbAccessType.MySql)]
-#endif
-    public class UpdateRefreshTests
-    {
-        [SetUp]
-        public void Init()
-        {
-            _mgr = new Manager();
-            _dbAccess = _mgr.GetWrapper(_type);
-        }
+	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	public class UpdateRefreshTests : BaseTest
+	{
+		public UpdateRefreshTests(DbAccessType type) : base(type)
+		{
+		}
 
-        [TearDown]
-        public void TestTearDown()
-        {
-            // inc. class name
-            var fullNameOfTheMethod = TestContext.CurrentContext.Test.FullName;
-            // method name only
-            var methodName = TestContext.CurrentContext.Test.Name;
-            // the state of the test execution
-            var state = TestContext.CurrentContext.Result.Outcome == ResultState.Failure; // TestState enum
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void Refresh()
+		{
+			DataMigrationHelper.AddUsers(1, DbAccess);
 
-            if (state)
-                _mgr.FlushErrorData();
-        }
+			var singleEntity = DbAccess
+				.Query()
+				.Top<Users>(1)
+				.ForResult<Users>()
+				.Single();
 
-        [SetUp]
-        public void Clear()
-        {
-            _dbAccess.Config.Dispose();
-            _dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-            if (_dbAccess.DbAccessType == DbAccessType.MsSql)
-                _dbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-        }
+			var id = singleEntity.UserID;
+			Assert.IsNotNull(singleEntity);
 
-        private readonly DbAccessType _type;
+			var preName = singleEntity.UserName;
+			var postName = Guid.NewGuid().ToString();
+			Assert.IsNotNull(preName);
 
-        public UpdateRefreshTests(DbAccessType type)
-        {
-            _type = type;
-        }
+			singleEntity.UserName = postName;
+			DbAccess.Update(singleEntity);
+			singleEntity.UserName = null;
 
-        private DbAccessLayer _dbAccess;
-        private IManager _mgr;
+			singleEntity = DbAccess.Refresh(singleEntity);
+			var refEntity = DbAccess.Select<Users>(id);
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void Update()
-        {
-            DataMigrationHelper.AddUsers(1, _dbAccess);
-            var query = _dbAccess
-                .Query()
-                .Top<Users>(1);
-            var singleEntity = query
-                .ForResult<Users>()
-                .Single();
-            Assert.IsNotNull(singleEntity);
+			Assert.IsNotNull(refEntity);
+			Assert.AreEqual(id, refEntity.UserID);
+			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
+			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
+		}
 
-            var preName = singleEntity.UserName;
-            var postName = Guid.NewGuid().ToString();
-            Assert.IsNotNull(preName);
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void RefreshInplace()
+		{
+			DataMigrationHelper.AddUsers(1, DbAccess);
+			var singleEntity = DbAccess
+				.Query()
+				.Top<Base.TestModels.CheckWrapperBaseTests.Users>(1)
+				.ForResult<Users>()
+				.Single();
+			var id = singleEntity.UserID;
+			Assert.IsNotNull(singleEntity);
 
-            singleEntity.UserName = postName;
-            _dbAccess.Update(singleEntity);
+			var preName = singleEntity.UserName;
+			var postName = Guid.NewGuid().ToString();
+			Assert.IsNotNull(preName);
 
-            var refEntity = _dbAccess.Select<Users>(singleEntity.UserID);
-            Assert.IsNotNull(refEntity);
-            Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
-            Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
-        }
+			singleEntity.UserName = postName;
+			DbAccess.Update(singleEntity);
+			singleEntity.UserName = null;
 
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void Refresh()
-        {
-            DataMigrationHelper.AddUsers(1, _dbAccess);
+			DbAccess.RefreshKeepObject(singleEntity);
+			var refEntity = DbAccess.Select<Users>(id);
 
-            var singleEntity = _dbAccess
-                .Query()
-                .Top<Base.Users>(1)
-                .ForResult<Base.Users>()
-                .Single();
+			Assert.IsNotNull(refEntity);
+			Assert.AreEqual(id, refEntity.UserID);
+			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
+			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
+		}
 
-            var id = singleEntity.UserID;
-            Assert.IsNotNull(singleEntity);
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void Update()
+		{
+			DataMigrationHelper.AddUsers(1, DbAccess);
+			var query = DbAccess
+				.Query()
+				.Top<Users>(1);
+			var singleEntity = query
+				.ForResult<Users>()
+				.Single();
+			Assert.IsNotNull(singleEntity);
 
-            var preName = singleEntity.UserName;
-            var postName = Guid.NewGuid().ToString();
-            Assert.IsNotNull(preName);
+			var preName = singleEntity.UserName;
+			var postName = Guid.NewGuid().ToString();
+			Assert.IsNotNull(preName);
 
-            singleEntity.UserName = postName;
-            _dbAccess.Update(singleEntity);
-            singleEntity.UserName = null;
+			singleEntity.UserName = postName;
+			DbAccess.Update(singleEntity);
 
-            singleEntity = _dbAccess.Refresh(singleEntity);
-            var refEntity = _dbAccess.Select<Base.Users>(id);
-
-            Assert.IsNotNull(refEntity);
-            Assert.AreEqual(id, refEntity.UserID);
-            Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
-            Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
-        }
-
-        [Test]
-        [Category("MsSQL")]
-        [Category("SqLite")]
-        public void RefreshInplace()
-        {
-            DataMigrationHelper.AddUsers(1, _dbAccess);
-            var singleEntity = _dbAccess
-                .Query()
-                .Top<Base.TestModels.CheckWrapperBaseTests.Users>(1)
-                .ForResult<Base.Users>()
-                .Single();
-            var id = singleEntity.UserID;
-            Assert.IsNotNull(singleEntity);
-
-            var preName = singleEntity.UserName;
-            var postName = Guid.NewGuid().ToString();
-            Assert.IsNotNull(preName);
-
-            singleEntity.UserName = postName;
-            _dbAccess.Update(singleEntity);
-            singleEntity.UserName = null;
-
-            _dbAccess.RefreshKeepObject(singleEntity);
-            var refEntity = _dbAccess.Select<Users>(id);
-
-            Assert.IsNotNull(refEntity);
-            Assert.AreEqual(id, refEntity.UserID);
-            Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
-            Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
-        }
-    }
+			var refEntity = DbAccess.Select<Users>(singleEntity.UserID);
+			Assert.IsNotNull(refEntity);
+			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
+			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
+		}
+	}
 }

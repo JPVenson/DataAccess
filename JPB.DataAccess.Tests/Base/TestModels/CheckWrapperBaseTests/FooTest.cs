@@ -1,6 +1,10 @@
-﻿using System.Data;
+﻿#region
+
+using System.Data;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 {
@@ -10,7 +14,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		{
 			var access = new DbAccessLayer(DbAccessType.MsSql,
 				"Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
-			var @select = access.Select<Foo>("SomeName");
+			var select = access.Select<Foo>("SomeName");
 		}
 
 		public class Foo

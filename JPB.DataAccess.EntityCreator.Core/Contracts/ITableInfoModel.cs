@@ -14,4 +14,11 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool CreateDataRecordLoader { get; set; }
 		string GetClassName();
 	}
+
+	public interface ISharedInterface
+	{
+		ISharedInterface Parent { get; set; }
+		IList<IColumInfoModel> ContainsColumns { get; }
+		string Name { get; set; }
+	}
 }

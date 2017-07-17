@@ -1,14 +1,10 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+﻿#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
+#endregion
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
@@ -22,6 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright © Jean-Pierre Bachmann 2017")]
 [assembly: AssemblyTrademark("")]
 //[assembly: AssemblyCulture("en-us")]
+
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyDefaultAlias("DataAccess")]
 

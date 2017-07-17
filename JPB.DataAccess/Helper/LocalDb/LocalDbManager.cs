@@ -1,19 +1,28 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Transactions;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 
+#endregion
+
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	///
 	/// </summary>
 	public class LocalDbManager
 	{
+		internal static readonly Dictionary<Type, ILocalDbPrimaryKeyConstraint> DefaultPkProvider;
+
+		[ThreadStatic] private static LocalDbManager _scope;
+
+		private readonly Dictionary<Type, ILocalDbReposetoryBaseInternalUsage> _database;
+		private readonly HashSet<ReproMappings> _mappings;
+
 		static LocalDbManager()
 		{
 			DefaultPkProvider = new Dictionary<Type, ILocalDbPrimaryKeyConstraint>();
@@ -29,21 +38,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 			_mappings = new HashSet<ReproMappings>();
 		}
 
-		internal static readonly Dictionary<Type, ILocalDbPrimaryKeyConstraint> DefaultPkProvider;
-
-		[ThreadStatic]
-		private static LocalDbManager _scope;
-
 		/// <summary>
-		/// Access to the current local Scope
-		/// Not ThreadSave
+		///     Access to the current local Scope
+		///     Not ThreadSave
 		/// </summary>
 		public static LocalDbManager Scope
 		{
-			get
-			{
-				return _scope;
-			}
+			get { return _scope; }
 			internal set { _scope = value; }
 		}
 
@@ -53,7 +54,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// Will be invoked when the current database is setup
+		///     Will be invoked when the current database is setup
 		/// </summary>
 		public event EventHandler SetupDone;
 
@@ -61,7 +62,6 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			var handler = SetupDone;
 			if (handler != null)
-			{
 				using (var transaction = new TransactionScope())
 				{
 					using (new ReplicationScope())
@@ -70,11 +70,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					}
 					transaction.Complete();
 				}
-			}
 		}
-
-		private readonly Dictionary<Type, ILocalDbReposetoryBaseInternalUsage> _database;
-		private readonly HashSet<ReproMappings> _mappings;
 
 		internal void AddTable(ILocalDbReposetoryBaseInternalUsage repro)
 		{
@@ -93,45 +89,45 @@ namespace JPB.DataAccess.Helper.LocalDb
 		}
 
 		/// <summary>
-		/// allowes to Add or remove tabels from this Database.
-		/// If you try to use the tables before calling dispose on the returned Scope an InvalidOperationException will be thrown
+		///     allowes to Add or remove tabels from this Database.
+		///     If you try to use the tables before calling dispose on the returned Scope an InvalidOperationException will be
+		///     thrown
 		/// </summary>
 		/// <returns></returns>
 		public EditDatabaseScope Alter()
 		{
 			_mappings.Clear();
 			foreach (var localDbReposetoryBase in _database)
-			{
 				localDbReposetoryBase.Value.ReposetoryCreated = false;
-			}
 			return new EditDatabaseScope(this);
 		}
 
 		/// <summary>
-		/// Creates a new Class that supportes the <c>IXmlSerializable</c> interface. It is linked to this
-		/// database and can be used to read or write all content in this database.
-		/// To Write all elements
-		/// <example>
-		/// <code>
-		/// using (var memStream = new MemoryStream())
-		///	{
-		///		new XmlSerializer(typeof(DataContent)).Serialize(memStream, LocalDbManager.Scope.GetSerializableContent());
-		///		var xml = Encoding.ASCII.GetString(memStream.ToArray());
-		///	}
-		/// </code>
-		/// When reading the data the database creation has to be in progress. You must execute the statement inside the DatabaseScope you want to fill
-		/// <code>
-		/// using (new DatabaseScope())
-		///	{
-		///		//Table creation ...
-		///		//new LocalDbReposetory&lt;T&gt;(new DbConfig())
-		///		using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes("xml")))
-		///		{
-		///			new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
-		///		}
-		///	}
-		/// </code>
-		/// </example>
+		///     Creates a new Class that supportes the <c>IXmlSerializable</c> interface. It is linked to this
+		///     database and can be used to read or write all content in this database.
+		///     To Write all elements
+		///     <example>
+		///         <code>
+		///  using (var memStream = new MemoryStream())
+		/// 	{
+		/// 		new XmlSerializer(typeof(DataContent)).Serialize(memStream, LocalDbManager.Scope.GetSerializableContent());
+		/// 		var xml = Encoding.ASCII.GetString(memStream.ToArray());
+		/// 	}
+		///  </code>
+		///         When reading the data the database creation has to be in progress. You must execute the statement inside the
+		///         DatabaseScope you want to fill
+		///         <code>
+		///  using (new DatabaseScope())
+		/// 	{
+		/// 		//Table creation ...
+		/// 		//new LocalDbReposetory&lt;T&gt;(new DbConfig())
+		/// 		using (var memStream = new MemoryStream(Encoding.ASCII.GetBytes("xml")))
+		/// 		{
+		/// 			new XmlSerializer(typeof(DataContent)).Deserialize(memStream);
+		/// 		}
+		/// 	}
+		///  </code>
+		///     </example>
 		/// </summary>
 		/// <returns></returns>
 		public DataContent GetSerializableContent()

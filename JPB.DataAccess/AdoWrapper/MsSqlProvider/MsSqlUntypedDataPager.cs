@@ -1,11 +1,4 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+﻿#region
 
 using System;
 using System.Collections;
@@ -17,40 +10,49 @@ using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Operators;
-using JPB.DataAccess.Query.Operators.Orders;
+
+#endregion
 
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <seealso cref="JPB.DataAccess.Contacts.Pager.IDataPager{T}" />
 	public class MsSqlUntypedDataPager<T> : IDataPager<T>
 	{
 		/// <summary>
-		/// The SQL version
-		/// </summary>
-		protected string SqlVersion;
-		/// <summary>
-		/// The cache
+		///     The cache
 		/// </summary>
 		private bool _cache;
+
 		/// <summary>
-		/// The check run
+		///     The check run
 		/// </summary>
 		private bool? _checkRun;
+
 		/// <summary>
-		/// The current page
+		///     The current page
 		/// </summary>
 		private long _currentPage;
+
 		/// <summary>
-		/// The synchronize helper
+		///     The synchronize helper
 		/// </summary>
 		private Action<Action> _syncHelper;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MsSqlUntypedDataPager{T}"/> class.
+		///     The pk
+		/// </summary>
+		string pk;
+
+		/// <summary>
+		///     The SQL version
+		/// </summary>
+		protected string SqlVersion;
+
+		/// <summary>
+		///     Initializes a new instance of the <see cref="MsSqlUntypedDataPager{T}" /> class.
 		/// </summary>
 		public MsSqlUntypedDataPager()
 		{
@@ -63,7 +65,15 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Not Implimented
+		///     For Advanced querys including Order statements
+		/// </summary>
+		/// <value>
+		///     The command query.
+		/// </value>
+		public ElementProducer<T> CommandQuery { get; set; }
+
+		/// <summary>
+		///     Not Implimented
 		/// </summary>
 		/// <exception cref="Exception">To be supported ... sory</exception>
 		public bool Cache
@@ -78,40 +88,33 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Base query to get a collection of <typeparamref name="T" /> Can NOT contain an Order Statement. Please use the CommandQuery property for this
+		///     Base query to get a collection of <typeparamref name="T" /> Can NOT contain an Order Statement. Please use the
+		///     CommandQuery property for this
 		/// </summary>
 		public IDbCommand BaseQuery { get; set; }
 
 		/// <summary>
-		/// For Advanced querys including Order statements
-		/// </summary>
-		/// <value>
-		/// The command query.
-		/// </value>
-		public ElementProducer<T> CommandQuery { get; set; }
-
-		/// <summary>
-		/// Should raise Events
+		///     Should raise Events
 		/// </summary>
 		public bool RaiseEvents { get; set; }
 
 		/// <summary>
-		/// Raised if new Page is loading
+		///     Raised if new Page is loading
 		/// </summary>
 		public event Action NewPageLoading;
 
 		/// <summary>
-		/// Raised if new page is Loaded
+		///     Raised if new page is Loaded
 		/// </summary>
 		public event Action NewPageLoaded;
 
 		/// <summary>
-		/// Commands that are sequencely attached to the main pager command
+		///     Commands that are sequencely attached to the main pager command
 		/// </summary>
 		public List<IDbCommand> AppendedComands { get; set; }
 
 		/// <summary>
-		/// Id of Current page beween 1 and MaxPage
+		///     Id of Current page beween 1 and MaxPage
 		/// </summary>
 		/// <exception cref="InvalidOperationException">The current page must be bigger or equals 1</exception>
 		public long CurrentPage
@@ -120,42 +123,34 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			set
 			{
 				if (value >= 1)
-				{
 					_currentPage = value;
-				}
 				else
-				{
 					throw new InvalidOperationException("The current page must be bigger or equals 1");
-				}
 			}
 		}
 
 		/// <summary>
-		/// The pk
-		/// </summary>
-		string pk;
-
-		/// <summary>
-		/// The last possible Page
+		///     The last possible Page
 		/// </summary>
 		public long MaxPage { get; private set; }
 
 		/// <summary>
-		/// Items to load on one page
+		///     Items to load on one page
 		/// </summary>
 		public int PageSize { get; set; }
+
 		/// <summary>
-		/// Get the complete ammount of all items listend
+		///     Get the complete ammount of all items listend
 		/// </summary>
 		public long TotalItemCount { get; private set; }
 
 		/// <summary>
-		/// Typed list of all Elements
+		///     Typed list of all Elements
 		/// </summary>
 		public ICollection<T> CurrentPageItems { get; protected set; }
 
 		/// <summary>
-		/// Loads the PageSize into CurrentPageItems
+		///     Loads the PageSize into CurrentPageItems
 		/// </summary>
 		/// <param name="dbAccess"></param>
 		void IDataPager.LoadPage(DbAccessLayer dbAccess)
@@ -164,9 +159,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			IDbCommand finalAppendCommand;
 
 			if (string.IsNullOrEmpty(SqlVersion))
-			{
 				SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
-			}
 
 			SyncHelper(CurrentPageItems.Clear);
 			if (pk == null)
@@ -174,17 +167,18 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 			if (CommandQuery != null)
 			{
-				TotalItemCount = new ElementProducer<T>(this.CommandQuery.Clone()).CountInt().FirstOrDefault();
+				TotalItemCount = new ElementProducer<T>(CommandQuery).CountInt().FirstOrDefault();
 				MaxPage = (long)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 				RaiseNewPageLoading();
-				var elements = new ElementProducer<T>(this.CommandQuery.Clone()).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
-				{
-					PagedRows = (CurrentPage - 1) * PageSize,
-					PageSize
-				}).ToArray();
+				var elements =
+					new ElementProducer<T>(CommandQuery).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
+					{
+						PagedRows = (CurrentPage - 1) * PageSize,
+						PageSize
+					}).ToArray();
 
-				foreach (T item in elements)
+				foreach (var item in elements)
 				{
 					var item1 = item;
 					SyncHelper(() => CurrentPageItems.Add(item1));
@@ -197,9 +191,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				if (AppendedComands.Any())
 				{
 					if (BaseQuery == null)
-					{
 						BaseQuery = dbAccess.CreateSelect<T>();
-					}
 
 					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
 						(current, comand) => dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
@@ -207,20 +199,18 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				else
 				{
 					if (BaseQuery == null)
-					{
 						BaseQuery = dbAccess.CreateSelect<T>();
-					}
 
 					finalAppendCommand = BaseQuery;
 				}
 
 				var selectMaxCommand = dbAccess
-							.Query()
-							.QueryText("WITH CTE AS")
-							.InBracket(query => query.QueryCommand(finalAppendCommand))
-							.QueryText("SELECT COUNT(1) FROM CTE")
-							.ContainerObject
-							.Compile();
+					.Query()
+					.QueryText("WITH CTE AS")
+					.InBracket(query => query.QueryCommand(finalAppendCommand))
+					.QueryText("SELECT COUNT(1) FROM CTE")
+					.ContainerObject
+					.Compile();
 
 				////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
 
@@ -247,7 +237,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				{
 					command = dbAccess
 						.Query()
-						.WithCte("CTE", cte => cte.QueryCommand(finalAppendCommand))
+						.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
 						.QueryText("SELECT * FROM")
 						.QueryText("CTE")
 						.QueryText("ORDER BY")
@@ -268,42 +258,42 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 						{
 							if (BaseQuery != null)
 							{
-								baseCte.Select.Table<T>();
+								return baseCte.Select.Table<T>();
 							}
 							else
 							{
-								baseCte.QueryCommand(finalAppendCommand);
+								return new SelectQuery<T>(baseCte.QueryCommand(finalAppendCommand));
 							}
 						})
 						.WithCte("CTE", cte =>
 						{
-							cte.QueryText("SELECT * FROM (")
-									.Select.Table<T>()
-									.RowNumberOrder("@pk")
-									.WithParamerters(new { Pk = pk })
-									.QueryText("AS RowNr")
-									.QueryText(", BASECTE.* FROM BASECTE")
-								.QueryText(")")
-								.As("TBL")
-								.Where
-								.Column("RowNr")
-								.Is
-								.Between(page =>
-								{
-									page.QueryText("@PagedRows * @PageSize + 1")
-										.WithParamerters(new
-										{
-											PagedRows = (CurrentPage - 1),
-											PageSize
-										});
-								},
-									maxPage =>
-									{
-										maxPage
-											.InBracket(calc => { calc.QueryText("@PagedRows + 1"); })
-											.QueryText("* @PageSize");
-									}
-								);
+							return new SelectQuery<T>(cte.QueryText("SELECT * FROM (")
+														 .Select.Table<T>()
+														 .RowNumberOrder("@pk")
+														 .WithParamerters(new { Pk = pk })
+														 .QueryText("AS RowNr")
+														 .QueryText(", BASECTE.* FROM BASECTE")
+														 .QueryText(")")
+														 .As("TBL")
+														 .Where
+														 .Column("RowNr")
+														 .Is
+														 .Between(page =>
+														 {
+															 return page.QueryText("@PagedRows * @PageSize + 1")
+																  .WithParamerters(new
+																  {
+																	  PagedRows = CurrentPage - 1,
+																	  PageSize
+																  });
+														 },
+														 maxPage =>
+														 {
+															 return maxPage
+																	  .InBracket(calc => { return calc.QueryText("@PagedRows + 1"); })
+																	  .QueryText("* @PageSize");
+														 }
+														 ));
 						}, true)
 						.QueryText("SELECT * FROM CTE");
 
@@ -311,7 +301,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				}
 				selectWhere = dbAccess.SelectNative(typeof(T), command, true).Cast<T>().ToArray();
 
-				foreach (T item in selectWhere)
+				foreach (var item in selectWhere)
 				{
 					var item1 = item;
 					SyncHelper(() => CurrentPageItems.Add(item1));
@@ -322,7 +312,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Typed list of all Elements
+		///     Typed list of all Elements
 		/// </summary>
 		IEnumerable IDataPager.CurrentPageItems
 		{
@@ -342,7 +332,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Raises the new page loaded.
+		///     Raises the new page loaded.
 		/// </summary>
 		protected virtual void RaiseNewPageLoaded()
 		{
@@ -353,7 +343,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Raises the new page loading.
+		///     Raises the new page loading.
 		/// </summary>
 		protected virtual void RaiseNewPageLoading()
 		{
@@ -364,7 +354,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Checks the version for fetch.
+		///     Checks the version for fetch.
 		/// </summary>
 		/// <returns></returns>
 		private bool CheckVersionForFetch()
@@ -392,23 +382,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			else if (major == 11)
 			{
 				if (minor > 0)
-				{
 					_checkRun = true;
-				}
 				else if (minor == 0)
-				{
 					if (build > 2100)
-					{
 						_checkRun = true;
-					}
 					else if (build == 2100)
-					{
 						if (revision >= 60)
-						{
 							_checkRun = true;
-						}
-					}
-				}
 			}
 			else
 			{
@@ -419,7 +399,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>
 		public void Dispose()
 		{

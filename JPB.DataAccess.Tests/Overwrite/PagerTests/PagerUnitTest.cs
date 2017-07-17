@@ -1,9 +1,11 @@
-﻿using System;
-using JPB.DataAccess.Contacts.Pager;
+﻿#region
+
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.PagerTests
 {
@@ -11,6 +13,12 @@ namespace JPB.DataAccess.Tests.PagerTests
 	[TestFixture(DbAccessType.SqLite)]
 	public class PagerUnitTest
 	{
+		[SetUp]
+		public void Init()
+		{
+			expectWrapper = new Manager().GetWrapper(_type);
+		}
+
 		private readonly DbAccessType _type;
 
 		public PagerUnitTest(DbAccessType type)
@@ -20,22 +28,17 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 		private DbAccessLayer expectWrapper;
 
-		[SetUp]
-		public void Init()
-		{
-			expectWrapper = new Manager().GetWrapper(_type);
-		}
-
 		[Test]
 		public void PagerCall()
 		{
 			var testUsers = DataMigrationHelper.AddUsers(250, expectWrapper);
 
-			object refSelect =
-				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
+			var refSelect =
+				expectWrapper.Database.Run(
+					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
-			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())
+			using (var pager = expectWrapper.Database.CreatePager<Users>())
 			{
 				Assert.That(pager, Is.Not.Null);
 
@@ -46,8 +49,8 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				#region CheckEvents
 
-				bool triggeredNewPageLoaded = false;
-				bool triggeredNewPageLoading = false;
+				var triggeredNewPageLoaded = false;
+				var triggeredNewPageLoading = false;
 
 				pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
 				pager.NewPageLoading += () => triggeredNewPageLoading = true;
@@ -69,8 +72,8 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				#region CheckPage Size
 
-				int oldPageSize = pager.PageSize;
-				int newPageSize = 20;
+				var oldPageSize = pager.PageSize;
+				var newPageSize = 20;
 				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(oldPageSize));
 
 				pager.PageSize = newPageSize;
@@ -82,7 +85,6 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				#endregion
 			}
-
 		}
 
 		[Test]
@@ -90,13 +92,15 @@ namespace JPB.DataAccess.Tests.PagerTests
 		{
 			var testUsers = DataMigrationHelper.AddUsers(250, expectWrapper);
 
-			object refSelect =
-				expectWrapper.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
+			var refSelect =
+				expectWrapper.Database.Run(
+					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
-			using (IDataPager<Users> pager = expectWrapper.Database.CreatePager<Users>())
+			using (var pager = expectWrapper.Database.CreatePager<Users>())
 			{
-				pager.AppendedComands.Add(expectWrapper.Database.CreateCommand(string.Format("WHERE User_ID = {0}", testUsers[0])));
+				pager.AppendedComands.Add(
+					expectWrapper.Database.CreateCommand(string.Format("WHERE User_ID = {0}", testUsers[0])));
 
 				Assert.That(pager, Is.Not.Null);
 
@@ -107,8 +111,8 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				#region CheckEvents
 
-				bool triggeredNewPageLoaded = false;
-				bool triggeredNewPageLoading = false;
+				var triggeredNewPageLoaded = false;
+				var triggeredNewPageLoading = false;
 
 				pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
 				pager.NewPageLoading += () => triggeredNewPageLoading = true;
@@ -130,8 +134,8 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				#region CheckPage Size
 
-				int oldPageSize = pager.PageSize;
-				int newPageSize = 20;
+				var oldPageSize = pager.PageSize;
+				var newPageSize = 20;
 				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(1));
 
 				pager.PageSize = newPageSize;
@@ -143,7 +147,6 @@ namespace JPB.DataAccess.Tests.PagerTests
 
 				#endregion
 			}
-
 		}
 	}
 }

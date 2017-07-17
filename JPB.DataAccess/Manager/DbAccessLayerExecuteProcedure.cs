@@ -1,11 +1,5 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+﻿#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +11,8 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 
+#endregion
+
 namespace JPB.DataAccess.Manager
 {
 	partial class DbAccessLayer
@@ -26,7 +22,7 @@ namespace JPB.DataAccess.Manager
 		public static Dictionary<Type, DbType> DbTypeMap;
 
 		/// <summary>
-		/// Map an SourceDbType to the proper C# mscore lib type
+		///     Map an SourceDbType to the proper C# mscore lib type
 		/// </summary>
 		/// <param name="source"></param>
 		/// <returns></returns>
@@ -34,8 +30,9 @@ namespace JPB.DataAccess.Manager
 		{
 			return DbTypeMap.FirstOrDefault(s => s.Value == source).Key;
 		}
+
 		/// <summary>
-		/// Map an C# mscore lib type to the proper SourceDbType
+		///     Map an C# mscore lib type to the proper SourceDbType
 		/// </summary>
 		/// <param name="source"></param>
 		/// <returns></returns>
@@ -104,7 +101,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public void ExecuteProcedureNonResult(Type type, object procParam)
 		{
-			var command = CreateProcedureCall(this.GetClassInfo(type), procParam, Database);
+			var command = CreateProcedureCall(GetClassInfo(type), procParam, Database);
 			Database.ExecuteNonQuery(command);
 		}
 
@@ -123,8 +120,8 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public IEnumerable ExecuteProcedure(Type procParamType, Type resultType, object procParam)
 		{
-			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
-			var typeInfo = resultType.GetClassInfo();
+			var command = CreateProcedureCall(GetClassInfo(procParamType), procParam, Database);
+			var typeInfo = GetClassInfo(resultType);
 			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping, typeInfo);
 			//if (LoadCompleteResultBeforeMapping)
 			//{

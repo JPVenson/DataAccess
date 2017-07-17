@@ -1,7 +1,10 @@
-﻿using System;
+﻿#region
+
 using System.Collections;
 using System.Collections.Generic;
 using JPB.DataAccess.Query.Contracts;
+
+#endregion
 
 namespace JPB.DataAccess.Query
 {
@@ -45,19 +48,19 @@ namespace JPB.DataAccess.Query
 	//}
 
 	/// <summary>
-	/// Wrapes the QueryBuilderX element for an IEnumerable that is strongly typed
+	///     Wrapes the QueryBuilderX element for an IEnumerable that is strongly typed
 	/// </summary>
 	/// <typeparam name="TPoco"></typeparam>
 	public class QueryEnumeratorEx<TPoco> : IEnumerable<TPoco>
 	{
-		private readonly QueryBuilderX _builder;
+		private readonly IQueryBuilder _builder;
 
 		/// <summary>
-		/// For Internal Usage only
+		///     For Internal Usage only
 		/// </summary>
-		public QueryEnumeratorEx(QueryBuilderX builder)
+		public QueryEnumeratorEx(IQueryBuilder builder)
 		{
-			_builder = builder.Clone();
+			_builder = builder;
 		}
 
 		IEnumerator<TPoco> IEnumerable<TPoco>.GetEnumerator()
@@ -66,11 +69,11 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <summary>
-		/// Returns an enumerator that contains all elements in the given QueryBuilderX
+		///     Returns an enumerator that contains all elements in the given QueryBuilderX
 		/// </summary>
 		public IEnumerator GetEnumerator()
 		{
-			return ((IEnumerable<TPoco>)this).GetEnumerator();
+			return ((IEnumerable<TPoco>) this).GetEnumerator();
 		}
 	}
 }

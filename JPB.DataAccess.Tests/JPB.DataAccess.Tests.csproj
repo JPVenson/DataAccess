@@ -68,9 +68,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=3.4.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.4.0\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="nunit.framework, Version=3.6.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.6.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -87,9 +86,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUser.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceConfig.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceDirectConfig.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\GeneratedUsers.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructor.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructorWithMultiXml.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructorWithSingleXml.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateNullableConstructor.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersMeta.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersWithoutProperties.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersWithStaticInsert.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_CLASSEL.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_CTORSEL.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_FUNCSELECT.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_FUNCSELECTFAC.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_IDFM_FUNCSELECTFACWITHPARAM.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_UFM.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_StaticQueryFactoryForSelect.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_StaticQueryFactoryForSelectWithArugments.cs" />
+    <Compile Include="Overwrite\AllTestContextHelper.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
     <Compile Include="Overwrite\DataMigrationTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\BaseTest.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\ConfigurationTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\EventTest.cs" />
@@ -127,7 +149,7 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Image.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcA.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcAResult.cs" />
-    <Compile Include="Base\TestModels\CheckWrapperBaseTests\User.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_Col.cs" />
     <Compile Include="Base\TestModels\MetaAPI\StructCreating.cs" />
     <Compile Include="Base\TestModels\XmlDataRecordTest\InstanceMock.cs" />
     <Compile Include="Base\Users.cs" />
@@ -141,10 +163,6 @@
     <ProjectReference Include="..\JPB.DataAccess.SqlLite\JPB.DataAccess.SqLite.csproj">
       <Project>{de42f7ed-51b5-4118-831b-05efeeecd7ac}</Project>
       <Name>JPB.DataAccess.SqLite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\JPB.DataAccess.Tests.Common\JPB.DataAccess.Tests.Common.csproj">
-      <Project>{2A60F2C0-72EA-48C7-A9AD-9BD7F4C2DA0B}</Project>
-      <Name>JPB.DataAccess.Tests.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
       <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>

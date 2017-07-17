@@ -1,15 +1,8 @@
-﻿/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+﻿#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -21,10 +14,11 @@ using System.Text;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CSharp;
+
+#endregion
 
 namespace JPB.DataAccess.DbInfoConfig
 {
@@ -34,9 +28,9 @@ namespace JPB.DataAccess.DbInfoConfig
 	public class FactoryHelper
 	{
 		/// <summary>
-		/// Creates a new CodeDOM Element that is ether a Factory(Public Static Object Factory) or an constructor
-		/// Both functions accepts only one Argument of type IDataRecord
-		/// Both functions are empty
+		///     Creates a new CodeDOM Element that is ether a Factory(Public Static Object Factory) or an constructor
+		///     Both functions accepts only one Argument of type IDataRecord
+		///     Both functions are empty
 		/// </summary>
 		/// <param name="factory"></param>
 		/// <returns></returns>
@@ -61,13 +55,14 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
-		/// Generates a Constructor with a Full Ado.Net constructor
+		///     Generates a Constructor with a Full Ado.Net constructor
 		/// </summary>
 		/// <param name="target"></param>
 		/// <param name="settings"></param>
 		/// <param name="importNameSpace"></param>
 		/// <returns></returns>
-		public static CodeMemberMethod GenerateConstructor(DbClassInfoCache target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
+		public static CodeMemberMethod GenerateConstructor(DbClassInfoCache target, FactoryHelperSettings settings,
+			CodeNamespace importNameSpace)
 		{
 			var codeConstructor = GenerateTypeConstructor();
 			GenerateBody(target, settings, importNameSpace, codeConstructor, new CodeBaseReferenceExpression());
@@ -75,13 +70,16 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
-		/// Generates a Function with a Full ado.net constructor beavior.
-		/// It Creates a new Instance of <param name="target"></param> and then fills all public properties
+		///     Generates a Function with a Full ado.net constructor beavior.
+		///     It Creates a new Instance of
+		///     <param name="target"></param>
+		///     and then fills all public properties
 		/// </summary>
 		/// <param name="settings"></param>
 		/// <param name="importNameSpace"></param>
 		/// <returns></returns>
-		public static CodeMemberMethod GenerateFactory(DbClassInfoCache target, FactoryHelperSettings settings, CodeNamespace importNameSpace)
+		public static CodeMemberMethod GenerateFactory(DbClassInfoCache target, FactoryHelperSettings settings,
+			CodeNamespace importNameSpace)
 		{
 			var codeFactory = GenerateTypeConstructor(true);
 			var super = new CodeVariableReferenceExpression("super");
@@ -100,7 +98,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
-		/// Creates the short code type reference.
+		///     Creates the short code type reference.
 		/// </summary>
 		/// <param name="type">The type.</param>
 		/// <param name="imports">The imports.</param>
@@ -115,7 +113,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
-		/// Shortifies the specified type reference.
+		///     Shortifies the specified type reference.
 		/// </summary>
 		/// <param name="typeReference">The type reference.</param>
 		/// <param name="type">The type.</param>
@@ -129,7 +127,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			}
 
 			if (type.Namespace != null && imports.Cast<CodeNamespaceImport>()
-				.Any(cni => cni.Namespace == type.Namespace))
+				    .Any(cni => cni.Namespace == type.Namespace))
 			{
 				var prefix = type.Namespace + '.';
 
@@ -137,15 +135,13 @@ namespace JPB.DataAccess.DbInfoConfig
 				{
 					var pos = typeReference.BaseType.IndexOf(prefix);
 					if (pos == 0)
-					{
 						typeReference.BaseType = typeReference.BaseType.Substring(prefix.Length);
-					}
 				}
 			}
 		}
 
 		/// <summary>
-		/// Creates a new body in stlye of an Ado.net Constructor and attaches it to the <paramref name="target"/>
+		///     Creates a new body in stlye of an Ado.net Constructor and attaches it to the <paramref name="target" />
 		/// </summary>
 		/// <param name="properties"></param>
 		/// <param name="settings"></param>
@@ -301,8 +297,8 @@ namespace JPB.DataAccess.DbInfoConfig
 							container.Statements.Add(bufferVariable);
 							uncastLocalVariableRef = new CodeVariableReferenceExpression(variableName);
 							var setToValue = new CodeAssignStatement(refToProperty,
-							new CodeCastExpression(
-								new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
+								new CodeCastExpression(
+									new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
 									uncastLocalVariableRef));
 							container.Statements.Add(setToValue);
 						}
@@ -316,13 +312,9 @@ namespace JPB.DataAccess.DbInfoConfig
 						isNullable = true;
 
 					if (propertyInfoCache.PropertyType == typeof(string))
-					{
 						baseType = typeof(string);
-					}
 					else if (propertyInfoCache.PropertyType.IsArray)
-					{
 						baseType = propertyInfoCache.PropertyType;
-					}
 
 					if (baseType != null)
 					{
@@ -344,15 +336,11 @@ namespace JPB.DataAccess.DbInfoConfig
 
 						CodeAssignStatement setToNull;
 						if (!isNullable && baseType != typeof(string))
-						{
 							setToNull = new CodeAssignStatement(refToProperty,
-							new CodeDefaultValueExpression(
-								CreateShortCodeTypeReference(baseType, importNameSpace.Imports)));
-						}
+								new CodeDefaultValueExpression(
+									CreateShortCodeTypeReference(baseType, importNameSpace.Imports)));
 						else
-						{
 							setToNull = new CodeAssignStatement(refToProperty, new CodePrimitiveExpression(null));
-						}
 
 						var setToValue = new CodeAssignStatement(refToProperty,
 							new CodeCastExpression(
@@ -367,27 +355,26 @@ namespace JPB.DataAccess.DbInfoConfig
 						if (bufferVariable != null)
 						{
 							CodeExpression castExp = new CodeCastExpression(
-						new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
-						new CodeVariableReferenceExpression(bufferVariable.Name));
+								new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
+								new CodeVariableReferenceExpression(bufferVariable.Name));
 							var setExpr = new CodeAssignStatement(refToProperty, castExp);
 							container.Statements.Add(setExpr);
 						}
 						else
 						{
 							CodeExpression castExp = new CodeCastExpression(
-		new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
-		codeIndexerExpression);
+								new CodeTypeReference(propertyInfoCache.PropertyType, CodeTypeReferenceOptions.GenericTypeParameter),
+								codeIndexerExpression);
 							var setExpr = new CodeAssignStatement(refToProperty, castExp);
 							container.Statements.Add(setExpr);
 						}
-
 					}
 				}
 			}
 		}
 
 		/// <summary>
-		/// Generates a C# DOM body for an IDataReader loader.
+		///     Generates a C# DOM body for an IDataReader loader.
 		/// </summary>
 		/// <param name="sourceType">Type of the source.</param>
 		/// <param name="settings">The settings.</param>
@@ -404,15 +391,20 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
-		/// Generates a type constructor by using the <see cref="GenerateBody(Dictionary{string,DbPropertyInfoCache},FactoryHelperSettings,CodeNamespace,CodeMemberMethod,CodeExpression)"/>.
+		///     Generates a type constructor by using the
+		///     <see
+		///         cref="GenerateBody(Dictionary{string,DbPropertyInfoCache},FactoryHelperSettings,CodeNamespace,CodeMemberMethod,CodeExpression)" />
+		///     .
 		/// </summary>
 		/// <param name="propertyToDbColumn">The property to database column.</param>
 		/// <param name="altNamespace">The alt namespace.</param>
 		/// <returns></returns>
-		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<DbPropertyInfoCache> propertyToDbColumn, string altNamespace)
+		public static CodeMemberMethod GenerateTypeConstructor(IEnumerable<DbPropertyInfoCache> propertyToDbColumn,
+			string altNamespace)
 		{
 			var codeConstructor = GenerateTypeConstructor();
-			GenerateBody(propertyToDbColumn.ToDictionary(s => s.DbName), new FactoryHelperSettings(), new CodeNamespace(altNamespace), codeConstructor, new CodeThisReferenceExpression());
+			GenerateBody(propertyToDbColumn.ToDictionary(s => s.DbName), new FactoryHelperSettings(),
+				new CodeNamespace(altNamespace), codeConstructor, new CodeThisReferenceExpression());
 			return codeConstructor;
 		}
 
@@ -439,9 +431,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			var configAttrCtorAtt = target.Attributes.FirstOrDefault(s => s.Attribute is AutoGenerateCtorAttribute);
 			AutoGenerateCtorAttribute classCtorAttr = null;
 			if (configAttrCtorAtt != null)
-			{
 				classCtorAttr = configAttrCtorAtt.Attribute as AutoGenerateCtorAttribute;
-			}
 
 			CodeNamespace importNameSpace;
 			importNameSpace = new CodeNamespace(target.Type.Namespace);
@@ -450,8 +440,8 @@ namespace JPB.DataAccess.DbInfoConfig
 			var compiler = new CodeTypeDeclaration();
 			compiler.IsClass = true;
 
-			bool generateFactory = classCtorAttr != null &&
-				classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod || target.Type.IsSealed;
+			var generateFactory = classCtorAttr != null &&
+			                      classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod || target.Type.IsSealed;
 
 			CodeMemberMethod codeConstructor;
 			var codeName = target.Name.Split('.').Last();
@@ -470,9 +460,8 @@ namespace JPB.DataAccess.DbInfoConfig
 				superName = codeName + "_Super";
 			}
 			if (target.Constructors.Any(f => f.Arguments.Any()))
-			{
-				throw new TypeAccessException(string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
-			}
+				throw new TypeAccessException(
+					string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
 
 			compiler.Attributes |= MemberAttributes.Public;
 			compiler.Name = superName;
@@ -480,20 +469,16 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			cp.GenerateInMemory = true;
 			if (settings.FileCollisonDetection == CollisonDetectionMode.Pessimistic)
-			{
 				cp.OutputAssembly =
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-				+ @"\"
-				+ Guid.NewGuid().ToString("N")
-				+ "_Poco.dll";
-			}
+					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+					+ @"\"
+					+ Guid.NewGuid().ToString("N")
+					+ "_Poco.dll";
 			else
-			{
 				cp.OutputAssembly =
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-				+ @"\" + target.Type.FullName
-				+ "_Poco.dll";
-			}
+					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+					+ @"\" + target.Type.FullName
+					+ "_Poco.dll";
 
 			settings.TempFileData.Add(cp.OutputAssembly);
 
@@ -509,18 +494,18 @@ namespace JPB.DataAccess.DbInfoConfig
 				if (targetType != null)
 					constructorInfos = targetType.GetConstructors();
 
-				if(constructorInfos == null)
-					throw new Exception(string.Format("A dll with a matching name for type: {0} was found and the FileCollisonDetection is Optimistic but no matching Constuctors where found", type.Name));
+				if (constructorInfos == null)
+					throw new Exception(
+						string.Format(
+							"A dll with a matching name for type: {0} was found and the FileCollisonDetection is Optimistic but no matching Constuctors where found",
+							type.Name));
 			}
 
 			if (constructorInfos == null)
 			{
 				var callingAssm = Assembly.GetEntryAssembly();
 				if (callingAssm == null)
-				{
-					//testing we are?
 					callingAssm = Assembly.GetExecutingAssembly();
-				}
 
 				if (settings.CreateDebugCode)
 				{
@@ -541,22 +526,17 @@ namespace JPB.DataAccess.DbInfoConfig
 				var compileUnit = new CodeCompileUnit();
 
 				foreach (var defaultNamespace in settings.DefaultNamespaces)
-				{
 					importNameSpace.Imports.Add(new CodeNamespaceImport(defaultNamespace));
-				}
 
-				foreach (var additionalNamespace in target.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute).Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
-				{
+				foreach (
+					var additionalNamespace in
+					target.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute)
+						.Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
 					importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
-				}
 
 				if (classCtorAttr != null && classCtorAttr.FullSateliteImport)
-				{
 					foreach (var referencedAssembly in target.Type.Assembly.GetReferencedAssemblies())
-					{
 						cp.ReferencedAssemblies.Add(referencedAssembly.Name);
-					}
-				}
 
 				importNameSpace.Types.Add(compiler);
 
@@ -567,12 +547,10 @@ namespace JPB.DataAccess.DbInfoConfig
 				if (compileAssemblyFromDom.Errors.Count > 0 && !settings.EnforceCreation)
 				{
 					var sb = new StringBuilder(string.Format("There are {0} errors due compilation.",
-							compileAssemblyFromDom.Errors.Count));
-					int errNr = 0;
+						compileAssemblyFromDom.Errors.Count));
+					var errNr = 0;
 					foreach (CompilerError error in compileAssemblyFromDom.Errors)
-					{
 						sb.AppendLine(errNr++ + error.ErrorNumber + ":" + error.Column + "," + error.Line + " -> " + error.ErrorText);
-					}
 					var ex =
 						new InvalidDataException(sb.ToString());
 
@@ -590,13 +568,11 @@ namespace JPB.DataAccess.DbInfoConfig
 					if (settings.EnforceCreation)
 						return null;
 					var ex =
-						new InvalidDataException(string.Format("There are was an unknown error due compilation. No CTOR was build"));
+						new InvalidDataException("There are was an unknown error due compilation. No CTOR was build");
 
 					ex.Data.Add("Object", compileAssemblyFromDom);
 					foreach (CompilerError error in compileAssemblyFromDom.Errors)
-					{
 						ex.Data.Add(error.ErrorNumber, error);
-					}
 					throw ex;
 				}
 			}
@@ -614,7 +590,8 @@ namespace JPB.DataAccess.DbInfoConfig
 				return true;
 			});
 
-			var dm = new DynamicMethod("Create" + target.Name.Split('.')[0], target.Type, new[] { typeof(IDataRecord) }, target.Type, true);
+			var dm = new DynamicMethod("Create" + target.Name.Split('.')[0], target.Type, new[] {typeof(IDataRecord)},
+				target.Type, true);
 			var il = dm.GetILGenerator();
 			if (generateFactory)
 			{
@@ -632,12 +609,10 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			if (!settings.CreateDebugCode)
 				foreach (string tempFile in cp.TempFiles)
-				{
 					if (!tempFile.EndsWith("dll") && !tempFile.EndsWith("pdb"))
 						File.Delete(tempFile);
-				}
 
-			var func = (Func<IDataRecord, object>)dm.CreateDelegate(typeof(Func<IDataRecord, object>));
+			var func = (Func<IDataRecord, object>) dm.CreateDelegate(typeof(Func<IDataRecord, object>));
 			return func;
 		}
 
@@ -647,13 +622,13 @@ namespace JPB.DataAccess.DbInfoConfig
 			var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
 			var moduleBuilder = assemblyBuilder.DefineDynamicModule(name + "Module");
 			var tb = moduleBuilder.DefineType(name
-								, TypeAttributes.Public |
-								TypeAttributes.Class |
-								TypeAttributes.AutoClass |
-								TypeAttributes.AnsiClass |
-								TypeAttributes.BeforeFieldInit |
-								TypeAttributes.AutoLayout
-								, null);
+				, TypeAttributes.Public |
+				  TypeAttributes.Class |
+				  TypeAttributes.AutoClass |
+				  TypeAttributes.AnsiClass |
+				  TypeAttributes.BeforeFieldInit |
+				  TypeAttributes.AutoLayout
+				, null);
 			return tb;
 		}
 

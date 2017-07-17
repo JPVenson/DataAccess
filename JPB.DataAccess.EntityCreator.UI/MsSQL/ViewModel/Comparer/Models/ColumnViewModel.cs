@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Data;
+using JPB.DataAccess.EntityCreator.Core;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.WPFBase.MVVM.ViewModel;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
@@ -13,9 +14,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 		{
 			var items = new ItemCollection();
 
-			foreach (SqlDbType sqlType in Enum.GetValues(typeof(SqlDbType)))
+			foreach (var sqlDefinedType in DbTypeToCsType.SqlDefinedTypes)
 			{
-				items.Add(sqlType.ToString());
+				items.Add(sqlDefinedType.Value, string.Format("{0} - ({1})", sqlDefinedType.Key, sqlDefinedType.Value.Name));
 			}
 
 			return items;
@@ -81,7 +82,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 			}
 		}
 
-		[Browsable(false)]
+		[Browsable(true)]
+		[DisplayName("Type")]
+		[ItemsSource(typeof(SqlDataTypeItemSource))]
 		public Type TargetType
 		{
 			get { return ColumnInfo.TargetType; }
@@ -92,19 +95,30 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 			}
 		}
 
-		[DisplayName("Type")]
-		[ItemsSource(typeof(SqlDataTypeItemSource))]
-		public string TargetType2
+		[Browsable(false)]
+		public SqlDbType SqlType
 		{
-			get { return ColumnInfo.TargetType2; }
+			get { return ColumnInfo.SqlType; }
 			set
 			{
-				if(string.IsNullOrEmpty(value))
-					return;
-
-				ColumnInfo.TargetType2 = value;
+				ColumnInfo.SqlType = value;
 				SendPropertyChanged();
 			}
 		}
+
+		//[DisplayName("Type")]
+		//[ItemsSource(typeof(SqlDataTypeItemSource))]
+		//public string TargetType2
+		//{
+		//	get { return ColumnInfo.TargetType2; }
+		//	set
+		//	{
+		//		if(string.IsNullOrEmpty(value))
+		//			return;
+
+		//		ColumnInfo.TargetType2 = value;
+		//		SendPropertyChanged();
+		//	}
+		//}
 	}
 }

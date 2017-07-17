@@ -1,235 +1,238 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
-using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 
+#endregion
+
 namespace JPB.DataAccess.Contacts
 {
-    /// <summary>
-    ///     Database wrapper interface
-    /// </summary>
-    public interface IDatabase : IDisposable
-    {
-        /// <summary>
-        /// Should additional Query infos be saved?
-        /// </summary>
-        bool Debugger { get; set; }
+	/// <summary>
+	///     Database wrapper interface
+	/// </summary>
+	public interface IDatabase : IDisposable
+	{
+		/// <summary>
+		///     Should additional Query infos be saved?
+		/// </summary>
+		bool Debugger { get; set; }
 
-        /// <summary>
-        ///     Defines the Target database we are conneting to
-        /// </summary>
-        DbAccessType TargetDatabase { get; }
+		/// <summary>
+		/// Set the NestedTransaction option.
+		/// If set to true when calling an BeginTransaction will succeed when an open connection was done and will be "Attached" to that connection.
+		/// Otherwise it will throw an exception
+		/// </summary>
+		bool AllowNestedTransactions { get; set; }
 
-        /// <summary>
-        ///     NotImp
-        /// </summary>
-        bool IsAttached { get; }
+		/// <summary>
+		///     Defines the Target database we are conneting to
+		/// </summary>
+		DbAccessType TargetDatabase { get; }
 
-        /// <summary>
-        ///     Get the Current Connection string
-        /// </summary>
-        string ConnectionString { get; }
+		/// <summary>
+		///     NotImp
+		/// </summary>
+		bool IsAttached { get; }
 
-        /// <summary>
-        ///     If local instance get the file
-        /// </summary>
-        string DatabaseFile { get; }
+		/// <summary>
+		///     Get the Current Connection string
+		/// </summary>
+		string ConnectionString { get; }
 
-        /// <summary>
-        ///     Get the Database name that we are connected to
-        /// </summary>
-        string DatabaseName { get; }
+		/// <summary>
+		///     If local instance get the file
+		/// </summary>
+		string DatabaseFile { get; }
 
-        /// <summary>
-        ///     Get the Server we are Connected to
-        /// </summary>
-        string ServerName { get; }
+		/// <summary>
+		///     Get the Database name that we are connected to
+		/// </summary>
+		string DatabaseName { get; }
 
-        /// <summary>
-        /// Should always be called just before executing the given Command
-        /// </summary>
-        /// <param name="cmd"></param>
-        void PrepaireRemoteExecution(IDbCommand cmd);
+		/// <summary>
+		///     Get the Server we are Connected to
+		/// </summary>
+		string ServerName { get; }
 
-        /// <summary>
-        ///     Get the last Executed QueryCommand wrapped by a Debugger
-        /// </summary>
-        QueryDebugger LastExecutedQuery { get; }
+		/// <summary>
+		///     Get the last Executed QueryCommand wrapped by a Debugger
+		/// </summary>
+		QueryDebugger LastExecutedQuery { get; }
 
-        /// <summary>
-        ///     Get Database specific Datapager
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        IDataPager<T> CreatePager<T>();
+		/// <summary>
+		///     Should always be called just before executing the given Command
+		/// </summary>
+		/// <param name="cmd"></param>
+		void PrepaireRemoteExecution(IDbCommand cmd);
 
-        /// <summary>
-        ///     Get database specific converter Datapager
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TE"></typeparam>
-        /// <returns></returns>
-        IWrapperDataPager<T, TE> CreatePager<T, TE>();
+		/// <summary>
+		///     Get Database specific Datapager
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		IDataPager<T> CreatePager<T>();
 
-        /// <summary>
-        ///     Required
-        ///     Is used to attach a Strategy that handles certain kinds of Databases
-        /// </summary>
-        void Attach(IDatabaseStrategy strategy);
+		/// <summary>
+		///     Get database specific converter Datapager
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TE"></typeparam>
+		/// <returns></returns>
+		IWrapperDataPager<T, TE> CreatePager<T, TE>();
 
-        /// <summary>
-        ///     Required
-        ///     Is used to create an new Connection based on the Strategy and
-        ///     keep it
-        /// </summary>
-        /// <returns></returns>
-        IDbConnection GetConnection();
+		/// <summary>
+		///     Required
+		///     Is used to attach a Strategy that handles certain kinds of Databases
+		/// </summary>
+		void Attach(IDatabaseStrategy strategy);
 
-        /// <summary>
-        ///     Required
-        ///     When a new Connection is requested this function is used
-        /// </summary>
-        void Connect(IsolationLevel? levl = null);
+		/// <summary>
+		///     Required
+		///     Is used to create an new Connection based on the Strategy and
+		///     keep it
+		/// </summary>
+		/// <returns></returns>
+		IDbConnection GetConnection();
 
-        /// <summary>
-        /// rollback the current Transaction.
-        /// </summary>
-        void TransactionRollback();
+		/// <summary>
+		///     Required
+		///     When a new Connection is requested this function is used
+		/// </summary>
+		void Connect(IsolationLevel? levl = null);
 
-        /// <summary>
-        ///     Required
-        ///     Closing a open Connection
-        /// </summary>
-        void CloseConnection();
+		/// <summary>
+		///     rollback the current Transaction.
+		/// </summary>
+		void TransactionRollback();
 
-        /// <summary>
-        ///     Required
-        ///     Closing all Connections that maybe open
-        /// </summary>
-        void CloseAllConnection();
+		/// <summary>
+		///     Required
+		///     Closing a open Connection
+		/// </summary>
+		void CloseConnection();
 
-        /// <summary>
-        /// Executes a Query that returns no data
-        /// </summary>
-        /// <param name="strSql">The SQL.</param>
-        /// <param name="obj">Arguments</param>
-        /// <returns></returns>
-        int ExecuteNonQuery(string strSql, params object[] obj);
-        /// <summary>
-        /// Executes a Query that returns no data
-        /// </summary>
-        /// <param name="cmd">The command.</param>
-        /// <returns></returns>
-        int ExecuteNonQuery(IDbCommand cmd);
+		/// <summary>
+		///     Required
+		///     Closing all Connections that maybe open
+		/// </summary>
+		void CloseAllConnection();
 
-        /// <summary>
-        /// Gets the data reader for the given Sql Statement.
-        /// </summary>
-        /// <param name="strSql">The SQL.</param>
-        /// <param name="obj">Arguments.</param>
-        /// <returns></returns>
-        IDataReader GetDataReader(string strSql, params object[] obj);
+		/// <summary>
+		///     Executes a Query that returns no data
+		/// </summary>
+		/// <param name="strSql">The SQL.</param>
+		/// <param name="obj">Arguments</param>
+		/// <returns></returns>
+		int ExecuteNonQuery(string strSql, params object[] obj);
 
-        /// <summary>
-        /// Gets a single Value from the Query
-        /// </summary>
-        /// <param name="cmd">The command.</param>
-        /// <returns></returns>
-        object GetSkalar(IDbCommand cmd);
+		/// <summary>
+		///     Executes a Query that returns no data
+		/// </summary>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
+		int ExecuteNonQuery(IDbCommand cmd);
 
-        /// <summary>
-        /// Gets a single Value from the Query
-        /// </summary>
-        /// <param name="strSql">The string SQL.</param>
-        /// <param name="obj">The object.</param>
-        /// <returns></returns>
-        object GetSkalar(string strSql, params object[] obj);
+		/// <summary>
+		///     Gets the data reader for the given Sql Statement.
+		/// </summary>
+		/// <param name="strSql">The SQL.</param>
+		/// <param name="obj">Arguments.</param>
+		/// <returns></returns>
+		IDataReader GetDataReader(string strSql, params object[] obj);
 
-        //DataTable GetDataTable(string name, string strSql);
-        //DataSet GetDataSet(string strSql);
+		/// <summary>
+		///     Gets a single Value from the Query
+		/// </summary>
+		/// <param name="cmd">The command.</param>
+		/// <returns></returns>
+		object GetSkalar(IDbCommand cmd);
 
-        /// <summary>
-        ///     Required
-        ///     Creates a Command based on the Strategy
-        /// </summary>
-        /// <returns></returns>
-        IDbCommand CreateCommand(string strSql, params IDataParameter[] fields);
+		/// <summary>
+		///     Gets a single Value from the Query
+		/// </summary>
+		/// <param name="strSql">The string SQL.</param>
+		/// <param name="obj">The object.</param>
+		/// <returns></returns>
+		object GetSkalar(string strSql, params object[] obj);
 
-        /// <summary>
-        ///     Required
-        ///     Creates a Parameter based on the Strategy
-        /// </summary>
-        /// <returns></returns>
-        IDataParameter CreateParameter(string strName, object value);
+		//DataTable GetDataTable(string name, string strSql);
+		//DataSet GetDataSet(string strSql);
 
-        /// <summary>
-        ///     Required
-        ///     Opens a Connection or reuse an existing one and then execute the action
-        /// </summary>
-        void Run(Action<IDatabase> action);
+		/// <summary>
+		///     Required
+		///     Creates a Command based on the Strategy
+		/// </summary>
+		/// <returns></returns>
+		IDbCommand CreateCommand(string strSql, params IDataParameter[] fields);
 
-        /// <summary>
-        ///     Required
-        ///     Opens a Connection or reuse an existing one and then execute the action
-        /// </summary>
-        T Run<T>(Func<IDatabase, T> func);
+		/// <summary>
+		///     Required
+		///     Creates a Parameter based on the Strategy
+		/// </summary>
+		/// <returns></returns>
+		IDataParameter CreateParameter(string strName, object value);
 
-        /// <summary>
-        ///     Required
-        ///     Opens a Connection or reuse an existing one and then execute the action
-        /// </summary>
-        void RunInTransaction(Action<IDatabase> action);
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		void Run(Action<IDatabase> action);
 
-        /// <summary>
-        ///     Required
-        ///     Opens a Connection or reuse an existing one and then execute the action
-        /// </summary>
-        void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction);
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		T Run<T>(Func<IDatabase, T> func);
 
-        /// <summary>
-        ///     Required
-        ///     Opens a Connection or reuse an existing one and then execute the action
-        /// </summary>
-        T RunInTransaction<T>(Func<IDatabase, T> func);
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		void RunInTransaction(Action<IDatabase> action);
 
-        /// <summary>
-        ///     Required
-        ///     Opens a Connection or reuse an existing one and then execute the action
-        /// </summary>
-        T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction);
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction);
 
-        /// <summary>
-        /// Clones this instance.
-        /// </summary>
-        /// <returns></returns>
-        IDatabase Clone();
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		T RunInTransaction<T>(Func<IDatabase, T> func);
 
-        /// <summary>
-        /// Getlasts the inserted identifier command.
-        /// </summary>
-        /// <returns></returns>
-        IDbCommand GetlastInsertedIdCommand();
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction);
 
-        /// <summary>
-        ///     Formarts a Command to a executable QueryCommand
-        /// </summary>
-        /// <returns></returns>
-        string FormartCommandToQuery(IDbCommand comm);
+		/// <summary>
+		///     Clones this instance.
+		/// </summary>
+		/// <returns></returns>
+		IDatabase Clone();
 
-        /// <summary>
-        ///     Converts the Generic SourceDbType to the Specific represntation
-        /// </summary>
-        /// <returns></returns>
-        string ConvertParameter(DbType type);
-    }
+		/// <summary>
+		///     Getlasts the inserted identifier command.
+		/// </summary>
+		/// <returns></returns>
+		IDbCommand GetlastInsertedIdCommand();
+
+		/// <summary>
+		///     Formarts a Command to a executable QueryCommand
+		/// </summary>
+		/// <returns></returns>
+		string FormartCommandToQuery(IDbCommand comm);
+
+		/// <summary>
+		///     Converts the Generic SourceDbType to the Specific represntation
+		/// </summary>
+		/// <returns></returns>
+		string ConvertParameter(DbType type);
+	}
 }

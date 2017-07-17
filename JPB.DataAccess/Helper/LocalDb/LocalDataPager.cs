@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,49 +9,53 @@ using System.Linq;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 
+#endregion
+
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
-	/// Provides LINQ paged access to an LocalDbReporsetory
+	///     Provides LINQ paged access to an LocalDbReporsetory
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <seealso cref="JPB.DataAccess.Contacts.Pager.IDataPager{T}" />
 	public class LocalDataPager<T> : IDataPager<T>
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="LocalDataPager{T}" /> class.
+		///     The current page
+		/// </summary>
+		private long _currentPage;
+
+		/// <summary>
+		///     Initializes a new instance of the <see cref="LocalDataPager{T}" /> class.
 		/// </summary>
 		/// <param name="localDbRepository">The local database repository.</param>
 		public LocalDataPager(LocalDbRepository<T> localDbRepository)
 		{
-			this._localDbRepository = localDbRepository;
-			this.CurrentPage = 1;
-			SyncHelper = (s) => s();
+			_localDbRepository = localDbRepository;
+			CurrentPage = 1;
+			SyncHelper = s => s();
 			CurrentPageItems = new ObservableCollection<T>();
 		}
 
 		/// <summary>
-		/// The current page
-		/// </summary>
-		private long _currentPage;
-		/// <summary>
-		/// Commands that are sequencely attached to the main pager command
+		///     Commands that are sequencely attached to the main pager command
 		/// </summary>
 		public List<IDbCommand> AppendedComands { get; set; }
 
 		/// <summary>
-		/// The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be aware
-		/// of it
+		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be
+		///     aware
+		///     of it
 		/// </summary>
 		public IDbCommand BaseQuery { get; set; }
 
 		/// <summary>
-		/// Not Implimented
+		///     Not Implimented
 		/// </summary>
 		public bool Cache { get; set; }
 
 		/// <summary>
-		/// Id of Current page beween 1 and MaxPage
+		///     Id of Current page beween 1 and MaxPage
 		/// </summary>
 		/// <exception cref="InvalidOperationException">The current page must be bigger or equals 1</exception>
 		public long CurrentPage
@@ -60,37 +66,32 @@ namespace JPB.DataAccess.Helper.LocalDb
 				if (value >= 1)
 					_currentPage = value;
 				else
-				{
 					throw new InvalidOperationException("The current page must be bigger or equals 1");
-				}
 			}
 		}
 
 		/// <summary>
-		/// Typed list of all Elements
+		///     Typed list of all Elements
 		/// </summary>
-		public ICollection<T> CurrentPageItems
-		{
-			get;
-			private set;
-		}
+		public ICollection<T> CurrentPageItems { get; private set; }
 
 		/// <summary>
-		/// The last possible Page
+		///     The last possible Page
 		/// </summary>
 		public long MaxPage { get; private set; }
 
 		/// <summary>
-		/// Items to load on one page
+		///     Items to load on one page
 		/// </summary>
 		public int PageSize { get; set; }
+
 		/// <summary>
-		/// Get the complete ammount of all items listend
+		///     Get the complete ammount of all items listend
 		/// </summary>
 		public long TotalItemCount { get; private set; }
 
 		/// <summary>
-		/// Should raise Events
+		///     Should raise Events
 		/// </summary>
 		public bool RaiseEvents { get; set; }
 
@@ -99,50 +100,44 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public Action<Action> SyncHelper { get; set; }
 
 		/// <summary>
-		/// Typed list of all Elements
+		///     Typed list of all Elements
 		/// </summary>
 		IEnumerable IDataPager.CurrentPageItems
 		{
-			get { return this.CurrentPageItems; }
+			get { return CurrentPageItems; }
 		}
 
 		/// <summary>
-		/// Raised if new Page is loaded
+		///     Raised if new Page is loaded
 		/// </summary>
 		public event Action NewPageLoaded;
+
 		/// <summary>
-		/// Raised if new Page is loading
+		///     Raised if new Page is loading
 		/// </summary>
 		public event Action NewPageLoading;
 
 		/// <summary>
-		/// Loads the PageSize into CurrentPageItems
+		///     Loads the PageSize into CurrentPageItems
 		/// </summary>
 		/// <param name="dbAccess"></param>
 		public void LoadPage(DbAccessLayer dbAccess)
 		{
 			SyncHelper(CurrentPageItems.Clear);
-			MaxPage = (long) Math.Ceiling((((decimal)_localDbRepository.Count / this.PageSize)));
+			MaxPage = (long) Math.Ceiling((decimal) _localDbRepository.Count / PageSize);
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoading;
 				if (handler != null)
-				{
 					handler();
-				}
 			}
 
 			TotalItemCount = _localDbRepository.Count;
 
-			var items = _localDbRepository.Skip((int)((this.CurrentPage - 1) * this.PageSize)).Take(this.PageSize).ToArray();
+			var items = _localDbRepository.Skip((int) ((CurrentPage - 1) * PageSize)).Take(PageSize).ToArray();
 
 			foreach (var item in items)
-			{
-				SyncHelper(() =>
-				{
-					this.CurrentPageItems.Add(item);
-				});
-			}
+				SyncHelper(() => { CurrentPageItems.Add(item); });
 
 			if (CurrentPage > MaxPage)
 				CurrentPage = MaxPage;
@@ -151,27 +146,30 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				var handler = NewPageLoaded;
 				if (handler != null)
-				{
 					handler();
-				}
 			}
 		}
 
 		#region IDisposable Support
+
 		/// <summary>
-		/// The disposed value
+		///     The disposed value
 		/// </summary>
-		private bool disposedValue = false; // To detect redundant calls
-											/// <summary>
-											/// The local database repository
-											/// </summary>
+		private bool disposedValue; // To detect redundant calls
+
+		/// <summary>
+		///     The local database repository
+		/// </summary>
 		private readonly LocalDbRepository<T> _localDbRepository;
 
 
 		/// <summary>
-		/// Releases unmanaged and - optionally - managed resources.
+		///     Releases unmanaged and - optionally - managed resources.
 		/// </summary>
-		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+		/// <param name="disposing">
+		///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
+		///     unmanaged resources.
+		/// </param>
 		protected virtual void Dispose(bool disposing)
 		{
 			if (!disposedValue)
@@ -196,7 +194,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		// This code added to correctly implement the disposable pattern.
 		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>
 		public void Dispose()
 		{
@@ -205,7 +203,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			// TODO: uncomment the following line if the finalizer is overridden above.
 			// GC.SuppressFinalize(this);
 		}
-		#endregion
 
+		#endregion
 	}
 }

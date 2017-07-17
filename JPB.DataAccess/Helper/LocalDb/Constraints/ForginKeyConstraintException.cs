@@ -1,13 +1,13 @@
 ﻿namespace JPB.DataAccess.Helper.LocalDb.Constraints
 {
 	/// <summary>
-	/// An exception that will be thrown if an Invalid data insert/update/delete is detected
+	///     An exception that will be thrown if an Invalid data insert/update/delete is detected
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Constraints.ConstraintException" />
 	public class ForginKeyConstraintException : ConstraintException
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ForginKeyConstraintException"/> class.
+		///     Initializes a new instance of the <see cref="ForginKeyConstraintException" /> class.
 		/// </summary>
 		/// <param name="constraintName">Name of the constraint.</param>
 		/// <param name="changedTableName">Name of the changed table.</param>
@@ -23,25 +23,24 @@
 			string pkName,
 			string fkName)
 			: base(string.Format(
-			"The attempt to change/or add an POCO with the value " +
-			"'{2}' " +
-			"on the property" +
-			"'{3}'" +
-			"on the table " +
-			"'{0}' " +
-			"would violate the constraint '{5}' on table " +
-			"'{1}' " +
-			"on the property" +
-			"'{4}'" +
-			"\r\nAll transactions will be rolled back",
-			changedTableName,
-			constraintTableName,
-			constraintValue,
-			pkName,
-			fkName,
-			constraintName))
+				"The attempt to change/or add an POCO with the value " +
+				"'{2}' " +
+				"on the property" +
+				"'{3}'" +
+				"on the table " +
+				"'{0}' " +
+				"would violate the constraint '{5}' on table " +
+				"'{1}' " +
+				"on the property" +
+				"'{4}'" +
+				"\r\nAll transactions will be rolled back",
+				changedTableName,
+				constraintTableName,
+				constraintValue,
+				pkName,
+				fkName,
+				constraintName))
 		{
-
 		}
 	}
 }

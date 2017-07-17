@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.WPFBase.MVVM.ViewModel;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 {
+	[DebuggerDisplay("{GetPropertyName()}")]
 	public class ColumnInfoViewModel : AsyncViewModelBase, IColumInfoModel
 	{
 		public IColumInfoModel Model { get; set; }

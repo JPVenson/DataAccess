@@ -1,51 +1,45 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
+#region
 
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 
+#endregion
+
 namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
-	///
 	/// </summary>
 	public class DbConfig
-		: MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>
+		:
+			MetaInfoStore
+			<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache,
+				DbMethodArgument>
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DbConfig"/> class.
+		///     Initializes a new instance of the <see cref="DbConfig" /> class.
 		/// </summary>
 		/// <param name="local"></param>
 		public DbConfig(bool local = false)
 			: base(local)
 		{
-			ConstructorSettings = new FactoryHelperSettings();
-
+			ConstructorSettings = FactoryHelperSettings.DefaultSettings.Copy();
 		}
 
-		/// <summary>
-		/// For Internal use Only
-		/// </summary>
-#if !DEBUG
-		[DebuggerHidden]
-#endif
-		[Browsable(false)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public static void Clear()
-		{
-			MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>.Clear();
-		}
+//		/// <summary>
+//		/// For Internal use Only
+//		/// </summary>
+//#if !DEBUG
+//		[DebuggerHidden]
+//#endif
+//		[Browsable(false)]
+//		[EditorBrowsable(EditorBrowsableState.Never)]
+//		public static void Clear()
+//		{
+//			MetaInfoStore<DbClassInfoCache, DbPropertyInfoCache, DbAttributeInfoCache, DbMethodInfoCache, DbConstructorInfoCache, DbMethodArgument>.Clear();
+//		}
 
 		/// <summary>
 		///     The settings that are used to create a DOM ctor
@@ -53,7 +47,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		public FactoryHelperSettings ConstructorSettings { get; private set; }
 
 		/// <summary>
-		/// Gets an Cache object if exists or creats one
+		///     Gets an Cache object if exists or creats one
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -67,7 +61,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		/// <summary>
-		/// Gets the or create class information cache.
+		///     Gets the or create class information cache.
 		/// </summary>
 		/// <param name="type">The type.</param>
 		/// <returns></returns>
@@ -104,7 +98,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <returns></returns>
 		public new virtual DbConfig Include<T>()
 		{
-			return this.Include(typeof(T));
+			return Include(typeof(T));
 		}
 
 		/// <summary>
@@ -116,12 +110,12 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <returns></returns>
 		public new virtual DbConfig Include(Type type)
 		{
-			this.GetOrCreateClassInfoCache(type);
+			GetOrCreateClassInfoCache(type);
 			return this;
 		}
 
 		/// <summary>
-		/// Includes the specified types.
+		///     Includes the specified types.
 		/// </summary>
 		/// <param name="t">The type.</param>
 		/// <returns></returns>
@@ -131,9 +125,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			try
 			{
 				if (isThreadSave)
-				{
 					Monitor.Enter(SClassInfoCaches);
-				}
 				foreach (var type in t)
 				{
 					var element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
@@ -150,15 +142,13 @@ namespace JPB.DataAccess.DbInfoConfig
 			finally
 			{
 				if (isThreadSave)
-				{
 					Monitor.Exit(SClassInfoCaches);
-				}
 			}
 			return this;
 		}
 
 		/// <summary>
-		/// Releases unmanaged and - optionally - managed resources.
+		///     Releases unmanaged and - optionally - managed resources.
 		/// </summary>
 		public override void Dispose()
 		{

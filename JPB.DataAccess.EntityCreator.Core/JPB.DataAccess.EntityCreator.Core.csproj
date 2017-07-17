@@ -57,9 +57,11 @@
     <Compile Include="Contracts\ITableInfoModel.cs" />
     <Compile Include="Contracts\ITableInformations.cs" />
     <Compile Include="DbTypeToCsType.cs" />
+    <Compile Include="DefaultLogger.cs" />
     <Compile Include="Models\ColumInfoModel.cs" />
     <Compile Include="Models\ConfigStore.cs" />
     <Compile Include="Models\EnumDeclarationModel.cs" />
+    <Compile Include="Models\SharedInterface.cs" />
     <Compile Include="Models\SpParam.cs" />
     <Compile Include="Models\StoredPrcInfoModel.cs" />
     <Compile Include="NoYesConverter.cs" />

@@ -1,9 +1,12 @@
+#region
+
 using System;
+
+#endregion
 
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialTriggerCollection{TEntity}" />
@@ -11,40 +14,29 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		: ISequentialTriggerCollection<TEntity>
 	{
 		/// <summary>
-		/// The tabel
-		/// </summary>
-		protected readonly LocalDbRepository<TEntity> Tabel;
-		/// <summary>
-		/// The Collection that should be mirrored
+		///     The Collection that should be mirrored
 		/// </summary>
 		protected readonly ISequentialTriggerCollection<TEntity> Duplication;
 
 		/// <summary>
-		/// Occurs when [insert].
+		///     The tabel
 		/// </summary>
-		private event EventHandler<ISequentialToken<TEntity>> _insert;
-		/// <summary>
-		/// Occurs when [update].
-		/// </summary>
-		private event EventHandler<ISequentialToken<TEntity>> _update;
-		/// <summary>
-		/// Occurs when [delete].
-		/// </summary>
-		private event EventHandler<ISequentialToken<TEntity>> _delete;
+		protected readonly LocalDbRepository<TEntity> Tabel;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SequentialSequentialTriggerCollection{TEntity}"/> class.
+		///     Initializes a new instance of the <see cref="SequentialSequentialTriggerCollection{TEntity}" /> class.
 		/// </summary>
 		/// <param name="tabel">The tabel.</param>
 		/// <param name="duplication">The duplication.</param>
-		internal SequentialSequentialTriggerCollection(LocalDbRepository<TEntity> tabel, ISequentialTriggerCollection<TEntity> duplication = null)
+		internal SequentialSequentialTriggerCollection(LocalDbRepository<TEntity> tabel,
+			ISequentialTriggerCollection<TEntity> duplication = null)
 		{
 			Tabel = tabel;
 			Duplication = duplication;
 		}
 
 		/// <summary>
-		/// Will be invoked when the Add function is triggerd.
+		///     Will be invoked when the Add function is triggerd.
 		/// </summary>
 		public virtual event EventHandler<ISequentialToken<TEntity>> Insert
 		{
@@ -63,7 +55,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		}
 
 		/// <summary>
-		/// Will be invoked when an Entity is updated
+		///     Will be invoked when an Entity is updated
 		/// </summary>
 		public virtual event EventHandler<ISequentialToken<TEntity>> Update
 		{
@@ -82,7 +74,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		}
 
 		/// <summary>
-		/// Will be invoked when the Remove function is called
+		///     Will be invoked when the Remove function is called
 		/// </summary>
 		public virtual event EventHandler<ISequentialToken<TEntity>> Delete
 		{
@@ -101,7 +93,49 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		}
 
 		/// <summary>
-		/// Invokes the trigger.
+		///     Called when [insert] is invoked.
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		public virtual void OnInsert(TEntity obj)
+		{
+			InvokeTrigger(_insert, obj);
+		}
+
+		/// <summary>
+		///     Called when [update] is invoked.
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		public virtual void OnUpdate(TEntity obj)
+		{
+			InvokeTrigger(_update, obj);
+		}
+
+		/// <summary>
+		///     Called when [delete] is invoked.
+		/// </summary>
+		/// <param name="obj">The object.</param>
+		public virtual void OnDelete(TEntity obj)
+		{
+			InvokeTrigger(_delete, obj);
+		}
+
+		/// <summary>
+		///     Occurs when [insert].
+		/// </summary>
+		private event EventHandler<ISequentialToken<TEntity>> _insert;
+
+		/// <summary>
+		///     Occurs when [update].
+		/// </summary>
+		private event EventHandler<ISequentialToken<TEntity>> _update;
+
+		/// <summary>
+		///     Occurs when [delete].
+		/// </summary>
+		private event EventHandler<ISequentialToken<TEntity>> _delete;
+
+		/// <summary>
+		///     Invokes the trigger.
 		/// </summary>
 		/// <param name="trigger">The trigger.</param>
 		/// <param name="obj">The object.</param>
@@ -113,33 +147,6 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 				trigger.Invoke(this, token);
 			if (token.Canceled)
 				throw new TriggerException<TEntity>(token.Reason, Tabel);
-		}
-
-		/// <summary>
-		/// Called when [insert] is invoked.
-		/// </summary>
-		/// <param name="obj">The object.</param>
-		public virtual void OnInsert(TEntity obj)
-		{
-			InvokeTrigger(_insert, obj);
-		}
-
-		/// <summary>
-		/// Called when [update] is invoked.
-		/// </summary>
-		/// <param name="obj">The object.</param>
-		public virtual void OnUpdate(TEntity obj)
-		{
-			InvokeTrigger(_update, obj);
-		}
-
-		/// <summary>
-		/// Called when [delete] is invoked.
-		/// </summary>
-		/// <param name="obj">The object.</param>
-		public virtual void OnDelete(TEntity obj)
-		{
-			InvokeTrigger(_delete, obj);
 		}
 	}
 

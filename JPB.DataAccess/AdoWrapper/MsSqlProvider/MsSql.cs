@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,33 +11,35 @@ using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 
+#endregion
+
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
-	/// Wrapps MsSQL spezifc data
+	///     Wrapps MsSQL spezifc data
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Contacts.IDatabaseStrategy" />
 	public class MsSql : IDatabaseStrategy
 	{
 		/// <summary>
-		/// The template MSSQL untrusted
+		///     The template MSSQL untrusted
 		/// </summary>
 		private const string TEMPLATE_MSSQL_UNTRUSTED =
 			"server={0};database={1};user id={2};password={3};Connect Timeout=100;Min Pool Size=5;trusted_connection=false";
 
 		/// <summary>
-		/// The template MSSQL trusted
+		///     The template MSSQL trusted
 		/// </summary>
 		private const string TEMPLATE_MSSQL_TRUSTED =
 			"server={0};database={1};Connect Timeout=100;Min Pool Size=5;trusted_connection=true";
 
 		/// <summary>
-		/// The connection string
+		///     The connection string
 		/// </summary>
 		private string _connStr = string.Empty;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MsSql"/> class.
+		///     Initializes a new instance of the <see cref="MsSql" /> class.
 		/// </summary>
 		/// <param name="strServer">The string server.</param>
 		/// <param name="strDatabase">The string database.</param>
@@ -45,7 +49,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MsSql"/> class.
+		///     Initializes a new instance of the <see cref="MsSql" /> class.
 		/// </summary>
 		/// <param name="strServer">The string server.</param>
 		/// <param name="strDatabase">The string database.</param>
@@ -56,14 +60,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
 				_connStr = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
 			else
-			{
 				_connStr = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
 					strLogin.Trim(), strPassword.Trim());
-			}
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="MsSql"/> class.
+		///     Initializes a new instance of the <see cref="MsSql" /> class.
 		/// </summary>
 		/// <param name="strConnStr">The string connection string.</param>
 		public MsSql(string strConnStr)
@@ -74,7 +76,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		#region IDatabaseStrategy Members
 
 		/// <summary>
-		/// Defines the database type this Strategy is used for
+		///     Defines the database type this Strategy is used for
 		/// </summary>
 		public DbAccessType SourceDatabase
 		{
@@ -82,7 +84,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// An Valid Connection string for the given Strategy
+		///     An Valid Connection string for the given Strategy
 		/// </summary>
 		public string ConnectionString
 		{
@@ -91,7 +93,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Optional used when connecting to a Local file
+		///     Optional used when connecting to a Local file
 		/// </summary>
 		/// <exception cref="Exception">The method or operation is not implemented.</exception>
 		public string DatabaseFile
@@ -100,7 +102,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Should return the current database if availibe
+		///     Should return the current database if availibe
 		/// </summary>
 		public string ServerName
 		{
@@ -112,7 +114,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates a new Provider specific Connection that will held open until all actors want to close it
+		///     Creates a new Provider specific Connection that will held open until all actors want to close it
 		/// </summary>
 		/// <returns></returns>
 		public IDbConnection CreateConnection()
@@ -122,7 +124,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates a command.
+		///     Creates a command.
 		/// </summary>
 		/// <param name="strSql">The string SQL.</param>
 		/// <param name="conn">The connection.</param>
@@ -135,7 +137,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates a command.
+		///     Creates a command.
 		/// </summary>
 		/// <param name="strSql">The string SQL.</param>
 		/// <param name="conn">The connection.</param>
@@ -145,16 +147,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		{
 			var cmd = (SqlCommand) CreateCommand(strSql, conn);
 
-			foreach (IDataParameter dataParameter in fields)
-			{
+			foreach (var dataParameter in fields)
 				cmd.Parameters.AddWithValue(dataParameter.ParameterName, dataParameter.Value);
-			}
 
 			return cmd;
 		}
 
 		/// <summary>
-		/// Creates a query parameter.
+		///     Creates a query parameter.
 		/// </summary>
 		/// <param name="strName">Name of the string.</param>
 		/// <param name="value">The value.</param>
@@ -165,7 +165,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates the data adapter.
+		///     Creates the data adapter.
 		/// </summary>
 		/// <param name="cmd">The command.</param>
 		/// <returns></returns>
@@ -177,7 +177,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates a data table.
+		///     Creates a data table.
 		/// </summary>
 		/// <param name="name">The name.</param>
 		/// <param name="cmd">The command.</param>
@@ -199,7 +199,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Getlasts a inserted identifier command.
+		///     Getlasts a inserted identifier command.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <returns></returns>
@@ -210,7 +210,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates a data pager.
+		///     Creates a data pager.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -220,7 +220,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates the a pager that can convert each item.
+		///     Creates the a pager that can convert each item.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <typeparam name="TE">The type of the e.</typeparam>
@@ -231,7 +231,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Formarts a Command into a QueryCommand after the Strategy rules
+		///     Formarts a Command into a QueryCommand after the Strategy rules
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
@@ -241,7 +241,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Converts the Generic SourceDbType to the Specific represntation
+		///     Converts the Generic SourceDbType to the Specific represntation
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -251,10 +251,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Creates a new object that is a copy of the current instance.
+		///     Creates a new object that is a copy of the current instance.
 		/// </summary>
 		/// <returns>
-		/// A new object that is a copy of this instance.
+		///     A new object that is a copy of this instance.
 		/// </returns>
 		public object Clone()
 		{
@@ -262,7 +262,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Compacts the database.
+		///     Compacts the database.
 		/// </summary>
 		/// <param name="strSource">The string source.</param>
 		/// <param name="strDest">The string dest.</param>
@@ -273,7 +273,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Shrinks the database.
+		///     Shrinks the database.
 		/// </summary>
 		/// <param name="strConnectionString">The string connection string.</param>
 		/// <exception cref="NotImplementedException">The method or operation is not implemented.</exception>
@@ -283,7 +283,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Prepares the query.
+		///     Prepares the query.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <param name="strSql">The string SQL.</param>
@@ -294,7 +294,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Imports the specified dt.
+		///     Imports the specified dt.
 		/// </summary>
 		/// <param name="dt">The dt.</param>
 		/// <param name="cmd">The command.</param>
@@ -312,7 +312,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Gets the time stamp.
+		///     Gets the time stamp.
 		/// </summary>
 		/// <returns></returns>
 		public string GetTimeStamp()
@@ -321,7 +321,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Gets the time stamp.
+		///     Gets the time stamp.
 		/// </summary>
 		/// <param name="dtValue">The dt value.</param>
 		/// <returns></returns>
@@ -336,12 +336,12 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Gets the tables.
+		///     Gets the tables.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <param name="strFilter">The string filter.</param>
 		/// <returns></returns>
-		public string[] GetTables(IDbConnection conn, String strFilter)
+		public string[] GetTables(IDbConnection conn, string strFilter)
 		{
 			const string sql = "select NAME from SYSOBJECTS where TYPE = 'U' AND NAME <> 'dtproperties' order by NAME";
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
@@ -355,7 +355,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Gets the table columns.
+		///     Gets the table columns.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <param name="strTableName">Name of the string table.</param>
@@ -377,68 +377,74 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Drops the table.
+		///     Drops the table.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <param name="strTableName">Name of the string table.</param>
 		/// <returns></returns>
-		public int DropTable(IDbConnection conn, String strTableName)
+		public int DropTable(IDbConnection conn, string strTableName)
 		{
-			var sql = String.Format("DROP TABLE {0}", strTableName);
+			var sql = string.Format("DROP TABLE {0}", strTableName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
+			{
 				return cmd.ExecuteNonQuery();
+			}
 		}
 
 		/// <summary>
-		/// Gets the views SQL.
+		///     Gets the views SQL.
 		/// </summary>
 		/// <param name="strName">Name of the string.</param>
 		/// <returns></returns>
-		public string GetViewsSql(String strName)
+		public string GetViewsSql(string strName)
 		{
 			return string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
 		}
 
 		/// <summary>
-		/// Gets the stored procedure SQL.
+		///     Gets the stored procedure SQL.
 		/// </summary>
 		/// <param name="strName">Name of the string.</param>
 		/// <returns></returns>
-		public string GetStoredProcedureSql(String strName)
+		public string GetStoredProcedureSql(string strName)
 		{
 			return string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
 		}
 
 		/// <summary>
-		/// Supportses the view.
+		///     Supportses the view.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <param name="strName">Name of the string.</param>
 		/// <returns></returns>
-		public bool SupportsView(IDbConnection conn, String strName)
+		public bool SupportsView(IDbConnection conn, string strName)
 		{
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 			using (IDataReader dr = cmd.ExecuteReader())
-				return (dr.Read());
+			{
+				return dr.Read();
+			}
 		}
 
 		/// <summary>
-		/// Supportses the stored procedure.
+		///     Supportses the stored procedure.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <param name="strName">Name of the string.</param>
 		/// <returns></returns>
-		public bool SupportsStoredProcedure(IDbConnection conn, String strName)
+		public bool SupportsStoredProcedure(IDbConnection conn, string strName)
 		{
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
 			using (var cmd = new SqlCommand(sql, (SqlConnection) conn))
 			using (IDataReader dr = cmd.ExecuteReader())
-				return (dr.Read());
+			{
+				return dr.Read();
+			}
 		}
 
 		/// <summary>
-		/// Commands as ms SQL.
+		///     Commands as ms SQL.
 		/// </summary>
 		/// <param name="sc">The sc.</param>
 		/// <returns></returns>
@@ -458,23 +464,20 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				case CommandType.StoredProcedure:
 					sql.AppendLine("DECLARE @return_value int;");
 
-					foreach (SqlParameter sp in sc.Parameters.Cast<SqlParameter>())
-					{
-						if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
+					foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+						if (sp.Direction == ParameterDirection.InputOutput || sp.Direction == ParameterDirection.Output)
 						{
 							sql.Append("DECLARE " + sp.ParameterName + "\t" + sp.SqlDbType + "\t= ");
 
-							sql.AppendLine(((sp.Direction == ParameterDirection.Output) ? "NULL" : QueryDebugger.ParameterValue(sp)) + ";");
+							sql.AppendLine((sp.Direction == ParameterDirection.Output ? "NULL" : QueryDebugger.ParameterValue(sp)) + ";");
 						}
-					}
 
 					sql.AppendLine("EXEC [" + sc.CommandText + "]");
 
-					foreach (IDataParameter sp in sc.Parameters.Cast<IDataParameter>())
-					{
+					foreach (var sp in sc.Parameters.Cast<IDataParameter>())
 						if (sp.Direction != ParameterDirection.ReturnValue)
 						{
-							sql.Append((firstParam) ? "\t" : "\t, ");
+							sql.Append(firstParam ? "\t" : "\t, ");
 
 							if (firstParam) firstParam = false;
 
@@ -484,28 +487,21 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 								sql.AppendLine(sp.ParameterName + " = " + sp.ParameterName + " OUTPUT");
 						}
-					}
 					sql.AppendLine(";");
 
 					sql.AppendLine("SELECT 'Return Value' = CONVERT(NVARCHAR, @return_value);");
 
-					foreach (IDataParameter sp in sc.Parameters.Cast<IDataParameter>())
-					{
-						if ((sp.Direction == ParameterDirection.InputOutput) || (sp.Direction == ParameterDirection.Output))
-						{
+					foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+						if (sp.Direction == ParameterDirection.InputOutput || sp.Direction == ParameterDirection.Output)
 							sql.AppendLine("SELECT '" + sp.ParameterName + "' = CONVERT(NVARCHAR, " + sp.ParameterName + ");");
-						}
-					}
 					break;
 				case CommandType.Text:
 				case CommandType.TableDirect:
-					foreach (SqlParameter sp in sc.Parameters.Cast<SqlParameter>())
+					foreach (var sp in sc.Parameters.Cast<SqlParameter>())
 					{
 						var paramTypeCompiler = sp.SqlDbType.ToString().ToUpper();
 						if (sp.Size > 0)
-						{
 							paramTypeCompiler += "(" + sp.Size + ")";
-						}
 
 						sql.AppendLine("DECLARE " + " "
 						               + sp.ParameterName + " "
@@ -521,11 +517,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Parameters the value.
+		///     Parameters the value.
 		/// </summary>
 		/// <param name="sp">The sp.</param>
 		/// <returns></returns>
-		public static String ParameterValue(SqlParameter sp)
+		public static string ParameterValue(SqlParameter sp)
 		{
 			var retval = "";
 
@@ -545,7 +541,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					break;
 
 				case SqlDbType.Bit:
-					retval = (sp.Value is bool && (bool) sp.Value) ? "1" : "0";
+					retval = sp.Value is bool && (bool) sp.Value ? "1" : "0";
 					break;
 
 				case SqlDbType.Binary:
@@ -579,11 +575,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		/// Calls the API to close all open Connections and free the Database
+		///     Calls the API to close all open Connections and free the Database
 		/// </summary>
 		public void CloseAllConnections()
 		{
-
 			GC.Collect();
 
 			//HACK

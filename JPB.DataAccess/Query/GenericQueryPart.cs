@@ -1,11 +1,4 @@
-/*
-This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
-Please consider to give some Feedback on CodeProject
-
-http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
-
-*/
+#region
 
 using System;
 using System.Collections.Generic;
@@ -16,12 +9,14 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Query.Contracts;
 
+#endregion
+
 namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	///     Wrapper for Generic QueryCommand parts
 	/// </summary>
-	public class GenericQueryPart : ICloneable
+	public class GenericQueryPart
 	{
 		private readonly IQueryBuilder _builder;
 
@@ -61,10 +56,10 @@ namespace JPB.DataAccess.Query
 		public IEnumerable<IQueryParameter> QueryParameters { get; set; }
 
 		/// <summary>
-		/// Gets the Query builder element.
+		///     Gets the Query builder element.
 		/// </summary>
 		/// <value>
-		/// The builder.
+		///     The builder.
 		/// </value>
 		public IQueryBuilder Builder
 		{
@@ -74,13 +69,14 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public object Clone()
+		public object Clone(IQueryBuilder builder)
 		{
-			return MemberwiseClone();
+			return new GenericQueryPart(Prefix, QueryParameters.Select(e => e.Clone()).ToList(), builder);
 		}
 
 		/// <summary>
-		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and parameter
+		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and
+		///     parameter
 		/// </summary>
 		/// <param name="command"></param>
 		/// <param name="builder"></param>
@@ -97,7 +93,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public virtual string Render()
 		{
-			var sb = new StringBuilderInterlaced();
+			var sb = new ConsoleStringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();
 		}
@@ -106,7 +102,7 @@ namespace JPB.DataAccess.Query
 		///     For display
 		/// </summary>
 		/// <returns></returns>
-		internal virtual void Render(StringBuilderInterlaced sb)
+		internal virtual void Render(ConsoleStringBuilderInterlaced sb)
 		{
 			sb
 				.AppendInterlacedLine("new GenericQueryPart {")
@@ -118,7 +114,7 @@ namespace JPB.DataAccess.Query
 			{
 				sb.AppendInterlacedLine("{")
 					.Up();
-				foreach (QueryParameter queryParameter in QueryParameters.Cast<QueryParameter>())
+				foreach (var queryParameter in QueryParameters.Cast<QueryParameter>())
 				{
 					queryParameter.Render(sb);
 					sb.AppendLine(",");

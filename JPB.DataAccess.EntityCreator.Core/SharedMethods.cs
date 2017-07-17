@@ -1,42 +1,43 @@
-﻿using System;
-using System.CodeDom;
+﻿using System.CodeDom;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.Core.Compiler;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.EntityCreator.Core
 {
-	class DefaultLogger : ILogger
-	{
-		/// <summary>
-		/// Writes one or more chars to the output by using string.Format
-		/// </summary>
-		/// <param name="content"></param>
-		/// <param name="arguments"></param>
-		public void Write(string content, params object[] arguments)
-		{
-			Console.Write(content, arguments);
-		}
-
-		/// <summary>
-		/// Writes one or more chars to the output by using string.Format followed by an Enviroment.NewLine
-		/// </summary>
-		/// <param name="content"></param>
-		/// <param name="arguments"></param>
-		public void WriteLine(string content = null, params object[] arguments)
-		{
-			Console.WriteLine(content, arguments);
-		}
-	}
-
 	public static class SharedMethods
 	{
 		public static ILogger Logger = new DefaultLogger();
+
+		public static IEnumerable<ISharedInterface> GetSuggjestedInterfaces(IEnumerable<ITableInfoModel> tables)
+		{
+			IDictionary<string, Dictionary<ITableInfoModel, IColumInfoModel>> sharedProps = new Dictionary<string, Dictionary<ITableInfoModel, IColumInfoModel>>();
+
+			foreach (var tableInfoModel in tables)
+			{
+				foreach (var columInfoModel in tableInfoModel.ColumnInfos)
+				{
+					var columnName = columInfoModel.GetPropertyName();
+					var hasValue = sharedProps.FirstOrDefault(f => f.Key == columnName).Value;
+
+					if (hasValue == null)
+					{
+						sharedProps.Add(columnName, hasValue = new Dictionary<ITableInfoModel, IColumInfoModel>());
+					}
+					hasValue.Add(tableInfoModel, columInfoModel);
+				}
+			}
+			sharedProps = sharedProps.Where(f => f.Value.Count > 1)
+			                         .ToDictionary(f => f.Key, f => f.Value.ToDictionary(g => g.Key, g => g.Value));
+			return sharedProps.Select(f => new SharedInterface("IHas" + f.Key, null, f.Value.Select(e => e.Value).ToList())).ToList();
+		}
 
 		public static void CompileTable(ITableInfoModel tableInfoModel, IMsSqlCreator sourceCreator, Stream to = null)
 		{
@@ -97,7 +98,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 					}
 				}
 
-				if (columInfoModel.ColumnInfo.TargetType2 == "Timestamp")
+				if (columInfoModel.ColumnInfo.SqlType == SqlDbType.Timestamp)
 				{
 					codeMemberProperty.CustomAttributes.Add(
 						new CodeAttributeDeclaration(typeof(RowVersionAttribute).Name));
@@ -129,7 +130,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 				var newName = CheckOrAlterName(tableName);
 				if (newName != tableName)
 				{
-					Console.WriteLine("Alter Table'{0}' to '{1}'", tableName, newName);
+					Logger.WriteLine("Alter Table'{0}' to '{1}'", tableName, newName);
 					tableInfoModel.NewTableName = newName;
 				}
 

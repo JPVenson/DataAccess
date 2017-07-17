@@ -1,5 +1,3 @@
-using System;
-
 namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	//public class SequentialTriggerAfterCollection<TToken, TEntity>

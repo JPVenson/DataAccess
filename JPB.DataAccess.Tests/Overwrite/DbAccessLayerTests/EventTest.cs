@@ -1,103 +1,59 @@
-﻿using JPB.DataAccess.Manager;
+﻿#region
+
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
+
+#endregion
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-	[TestFixture(DbAccessType.MsSql)]
-	[TestFixture(DbAccessType.SqLite)]
-	//[TestFixture(DbAccessType.MySql)]
-	public class EventTest
+	[Parallelizable(ParallelScope.None)]
+	public class EventTest : BaseTest
 	{
-		private readonly DbAccessType _type;
-
-		public EventTest(DbAccessType type)
+		public EventTest(DbAccessType type) : base(type)
 		{
-			_type = type;
-		}
-
-		private DbAccessLayer _dbAccess;
-		private IManager _mgr;
-
-		[SetUp]
-		public void Init()
-		{
-			_mgr = new Manager();
-			_dbAccess = _mgr.GetWrapper(_type);
-		}
-
-		[TearDown]
-		public void TestTearDown()
-		{
-			// inc. class name
-			var fullNameOfTheMethod = NUnit.Framework.TestContext.CurrentContext.Test.FullName;
-			// method name only
-			var methodName = NUnit.Framework.TestContext.CurrentContext.Test.Name;
-			// the state of the test execution
-			var state = NUnit.Framework.TestContext.CurrentContext.Result.Outcome == ResultState.Failure; // TestState enum
-
-			if (state)
-			{
-				_mgr.FlushErrorData();
-			}
-		}
-
-		[SetUp]
-		public void Clear()
-		{
-			_dbAccess.Config.Dispose();
-			_dbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-			if (_dbAccess.DbAccessType == DbAccessType.MsSql)
-				_dbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-		}
-
-		public void TestOnUpdate()
-		{
-			_dbAccess.RaiseEvents = true;
-			var insertWithSelect = _dbAccess.InsertWithSelect(new Users());
-
-			var riseFlag = false;
-			_dbAccess.OnUpdate += (sender, eventx) =>
-			{
-				riseFlag = true;
-			};
-			_dbAccess.Update(insertWithSelect);
-			Assert.True(riseFlag);
-			_dbAccess.RaiseEvents = false;
-			riseFlag = false;
-			_dbAccess.Update(insertWithSelect);
-			Assert.False(riseFlag);
-		}
-
-		public void TestOnInsert()
-		{
-			_dbAccess.RaiseEvents = true;
-			var riseFlag = false;
-			_dbAccess.OnInsert += (sender, eventx) =>
-			{
-				riseFlag = true;
-			};
-			_dbAccess.Insert(new Users());
-			Assert.True(riseFlag);
-
-			_dbAccess.RaiseEvents = false;
-			riseFlag = false;
-			_dbAccess.Insert(new Users());
-			Assert.False(riseFlag);
-
 		}
 
 		public void TestOnSelect()
 		{
-			_dbAccess.RaiseEvents = true;
-
+			DbAccess.RaiseEvents = true;
 		}
 
 		public void TestOnDelete()
 		{
-			_dbAccess.RaiseEvents = true;
+			DbAccess.RaiseEvents = true;
+		}
 
+		[Test]
+		public void TestOnInsert()
+		{
+			DbAccess.RaiseEvents = true;
+			var riseFlag = false;
+			DbAccess.OnInsert += (sender, eventx) => { riseFlag = true; };
+			DbAccess.Insert(new Users());
+			Assert.True(riseFlag);
+
+			DbAccess.RaiseEvents = false;
+			riseFlag = false;
+			DbAccess.Insert(new Users());
+			Assert.False(riseFlag);
+		}
+
+		[Test]
+		public void TestOnUpdate()
+		{
+			DbAccess.RaiseEvents = true;
+			var insertWithSelect = DbAccess.InsertWithSelect(new Users());
+
+			var riseFlag = false;
+			DbAccess.OnUpdate += (sender, eventx) => { riseFlag = true; };
+			DbAccess.Update(insertWithSelect);
+			Assert.True(riseFlag);
+			DbAccess.RaiseEvents = false;
+			riseFlag = false;
+			DbAccess.Update(insertWithSelect);
+			Assert.False(riseFlag);
 		}
 	}
 }

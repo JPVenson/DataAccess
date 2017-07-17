@@ -1,14 +1,14 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.Query.Contracts;
+
+#endregion
 
 namespace JPB.DataAccess.Query.Operators.Selection
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IDbElementSelector" />
@@ -17,7 +17,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		private string _currentIdent;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DatabaseObjectSelector"/> class.
+		///     Initializes a new instance of the <see cref="DatabaseObjectSelector" /> class.
 		/// </summary>
 		/// <param name="database">The database.</param>
 		/// <param name="currentIdent">The current ident.</param>
@@ -27,7 +27,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DatabaseObjectSelector"/> class.
+		///     Initializes a new instance of the <see cref="DatabaseObjectSelector" /> class.
 		/// </summary>
 		/// <param name="database">The database.</param>
 		public DatabaseObjectSelector(IQueryBuilder database) : base(database)
@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		}
 
 		/// <summary>
-		/// Changes the current Identitfyer
+		///     Changes the current Identitfyer
 		/// </summary>
 		/// <param name="alias">The alias.</param>
 		/// <returns></returns>
@@ -47,7 +47,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		}
 
 		/// <summary>
-		/// Creates a Select statement for a given Poco
+		///     Creates a Select statement for a given Poco
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <param name="argumentsForFactory">The arguments for factory.</param>
@@ -57,19 +57,22 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		{
 			if (argumentsForFactory == null)
 				throw new ArgumentNullException("argumentsForFactory");
-			var cmd = ContainerObject.AccessLayer.CreateSelectQueryFactory(this.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)), argumentsForFactory);
+			var cmd =
+				ContainerObject.AccessLayer.CreateSelectQueryFactory(ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),
+					argumentsForFactory);
 			return new SelectQuery<TPoco>(this.QueryCommand(cmd), null);
 		}
 
 		/// <summary>
-		/// Creates an Column Chooser object to spezify columns to select
+		///     Creates an Column Chooser object to spezify columns to select
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <returns></returns>
 		public ColumnChooser<TPoco> Only<TPoco>()
 		{
 			if (_currentIdent == null)
-				_currentIdent = string.Format("{0}_{1}", base.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).TableName, base.ContainerObject.GetNextParameterId());
+				_currentIdent = string.Format("{0}_{1}", ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).TableName,
+					ContainerObject.GetNextParameterId());
 			return new ColumnChooser<TPoco>(this, new List<string>(), _currentIdent);
 		}
 	}

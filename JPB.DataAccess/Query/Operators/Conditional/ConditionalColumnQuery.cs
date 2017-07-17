@@ -1,10 +1,13 @@
-﻿using JPB.DataAccess.Helper;
+﻿#region
+
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Query.Contracts;
+
+#endregion
 
 namespace JPB.DataAccess.Query.Operators.Conditional
 {
 	/// <summary>
-	///
 	/// </summary>
 	/// <typeparam name="TPoco">The type of the poco.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
@@ -12,12 +15,22 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 	public class ConditionalColumnQuery<TPoco> : QueryBuilderX, IConditionalColumnQuery<TPoco>
 	{
 		/// <summary>
-		/// The state of the current bilder
+		///     The state of the current bilder
 		/// </summary>
 		public readonly CondtionBuilderState State;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ConditionalColumnQuery{TPoco}"/> class.
+		///     Initializes a new instance of the <see cref="ConditionalColumnQuery{TPoco}" /> class.
+		/// </summary>
+		/// <param name="database">The database.</param>
+		/// <param name="state">The state.</param>
+		public ConditionalColumnQuery(ConditionalColumnQuery<TPoco> database) : base(database)
+		{
+			State = database.State;
+		}
+
+		/// <summary>
+		///     Initializes a new instance of the <see cref="ConditionalColumnQuery{TPoco}" /> class.
 		/// </summary>
 		/// <param name="database">The database.</param>
 		/// <param name="state">The state.</param>
@@ -27,14 +40,11 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		}
 
 		/// <summary>
-		/// Prepaires an Conditional Query that targets an single Column
+		///     Prepaires an Conditional Query that targets an single Column
 		/// </summary>
 		public ConditionalOperatorQuery<TPoco> Is
 		{
-			get
-			{
-				return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Is));
-			}
+			get { return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Is)); }
 		}
 
 		///// <summary>
@@ -63,26 +73,26 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		//}
 
 		/// <summary>
-		/// Prepaires an Conditional Query
+		///     Prepaires an Conditional Query
 		/// </summary>
 		public ConditionalEvalQuery<TPoco> IsQueryOperatorValue(string value)
 		{
-			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ(value), State);
+			return new ConditionalEvalQuery<TPoco>(this.QueryQ(value), State);
 		}
 
 		/// <summary>
-		/// Prepaires an Conditional Query
+		///     Prepaires an Conditional Query
 		/// </summary>
 		public ConditionalEvalQuery<TPoco> QueryOperatorValue(string operators, object value)
 		{
-			var nextParameterId = this.ContainerObject.GetNextParameterId();
+			var nextParameterId = ContainerObject.GetNextParameterId();
 			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ(string.Format("{1} @m_val{0}", nextParameterId, operators), new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)), State);
+				.QueryQ(string.Format("{1} @m_val{0}", nextParameterId, operators),
+					new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)), State);
 		}
 
 		/// <summary>
-		/// Prepaires an Conditional Query
+		///     Prepaires an Conditional Query
 		/// </summary>
 		public ConditionalEvalQuery<TPoco> IsQueryValue(string value)
 		{
@@ -91,12 +101,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		}
 
 		/// <summary>
-		/// Defines an condition that should be inverted
+		///     Defines an condition that should be inverted
 		/// </summary>
 		public ConditionalEvalQuery<TPoco> NotQueryValue(string value)
 		{
 			return new ConditionalEvalQuery<TPoco>(this
-					.QueryQ("<> " + value), State);
+				.QueryQ("<> " + value), State);
 		}
 	}
 }
