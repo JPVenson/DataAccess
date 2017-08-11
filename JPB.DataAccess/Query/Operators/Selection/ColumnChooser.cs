@@ -58,7 +58,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		/// <returns></returns>
 		public ColumnChooser<TPoco> Column<TA>(Expression<Func<TPoco, TA>> columnName)
 		{
-			var member = columnName.GetPropertyInfoFromLabda();
+			var member = columnName.GetPropertyInfoFromLamdba();
 			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
 			return Column(propName.DbName);
 		}

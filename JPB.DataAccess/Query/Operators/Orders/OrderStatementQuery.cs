@@ -43,7 +43,7 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		public OrderByColumn<TPoco> By<TA>(
 			Expression<Func<TPoco, TA>> columnName)
 		{
-			var member = columnName.GetPropertyInfoFromLabda();
+			var member = columnName.GetPropertyInfoFromLamdba();
 			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
 			return By(propName.DbName);
 		}

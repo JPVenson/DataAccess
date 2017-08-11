@@ -3,6 +3,7 @@
 using System;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.Operators.Selection;
 
 #endregion
@@ -108,6 +109,11 @@ namespace JPB.DataAccess.Query.Operators
 			get { return new CountElementsObjectSelector(this); }
 		}
 
+		public PrepaireUpdateQuery Update
+		{
+			get { return new PrepaireUpdateQuery(this); }
+		}
+
 		/// <summary>
 		///     Adds a Select - Statement
 		///     Uses reflection or a Factory mehtod to create
@@ -145,26 +151,26 @@ namespace JPB.DataAccess.Query.Operators
 
 		/// <summary>
 		///     Adds a Update - Statement
-		///     Uses reflection or a Factory mehtod to create
+		///     Uses reflection or a Factory mehtod to create an update statement that will check for the id of the obj
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public UpdateQuery<T> UpdateDirect<T>(T obj)
+		public ConditionalEvalQuery<T> UpdateEntity<T>(T obj)
 		{
-			return new UpdateQuery<T>(this
+			return new ConditionalEvalQuery<T>(new UpdateQuery<T>(this
 				.QueryCommand(
 					DbAccessLayer
 						.CreateUpdate(ContainerObject
-							.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
+							.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj))));
 		}
 
 		/// <summary>
 		///     Adds a Update - Statement
-		///     Uses reflection or a Factory mehtod to create
+		///     Uses reflection or a Factory mehtod to create an update statement for the whole table based on the obj
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public UpdateQuery<T> Update<T>(T obj)
+		public UpdateQuery<T> UpdateStatement<T>(T obj)
 		{
 			return new UpdateQuery<T>(this
 				.QueryCommand(

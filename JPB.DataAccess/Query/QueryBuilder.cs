@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,14 +15,12 @@ namespace JPB.DataAccess.Query
 {
 	public abstract class QueryBuilderContainer : IQueryBuilder
 	{
-		internal QueryBuilderContainer(DbAccessLayer database, Type type)
+		internal QueryBuilderContainer(DbAccessLayer database, Type type) : this(new InternalContainerContainer(database, type))
 		{
 			if (database == null)
 				throw new ArgumentNullException("database", "Please use a valid Database");
 			if (database == null)
 				throw new ArgumentNullException("type", "Please use a valid Type");
-
-			ContainerObject = new InternalContainerContainer(database, type);
 		}
 
 		internal QueryBuilderContainer(IQueryContainer database)
@@ -32,22 +31,19 @@ namespace JPB.DataAccess.Query
 			ContainerObject = database.Clone();
 		}
 
-		internal QueryBuilderContainer(IQueryBuilder database)
+		internal QueryBuilderContainer(IQueryBuilder database) : this(database.ContainerObject.Clone())
 		{
 			if (database == null)
 				throw new ArgumentNullException("database", "Please use a valid Database");
-
-			ContainerObject = database.ContainerObject.Clone();
 		}
 
-		internal QueryBuilderContainer(IQueryBuilder database, Type type)
+		internal QueryBuilderContainer(IQueryBuilder database, Type type) : this(database.ContainerObject.Clone())
 		{
 			if (database == null)
 				throw new ArgumentNullException("database", "Please use a valid Database");
 			if (database == null)
 				throw new ArgumentNullException("type", "Please use a valid Type");
 
-			ContainerObject = database.ContainerObject.Clone();
 			ContainerObject.ForType = type;
 		}
 
@@ -55,12 +51,10 @@ namespace JPB.DataAccess.Query
 		///     Creates a new Query
 		/// </summary>
 		/// <param name="database"></param>
-		protected QueryBuilderContainer(DbAccessLayer database)
+		protected QueryBuilderContainer(DbAccessLayer database) : this(new InternalContainerContainer(database))
 		{
 			if (database == null)
 				throw new ArgumentNullException("database", "Please use a valid DbAccess Layer");
-
-			ContainerObject = new InternalContainerContainer(database);
 		}
 
 		/// <summary>

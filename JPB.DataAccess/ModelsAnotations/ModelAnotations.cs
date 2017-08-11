@@ -274,10 +274,18 @@ namespace JPB.DataAccess.ModelsAnotations
 	#endregion
 
 	/// <summary>
-	///     Ignores this Property when creating an Update or Insert statement
+	///     Ignores this Property when creating an  Insert statement
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property)]
 	public class InsertIgnoreAttribute : DbAccessTypeAttribute
+	{
+	}
+
+	/// <summary>
+	///     Ignores this Property when creating an Update statement
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Property)]
+	public class UpdateIgnoreAttribute : DbAccessTypeAttribute
 	{
 	}
 

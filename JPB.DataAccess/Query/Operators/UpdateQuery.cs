@@ -1,6 +1,7 @@
 #region
 
 using System;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
 

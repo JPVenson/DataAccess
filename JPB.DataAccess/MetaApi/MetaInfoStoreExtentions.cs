@@ -35,7 +35,7 @@ namespace JPB.DataAccess.MetaApi
 		/// <returns></returns>
 		/// <exception cref="ArgumentException">
 		/// </exception>
-		public static string GetPropertyInfoFromLabda<TSource, TProperty>(
+		public static string GetPropertyInfoFromLamdba<TSource, TProperty>(
 			this Expression<Func<TSource, TProperty>> propertyLambda)
 		{
 			var type = typeof(TSource);

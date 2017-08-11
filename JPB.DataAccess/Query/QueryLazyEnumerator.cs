@@ -27,8 +27,15 @@ namespace JPB.DataAccess.Query
 			_accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
 			var command = queryContainer.Compile();
 			queryContainer.AccessLayer.RaiseSelect(command);
-
-			_executeReader = command.ExecuteReader();
+			try
+			{
+				_executeReader = command.ExecuteReader();
+			}
+			catch (Exception ex)
+			{
+				_accessLayer.RaiseFailedQuery(this, command, ex);
+				throw;
+			}
 		}
 
 		public void Dispose()

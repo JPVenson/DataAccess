@@ -327,28 +327,30 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		///     Inserts a TOP statement
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TPoco"></typeparam>
 		/// <param name="query">The query.</param>
 		/// <param name="top">The top.</param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException">For the Selected DB type is no Top implementations Available</exception>
-		public static ElementProducer<T> Top<T>(this RootQuery query, uint top)
+		public static ElementProducer<TPoco> Top<TPoco>(this QueryBuilderX query, uint top)
 		{
-			switch (query.ContainerObject.AccessLayer.Database.TargetDatabase)
-			{
-				case DbAccessType.MsSql:
-					return
-						new SelectQuery<T>(
-							query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
-								"TOP " + top)));
-				case DbAccessType.SqLite:
-				case DbAccessType.MySql:
-					var selectQuery = new SelectQuery<T>(
-						query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)))));
-					return selectQuery.QueryText(" LIMIT {0} ", top);
-				default:
-					throw new NotSupportedException("For the Selected DB type is no Top implementations Available");
-			}
+			var wrapper = new QueryBuilderX(query.ContainerObject.AccessLayer).QueryD(string.Format("SELECT TOP {0} * FROM (", top)).Append(query).QueryD(")");
+			return new ElementProducer<TPoco>(wrapper);
+			//switch (query.ContainerObject.AccessLayer.Database.TargetDatabase)
+			//{
+			//	case DbAccessType.MsSql:
+			//		return
+			//			new SelectQuery<T>(
+			//				query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
+			//					"TOP " + top)));
+			//	case DbAccessType.SqLite:
+			//	case DbAccessType.MySql:
+			//		var selectQuery = new SelectQuery<T>(
+			//			query.QueryText(DbAccessLayer.CreateSelect(query.ContainerObject.AccessLayer.GetClassInfo(typeof(T)))));
+			//		return selectQuery.QueryText(" LIMIT {0} ", top);
+			//	default:
+			//		throw new NotSupportedException("For the Selected DB type is no Top implementations Available");
+			//}
 		}
 
 		//public static IQueryBuilder<T> Count<T>(this IQueryBuilder<T> query, string what)
@@ -458,7 +460,7 @@ namespace JPB.DataAccess.Query
 		public static ConditionalQuery<TPoco> OrderBy<TPoco, TE>(this ElementProducer<TPoco> query,
 			Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLabda()),
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} ASC", columnName.GetPropertyInfoFromLamdba()),
 				new CondtionBuilderState(query.CurrentIdentifier));
 		}
 
@@ -487,7 +489,7 @@ namespace JPB.DataAccess.Query
 		public static ConditionalQuery<TPoco> OrderByDesc<TPoco, TE>(this ElementProducer<TPoco> query,
 			Expression<Func<TPoco, TE>> columnName, bool desc = false)
 		{
-			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLabda()),
+			return new ConditionalQuery<TPoco>(query.QueryText("ORDER BY {0} DESC", columnName.GetPropertyInfoFromLamdba()),
 				new CondtionBuilderState(query.CurrentIdentifier));
 		}
 

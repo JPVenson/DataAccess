@@ -85,7 +85,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		public ConditionalColumnQuery<TPoco> Column<TA>(
 			Expression<Func<TPoco, TA>> columnName)
 		{
-			var member = columnName.GetPropertyInfoFromLabda();
+			var member = columnName.GetPropertyInfoFromLamdba();
 			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
 			if (CurrentIdentifier != null)
 				return Column(CurrentIdentifier + "." + propName.DbName);

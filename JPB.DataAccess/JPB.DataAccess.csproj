@@ -293,13 +293,17 @@
     <Compile Include="Query\Operators\CountElementsObjectSelector.cs" />
     <Compile Include="Query\Operators\DeleteQuery.cs" />
     <Compile Include="Query\Operators\ElementProducer.cs" />
+    <Compile Include="Query\Operators\NextUpdateOrCondtionQuery.cs" />
     <Compile Include="Query\Operators\Orders\OrderByColumn.cs" />
     <Compile Include="Query\Operators\Orders\OrderStatementQuery.cs" />
+    <Compile Include="Query\Operators\PrepaireUpdateQuery.cs" />
     <Compile Include="Query\Operators\QueryElement.cs" />
     <Compile Include="Query\Operators\RootQuery.cs" />
     <Compile Include="Query\Operators\Selection\ColumnChooser.cs" />
     <Compile Include="Query\Operators\Selection\DatabaseObjectSelector.cs" />
     <Compile Include="Query\Operators\SelectQuery.cs" />
+    <Compile Include="Query\Operators\SetValueForUpdateQuery.cs" />
+    <Compile Include="Query\Operators\UpdateColumnSetters.cs" />
     <Compile Include="Query\Operators\UpdateQuery.cs" />
     <Compile Include="Query\QueryBuilder.cs" />
     <Compile Include="Query\QueryBuilderExtentions.cs" />

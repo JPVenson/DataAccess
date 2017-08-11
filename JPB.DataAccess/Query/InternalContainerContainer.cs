@@ -39,6 +39,7 @@ namespace JPB.DataAccess.Query
 		{
 			AccessLayer = database;
 			Parts = new List<GenericQueryPart>();
+			QueryInfos = new Dictionary<string, object>();
 		}
 
 		internal InternalContainerContainer(IQueryContainer pre)
@@ -49,7 +50,13 @@ namespace JPB.DataAccess.Query
 			Parts = pre.Parts.Select(f => f.Clone(null) as GenericQueryPart).ToList();
 			EnumerationMode = pre.EnumerationMode;
 			AllowParamterRenaming = pre.AllowParamterRenaming;
+			QueryInfos = pre.QueryInfos.Select(f => f).ToDictionary(f => f.Key, f => f.Value);
 		}
+
+		/// <summary>
+		/// Provides internal formatting infos about the current query
+		/// </summary>
+		public IDictionary<string, object> QueryInfos { get; private set; }
 
 		/// <summary>
 		///     If enabled the IQueryContainer will insert linebreaks after some Commands

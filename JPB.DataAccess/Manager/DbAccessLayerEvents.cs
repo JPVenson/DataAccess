@@ -9,14 +9,14 @@ using JPB.DataAccess.DbEventArgs;
 namespace JPB.DataAccess.Manager
 {
 	/// <summary>
-	///     A database operation is done
+	///     A database operation has to be done
 	/// </summary>
 	public delegate void DatabaseActionHandler(object sender, DatabaseActionEvent e);
 
 	/// <summary>
-	///     A database operation is failed
+	///     A database operation is done with an exception
 	/// </summary>
-	public delegate void DatabaseFailedActionHandler(object sender, Exception e);
+	public delegate void DatabaseExceptionActionHandler(object sender, DatabaseActionEvent e, Exception ex);
 
 	partial class DbAccessLayer
 	{
@@ -26,10 +26,10 @@ namespace JPB.DataAccess.Manager
 		public bool RaiseEvents { get; set; }
 
 		/// <summary>
-		///     Should raise events (Performace critical!)
+		///     Will be triggerd when any DbAccessLayer detects an invalid Query that failed on the server
+		///     Will only be triggerd when setting RaiseEvents to true
 		/// </summary>
-		[Obsolete]
-		public static bool RaiseStaticEvents { get; set; }
+		public event DatabaseExceptionActionHandler OnFailedQuery;
 
 		/// <summary>
 		///     Will be triggerd when any DbAccessLayer tries to handle a Delete Statement.
@@ -89,6 +89,23 @@ namespace JPB.DataAccess.Manager
 		internal void RaiseInsert(object sender, IDbCommand query)
 		{
 			InvokeAsync(OnInsert, sender, query);
+		}
+
+		internal void RaiseFailedQuery(object sender, IDbCommand query, Exception ex)
+		{
+			if (!RaiseEvents)
+				return;
+
+			var handler = OnFailedQuery;
+			if (handler != null)
+			{
+				var eventListeners = handler.GetInvocationList();
+				foreach (var t in eventListeners)
+				{
+					var methodToInvoke = (DatabaseExceptionActionHandler)t;
+					methodToInvoke.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(Database)), ex, ar => { }, null);
+				}
+			}
 		}
 	}
 }

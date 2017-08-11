@@ -164,7 +164,7 @@ namespace JPB.DataAccess.Manager
 				classInfo
 					.Propertys
 					.Select(f => f.Value)
-					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.ForginKeyAttribute != null)
+					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.UpdateIgnore || s.ForginKeyAttribute != null)
 					.Select(s => s.DbName)
 					.ToArray();
 
@@ -211,7 +211,7 @@ namespace JPB.DataAccess.Manager
 				classInfo
 					.Propertys
 					.Select(f => f.Value)
-					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.ForginKeyAttribute != null)
+					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.UpdateIgnore || s.ForginKeyAttribute != null)
 					.Select(s => s.DbName)
 					.ToArray();
 

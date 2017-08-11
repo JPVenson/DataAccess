@@ -133,6 +133,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public bool InsertIgnore { get; protected internal set; }
 
 		/// <summary>
+		///     Should this property not be Updated
+		/// </summary>
+		public bool UpdateIgnore { get; protected internal set; }
+
+		/// <summary>
 		///     if known the ForginKey attribute
 		/// </summary>
 		public DbAttributeInfoCache<ForeignKeyAttribute> ForginKeyAttribute { get; protected internal set; }
@@ -202,6 +207,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			PrimaryKeyAttribute = DbAttributeInfoCache<PrimaryKeyAttribute>.WrapperOrNull(Attributes);
 			InsertIgnore = Attributes.Any(f => f.Attribute is InsertIgnoreAttribute);
+			UpdateIgnore = Attributes.Any(f => f.Attribute is UpdateIgnoreAttribute);
 			if (Getter != null && Getter.MethodInfo != null)
 			{
 				if (Getter.MethodInfo.IsVirtual)

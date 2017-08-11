@@ -85,7 +85,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public ElementProducer<int> Column<TPoco, TA>(Expression<Func<TPoco, TA>> columnName)
 		{
-			var member = columnName.GetPropertyInfoFromLabda();
+			var member = columnName.GetPropertyInfoFromLamdba();
 			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
 			return Column<TPoco>(propName.DbName);
 		}

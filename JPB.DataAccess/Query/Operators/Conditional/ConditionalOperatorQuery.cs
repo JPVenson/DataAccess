@@ -123,7 +123,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			return new ConditionalEvalQuery<TPoco>(this
 				.QueryQ(string.Format("{0} @m_val{1} AND @m_val{2}", prefix, valAId, valBId),
 					new QueryParameter(string.Format("@m_val{0}", valAId), valueA),
-					new QueryParameter(string.Format("@m_val{0}", valBId), valBId)), State);
+					new QueryParameter(string.Format("@m_val{0}", valBId), valueB)), State);
 		}
 
 		/// <summary>

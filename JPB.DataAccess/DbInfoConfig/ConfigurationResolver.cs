@@ -37,7 +37,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <typeparam name="TProp"></typeparam>
 		public void SetPropertyAttribute<TProp>(Expression<Func<T, TProp>> exp, DataAccessAttribute attribute)
 		{
-			var info = exp.GetPropertyInfoFromLabda();
+			var info = exp.GetPropertyInfoFromLamdba();
 			var fod = ClassInfoCache.Propertys.First(s => s.Key == info).Value;
 			fod.Attributes.Add(new DbAttributeInfoCache(attribute));
 		}

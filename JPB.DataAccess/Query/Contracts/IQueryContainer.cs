@@ -14,6 +14,8 @@ namespace JPB.DataAccess.Query.Contracts
 	/// </summary>
 	public interface IQueryContainer
 	{
+		IDictionary<string, object> QueryInfos { get; }
+
 		/// <summary>
 		///     Declares the Return type that is awaited
 		/// </summary>

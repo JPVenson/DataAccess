@@ -325,7 +325,25 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			var userIdPre = user.UserID;
 			var usernamePre = user.UserName;
 			user.UserName = Guid.NewGuid().ToString();
-			DbAccessLayer.Query().Update(user).ExecuteNonQuery();
+			DbAccessLayer.Query().UpdateEntity(user).ExecuteNonQuery();
+			user = DbAccessLayer.Select<Users>(addUsers);
+			Assert.That(user.UserID, Is.EqualTo(userIdPre));
+			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));
+		}
+
+		[Test]
+		public void UpdateExplicit()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(1, DbAccessLayer)[0];
+			var user = DbAccessLayer.Select<Users>(addUsers);
+			var userIdPre = user.UserID;
+			var usernamePre = user.UserName;
+			user.UserName = Guid.NewGuid().ToString();
+			DbAccessLayer.Query().Update.Table<Users>().Set
+				.ColumnTo(f => f.UserName, user.UserName)
+				.And
+				.ColumnTo(f => f.UserName, user.UserName)
+				.ExecuteNonQuery();
 			user = DbAccessLayer.Select<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));
