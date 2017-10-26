@@ -47,15 +47,25 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			IEqualityComparer<TKey> elementComparer = null)
 		{
 			LockRoot = new object();
-			if (name == null) throw new ArgumentNullException("name");
-			if (getKey == null) throw new ArgumentNullException("getKey");
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (getKey == null)
+			{
+				throw new ArgumentNullException("getKey");
+			}
 			Name = name;
 			_getKey = getKey;
 
 			if (elementComparer != null)
+			{
 				_index = new HashSet<TKey>(elementComparer);
+			}
 			else
+			{
 				_index = new HashSet<TKey>();
+			}
 		}
 
 		/// <summary>
@@ -75,7 +85,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			lock (LockRoot)
 			{
 				if (_index.Contains(_getKey(item)))
+				{
 					return false;
+				}
 			}
 			return true;
 		}

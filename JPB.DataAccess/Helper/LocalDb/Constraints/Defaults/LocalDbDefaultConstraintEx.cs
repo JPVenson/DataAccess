@@ -47,23 +47,29 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 
 			var member = _exp.Body as MemberExpression;
 			if (member == null)
+			{
 				throw new ArgumentException(string.Format(
-					"Expression '{0}' refers to a method, not a property.",
-					_exp));
+				"Expression '{0}' refers to a method, not a property.",
+				_exp));
+			}
 
 			var propInfo = member.Member as PropertyInfo;
 			if (propInfo == null)
+			{
 				throw new ArgumentException(string.Format(
-					"Expression '{0}' refers to a field, not a property.",
-					_exp));
+				"Expression '{0}' refers to a field, not a property.",
+				_exp));
+			}
 
 			var type = _config.GetOrCreateClassInfoCache(typeof(TEntity));
 
 			var fod = type.Propertys.FirstOrDefault(f => f.Key == propInfo.Name);
 
 			if (fod.Value == null)
+			{
 				throw new InvalidCastException(
-					"The given property name is invalid. When using Nullable types do not use the Value property. Use the Nullable propertie");
+				"The given property name is invalid. When using Nullable types do not use the Value property. Use the Nullable propertie");
+			}
 
 			_dbPropertyInfoCache = fod.Value;
 		}
@@ -78,7 +84,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			var preValue = _dbPropertyInfoCache.Getter.Invoke(item);
 			var defaultValue = default(TValue);
 			if (defaultValue == null && preValue == null || defaultValue != null && defaultValue.Equals(preValue))
+			{
 				_dbPropertyInfoCache.Setter.Invoke(item, value);
+			}
 		}
 
 		/// <summary>

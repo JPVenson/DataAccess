@@ -29,14 +29,26 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				images = new LocalDbRepository<Image>(new DbConfig(true));
 				if (checks != null)
+				{
 					foreach (var localDbCheckConstraint in checks)
+					{
 						images.Constraints.Check.Add(localDbCheckConstraint);
+					}
+				}
 				if (unique != null)
+				{
 					foreach (var localDbCheckConstraint in unique)
+					{
 						images.Constraints.Unique.Add(localDbCheckConstraint);
+					}
+				}
 				if (defaults != null)
+				{
 					foreach (var localDbCheckConstraint in defaults)
+					{
 						images.Constraints.Default.Add(localDbCheckConstraint);
+					}
+				}
 			}
 			return images;
 		}

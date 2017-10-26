@@ -53,7 +53,9 @@ namespace JPB.DataAccess.Anonymous
 				.Where(f => f.Value.AnonymousObjectGenerationAttribute != null && f.Value.Setter != null && f.Value.Getter != null)
 				.ToArray();
 			if (!toHandleProps.Any())
+			{
 				return source;
+			}
 
 			var anoClass = new AnonymousClass(orCreateClassInfoCache, new WeakReference(source));
 			AnonymousClasses.Add(anoClass);
@@ -64,7 +66,9 @@ namespace JPB.DataAccess.Anonymous
 					DefaultGenerator.FirstOrDefault(
 						f => f.TargetPropType != null && f.TargetPropType == result.Value.PropertyType);
 				if (fod == null)
+				{
 					throw new NotImplementedException("There is no Generator for this type " + result.Value.PropertyType);
+				}
 
 				var original = result.Value.Getter.Invoke(source);
 				var generateAnoymousAlias = fod.GenerateAnoymousAlias(orCreateClassInfoCache,
@@ -82,14 +86,18 @@ namespace JPB.DataAccess.Anonymous
 			var orCreateClassInfoCache = _config.GetOrCreateClassInfoCache(source.GetType());
 			var anoClass = AnonymousClasses.FirstOrDefault(f => f.Reference.IsAlive && f.Reference.Target == source);
 			if (anoClass == null)
+			{
 				return source;
+			}
 
 			var toHandleProps = orCreateClassInfoCache.Propertys.Where(
 				f =>
 					f.Value.AnonymousObjectGenerationAttribute != null && f.Value.Setter != null &&
 					f.Value.Getter != null).ToArray();
 			if (toHandleProps.Any())
+			{
 				return source;
+			}
 
 			foreach (var result in anoClass.Objects)
 			{
@@ -97,10 +105,14 @@ namespace JPB.DataAccess.Anonymous
 					DefaultGenerator.FirstOrDefault(
 						f => f.TargetPropType != null && f.TargetPropType == result.SourcePropValue.GetType());
 				if (fod == null)
+				{
 					throw new NotImplementedException("There is no Generator for this type " + result.SourcePropValue.GetType());
+				}
 				var prop = toHandleProps.FirstOrDefault(f => f.Key == result.PropName);
 				if (prop.Value == null)
+				{
 					throw new InvalidOperationException();
+				}
 				prop.Value.Setter.Invoke(source, result.SourcePropValue);
 			}
 			return source;

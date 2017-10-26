@@ -48,7 +48,9 @@ namespace JPB.DataAccess.Tests
 					                   .ToArray();
 
 			if (arguments.Any())
+			{
 				testClassName = testClassName + "_ARG_" + arguments.Aggregate((e, f) => e + f).GetHashCode();
+			}
 			testClassName = new Regex("[^a-zA-Z0-9]").Replace(testClassName, "_");
 			_errorData.AppendLine($"Attach to Database: {testClassName}");
 

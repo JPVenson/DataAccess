@@ -29,13 +29,14 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		public bool CreateFallbackProperty { get; set; }
 		public bool CreateSelectFactory { get; set; }
 		public bool CreateDataRecordLoader { get; set; }
+		public bool WrapNullables { get; set; }
 
 		public TableInfoModel()
 		{
 			ColumnInfos = new List<IColumInfoModel>();
 		}
 
-		public TableInfoModel(TableInformations info, string database, DbAccessLayer db)
+		public TableInfoModel(ITableInformations info, string database, DbAccessLayer db)
 		{
 			CreateSelectFactory = true;
 			Info = info;

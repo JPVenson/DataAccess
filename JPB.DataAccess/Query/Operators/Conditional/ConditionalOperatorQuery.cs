@@ -63,10 +63,14 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		public ConditionalEvalQuery<TPoco> In<TValue>(params TValue[] values)
 		{
 			if (values.Length == 0)
+			{
 				throw new NotSupportedException("Cannot add no values to In");
+			}
 			if (typeof(TValue).IsAssignableFrom(typeof(IEnumerable)))
+			{
 				throw new InvalidOperationException(
-					"Enumerations are not allowed. Did you forgot to call ToArray on the Linq expression?");
+				"Enumerations are not allowed. Did you forgot to call ToArray on the Linq expression?");
+			}
 			var prefix = "";
 			switch (State.Operator)
 			{
@@ -84,7 +88,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 
 			foreach (var value in values)
 			{
-				var valId = ContainerObject.GetNextParameterId();
+				var valId = prefixElement.ContainerObject.GetNextParameterId();
 				prefixElement = prefixElement.QueryQ(string.Format("@m_val{0},", valId),
 					new QueryParameter(string.Format("@m_val{0}", valId), value));
 			}
@@ -233,11 +237,15 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			{
 				case Operator.Is:
 					if (value == null)
+					{
 						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
+					}
 					return QueryOperatorValue("=", value);
 				case Operator.Not:
 					if (value == null)
+					{
 						return new ConditionalEvalQuery<TPoco>(this.QueryText("NOT NULL"), State);
+					}
 					return QueryOperatorValue("<>", value);
 				default:
 					throw new NotSupportedException("Invalid value");
@@ -295,11 +303,15 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			{
 				case Operator.Is:
 					if (value == null)
+					{
 						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
+					}
 					return QueryOperatorValue("=", value);
 				case Operator.Not:
 					if (value == null)
+					{
 						return new ConditionalEvalQuery<TPoco>(this.QueryText("NOT NULL"), State);
+					}
 					return QueryOperatorValue("<>", value);
 				default:
 					throw new NotSupportedException("Invalid value");
@@ -313,7 +325,9 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			var eval = this.QueryText(operators + "(");
 			foreach (var genericQueryPart in sub.ContainerObject.Parts)
+			{
 				eval = eval.Add(genericQueryPart);
+			}
 			eval = this.QueryText(")");
 			return new ConditionalEvalQuery<TPoco>(eval, State);
 		}

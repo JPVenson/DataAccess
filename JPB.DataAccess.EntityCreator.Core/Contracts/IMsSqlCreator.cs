@@ -17,6 +17,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool GenerateConfigMethod { get; set; }
 		string Namespace { get; set; }
 		string SqlVersion { get; set; }
+		bool WrapNullables { get; set; }
 		void Compile();
 	}
 }

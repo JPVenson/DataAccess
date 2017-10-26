@@ -58,7 +58,9 @@ namespace JPB.DataAccess.Manager
 		internal void InvokeAsync(DatabaseActionHandler handler, object sender, IDbCommand query)
 		{
 			if (!RaiseEvents)
+			{
 				return;
+			}
 
 			if (handler != null)
 			{
@@ -94,7 +96,9 @@ namespace JPB.DataAccess.Manager
 		internal void RaiseFailedQuery(object sender, IDbCommand query, Exception ex)
 		{
 			if (!RaiseEvents)
+			{
 				return;
+			}
 
 			var handler = OnFailedQuery;
 			if (handler != null)

@@ -58,10 +58,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		public MsSql(string strServer, string strDatabase, string strLogin, string strPassword)
 		{
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
+			{
 				_connStr = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
+			}
 			else
+			{
 				_connStr = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
-					strLogin.Trim(), strPassword.Trim());
+				strLogin.Trim(), strPassword.Trim());
+			}
 		}
 
 		/// <summary>
@@ -148,7 +152,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			var cmd = (SqlCommand) CreateCommand(strSql, conn);
 
 			foreach (var dataParameter in fields)
+			{
 				cmd.Parameters.AddWithValue(dataParameter.ParameterName, dataParameter.Value);
+			}
 
 			return cmd;
 		}
@@ -305,7 +311,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				adapter.SelectCommand = (SqlCommand) cmd;
 
 				foreach (DataRow row in dt.Rows)
+				{
 					row.SetAdded();
+				}
 
 				adapter.Update(dt);
 			}
@@ -349,7 +357,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			{
 				var list = new List<string>();
 				while (dr.Read())
+				{
 					list.Add((string) dr[0]);
+				}
 				return list.ToArray();
 			}
 		}
@@ -371,7 +381,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			{
 				var list = new List<string>();
 				while (dr.Read())
+				{
 					list.Add((string) dr[0]);
+				}
 				return list.ToArray();
 			}
 		}
@@ -451,13 +463,17 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		public static string CommandAsMsSql(IDbCommand sc)
 		{
 			if (!(sc is SqlCommand))
+			{
 				return sc.CommandText;
+			}
 
 			var sql = new StringBuilder();
 			var firstParam = true;
 
 			if (!string.IsNullOrEmpty(sc.Connection.Database))
+			{
 				sql.AppendLine("USE  [" + sc.Connection.Database + "];");
+			}
 
 			switch (sc.CommandType)
 			{
@@ -465,35 +481,50 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					sql.AppendLine("DECLARE @return_value int;");
 
 					foreach (var sp in sc.Parameters.Cast<SqlParameter>())
+					{
 						if (sp.Direction == ParameterDirection.InputOutput || sp.Direction == ParameterDirection.Output)
 						{
 							sql.Append("DECLARE " + sp.ParameterName + "\t" + sp.SqlDbType + "\t= ");
 
 							sql.AppendLine((sp.Direction == ParameterDirection.Output ? "NULL" : QueryDebugger.ParameterValue(sp)) + ";");
 						}
+					}
 
 					sql.AppendLine("EXEC [" + sc.CommandText + "]");
 
 					foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+					{
 						if (sp.Direction != ParameterDirection.ReturnValue)
 						{
 							sql.Append(firstParam ? "\t" : "\t, ");
 
-							if (firstParam) firstParam = false;
+							if (firstParam)
+							{
+								firstParam = false;
+							}
 
 							if (sp.Direction == ParameterDirection.Input)
+							{
 								sql.AppendLine(sp.ParameterName + " = " + QueryDebugger.ParameterValue(sp));
+							}
 							else
 
+							{
 								sql.AppendLine(sp.ParameterName + " = " + sp.ParameterName + " OUTPUT");
+							}
 						}
+					}
 					sql.AppendLine(";");
 
 					sql.AppendLine("SELECT 'Return Value' = CONVERT(NVARCHAR, @return_value);");
 
 					foreach (var sp in sc.Parameters.Cast<IDataParameter>())
+					{
 						if (sp.Direction == ParameterDirection.InputOutput || sp.Direction == ParameterDirection.Output)
+						{
 							sql.AppendLine("SELECT '" + sp.ParameterName + "' = CONVERT(NVARCHAR, " + sp.ParameterName + ");");
+						}
+					}
 					break;
 				case CommandType.Text:
 				case CommandType.TableDirect:
@@ -501,7 +532,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					{
 						var paramTypeCompiler = sp.SqlDbType.ToString().ToUpper();
 						if (sp.Size > 0)
+						{
 							paramTypeCompiler += "(" + sp.Size + ")";
+						}
 
 						sql.AppendLine("DECLARE " + " "
 						               + sp.ParameterName + " "

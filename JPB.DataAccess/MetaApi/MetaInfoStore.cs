@@ -79,12 +79,16 @@ namespace JPB.DataAccess.MetaApi
 		public static void Clear()
 		{
 			if (EnableGlobalThreadSafety)
+			{
 				lock (_globalClassInfoCaches)
 				{
 					_globalClassInfoCaches.Clear();
 				}
+			}
 			else
+			{
 				_globalClassInfoCaches.Clear();
+			}
 		}
 
 		/// <summary>
@@ -98,7 +102,9 @@ namespace JPB.DataAccess.MetaApi
 			get
 			{
 				if (IsGlobal)
+				{
 					return _globalClassInfoCaches;
+				}
 				return _classInfoCaches;
 			}
 		}
@@ -133,21 +139,28 @@ namespace JPB.DataAccess.MetaApi
 		/// <exception cref="ArgumentNullException">type</exception>
 		protected internal virtual TClass GetOrCreateClassInfoCache(Type type, out bool newCreated)
 		{
-			if (type == null) throw new ArgumentNullException("type");
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
 			newCreated = false;
 			TClass element;
 			var isThreadSave = EnableInstanceThreadSafety || EnableGlobalThreadSafety;
 			try
 			{
 				if (isThreadSave)
+				{
 					Monitor.Enter(SClassInfoCaches);
+				}
 
 				element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
 				if (element == null)
 				{
 					element = new TClass();
 					if (!type.IsAnonymousType())
+					{
 						SClassInfoCaches.Add(element);
+					}
 					element.Init(type, type.IsAnonymousType());
 					newCreated = true;
 				}
@@ -155,7 +168,9 @@ namespace JPB.DataAccess.MetaApi
 			finally
 			{
 				if (isThreadSave)
+				{
 					Monitor.Exit(SClassInfoCaches);
+				}
 			}
 			return element;
 		}
@@ -171,14 +186,18 @@ namespace JPB.DataAccess.MetaApi
 		protected internal virtual TClass GetOrCreateClassInfoCache(string typeName, out bool newCreated)
 		{
 			if (string.IsNullOrEmpty(typeName))
+			{
 				throw new ArgumentException("Value cannot be null or empty.", "typeName");
+			}
 			newCreated = false;
 			TClass element;
 			var isThreadSave = EnableInstanceThreadSafety || EnableGlobalThreadSafety;
 			try
 			{
 				if (isThreadSave)
+				{
 					Monitor.Enter(SClassInfoCaches);
+				}
 
 				element = SClassInfoCaches.FirstOrDefault(s => s.Name.Equals(typeName));
 				if (element == null)
@@ -186,7 +205,9 @@ namespace JPB.DataAccess.MetaApi
 					var type = Type.GetType(typeName, true, false);
 
 					if (type == null)
+					{
 						return null;
+					}
 
 					element = new TClass();
 					SClassInfoCaches.Add(element);
@@ -197,7 +218,9 @@ namespace JPB.DataAccess.MetaApi
 			finally
 			{
 				if (isThreadSave)
+				{
 					Monitor.Exit(SClassInfoCaches);
+				}
 			}
 			return element;
 		}
@@ -212,20 +235,28 @@ namespace JPB.DataAccess.MetaApi
 		protected internal virtual TClass GetFake(string typeName)
 		{
 			if (string.IsNullOrEmpty(typeName))
+			{
 				throw new ArgumentException("Value cannot be null or empty.", "typeName");
+			}
 			var isThreadSave = EnableInstanceThreadSafety || EnableGlobalThreadSafety;
 			try
 			{
 				if (isThreadSave)
+				{
 					Monitor.Enter(SClassInfoCaches);
+				}
 
 				var element = SClassInfoCaches.FirstOrDefault(s => s.Name.Equals(typeName));
 				if (element != null)
+				{
 					throw new InvalidOperationException("Type exists cannot create a new type");
+				}
 				var type = FactoryHelper.CompileNewType(typeName);
 
 				if (type == null)
+				{
 					return null;
+				}
 
 				element = new TClass();
 				SClassInfoCaches.Add(element);
@@ -235,7 +266,9 @@ namespace JPB.DataAccess.MetaApi
 			finally
 			{
 				if (isThreadSave)
+				{
 					Monitor.Exit(SClassInfoCaches);
+				}
 			}
 		}
 
@@ -292,7 +325,9 @@ namespace JPB.DataAccess.MetaApi
 			try
 			{
 				if (isThreadSave)
+				{
 					Monitor.Enter(SClassInfoCaches);
+				}
 				foreach (var type in t)
 				{
 					var element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
@@ -300,7 +335,9 @@ namespace JPB.DataAccess.MetaApi
 					{
 						element = new TClass();
 						if (!type.IsAnonymousType())
+						{
 							SClassInfoCaches.Add(element);
+						}
 						element.Init(type, type.IsAnonymousType());
 					}
 				}
@@ -308,7 +345,9 @@ namespace JPB.DataAccess.MetaApi
 			finally
 			{
 				if (isThreadSave)
+				{
 					Monitor.Exit(SClassInfoCaches);
+				}
 			}
 			return this;
 		}
@@ -327,14 +366,18 @@ namespace JPB.DataAccess.MetaApi
 			try
 			{
 				if (isThreadSave)
+				{
 					Monitor.Enter(SClassInfoCaches);
+				}
 
 				SClassInfoCaches.Add(existingItem);
 			}
 			finally
 			{
 				if (isThreadSave)
+				{
 					Monitor.Exit(SClassInfoCaches);
+				}
 			}
 			return this;
 		}

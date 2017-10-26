@@ -74,7 +74,9 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			get
 			{
 				if (State.InBreaket)
+				{
 					return new ConditionalEvalQuery<TPoco>(this.QueryText(")"), State.ToInBreaket(true));
+				}
 				return new ConditionalEvalQuery<TPoco>(this, State);
 			}
 		}

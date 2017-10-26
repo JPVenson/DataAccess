@@ -41,6 +41,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			set { _is2014 = value; }
 		}
 
+		public IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
 		public IEnumerable<ITableInfoModel> Tables { get; set; }
 		public IEnumerable<Dictionary<int, string>> Enums { get; private set; }
 		public IEnumerable<ITableInfoModel> Views { get; set; }
@@ -94,6 +95,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Enums = new List<Dictionary<int, string>>();
 			RenderMenu();
 		}
+
+		public bool WrapNullables { get; set; }
 
 		public void Compile()
 		{

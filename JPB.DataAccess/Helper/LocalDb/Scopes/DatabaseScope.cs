@@ -18,7 +18,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		public DatabaseScope()
 		{
 			if (LocalDbManager.Scope != null)
+			{
 				throw new NotSupportedException("Nested DatabaseScopes are not allowed");
+			}
 
 			LocalDbManager.Scope = new LocalDbManager();
 		}

@@ -64,9 +64,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 			set
 			{
 				if (value >= 1)
+				{
 					_currentPage = value;
+				}
 				else
+				{
 					throw new InvalidOperationException("The current page must be bigger or equals 1");
+				}
 			}
 		}
 
@@ -129,7 +133,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				var handler = NewPageLoading;
 				if (handler != null)
+				{
 					handler();
+				}
 			}
 
 			TotalItemCount = _localDbRepository.Count;
@@ -137,16 +143,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 			var items = _localDbRepository.Skip((int) ((CurrentPage - 1) * PageSize)).Take(PageSize).ToArray();
 
 			foreach (var item in items)
+			{
 				SyncHelper(() => { CurrentPageItems.Add(item); });
+			}
 
 			if (CurrentPage > MaxPage)
+			{
 				CurrentPage = MaxPage;
+			}
 
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoaded;
 				if (handler != null)
+				{
 					handler();
+				}
 			}
 		}
 

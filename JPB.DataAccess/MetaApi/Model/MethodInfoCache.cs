@@ -106,7 +106,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		public virtual object Invoke(object target, params object[] param)
 		{
 			if (UseILWrapper && Delegate != null)
+			{
 				return Delegate(target, param);
+			}
 			return MethodInfo.Invoke(target, param);
 		}
 
@@ -154,10 +156,14 @@ namespace JPB.DataAccess.MetaApi.Model
 			UseILWrapper = false;
 
 			if (!string.IsNullOrEmpty(MethodName))
+			{
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
+			}
 
 			if (mehtodInfo == null)
+			{
 				throw new ArgumentNullException("mehtodInfo");
+			}
 			MethodInfo = mehtodInfo;
 			if (mehtodInfo is MethodInfo)
 			{
@@ -165,9 +171,13 @@ namespace JPB.DataAccess.MetaApi.Model
 			}
 
 			if (string.IsNullOrEmpty(name))
+			{
 				MethodName = mehtodInfo.Name;
+			}
 			else
+			{
 				MethodName = name;
+			}
 			Attributes = new HashSet<TAtt>(mehtodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
@@ -200,9 +210,13 @@ namespace JPB.DataAccess.MetaApi.Model
 				var methodInfo = method as MethodInfo;
 				il.EmitCall(method.IsStatic || declaringType.IsValueType ? OpCodes.Call : OpCodes.Callvirt, methodInfo, null);
 				if (methodInfo.ReturnType == null || methodInfo.ReturnType == typeof(void))
+				{
 					il.Emit(OpCodes.Ldnull);
+				}
 				else if (methodInfo.ReturnType.IsValueType)
+				{
 					il.Emit(OpCodes.Box, methodInfo.ReturnType);
+				}
 			}
 			else if (method is ConstructorInfo)
 			{

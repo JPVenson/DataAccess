@@ -17,9 +17,13 @@ namespace JPB.DataAccess.Tests
 		{
 			FactoryHelperSettings targetSetting;
 			if (config == null)
+			{
 				targetSetting = FactoryHelperSettings.DefaultSettings;
+			}
 			else
+			{
 				targetSetting = config;
+			}
 
 			targetSetting.CreateDebugCode = false;
 			targetSetting.EnforceCreation = true;
@@ -45,7 +49,9 @@ namespace JPB.DataAccess.Tests
 			{
 				that.DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 				if (that.DbAccess.DbAccessType == DbAccessType.MsSql)
+				{
 					that.DbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
+				}
 
 				if (that.DbAccess.Config != null)
 				{

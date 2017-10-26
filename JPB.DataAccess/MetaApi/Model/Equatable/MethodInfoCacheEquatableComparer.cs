@@ -33,9 +33,13 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public int Compare(IMethodInfoCache<TAtt, TArg> x, IMethodInfoCache<TAtt, TArg> y)
 		{
 			if (x == null)
+			{
 				return -1;
+			}
 			if (y == null)
+			{
 				return +1;
+			}
 			return string.Compare(x.MethodName, y.MethodName, StringComparison.Ordinal);
 		}
 #pragma warning disable CS1711 // XML comment has a typeparam tag, but there is no type parameter by that name
@@ -57,11 +61,17 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 #pragma warning restore CS1711 // XML comment has a typeparam tag, but there is no type parameter by that name
 		{
 			if (x == null && y == null)
+			{
 				return true;
+			}
 			if (x == null || y == null)
+			{
 				return false;
+			}
 			if (x.MethodName != y.MethodName)
+			{
 				return false;
+			}
 			return x.MethodInfo.Equals(y.MethodInfo);
 		}
 

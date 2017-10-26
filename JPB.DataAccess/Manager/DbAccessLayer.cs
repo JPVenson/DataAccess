@@ -477,6 +477,11 @@ namespace JPB.DataAccess.Manager
 				return plainValue;
 			}
 
+			if (classInfo.WrapNullables != null && !(reader is EgarNullableWrappedRecord) && reader is EgarDataRecord)
+			{
+				reader = new EgarNullableWrappedRecord(reader, ((EgarDataRecord) reader)._configStore);
+			}
+
 			if (classInfo.Factory != null)
 			{
 				fullLoaded = classInfo.FullFactory;
@@ -561,7 +566,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		[Obsolete("This mehtod is replaced by several FASTER equal ones. " +
 				  "It may be replaced, updated or delted. But it will change that is for sure. " +
-				  "legacy support only")]
+				  "legacy or Fallback support only")]
 		public static object ReflectionPropertySet(
 			DbConfig config,
 			object instance,
@@ -773,6 +778,15 @@ namespace JPB.DataAccess.Manager
 			return EnumerateMarsDataRecords(query).FirstOrDefault();
 		}
 
+		/// <summary>
+		/// Produces an IDataRecord for the given Reader
+		/// </summary>
+		/// <returns></returns>
+		protected virtual IDataRecord RecordGenerator(IDataReader reader, DbConfig config)
+		{
+			return new EgarDataRecord(reader, Config);
+		}
+
 		internal List<List<IDataRecord>> EnumerateMarsDataRecords(
 			IDbCommand query)
 		{
@@ -793,7 +807,7 @@ namespace JPB.DataAccess.Manager
 								var resultSet = new List<IDataRecord>();
 								while (dr.Read())
 								{
-									resultSet.Add(new EgarDataRecord(dr, Config));
+									resultSet.Add(RecordGenerator(dr, Config));
 								}
 								records.Add(resultSet);
 								typeIndex++;

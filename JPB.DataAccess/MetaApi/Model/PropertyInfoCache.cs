@@ -47,7 +47,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		public virtual IPropertyInfoCache<TAtt> Init(PropertyInfo propertyInfo, bool anon)
 		{
 			if (!string.IsNullOrEmpty(PropertyName))
+			{
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
+			}
 
 			Attributes.Clear();
 			if (propertyInfo == null)
@@ -162,9 +164,13 @@ namespace JPB.DataAccess.MetaApi.Model
 			else
 			{
 				if (getMethod != null)
+				{
 					Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(getMethod);
+				}
 				if (setMethod != null)
+				{
 					Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(setMethod);
+				}
 			}
 
 			Attributes = new HashSet<TAtt>(propertyInfo
@@ -284,19 +290,25 @@ namespace JPB.DataAccess.MetaApi.Model
 			params AttributeInfoCache[] attributes)
 		{
 			if (attributes == null)
+			{
 				throw new ArgumentNullException("attributes");
+			}
 
 			PropertyName = name;
 
 			if (setter != null)
+			{
 				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) =>
 				{
 					setter((T) o, (TE) objects[0]);
 					return null;
 				});
+			}
 
 			if (getter != null)
+			{
 				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) => getter((T) o));
+			}
 		}
 	}
 }

@@ -98,7 +98,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Add(ILocalDbUniqueConstraint<TEntity> item)
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			_constraints.Add(item);
 		}
 
@@ -112,7 +114,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Add<TValue>(string name, Func<TEntity, TValue> item)
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			_constraints.Add(new LocalDbUniqueConstraint<TEntity, TValue>(name, item));
 		}
 
@@ -123,7 +127,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Clear()
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			_constraints.Clear();
 		}
 
@@ -169,7 +175,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public bool Remove(ILocalDbUniqueConstraint<TEntity> item)
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			return _constraints.Remove(item);
 		}
 
@@ -196,7 +204,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void ItemAdded(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
+			{
 				localDbUniqueConstraint.Add(item);
+			}
 		}
 
 		/// <summary>
@@ -206,7 +216,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void ItemRemoved(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
+			{
 				localDbUniqueConstraint.Delete(item);
+			}
 		}
 
 		/// <summary>
@@ -216,7 +228,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void ItemUpdated(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
+			{
 				localDbUniqueConstraint.Update(item);
+			}
 		}
 
 		/// <summary>
@@ -247,9 +261,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Enforce(TEntity item)
 		{
 			foreach (var localDbUniqueConstraint in _constraints)
+			{
 				if (!localDbUniqueConstraint.CheckConstraint(item))
+				{
 					throw new ConstraintException(string.Format("The Unique Constraint '{0}' has detected an invalid object",
-						localDbUniqueConstraint.Name));
+					localDbUniqueConstraint.Name));
+				}
+			}
 		}
 	}
 }

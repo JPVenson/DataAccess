@@ -42,13 +42,21 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		internal CondtionBuilderState ToInBreaket(bool op)
 		{
 			if (op)
+			{
 				_breaketCounter++;
+			}
 			else
+			{
 				_breaketCounter--;
+			}
 			if (_breaketCounter > 0)
+			{
 				InBreaket = false;
+			}
 			else
+			{
 				InBreaket = true;
+			}
 
 			return this;
 		}

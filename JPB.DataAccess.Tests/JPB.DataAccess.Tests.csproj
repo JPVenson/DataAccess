@@ -86,10 +86,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Book.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\BookMeta.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUser.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceConfig.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceDirectConfig.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\GeneratedUsers.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ImageMeta.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ImageNullable.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcBParams.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcBParamsDirect.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructor.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructorWithMultiXml.cs" />
@@ -108,6 +114,7 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK_UFM.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_StaticQueryFactoryForSelect.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_StaticQueryFactoryForSelectWithArugments.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_UsernameAnonymous.cs" />
     <Compile Include="Overwrite\AllTestContextHelper.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
     <Compile Include="Overwrite\DataMigrationTests.cs" />
@@ -147,8 +154,8 @@
     <Compile Include="Overwrite\SqLiteManager.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\FooTest.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Image.cs" />
-    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcA.cs" />
-    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcAResult.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcAParams.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcAParamsResult.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_Col.cs" />
     <Compile Include="Base\TestModels\MetaAPI\StructCreating.cs" />
     <Compile Include="Base\TestModels\XmlDataRecordTest\InstanceMock.cs" />

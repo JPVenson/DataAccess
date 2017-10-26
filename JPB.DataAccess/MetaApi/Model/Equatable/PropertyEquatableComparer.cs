@@ -29,9 +29,13 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public int Compare(IPropertyInfoCache<TAtt> x, IPropertyInfoCache<TAtt> y)
 		{
 			if (x == null)
+			{
 				return -1;
+			}
 			if (y == null)
+			{
 				return +1;
+			}
 
 			return x.GetHashCode() - y.GetHashCode();
 		}
@@ -47,16 +51,26 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public bool Equals(IPropertyInfoCache<TAtt> x, IPropertyInfoCache<TAtt> y)
 		{
 			if (x == null && y == null)
+			{
 				return true;
+			}
 			if (x == null || y == null)
+			{
 				return false;
+			}
 
 			if (x.PropertyInfo == null && y.PropertyInfo != null || y.PropertyInfo == null && x.PropertyInfo != null)
+			{
 				return false;
+			}
 			if (x.PropertyInfo.DeclaringType.FullName != y.PropertyInfo.DeclaringType.FullName)
+			{
 				return false;
+			}
 			if (x.PropertyName != y.PropertyName)
+			{
 				return false;
+			}
 			return true;
 		}
 

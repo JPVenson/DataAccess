@@ -61,11 +61,13 @@ namespace JPB.DataAccess.AdoWrapper
 		private void Dispose(bool disposing)
 		{
 			if (disposing)
+			{
 				if (GetConnection() != null)
 				{
 					_conn2.Dispose();
 					_conn2 = null;
 				}
+			}
 		}
 
 		/// <summary>
@@ -76,7 +78,9 @@ namespace JPB.DataAccess.AdoWrapper
 		public static DefaultDatabaseAccess Create(IDatabaseStrategy strategy)
 		{
 			if (null == strategy)
+			{
 				return null;
+			}
 
 			var db = new DefaultDatabaseAccess();
 			db.Attach(strategy);
@@ -86,14 +90,18 @@ namespace JPB.DataAccess.AdoWrapper
 		private int DoExecuteNonQuery(string strSql, params object[] param)
 		{
 			if (null == GetConnection())
+			{
 				throw new Exception("DB2.ExecuteNonQuery: void connection");
+			}
 			var counter = 0;
 			using (
 				var cmd = _strategy.CreateCommand(strSql, GetConnection(),
 					param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
 			{
 				if (Transaction != null)
+				{
 					cmd.Transaction = Transaction;
+				}
 				AttachQueryDebugger(cmd);
 
 				return cmd.ExecuteNonQuery();
@@ -102,12 +110,17 @@ namespace JPB.DataAccess.AdoWrapper
 
 		private IDataReader DoGetDataReader(string strSql)
 		{
-			if (null == GetConnection()) throw new Exception("DB2.GetDataReader: void connection");
+			if (null == GetConnection())
+			{
+				throw new Exception("DB2.GetDataReader: void connection");
+			}
 
 			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 			{
 				if (Transaction != null)
+				{
 					cmd.Transaction = Transaction;
+				}
 				AttachQueryDebugger(cmd);
 				return cmd.ExecuteReader();
 			}
@@ -115,12 +128,17 @@ namespace JPB.DataAccess.AdoWrapper
 
 		private object DoGetSkalar(string strSql)
 		{
-			if (null == GetConnection()) throw new Exception("DB2.GetSkalar: void connection");
+			if (null == GetConnection())
+			{
+				throw new Exception("DB2.GetSkalar: void connection");
+			}
 
 			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
 			{
 				if (Transaction != null)
+				{
 					cmd.Transaction = Transaction;
+				}
 				AttachQueryDebugger(cmd);
 				return cmd.ExecuteScalar();
 			}
@@ -155,7 +173,9 @@ namespace JPB.DataAccess.AdoWrapper
 		public void AttachQueryDebugger(IDbCommand cmd)
 		{
 			if (Debugger)
+			{
 				LastExecutedQuery = new QueryDebugger(cmd, this);
+			}
 		}
 
 		/// <summary>
@@ -191,7 +211,9 @@ namespace JPB.DataAccess.AdoWrapper
 			get
 			{
 				if (_strategy == null)
+				{
 					return DbAccessType.Unknown;
+				}
 				return _strategy.SourceDatabase;
 			}
 		}
@@ -289,7 +311,9 @@ namespace JPB.DataAccess.AdoWrapper
 			lock (_conn2)
 			{
 				if (_conn2.State != ConnectionState.Open)
+				{
 					_conn2.Open();
+				}
 			}
 
 			//This is the First call of connect so we Could
@@ -351,7 +375,9 @@ namespace JPB.DataAccess.AdoWrapper
 			lock (this)
 			{
 				if (_handlecounter > 0)
+				{
 					_handlecounter--;
+				}
 			}
 
 			if (_conn2 != null && _handlecounter == 0)
@@ -418,7 +444,9 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			var cmd = _strategy.CreateCommand(strSql, GetConnection(), fields);
 			if (Transaction != null)
+			{
 				cmd.Transaction = Transaction;
+			}
 			return cmd;
 		}
 
@@ -441,10 +469,14 @@ namespace JPB.DataAccess.AdoWrapper
 		public int ExecuteNonQuery(IDbCommand cmd)
 		{
 			if (null == GetConnection())
+			{
 				throw new Exception("DB2.ExecuteNonQuery: void connection");
+			}
 
 			if (Transaction != null)
+			{
 				cmd.Transaction = Transaction;
+			}
 			AttachQueryDebugger(cmd);
 			return cmd.ExecuteNonQuery();
 		}
@@ -466,7 +498,9 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDbCommand GetlastInsertedIdCommand()
 		{
 			if (null == GetConnection())
+			{
 				throw new Exception("DB2.ExecuteNonQuery: void connection");
+			}
 
 			return _strategy.GetlastInsertedID_Cmd(GetConnection());
 		}
@@ -510,7 +544,9 @@ namespace JPB.DataAccess.AdoWrapper
 		public object GetSkalar(IDbCommand cmd)
 		{
 			if (Transaction != null)
+			{
 				cmd.Transaction = Transaction;
+			}
 			AttachQueryDebugger(cmd);
 			return cmd.ExecuteScalar();
 		}
@@ -622,7 +658,9 @@ namespace JPB.DataAccess.AdoWrapper
 			finally
 			{
 				if (preState < _handlecounter)
+				{
 					CloseConnection();
+				}
 			}
 		}
 

@@ -22,7 +22,9 @@ namespace JPB.DataAccess.Tests
 		{
 			ConnectionType = "DefaultConnection";
 			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
+			{
 				ConnectionType = "CiConnection";
+			}
 		}
 
 		public string ConnectionType { get; set; }
@@ -37,7 +39,9 @@ namespace JPB.DataAccess.Tests
 			get
 			{
 				if (_connectionString != null)
+				{
 					return _connectionString;
+				}
 				_connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
 				_errorText.AppendLine("-------------------------------------------");
 				_errorText.AppendLine("Connection String");
@@ -50,7 +54,9 @@ namespace JPB.DataAccess.Tests
 		{
 			var dbname = string.Format("YAORM_TestDb_Test_MsSQL_{0}", testName);
 			if (expectWrapper != null)
+			{
 				expectWrapper.Database.CloseAllConnection();
+			}
 
 			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
 			//try
@@ -101,7 +107,9 @@ namespace JPB.DataAccess.Tests
 		public void Clear()
 		{
 			if (expectWrapper != null)
+			{
 				expectWrapper.Database.CloseAllConnection();
+			}
 		}
 	}
 }

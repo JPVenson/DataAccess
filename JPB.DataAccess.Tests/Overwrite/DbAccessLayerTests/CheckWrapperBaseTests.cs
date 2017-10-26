@@ -44,7 +44,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void AutoGenFactoryTestXmlMulti()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
 				return;
+			}
 
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
@@ -75,8 +77,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void AutoGenFactoryTestXmlSingle()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
 				return;
-
+			}
 
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 

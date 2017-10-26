@@ -19,7 +19,9 @@ namespace JPB.DataAccess.Tests
 		{
 			ConnectionType = "DefaultConnectionMySQL";
 			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
+			{
 				ConnectionType = "CiConnectionMySQL";
+			}
 		}
 
 		public string ConnectionType { get; set; }
@@ -28,7 +30,9 @@ namespace JPB.DataAccess.Tests
 		{
 			var dbname = string.Format("YAORM_TestDb_Test_MySQL_{0}", testName);
 			if (_expectWrapper != null)
+			{
 				_expectWrapper.Database.CloseAllConnection();
+			}
 
 			var redesginDatabase = string.Format(
 				"DROP DATABASE IF EXISTS {0};",
@@ -72,7 +76,9 @@ namespace JPB.DataAccess.Tests
 			get
 			{
 				if (_connectionString != null)
+				{
 					return _connectionString;
+				}
 				_connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
 				Console.WriteLine("-------------------------------------------");
 				Console.WriteLine("Connection String");
@@ -88,7 +94,9 @@ namespace JPB.DataAccess.Tests
 		public void Clear()
 		{
 			if (_expectWrapper != null)
+			{
 				_expectWrapper.Database.CloseAllConnection();
+			}
 		}
 	}
 }

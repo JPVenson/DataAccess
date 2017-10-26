@@ -157,16 +157,24 @@ namespace JPB.DataAccess.Helper
 			var rightNull = right == null;
 			//generic Checks
 			if (ReferenceEquals(left, right))
+			{
 				return 0;
+			}
 
 			if (leftNull)
+			{
 				return 1;
+			}
 			if (rightNull)
+			{
 				return -1;
+			}
 
 			if (_compareTo == null)
+			{
 				throw new NotSupportedException(string.Format("The Primary key on object '{0}' does not implement IComparable",
-					_typeInfo.Name));
+				_typeInfo.Name));
+			}
 			return _compareTo(left, right);
 		}
 
@@ -191,12 +199,18 @@ namespace JPB.DataAccess.Helper
 			}
 
 			if (leftNull)
+			{
 				return false;
+			}
 			if (rightNull)
+			{
 				return false;
+			}
 
 			if (_assertionBlock != null && _assertionBlock(left, right))
+			{
 				return false;
+			}
 
 			if (_propEqual(left, right))
 			{
@@ -222,12 +236,18 @@ namespace JPB.DataAccess.Helper
 			var rightTypeCode = Type.GetTypeCode(right.Type);
 
 			if (leftTypeCode == rightTypeCode)
+			{
 				return;
+			}
 
 			if (leftTypeCode > rightTypeCode)
+			{
 				right = Expression.Convert(right, left.Type);
+			}
 			else
+			{
 				left = Expression.Convert(left, right.Type);
+			}
 		}
 
 		private void Init(
@@ -240,10 +260,14 @@ namespace JPB.DataAccess.Helper
 
 			_typeInfo = config.GetOrCreateClassInfoCache(plainType);
 			if (_typeInfo.PrimaryKeyProperty == null && string.IsNullOrEmpty(property))
+			{
 				throw new NotSupportedException(string.Format("The type '{0}' does not define any PrimaryKey", plainType.Name));
+			}
 
 			if (string.IsNullOrEmpty(property))
+			{
 				property = _typeInfo.PrimaryKeyProperty.PropertyName;
+			}
 
 			ReturnTarget = Expression.Label(typeof(bool));
 			var returnTrue = Expression.Return(ReturnTarget, Expression.Constant(true));
@@ -260,13 +284,19 @@ namespace JPB.DataAccess.Helper
 			{
 				Expression assertionObject = Expression.Constant(assertNotDatabaseMember);
 				if (_typeInfo.PrimaryKeyProperty.PropertyType != assertNotDatabaseMember.GetType())
+				{
 					if (DefaultRewrite)
+					{
 						Visit(ref PropLeft, ref assertionObject);
+					}
 					else
+					{
 						throw new NotSupportedException(string.Format("Unknown Type cast detected." +
 						                                              " Assert typ is '{0}' property is '{1}' " +
 						                                              "... sry i am good but not as this good! Try the PocoPkComparer.DefaultRewrite option",
-							assertNotDatabaseMember.GetType().Name, _typeInfo.PrimaryKeyProperty.PropertyType.Name));
+						assertNotDatabaseMember.GetType().Name, _typeInfo.PrimaryKeyProperty.PropertyType.Name));
+					}
+				}
 
 				var eqLeftPropEqualsAssertion = Expression.Equal(PropLeft, assertionObject);
 				var eqRightPropEqualsAssertion = Expression.Equal(propRight, assertionObject);
@@ -278,7 +308,9 @@ namespace JPB.DataAccess.Helper
 			var eqPropertyEqual = Expression.Equal(PropLeft, propRight);
 
 			if (resAssertionBlock != null)
+			{
 				_assertionBlock = Wrap(resAssertionBlock);
+			}
 			_propEqual = Wrap(Expression.IfThen(eqPropertyEqual, returnTrue));
 
 			if (typeof(IComparable).IsAssignableFrom(typeof(T)))

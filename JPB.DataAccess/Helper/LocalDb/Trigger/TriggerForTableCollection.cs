@@ -50,7 +50,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			get
 			{
 				if (_table.IsMigrating)
+				{
 					return WithReplication.For;
+				}
 				return NotForReplication.For;
 			}
 		}
@@ -66,7 +68,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			get
 			{
 				if (_table.IsMigrating)
+				{
 					return WithReplication.After;
+				}
 				return NotForReplication.After;
 			}
 		}
@@ -82,10 +86,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			get
 			{
 				if (TriggerInsteadtOfCollection<TEntity>.AsInsteadtOf)
+				{
 					return TriggerInsteadtOfCollection<TEntity>.Empty();
+				}
 
 				if (_table.IsMigrating)
+				{
 					return WithReplication.InsteadOf;
+				}
 				return NotForReplication.InsteadOf;
 			}
 		}

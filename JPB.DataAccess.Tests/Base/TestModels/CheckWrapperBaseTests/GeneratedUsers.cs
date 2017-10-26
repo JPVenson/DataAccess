@@ -31,9 +31,13 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			object username;
 			username = record["UserName"];
 			if (username == DBNull.Value)
+			{
 				super.UserName = null;
+			}
 			else
+			{
 				super.UserName = (string) username;
+			}
 			return super;
 		}
 

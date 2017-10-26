@@ -102,7 +102,9 @@ namespace JPB.DataAccess.Manager
 				}
 			}
 			if (insertRange != null)
+			{
 				commands.Add(insertRange);
+			}
 			return commands.ToArray();
 		}
 
@@ -133,7 +135,9 @@ namespace JPB.DataAccess.Manager
 			{
 				var values = "";
 				for (var index = 0; index < propertyInfos.Length; index++)
+				{
 					values = values + ("@" + index) + ",";
+				}
 				values = values.Remove(values.Length - 1);
 				query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
 			}

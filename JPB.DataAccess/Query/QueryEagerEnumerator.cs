@@ -33,9 +33,13 @@ namespace JPB.DataAccess.Query
 		public void Dispose()
 		{
 			if (_task != null)
+			{
 				_task.Dispose();
+			}
 			if (_enumerateDataRecords != null)
+			{
 				_enumerateDataRecords.Clear();
+			}
 			_elements.Clear();
 		}
 
@@ -54,7 +58,9 @@ namespace JPB.DataAccess.Query
 				}
 
 				if (_enumerateDataRecords.Count < _counter)
+				{
 					return false;
+				}
 
 				var dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
 				Current = _queryContainer.AccessLayer.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),

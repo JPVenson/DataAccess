@@ -52,7 +52,9 @@ namespace JPB.DataAccess.Query
 			}
 
 			if (_executeReader.Read())
+			{
 				return true;
+			}
 			return false;
 		}
 

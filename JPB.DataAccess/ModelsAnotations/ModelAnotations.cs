@@ -39,8 +39,10 @@ namespace JPB.DataAccess.ModelsAnotations
 			if (anonymousObjectGenerator != null)
 			{
 				if (!typeof(IAnonymousObjectGenerator).IsAssignableFrom(anonymousObjectGenerator))
+				{
 					throw new InvalidOperationException(string.Format("The type {0} is not assignable to the expected type of {1}",
-						anonymousObjectGenerator, typeof(IAnonymousObjectGenerator)));
+					anonymousObjectGenerator, typeof(IAnonymousObjectGenerator)));
+				}
 				AnonymousObjectGenerator = anonymousObjectGenerator;
 			}
 		}
@@ -339,8 +341,10 @@ namespace JPB.DataAccess.ModelsAnotations
 			var classInfo = forgeinTable.GetClassInfo();
 			ForeignTable = classInfo.TableName;
 			if (classInfo.PrimaryKeyProperty == null)
+			{
 				throw new NotSupportedException(
-					string.Format("To use this constructor you have to define a Primary key on table {0} first", ForeignTable));
+				string.Format("To use this constructor you have to define a Primary key on table {0} first", ForeignTable));
+			}
 
 			ForeignKey = classInfo.PrimaryKeyProperty.DbName;
 		}
@@ -367,6 +371,14 @@ namespace JPB.DataAccess.ModelsAnotations
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property)]
 	public class PrimaryKeyAttribute : DataAccessAttribute
+	{
+	}
+
+	/// <summary>
+	///     Should the DbAccessLayer wrap DbNull values to C# nullables
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Class)]
+	public class WrapDbNullablesAttribute : DataAccessAttribute
 	{
 	}
 
@@ -447,7 +459,9 @@ namespace JPB.DataAccess.ModelsAnotations
 			Converter = converter;
 
 			if (!typeof(IValueConverter).IsAssignableFrom(converter))
+			{
 				throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
+			}
 
 			Parameter = string.Empty;
 		}
@@ -512,7 +526,9 @@ namespace JPB.DataAccess.ModelsAnotations
 			set
 			{
 				if (!typeof(ILoadFromXmlStrategy).IsAssignableFrom(value))
+				{
 					throw new ArgumentException("Not able to assgin value from IloadFromXMLStrategy");
+				}
 				_loadFromXmlStrategy = value;
 			}
 		}

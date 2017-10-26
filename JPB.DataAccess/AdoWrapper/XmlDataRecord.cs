@@ -103,9 +103,13 @@ namespace JPB.DataAccess.AdoWrapper
 		public object GetValue(int i)
 		{
 			if (i == -1)
+			{
 				return DBNull.Value;
+			}
 			if (i >= baseElement.Elements().Count())
+			{
 				return DBNull.Value;
+			}
 
 			var name = GetName(i);
 
@@ -113,13 +117,17 @@ namespace JPB.DataAccess.AdoWrapper
 
 			var firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
 			if (firstOrDefault == null)
+			{
 				return DBNull.Value;
+			}
 
 			var propertyType = firstOrDefault.PropertyType;
 			var xElement = baseElement.Elements().ElementAt(i);
 
 			if (xElement.HasElements)
+			{
 				return xElement.ToString();
+			}
 
 			var type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
 			return type;
@@ -145,14 +153,18 @@ namespace JPB.DataAccess.AdoWrapper
 		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single, DbConfig accessLayer = null)
 		{
 			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
+			{
 				return null;
+			}
 			try
 			{
 				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
 				var record = new XmlDataRecord(xDocument, target, accessLayer);
 
 				if (single)
+				{
 					return record.CreateListOfItems().FirstOrDefault();
+				}
 
 				return record;
 			}
@@ -255,7 +267,9 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				var item = elements[i];
 				if (item.Name == name)
+				{
 					return i;
+				}
 			}
 			return -1;
 		}

@@ -69,7 +69,9 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 					Arguments.Where(f => f.Attributes.All(e => !(e.Attribute is IgnoreReflectionAttribute))));
 
 			foreach (var dbMethodArgument in Arguments)
+			{
 				dbMethodArgument.DeclaringMethod = this;
+			}
 			return base.Init(mehtodInfo);
 		}
 	}

@@ -1,5 +1,4 @@
-﻿using JPB.ErrorValidation;
-using JPB.ErrorValidation.ValidationRules;
+﻿using JPB.ErrorValidation.ValidationRules;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {

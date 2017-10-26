@@ -70,7 +70,9 @@ namespace JPB.DataAccess.Query.Operators
 			var sb = new StringBuilder();
 			sb.Append("SELECT COUNT( ");
 			if (DistinctMode)
+			{
 				sb.Append("DISTINCT");
+			}
 			sb.Append("1) FROM ");
 			sb.Append(ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName);
 			return new SelectQuery<int>(this.QueryText(sb.ToString()));
@@ -101,7 +103,9 @@ namespace JPB.DataAccess.Query.Operators
 			var sb = new StringBuilder();
 			sb.Append("SELECT COUNT( ");
 			if (DistinctMode)
+			{
 				sb.Append("DISTINCT");
+			}
 			sb.AppendFormat("{0}) FROM ", columnName);
 			sb.Append(ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName);
 			return new SelectQuery<int>(this.QueryText(sb.ToString()));

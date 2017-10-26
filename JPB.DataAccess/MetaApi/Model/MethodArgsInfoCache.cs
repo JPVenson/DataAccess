@@ -72,7 +72,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		public virtual IMethodArgsInfoCache<TAtt> Init(ParameterInfo info)
 		{
 			if (!string.IsNullOrEmpty(ArgumentName))
+			{
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
+			}
 			ParameterInfo = info;
 			ArgumentName = info.Name;
 			Type = info.ParameterType;

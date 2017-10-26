@@ -146,7 +146,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectPrimitivSelectNullHandling()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
 				return;
+			}
 			DataMigrationHelper.AddUsers(1, DbAccess);
 			Assert.That(() =>
 			{

@@ -91,7 +91,9 @@ namespace JPB.DataAccess.DebuggerHelper
 			get
 			{
 				if (_loaded)
+				{
 					return _stackTracer;
+				}
 				_wokerTask.Wait();
 				return _stackTracer;
 			}
@@ -118,28 +120,38 @@ namespace JPB.DataAccess.DebuggerHelper
 				                      {
 					                      IEnumerable<StackFrame> stackFrames;
 					                      if (stack != null)
+					                      {
 						                      stackFrames = (stack as IEnumerable<StackFrame>).Where(s =>
-						                                                                             {
-							                                                                             var methodBase = s.GetMethod();
-							                                                                             if (
-								                                                                             _assembly.DefinedTypes.Contains(
-								                                                                                                             methodBase
-										                                                                                                             .DeclaringType))
-								                                                                             return false;
+						                      {
+							                      var methodBase = s.GetMethod();
+							                      if (
+							                      _assembly.DefinedTypes.Contains(
+							                      methodBase
+									                      .DeclaringType))
+							                      {
+								                      return false;
+							                      }
 
-							                                                                             if (methodBase.DeclaringType != null &&
-							                                                                                 methodBase.DeclaringType
-							                                                                                           .Assembly
-							                                                                                           .GlobalAssemblyCache)
-								                                                                             return false;
+							                      if (methodBase.DeclaringType != null &&
+							                          methodBase.DeclaringType
+							                                    .Assembly
+							                                    .GlobalAssemblyCache)
+							                      {
+								                      return false;
+							                      }
 
-							                                                                             return true;
-						                                                                             });
+							                      return true;
+						                      });
+					                      }
 					                      else
+					                      {
 						                      stackFrames = new List<StackFrame>();
+					                      }
 					                      var enumerable = stackFrames.Select(s => s.ToString()).ToArray();
 					                      if (enumerable.Any())
+					                      {
 						                      StackTracer = enumerable.Aggregate((e, f) => e + Environment.NewLine + f);
+					                      }
 				                      }
 				                      finally
 				                      {
@@ -157,7 +169,9 @@ namespace JPB.DataAccess.DebuggerHelper
 			var sql = new StringBuilder();
 
 			if (!string.IsNullOrEmpty(command.Connection.Database))
+			{
 				sql.AppendLine("USE [" + command.Connection.Database + "];");
+			}
 
 			foreach (IDataParameter parameter in command.Parameters)
 			{

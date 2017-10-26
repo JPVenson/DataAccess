@@ -28,7 +28,9 @@ namespace JPB.DataAccess.Query
 		public static IEnumerable<MsQueryBuilderExtentions.JoinMode> GetJoins()
 		{
 			if (_joints != null)
+			{
 				return _joints;
+			}
 
 			_joints =
 				typeof(TJoinMode)

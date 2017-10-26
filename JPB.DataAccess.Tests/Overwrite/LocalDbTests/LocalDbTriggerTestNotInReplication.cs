@@ -37,7 +37,9 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			repro.Triggers.NotForReplication.For.Delete += (sender, token) =>
 			{
 				if (!deleted)
+				{
 					Assert.That(orderFlag, Is.False);
+				}
 				orderFlag = true;
 			};
 
@@ -154,7 +156,9 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			repro.Triggers.NotForReplication.For.Insert += (sender, token) =>
 			{
 				if (!inserted)
+				{
 					Assert.That(orderFlag, Is.False);
+				}
 				orderFlag = true;
 			};
 

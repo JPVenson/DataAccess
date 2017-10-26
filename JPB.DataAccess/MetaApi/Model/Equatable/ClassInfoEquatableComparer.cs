@@ -16,22 +16,34 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public int Compare(IClassInfoCache x, IClassInfoCache y)
 		{
 			if (x == null)
+			{
 				return -1;
+			}
 			if (y == null)
+			{
 				return +1;
+			}
 			return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
 		}
 
 		public bool Equals(IClassInfoCache x, IClassInfoCache y)
 		{
 			if (x == null && y == null)
+			{
 				return true;
+			}
 			if (x == null || y == null)
+			{
 				return false;
+			}
 			if (x.Name != y.Name)
+			{
 				return false;
+			}
 			if (x.Type == y.Type)
+			{
 				return true;
+			}
 			return true;
 		}
 
@@ -43,15 +55,25 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public bool Equals(Type x, Type y)
 		{
 			if (x == null && y == null)
+			{
 				return true;
+			}
 			if (x == null || y == null)
+			{
 				return false;
+			}
 			if (x.FullName != y.FullName)
+			{
 				return false;
+			}
 			if (x == y)
+			{
 				return true;
+			}
 			if (x.IsEquivalentTo(y))
+			{
 				return true;
+			}
 			return false;
 		}
 

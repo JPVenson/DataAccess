@@ -45,7 +45,10 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 			IEqualityComparer<TKey> elementComparer = null)
 		{
 			LockRoot = new object();
-			if (name == null) throw new ArgumentNullException("name");
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
 			Name = name;
 			_indexer = column;
 			if (elementComparer != null)

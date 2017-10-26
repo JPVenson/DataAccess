@@ -76,16 +76,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 				var indexOfElementString = reader.GetAttribute("Index");
 				var typeString = reader.GetAttribute("Type");
 				if (indexOfElementString == null)
+				{
 					throw new InvalidDataException("Invalid XML document for Db import. index is unset");
+				}
 
 				if (typeString == null)
+				{
 					throw new InvalidDataException("Invalid XML document for Db import. type is unset");
+				}
 
 				var type = Type.GetType(typeString);
 
 				if (type == null)
+				{
 					throw new InvalidDataException(string.Format("Invalid XML document for Db import. type is invalid '{0}'",
-						typeString));
+					typeString));
+				}
 
 				elements.Add(indexOfElementString, type);
 			} while (reader.Read() && reader.Name == ReproIncluded);
@@ -99,13 +105,17 @@ namespace JPB.DataAccess.Helper.LocalDb
 					{
 						var indexOfElementString = reader.GetAttribute("Index");
 						if (indexOfElementString == null)
+						{
 							throw new InvalidDataException("Invalid XML document for Db import. index for a table is unset");
+						}
 						reader.ReadStartElement(TableContentList);
 						var type = elements[indexOfElementString];
 						var table =
 							LocalDbManager.Scope.Database.First(s => s.Key.AssemblyQualifiedName == type.AssemblyQualifiedName).Value;
 						if (table == null)
+						{
 							throw new InvalidDataException("Invalid Database config for Db import. There is no Table for the type " + type);
+						}
 						do
 						{
 							object emptyElement = table.TypeInfo.DefaultFactory();
@@ -120,7 +130,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 								object contvertedValue = null;
 								if (!isNumm)
+								{
 									contvertedValue = DataConverterExtensions.ChangeType(value, dbPropertyInfoCache.PropertyType);
+								}
 
 								dbPropertyInfoCache.Setter.Invoke(emptyElement, contvertedValue);
 							} while (reader.Name != table.TypeInfo.TableName);
@@ -150,7 +162,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			foreach (var localDbReposetoryBase in _instance.Database)
 			{
 				if (localDbReposetoryBase.Value.Count == 0)
+				{
 					continue;
+				}
 
 				writer.WriteStartElement(ReproIncluded);
 				writer.WriteAttributeString("Index", index++.ToString());
@@ -164,7 +178,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 			foreach (var localDbReposetoryBase in _instance.Database)
 			{
 				if (localDbReposetoryBase.Value.Count == 0)
+				{
 					continue;
+				}
 
 				//write table
 				writer.WriteStartElement(TableContentList);
@@ -186,7 +202,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 						writer.WriteStartElement(dbPropertyInfoCach.DbName);
 						var value = dbPropertyInfoCach.Getter.Invoke(poco);
 						if (value != null)
+						{
 							writer.WriteValue(value);
+						}
 						writer.WriteEndElement();
 					}
 					writer.WriteEndElement();

@@ -77,7 +77,9 @@ namespace JPB.DataAccess.Helper
 		public virtual IStringBuilderInterlaced<TColor> Down()
 		{
 			if (_interlacedLevel > 0)
+			{
 				_interlacedLevel--;
+			}
 			return this;
 		}
 
@@ -94,12 +96,20 @@ namespace JPB.DataAccess.Helper
 		{
 			var text = "";
 			if (_transformInterlaced)
+			{
 				for (var i = 0; i < _interlacedLevel; i++)
-					for (var j = 0; j < _interlacedSpace; j++)
-						text += " ";
+				for (var j = 0; j < _interlacedSpace; j++)
+				{
+					text += " ";
+				}
+			}
 			else
+			{
 				for (var i = 0; i < _interlacedLevel; i++)
+				{
 					text += "\t";
+				}
+			}
 			Add(new ColoredString(text));
 		}
 
@@ -170,7 +180,9 @@ namespace JPB.DataAccess.Helper
 		public virtual IStringBuilderInterlaced<TColor> Append(string value, TColor color = null)
 		{
 			if (color == null)
+			{
 				color = _color;
+			}
 			Add(new ColoredString(value, color));
 			return this;
 		}
@@ -298,10 +310,14 @@ namespace JPB.DataAccess.Helper
 					{
 						//write buffer to output
 						if (color != null)
+						{
 							changeColor(color);
+						}
 						output.Write(sb.ToString());
 						if (color != null)
+						{
 							changeColorBack();
+						}
 						sb.Clear();
 					}
 
@@ -311,10 +327,14 @@ namespace JPB.DataAccess.Helper
 			}
 
 			if (color != null)
+			{
 				changeColor(color);
+			}
 			output.Write(sb.ToString());
 			if (color != null)
+			{
 				changeColorBack();
+			}
 		}
 
 		/// <summary>

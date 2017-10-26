@@ -88,7 +88,9 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			var member = columnName.GetPropertyInfoFromLamdba();
 			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
 			if (CurrentIdentifier != null)
+			{
 				return Column(CurrentIdentifier + "." + propName.DbName);
+			}
 			return Column(propName.DbName);
 		}
 	}

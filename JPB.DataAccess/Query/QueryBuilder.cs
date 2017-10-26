@@ -18,15 +18,21 @@ namespace JPB.DataAccess.Query
 		internal QueryBuilderContainer(DbAccessLayer database, Type type) : this(new InternalContainerContainer(database, type))
 		{
 			if (database == null)
+			{
 				throw new ArgumentNullException("database", "Please use a valid Database");
+			}
 			if (database == null)
+			{
 				throw new ArgumentNullException("type", "Please use a valid Type");
+			}
 		}
 
 		internal QueryBuilderContainer(IQueryContainer database)
 		{
 			if (database == null)
+			{
 				throw new ArgumentNullException("database", "Please use a valid Database");
+			}
 
 			ContainerObject = database.Clone();
 		}
@@ -34,15 +40,21 @@ namespace JPB.DataAccess.Query
 		internal QueryBuilderContainer(IQueryBuilder database) : this(database.ContainerObject.Clone())
 		{
 			if (database == null)
+			{
 				throw new ArgumentNullException("database", "Please use a valid Database");
+			}
 		}
 
 		internal QueryBuilderContainer(IQueryBuilder database, Type type) : this(database.ContainerObject.Clone())
 		{
 			if (database == null)
+			{
 				throw new ArgumentNullException("database", "Please use a valid Database");
+			}
 			if (database == null)
+			{
 				throw new ArgumentNullException("type", "Please use a valid Type");
+			}
 
 			ContainerObject.ForType = type;
 		}
@@ -54,7 +66,9 @@ namespace JPB.DataAccess.Query
 		protected QueryBuilderContainer(DbAccessLayer database) : this(new InternalContainerContainer(database))
 		{
 			if (database == null)
+			{
 				throw new ArgumentNullException("database", "Please use a valid DbAccess Layer");
+			}
 		}
 
 		/// <summary>
@@ -87,7 +101,9 @@ namespace JPB.DataAccess.Query
 		public IEnumerator<TPoco> GetEnumerator<TPoco>()
 		{
 			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+			{
 				return new QueryEagerEnumerator<TPoco>(ContainerObject);
+			}
 			return new QueryLazyEnumerator<TPoco>(ContainerObject);
 		}
 
@@ -143,7 +159,9 @@ namespace JPB.DataAccess.Query
 		public QueryBuilderX Append(QueryBuilderX right)
 		{
 			if (right.ContainerObject == ContainerObject)
+			{
 				return this;
+			}
 
 			var builder = this;
 			foreach (var part in right.ContainerObject.Parts)
@@ -168,7 +186,9 @@ namespace JPB.DataAccess.Query
 						 {
 							 var para = f.GetParameters();
 							 if (para.Length > 1)
+							 {
 								 return false;
+							 }
 							 var firstOrDefault = para.FirstOrDefault();
 							 return firstOrDefault != null && firstOrDefault.ParameterType.IsAssignableFrom(typeof(T));
 						 });

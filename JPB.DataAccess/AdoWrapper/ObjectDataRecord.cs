@@ -99,7 +99,9 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			var i = 0;
 			foreach (var dbPropertyInfoCach in _classTypeCache.Propertys)
+			{
 				values[i++] = GetConvertedValue(dbPropertyInfoCach.Value.Getter.Invoke(_poco));
+			}
 			return _classTypeCache.Propertys.Count;
 		}
 
@@ -113,7 +115,9 @@ namespace JPB.DataAccess.AdoWrapper
 			foreach (var key in _classTypeCache.Propertys.Keys)
 			{
 				if (key == localName)
+				{
 					return index;
+				}
 				index++;
 			}
 			return -1;
@@ -167,7 +171,9 @@ namespace JPB.DataAccess.AdoWrapper
 				affected++;
 				buffer[bufferoffset + j] = bytes[j];
 				if (length <= affected)
+				{
 					return affected;
+				}
 			}
 			return affected;
 		}
@@ -208,7 +214,9 @@ namespace JPB.DataAccess.AdoWrapper
 				affected++;
 				buffer[bufferoffset + j] = bytes[j];
 				if (length <= affected)
+				{
 					return affected;
+				}
 			}
 			return affected;
 		}

@@ -58,11 +58,15 @@ namespace JPB.DataAccess.Manager
 		public static IDbCommand CreateDeleteSimple(IDatabase db, DbClassInfoCache classInfo, object primaryKey)
 		{
 			if (primaryKey == null)
+			{
 				return db.CreateCommand("DELETE FROM " + classInfo.TableName);
+			}
 
 			if (classInfo.PrimaryKeyProperty == null)
+			{
 				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported",
-					classInfo.Name));
+				classInfo.Name));
+			}
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
 			return db.CreateCommandWithParameterValues(query,
@@ -80,11 +84,15 @@ namespace JPB.DataAccess.Manager
 		public static IDbCommand CreateDelete(IDatabase db, DbClassInfoCache classInfo, object entry = null)
 		{
 			if (entry == null)
+			{
 				return db.CreateCommand("DELETE FROM " + classInfo.TableName);
+			}
 
 			if (classInfo.PrimaryKeyProperty == null)
+			{
 				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported",
-					classInfo.Name));
+				classInfo.Name));
+			}
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
 			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
 			return db.CreateCommandWithParameterValues(query,

@@ -27,7 +27,9 @@ namespace JPB.DataAccess.Anonymous
 		public object GenerateAnoymousAlias(DbClassInfoCache targetClass, DbClassInfoCache targetPropType, object targetValue)
 		{
 			if (targetValue == null)
+			{
 				return null;
+			}
 
 			return
 				MD5.Create()
@@ -57,7 +59,9 @@ namespace JPB.DataAccess.Anonymous
 		public object GenerateAnoymousAlias(DbClassInfoCache targetClass, DbClassInfoCache targetPropType, object targetValue)
 		{
 			if (targetValue == null)
+			{
 				return null;
+			}
 
 			return
 				MD5.Create()

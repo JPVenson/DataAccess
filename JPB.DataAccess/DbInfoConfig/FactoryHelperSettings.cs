@@ -99,6 +99,11 @@ namespace JPB.DataAccess.DbInfoConfig
 		public bool EnforceCreation { get; set; }
 
 		/// <summary>
+		///		When set the check for DbNull will be skipped
+		/// </summary>
+		public bool AssertDataNotDbNull { get; set; }
+
+		/// <summary>
 		///     Shame on me.
 		///     To set all propertys from the outside ill create a super class that inherts from the POCO .
 		///     to get rid of this super class you can set this property to true then the superclass will be cased into its

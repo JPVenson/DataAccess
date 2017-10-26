@@ -16,9 +16,9 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		}
 
 		[SelectFactoryMethod]
-		public static void Callup(RootQuery builder, string tableName, string database)
+		public static IQueryBuilder Callup(RootQuery builder, string tableName, string database)
 		{
-			builder.QueryText("SELECT ccu.column_name AS SourceColumn ,kcu.table_name AS TargetTable ,kcu.column_name AS TargetColumn")
+			return builder.QueryText("SELECT ccu.column_name AS SourceColumn ,kcu.table_name AS TargetTable ,kcu.column_name AS TargetColumn")
 				.QueryText("FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu")
 				.QueryText("INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc")
 				.QueryText("ON ccu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME")

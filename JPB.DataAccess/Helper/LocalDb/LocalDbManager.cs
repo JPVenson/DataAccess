@@ -62,6 +62,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			var handler = SetupDone;
 			if (handler != null)
+			{
 				using (var transaction = new TransactionScope())
 				{
 					using (new ReplicationScope())
@@ -70,6 +71,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					}
 					transaction.Complete();
 				}
+			}
 		}
 
 		internal void AddTable(ILocalDbReposetoryBaseInternalUsage repro)
@@ -98,7 +100,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			_mappings.Clear();
 			foreach (var localDbReposetoryBase in _database)
+			{
 				localDbReposetoryBase.Value.ReposetoryCreated = false;
+			}
 			return new EditDatabaseScope(this);
 		}
 

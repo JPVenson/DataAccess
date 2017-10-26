@@ -66,7 +66,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Add(ILocalDbCheckConstraint<TEntity> item)
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			_constraints.Add(item);
 		}
 
@@ -79,7 +81,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Add(string name, Func<TEntity, bool> item)
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			_constraints.Add(new LocalDbCheckConstraint<TEntity>(name, item));
 		}
 
@@ -90,7 +94,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Clear()
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			_constraints.Clear();
 		}
 
@@ -136,7 +142,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public bool Remove(ILocalDbCheckConstraint<TEntity> item)
 		{
 			if (_localDbRepository.ReposetoryCreated)
+			{
 				throw new InvalidOperationException("Missing Alter or Setup statement of table");
+			}
 			return _constraints.Remove(item);
 		}
 
@@ -164,9 +172,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 		public void Enforce(TEntity item)
 		{
 			foreach (var localDbCheckConstraint in _constraints)
+			{
 				if (!localDbCheckConstraint.CheckConstraint(item))
+				{
 					throw new ConstraintException(string.Format("The Check Constraint '{0}' has detected an invalid object",
-						localDbCheckConstraint.Name));
+					localDbCheckConstraint.Name));
+				}
+			}
 		}
 	}
 }

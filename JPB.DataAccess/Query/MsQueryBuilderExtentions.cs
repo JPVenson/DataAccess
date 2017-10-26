@@ -37,7 +37,9 @@ namespace JPB.DataAccess.Query
 			var transpiledValue = MsSql.ParameterValue(new SqlParameter(name, value));
 			var sqlName = name;
 			if (!sqlName.StartsWith("@"))
+			{
 				sqlName = "@" + sqlName;
+			}
 
 			query.QueryText("SET {0} = {1}", sqlName, transpiledValue);
 			return query;
@@ -57,14 +59,20 @@ namespace JPB.DataAccess.Query
 		{
 			var sqlName = name;
 			if (!sqlName.StartsWith("@"))
+			{
 				sqlName = "@" + sqlName;
+			}
 			var typeName = type.ToString();
 			if (new SqlParameter("xxx", type).Size > 0)
+			{
 				typeName = "(MAX)";
+			}
 
 			query = query.QueryText("DECLARE {0} {1};", sqlName, typeName);
 			if (value != null)
+			{
 				query = query.SetVariable(sqlName, value);
+			}
 			return query;
 		}
 
@@ -120,9 +128,13 @@ namespace JPB.DataAccess.Query
 			var prefix = string.Empty;
 
 			if (lod is CteQueryPart || subCte)
+			{
 				prefix = string.Format(", {0} AS", cteName);
+			}
 			else
+			{
 				prefix = string.Format("WITH {0} AS ", cteName);
+			}
 
 			return new RootQuery(query.Add(new GenericQueryPart(prefix)).InBracket(cteAction).Add(new CteQueryPart("")));
 		}
@@ -289,7 +301,9 @@ namespace JPB.DataAccess.Query
 			string mode = null)
 		{
 			if (mode == null)
+			{
 				mode = "";
+			}
 
 			var accessLayer = query.ContainerObject.AccessLayer;
 			var sourcePK = typeof(TLeft).GetFK(typeof(TRight), query.ContainerObject.AccessLayer.Config);
@@ -422,13 +436,21 @@ namespace JPB.DataAccess.Query
 					{
 						var partType = genericQueryPart.Builder != null ? genericQueryPart.Builder.GetType() : null;
 						if (partType != null && order)
+						{
 							if (partType != typeof(OrderByColumn<TPoco>) && partType != typeof(OrderStatementQuery<TPoco>))
+							{
 								order = false;
+							}
+						}
 
 						if (genericQueryPart.Prefix == "ORDER BY")
+						{
 							order = true;
+						}
 						if (!order)
+						{
 							f = f.Add(genericQueryPart);
+						}
 					}
 
 					return new SelectQuery<TPoco>(f);

@@ -127,7 +127,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			}
 
 			if (type.Namespace != null && imports.Cast<CodeNamespaceImport>()
-				    .Any(cni => cni.Namespace == type.Namespace))
+					.Any(cni => cni.Namespace == type.Namespace))
 			{
 				var prefix = type.Namespace + '.';
 
@@ -135,7 +135,9 @@ namespace JPB.DataAccess.DbInfoConfig
 				{
 					var pos = typeReference.BaseType.IndexOf(prefix);
 					if (pos == 0)
+					{
 						typeReference.BaseType = typeReference.BaseType.Substring(prefix.Length);
+					}
 				}
 			}
 		}
@@ -163,11 +165,15 @@ namespace JPB.DataAccess.DbInfoConfig
 				if (settings.EnforcePublicPropertys)
 				{
 					if (propertyInfoCache.Getter.MethodInfo.IsPrivate)
+					{
 						throw new AccessViolationException(string.Format(
-							"The Getter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
+						"The Getter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
+					}
 					if (propertyInfoCache.Setter.MethodInfo.IsPrivate)
+					{
 						throw new AccessViolationException(string.Format(
-							"The Setter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
+						"The Setter of {0} is private. Full creation cannot be enforced", propertyInfoCache.PropertyName));
+					}
 				}
 
 				var codeIndexerExpression = new CodeIndexerExpression(new CodeVariableReferenceExpression("record"),
@@ -309,14 +315,20 @@ namespace JPB.DataAccess.DbInfoConfig
 					var baseType = Nullable.GetUnderlyingType(propertyInfoCache.PropertyType);
 
 					if (baseType != null)
+					{
 						isNullable = true;
+					}
 
 					if (propertyInfoCache.PropertyType == typeof(string))
+					{
 						baseType = typeof(string);
+					}
 					else if (propertyInfoCache.PropertyType.IsArray)
+					{
 						baseType = propertyInfoCache.PropertyType;
+					}
 
-					if (baseType != null)
+					if (baseType != null && !settings.AssertDataNotDbNull)
 					{
 						if (bufferVariable == null)
 						{
@@ -336,11 +348,15 @@ namespace JPB.DataAccess.DbInfoConfig
 
 						CodeAssignStatement setToNull;
 						if (!isNullable && baseType != typeof(string))
+						{
 							setToNull = new CodeAssignStatement(refToProperty,
-								new CodeDefaultValueExpression(
-									CreateShortCodeTypeReference(baseType, importNameSpace.Imports)));
+							new CodeDefaultValueExpression(
+							CreateShortCodeTypeReference(baseType, importNameSpace.Imports)));
+						}
 						else
+						{
 							setToNull = new CodeAssignStatement(refToProperty, new CodePrimitiveExpression(null));
+						}
 
 						var setToValue = new CodeAssignStatement(refToProperty,
 							new CodeCastExpression(
@@ -431,7 +447,9 @@ namespace JPB.DataAccess.DbInfoConfig
 			var configAttrCtorAtt = target.Attributes.FirstOrDefault(s => s.Attribute is AutoGenerateCtorAttribute);
 			AutoGenerateCtorAttribute classCtorAttr = null;
 			if (configAttrCtorAtt != null)
+			{
 				classCtorAttr = configAttrCtorAtt.Attribute as AutoGenerateCtorAttribute;
+			}
 
 			CodeNamespace importNameSpace;
 			importNameSpace = new CodeNamespace(target.Type.Namespace);
@@ -441,7 +459,7 @@ namespace JPB.DataAccess.DbInfoConfig
 			compiler.IsClass = true;
 
 			var generateFactory = classCtorAttr != null &&
-			                      classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod || target.Type.IsSealed;
+								  classCtorAttr.CtorGeneratorMode == CtorGeneratorMode.FactoryMethod || target.Type.IsSealed;
 
 			CodeMemberMethod codeConstructor;
 			var codeName = target.Name.Split('.').Last();
@@ -460,8 +478,10 @@ namespace JPB.DataAccess.DbInfoConfig
 				superName = codeName + "_Super";
 			}
 			if (target.Constructors.Any(f => f.Arguments.Any()))
+			{
 				throw new TypeAccessException(
-					string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
+				string.Format("Target type '{0}' does not define an public parametherless constructor. POCO's!!!!", target.Name));
+			}
 
 			compiler.Attributes |= MemberAttributes.Public;
 			compiler.Name = superName;
@@ -469,16 +489,20 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			cp.GenerateInMemory = true;
 			if (settings.FileCollisonDetection == CollisonDetectionMode.Pessimistic)
+			{
 				cp.OutputAssembly =
-					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-					+ @"\"
-					+ Guid.NewGuid().ToString("N")
-					+ "_Poco.dll";
+						Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+						+ @"\"
+						+ Guid.NewGuid().ToString("N")
+						+ "_Poco.dll";
+			}
 			else
+			{
 				cp.OutputAssembly =
-					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-					+ @"\" + target.Type.FullName
-					+ "_Poco.dll";
+						Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+						+ @"\" + target.Type.FullName
+						+ "_Poco.dll";
+			}
 
 			settings.TempFileData.Add(cp.OutputAssembly);
 
@@ -492,20 +516,26 @@ namespace JPB.DataAccess.DbInfoConfig
 				targetType = target.Type.GetTypeInfo();
 				var type = bufferAssam.DefinedTypes.FirstOrDefault(s => s == targetType);
 				if (targetType != null)
+				{
 					constructorInfos = targetType.GetConstructors();
+				}
 
 				if (constructorInfos == null)
+				{
 					throw new Exception(
-						string.Format(
-							"A dll with a matching name for type: {0} was found and the FileCollisonDetection is Optimistic but no matching Constuctors where found",
-							type.Name));
+					string.Format(
+					"A dll with a matching name for type: {0} was found and the FileCollisonDetection is Optimistic but no matching Constuctors where found",
+					type.Name));
+				}
 			}
 
 			if (constructorInfos == null)
 			{
 				var callingAssm = Assembly.GetEntryAssembly();
 				if (callingAssm == null)
+				{
 					callingAssm = Assembly.GetExecutingAssembly();
+				}
 
 				if (settings.CreateDebugCode)
 				{
@@ -526,17 +556,25 @@ namespace JPB.DataAccess.DbInfoConfig
 				var compileUnit = new CodeCompileUnit();
 
 				foreach (var defaultNamespace in settings.DefaultNamespaces)
+				{
 					importNameSpace.Imports.Add(new CodeNamespaceImport(defaultNamespace));
+				}
 
 				foreach (
 					var additionalNamespace in
 					target.Attributes.Where(f => f.Attribute is AutoGenerateCtorNamespaceAttribute)
 						.Select(f => f.Attribute as AutoGenerateCtorNamespaceAttribute))
+				{
 					importNameSpace.Imports.Add(new CodeNamespaceImport(additionalNamespace.UsedNamespace));
+				}
 
 				if (classCtorAttr != null && classCtorAttr.FullSateliteImport)
+				{
 					foreach (var referencedAssembly in target.Type.Assembly.GetReferencedAssemblies())
+					{
 						cp.ReferencedAssemblies.Add(referencedAssembly.Name);
+					}
+				}
 
 				importNameSpace.Types.Add(compiler);
 
@@ -550,7 +588,9 @@ namespace JPB.DataAccess.DbInfoConfig
 						compileAssemblyFromDom.Errors.Count));
 					var errNr = 0;
 					foreach (CompilerError error in compileAssemblyFromDom.Errors)
+					{
 						sb.AppendLine(errNr++ + error.ErrorNumber + ":" + error.Column + "," + error.Line + " -> " + error.ErrorText);
+					}
 					var ex =
 						new InvalidDataException(sb.ToString());
 
@@ -566,13 +606,17 @@ namespace JPB.DataAccess.DbInfoConfig
 				if (!constructorInfos.Any())
 				{
 					if (settings.EnforceCreation)
+					{
 						return null;
+					}
 					var ex =
 						new InvalidDataException("There are was an unknown error due compilation. No CTOR was build");
 
 					ex.Data.Add("Object", compileAssemblyFromDom);
 					foreach (CompilerError error in compileAssemblyFromDom.Errors)
+					{
 						ex.Data.Add(error.ErrorNumber, error);
+					}
 					throw ex;
 				}
 			}
@@ -583,14 +627,18 @@ namespace JPB.DataAccess.DbInfoConfig
 				if (generateFactory)
 				{
 					if (param.Length < 1)
+					{
 						return false;
+					}
 					if (param.First().ParameterType != typeof(IDataRecord))
+					{
 						return false;
+					}
 				}
 				return true;
 			});
 
-			var dm = new DynamicMethod("Create" + target.Name.Split('.')[0], target.Type, new[] {typeof(IDataRecord)},
+			var dm = new DynamicMethod("Create" + target.Name.Split('.')[0], target.Type, new[] { typeof(IDataRecord) },
 				target.Type, true);
 			var il = dm.GetILGenerator();
 			if (generateFactory)
@@ -608,11 +656,17 @@ namespace JPB.DataAccess.DbInfoConfig
 			}
 
 			if (!settings.CreateDebugCode)
+			{
 				foreach (string tempFile in cp.TempFiles)
+				{
 					if (!tempFile.EndsWith("dll") && !tempFile.EndsWith("pdb"))
+					{
 						File.Delete(tempFile);
+					}
+				}
+			}
 
-			var func = (Func<IDataRecord, object>) dm.CreateDelegate(typeof(Func<IDataRecord, object>));
+			var func = (Func<IDataRecord, object>)dm.CreateDelegate(typeof(Func<IDataRecord, object>));
 			return func;
 		}
 

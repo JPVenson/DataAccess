@@ -73,7 +73,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var containingList = new List<Users>();
 
 			for (var i = 0; i < 10000; i++)
+			{
 				containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
+			}
 
 			DbAccess.RangerInsertPation = 1;
 			var stopWatch = new Stopwatch();
@@ -98,7 +100,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var containingList = new List<Users>();
 
 			for (var i = 0; i < 10000; i++)
+			{
 				containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
+			}
 
 			var stopWatch = new Stopwatch();
 			stopWatch.Start();
@@ -126,14 +130,18 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var insGuid = Guid.NewGuid().ToString();
 
 			for (var i = 0; i < upperCountTestUsers; i++)
+			{
 				testUers.Add(new Users {UserName = insGuid});
+			}
 
 			DbAccess.InsertRange(testUers);
 
 			var refSelect =
 				DbAccess.Database.Run(s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			if (refSelect is long)
+			{
 				refSelect = Convert.ChangeType(refSelect, typeof(int));
+			}
 
 			Assert.AreEqual(testUers.Count, refSelect);
 		}

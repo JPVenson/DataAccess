@@ -98,7 +98,9 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 		public void UpdateIndex(long index)
 		{
 			if (index > byte.MaxValue)
+			{
 				throw new InvalidOperationException("Index must be lower then Byte.MaxValue");
+			}
 			_counter = (byte) index;
 		}
 
@@ -114,12 +116,16 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 		public new bool Equals(object x, object y)
 		{
 			if (x is byte && y is byte)
+			{
 				return (byte) x == (byte) y;
+			}
 			if (x is byte? && y != null)
 			{
 				var nullableX = (byte?) x;
 				if (y == null)
+				{
 					return nullableX.HasValue && y != null;
+				}
 				return nullableX.Value == (byte) y;
 			}
 			if (y is byte?)

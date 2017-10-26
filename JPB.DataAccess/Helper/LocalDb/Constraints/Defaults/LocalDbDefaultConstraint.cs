@@ -32,9 +32,18 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 		/// </exception>
 		public LocalDbDefaultConstraint(string name, TValue value, Action<TEntity, TValue> set)
 		{
-			if (name == null) throw new ArgumentNullException("name");
-			if (value == null) throw new ArgumentNullException("value");
-			if (set == null) throw new ArgumentNullException("set");
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (value == null)
+			{
+				throw new ArgumentNullException("value");
+			}
+			if (set == null)
+			{
+				throw new ArgumentNullException("set");
+			}
 			_value = value;
 			_set = set;
 			Name = name;

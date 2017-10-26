@@ -20,7 +20,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			get { return _userId; }
 			set
 			{
-				if (value == _userId) return;
+				if (value == _userId)
+				{
+					return;
+				}
 				_userId = value;
 				OnPropertyChanged();
 			}
@@ -31,7 +34,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			get { return _userName; }
 			set
 			{
-				if (value == _userName) return;
+				if (value == _userName)
+				{
+					return;
+				}
 				_userName = value;
 				OnPropertyChanged();
 			}
@@ -42,7 +48,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
 			var handler = PropertyChanged;
-			if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+			if (handler != null)
+			{
+				handler(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 	}
 }

@@ -1,12 +1,9 @@
-﻿#region
-
 using JPB.DataAccess.ModelsAnotations;
-
-#endregion
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 {
-	public class Image
+	[ForModel("Image")]
+	public class ImageNullable
 	{
 		[PrimaryKey]
 		public long ImageId { get; set; }
@@ -14,6 +11,6 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public string Text { get; set; }
 
 		[ForeignKeyDeclaration("BookId", typeof(Book))]
-		public int IdBook { get; set; }
+		public int? IdBook { get; set; }
 	}
 }

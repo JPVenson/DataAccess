@@ -57,7 +57,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		public override IMethodInfoCache<TAtt, TArg> Init(MethodBase info)
 		{
 			if (info is ConstructorInfo)
+			{
 				return Init(info as ConstructorInfo);
+			}
 
 			throw new NotImplementedException();
 		}

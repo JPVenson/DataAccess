@@ -14,9 +14,13 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		internal DbAutoStaticPropertyInfoCache(string name, Type declaringType, params AttributeInfoCache[] attributes)
 		{
 			if (name == null)
+			{
 				throw new ArgumentNullException("name");
+			}
 			if (attributes == null)
+			{
 				throw new ArgumentNullException("attributes");
+			}
 
 			PropertyName = name;
 

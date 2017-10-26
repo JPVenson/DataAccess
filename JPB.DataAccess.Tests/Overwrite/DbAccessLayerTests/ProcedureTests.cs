@@ -21,7 +21,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void ProcedureDirectParamTest()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
 				return;
+			}
 			DataMigrationHelper.AddUsers(100, DbAccess);
 
 			Assert.That(() => DbAccess.Select<TestProcBParamsDirect>(new object[] {10}),
@@ -33,7 +35,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void ProcedureParamLessTest()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
 				return;
+			}
 			DataMigrationHelper.AddUsers(100, DbAccess);
 			var expectedUser = DbAccess.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
@@ -50,7 +54,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void ProcedureParamTest()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
 				return;
+			}
 			DataMigrationHelper.AddUsers(100, DbAccess);
 
 			Assert.That(() => DbAccess.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams

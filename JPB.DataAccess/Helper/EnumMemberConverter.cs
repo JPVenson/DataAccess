@@ -27,7 +27,9 @@ namespace JPB.DataAccess.Helper
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			if (targetType.IsEnum)
+			{
 				return Enum.Parse(targetType, value.ToString(), true);
+			}
 			throw new InvalidCastException("No enum member Provided");
 		}
 

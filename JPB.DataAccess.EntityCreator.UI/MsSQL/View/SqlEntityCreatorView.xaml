@@ -1,14 +1,14 @@
 ﻿<UserControl x:Class="JPB.DataAccess.EntityCreator.UI.MsSQL.View.SqlEntityCreatorView"
 			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:local="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.View"
 			 xmlns:viewModel="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel"
 			 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 			 xmlns:xcdg="http://schemas.xceed.com/wpf/xaml/datagrid"
 			 xmlns:models="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models"
-			 mc:Ignorable="d" 
+			 mc:Ignorable="d"
 			 d:DesignHeight="300" d:DesignWidth="500" d:DataContext="{d:DesignInstance viewModel:SqlEntityCreatorViewModel}">
 	<DockPanel Dock="Top">
 		<xctk:BusyIndicator IsBusy="{Binding IsWorking}" BusyContent="{Binding Status}">
@@ -35,10 +35,11 @@
 							<xctk:PropertyDefinition TargetProperties="GenerateForgeinKeyDeclarations" Description="Create ForeignKeyDeclarationAttribute attribute on ForgeinKey Propertys" />
 							<xctk:PropertyDefinition TargetProperties="GenerateConfigMethod" Description="Creates an Method that Manipulates the ConfigStore. This removes all Attributes from all propertys and the class. It also remove (if exists) the Ado.net Constructor" />
 							<xctk:PropertyDefinition TargetProperties="GenerateCompilerHeader" Description="Creates an Comment with the current Date and Creating user" />
+							<xctk:PropertyDefinition TargetProperties="WrapNullables" Description="Wraps all DbNullables to C# NULL values" />
 						</xctk:PropertyGrid.PropertyDefinitions>
 					</xctk:PropertyGrid>
 
-					<ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Visible">
+					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 						<DockPanel>
 							<DockPanel>
 								<Button DockPanel.Dock="Top" Content="Preview" Command="{Binding SelectedTable.CreatePreviewCommand}" />
@@ -63,31 +64,35 @@
 										   SelectedObjectType="{x:Type viewModel:TableInfoViewModel}"
 											AutoGenerateProperties="False">
 												<xctk:PropertyGrid.PropertyDefinitions>
-													<xctk:PropertyDefinition 
-														TargetProperties="NewTableName" 
+													<xctk:PropertyDefinition
+														TargetProperties="NewTableName"
 														DisplayName="Cs Name"
 														Description="If blank the Table name will be used as class name. If not blank this field will be used" />
-													<xctk:PropertyDefinition 
-														TargetProperties="Info" 
+													<xctk:PropertyDefinition
+														TargetProperties="Info"
 														DisplayName="Table Name"
 														IsExpandable="True"
 														Description="The SQL Table name">
 													</xctk:PropertyDefinition>
-													<xctk:PropertyDefinition 
-														TargetProperties="Exclude" 
+													<xctk:PropertyDefinition
+														TargetProperties="Exclude"
 														Description="If set this class will be skiped" />
-													<xctk:PropertyDefinition 
-														TargetProperties="CreateFallbackProperty" 
+													<xctk:PropertyDefinition
+														TargetProperties="CreateFallbackProperty"
 														DisplayName="Fallback Property"
 														Description="Creates and Annotates an property that will be filled with all columns that cannot be matched" />
-													<xctk:PropertyDefinition 
-														TargetProperties="CreateSelectFactory" 
+													<xctk:PropertyDefinition
+														TargetProperties="CreateSelectFactory"
 														DisplayName="Select Query"
 														Description="ToBeSupported" />
-													<xctk:PropertyDefinition 
-														TargetProperties="CreateDataRecordLoader" 
+													<xctk:PropertyDefinition
+														TargetProperties="CreateDataRecordLoader"
 														DisplayName="IDataRecord Constructor"
 														Description="Create an ado.net Constructor" />
+													<xctk:PropertyDefinition
+														TargetProperties="WrapNullables"
+														DisplayName="Wrap Nullables"
+														Description="" />
 												</xctk:PropertyGrid.PropertyDefinitions>
 											</xctk:PropertyGrid>
 										</DockPanel>
@@ -96,7 +101,10 @@
 												<Button Content="Add" Command="{Binding AddColumnCommand}"/>
 												<Button Content="Remove" Command="{Binding RemoveColumnCommand}"/>
 											</DockPanel>
-											<xcdg:DataGridControl AutoCreateColumns="False" DockPanel.Dock="Left" ItemsSource="{Binding ColumnInfoModels}" SelectedItem="{Binding SelectedColumn}">
+											<xcdg:DataGridControl
+												AutoCreateColumns="False"
+												DockPanel.Dock="Left"
+												ItemsSource="{Binding ColumnInfoModels}" SelectedItem="{Binding SelectedColumn}">
 												<xcdg:DataGridControl.Columns>
 													<xcdg:Column FieldName="ColumnInfo.ColumnName" Title="Table name" ReadOnly="True"/>
 													<xcdg:Column FieldName="NewColumnName" Title="C# Name"/>
@@ -121,27 +129,27 @@
 										   SelectedObjectType="{x:Type models:ColumnInfoViewModel}"
 											AutoGenerateProperties="False">
 											<xctk:PropertyGrid.PropertyDefinitions>
-												<xctk:PropertyDefinition 
-													TargetProperties="NewColumnName" 
+												<xctk:PropertyDefinition
+													TargetProperties="NewColumnName"
 													DisplayName="Property Name"
 													Description="If blank the Column name will be used for this property." />
-												<xctk:PropertyDefinition 
-													TargetProperties="IsRowVersion" 
+												<xctk:PropertyDefinition
+													TargetProperties="IsRowVersion"
 													DisplayName="Row Version"
 													Description="Should this Property be used to ensure the version of the local instance"/>
-												<xctk:PropertyDefinition 
-													TargetProperties="PrimaryKey" 
+												<xctk:PropertyDefinition
+													TargetProperties="PrimaryKey"
 													DisplayName="Primary Key"
 													Description="Should this Property be used to provide an uniq key" />
-												<xctk:PropertyDefinition 
-													TargetProperties="InsertIgnore" 
+												<xctk:PropertyDefinition
+													TargetProperties="InsertIgnore"
 													DisplayName="Ignore on Insert"
 													Description="Should this Property be ignored if inserted" />
-												<xctk:PropertyDefinition 
-													TargetProperties="Exclude" 
+												<xctk:PropertyDefinition
+													TargetProperties="Exclude"
 													Description="Should this Property be excluded" />
-												<xctk:PropertyDefinition 
-														TargetProperties="ColumnViewModel" 
+												<xctk:PropertyDefinition
+														TargetProperties="ColumnViewModel"
 														DisplayName="Column Info"
 														IsExpandable="True"
 														Description="The SQL Column" />

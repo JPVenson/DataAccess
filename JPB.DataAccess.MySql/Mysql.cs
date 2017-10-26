@@ -35,7 +35,9 @@ namespace JPB.DataAccess.MySql
 		public MySql(string strServer, string strDatabase, string strLogin, string strPassword)
 		{
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
+			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
+			}
 			else
 			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
@@ -122,13 +124,17 @@ namespace JPB.DataAccess.MySql
 		public string FormartCommandToQuery(IDbCommand command)
 		{
 			if (!(command is MySqlCommand))
+			{
 				return command.CommandText;
+			}
 
 			var sql = new StringBuilder();
 			var firstParam = true;
 
 			if (!string.IsNullOrEmpty(command.Connection.Database))
+			{
 				sql.AppendLine("USE  [" + command.Connection.Database + "];");
+			}
 
 			switch (command.CommandType)
 			{
@@ -153,13 +159,20 @@ namespace JPB.DataAccess.MySql
 						{
 							sql.Append((firstParam) ? "\t" : "\t, ");
 
-							if (firstParam) firstParam = false;
+							if (firstParam)
+							{
+								firstParam = false;
+							}
 
 							if (sp.Direction == ParameterDirection.Input)
+							{
 								sql.AppendLine(sp.ParameterName + " = " + QueryDebugger.ParameterValue(sp));
+							}
 							else
 
+							{
 								sql.AppendLine(sp.ParameterName + " = " + sp.ParameterName + " OUTPUT");
+							}
 						}
 					}
 					sql.AppendLine(";");

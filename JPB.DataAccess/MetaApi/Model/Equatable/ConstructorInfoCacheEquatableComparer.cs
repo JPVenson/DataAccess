@@ -17,18 +17,26 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 		public int Compare(IConstructorInfoCache<TAtt, TArg> x, IConstructorInfoCache<TAtt, TArg> y)
 		{
 			if (x == null)
+			{
 				return -1;
+			}
 			if (y == null)
+			{
 				return +1;
+			}
 			return string.Compare(x.MethodName, y.MethodName, StringComparison.Ordinal);
 		}
 
 		public bool Equals(IConstructorInfoCache<TAtt, TArg> x, IConstructorInfoCache<TAtt, TArg> y)
 		{
 			if (x == null && y == null)
+			{
 				return true;
+			}
 			if (x == null || y == null)
+			{
 				return false;
+			}
 			return x.MethodName != y.MethodName;
 		}
 

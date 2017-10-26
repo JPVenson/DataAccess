@@ -30,7 +30,9 @@ namespace JPB.DataAccess.Tests
 		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
 			if (expectWrapper != null)
+			{
 				expectWrapper.Database.CloseAllConnection();
+			}
 
 			//string dbname = "testDB";
 			//var sqlLiteFileName = dbname + ".sqlite";
@@ -58,7 +60,9 @@ namespace JPB.DataAccess.Tests
 			expectWrapper.Database.CloseAllConnection();
 
 			if (File.Exists(tempPath))
+			{
 				File.Delete(tempPath);
+			}
 		}
 	}
 }

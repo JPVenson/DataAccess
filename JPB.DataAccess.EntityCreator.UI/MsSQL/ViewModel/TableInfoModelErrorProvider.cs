@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Windows.Documents;
 using JPB.ErrorValidation.ValidationRules;
 using JPB.ErrorValidation.ValidationTyps;
 

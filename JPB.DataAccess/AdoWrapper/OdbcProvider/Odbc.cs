@@ -33,10 +33,14 @@ namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 		public Obdc(string strServer, string strDatabase, string strLogin, string strPassword)
 		{
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
+			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
+			}
 			else
+			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
-					strLogin.Trim(), strPassword.Trim());
+				strLogin.Trim(), strPassword.Trim());
+			}
 		}
 
 		public Obdc(string strConnStr)
@@ -77,7 +81,9 @@ namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 				(OdbcConnection) (conn is OdbcConnection ? conn : CreateConnection()));
 
 			foreach (var dbDataParameter in fields)
+			{
 				oleDbCommand.Parameters.AddWithValue(dbDataParameter.ParameterName, dbDataParameter.Value);
+			}
 			return oleDbCommand;
 		}
 

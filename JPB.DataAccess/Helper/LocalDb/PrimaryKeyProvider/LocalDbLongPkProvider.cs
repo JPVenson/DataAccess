@@ -112,12 +112,16 @@ namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 		public new bool Equals(object x, object y)
 		{
 			if (x is long && y is long)
+			{
 				return (long) x == (long) y;
+			}
 			if (x is long? && y != null)
 			{
 				var nullableX = (long?) x;
 				if (y == null)
+				{
 					return nullableX.HasValue && y != null;
+				}
 				return nullableX.Value == (long) y;
 			}
 			if (y is long?)

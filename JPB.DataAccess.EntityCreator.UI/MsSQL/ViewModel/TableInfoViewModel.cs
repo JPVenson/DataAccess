@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models;
-using JPB.ErrorValidation;
 using JPB.ErrorValidation.ViewModelProvider;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
@@ -133,6 +128,16 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.CreateDataRecordLoader = value;
+				SendPropertyChanged();
+			}
+		}
+
+		public bool WrapNullables
+		{
+			get { return SourceElement.WrapNullables; }
+			set
+			{
+				SourceElement.WrapNullables = value;
 				SendPropertyChanged();
 			}
 		}

@@ -26,12 +26,18 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		{
 			RewriteDefaultValues = rewriteDefaultValues;
 			if (Current != null)
+			{
 				throw new InvalidOperationException("Nested Identity Scopes are not supported");
+			}
 			if (Transaction.Current == null)
+			{
 				throw new InvalidOperationException("Has to be executed inside a valid TransactionScope");
+			}
 
 			if (Current == null)
+			{
 				Current = this;
+			}
 		}
 
 		internal bool RewriteDefaultValues { get; private set; }
@@ -63,7 +69,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		{
 			var handler = OnIdentityInsertCompleted;
 			if (handler != null)
+			{
 				handler(this, EventArgs.Empty);
+			}
 		}
 	}
 }

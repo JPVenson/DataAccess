@@ -55,6 +55,11 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			get { return _base.Members; }
 		}
 
+		public void AddAttribute(CodeAttributeDeclaration attribute)
+		{
+			_base.CustomAttributes.Add(attribute);
+		}
+
 		public string Name { get { return _base.Name; } }
 
 		public bool CompileHeader { get; set; }
@@ -180,7 +185,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			}
 
 			//Add Code Generated Attribute
-			var generatedCodeAttribute = new GeneratedCodeAttribute(AttrbuteHeader, "1.0.0.8");
+			var generatedCodeAttribute = new GeneratedCodeAttribute(AttrbuteHeader, "1.0.0.9");
 			var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
 				new CodeAttributeArgument(
 					new CodePrimitiveExpression(generatedCodeAttribute.Tool)),
@@ -192,7 +197,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 			if (GenerateConfigMethod)
 			{
-				GenerateConfigMehtod(columnInfos, importNameSpace);
+				GenerateConfigMehtod(columnInfos, importNameSpace, _base.CustomAttributes.OfType<CodeAttributeDeclaration>().Any(f => f.Name == typeof(WrapDbNullablesAttribute).Name));
 			}
 			else
 			{
@@ -282,7 +287,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			}
 		}
 
-		private void GenerateConfigMehtod(IEnumerable<IColumInfoModel> columnInfos, CodeNamespace importNameSpace)
+		private void GenerateConfigMehtod(IEnumerable<IColumInfoModel> columnInfos, CodeNamespace importNameSpace, bool skipDbNullCheck)
 		{
 			const string configArgumentName = "config";
 
@@ -331,8 +336,9 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			{
 				if (member is CodeMemberProperty || (member is CodeMemberMethod && !(member is CodeConstructor)))
 				{
-					var property = member as CodeTypeMember;
+					var property = member;
 					if (property.CustomAttributes != null)
+					{
 						foreach (CodeAttributeDeclaration attribute in property.CustomAttributes)
 						{
 							var dbAttribute = new CodeObjectCreateExpression(attribute.Name);
@@ -346,8 +352,8 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 							configMethod.Statements.Add(configPropCall);
 						}
-
-					property.CustomAttributes.Clear();
+						property.CustomAttributes.Clear();
+					}
 				}
 
 				if (member is CodeConstructor)
@@ -368,7 +374,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 						var codeAssignment = new CodeAssignStatement(super, new CodeObjectCreateExpression(TargetCsName));
 						codeFactory.Statements.Add(codeAssignment);
 						FactoryHelper.GenerateBody(dbInfos.ToDictionary(s => s.DbName),
-							new FactoryHelperSettings(),
+							new FactoryHelperSettings()
+							{
+								AssertDataNotDbNull = skipDbNullCheck
+							},
 							importNameSpace,
 							codeFactory,
 							super);

@@ -38,7 +38,9 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			var state = TestContext.CurrentContext.Result.Outcome == ResultState.Failure; // TestState enum
 
 			if (state)
+			{
 				_mgr.FlushErrorData();
+			}
 
 			_mgr.Clear();
 		}
@@ -150,7 +152,9 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			var elementsToRead = new List<long>();
 
 			for (var i = 0; i < 25; i++)
+			{
 				elementsToRead.Add(addUsers[rand.Next(0, addUsers.Length)]);
+			}
 
 			var elementProducer =
 				DbAccessLayer.Query()
@@ -255,18 +259,22 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			{
 				var countOfImages = -1;
 				if (DbAccessLayer.DbAccessType == DbAccessType.MsSql)
+				{
 					countOfImages =
-						DbAccessLayer.RunPrimetivSelect<int>(
+							DbAccessLayer.RunPrimetivSelect<int>(
 							string.Format("SELECT COUNT(1) FROM {0} WHERE {0}.{1} = {2}",
-								ImageMeta.TableName, ImageMeta.ForgeinKeyName,
-								id))[0];
+							ImageMeta.TableName, ImageMeta.ForgeinKeyName,
+							id))[0];
+				}
 				if (DbAccessLayer.DbAccessType == DbAccessType.SqLite)
+				{
 					countOfImages =
-						(int)
-						DbAccessLayer.RunPrimetivSelect<long>(
+							(int)
+							DbAccessLayer.RunPrimetivSelect<long>(
 							string.Format("SELECT COUNT(1) FROM {0} WHERE {0}.{1} = {2}",
-								ImageMeta.TableName, ImageMeta.ForgeinKeyName,
-								id))[0];
+							ImageMeta.TableName, ImageMeta.ForgeinKeyName,
+							id))[0];
+				}
 
 				Assert.That(countOfImages, Is.EqualTo(2));
 				var deSelect =
@@ -288,19 +296,25 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 
 			var runPrimetivSelect = -1;
 			if (DbAccessLayer.DbAccessType == DbAccessType.MsSql)
+			{
 				runPrimetivSelect =
-					DbAccessLayer.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
-						[0];
+						DbAccessLayer.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
+								[0];
+			}
 			if (DbAccessLayer.DbAccessType == DbAccessType.SqLite)
+			{
 				runPrimetivSelect =
-					(int)
-					DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
-						[0];
+						(int)
+						DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
+								[0];
+			}
 			if (DbAccessLayer.DbAccessType == DbAccessType.MySql)
+			{
 				runPrimetivSelect =
-					(int)
-					DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
-						[0];
+						(int)
+						DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
+								[0];
+			}
 			var deSelect = DbAccessLayer.Select<Users>();
 			var forResult = DbAccessLayer.Query().Select.Table<Users>().ForResult().ToArray();
 

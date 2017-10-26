@@ -68,7 +68,9 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 					else
 					{
 						if (firstOrDefault != null)
+						{
 							_users.Remove(firstOrDefault);
+						}
 					}
 					foreach (var userse in _users)
 					{
@@ -87,9 +89,13 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 
 			//Add TestMethod
 			if (_useObjectCopy)
+			{
 				Assert.That(_users.Contains(user), Is.True);
+			}
 			else
+			{
 				Assert.That(_users.Contains(user), Is.False);
+			}
 		}
 
 		[Test]

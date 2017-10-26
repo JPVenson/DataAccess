@@ -56,6 +56,11 @@ namespace JPB.DataAccess.EntityCreator.Core
 			}
 			compiler.GenerateConfigMethod = sourceCreator.GenerateConfigMethod;
 
+			if (tableInfoModel.WrapNullables || sourceCreator.WrapNullables)
+			{
+				compiler.AddAttribute(new CodeAttributeDeclaration(typeof(WrapDbNullablesAttribute).Name));
+			}
+
 			if (tableInfoModel.CreateSelectFactory || sourceCreator.GenerateConstructor)
 			{
 				compiler.GenerateTypeConstructorBasedOnElements(tableInfoModel.ColumnInfos.Where(s => !s.Exclude));
@@ -67,6 +72,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 					continue;
 
 				var codeMemberProperty = compiler.AddProperty(columInfoModel);
+
 				if (columInfoModel.PrimaryKey)
 				{
 					codeMemberProperty.CustomAttributes.Add(

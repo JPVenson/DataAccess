@@ -36,7 +36,9 @@ namespace JPB.DataAccess.DbCollection
 		{
 			_base = new List<T>();
 			foreach (T item in enumerable)
+			{
 				_base.Add(item);
+			}
 		}
 
 		/// <summary>
@@ -101,7 +103,9 @@ namespace JPB.DataAccess.DbCollection
 			_changeTracker = new Dictionary<T, List<string>>();
 
 			if (subset is IOrderedEnumerable<T>)
+			{
 				throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
+			}
 
 			foreach (T item in subset)
 			{
@@ -124,7 +128,9 @@ namespace JPB.DataAccess.DbCollection
 			_changeTracker = new Dictionary<T, List<string>>();
 
 			if (subset is IOrderedEnumerable<T>)
+			{
 				throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
+			}
 
 			foreach (var item in subset)
 			{
@@ -146,7 +152,9 @@ namespace JPB.DataAccess.DbCollection
 			var fod = _internalCollection.ContainsKey(item);
 
 			if (!fod)
+			{
 				return false;
+			}
 
 			_internalCollection[item] = state;
 			return true;
@@ -161,7 +169,9 @@ namespace JPB.DataAccess.DbCollection
 			CollectionStates entry;
 
 			if (!_internalCollection.TryGetValue(item, out entry))
+			{
 				return CollectionStates.Unknown;
+			}
 			return entry;
 		}
 
@@ -196,7 +206,9 @@ namespace JPB.DataAccess.DbCollection
 				}
 
 				if (tempCommand != null)
+				{
 					bulk = layer.Database.MergeCommands(bulk, tempCommand, true);
+				}
 			}
 
 			var results = layer.ExecuteMARS(bulk, typeof(T)).SelectMany(s => s).Cast<T>().ToArray();
@@ -211,10 +223,14 @@ namespace JPB.DataAccess.DbCollection
 
 			//Removed
 			foreach (var item in removed)
+			{
 				_internalCollection.Remove(item);
+			}
 
 			foreach (var collectionStatese in _internalCollection.Keys.ToArray())
+			{
 				ChangeState(collectionStatese, CollectionStates.Unchanged);
+			}
 		}
 
 		//	public T Value { get; set; }
@@ -245,7 +261,9 @@ namespace JPB.DataAccess.DbCollection
 		public void Clear()
 		{
 			foreach (var pair in _internalCollection.ToArray())
+			{
 				Remove(pair.Key);
+			}
 		}
 
 		public bool Contains(T item)
@@ -293,13 +311,21 @@ namespace JPB.DataAccess.DbCollection
 			var listEntry = new List<string>();
 			var trackerEntry = _changeTracker.FirstOrDefault(s => s.Key == sender as T);
 			if (trackerEntry.Equals(default(KeyValuePair<T, List<string>>)))
+			{
 				_changeTracker.Add(sender as T, listEntry);
+			}
 			else
+			{
 				listEntry = trackerEntry.Value;
+			}
 			if (!listEntry.Contains(e.PropertyName))
+			{
 				listEntry.Add(e.PropertyName);
+			}
 			if (GetEntryState(sender as T) == CollectionStates.Unchanged)
+			{
 				ChangeState(sender as T, CollectionStates.Changed);
+			}
 		}
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 		//	public StateHolder(T value, CollectionStates state)

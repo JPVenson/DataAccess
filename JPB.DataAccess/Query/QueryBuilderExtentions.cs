@@ -33,7 +33,9 @@ namespace JPB.DataAccess.Query
 							.FirstOrDefault(s => s.Name == queryParameter.Name && s.Value != queryParameter.Value);
 
 					if (fod == null)
+					{
 						continue;
+					}
 
 					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the QueryCommand
 					var name = fod.Name;

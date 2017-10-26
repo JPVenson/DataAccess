@@ -49,10 +49,14 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 		public OleDb(string strServer, string strDatabase, string strLogin, string strPassword)
 		{
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
+			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
+			}
 			else
+			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_UNTRUSTED, strServer.Trim(), strDatabase.Trim(),
-					strLogin.Trim(), strPassword.Trim());
+				strLogin.Trim(), strPassword.Trim());
+			}
 		}
 
 		/// <summary>
@@ -147,7 +151,9 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 				(OleDbConnection) (conn is OleDbConnection ? conn : CreateConnection()));
 
 			foreach (var dbDataParameter in fields)
+			{
 				oleDbCommand.Parameters.AddWithValue(dbDataParameter.ParameterName, dbDataParameter.Value);
+			}
 			return oleDbCommand;
 		}
 

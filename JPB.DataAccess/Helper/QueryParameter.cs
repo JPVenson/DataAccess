@@ -26,9 +26,13 @@ namespace JPB.DataAccess.Helper
 			Name = name;
 			Value = value;
 			if (value != null)
+			{
 				SourceType = value.GetType();
+			}
 			else
+			{
 				SourceType = DBNull.Value.GetType();
+			}
 		}
 
 		/// <summary>
@@ -67,7 +71,9 @@ namespace JPB.DataAccess.Helper
 		{
 			var value = "{Null}";
 			if (Value != null)
+			{
 				value = Value.ToString();
+			}
 			sb.AppendInterlacedLine("new QueryParameter {")
 				.Up()
 				.AppendInterlacedLine("Name = {0},", Name)
@@ -120,7 +126,9 @@ namespace JPB.DataAccess.Helper
 				_sourceType = value;
 				var dbType = DbAccessLayer.Map(value);
 				if (dbType != null)
+				{
 					SourceDbType = dbType.Value;
+				}
 			}
 		}
 

@@ -27,14 +27,20 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		public ReplicationScope()
 		{
 			if (Current != null)
+			{
 				throw new InvalidOperationException("Nested Identity Scopes are not supported");
+			}
 			if (Transaction.Current == null)
+			{
 				throw new InvalidOperationException("Has to be executed inside a valid TransactionScope");
+			}
 
 			_current = this;
 
 			foreach (var localDbReposetoryBase in LocalDbManager.Scope.Database)
+			{
 				localDbReposetoryBase.Value.IsMigrating = true;
+			}
 		}
 
 		/// <summary>
@@ -54,7 +60,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		public void Dispose()
 		{
 			foreach (var localDbReposetoryBase in LocalDbManager.Scope.Database)
+			{
 				localDbReposetoryBase.Value.IsMigrating = false;
+			}
 			_current = null;
 		}
 	}

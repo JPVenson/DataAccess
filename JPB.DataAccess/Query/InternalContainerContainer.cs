@@ -163,10 +163,14 @@ namespace JPB.DataAccess.Query
 		public IEnumerator GetEnumerator()
 		{
 			if (ForType == null)
+			{
 				throw new ArgumentNullException("No type Supplied", new Exception());
+			}
 
 			if (EnumerationMode == EnumerationMode.FullOnLoad)
+			{
 				return new QueryEagerEnumerator(this, ForType);
+			}
 			return new QueryLazyEnumerator(this, ForType);
 		}
 

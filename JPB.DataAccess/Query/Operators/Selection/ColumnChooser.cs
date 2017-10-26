@@ -43,9 +43,13 @@ namespace JPB.DataAccess.Query.Operators.Selection
 			{
 				string selectQuery;
 				if (_columns.Any())
+				{
 					selectQuery = DbAccessLayer.CreateSelectByColumns(Cache, _columns.Aggregate((e, f) => e + ", " + f));
+				}
 				else
+				{
 					selectQuery = DbAccessLayer.CreateSelect(Cache);
+				}
 				return new SelectQuery<TPoco>(this.QueryText(selectQuery));
 			}
 		}
@@ -71,9 +75,13 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		public ColumnChooser<TPoco> Column(string columnName)
 		{
 			if (CurrentIdentifier != null)
+			{
 				_columns.Add(CurrentIdentifier + "." + columnName);
+			}
 			else
+			{
 				_columns.Add(columnName);
+			}
 			return new ColumnChooser<TPoco>(this, _columns, CurrentIdentifier);
 		}
 	}

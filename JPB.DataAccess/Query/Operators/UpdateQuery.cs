@@ -68,7 +68,10 @@ namespace JPB.DataAccess.Query.Operators
 		/// <exception cref="ArgumentNullException">alias</exception>
 		public UpdateQuery<TPoco> Alias(string alias)
 		{
-			if (alias == null) throw new ArgumentNullException("alias");
+			if (alias == null)
+			{
+				throw new ArgumentNullException("alias");
+			}
 			return new UpdateQuery<TPoco>(this, alias);
 		}
 	}

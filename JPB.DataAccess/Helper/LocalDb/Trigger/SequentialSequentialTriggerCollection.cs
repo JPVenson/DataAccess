@@ -44,13 +44,17 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			{
 				_insert += value;
 				if (Duplication != null)
+				{
 					Duplication.Insert += value;
+				}
 			}
 			remove
 			{
 				_insert -= value;
 				if (Duplication != null)
+				{
 					Duplication.Insert -= value;
+				}
 			}
 		}
 
@@ -63,13 +67,17 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			{
 				_update += value;
 				if (Duplication != null)
+				{
 					Duplication.Update += value;
+				}
 			}
 			remove
 			{
 				_update -= value;
 				if (Duplication != null)
+				{
 					Duplication.Update -= value;
+				}
 			}
 		}
 
@@ -82,13 +90,17 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 			{
 				_delete += value;
 				if (Duplication != null)
+				{
 					Duplication.Delete += value;
+				}
 			}
 			remove
 			{
 				_delete -= value;
 				if (Duplication != null)
+				{
 					Duplication.Delete -= value;
+				}
 			}
 		}
 
@@ -144,9 +156,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		{
 			var token = new SequentialToken<TEntity>(obj);
 			if (trigger != null)
+			{
 				trigger.Invoke(this, token);
+			}
 			if (token.Canceled)
+			{
 				throw new TriggerException<TEntity>(token.Reason, Tabel);
+			}
 		}
 	}
 

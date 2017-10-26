@@ -35,7 +35,9 @@ namespace JPB.DataAccess.MySql
 			set
 			{
 				if (value)
+				{
 					throw new Exception("To be supported ... sory");
+				}
 				_cache = value;
 			}
 		}
@@ -48,8 +50,16 @@ namespace JPB.DataAccess.MySql
 		public long FirstID { get; private set; }
 		public long LastID { get; private set; }
 
-		private void RaiseNewPageLoading() { var handler = NewPageLoading; if (handler != null) handler(); }
-		private void RaiseNewPageLoaded() { var handler = NewPageLoaded; if (handler != null) handler(); }
+		private void RaiseNewPageLoading() { var handler = NewPageLoading; if (handler != null)
+			{
+				handler();
+			}
+		}
+		private void RaiseNewPageLoaded() { var handler = NewPageLoaded; if (handler != null)
+			{
+				handler();
+			}
+		}
 
 		public long CurrentPage
 		{
@@ -57,7 +67,9 @@ namespace JPB.DataAccess.MySql
 			set
 			{
 				if (value >= 0)
+				{
 					_currentPage = value;
+				}
 			}
 		}
 
@@ -158,7 +170,9 @@ namespace JPB.DataAccess.MySql
 			set
 			{
 				if (value != null)
+				{
 					_syncHelper = value;
+				}
 			}
 		}
 

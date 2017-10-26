@@ -52,7 +52,9 @@ namespace JPB.DataAccess.SqLite
 			set
 			{
 				if (value)
+				{
 					throw new Exception("To be supported ... sory");
+				}
 				_cache = false;
 			}
 		}
@@ -79,7 +81,9 @@ namespace JPB.DataAccess.SqLite
 			set
 			{
 				if (value >= 1)
+				{
 					_currentPage = value;
+				}
 				else
 				{
 					throw new InvalidOperationException("The current page must be bigger or equals 1");
@@ -161,7 +165,9 @@ namespace JPB.DataAccess.SqLite
 			}
 
 			if (CurrentPage > MaxPage)
+			{
 				CurrentPage = MaxPage;
+			}
 
 			RaiseNewPageLoaded();
 		}
@@ -179,7 +185,9 @@ namespace JPB.DataAccess.SqLite
 			set
 			{
 				if (value != null)
+				{
 					_syncHelper = value;
+				}
 			}
 		}
 
@@ -188,9 +196,14 @@ namespace JPB.DataAccess.SqLite
 		protected virtual void RaiseNewPageLoaded()
 		{
 			if (!RaiseEvents)
+			{
 				return;
+			}
 			var handler = NewPageLoaded;
-			if (handler != null) handler();
+			if (handler != null)
+			{
+				handler();
+			}
 		}
 
 		/// <summary>
@@ -198,9 +211,14 @@ namespace JPB.DataAccess.SqLite
 		protected virtual void RaiseNewPageLoading()
 		{
 			if (!RaiseEvents)
+			{
 				return;
+			}
 			var handler = NewPageLoading;
-			if (handler != null) handler();
+			if (handler != null)
+			{
+				handler();
+			}
 		}
 
 		public void Dispose()

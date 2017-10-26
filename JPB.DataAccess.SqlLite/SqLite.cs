@@ -276,7 +276,9 @@ namespace JPB.DataAccess.SqLite
 				adapter.SelectCommand = (SQLiteCommand)cmd;
 
 				foreach (DataRow row in dt.Rows)
+				{
 					row.SetAdded();
+				}
 
 				adapter.Update(dt);
 			}
@@ -320,7 +322,9 @@ namespace JPB.DataAccess.SqLite
 			{
 				var list = new List<string>();
 				while (dr.Read())
+				{
 					list.Add((string)dr[0]);
+				}
 				return list.ToArray();
 			}
 		}
@@ -342,7 +346,9 @@ namespace JPB.DataAccess.SqLite
 			{
 				var list = new List<string>();
 				while (dr.Read())
+				{
 					list.Add((string)dr[0]);
+				}
 				return list.ToArray();
 			}
 		}
@@ -357,7 +363,9 @@ namespace JPB.DataAccess.SqLite
 		{
 			var sql = String.Format("DROP TABLE {0}", strTableName);
 			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
+			{
 				return cmd.ExecuteNonQuery();
+			}
 		}
 
 		/// <summary>
@@ -391,7 +399,9 @@ namespace JPB.DataAccess.SqLite
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
 			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
 			using (IDataReader dr = cmd.ExecuteReader())
+			{
 				return (dr.Read());
+			}
 		}
 
 		/// <summary>
@@ -405,7 +415,9 @@ namespace JPB.DataAccess.SqLite
 			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
 			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
 			using (IDataReader dr = cmd.ExecuteReader())
+			{
 				return (dr.Read());
+			}
 		}
 
 		/// <summary>
@@ -416,13 +428,17 @@ namespace JPB.DataAccess.SqLite
 		public static String CommandAsMsSql(IDbCommand sc)
 		{
 			if (!(sc is SQLiteCommand))
+			{
 				return sc.CommandText;
+			}
 
 			var sql = new StringBuilder();
 			var firstParam = true;
 
 			if (!string.IsNullOrEmpty(sc.Connection.Database))
+			{
 				sql.AppendLine("USE  [" + sc.Connection.Database + "];");
+			}
 
 			switch (sc.CommandType)
 			{
@@ -447,13 +463,20 @@ namespace JPB.DataAccess.SqLite
 						{
 							sql.Append((firstParam) ? "\t" : "\t, ");
 
-							if (firstParam) firstParam = false;
+							if (firstParam)
+							{
+								firstParam = false;
+							}
 
 							if (sp.Direction == ParameterDirection.Input)
+							{
 								sql.AppendLine(sp.ParameterName + " = " + QueryDebugger.ParameterValue(sp));
+							}
 							else
 
+							{
 								sql.AppendLine(sp.ParameterName + " = " + sp.ParameterName + " OUTPUT");
+							}
 						}
 					}
 					sql.AppendLine(";");

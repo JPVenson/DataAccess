@@ -54,7 +54,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			CurrentPageItems.Clear();
 
 			foreach (var currentPageItem in base.CurrentPageItems)
+			{
 				CurrentPageItems.Add(Converter(currentPageItem));
+			}
 		}
 	}
 }

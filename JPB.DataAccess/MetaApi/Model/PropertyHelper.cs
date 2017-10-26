@@ -36,7 +36,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		public override object Invoke(dynamic target, params dynamic[] param)
 		{
 			if (_getter != null)
+			{
 				return _getter(target);
+			}
 			var paramOne = param[0];
 			var result = _setter(target, paramOne);
 			return result;

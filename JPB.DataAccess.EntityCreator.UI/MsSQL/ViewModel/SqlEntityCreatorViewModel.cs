@@ -68,7 +68,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		private string _namespace;
 
-		private TableInfoViewModel _selectedTable;
+		private ITableInfoModel _selectedTable;
 
 		private string _status;
 
@@ -84,7 +84,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		public DelegateCommand SaveConfigCommand { get; private set; }
 
-		public TableInfoViewModel SelectedTable
+		public ITableInfoModel SelectedTable
 		{
 			get { return _selectedTable; }
 			set
@@ -227,6 +227,19 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var entrysAsync = CreateEntrysAsync(connection, outputPath, database);
 		}
 
+		private bool _wrapNullables;
+
+		public bool WrapNullables
+		{
+			get { return _wrapNullables; }
+			set
+			{
+				SendPropertyChanging(() => WrapNullables);
+				_wrapNullables = value;
+				SendPropertyChanged(() => WrapNullables);
+			}
+		}
+
 		public void Compile()
 		{
 			var path = "";
@@ -260,6 +273,11 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				foreach (var tableInfoModel in Tables)
 				{
 					Status = string.Format("Compiling Table '{0}'", tableInfoModel.GetClassName());
+					SharedMethods.CompileTable(tableInfoModel, this);
+				}
+				foreach (var tableInfoModel in Views)
+				{
+					Status = string.Format("Compiling View '{0}'", tableInfoModel.GetClassName());
 					SharedMethods.CompileTable(tableInfoModel, this);
 				}
 			}
@@ -369,19 +387,16 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			Status = "Reading Tables";
 
 			var counter = 2;
-			var createTables = SimpleWorkWithSyncContinue(() =>
+			var createTables = SimpleWork(() =>
 			{
-				return
-						new DbAccessLayer(DbAccessType.MsSql, connection).Select<TableInformations>()
-						                                                 .Select(
-						                                                 s =>
-							                                                 new TableInfoModel(s, databaseName,
-							                                                 new DbAccessLayer(DbAccessType.MsSql, connection)))
-						                                                 .Select(s => new TableInfoViewModel(s, this))
-						                                                 .ToList();
-			}, dbInfo =>
-			{
-				foreach (var source in dbInfo)
+				var tables = new DbAccessLayer(DbAccessType.MsSql, connection).Select<TableInformations>()
+				                                                              .Select(
+				                                                              s =>
+					                                                              new TableInfoModel(s, databaseName,
+					                                                              new DbAccessLayer(DbAccessType.MsSql, connection)))
+				                                                              .Select(s => new TableInfoViewModel(s, this))
+				                                                              .ToList();
+				foreach (var source in tables)
 				{
 					if (Tables.All(f => f.Info.TableName != source.Info.TableName))
 					{
@@ -389,16 +404,16 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 					}
 				}
 			});
-			var createViews = SimpleWorkWithSyncContinue(() =>
+			var createViews = SimpleWork(() =>
 			{
-				return
+				var views =
 						new DbAccessLayer(DbAccessType.MsSql, connection)
 								.Select<ViewInformation>()
 								.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
+								.Select(s => new TableInfoViewModel(s, this))
 								.ToList();
-			}, dbInfo =>
-			{
-				foreach (var source in dbInfo)
+
+				foreach (var source in views)
 				{
 					if (Views.All(f => f.Info.TableName != source.Info.TableName))
 					{
@@ -490,7 +505,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 							var originalTable = Tables.FirstOrDefault(s => s.Info.TableName == fileTable.Info.TableName);
 							if (originalTable != null)
 							{
-								defaultContextMapper.Map(fileTable, originalTable.SourceElement);
+								defaultContextMapper.Map(fileTable, originalTable);
 								foreach (var fileColumn in fileTable.ColumnInfos.ToArray())
 								{
 									var origianlColumn =
@@ -506,7 +521,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 									//}
 								}
 
-								originalTable.Refresh();
+								//originalTable.Refresh();
 							}
 							else
 							{
@@ -546,8 +561,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				var options = new ConfigStore();
 				options.StoredPrcInfoModels = StoredProcs.ToList();
-				options.Views = Views.Select(s => s.SourceElement).ToList();
-				options.Tables = Tables.Select(s => s.SourceElement).ToList();
+				options.Views = Views.Select(f => f.SourceElement).ToList();
+				options.Tables = Tables.Select(f => f.SourceElement).ToList();
 
 				options.GenerateConstructor = GenerateConstructor;
 				options.GenerateForgeinKeyDeclarations = GenerateForgeinKeyDeclarations;
@@ -649,6 +664,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private void AdjustNamesExecute(object sender)
 		{
 			SimpleWork(() => { SharedMethods.AutoAlignNames(Tables); });
+			SimpleWork(() => { SharedMethods.AutoAlignNames(Views); });
 		}
 
 		private bool CanAdjustNamesExecute(object sender)

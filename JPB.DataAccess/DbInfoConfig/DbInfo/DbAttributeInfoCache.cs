@@ -66,10 +66,14 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public static DbAttributeInfoCache<TAttr> WrapperOrNull(AttributeInfoCache firstOrDefault)
 		{
 			if (firstOrDefault == null)
+			{
 				return null;
+			}
 			if (typeof(TAttr) != firstOrDefault.Attribute.GetType())
+			{
 				throw new ArgumentException(string.Format("Wrong type supplyed expected '{0}' got '{1}'", typeof(TAttr).Name,
-					firstOrDefault.Attribute.GetType().Name));
+				firstOrDefault.Attribute.GetType().Name));
+			}
 
 			return new DbAttributeInfoCache<TAttr>(firstOrDefault);
 		}

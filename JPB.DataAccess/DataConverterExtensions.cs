@@ -69,12 +69,16 @@ namespace JPB.DataAccess
 		internal static object GetParamaterValue(this object source, DbConfig config, string name)
 		{
 			if (source == null)
+			{
 				throw new ArgumentNullException("source");
+			}
 
 			DbPropertyInfoCache propertyInfo;
 			config.GetOrCreateClassInfoCache(source.GetType()).Propertys.TryGetValue(name, out propertyInfo);
 			if (propertyInfo == null)
+			{
 				throw new ArgumentNullException("name");
+			}
 			return propertyInfo.GetConvertedValue(source);
 		}
 
@@ -119,7 +123,9 @@ namespace JPB.DataAccess
 				.Where(f => f.ForginKeyAttribute != null || f.ForginKeyDeclarationAttribute != null)
 				.FirstOrDefault(f => f.PropertyType == fkType || f.ForginKeyDeclarationAttribute != null && f.ForginKeyDeclarationAttribute.Attribute.ForeignType == fkType);
 			if (hasFk != null)
+			{
 				return hasFk.DbName;
+			}
 			return null;
 		}
 
@@ -155,7 +161,9 @@ namespace JPB.DataAccess
 
 				if (newValue == null && oldValue == null ||
 				    oldValue != null && (newValue == null || newValue.Equals(oldValue)))
+				{
 					continue;
+				}
 
 				propertyInfo.Setter.Invoke(@base, newValue);
 				updated = true;
@@ -166,7 +174,9 @@ namespace JPB.DataAccess
 		internal static object GetDefault(Type type)
 		{
 			if (type.IsValueType)
+			{
 				return Activator.CreateInstance(type);
+			}
 			return null;
 		}
 
@@ -207,9 +217,13 @@ namespace JPB.DataAccess
 		public static bool CheckForListInterface(this PropertyInfo info)
 		{
 			if (info.PropertyType == typeof(string))
+			{
 				return false;
+			}
 			if (info.PropertyType.GetInterface(typeof(IEnumerable).Name) != null)
+			{
 				return true;
+			}
 			return info.PropertyType.GetInterface(typeof(IEnumerable<>).Name) != null;
 		}
 
@@ -221,9 +235,13 @@ namespace JPB.DataAccess
 		public static bool CheckForListInterface(this DbPropertyInfoCache info)
 		{
 			if (info.PropertyType == typeof(string))
+			{
 				return false;
+			}
 			if (info.PropertyType.GetInterface(typeof(IEnumerable).Name) != null)
+			{
 				return true;
+			}
 			return info.PropertyType.GetInterface(typeof(IEnumerable<>).Name) != null;
 		}
 
@@ -272,7 +290,9 @@ namespace JPB.DataAccess
 			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
 				if (value == null)
+				{
 					return null;
+				}
 
 				t = Nullable.GetUnderlyingType(t);
 			}
@@ -289,23 +309,35 @@ namespace JPB.DataAccess
 				// ReSharper disable once UseIsOperator.1
 				// ReSharper disable once UseMethodIsInstanceOfType
 				if (typeof(long).IsAssignableFrom(valueType))
+				{
 					value = Enum.ToObject(t, value);
+				}
 				else if (value is string)
+				{
 					value = Enum.Parse(t, value as string, true);
+				}
 			}
 			else if (typeof(bool).IsAssignableFrom(t))
 			{
 				if (value is int)
+				{
 					value = value.Equals(1);
+				}
 				else if (value is string)
+				{
 					value = value.Equals("1");
+				}
 				else if (value is bool)
+				{
 					value = (bool) value;
+				}
 			}
 			else if (typeof(byte[]).IsAssignableFrom(t))
 			{
 				if (value is string)
+				{
 					value = Encoding.Default.GetBytes(value as string);
+				}
 			}
 
 			return Convert.ChangeType(value, t);

@@ -56,7 +56,9 @@ namespace JPB.DataAccess.DbInfoConfig
 			bool isNewCreated;
 			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
 			if (isNewCreated)
+			{
 				val.CheckForConfig(this);
+			}
 			return val;
 		}
 
@@ -70,7 +72,9 @@ namespace JPB.DataAccess.DbInfoConfig
 			bool isNewCreated;
 			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
 			if (isNewCreated)
+			{
 				val.CheckForConfig(this);
+			}
 			return val;
 		}
 
@@ -125,7 +129,9 @@ namespace JPB.DataAccess.DbInfoConfig
 			try
 			{
 				if (isThreadSave)
+				{
 					Monitor.Enter(SClassInfoCaches);
+				}
 				foreach (var type in t)
 				{
 					var element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
@@ -133,7 +139,9 @@ namespace JPB.DataAccess.DbInfoConfig
 					{
 						element = new DbClassInfoCache();
 						if (!type.IsAnonymousType())
+						{
 							SClassInfoCaches.Add(element);
+						}
 						element.Init(type, type.IsAnonymousType());
 						element.CheckForConfig(this);
 					}
@@ -142,7 +150,9 @@ namespace JPB.DataAccess.DbInfoConfig
 			finally
 			{
 				if (isThreadSave)
+				{
 					Monitor.Exit(SClassInfoCaches);
+				}
 			}
 			return this;
 		}

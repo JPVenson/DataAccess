@@ -59,6 +59,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		public bool FullFactory { get; internal set; }
 
 		/// <summary>
+		///     If known the WrapDbNullablesAttribute attribute
+		/// </summary>
+		public DbAttributeInfoCache<WrapDbNullablesAttribute> WrapNullables { get; set; }
+
+		/// <summary>
 		///     If known the ForModelAttribute attribute
 		/// </summary>
 		public DbAttributeInfoCache<ForModelAttribute> ForModel { get; private set; }
@@ -168,6 +173,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			}
 
 			ForModel = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes);
+			WrapNullables = DbAttributeInfoCache<WrapDbNullablesAttribute>.WrapperOrNull(Attributes);
 			SelectFactory = DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(Attributes);
 			var preConfig = MethodProxyAttribute == null;
 

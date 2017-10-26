@@ -26,7 +26,9 @@ namespace JPB.DataAccess.Anonymous
 		public void Dispose()
 		{
 			foreach (var anonymousObject in Objects)
+			{
 				anonymousObject.Dispose();
+			}
 			Objects.Clear();
 			ClassInfo = null;
 			Reference = null;

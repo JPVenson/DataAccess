@@ -78,11 +78,17 @@ namespace JPB.DataAccess.DbInfoConfig
 			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
+			{
 				throw new ArgumentNullException("methodName");
+			}
 			if (methodBody == null)
+			{
 				throw new ArgumentNullException("methodBody");
+			}
 			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
+			{
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
+			}
 			var mehtodInfo = new DbMethodInfoCache(methodBody, ClassInfoCache.Type, methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
@@ -95,11 +101,17 @@ namespace JPB.DataAccess.DbInfoConfig
 			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
+			{
 				throw new ArgumentNullException("methodName");
+			}
 			if (methodBody == null)
+			{
 				throw new ArgumentNullException("methodBody");
+			}
 			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
+			{
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
+			}
 			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
 			{
 				methodBody((Source) o, (Input) objects[0]);
@@ -115,11 +127,17 @@ namespace JPB.DataAccess.DbInfoConfig
 			params DbAttributeInfoCache[] attributes)
 		{
 			if (methodName == null)
+			{
 				throw new ArgumentNullException("methodName");
+			}
 			if (methodBody == null)
+			{
 				throw new ArgumentNullException("methodBody");
+			}
 			if (ClassInfoCache.Mehtods.Any(s => s.MethodName == methodName))
+			{
 				throw new ArgumentOutOfRangeException("methodName", "Method name does exist. Cannot define a Method twice");
+			}
 			var mehtodInfo = new DbMethodInfoCache((o, objects) => { return methodBody((Source) o); }, ClassInfoCache.Type,
 				methodName, attributes);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
@@ -133,12 +151,18 @@ namespace JPB.DataAccess.DbInfoConfig
 			params AttributeInfoCache[] attributes)
 		{
 			if (name == null)
+			{
 				throw new ArgumentNullException("name");
+			}
 			if (ClassInfoCache.Propertys.Any(s => s.Key == name))
+			{
 				throw new ArgumentOutOfRangeException("name", "Property name does exist. Cannot define a property twice");
+			}
 			if (setter == null && getter == null)
+			{
 				throw new ArgumentNullException("setter",
-					"Propertys must define at least one accessor. You cannot define a property without getter and setter");
+				"Propertys must define at least one accessor. You cannot define a property without getter and setter");
+			}
 			var propInfo = new DbPropertyInfoCache<T, TE>(name, setter, getter, attributes);
 			ClassInfoCache.Propertys.Add(name, propInfo);
 		}
@@ -150,9 +174,13 @@ namespace JPB.DataAccess.DbInfoConfig
 		public void CreateStaticProperty<TE>(string name, params AttributeInfoCache[] attributes)
 		{
 			if (name == null)
+			{
 				throw new ArgumentNullException("name");
+			}
 			if (ClassInfoCache.Propertys.Any(s => s.Key == name))
+			{
 				throw new ArgumentOutOfRangeException("name", "Property name does exist. Cannot define a property twice");
+			}
 			var propInfo = new DbAutoStaticPropertyInfoCache<TE>(name, typeof(T), attributes);
 			ClassInfoCache.Propertys.Add(name, propInfo);
 		}

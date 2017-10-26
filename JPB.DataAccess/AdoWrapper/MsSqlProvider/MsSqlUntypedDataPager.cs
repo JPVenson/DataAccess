@@ -82,7 +82,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			set
 			{
 				if (value)
+				{
 					throw new Exception("To be supported ... sory");
+				}
 				_cache = false;
 			}
 		}
@@ -123,9 +125,13 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			set
 			{
 				if (value >= 1)
+				{
 					_currentPage = value;
+				}
 				else
+				{
 					throw new InvalidOperationException("The current page must be bigger or equals 1");
+				}
 			}
 		}
 
@@ -159,11 +165,15 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			IDbCommand finalAppendCommand;
 
 			if (string.IsNullOrEmpty(SqlVersion))
+			{
 				SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+			}
 
 			SyncHelper(CurrentPageItems.Clear);
 			if (pk == null)
+			{
 				pk = typeof(T).GetPK(dbAccess.Config);
+			}
 
 			if (CommandQuery != null)
 			{
@@ -191,7 +201,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				if (AppendedComands.Any())
 				{
 					if (BaseQuery == null)
+					{
 						BaseQuery = dbAccess.CreateSelect<T>();
+					}
 
 					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
 						(current, comand) => dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
@@ -199,7 +211,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				else
 				{
 					if (BaseQuery == null)
+					{
 						BaseQuery = dbAccess.CreateSelect<T>();
+					}
 
 					finalAppendCommand = BaseQuery;
 				}
@@ -327,7 +341,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			set
 			{
 				if (value != null)
+				{
 					_syncHelper = value;
+				}
 			}
 		}
 
@@ -337,9 +353,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		protected virtual void RaiseNewPageLoaded()
 		{
 			if (!RaiseEvents)
+			{
 				return;
+			}
 			var handler = NewPageLoaded;
-			if (handler != null) handler();
+			if (handler != null)
+			{
+				handler();
+			}
 		}
 
 		/// <summary>
@@ -348,9 +369,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		protected virtual void RaiseNewPageLoading()
 		{
 			if (!RaiseEvents)
+			{
 				return;
+			}
 			var handler = NewPageLoading;
-			if (handler != null) handler();
+			if (handler != null)
+			{
+				handler();
+			}
 		}
 
 		/// <summary>
@@ -360,7 +386,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		private bool CheckVersionForFetch()
 		{
 			if (_checkRun != null)
+			{
 				return _checkRun.Value;
+			}
 
 			var versionParts = SqlVersion.Split('.');
 
@@ -382,13 +410,23 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			else if (major == 11)
 			{
 				if (minor > 0)
+				{
 					_checkRun = true;
+				}
 				else if (minor == 0)
+				{
 					if (build > 2100)
+					{
 						_checkRun = true;
+					}
 					else if (build == 2100)
+					{
 						if (revision >= 60)
+						{
 							_checkRun = true;
+						}
+					}
+				}
 			}
 			else
 			{

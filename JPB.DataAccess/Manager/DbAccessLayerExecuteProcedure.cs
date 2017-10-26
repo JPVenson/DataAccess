@@ -160,7 +160,9 @@ namespace JPB.DataAccess.Manager
 				sb.Append(queryParameter.Name.CheckParamter());
 				sb.Append(" ");
 				if (count < procParams.Length)
+				{
 					sb.Append(", ");
+				}
 			}
 
 			var procedureProcessor = new ProcedureProcessor(sb.ToString(), this);
@@ -204,7 +206,9 @@ namespace JPB.DataAccess.Manager
 			public IDbCommand CreateCommand(object target, IDatabase db)
 			{
 				if (TargetType == null)
+				{
 					TargetType = _dbAccessLayer.GetClassInfo(target.GetType());
+				}
 
 				var dbCommand = db.CreateCommand(Query);
 

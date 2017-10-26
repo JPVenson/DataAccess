@@ -33,19 +33,23 @@ namespace JPB.DataAccess
 			DbConfig config = null)
 		{
 			if (reader == null)
+			{
 				return null;
+			}
 
 			bool created;
 			var source = DbAccessLayer.CreateInstance(type, reader, out created);
 			if (created)
+			{
 				return source;
+			}
 
 			if (config == null)
+			{
 				config = new DbConfig(true);
+			}
 
-#pragma warning disable 618
 			return DbAccessLayer.ReflectionPropertySet(config, source, type, reader, null, accessType);
-#pragma warning restore 618
 		}
 
 		/// <summary>
@@ -127,9 +131,11 @@ namespace JPB.DataAccess
 					{
 						//Parameter is found twice in both commands so rename it
 						if (!autoRename)
+						{
 							throw new ArgumentOutOfRangeException("base",
-								string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
-									item.ParameterName));
+							string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
+							item.ParameterName));
+						}
 						var counter = seed;
 						var parameterName = item.ParameterName;
 						var buffParam = parameterName;
@@ -253,10 +259,12 @@ namespace JPB.DataAccess
 		{
 			var listofQueryParamter = new List<IQueryParameter>();
 			for (var i = 0; i < values.Count(); i++)
+			{
 				listofQueryParamter.Add(new QueryParameter(i.ToString(CultureInfo.InvariantCulture), values[i].Item2)
 				{
 					SourceType = values[i].Item1
 				});
+			}
 			return db.CreateCommandWithParameterValues(query, listofQueryParamter);
 		}
 
@@ -275,7 +283,9 @@ namespace JPB.DataAccess
 		{
 			var cmd = CreateCommand(db, query);
 			if (values == null)
+			{
 				return cmd;
+			}
 			foreach (var queryParameter in values)
 			{
 				var dbDataParameter = cmd.CreateParameter();
@@ -285,7 +295,9 @@ namespace JPB.DataAccess
 				cmd.Parameters.Add(dbDataParameter);
 			}
 			if (db.LastExecutedQuery != null)
+			{
 				db.LastExecutedQuery.Refresh();
+			}
 			return cmd;
 		}
 
@@ -304,7 +316,9 @@ namespace JPB.DataAccess
 		{
 			var cmd = CreateCommand(db, query);
 			if (values == null)
+			{
 				return cmd;
+			}
 			foreach (var queryParameter in values)
 			{
 				var dbDataParameter = cmd.CreateParameter();
@@ -314,20 +328,28 @@ namespace JPB.DataAccess
 				cmd.Parameters.Add(dbDataParameter);
 			}
 			if (db.LastExecutedQuery != null)
+			{
 				db.LastExecutedQuery.Refresh();
+			}
 			return cmd;
 		}
 
 		internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(this object parameter)
 		{
 			if (parameter == null)
+			{
 				return new IQueryParameter[0];
+			}
 
 			if (parameter is IQueryParameter)
+			{
 				return new[] {parameter as IQueryParameter};
+			}
 
 			if (parameter is IEnumerable<IQueryParameter>)
+			{
 				return parameter as IEnumerable<IQueryParameter>;
+			}
 
 			using (var dbConfig = new DbConfig(true))
 			{
@@ -369,7 +391,9 @@ namespace JPB.DataAccess
 		{
 			var filteredList = FilterDbSchemaMapping(type, ignore).ToArray();
 			if (filteredList.Any())
+			{
 				return filteredList.Aggregate((e, f) => e + ", " + f);
+			}
 			return string.Empty;
 		}
 

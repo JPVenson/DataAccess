@@ -205,8 +205,12 @@ namespace JPB.DataAccess.Manager
 			var plainCommand = Database.CreateCommand(
 				CreateSelectQueryFactory(GetClassInfo(type)).CommandText + " " + query);
 			if (paramenter != null)
+			{
 				foreach (var para in paramenter)
+				{
 					plainCommand.Parameters.AddWithValue(para.Name, para.Value, Database);
+				}
+			}
 			return plainCommand;
 		}
 
@@ -249,8 +253,12 @@ namespace JPB.DataAccess.Manager
 			params object[] parameter)
 		{
 			if (!parameter.Any())
+			{
 				if (type.SelectFactory != null)
+				{
 					return Database.CreateCommand(type.SelectFactory.Attribute.Query);
+				}
+			}
 
 			return GenericQueryCreation<SelectFactoryMethodAttribute>(type, (e, f) => CreateSelect(type, Database), null,
 				parameter);
@@ -285,29 +293,43 @@ namespace JPB.DataAccess.Manager
 			where TE : DbAccessTypeAttribute
 		{
 			if (type == null)
+			{
 				throw new ArgumentNullException("type");
+			}
 			if (fallback == null)
+			{
 				throw new ArgumentNullException("fallback");
+			}
 
 			var factoryAttribute = typeof(TE);
 
 			try
 			{
 				if (_isIndented)
+				{
 					if (Multipath)
+					{
 						return fallback(entity, Database);
+					}
 					else
+					{
 						throw new InvalidOperationException(
-							"This method is not allowed in the context of any FactoryMethod. Enable Multipath to allow the Intiligent Query creation");
+						"This method is not allowed in the context of any FactoryMethod. Enable Multipath to allow the Intiligent Query creation");
+					}
+				}
 				_isIndented = true;
 
 				var arguments = parameter.ToList();
 
 				//try to get the attribute for static selection
 				if (!arguments.Any())
+				{
 					if (factoryAttribute == typeof(SelectFactoryMethodAttribute) && type.SelectFactory != null
 					    && (!IsMultiProviderEnvironment || type.SelectFactory.Attribute.TargetDatabase == Database.TargetDatabase))
+					{
 						return DbAccessLayerHelper.CreateCommand(Database, type.SelectFactory.Attribute.Query);
+					}
+				}
 
 				var methods =
 					type.Mehtods
@@ -324,18 +346,26 @@ namespace JPB.DataAccess.Manager
 						var parameterInfos = s.Arguments.Where(f => typeof(RootQuery) != f.Type).ToArray();
 
 						if (parameterInfos.Length != arguments.Count)
+						{
 							return false;
+						}
 
 						for (var i = 0; i < parameterInfos.Length; i++)
 						{
 							var para = parameterInfos[i];
 							if (para.ParameterInfo.IsOptional)
+							{
 								continue;
+							}
 							var tryParam = arguments[i];
 							if (tryParam == null)
+							{
 								return false;
+							}
 							if (!(para.Type == tryParam.GetType()))
+							{
 								return false;
+							}
 						}
 						return true;
 					}).ToArray();
@@ -343,7 +373,9 @@ namespace JPB.DataAccess.Manager
 					if (searchMethodWithFittingParams.Length != 1)
 					{
 						if (CheckFactoryArguments && arguments.Any())
+						{
 							ThrowNoFactoryFoundException<TE>(arguments);
+						}
 						return fallback(entity, Database);
 					}
 
@@ -355,7 +387,9 @@ namespace JPB.DataAccess.Manager
 						&& method.MethodInfo.IsStatic)
 					{
 						if (CheckFactoryArguments && arguments.Any())
+						{
 							ThrowNoFactoryFoundException<TE>(arguments);
+						}
 						return fallback(entity, Database);
 					}
 
@@ -371,7 +405,9 @@ namespace JPB.DataAccess.Manager
 
 						queryBuilder = Query();
 						if (cleanParams == null)
+						{
 							cleanParams = new List<object>();
+						}
 
 						cleanParams.Insert(0, queryBuilder);
 					}
@@ -404,7 +440,9 @@ namespace JPB.DataAccess.Manager
 					}
 				}
 				if (CheckFactoryArguments && arguments.Any())
+				{
 					ThrowNoFactoryFoundException<TE>(arguments);
+				}
 				return fallback(entity, Database);
 			}
 			finally
@@ -421,11 +459,15 @@ namespace JPB.DataAccess.Manager
 					"CheckFactoryArguments is activated and arguments are provided but no factory machtes the given arguments");
 			var types = new List<string>();
 			foreach (var argument in arguments)
+			{
 				types.Add(argument.GetType().ToString());
+			}
 
 			var data = new List<string>();
 			foreach (var argument in arguments)
+			{
 				data.Add(argument.ToString());
+			}
 			invalidOperationException.Data.Add("FactoryType", typeof(TE));
 			invalidOperationException.Data.Add("Types", types);
 			invalidOperationException.Data.Add("Data", data);
@@ -440,7 +482,9 @@ namespace JPB.DataAccess.Manager
 		public IDbCommand CreateSelect(Type type, object pk)
 		{
 			if (GetClassInfo(type).PrimaryKeyProperty == null)
+			{
 				throw new NotSupportedException(string.Format("Class '{0}' does not define any Primary key", type.Name));
+			}
 
 			var query = CreateSelectQueryFactory(GetClassInfo(type)).CommandText
 			            + " WHERE " + GetClassInfo(type).PrimaryKeyProperty.DbName + " = @pk";
@@ -497,7 +541,9 @@ namespace JPB.DataAccess.Manager
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
 			if (prefix != null)
+			{
 				sb.Append(prefix + " ");
+			}
 			sb.Append(columns);
 			sb.Append(" FROM ");
 			sb.Append(classType.TableName);
@@ -601,9 +647,13 @@ namespace JPB.DataAccess.Manager
 						var query = DbAccessLayerHelper.CreateCommand(s, queryString);
 
 						foreach (var item in paramenter)
+						{
 							query.Parameters.AddWithValue(item.Name, item.Value, s);
+						}
 						if (Database.LastExecutedQuery != null)
+						{
 							Database.LastExecutedQuery.Refresh();
+						}
 						Database.PrepaireRemoteExecution(query);
 						return RunSelect(type, query);
 					}
@@ -658,7 +708,9 @@ namespace JPB.DataAccess.Manager
 		public object[] SelectWhere(Type type, string where, IEnumerable<IQueryParameter> paramenter)
 		{
 			if (!where.StartsWith("WHERE"))
-				where = where.Insert(0, "WHERE ");
+			{
+				@where = @where.Insert(0, "WHERE ");
+			}
 
 			var query = CreateSelect(type, where, paramenter);
 			return RunSelect(type, query);
@@ -822,7 +874,9 @@ namespace JPB.DataAccess.Manager
 		public object[] SelectNative(Type type, IDbCommand command, bool multiRow)
 		{
 			if (!multiRow)
+			{
 				return SelectNative(type, command);
+			}
 
 			//var guessingRelations = new Dictionary<PropertyInfo, IDbCommand>();
 
@@ -842,7 +896,9 @@ namespace JPB.DataAccess.Manager
 			var sel = RunSelect(type, command);
 
 			if (ProcessNavigationPropertys && GetClassInfo(type).HasRelations)
+			{
 				return sel.AsParallel().Select(s => LoadNavigationProps(s)).ToArray();
+			}
 
 			return sel;
 		}
@@ -863,7 +919,9 @@ namespace JPB.DataAccess.Manager
 					propertyInfo.GetCustomAttributes().FirstOrDefault(s => s is ForeignKeyAttribute) as
 						ForeignKeyAttribute;
 				if (firstOrDefault == null)
+				{
 					continue;
+				}
 				Type targetType = null;
 				if (propertyInfo.CheckForListInterface())
 				{
@@ -872,7 +930,9 @@ namespace JPB.DataAccess.Manager
 					targetType = propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 
 					if (string.IsNullOrEmpty(targetName))
+					{
 						targetName = targetType.GetPK(Config);
+					}
 
 					sqlCommand = CreateSelect(targetType,
 						" WHERE " + targetName + " = @pk", new List<IQueryParameter>
@@ -885,7 +945,9 @@ namespace JPB.DataAccess.Manager
 					var fkproperty = source.GetParamaterValue(Config, firstOrDefault.KeyName);
 
 					if (fkproperty == null)
+					{
 						continue;
+					}
 
 					targetType = propertyInfo.PropertyType;
 					sqlCommand = CreateSelect(targetType, fkproperty);
@@ -902,10 +964,14 @@ namespace JPB.DataAccess.Manager
 					var reproCollection = constructorInfo.Invoke(new object[] {orDefault});
 					propertyInfo.Setter.Invoke(source, reproCollection);
 					foreach (var item in orDefault)
+					{
 						LoadNavigationProps(item);
+					}
 				}
 				if (propertyInfo.CheckForListInterface())
+				{
 					continue;
+				}
 
 				var @default = orDefault.FirstOrDefault();
 				propertyInfo.Setter.Invoke(source, @default);
@@ -927,8 +993,12 @@ namespace JPB.DataAccess.Manager
 			var objects = RunSelect(type, command);
 
 			if (ProcessNavigationPropertys && GetClassInfo(type).HasRelations)
+			{
 				foreach (var model in objects)
+				{
 					LoadNavigationProps(model);
+				}
+			}
 
 			return objects.ToArray();
 		}
@@ -984,7 +1054,9 @@ namespace JPB.DataAccess.Manager
 			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
 
 			foreach (var enumarateFromDynamic in enumarateFromDynamics)
+			{
 				command.Parameters.AddWithValue(enumarateFromDynamic.Name, enumarateFromDynamic.Value, Database);
+			}
 
 			return RunSelect(type, command);
 		}

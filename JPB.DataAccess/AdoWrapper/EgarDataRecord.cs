@@ -12,6 +12,24 @@ using JPB.DataAccess.DbInfoConfig;
 namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
+	///		A EgarDataRecord that returns <c>null</c> instedt of <c>DbNull</c> on null fields
+	/// </summary>
+	public class EgarNullableWrappedRecord : EgarDataRecord
+	{
+		public EgarNullableWrappedRecord(IDataRecord sourceRecord, DbConfig configuration)
+			: base(sourceRecord, configuration)
+		{
+
+		}
+
+		protected internal override object GetValueInternal(int i)
+		{
+			var val = base.GetValueInternal(i);
+			return val == DBNull.Value ? null : val;
+		}
+	}
+
+	/// <summary>
 	///     Provides an IDataRecord Access that enumerates the Source record. Not ThreadSave
 	/// </summary>
 	/// <seealso cref="System.Data.IDataRecord" />
@@ -21,7 +39,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <summary>
 		///     The access layer
 		/// </summary>
-		private readonly DbConfig _configStore;
+		internal readonly DbConfig _configStore;
 
 		private IDictionary<int, string> _dataOrder;
 
@@ -62,6 +80,10 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </value>
 		internal Array Objects { get; set; }
 
+		/// <summary>
+		/// The Headers sorted by the occurence in the Class
+		/// (Sorted for Performance reasons)
+		/// </summary>
 		protected string[] MetaHeader { get; set; }
 
 
@@ -112,6 +134,11 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public object GetValue(int i)
 		{
+			return GetValueInternal(i);
+		}
+
+		protected internal virtual object GetValueInternal(int i)
+		{
 			return Objects.GetValue(i);
 		}
 
@@ -127,8 +154,10 @@ namespace JPB.DataAccess.AdoWrapper
 			for (var i = 0; i < Objects.Length; i++)
 			{
 				if (values.Length > i)
+				{
 					break;
-				values.SetValue(Objects.GetValue(i), i);
+				}
+				values.SetValue(GetValueInternal(i), i);
 			}
 			return values.Length;
 		}
@@ -192,17 +221,25 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			var value = (byte[]) GetValue(i);
 			if (fieldOffset > value.Length)
+			{
 				throw new ArgumentOutOfRangeException("fieldOffset");
+			}
 
 			if (bufferoffset > buffer.Length)
+			{
 				throw new ArgumentOutOfRangeException("bufferoffset");
+			}
 
 			if (length > value.Length)
+			{
 				throw new ArgumentOutOfRangeException("bufferoffset");
+			}
 
 			long j;
 			for (j = fieldOffset; j < value.Length || j < length; j++)
+			{
 				buffer[j + bufferoffset] = value[j];
+			}
 			return j;
 		}
 
@@ -241,17 +278,25 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			var value = (char[]) GetValue(i);
 			if (fieldoffset > value.Length)
+			{
 				throw new ArgumentOutOfRangeException("fieldoffset");
+			}
 
 			if (bufferoffset > buffer.Length)
+			{
 				throw new ArgumentOutOfRangeException("bufferoffset");
+			}
 
 			if (length > value.Length)
+			{
 				throw new ArgumentOutOfRangeException("bufferoffset");
+			}
 
 			long j;
 			for (j = fieldoffset; j < value.Length || j < length; j++)
+			{
 				buffer[j + bufferoffset] = value[j];
+			}
 			return j;
 		}
 
@@ -410,7 +455,9 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				var value = GetValue(i);
 				if (value is DBNull)
+				{
 					return null;
+				}
 				return value;
 			}
 		}
@@ -428,7 +475,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				return Objects.GetValue(GetOrdinal(name));
+				return GetValueInternal(GetOrdinal(name));
 				throw new IndexOutOfRangeException("Name is unkown");
 			}
 		}

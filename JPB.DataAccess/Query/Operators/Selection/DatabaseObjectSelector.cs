@@ -42,7 +42,10 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		/// <exception cref="ArgumentNullException">alias</exception>
 		public DatabaseObjectSelector Alias(string alias)
 		{
-			if (alias == null) throw new ArgumentNullException("alias");
+			if (alias == null)
+			{
+				throw new ArgumentNullException("alias");
+			}
 			return new DatabaseObjectSelector(this, alias);
 		}
 
@@ -56,7 +59,9 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		public SelectQuery<TPoco> Table<TPoco>(params object[] argumentsForFactory)
 		{
 			if (argumentsForFactory == null)
+			{
 				throw new ArgumentNullException("argumentsForFactory");
+			}
 			var cmd =
 				ContainerObject.AccessLayer.CreateSelectQueryFactory(ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),
 					argumentsForFactory);
@@ -71,8 +76,10 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		public ColumnChooser<TPoco> Only<TPoco>()
 		{
 			if (_currentIdent == null)
+			{
 				_currentIdent = string.Format("{0}_{1}", ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).TableName,
-					ContainerObject.GetNextParameterId());
+				ContainerObject.GetNextParameterId());
+			}
 			return new ColumnChooser<TPoco>(this, new List<string>(), _currentIdent);
 		}
 	}

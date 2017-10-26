@@ -41,7 +41,9 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		public OrderByColumn<TPoco> OrderBy(bool ascending)
 		{
 			if (ascending)
+			{
 				return this;
+			}
 			return Descending;
 		}
 
