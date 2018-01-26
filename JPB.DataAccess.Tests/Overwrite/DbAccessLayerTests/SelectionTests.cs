@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		{
 			DataMigrationHelper.AddUsers(100, DbAccess);
 			var firstAvaibleUser =
-				DbAccess.Query().Top<Base.TestModels.CheckWrapperBaseTests.Users>(1).ForResult<Users>().First();
+				DbAccess.Query().Select.Table<Base.TestModels.CheckWrapperBaseTests.Users>().LimitBy(1).ForResult<Users>().First();
 
 			var refSelect = DbAccess.Select<Users_PK>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(refSelect);

@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
@@ -83,6 +84,29 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(cc._columns, Is.Empty);
 			var cc2 = cc.Column(f => f.UserID);
 			Assert.That(cc2._columns, Contains.Item(Prefix + "." + UsersMeta.PrimaryKeyName));
+		}
+
+		[Test]
+		public void CheckPkSelection()
+		{
+			var cc = new ColumnChooser<Users>(_fakeDb, new List<string>(), null).PrimaryKey();
+			Assert.That(cc, Is.Not.Null);
+			Assert.That(cc._columns, Contains.Item(UsersMeta.PrimaryKeyName));
+		}
+
+		[Test]
+		public void CheckFkSelection()
+		{
+			var cc = new ColumnChooser<Image>(_fakeDb, new List<string>(), null).ForginKey<Book>();
+			Assert.That(cc, Is.Not.Null);
+			Assert.That(cc._columns, Contains.Item(ImageMeta.ForgeinKeyName));
+		}
+
+		[Test]
+		public void CheckInvalidFkSelection()
+		{
+			var cc = new ColumnChooser<Image>(_fakeDb, new List<string>(), null);
+			Assert.That(() => cc.ForginKey<Users>(), Throws.Exception.TypeOf<InvalidOperationException>());
 		}
 	}
 }

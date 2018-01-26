@@ -21,14 +21,4 @@
 		/// </value>
 		IReplicationNode<TEntity> WithReplication { get; }
 	}
-
-	internal interface ITriggerForTableCollectionInternalUsage<TEntity>
-		: ITriggerForTableCollection<TEntity>
-	{
-		ISequentialTriggerCollection<TEntity> For { get; }
-
-		ISequentialTriggerCollection<TEntity> After { get; }
-
-		ITriggerInsteadtOfCollection<TEntity> InsteadOf { get; }
-	}
 }

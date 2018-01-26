@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
@@ -8,6 +9,7 @@ using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 #endregion
 
@@ -162,9 +164,48 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		}
 
 		[Test]
-		public void SimpleParallelAccess()
+		[TestCase(999)]
+		[TestCase(9999)]
+		[TestCase(99999)]
+		[TestCase(999999)]
+		public void SimpleParallelAccess(int limit)
 		{
-			Assert.That(() => { Parallel.For(0, 999, d => { _users.Add(new Users()); }); }, Throws.Nothing);
+			Assert.That(() => { Parallel.For(0, limit, new ParallelOptions() { MaxDegreeOfParallelism = 6 }, d => { _users.Add(new Users()); }); }, Throws.Nothing);
+			Assert.That(_users.Count, Is.EqualTo(limit));
+			var idCounter = 1;
+			foreach (var user in _users)
+			{
+				Assert.That(user, Is.Not.Null.And.Property(nameof(Users.UserID)).EqualTo(idCounter));
+				idCounter++;
+			}
+		}
+
+		[TestCase(2, new[] { 999, 9999, 99999 })]
+		public void ParallelAccessSpeedEval(int iterateCount, int[] limits)
+		{
+			var results = new List<Tuple<int, long>>();
+			foreach (var limit in limits)
+			{
+				var iterationResults = new List<Tuple<int, long>>();
+				for (int i = 0; i < iterateCount; i++)
+				{
+					var sp = new Stopwatch();
+					sp.Start();
+					SimpleParallelAccess(limit);
+					sp.Stop();
+					iterationResults.Add(new Tuple<int, long>(limit, sp.ElapsedMilliseconds));
+					TestInit();
+				}
+				results.Add(iterationResults.Aggregate((e, f) => new Tuple<int, long>(e.Item1 + f.Item1, e.Item2 + f.Item2)));
+			}
+
+			foreach (var result in results)
+			{
+				TestContext.Out.WriteLine($"Enumerating {iterateCount} times over {result.Item1} users took {result.Item2} ms that is {result.Item2 / (float)result.Item1} ms per 1 user");
+			}
+
+			var allITems = results.Aggregate((e, f) => new Tuple<int, long>(e.Item1 + f.Item1, e.Item2 + f.Item2));
+			TestContext.Out.WriteLine($"Enumerating All {allITems.Item1} users took {allITems.Item2} ms that is {allITems.Item2 / (float)allITems.Item1} ms per 1 user");
 		}
 	}
 }

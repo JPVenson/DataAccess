@@ -55,6 +55,31 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		}
 
 		/// <summary>
+		///		Selects the current PrimaryKey
+		/// </summary>
+		/// <returns></returns>
+		public ColumnChooser<TPoco> PrimaryKey()
+		{
+			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
+			return Column(tCache.PrimaryKeyProperty.DbName);
+		}
+
+		/// <summary>
+		///		Selects the ForginKey to the table.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">If there are 0 or more then 1 forginKeys</exception>
+		/// <returns></returns>
+		public ColumnChooser<TPoco> ForginKey<TFkPoco>()
+		{
+			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
+			var tProp = tCache.Propertys.Values
+			                  .Single(e =>
+				                  e.ForginKeyDeclarationAttribute != null &&
+				                  e.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TFkPoco));
+			return Column(tProp.DbName);
+		}
+
+		/// <summary>
 		///     Selectes a column based on a Propertie
 		/// </summary>
 		/// <typeparam name="TA">The type of a.</typeparam>

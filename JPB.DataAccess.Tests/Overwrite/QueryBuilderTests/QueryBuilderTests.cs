@@ -354,9 +354,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			var usernamePre = user.UserName;
 			user.UserName = Guid.NewGuid().ToString();
 			DbAccessLayer.Query().Update.Table<Users>().Set
-				.ColumnTo(f => f.UserName, user.UserName)
-				.And
-				.ColumnTo(f => f.UserName, user.UserName)
+				.Column(f => f.UserName).Value(user.UserName)
 				.ExecuteNonQuery();
 			user = DbAccessLayer.Select<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));

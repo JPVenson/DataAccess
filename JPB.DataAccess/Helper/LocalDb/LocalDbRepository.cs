@@ -16,6 +16,7 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper.LocalDb.Constraints;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Collections;
+using JPB.DataAccess.Helper.LocalDb.Index;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Helper.LocalDb.Trigger;
 using JPB.DataAccess.Manager;
@@ -102,6 +103,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private DbClassInfoCache _typeInfo;
 		internal IDictionary<object, TEntity> Base;
 		internal DbClassInfoCache TypeKeyInfo;
+		private IIndexCollectionInteralUsage<TEntity> _indexes;
 
 		/// <summary>
 		///     Returns an object with the given Primarykey
@@ -142,6 +144,19 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     Access to a collection of Constraints valid for this Table
 		/// </summary>
 		public IConstraintCollection<TEntity> Constraints { get; private set; }
+
+		/// <summary>
+		/// List of all Indexes on this Table
+		/// </summary>
+		public IIndexCollection<TEntity> Indexes
+		{
+			get { return _indexes; }
+		}
+
+		private IIndexCollectionInteralUsage<TEntity> IndexesUsage
+		{
+			get { return _indexes; }
+		}
 
 		/// <summary>
 		///     The used Config Store
@@ -218,13 +233,14 @@ namespace JPB.DataAccess.Helper.LocalDb
 					{
 						throw new InvalidOperationException(string.Format("The given type did not provide a Full ado.net constructor " +
 						                                                  "and the setting of the propertys did not succeed. " +
-						                                                  "Type: '{0}'", elementToAdd.GetType()));
+						                                                  "Type: '{0}'", typeof(TEntity)));
 					}
 				}
 
 				if (!TriggersUsage.InsteadOf.OnInsert(elementToAdd))
 				{
 					Base.Add(id, elementToAdd);
+					IndexesUsage.Add(item);
 				}
 				try
 				{
@@ -340,12 +356,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 				}
 				catch (Exception e)
 				{
-					hasInvalidOp = e;
-				}
-				if (hasInvalidOp != null)
-				{
 					Base.Add(id, item);
-					throw hasInvalidOp;
+					throw;
 				}
 				Constraints.Unique.ItemRemoved(item);
 			}
@@ -652,6 +664,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 			Constraints = new ConstraintCollection<TEntity>(this, primaryKeyConstraint);
 			_triggers = new TriggerForTableCollection<TEntity>(this);
+			_indexes = new IndexCollection<TEntity>();
 			Base = new ConcurrentDictionary<object, TEntity>();
 			_databaseDatabase.AddTable(this);
 			_databaseDatabase.SetupDone += DatabaseDatabaseOnSetupDone;

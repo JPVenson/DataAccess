@@ -558,6 +558,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		{
 			var retval = "";
 
+			if (sp.IsNullable && sp.Value == null)
+			{
+				return "{NULL}";
+			}
+
 			switch (sp.SqlDbType)
 			{
 				case SqlDbType.BigInt:

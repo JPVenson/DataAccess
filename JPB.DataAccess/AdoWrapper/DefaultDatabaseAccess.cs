@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DebuggerHelper;
@@ -302,9 +303,9 @@ namespace JPB.DataAccess.AdoWrapper
 		public void Connect(IsolationLevel? levl = null)
 		{
 			//check for an Active connection
-			if (null == _conn2)
-			//No Connection open one
+			if (_conn2 == null)
 			{
+				//No Connection open one
 				_conn2 = GetConnection();
 			}
 			//Connection exists check for open
@@ -380,22 +381,23 @@ namespace JPB.DataAccess.AdoWrapper
 				}
 			}
 
-			if (_conn2 != null && _handlecounter == 0)
+			if (_conn2 == null || _handlecounter != 0)
 			{
-				using (_conn2)
-				{
-					if (Transaction != null)
-					{
-						using (Transaction)
-						{
-							Transaction.Commit();
-						}
-						Transaction = null;
-					}
-					_conn2.Close();
-				}
-				_conn2 = null;
+				return;
 			}
+			using (_conn2)
+			{
+				if (Transaction != null)
+				{
+					using (Transaction)
+					{
+						Transaction.Commit();
+					}
+					Transaction = null;
+				}
+				_conn2.Close();
+			}
+			_conn2 = null;
 			//GC.Collect();
 		}
 
@@ -593,16 +595,11 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="action"></param>
 		public void Run(Action<IDatabase> action)
 		{
-			try
+			Run((dd) =>
 			{
-				Connect();
-
-				action(this);
-			}
-			finally
-			{
-				CloseConnection();
-			}
+				action(dd);
+				return (object) null;
+			});
 		}
 
 		/// <summary>
@@ -627,6 +624,40 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		/// <param name="func"></param>
+		/// <returns></returns>
+		public async Task RunAsync(Func<IDatabase, Task> func)
+		{
+			await RunAsync(async (dd) =>
+			{
+				await func(dd);
+				return (object)null;
+			});
+		}
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		/// <param name="func"></param>
+		/// <returns></returns>
+		public async Task<T> RunAsync<T>(Func<IDatabase, Task<T>> func)
+		{
+			try
+			{
+				Connect();
+				return await func(this);
+			}
+			finally
+			{
+				CloseConnection();
+			}
+		}
+
+		/// <summary>
 		///     Creates a new Transaction and executes the Action inside it. Then closes the Transaction
 		/// </summary>
 		/// <param name="action"></param>
@@ -643,25 +674,11 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="transaction"></param>
 		public void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction)
 		{
-			var preState = _handlecounter;
-			try
+			RunInTransaction((dd) =>
 			{
-				Connect(transaction);
-
-				action(this);
-			}
-			catch
-			{
-				TransactionRollback();
-				throw;
-			}
-			finally
-			{
-				if (preState < _handlecounter)
-				{
-					CloseConnection();
-				}
-			}
+				action(dd);
+				return (object)null;
+			}, GetDefaultTransactionLevel());
 		}
 
 
@@ -686,15 +703,36 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction)
 		{
+			return RunInTransactionAsync(async (dd) => await Task.FromResult(func(dd)), transaction).Result;
+		}
+
+		/// <summary>
+		///     Runs the in transaction.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="func">The function.</param>
+		/// <returns></returns>
+		public async Task<T> RunInTransactionAsync<T>(Func<IDatabase, Task<T>> func)
+		{
+			return await RunInTransaction(func, GetDefaultTransactionLevel());
+		}
+
+
+		/// <summary>
+		///     Runs the in transaction.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="func">The function.</param>
+		/// <param name="transaction">The transaction.</param>
+		/// <returns></returns>
+		public async Task<T> RunInTransactionAsync<T>(Func<IDatabase, Task<T>> func, IsolationLevel transaction)
+		{
+			var preState = _handlecounter;
 			try
 			{
-				//defaulting it
-				//Connect(IsolationLevel.ReadUncommitted);
 				Connect(transaction);
 
-				var res = func(this);
-
-				return res;
+				return await func(this);
 			}
 			catch
 			{
@@ -703,7 +741,10 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 			finally
 			{
-				CloseConnection();
+				if (preState < _handlecounter)
+				{
+					CloseConnection();
+				}
 			}
 		}
 

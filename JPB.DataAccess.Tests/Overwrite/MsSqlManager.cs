@@ -52,7 +52,7 @@ namespace JPB.DataAccess.Tests
 
 		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
-			var dbname = string.Format("YAORM_TestDb_Test_MsSQL_{0}", testName);
+			var dbname = string.Format("YAORM_2_TestDb_Test_MsSQL_{0}", testName);
 			if (expectWrapper != null)
 			{
 				expectWrapper.Database.CloseAllConnection();

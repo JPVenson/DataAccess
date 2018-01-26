@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 		/// <summary>
 		///     The lock root
 		/// </summary>
-		private readonly object LockRoot;
+		private readonly object _lockRoot;
 
 		private readonly DbPropertyInfoCache _indexer;
 
@@ -44,7 +44,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 			DbPropertyInfoCache column,
 			IEqualityComparer<TKey> elementComparer = null)
 		{
-			LockRoot = new object();
+			_lockRoot = new object();
 			if (name == null)
 			{
 				throw new ArgumentNullException("name");
@@ -78,7 +78,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 		/// <param name="item">The item.</param>
 		public void Add(TEntity item)
 		{
-			lock (LockRoot)
+			lock (_lockRoot)
 			{
 				_index.Add(GetKey(item), item);
 			}
@@ -90,7 +90,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 		/// <param name="item">The item.</param>
 		public void Delete(TEntity item)
 		{
-			lock (LockRoot)
+			lock (_lockRoot)
 			{
 				_index.Remove(GetKey(item));
 			}
@@ -102,7 +102,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 		/// <param name="item">The item.</param>
 		public void Update(TEntity item)
 		{
-			lock (LockRoot)
+			lock (_lockRoot)
 			{
 				Delete(item);
 				Add(item);
@@ -114,9 +114,13 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 			return GetEnumerator();
 		}
 
+		/// <inheritdoc />
 		public IEnumerator<TEntity> GetEnumerator()
 		{
-			return _index.Select(f => f.Value).GetEnumerator();
+			lock (_lockRoot)
+			{
+				return _index.Select(f => f.Value).GetEnumerator();
+			}
 		}
 	}
 }

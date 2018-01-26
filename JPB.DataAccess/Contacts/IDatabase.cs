@@ -2,6 +2,7 @@
 
 using System;
 using System.Data;
+using System.Threading.Tasks;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
@@ -191,6 +192,12 @@ namespace JPB.DataAccess.Contacts
 		///     Required
 		///     Opens a Connection or reuse an existing one and then execute the action
 		/// </summary>
+		Task RunAsync(Func<IDatabase, Task> func);
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
 		void RunInTransaction(Action<IDatabase> action);
 
 		/// <summary>
@@ -198,6 +205,18 @@ namespace JPB.DataAccess.Contacts
 		///     Opens a Connection or reuse an existing one and then execute the action
 		/// </summary>
 		void RunInTransaction(Action<IDatabase> action, IsolationLevel transaction);
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		Task<T> RunInTransactionAsync<T>(Func<IDatabase, Task<T>> func);
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		Task<T> RunInTransactionAsync<T>(Func<IDatabase, Task<T>> func, IsolationLevel transaction);
 
 		/// <summary>
 		///     Required

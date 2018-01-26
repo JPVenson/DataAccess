@@ -27,8 +27,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			var singleEntity = DbAccess
 				.Query()
-				.Top<Users>(1)
-				.ForResult<Users>()
+				.Select.Table<Users>()
+				.LimitBy(1)
 				.Single();
 
 			var id = singleEntity.UserID;
@@ -59,7 +59,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DataMigrationHelper.AddUsers(1, DbAccess);
 			var singleEntity = DbAccess
 				.Query()
-				.Top<Base.TestModels.CheckWrapperBaseTests.Users>(1)
+				.Select.Table<Base.TestModels.CheckWrapperBaseTests.Users>()
+				.LimitBy(1)
 				.ForResult<Users>()
 				.Single();
 			var id = singleEntity.UserID;
@@ -90,7 +91,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DataMigrationHelper.AddUsers(1, DbAccess);
 			var query = DbAccess
 				.Query()
-				.Top<Users>(1);
+				.Select
+				.Table<Users>()
+				.LimitBy(1);
 			var singleEntity = query
 				.ForResult<Users>()
 				.Single();

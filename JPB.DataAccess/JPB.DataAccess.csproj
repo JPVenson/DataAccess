@@ -201,6 +201,7 @@
     <Compile Include="Contacts\ILocalDbReposetoryBase.cs" />
     <Compile Include="Helper\LocalDb\Index\DbIndex.cs" />
     <Compile Include="Helper\LocalDb\Index\IDbIndex.cs" />
+    <Compile Include="Helper\LocalDb\Index\IndexCollection.cs" />
     <Compile Include="Helper\LocalDb\LocalDataPager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbManager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbRepository.cs" />
@@ -213,6 +214,8 @@
     <Compile Include="Helper\LocalDb\Scopes\IdentityInsertScope.cs" />
     <Compile Include="Helper\LocalDb\Scopes\ReplicationScope.cs" />
     <Compile Include="Helper\LocalDb\TransactionalItem.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\IIndexCollection.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\IIndexCollectionInteralUsage.cs" />
     <Compile Include="Helper\LocalDb\Trigger\IInsteadtOfActionToken.cs" />
     <Compile Include="Helper\LocalDb\Trigger\InsteadtOfActionToken.cs" />
     <Compile Include="Helper\LocalDb\Trigger\IReplicationNode.cs" />
@@ -220,6 +223,7 @@
     <Compile Include="Helper\LocalDb\Trigger\ISequentialTriggerCollection.cs" />
     <Compile Include="Helper\LocalDb\Trigger\ITriggerException.cs" />
     <Compile Include="Helper\LocalDb\Trigger\ITriggerForTableCollection.cs" />
+    <Compile Include="Helper\LocalDb\Trigger\ITriggerForTableCollectionInternalUsage.cs" />
     <Compile Include="Helper\LocalDb\Trigger\ReplicationNode.cs" />
     <Compile Include="Helper\LocalDb\Trigger\SequentialSequentialTriggerCollection.cs" />
     <Compile Include="Helper\LocalDb\Trigger\SequentialToken.cs" />
