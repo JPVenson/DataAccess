@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -115,7 +116,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(
 				() =>
 					testUser =
-						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect {UserName = testInsertName}),
+						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
 				Is.Not.Null
 					.And.Property("UserId").Not.EqualTo(0));
 
@@ -135,12 +136,12 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(
 				() =>
 					testUser =
-						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect {UserName = testInsertName}),
+						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
 				Is.Not.Null
 					.And.Property("UserId").Not.EqualTo(0));
 
 			var selTestUser =
-				DbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] {testUser.UserId})
+				DbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId })
 					.FirstOrDefault();
 			Assert.That(selTestUser, Is.Not.Null
 				.And.Property("UserName").EqualTo(testUser.UserName)
@@ -154,11 +155,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var resultSelect1 = DbAccess.ExecuteGenericCommand("Select 10", null);
 			Assert.AreEqual(resultSelect1, -1);
 
-			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test", new {test = 10});
+			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test", new { test = 10 });
 			Assert.AreEqual(resultSelect1, -1);
 
 			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test",
-				new List<QueryParameter> {new QueryParameter("test", 10)});
+				new List<QueryParameter> { new QueryParameter("test", 10) });
 			Assert.AreEqual(resultSelect1, -1);
 		}
 
@@ -233,7 +234,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 
 		[Test]
-		public void TransactionTest()
+		public void TransactionTestRollback()
 		{
 			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
@@ -246,6 +247,70 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				DbAccess.Delete<Users>();
 				dd.TransactionRollback();
 			});
+
+			var countAfter =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			Assert.That(count, Is.EqualTo(countAfter));
+		}
+
+		[Test]
+		public void TransactionTestExceptional()
+		{
+			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+
+			DataMigrationHelper.AddUsers(250, DbAccess);
+			var count =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+
+			Assert.That(() => DbAccess.Database.RunInTransaction(dd =>
+			{
+				DbAccess.Delete<Users>();
+				throw new Exception();
+			}), Throws.Exception);
+
+			var countAfter =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			Assert.That(count, Is.EqualTo(countAfter));
+		}
+
+		[Test]
+		public async Task TransactionAsyncTest()
+		{
+			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+
+			DataMigrationHelper.AddUsers(250, DbAccess);
+			var count =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+
+			await DbAccess.Database.RunInTransactionAsync(async dd =>
+			{
+				DbAccess.Delete<Users>();
+				await Task.FromResult("");
+				dd.TransactionRollback();
+				return "";
+			});
+
+			var countAfter =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			Assert.That(count, Is.EqualTo(countAfter));
+		}
+
+		[Test]
+		public async Task TransactionAsyncTestExceptional()
+		{
+			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+
+			DataMigrationHelper.AddUsers(250, DbAccess);
+			var count =
+				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+
+			Assert.That(async () => await DbAccess.Database.RunInTransactionAsync(async dd =>
+			{
+				DbAccess.Delete<Users>();
+				await Task.FromResult("");
+				dd.TransactionRollback();
+				return "";
+			}), Throws.Exception);
 
 			var countAfter =
 				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();

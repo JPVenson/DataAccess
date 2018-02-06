@@ -714,7 +714,22 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public async Task<T> RunInTransactionAsync<T>(Func<IDatabase, Task<T>> func)
 		{
-			return await RunInTransaction(func, GetDefaultTransactionLevel());
+			return await RunInTransactionAsync(func, GetDefaultTransactionLevel());
+		}
+
+		/// <summary>
+		///     Runs the in transaction.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="func">The function.</param>
+		/// <returns></returns>
+		public async Task RunInTransactionAsync<T>(Func<IDatabase, Task> func)
+		{
+			await RunInTransactionAsync(async (d) =>
+			{
+				await func(d);
+				return "";
+			}, GetDefaultTransactionLevel());
 		}
 
 

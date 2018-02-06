@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
@@ -65,6 +66,31 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		public ConditionalQuery<TPoco> Alias(string alias)
 		{
 			return new ConditionalQuery<TPoco>(this, State.ToAlias(alias));
+		}
+
+		/// <summary>
+		///		Selects the current PrimaryKey
+		/// </summary>
+		/// <returns></returns>
+		public ConditionalColumnQuery<TPoco> PrimaryKey()
+		{
+			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
+			return Column(tCache.PrimaryKeyProperty.DbName);
+		}
+
+		/// <summary>
+		///		Selects the ForginKey to the table.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">If there are 0 or more then 1 forginKeys</exception>
+		/// <returns></returns>
+		public ConditionalColumnQuery<TPoco> ForginKey<TFkPoco>()
+		{
+			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
+			var tProp = tCache.Propertys.Values
+			                  .Single(e =>
+				                  e.ForginKeyDeclarationAttribute != null &&
+				                  e.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TFkPoco));
+			return Column(tProp.DbName);
 		}
 
 		/// <summary>

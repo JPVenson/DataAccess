@@ -64,34 +64,8 @@ namespace JPB.DataAccess.Query.Operators
 		}
 	}
 
-	/// <summary>
-	/// </summary>
-	/// <typeparam name="TPoco">The type of the poco.</typeparam>
-	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
-	/// <seealso cref="JPB.DataAccess.Query.Contracts.IElementProducer{TPoco}" />
-	/// <seealso cref="System.Collections.Generic.IEnumerable{TPoco}" />
-	public class ElementProducer<TPoco> : IdentifyableQuery<TPoco>, IElementProducer<TPoco>, IEnumerable<TPoco>
+	public class ElementResultQuery<TPoco> : IdentifyableQuery<TPoco>, IElementProducer<TPoco>, IEnumerable<TPoco>
 	{
-		public ElementProducer(IQueryBuilder database, string currentIdentifier) : base(database, currentIdentifier)
-		{
-		}
-
-		public ElementProducer(IQueryBuilder database) : base(database)
-		{
-		}
-
-
-		/// <summary>
-		///     Adds a SQL WHERE statement
-		///     does not emit any conditional statement
-		///     should be followed by Column()
-		/// </summary>
-		/// <returns></returns>
-		public ConditionalQuery<TPoco> Where
-		{
-			get { return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier)); }
-		}
-
 		/// <summary>
 		///     Adds an SQL ORDER BY Statement
 		/// </summary>
@@ -194,6 +168,43 @@ namespace JPB.DataAccess.Query.Operators
 		public ElementProducer<TPoco> Alias(string alias)
 		{
 			return new ElementProducer<TPoco>(this, alias);
+		}
+
+		public ElementResultQuery(IQueryBuilder database, string currentIdentifier) : base(database, currentIdentifier)
+		{
+		}
+
+		public ElementResultQuery(IQueryBuilder database) : base(database)
+		{
+		}
+	}
+
+	/// <summary>
+	/// </summary>
+	/// <typeparam name="TPoco">The type of the poco.</typeparam>
+	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
+	/// <seealso cref="JPB.DataAccess.Query.Contracts.IElementProducer{TPoco}" />
+	/// <seealso cref="System.Collections.Generic.IEnumerable{TPoco}" />
+	public class ElementProducer<TPoco> : ElementResultQuery<TPoco>
+	{
+		public ElementProducer(IQueryBuilder database, string currentIdentifier) : base(database, currentIdentifier)
+		{
+		}
+
+		public ElementProducer(IQueryBuilder database) : base(database)
+		{
+		}
+
+
+		/// <summary>
+		///     Adds a SQL WHERE statement
+		///     does not emit any conditional statement
+		///     should be followed by Column()
+		/// </summary>
+		/// <returns></returns>
+		public ConditionalQuery<TPoco> Where
+		{
+			get { return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier)); }
 		}
 	}
 }

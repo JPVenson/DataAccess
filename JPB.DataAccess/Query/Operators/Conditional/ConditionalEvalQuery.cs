@@ -11,7 +11,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 	/// <typeparam name="TPoco">The type of the poco.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Query.Operators.ElementProducer{TPoco}" />
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IConditionalEvalQuery{TPoco}" />
-	public class ConditionalEvalQuery<TPoco> : ElementProducer<TPoco>, IConditionalEvalQuery<TPoco>
+	public class ConditionalEvalQuery<TPoco> : ElementResultQuery<TPoco>, IConditionalEvalQuery<TPoco>
 	{
 		/// <summary>
 		///     The current query state

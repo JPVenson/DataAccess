@@ -665,7 +665,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			Constraints = new ConstraintCollection<TEntity>(this, primaryKeyConstraint);
 			_triggers = new TriggerForTableCollection<TEntity>(this);
 			_indexes = new IndexCollection<TEntity>();
-			Base = new ConcurrentDictionary<object, TEntity>();
+			Base = new Dictionary<object, TEntity>();
 			_databaseDatabase.AddTable(this);
 			_databaseDatabase.SetupDone += DatabaseDatabaseOnSetupDone;
 		}

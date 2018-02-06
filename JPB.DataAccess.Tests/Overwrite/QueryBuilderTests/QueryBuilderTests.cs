@@ -283,7 +283,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				Assert.That(deSelect, Is.Not.Empty);
 				Assert.That(deSelect.Length, Is.EqualTo(countOfImages));
 				var book = DbAccessLayer.Select<Book>(id);
-				var forResult = DbAccessLayer.Query().Select.Table<Image>().In(book).ForResult().ToArray();
+				var forResult = DbAccessLayer.Query().Select.Table<Image>().In(book).ToArray();
 				Assert.That(forResult, Is.Not.Empty);
 				Assert.That(forResult.Count, Is.EqualTo(countOfImages));
 			}
