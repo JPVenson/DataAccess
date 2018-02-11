@@ -86,6 +86,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			Propertys = new Dictionary<string, TProp>(type
 					.GetProperties(BindingFlags.Public | BindingFlags.Static |
 					               BindingFlags.NonPublic | BindingFlags.Instance)
+					.Where(e => !e.GetIndexParameters().Any())
 					.Select(s => new TProp().Init(s, anon) as TProp)
 					.ToDictionary(s => s.PropertyName, s => s));
 			Mehtods = new HashSet<TMeth>(type

@@ -180,7 +180,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			}
 		}
 
-		[TestCase(2, new[] { 999, 9999, 99999 })]
+		[TestCase(2, new[] { 999, 9999, 99999,999999 })]
 		public void ParallelAccessSpeedEval(int iterateCount, int[] limits)
 		{
 			var results = new List<Tuple<int, long>>();

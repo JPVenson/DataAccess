@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
@@ -16,15 +17,30 @@ namespace JPB.DataAccess.Query
 	/// </summary>
 	internal class QueryLazyEnumerator : IEnumerator, IDisposable
 	{
-		private readonly DbAccessLayer _accessLayer;
-		private readonly IDataReader _executeReader;
+		private DbAccessLayer _accessLayer;
+		private IDataReader _executeReader;
 		private readonly DbClassInfoCache _type;
+		private object _preObject = null;
+		private Task _startupTask;
 
-		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type)
+		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type, bool async)
 		{
 			_type = queryContainer.AccessLayer.GetClassInfo(type);
-			_accessLayer = new DbAccessLayer(queryContainer.AccessLayer.Database);
-			_accessLayer.Database.Connect(IsolationLevel.ReadCommitted);
+			_accessLayer = queryContainer.AccessLayer;
+			if (async)
+			{
+				_startupTask = new Task(() => OpenReader(queryContainer));
+				_startupTask.Start();
+			}
+			else
+			{
+				OpenReader(queryContainer);
+			}
+		}
+
+		private void OpenReader(IQueryContainer queryContainer)
+		{
+			_accessLayer.Database.Connect();
 			var command = queryContainer.Compile();
 			queryContainer.AccessLayer.RaiseSelect(command);
 			try
@@ -40,14 +56,28 @@ namespace JPB.DataAccess.Query
 
 		public void Dispose()
 		{
-			_accessLayer.Database.CloseConnection();
+			if (_startupTask != null)
+			{
+				_startupTask.Wait();
+			}
+			if (_executeReader != null)
+			{
+				_executeReader.Close();
+				_executeReader.Dispose();
+			}
+
+			_accessLayer.Database.CloseConnection(true);
 		}
 
 		public bool MoveNext()
 		{
+			if (_startupTask != null)
+			{
+				_startupTask.Wait();
+			}
+			_preObject = null;
 			if (_executeReader.IsClosed)
 			{
-				Dispose();
 				return false;
 			}
 
@@ -65,19 +95,19 @@ namespace JPB.DataAccess.Query
 
 		public object Current
 		{
-			get { return _accessLayer.SetPropertysViaReflection(_type, _executeReader); }
+			get { return _preObject ?? (_preObject = _accessLayer.SetPropertysViaReflection(_type, _executeReader)); }
 		}
 	}
 
 	internal class QueryLazyEnumerator<T> : QueryLazyEnumerator, IEnumerator<T>
 	{
-		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type)
-			: base(queryContainer, type)
+		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type, bool async)
+			: base(queryContainer, type, async)
 		{
 		}
 
-		internal QueryLazyEnumerator(IQueryContainer queryContainer)
-			: base(queryContainer, typeof(T))
+		internal QueryLazyEnumerator(IQueryContainer queryContainer, bool async)
+			: base(queryContainer, typeof(T), async)
 		{
 		}
 

@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Manager
 	///     Contanins some Helper mehtods for CRUD operation
 	/// </summary>
 	[DebuggerDisplay(
-	"DB={DatabaseStrategy}, QueryDebug={Database.LastExecutedQuery ? Database.LastExecutedQuery.DebuggerQuery}")]
+	"DB={DatabaseStrategy}, QueryDebug={Database.LastExecutedQuery ?? Database.LastExecutedQuery.DebuggerQuery}")]
 #if !DEBUG
 		[DebuggerStepThrough]
 #endif
@@ -157,7 +157,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			DbAccessType = dbAccessType;
-			Database = new DefaultDatabaseAccess();
+			Database = new DefaultDatabaseAccess(new InstanceConnectionController());
 			var database =
 					GenerateStrategy(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value, connection);
 			Database.Attach(database);
@@ -180,7 +180,7 @@ namespace JPB.DataAccess.Manager
 
 			var database = GenerateStrategy(fullTypeNameToIDatabaseStrategy, string.Concat((object)connection));
 
-			Database = new DefaultDatabaseAccess();
+			Database = new DefaultDatabaseAccess(new InstanceConnectionController());
 			Database.Attach(database);
 			DatabaseStrategy = database;
 		}
@@ -199,7 +199,7 @@ namespace JPB.DataAccess.Manager
 			DbAccessType = database.SourceDatabase;
 			//ResolveDbType(database.GetType().FullName);
 
-			Database = new DefaultDatabaseAccess();
+			Database = new DefaultDatabaseAccess(new InstanceConnectionController());
 			Database.Attach(database);
 			DatabaseStrategy = database;
 		}
@@ -565,7 +565,7 @@ namespace JPB.DataAccess.Manager
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
 		[Obsolete("This mehtod is replaced by several FASTER equal ones. " +
-				  "It may be replaced, updated or delted. But it will change that is for sure. " +
+				  "It may be replaced, updated or deleted. But it will change that is for sure. " +
 				  "legacy or Fallback support only")]
 		public static object ReflectionPropertySet(
 			DbConfig config,
@@ -753,12 +753,6 @@ namespace JPB.DataAccess.Manager
 			//	var property = propertys.FirstOrDefault(s => s.PropertyName == item.Key);
 
 			//}
-
-			if (reader is EgarDataRecord)
-			{
-				(reader as IDisposable).Dispose();
-			}
-
 			return instance;
 		}
 
@@ -797,6 +791,8 @@ namespace JPB.DataAccess.Manager
 				var records = new List<List<IDataRecord>>();
 				using (query)
 				{
+					query.Connection = query.Connection ?? s.GetConnection();
+					query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
 					using (var dr = query.ExecuteReader())
 					{
 						try
@@ -849,6 +845,8 @@ namespace JPB.DataAccess.Manager
 				var records = new ArrayList();
 				using (query)
 				{
+					query.Connection = query.Connection ?? s.GetConnection();
+					query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
 					using (var dr = query.ExecuteReader())
 					{
 						try

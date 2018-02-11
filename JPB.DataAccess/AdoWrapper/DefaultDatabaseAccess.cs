@@ -19,32 +19,24 @@ namespace JPB.DataAccess.AdoWrapper
 	/// <summary>
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Contacts.IDatabase" />
-	[DebuggerDisplay("OpenRuns {_handlecounter}, IsConnectionOpen {_conn2 != null}, IsTransactionOpen {_trans != null}")]
+	[DebuggerDisplay("OpenRuns {TransactionController.InstanceCounter}, IsConnectionOpen {_conn2 != null ? _conn2.State.ToString() : \"Closed\"}, IsTransactionOpen {TransactionController.Transaction != null}")]
 	public sealed partial class DefaultDatabaseAccess : IDatabase
 	{
-		private IDbConnection _conn2;
-		private volatile int _handlecounter;
+		/// <summary>
+		/// ctor
+		/// </summary>
+		public DefaultDatabaseAccess(IConnectionController connectionController)
+		{
+			ConnectionController = connectionController;
+		}
+
 		private IDatabaseStrategy _strategy;
-		private readonly Queue<IDbTransaction> _transactions = new Queue<IDbTransaction>();
 
 		/// <summary>
-		/// The latest Transaction
+		/// Controlls the current Transaction Behavior
 		/// </summary>
-		public IDbTransaction Transaction
-		{
-			get { return _transactions.Count > 0 ? _transactions.Peek() : null; }
-			private set
-			{
-				if (value == null && _transactions.Count > 0)
-				{
-					_transactions.Dequeue();
-				}
-				else if(value != null)
-				{
-					_transactions.Enqueue(value);
-				}
-			}
-		}
+		public IConnectionController ConnectionController { get; private set; }
+
 
 		/// <summary>
 		///     If enabled each query will be decompiled and the LastInsertedQuery property will be set
@@ -63,10 +55,16 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			if (disposing)
 			{
-				if (GetConnection() != null)
+				if (ConnectionController.Connection != null)
 				{
-					_conn2.Dispose();
-					_conn2 = null;
+					while (ConnectionController.Transaction != null)
+					{
+						ConnectionController.Transaction.Rollback();
+						ConnectionController.Transaction = null;
+					}
+					ConnectionController.Connection.Close();
+					ConnectionController.Connection.Dispose();
+					ConnectionController.Connection = null;
 				}
 			}
 		}
@@ -83,66 +81,63 @@ namespace JPB.DataAccess.AdoWrapper
 				return null;
 			}
 
-			var db = new DefaultDatabaseAccess();
+			var db = new DefaultDatabaseAccess(new InstanceConnectionController());
 			db.Attach(strategy);
 			return db;
 		}
 
 		private int DoExecuteNonQuery(string strSql, params object[] param)
 		{
-			if (null == GetConnection())
+			return Run(d =>
 			{
-				throw new Exception("DB2.ExecuteNonQuery: void connection");
-			}
-			var counter = 0;
-			using (
-				var cmd = _strategy.CreateCommand(strSql, GetConnection(),
-					param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
-			{
-				if (Transaction != null)
+				var counter = 0;
+				using (
+				var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection,
+				param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
 				{
-					cmd.Transaction = Transaction;
-				}
-				AttachQueryDebugger(cmd);
+					if (ConnectionController.Transaction != null)
+					{
+						cmd.Transaction = ConnectionController.Transaction;
+					}
+					AttachQueryDebugger(cmd);
 
-				return cmd.ExecuteNonQuery();
-			}
+					return cmd.ExecuteNonQuery();
+				}
+			});
 		}
 
 		private IDataReader DoGetDataReader(string strSql)
 		{
-			if (null == GetConnection())
+			return Run(d =>
 			{
-				throw new Exception("DB2.GetDataReader: void connection");
-			}
-
-			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-			{
-				if (Transaction != null)
+				using (var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection))
 				{
-					cmd.Transaction = Transaction;
+					if (ConnectionController.Transaction != null)
+					{
+						cmd.Transaction = ConnectionController.Transaction;
+					}
+					AttachQueryDebugger(cmd);
+					return cmd.ExecuteReader();
 				}
-				AttachQueryDebugger(cmd);
-				return cmd.ExecuteReader();
-			}
+			});
+
 		}
 
 		private object DoGetSkalar(string strSql)
 		{
-			if (null == GetConnection())
+			return Run(d =>
 			{
-				throw new Exception("DB2.GetSkalar: void connection");
-			}
-
-			using (var cmd = _strategy.CreateCommand(strSql, GetConnection()))
-			{
-				if (Transaction != null)
+				using (var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection))
 				{
-					cmd.Transaction = Transaction;
+					if (ConnectionController.Transaction != null)
+					{
+						cmd.Transaction = ConnectionController.Transaction;
+					}
+					AttachQueryDebugger(cmd);
+					return cmd.ExecuteScalar();
 				}
-				AttachQueryDebugger(cmd);
-				return cmd.ExecuteScalar();
-			}
+			});
+
 		}
 
 		#region IDatabase Members
@@ -248,7 +243,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public string DatabaseName
 		{
-			get { return GetConnection().Database; }
+			get { return Run(e => ConnectionController.Connection.Database); }
 		}
 
 		/// <summary>
@@ -267,7 +262,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IDbConnection GetConnection()
 		{
-			return _conn2 ?? (_conn2 = _strategy.CreateConnection());
+			return ConnectionController.Connection ?? (ConnectionController.Connection = _strategy.CreateConnection());
 		}
 
 		/// <summary>
@@ -302,33 +297,29 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="levl"></param>
 		public void Connect(IsolationLevel? levl = null)
 		{
-			//check for an Active connection
-			if (_conn2 == null)
-			{
-				//No Connection open one
-				_conn2 = GetConnection();
-			}
+			ConnectionController.Connection = GetConnection();
 			//Connection exists check for open
-			lock (_conn2)
+			lock (ConnectionController.LockRoot)
 			{
-				if (_conn2.State != ConnectionState.Open)
+				if (ConnectionController.Connection.State != ConnectionState.Open)
 				{
-					_conn2.Open();
+					ConnectionController.Connection.Open();
 				}
+
+				//This is the First call of connect so we Could
+				//define it as Transaction
+				if (levl != null)
+				{
+					if (ConnectionController.Transaction == null || ConnectionController.Transaction != null && AllowNestedTransactions)
+					{
+						ConnectionController.Transaction = ConnectionController.Connection.BeginTransaction(levl.GetValueOrDefault());
+					}
+				}
+
+				//We created a Connection and proceed now with the DB access
+				ConnectionController.InstanceCounter++;
 			}
 
-			//This is the First call of connect so we Could
-			//define it as Transaction
-			if (levl != null)
-			{
-				if (Transaction == null || Transaction != null && AllowNestedTransactions)
-				{
-					Transaction = _conn2.BeginTransaction(levl.GetValueOrDefault());
-				}
-			}
-
-			//We created a Connection and proceed now with the DB access
-			_handlecounter++;
 			//Interlocked.Increment(ref _handlecounter);
 		}
 
@@ -338,11 +329,11 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			//Error inside the call
 			//Rollback the transaction and close the Connection
-			if (Transaction != null)
+			if (ConnectionController.Transaction != null)
 			{
 				//Force all open connections to close
-				Transaction.Rollback();
-				Transaction = null;
+				ConnectionController.Transaction.Rollback();
+				ConnectionController.Transaction = null;
 				CloseConnection();
 			}
 		}
@@ -351,53 +342,56 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public void TransactionCommit()
 		{
-			//Error inside the call
-			//Rollback the transaction and close the Connection
-			if (Transaction != null)
+			if (ConnectionController.Transaction != null)
 			{
 				CloseConnection();
-				if (_handlecounter != 0)
+				if (ConnectionController.InstanceCounter != 0)
 				{
-					Transaction.Commit();
-					Transaction = null;
+					ConnectionController.Transaction.Commit();
+					ConnectionController.Transaction = null;
 				}
 			}
 		}
 
-		/// <summary>
-		///     Required
-		///     Closing a open Connection
-		/// </summary>
-		public void CloseConnection()
+		/// <inheritdoc />
+		public void CloseConnection(bool forceExisting = false)
 		{
-			Debug.Assert(_handlecounter >= 0);
+			if (ConnectionController.Connection == null && forceExisting)
+			{
+				throw new InvalidOperationException("To call close connection you must first open one with Connect()");
+			}
+
+			if (ConnectionController.InstanceCounter == 0 && forceExisting)
+			{
+				throw new InvalidOperationException("Invalid State detected. A connection is still open but no handle was found to it");
+			}
 
 			//This is not the last call of Close so decrease the counter
-			lock (this)
+			lock (ConnectionController.LockRoot)
 			{
-				if (_handlecounter > 0)
+				if (ConnectionController.InstanceCounter > 0)
 				{
-					_handlecounter--;
+					ConnectionController.InstanceCounter--;
 				}
-			}
 
-			if (_conn2 == null || _handlecounter != 0)
-			{
-				return;
-			}
-			using (_conn2)
-			{
-				if (Transaction != null)
+				if (ConnectionController.Connection == null || ConnectionController.InstanceCounter != 0)
 				{
-					using (Transaction)
-					{
-						Transaction.Commit();
-					}
-					Transaction = null;
+					return;
 				}
-				_conn2.Close();
+				using (ConnectionController.Connection)
+				{
+					if (ConnectionController.Transaction != null)
+					{
+						using (ConnectionController.Transaction)
+						{
+							ConnectionController.Transaction.Commit();
+						}
+						ConnectionController.Transaction = null;
+					}
+					ConnectionController.Connection.Close();
+				}
+				ConnectionController.Connection = null;
 			}
-			_conn2 = null;
 			//GC.Collect();
 		}
 
@@ -407,32 +401,29 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public void CloseAllConnection()
 		{
-			Debug.Assert(_handlecounter >= 0);
-
 			//This is not the last call of Close so decrease the counter
-			lock (this)
+			lock (ConnectionController.LockRoot)
 			{
-				_handlecounter = 0;
-			}
-
-			if (_conn2 != null)
-			{
-				using (_conn2)
+				ConnectionController.InstanceCounter = 0;
+				if (ConnectionController.Connection != null)
 				{
-					if (Transaction != null)
+					using (ConnectionController.Connection)
 					{
-						using (Transaction)
+						if (ConnectionController.Transaction != null)
 						{
-							Transaction.Commit();
+							using (ConnectionController.Transaction)
+							{
+								ConnectionController.Transaction.Commit();
+							}
 						}
+						ConnectionController.Transaction = null;
+						ConnectionController.Connection.Close();
 					}
-					Transaction = null;
-					_conn2.Close();
+					ConnectionController.Connection = null;
 				}
-				_conn2 = null;
-			}
 
-			_strategy.CloseAllConnections();
+				_strategy.CloseAllConnections();
+			}
 		}
 
 		/// <summary>
@@ -444,10 +435,10 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
 		{
-			var cmd = _strategy.CreateCommand(strSql, GetConnection(), fields);
-			if (Transaction != null)
+			var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection, fields);
+			if (ConnectionController.Transaction != null)
 			{
-				cmd.Transaction = Transaction;
+				cmd.Transaction = ConnectionController.Transaction;
 			}
 			return cmd;
 		}
@@ -470,17 +461,16 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public int ExecuteNonQuery(IDbCommand cmd)
 		{
-			if (null == GetConnection())
+			return Run(d =>
 			{
-				throw new Exception("DB2.ExecuteNonQuery: void connection");
-			}
-
-			if (Transaction != null)
-			{
-				cmd.Transaction = Transaction;
-			}
-			AttachQueryDebugger(cmd);
-			return cmd.ExecuteNonQuery();
+				cmd.Connection = GetConnection();
+				if (ConnectionController.Transaction != null)
+				{
+					cmd.Transaction = ConnectionController.Transaction;
+				}
+				AttachQueryDebugger(cmd);
+				return cmd.ExecuteNonQuery();
+			});
 		}
 
 		/// <summary>
@@ -499,12 +489,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <exception cref="Exception">DB2.ExecuteNonQuery: void connection</exception>
 		public IDbCommand GetlastInsertedIdCommand()
 		{
-			if (null == GetConnection())
-			{
-				throw new Exception("DB2.ExecuteNonQuery: void connection");
-			}
-
-			return _strategy.GetlastInsertedID_Cmd(GetConnection());
+			return _strategy.GetlastInsertedID_Cmd(ConnectionController.Connection);
 		}
 
 		/// <summary>
@@ -545,12 +530,15 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public object GetSkalar(IDbCommand cmd)
 		{
-			if (Transaction != null)
+			return Run(d =>
 			{
-				cmd.Transaction = Transaction;
-			}
-			AttachQueryDebugger(cmd);
-			return cmd.ExecuteScalar();
+				if (ConnectionController.Transaction != null)
+				{
+					cmd.Transaction = ConnectionController.Transaction;
+				}
+				AttachQueryDebugger(cmd);
+				return cmd.ExecuteScalar();
+			});
 		}
 
 		/// <summary>
@@ -559,6 +547,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="strSql"></param>
 		/// <param name="obj"></param>
 		/// <returns></returns>
+		[Obsolete("This method should not be used anymore as it does not ensure SqlInjection prevention")]
 		public object GetSkalar(string strSql, params object[] obj)
 		{
 			return DoGetSkalar(string.Format(strSql, obj));
@@ -579,7 +568,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IDatabase Clone()
 		{
-			var db = new DefaultDatabaseAccess();
+			var db = new DefaultDatabaseAccess(ConnectionController);
 			db.Attach((IDatabaseStrategy)_strategy.Clone());
 			return db;
 		}
@@ -678,7 +667,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				action(dd);
 				return (object)null;
-			}, GetDefaultTransactionLevel());
+			}, transaction);
 		}
 
 
@@ -723,7 +712,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <typeparam name="T"></typeparam>
 		/// <param name="func">The function.</param>
 		/// <returns></returns>
-		public async Task RunInTransactionAsync<T>(Func<IDatabase, Task> func)
+		public async Task RunInTransactionAsync(Func<IDatabase, Task> func)
 		{
 			await RunInTransactionAsync(async (d) =>
 			{
@@ -742,7 +731,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public async Task<T> RunInTransactionAsync<T>(Func<IDatabase, Task<T>> func, IsolationLevel transaction)
 		{
-			var preState = _handlecounter;
+			var preState = ConnectionController.InstanceCounter;
 			try
 			{
 				Connect(transaction);
@@ -756,7 +745,7 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 			finally
 			{
-				if (preState < _handlecounter)
+				if (preState < ConnectionController.InstanceCounter)
 				{
 					CloseConnection();
 				}

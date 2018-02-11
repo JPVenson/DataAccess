@@ -2,6 +2,7 @@
 
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.DbAccessLayerTests;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
@@ -11,34 +12,23 @@ namespace JPB.DataAccess.Tests.PagerTests
 {
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]
-	public class PagerUnitTest
+	public class PagerUnitTest : BaseTest
 	{
-		[SetUp]
-		public void Init()
+		public PagerUnitTest(DbAccessType type) : base(type)
 		{
-			expectWrapper = new Manager().GetWrapper(_type);
 		}
-
-		private readonly DbAccessType _type;
-
-		public PagerUnitTest(DbAccessType type)
-		{
-			_type = type;
-		}
-
-		private DbAccessLayer expectWrapper;
 
 		[Test]
 		public void PagerCall()
 		{
-			var testUsers = DataMigrationHelper.AddUsers(250, expectWrapper);
+			var testUsers = DataMigrationHelper.AddUsers(250, DbAccess);
 
 			var refSelect =
-				expectWrapper.Database.Run(
+					DbAccess.Database.Run(
 					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
-			using (var pager = expectWrapper.Database.CreatePager<Users>())
+			using (var pager = DbAccess.Database.CreatePager<Users>())
 			{
 				Assert.That(pager, Is.Not.Null);
 
@@ -55,14 +45,14 @@ namespace JPB.DataAccess.Tests.PagerTests
 				pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
 				pager.NewPageLoading += () => triggeredNewPageLoading = true;
 
-				pager.LoadPage(expectWrapper);
+				pager.LoadPage(DbAccess);
 
 				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
 				Assert.That(triggeredNewPageLoaded, Is.False);
 				Assert.That(triggeredNewPageLoading, Is.False);
 
 				pager.RaiseEvents = true;
-				pager.LoadPage(expectWrapper);
+				pager.LoadPage(DbAccess);
 
 				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
 				Assert.That(triggeredNewPageLoaded);
@@ -79,7 +69,7 @@ namespace JPB.DataAccess.Tests.PagerTests
 				pager.PageSize = newPageSize;
 				Assert.That(pager.PageSize, Is.EqualTo(newPageSize));
 
-				pager.LoadPage(expectWrapper);
+				pager.LoadPage(DbAccess);
 				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
 				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(newPageSize));
 
@@ -90,17 +80,17 @@ namespace JPB.DataAccess.Tests.PagerTests
 		[Test]
 		public void PagerConditionalCall()
 		{
-			var testUsers = DataMigrationHelper.AddUsers(250, expectWrapper);
+			var testUsers = DataMigrationHelper.AddUsers(250, DbAccess);
 
 			var refSelect =
-				expectWrapper.Database.Run(
+					DbAccess.Database.Run(
 					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
-			using (var pager = expectWrapper.Database.CreatePager<Users>())
+			using (var pager = DbAccess.Database.CreatePager<Users>())
 			{
 				pager.AppendedComands.Add(
-					expectWrapper.Database.CreateCommand(string.Format("WHERE User_ID = {0}", testUsers[0])));
+				DbAccess.Database.CreateCommand(string.Format("WHERE User_ID = {0}", testUsers[0])));
 
 				Assert.That(pager, Is.Not.Null);
 
@@ -117,14 +107,14 @@ namespace JPB.DataAccess.Tests.PagerTests
 				pager.NewPageLoaded += () => triggeredNewPageLoaded = true;
 				pager.NewPageLoading += () => triggeredNewPageLoading = true;
 
-				pager.LoadPage(expectWrapper);
+				pager.LoadPage(DbAccess);
 
 				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
 				Assert.That(triggeredNewPageLoaded, Is.False);
 				Assert.That(triggeredNewPageLoading, Is.False);
 
 				pager.RaiseEvents = true;
-				pager.LoadPage(expectWrapper);
+				pager.LoadPage(DbAccess);
 
 				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
 				Assert.That(triggeredNewPageLoaded);
@@ -141,7 +131,7 @@ namespace JPB.DataAccess.Tests.PagerTests
 				pager.PageSize = newPageSize;
 				Assert.That(pager.PageSize, Is.EqualTo(newPageSize));
 
-				pager.LoadPage(expectWrapper);
+				pager.LoadPage(DbAccess);
 				Assert.That(pager.MaxPage, Is.Not.EqualTo(0));
 				Assert.That(pager.CurrentPageItems.Count, Is.EqualTo(1));
 

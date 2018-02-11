@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.Manager;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 
 #endregion
 
@@ -35,30 +36,34 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Mgr = new Manager();
 		}
 
-		protected IDisposable MakeManager(DbAccessType type, params object[] arguments)
-		{
-			DbAccess = Mgr.GetWrapper(Type, arguments);
-			return new ManagerScope(() =>
-			{
-				this.TearDown();
-				_dbAccess.Remove(DbAccess);
-			});
-		}
-
 		[TearDown]
 		public void TestTearDown()
 		{
-			this.TearDown();
-		}
-
-		[SetUp]
-		public void Clear()
-		{
-			this.ClearDb();
+			var failed = false;
+			if (_dbAccess != null)
+			{
+				if (_dbAccess.Database.ConnectionController.InstanceCounter != 0)
+				{
+					TestContext.Error.WriteLine("Invalid State Detected. Some connections are Still open. Proceed with Cleanup");
+					failed = true;
+				}
+			}
+			if (Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Failure) ||
+			    Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Error))
+			{
+				Mgr?.FlushErrorData();
+			}
+			else
+			{
+				Mgr?.Clear();
+			}
+			Mgr = null;
+			DbAccess = null;
+			Assert.That(failed, Is.False, () => "Invalid Connection State");
 		}
 
 		public object[] AdditionalArguments { get; }
-		private readonly List<DbAccessLayer> _dbAccess = new List<DbAccessLayer>();
+		private DbAccessLayer _dbAccess;
 
 		protected BaseTest(DbAccessType type, params object[] additionalArguments)
 		{
@@ -68,16 +73,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		public DbAccessLayer DbAccess
 		{
-			get
-			{
-				var last = _dbAccess.LastOrDefault();
-				if (last == null)
-				{
-					MakeManager(Type, AdditionalArguments);
-				}
-				return last;
-			}
-			private set { _dbAccess.Add(value); }
+			get { return _dbAccess ?? (_dbAccess = Mgr.GetWrapper(Type, AdditionalArguments)); }
+			private set { _dbAccess = value; }
 		}
 
 		public IManager Mgr { get; private set; }

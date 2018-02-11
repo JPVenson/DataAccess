@@ -126,6 +126,8 @@
     <Compile Include="AdoWrapper\DefaultTransactionScope.cs" />
     <Compile Include="AdoWrapper\EagarDataReader.cs" />
     <Compile Include="AdoWrapper\EgarDataRecord.cs" />
+    <Compile Include="AdoWrapper\IConnectionController.cs" />
+    <Compile Include="AdoWrapper\InstanceConnectionController.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSql.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataConverterPager.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataPager.cs" />
@@ -133,6 +135,7 @@
     <Compile Include="AdoWrapper\ObjectDataRecord.cs" />
     <Compile Include="AdoWrapper\OdbcProvider\Odbc.cs" />
     <Compile Include="AdoWrapper\OleDBProvider\OleDb.cs" />
+    <Compile Include="AdoWrapper\ThreadConnectionController.cs" />
     <Compile Include="AdoWrapper\XmlDataRecord.cs" />
     <Compile Include="Anonymous\AnonymousClass.cs" />
     <Compile Include="Anonymous\AnonymousObject.cs" />

@@ -1,5 +1,6 @@
 #region
 
+using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using JPB.DataAccess.DbInfoConfig;
@@ -12,10 +13,10 @@ namespace JPB.DataAccess.Tests
 {
 	public class SqLiteManager : IManagerImplementation
 	{
-		public const string SConnectionString = "Data Source=:memory:;";
+		public const string SConnectionString = "Data Source={0};";
 		private DbAccessLayer expectWrapper;
 
-		private string tempPath;
+		private string _dbFilePath;
 
 		public DbAccessType DbAccessType
 		{
@@ -33,21 +34,29 @@ namespace JPB.DataAccess.Tests
 			{
 				expectWrapper.Database.CloseAllConnection();
 			}
-
+			//load SqLite in domain
+			var type1 = typeof(SqLite.SqLite);
 			//string dbname = "testDB";
 			//var sqlLiteFileName = dbname + ".sqlite";
-			var dbname = string.Format("YAORM_SqLite_{0}", testName);
-			tempPath = string.Format(ConnectionString, dbname);
+			_dbFilePath = string.Format("YAORM_SqLite_{0}.db", testName);
+			if (File.Exists(_dbFilePath))
+			{
+				GC.Collect();
+				GC.WaitForPendingFinalizers();
+				GC.Collect();
+				File.Delete(_dbFilePath);
+			}
+			var connection = string.Format(ConnectionString, _dbFilePath);
 
 			//var file = MemoryMappedFile.CreateNew(dbname, 10000, MemoryMappedFileAccess.ReadWrite);
 
 			//tempPath = Path.GetTempFileName() + dbname + "sqLite";
 
-			expectWrapper = new DbAccessLayer(DbAccessType, tempPath, new DbConfig(true));
-			expectWrapper.Database.Connect();
+			expectWrapper = new DbAccessLayer(new SqLite.SqLite(connection), new DbConfig(true));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
+			var userses = expectWrapper.Select<Users>();
 			return expectWrapper;
 		}
 
@@ -59,9 +68,12 @@ namespace JPB.DataAccess.Tests
 		{
 			expectWrapper.Database.CloseAllConnection();
 
-			if (File.Exists(tempPath))
+			if (File.Exists(_dbFilePath))
 			{
-				File.Delete(tempPath);
+				GC.Collect();
+				GC.WaitForPendingFinalizers();
+				GC.Collect();
+				File.Delete(_dbFilePath);
 			}
 		}
 	}

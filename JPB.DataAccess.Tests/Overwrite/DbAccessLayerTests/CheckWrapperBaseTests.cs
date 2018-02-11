@@ -2,8 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -54,19 +57,19 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 
 			var elements = DbAccess.Query()
-				.QueryText("SELECT")
-				.QueryText("res." + UsersMeta.PrimaryKeyName)
-				.QueryText(",res." + UsersMeta.ContentName)
-				.QueryText(",")
-				.InBracket(
-					s =>
-						s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
-							.ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
-				.QueryText("AS Subs")
-				.QueryText("FROM")
-				.QueryText(UsersMeta.TableName)
-				.QueryText("AS res")
-				.ForResult<UsersAutoGenerateConstructorWithMultiXml>();
+			                       .QueryText("SELECT")
+			                       .QueryText("res." + UsersMeta.PrimaryKeyName)
+			                       .QueryText(",res." + UsersMeta.ContentName)
+			                       .QueryText(",")
+			                       .InBracket(
+			                       s =>
+				                       s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
+				                        .ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+			                       .QueryText("AS Subs")
+			                       .QueryText("FROM")
+			                       .QueryText(UsersMeta.TableName)
+			                       .QueryText("AS res")
+			                       .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
 
 			var result = elements.ToArray();
 
@@ -85,19 +88,19 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 
 			var query = DbAccess.Query()
-				.QueryText("SELECT")
-				.QueryText("res." + UsersMeta.PrimaryKeyName)
-				.QueryText(",res." + UsersMeta.ContentName)
-				.QueryText(",")
-				.InBracket(s =>
-					s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
-						.ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
-				.QueryText("AS Sub")
-				.QueryText("FROM")
-				.QueryText(UsersMeta.TableName)
-				.QueryText("AS res");
+			                    .QueryText("SELECT")
+			                    .QueryText("res." + UsersMeta.PrimaryKeyName)
+			                    .QueryText(",res." + UsersMeta.ContentName)
+			                    .QueryText(",")
+			                    .InBracket(s =>
+				                    s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
+				                     .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+			                    .QueryText("AS Sub")
+			                    .QueryText("FROM")
+			                    .QueryText(UsersMeta.TableName)
+			                    .QueryText("AS res");
 			var elements =
-				query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
+					query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
 
 			var result = elements.ToArray();
 
@@ -114,11 +117,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_StaticQueryFactoryForSelect testUser = null;
 			Assert.That(
-				() =>
-					testUser =
+			() =>
+				testUser =
 						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
-				Is.Not.Null
-					.And.Property("UserId").Not.EqualTo(0));
+			Is.Not.Null
+			  .And.Property("UserId").Not.EqualTo(0));
 
 			var selTestUser = DbAccess.Select<Users_StaticQueryFactoryForSelect>(testUser.UserId);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
@@ -134,18 +137,18 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_StaticQueryFactoryForSelect testUser = null;
 			Assert.That(
-				() =>
-					testUser =
+			() =>
+				testUser =
 						DbAccess.InsertWithSelect(new Users_StaticQueryFactoryForSelect { UserName = testInsertName }),
-				Is.Not.Null
-					.And.Property("UserId").Not.EqualTo(0));
+			Is.Not.Null
+			  .And.Property("UserId").Not.EqualTo(0));
 
 			var selTestUser =
-				DbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId })
-					.FirstOrDefault();
+					DbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId })
+					        .FirstOrDefault();
 			Assert.That(selTestUser, Is.Not.Null
-				.And.Property("UserName").EqualTo(testUser.UserName)
-				.And.Property("UserId").EqualTo(testUser.UserId));
+			                           .And.Property("UserName").EqualTo(testUser.UserName)
+			                           .And.Property("UserId").EqualTo(testUser.UserId));
 		}
 
 
@@ -159,7 +162,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.AreEqual(resultSelect1, -1);
 
 			resultSelect1 = DbAccess.ExecuteGenericCommand("SELECT @test",
-				new List<QueryParameter> { new QueryParameter("test", 10) });
+			new List<QueryParameter> { new QueryParameter("test", 10) });
 			Assert.AreEqual(resultSelect1, -1);
 		}
 
@@ -227,9 +230,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Unchanged));
 
 			Assert.That(() => DbAccess.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
-				.Property("User_ID").EqualTo(user25.User_ID)
-				.And
-				.Property("UserName").EqualTo(user25.UserName));
+			                                                                .Property("User_ID").EqualTo(user25.User_ID)
+			                                                                .And
+			                                                                .Property("UserName").EqualTo(user25.UserName));
 		}
 
 
@@ -240,7 +243,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 
 			DbAccess.Database.RunInTransaction(dd =>
 			{
@@ -249,7 +252,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			});
 
 			var countAfter =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 
@@ -260,7 +263,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 
 			Assert.That(() => DbAccess.Database.RunInTransaction(dd =>
 			{
@@ -269,7 +272,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			}), Throws.Exception);
 
 			var countAfter =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 
@@ -280,7 +283,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 
 			await DbAccess.Database.RunInTransactionAsync(async dd =>
 			{
@@ -291,30 +294,89 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			});
 
 			var countAfter =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 
 		[Test]
-		public async Task TransactionAsyncTestExceptional()
+		public void TransactionAsyncTestExceptional()
 		{
 			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
-
-			Assert.That(async () => await DbAccess.Database.RunInTransactionAsync(async dd =>
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			Assert.That(() =>
 			{
-				DbAccess.Delete<Users>();
-				await Task.FromResult("");
-				dd.TransactionRollback();
-				return "";
-			}), Throws.Exception);
+				DbAccess.Database.RunInTransactionAsync(async dd =>
+				{
+					DbAccess.Delete<Users>();
+					await Task.FromResult("");
+					throw new Exception();
+				}).Wait();
+			}, Throws.Exception);
 
 			var countAfter =
-				DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
+		}
+
+		[Test]
+		public void CallCloseConnectionShouldFail()
+		{
+			Assert.That(() => DbAccess.Database.CloseConnection(true), Throws.Exception.TypeOf<InvalidOperationException>());
+			Assert.That(() => DbAccess.Database.CloseConnection(false), Throws.Nothing);
+		}
+
+		[Test]
+		public void SharedTransactionCounter()
+		{
+			var dbOne = new DefaultDatabaseAccess(new ThreadConnectionController());
+			dbOne.Attach(new MsSql(DbAccess.Database.ConnectionString));
+			var rootAccess = new DbAccessLayer(dbOne, DbAccess.Config);
+			Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(0));
+			Assert.That(rootAccess.Database.ConnectionController.LockRoot, Is.Not.Null);
+			Assert.That(rootAccess.Database.ConnectionController.Transaction, Is.Null);
+
+			var dbTwo = new DefaultDatabaseAccess(new ThreadConnectionController());
+			dbTwo.Attach(new MsSql(DbAccess.Database.ConnectionString));
+			var nestedAccess = new DbAccessLayer(dbTwo, DbAccess.Config);
+			Assert.That(nestedAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(0));
+			Assert.That(nestedAccess.Database.ConnectionController.LockRoot, Is.EqualTo(dbOne.ConnectionController.LockRoot));
+			Assert.That(nestedAccess.Database.ConnectionController.Transaction, Is.Null);
+
+			Assert.That(rootAccess.Database, Is.Not.EqualTo(nestedAccess.Database));
+			Assert.That(rootAccess.Database.ConnectionController, Is.Not.EqualTo(nestedAccess.Database.ConnectionController));
+
+			DbAccess.ExecuteGenericCommand("ALTER DATABASE " + DbAccess.Database.DatabaseName +
+			                               " SET ALLOW_SNAPSHOT_ISOLATION ON");
+
+			rootAccess.Database.RunInTransaction(d =>
+			{
+				Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(nestedAccess.Database.ConnectionController.InstanceCounter));
+				Assert.That(rootAccess.Database.ConnectionController.Transaction, Is.EqualTo(nestedAccess.Database.ConnectionController.Transaction));
+				Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
+				DataMigrationHelper.AddUsers(10, rootAccess);
+
+				nestedAccess.Database.RunInTransaction((de) =>
+				{
+					Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(2));
+					Assert.That(nestedAccess.Select<Users>().Length, Is.EqualTo(10));
+					DataMigrationHelper.AddUsers(10, nestedAccess);
+				});
+
+				Assert.That(nestedAccess.Select<Users>().Length, Is.EqualTo(20));
+				DbAccess.Database.RunInTransaction((de) =>
+				{
+					Assert.That(DbAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
+					Assert.That(DbAccess.Select<Users>().Length, Is.EqualTo(0));
+				}, IsolationLevel.Snapshot);
+			}, IsolationLevel.Snapshot);
+			DbAccess.Database.RunInTransaction((de) =>
+			{
+				Assert.That(DbAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
+				Assert.That(DbAccess.Select<Users>().Length, Is.EqualTo(20));
+			}, IsolationLevel.Snapshot);
 		}
 	}
 }

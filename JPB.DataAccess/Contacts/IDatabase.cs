@@ -3,6 +3,7 @@
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
@@ -16,6 +17,11 @@ namespace JPB.DataAccess.Contacts
 	/// </summary>
 	public interface IDatabase : IDisposable
 	{
+		/// <summary>
+		/// Holds control over Current Transactions and Connections
+		/// </summary>
+		IConnectionController ConnectionController { get; }
+
 		/// <summary>
 		///     Should additional Query infos be saved?
 		/// </summary>
@@ -113,7 +119,8 @@ namespace JPB.DataAccess.Contacts
 		///     Required
 		///     Closing a open Connection
 		/// </summary>
-		void CloseConnection();
+		/// <param name="forceExisting">If set true additonal checks for existing connections are made</param>
+		void CloseConnection(bool forceExisting = false);
 
 		/// <summary>
 		///     Required
@@ -210,7 +217,7 @@ namespace JPB.DataAccess.Contacts
 		///     Required
 		///     Opens a Connection or reuse an existing one and then execute the action
 		/// </summary>
-		Task RunInTransactionAsync<T>(Func<IDatabase, Task> func);
+		Task RunInTransactionAsync(Func<IDatabase, Task> func);
 
 		/// <summary>
 		///     Required

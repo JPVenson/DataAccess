@@ -59,6 +59,7 @@ namespace JPB.DataAccess.Tests
 
 		public static object[] AddEntity(DbAccessLayer mgr, int number, Type poco, Action<object> defaulting = null)
 		{
+			mgr.RaiseEvents = false;
 			var typeCache = mgr.GetClassInfo(poco);
 			if (typeCache.PrimaryKeyProperty == null)
 			{
@@ -76,11 +77,13 @@ namespace JPB.DataAccess.Tests
 				users.Add(mgr.InsertWithSelect(poco, user));
 			}
 
+			mgr.RaiseEvents = true;
 			return users.Select(f => typeCache.PrimaryKeyProperty.Getter.Invoke(f)).ToArray();
 		}
 
 		public static long[] AddUsers(int number, DbAccessLayer mgr)
 		{
+			mgr.RaiseEvents = false;
 			var users = new List<Users>();
 			for (var i = 0; i < number; i++)
 			{
@@ -88,11 +91,13 @@ namespace JPB.DataAccess.Tests
 				user.UserName = Guid.NewGuid().ToString();
 				users.Add(mgr.InsertWithSelect(user));
 			}
+			mgr.RaiseEvents = true;
 			return users.Select(f => f.User_ID).ToArray();
 		}
 
 		public static int[] AddBooks(int number, DbAccessLayer mgr)
 		{
+			mgr.RaiseEvents = false;
 			var books = new List<Book>();
 			for (var i = 0; i < number; i++)
 			{
@@ -100,11 +105,13 @@ namespace JPB.DataAccess.Tests
 				book.BookName = Guid.NewGuid().ToString();
 				books.Add(mgr.InsertWithSelect(book));
 			}
+			mgr.RaiseEvents = true;
 			return books.Select(f => f.BookId).ToArray();
 		}
 
 		public static int[] AddBooksWithImage(int number, int imagesPerBook, DbAccessLayer mgr)
 		{
+			mgr.RaiseEvents = false;
 			var books = new List<Book>();
 			for (var i = 0; i < number; i++)
 			{
@@ -121,11 +128,13 @@ namespace JPB.DataAccess.Tests
 					});
 				}
 			}
+			mgr.RaiseEvents = true;
 			return books.Select(f => f.BookId).ToArray();
 		}
 
 		public static long[] AddImages(int number, DbAccessLayer mgr)
 		{
+			mgr.RaiseEvents = false;
 			var images = new List<ImageNullable>();
 			for (var i = 0; i < number; i++)
 			{
@@ -134,6 +143,7 @@ namespace JPB.DataAccess.Tests
 				image.IdBook = null;
 				images.Add(mgr.InsertWithSelect(image));
 			}
+			mgr.RaiseEvents = true;
 			return images.Select(f => f.ImageId).ToArray();
 		}
 	}

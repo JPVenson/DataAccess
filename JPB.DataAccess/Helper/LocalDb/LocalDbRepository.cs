@@ -373,7 +373,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		IEnumerator<TEntity> IEnumerable<TEntity>.GetEnumerator()
 		{
 			CheckCreatedElseThrow();
-			return Base.Values.Select(s =>
+			return Base.Values.ToArray().Select(s =>
 			                          {
 				                          if (_keepOriginalObject)
 				                          {
@@ -665,7 +665,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			Constraints = new ConstraintCollection<TEntity>(this, primaryKeyConstraint);
 			_triggers = new TriggerForTableCollection<TEntity>(this);
 			_indexes = new IndexCollection<TEntity>();
-			Base = new Dictionary<object, TEntity>();
+			Base = new ConcurrentDictionary<object, TEntity>();
 			_databaseDatabase.AddTable(this);
 			_databaseDatabase.SetupDone += DatabaseDatabaseOnSetupDone;
 		}

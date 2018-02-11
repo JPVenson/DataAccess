@@ -169,9 +169,9 @@ namespace JPB.DataAccess.Query
 
 			if (EnumerationMode == EnumerationMode.FullOnLoad)
 			{
-				return new QueryEagerEnumerator(this, ForType);
+				return new QueryEagerEnumerator(this, ForType, true);
 			}
-			return new QueryLazyEnumerator(this, ForType);
+			return new QueryLazyEnumerator(this, ForType, true);
 		}
 
 		/// <summary>

@@ -78,10 +78,14 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		[Test]
 		[Category("MsSQL")]
 		[Category("SqLite")]
-		public void CheckFactory()
+		[TestCase(true, EnumerationMode.FullOnLoad)]
+		[TestCase(true, EnumerationMode.OnCall)]
+		[TestCase(false, EnumerationMode.FullOnLoad)]
+		[TestCase(false, EnumerationMode.OnCall)]
+		public void CheckFactory(bool asyncEnumeration, EnumerationMode mode)
 		{
 			var addUsers = DataMigrationHelper.AddUsers(250, DbAccessLayer);
-			Assert.That(() => DbAccessLayer.Query().Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(), Is.Not.Empty);
+			Assert.That(() => DbAccessLayer.Query().ConfigEnumerationMode(mode).Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>().ForResult(asyncEnumeration).ToArray(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_PK_IDFM_FUNCSELECTFACWITHPARAM testUser = null;
@@ -105,7 +109,11 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		}
 
 		[Test]
-		public void Count()
+		[TestCase(true, EnumerationMode.FullOnLoad)]
+		[TestCase(true, EnumerationMode.OnCall)]
+		[TestCase(false, EnumerationMode.FullOnLoad)]
+		[TestCase(false, EnumerationMode.OnCall)]
+		public void Count(bool asyncEnumeration, EnumerationMode mode)
 		{
 			DataMigrationHelper.AddUsers(250, DbAccessLayer);
 
@@ -118,7 +126,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 				runPrimetivSelect =
 					DbAccessLayer.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 						[0];
-				forResult = DbAccessLayer.Query().Select.Table<Users>().CountInt().ForResult().FirstOrDefault();
+				forResult = DbAccessLayer.Query().ConfigEnumerationMode(mode).Select.Table<Users>().CountInt().ForResult(asyncEnumeration).FirstOrDefault();
 			}
 			if (DbAccessLayer.DbAccessType == DbAccessType.SqLite)
 			{
@@ -126,7 +134,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 					(int)
 					DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 						[0];
-				forResult = (int)DbAccessLayer.Query().Select.Table<Users>().CountLong().ForResult().FirstOrDefault();
+				forResult = (int)DbAccessLayer.Query().ConfigEnumerationMode(mode).Select.Table<Users>().CountLong().ForResult(asyncEnumeration).FirstOrDefault();
 			}
 			if (DbAccessLayer.DbAccessType == DbAccessType.MySql)
 			{
@@ -134,7 +142,7 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 					(int)
 					DbAccessLayer.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 						[0];
-				forResult = (int)DbAccessLayer.Query().Count<Users>().ForResult<long>().FirstOrDefault();
+				forResult = (int)DbAccessLayer.Query().ConfigEnumerationMode(mode).Count<Users>().ForResult<long>(asyncEnumeration).FirstOrDefault();
 			}
 
 			Assert.That(runPrimetivSelect, Is.EqualTo(forResult));
@@ -142,7 +150,11 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 		}
 
 		[Test]
-		public void In()
+		[TestCase(true, EnumerationMode.FullOnLoad)]
+		[TestCase(true, EnumerationMode.OnCall)]
+		[TestCase(false, EnumerationMode.FullOnLoad)]
+		[TestCase(false, EnumerationMode.OnCall)]
+		public void In(bool asyncEnumeration, EnumerationMode mode)
 		{
 			var maxItems = 250;
 			var addUsers = DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
@@ -157,10 +169,11 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			}
 
 			var elementProducer =
-				DbAccessLayer.Query()
+				DbAccessLayer.Query().ConfigEnumerationMode(mode)
 					.Select.Table<Users>()
 					.Where.Column(f => f.UserID)
 					.Is.In(elementsToRead.ToArray())
+					.ForResult(asyncEnumeration)
 					.ToArray();
 			var directQuery = DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement
 																+ string.Format(" WHERE User_ID IN ({0})",
@@ -180,12 +193,18 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 
 
 		[Test]
-		public void OrderBy()
+		[TestCase(true, EnumerationMode.FullOnLoad)]
+		[TestCase(true, EnumerationMode.OnCall)]
+		[TestCase(false, EnumerationMode.FullOnLoad)]
+		[TestCase(false, EnumerationMode.OnCall)]
+		public void OrderBy(bool asyncEnumeration, EnumerationMode mode)
 		{
 			var maxItems = 250;
 			DataMigrationHelper.AddUsers(maxItems, DbAccessLayer);
 			var elementProducer =
-				DbAccessLayer.Query().Select.Table<Users>().Order.By(s => s.UserName).ThenBy(f => f.UserID).ToArray();
+					DbAccessLayer.Query().ConfigEnumerationMode(mode).Select.Table<Users>().Order.By(s => s.UserName)
+					             .ThenBy(f => f.UserID)
+					             .ForResult(asyncEnumeration).ToArray();
 			var directQuery =
 				DbAccessLayer.SelectNative<Users>(UsersMeta.SelectStatement + " ORDER BY UserName, User_ID");
 

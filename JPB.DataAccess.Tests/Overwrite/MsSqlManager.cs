@@ -16,7 +16,7 @@ namespace JPB.DataAccess.Tests
 		private readonly StringBuilder _errorText = new StringBuilder();
 
 		private string _connectionString;
-		private DbAccessLayer expectWrapper;
+		private DbAccessLayer _expectWrapper;
 
 		public MsSqlManager()
 		{
@@ -50,52 +50,44 @@ namespace JPB.DataAccess.Tests
 			}
 		}
 
+		private string _dbname;
+
 		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
-			var dbname = string.Format("YAORM_2_TestDb_Test_MsSQL_{0}", testName);
-			if (expectWrapper != null)
+			_dbname = string.Format("YAORM_2_TestDb_Test_MsSQL_{0}", testName);
+			if (_expectWrapper != null)
 			{
-				expectWrapper.Database.CloseAllConnection();
+				_expectWrapper.Database.CloseAllConnection();
 			}
+			_expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
 
-			expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
-			//try
-			//{
-			//	expectWrapper.ExecuteGenericCommand(
-			//		expectWrapper.Database.CreateCommand(
-			//			string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
-			//}
-			//catch (Exception)
-			//{
-			//	_errorText.AppendLine("Db does not exist");
-			//}
 			var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-				dbname);
+				_dbname);
 
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(redesginDatabase));
-			expectWrapper.ExecuteGenericCommand(
-				expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", dbname)));
+			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(redesginDatabase));
+			_expectWrapper.ExecuteGenericCommand(
+				_expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", _dbname)));
 
-			expectWrapper = new DbAccessLayer(DbAccessType,
-				string.Format(ConnectionString + "Initial Catalog={0};", dbname), new DbConfig(true));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateMsSql));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateMsSQl));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
+			_expectWrapper = new DbAccessLayer(DbAccessType,
+				string.Format(ConnectionString + "Initial Catalog={0};", _dbname), new DbConfig(true));
+			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(UsersMeta.CreateMsSql));
+			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(BookMeta.CreateMsSQl));
+			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
 
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
+			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
 			                                                                         "AS BEGIN " +
 			                                                                         "SELECT * FROM Users " +
 			                                                                         "END"));
 
-			expectWrapper.ExecuteGenericCommand(
-				expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
+			_expectWrapper.ExecuteGenericCommand(
+				_expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
 				                                     "AS BEGIN " +
 				                                     "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
 				                                     "END "));
 
 
-			return expectWrapper;
+			return _expectWrapper;
 		}
 
 		public void FlushErrorData()
@@ -106,9 +98,20 @@ namespace JPB.DataAccess.Tests
 
 		public void Clear()
 		{
-			if (expectWrapper != null)
+			if (_expectWrapper != null)
 			{
-				expectWrapper.Database.CloseAllConnection();
+				_expectWrapper.Database.CloseAllConnection();
+
+				var redesginDatabase = string.Format(
+				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
+				_dbname);
+
+				var masterWrapper = new DbAccessLayer(DbAccessType,
+				string.Format(ConnectionString + "Initial Catalog=master;"), new DbConfig(true));
+
+				masterWrapper.ExecuteGenericCommand(masterWrapper.Database.CreateCommand(redesginDatabase));
+
+				_expectWrapper = null;
 			}
 		}
 	}

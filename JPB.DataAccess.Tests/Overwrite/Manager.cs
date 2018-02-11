@@ -39,8 +39,10 @@ namespace JPB.DataAccess.Tests
 			_errorData.AppendLine("Found " + type);
 
 			Assert.That(new DbConfig().SClassInfoCaches, Is.Empty, () => "The Global Class cache is not empty");
-			var testClassName = TestContext.CurrentContext.Test.ClassName.GetHashCode() + "_" +
-			                    TestContext.CurrentContext.Test.MethodName.GetHashCode();
+			var testClassName = TestContext.CurrentContext.Test.ClassName.Replace(typeof(Manager).Namespace, "") + "." +
+			                    TestContext.CurrentContext.Test.MethodName;
+
+
 			var arguments =
 					additionalArguments.Select(
 					                           f =>
@@ -96,12 +98,15 @@ namespace JPB.DataAccess.Tests
 			TestContext.Error.WriteLine(_errorData.ToString());
 			_errorData.Clear();
 
-			_selectedMgr.FlushErrorData();
+			_selectedMgr?.FlushErrorData();
 		}
 
 		public void Clear()
 		{
-			_selectedMgr.Clear();
+			if (_selectedMgr != null)
+			{
+				_selectedMgr.Clear();
+			}
 		}
 	}
 }

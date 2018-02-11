@@ -13,6 +13,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests
 {
+	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class DataMigrationTests : BaseTest
 	{
 		public DataMigrationTests(DbAccessType type) : base(type)
@@ -39,17 +40,14 @@ namespace JPB.DataAccess.Tests
 		[TestCase(UsersMeta.TableName, typeof(Users_StaticQueryFactoryForSelect))]
 		public void AddGenericTest(string tableName, Type type)
 		{
-			using (base.MakeManager(Type, tableName, type))
-			{
-				Assert.That(() => DataMigrationHelper.ClearDb(DbAccess), Throws.Nothing);
-				Assert.That(() => DbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)), Is.Zero);
-				Assert.That(DataMigrationHelper.AddEntity(DbAccess, 200, type), Is.Not.Empty.And.Unique);
-				Assert.That(() => DbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)),
-							Is.EqualTo(200));
-				Assert.That(DataMigrationHelper.AddEntity(DbAccess, 200, type), Is.Not.Empty.And.Unique);
-				Assert.That(() => DbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)),
-							Is.EqualTo(400));
-			}
+			Assert.That(() => DataMigrationHelper.ClearDb(DbAccess), Throws.Nothing);
+			Assert.That(() => DbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)), Is.Zero);
+			Assert.That(DataMigrationHelper.AddEntity(DbAccess, 200, type), Is.Not.Empty.And.Unique);
+			Assert.That(() => DbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)),
+			Is.EqualTo(200));
+			Assert.That(DataMigrationHelper.AddEntity(DbAccess, 200, type), Is.Not.Empty.And.Unique);
+			Assert.That(() => DbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)),
+			Is.EqualTo(400));
 		}
 
 		[Test]

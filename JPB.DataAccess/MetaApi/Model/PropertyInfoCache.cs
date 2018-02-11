@@ -62,7 +62,6 @@ namespace JPB.DataAccess.MetaApi.Model
 			PropertyName = propertyInfo.Name;
 			PropertyType = propertyInfo.PropertyType;
 
-
 			if (!anon && (getMethod != null || setMethod != null))
 			{
 				var isStatic = getMethod != null

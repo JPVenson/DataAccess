@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -64,8 +65,20 @@ namespace JPB.DataAccess.Query.Operators
 		}
 	}
 
+	[DebuggerTypeProxy(typeof(ElementResultQuery<>.QueryBuilderContainerDebugView))]
 	public class ElementResultQuery<TPoco> : IdentifyableQuery<TPoco>, IElementProducer<TPoco>, IEnumerable<TPoco>
 	{
+		private class QueryBuilderContainerDebugView : ElementResultQuery<TPoco>
+		{
+			public QueryBuilderContainerDebugView(ElementResultQuery<TPoco> container) : base(container)
+			{
+			}
+
+			public new IEnumerator<TPoco> GetEnumerator()
+			{
+				return base.GetEnumerator<TPoco>(false);
+			}
+		}
 		/// <summary>
 		///     Adds an SQL ORDER BY Statement
 		/// </summary>
@@ -128,9 +141,9 @@ namespace JPB.DataAccess.Query.Operators
 		///     Executes the Current QueryBuilder by setting the type
 		/// </summary>
 		/// <returns></returns>
-		public IEnumerable<TPoco> ForResult()
+		public IEnumerable<TPoco> ForResult(bool async = true)
 		{
-			return new QueryEnumeratorEx<TPoco>(this);
+			return new QueryEnumeratorEx<TPoco>(this, async);
 		}
 
 		/// <summary>

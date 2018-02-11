@@ -29,42 +29,5 @@ namespace JPB.DataAccess.Tests
 			targetSetting.EnforceCreation = true;
 			targetSetting.FileCollisonDetection = CollisonDetectionMode.Pessimistic;
 		}
-
-		public static void TearDown(this BaseTest that)
-		{
-			if (Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Failure) ||
-			    Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Error))
-			{
-				that.Mgr.FlushErrorData();
-			}
-			else
-			{
-				that.Clear();
-			}
-		}
-
-		public static void ClearDb(this BaseTest that)
-		{
-			if (that.DbAccess != null)
-			{
-				that.DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
-				if (that.DbAccess.DbAccessType == DbAccessType.MsSql)
-				{
-					that.DbAccess.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-				}
-
-				if (that.DbAccess.Config != null)
-				{
-					that.DbAccess.Config.Dispose();
-				}
-			}
-		}
-
-		public static void DeleteDb(this BaseTest that)
-		{
-			var redesginDatabase = string.Format("IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-				that.DbAccess.Database.DatabaseName);
-			that.DbAccess.ExecuteGenericCommand(that.DbAccess.Database.CreateCommand(redesginDatabase));
-		}
 	}
 }

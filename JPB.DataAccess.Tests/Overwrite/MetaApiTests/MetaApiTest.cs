@@ -1,5 +1,6 @@
 ﻿#region
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
@@ -17,11 +18,48 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 	public class MetaApiTest
 	{
 		[Test]
+		public void DictionaryClassCreating()
+		{
+			var cache = new DbConfig(true);
+
+			var dyn = new Dictionary<string, object>();
+			dyn.Add("", "");
+
+			var orCreateClassInfoCache = cache.GetOrCreateClassInfoCache(dyn.GetType());
+			Assert.That(orCreateClassInfoCache, Is.Not.Null);
+			Assert.That(orCreateClassInfoCache.Propertys, Is.Not.Null);
+			Assert.That(orCreateClassInfoCache.Propertys, Contains.Key("Keys"));
+			Assert.That(orCreateClassInfoCache.Propertys, Contains.Key("Values"));
+			Assert.That(orCreateClassInfoCache.Propertys, !Contains.Key("Item"));
+			var nTestDic = orCreateClassInfoCache.DefaultFactory();
+			Assert.That(nTestDic, Is.Not.Null);
+			Assert.That(nTestDic, Is.TypeOf(typeof(Dictionary<string, object>)));
+			Assert.That(nTestDic, Is.Empty);
+		}
+
+		[Test]
+		public void DynamicClassCreating()
+		{
+			var cache = new DbConfig(true);
+
+			var dyn = new
+			{
+				TestProp = ""
+			};
+
+			var orCreateClassInfoCache = cache.GetOrCreateClassInfoCache(dyn.GetType());
+			Assert.That(orCreateClassInfoCache, Is.Not.Null);
+			Assert.That(orCreateClassInfoCache.Propertys, Is.Not.Null);
+			Assert.That(orCreateClassInfoCache.Propertys, Contains.Key("TestProp"));
+			Assert.That(() => orCreateClassInfoCache.DefaultFactory(), Throws.Exception);
+		}
+
+		[Test]
 		public void ClassCreating()
 		{
 			var cache = new DbConfig(true);
 			cache.Include<ClassCreating>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
+			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null.And.TypeOf<ClassCreating>());
 		}
 
 		[Test]
@@ -67,7 +105,7 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 			{
 				var fakeType = cache.GetFake("FakeType");
 
-				fakeType.Mehtods.Add(new FakeMethodInfoCache((e, g) => { return g[0] + (string) g[1]; }, "TestMethod"));
+				fakeType.Mehtods.Add(new FakeMethodInfoCache((e, g) => { return g[0] + (string)g[1]; }, "TestMethod"));
 
 				Assert.That(fakeType.Propertys, Is.Empty);
 				Assert.That(fakeType.Mehtods.Count, Is.EqualTo(7));
@@ -77,7 +115,7 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 
 				Assert.That(refElement, Is.Not.Null.And.TypeOf(fakeType.Type));
 
-				var propTest = (FakeMethodInfoCache) fakeType.Mehtods.FirstOrDefault(s => s.MethodName == "TestMethod");
+				var propTest = (FakeMethodInfoCache)fakeType.Mehtods.FirstOrDefault(s => s.MethodName == "TestMethod");
 				Assert.That(propTest, Is.Not.Null);
 				var invoke = propTest.Invoke(refElement, "This is ", "an Test");
 				Assert.That(invoke, Is.Not.Null.And.EqualTo("This is an Test"));
@@ -165,7 +203,7 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 		{
 			var cache = new DbConfig(true);
 			cache.Include<StructCreating>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null);
+			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null.And.TypeOf<StructCreating>());
 		}
 	}
 }

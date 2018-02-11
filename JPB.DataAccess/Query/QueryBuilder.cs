@@ -13,6 +13,9 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query
 {
+	/// <summary>
+	/// Base class for each QueryPart
+	/// </summary>
 	public abstract class QueryBuilderContainer : IQueryBuilder
 	{
 		internal QueryBuilderContainer(DbAccessLayer database, Type type) : this(new InternalContainerContainer(database, type))
@@ -81,9 +84,9 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <typeparam name="E"></typeparam>
 		/// <returns></returns>
-		public IEnumerable<E> ForResult<E>()
+		public IEnumerable<E> ForResult<E>(bool async = true)
 		{
-			return new QueryEnumeratorEx<E>(this);
+			return new QueryEnumeratorEx<E>(this, async);
 		}
 
 		/// <summary>
@@ -95,24 +98,24 @@ namespace JPB.DataAccess.Query
 			ContainerObject.AccessLayer.ExecuteGenericCommand(dbCommand);
 		}
 
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public IEnumerator<TPoco> GetEnumerator<TPoco>()
+		{
+			return GetEnumerator<TPoco>(true);
+		}
+
+		/// <inheritdoc />
+		public IEnumerator<TPoco> GetEnumerator<TPoco>(bool async)
 		{
 			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
 			{
-				return new QueryEagerEnumerator<TPoco>(ContainerObject);
+				return new QueryEagerEnumerator<TPoco>(ContainerObject, async);
 			}
-			return new QueryLazyEnumerator<TPoco>(ContainerObject);
+			return new QueryLazyEnumerator<TPoco>(ContainerObject, async);
 		}
 
+		/// <inheritdoc />
 		public abstract IQueryBuilder CloneWith<T>(T instance) where T : IQueryBuilder;
-
-		public Task<IEnumerable<TE>> ForAsyncResult<TE>()
-		{
-			throw new NotImplementedException();
-		}
 
 		/// <inheritdoc />
 		public override string ToString()

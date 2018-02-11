@@ -54,18 +54,20 @@ namespace JPB.DataAccess.Query
 	public class QueryEnumeratorEx<TPoco> : IEnumerable<TPoco>
 	{
 		private readonly IQueryBuilder _builder;
+		private readonly bool _async;
 
 		/// <summary>
 		///     For Internal Usage only
 		/// </summary>
-		public QueryEnumeratorEx(IQueryBuilder builder)
+		public QueryEnumeratorEx(IQueryBuilder builder, bool async)
 		{
 			_builder = builder;
+			_async = async;
 		}
 
 		IEnumerator<TPoco> IEnumerable<TPoco>.GetEnumerator()
 		{
-			return _builder.GetEnumerator<TPoco>();
+			return _builder.GetEnumerator<TPoco>(_async);
 		}
 
 		/// <summary>
