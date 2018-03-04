@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 
@@ -159,6 +160,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		/// <param name="right">The right.</param>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public QueryBuilderX Append(QueryBuilderX right)
 		{
 			if (right.ContainerObject == ContainerObject)
@@ -180,6 +182,7 @@ namespace JPB.DataAccess.Query
 		//	return new QueryBuilderX(ContainerObject.Clone());
 		//}
 
+		[MustUseReturnValue]
 		public override IQueryBuilder CloneWith<T>(T instance)
 		{
 			var t = GetType();

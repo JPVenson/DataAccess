@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using JetBrains.Annotations;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
@@ -57,6 +58,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <param name="resultType"></param>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public RootQuery ConfigType(Type resultType)
 		{
 			if (resultType == null)
@@ -72,6 +74,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <param name="mode"></param>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public RootQuery ConfigEnumerationMode(EnumerationMode mode)
 		{
 			ContainerObject.EnumerationMode = mode;
@@ -83,6 +86,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <param name="mode"></param>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public RootQuery ConfigAllowParamterRenaming(bool mode)
 		{
 			ContainerObject.AllowParamterRenaming = mode;
@@ -109,6 +113,9 @@ namespace JPB.DataAccess.Query.Operators
 			get { return new CountElementsObjectSelector(this); }
 		}
 
+		/// <summary>
+		/// Creates an Update Statement
+		/// </summary>
 		public PrepaireUpdateQuery Update
 		{
 			get { return new PrepaireUpdateQuery(this); }
@@ -119,6 +126,7 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public SelectQuery<T> Execute<T>(params object[] argumentsForFactory)
 		{
 			var cmd = ContainerObject
@@ -133,6 +141,7 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public SelectQuery<T> SelectFactory<T>(params object[] argumentsForFactory)
 		{
 			return new DatabaseObjectSelector(this).Table<T>(argumentsForFactory);
@@ -143,6 +152,7 @@ namespace JPB.DataAccess.Query.Operators
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public SelectQuery<T> Distinct<T>()
 		{
 			var cmd = DbAccessLayer.CreateSelect(ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "DISTINCT");
@@ -155,6 +165,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public ConditionalEvalQuery<T> UpdateEntity<T>(T obj)
 		{
 			return new ConditionalEvalQuery<T>(new UpdateQuery<T>(this
@@ -170,6 +181,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public UpdateQuery<T> UpdateStatement<T>(T obj)
 		{
 			return new UpdateQuery<T>(this
@@ -185,6 +197,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public DeleteQuery<T> Delete<T>(T obj)
 		{
 			return new DeleteQuery<T>(this
@@ -200,6 +213,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[MustUseReturnValue]
 		public DeleteQuery<T> Delete<T>()
 		{
 			return new DeleteQuery<T>(this

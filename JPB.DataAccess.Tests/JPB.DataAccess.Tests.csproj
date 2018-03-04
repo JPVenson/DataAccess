@@ -149,6 +149,7 @@
     <Compile Include="Overwrite\PagerTests\PagerUnitTest.cs" />
     <Compile Include="Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
     <Compile Include="Overwrite\QueryBuilderTests\ColumChooserTest.cs" />
+    <Compile Include="Overwrite\QueryBuilderTests\QueryPerfTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Overwrite\QueryBuilderTests\QueryBuilderTests.cs" />
     <Compile Include="Overwrite\SqLiteManager.cs" />

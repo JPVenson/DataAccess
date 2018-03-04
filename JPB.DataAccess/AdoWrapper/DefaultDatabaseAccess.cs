@@ -436,6 +436,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
 		{
 			var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection, fields);
+			cmd.Connection = ConnectionController.Connection;
 			if (ConnectionController.Transaction != null)
 			{
 				cmd.Transaction = ConnectionController.Transaction;

@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Anonymous;
 using JPB.DataAccess.Contacts;
@@ -392,6 +393,8 @@ namespace JPB.DataAccess.Manager
 		///     Creates a Strong typed query that awaits no Result
 		/// </summary>
 		/// <returns></returns>
+		[MustUseReturnValue("Use the RootQuery to run a query to the database")]
+		[Pure]
 		public RootQuery Query()
 		{
 			return new RootQuery(this);

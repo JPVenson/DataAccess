@@ -155,7 +155,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException">Invalid value</exception>
-		public ConditionalEvalQuery<TPoco> EndWith(string value)
+		public ConditionalEvalQuery<TPoco> StartWith(string value)
 		{
 			switch (State.Operator)
 			{
@@ -174,7 +174,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException">Invalid value</exception>
-		public ConditionalEvalQuery<TPoco> StartWith(string value)
+		public ConditionalEvalQuery<TPoco> EndWith(string value)
 		{
 			switch (State.Operator)
 			{

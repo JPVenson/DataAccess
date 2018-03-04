@@ -470,7 +470,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			var sql = new StringBuilder();
 			var firstParam = true;
 
-			if (!string.IsNullOrEmpty(sc.Connection.Database))
+			if (sc.Connection != null && !string.IsNullOrEmpty(sc.Connection.Database))
 			{
 				sql.AppendLine("USE  [" + sc.Connection.Database + "];");
 			}

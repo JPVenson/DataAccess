@@ -41,10 +41,13 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(object primaryKey)
 		{
-			var query = CreateDeleteSimple(Database, GetClassInfo(typeof(T)), primaryKey);
-			RaiseDelete(null, query);
-			Database.PrepaireRemoteExecution(query);
-			Database.Run(s => { s.ExecuteNonQuery(query); });
+			Database.Run(s =>
+			{
+				var query = CreateDeleteSimple(Database, GetClassInfo(typeof(T)), primaryKey);
+				RaiseDelete(null, query);
+				Database.PrepaireRemoteExecution(query);
+				s.ExecuteNonQuery(query);
+			});
 		}
 
 		/// <summary>
@@ -106,10 +109,13 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Delete<T>(T entry, params object[] parameter)
 		{
-			var query = CreateDeleteQueryFactory(GetClassInfo(entry.GetType()), entry, parameter);
-			RaiseDelete(entry, query);
-			Database.PrepaireRemoteExecution(query);
-			Database.Run(s => { s.ExecuteNonQuery(query); });
+			Database.Run(s =>
+			{
+				var query = CreateDeleteQueryFactory(GetClassInfo(entry.GetType()), entry, parameter);
+				RaiseDelete(entry, query);
+				Database.PrepaireRemoteExecution(query);
+				s.ExecuteNonQuery(query);
+			});
 		}
 	}
 }
