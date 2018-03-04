@@ -1,8 +1,11 @@
 ﻿#region
 
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Tests.Base;
@@ -204,6 +207,31 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 			var cache = new DbConfig(true);
 			cache.Include<StructCreating>();
 			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null.And.TypeOf<StructCreating>());
+		}
+
+		[Test]
+		public void TestFrameworkDirectType()
+		{
+			var cache = new DbConfig(true);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(string)).IsMsCoreFrameworkType, Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(int)).IsMsCoreFrameworkType, Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(byte)).IsMsCoreFrameworkType, Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(decimal)).IsMsCoreFrameworkType, Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(decimal?)).IsMsCoreFrameworkType, Is.True);
+		}
+
+
+		[Test]
+		public void TestFrameworkType()
+		{
+			var cache = new DbConfig(true);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(ICollection<>)).IsFrameworkType(), Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(ICollection)).IsFrameworkType(), Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(IDataAdapter)).IsFrameworkType(), Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(IDataRecord)).IsFrameworkType(), Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(XmlReadMode)).IsFrameworkType(), Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(XmlReadMode?)).IsFrameworkType(), Is.True);
+			Assert.That(cache.GetOrCreateClassInfoCache(typeof(XmlAnyAttributeAttribute)).IsFrameworkType(), Is.True);
 		}
 	}
 }

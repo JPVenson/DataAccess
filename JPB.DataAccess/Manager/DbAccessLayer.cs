@@ -448,7 +448,6 @@ namespace JPB.DataAccess.Manager
 #pragma warning restore 618
 		}
 
-		private static readonly Assembly _msCoreLibAssembly = typeof(string).Assembly;
 
 		/// <summary>
 		///     Creates an instance based on a Ctor injection or Reflection loading
@@ -472,7 +471,7 @@ namespace JPB.DataAccess.Manager
 			out bool fullLoaded,
 			DbAccessType? accessType = null)
 		{
-			if (classInfo.Type.Assembly == _msCoreLibAssembly && reader.FieldCount == 1)
+			if (classInfo.IsMsCoreFrameworkType && reader.FieldCount == 1)
 			{
 				fullLoaded = true;
 				var plainValue = reader.GetValue(0);

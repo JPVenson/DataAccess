@@ -8,11 +8,12 @@ using JPB.DataAccess.Contacts.MetaApi;
 
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
-	internal class ClassInfoEquatableComparer
+	public class ClassInfoEquatableComparer
 		: IEqualityComparer<IClassInfoCache>,
 			IEqualityComparer<Type>,
 			IComparer<IClassInfoCache>
 	{
+		/// <inheritdoc />
 		public int Compare(IClassInfoCache x, IClassInfoCache y)
 		{
 			if (x == null)
@@ -26,6 +27,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 			return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
 		}
 
+		/// <inheritdoc />
 		public bool Equals(IClassInfoCache x, IClassInfoCache y)
 		{
 			if (x == null && y == null)
@@ -47,11 +49,13 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 			return true;
 		}
 
+		/// <inheritdoc />
 		public int GetHashCode(IClassInfoCache obj)
 		{
 			return GetHashCode(obj.Type);
 		}
 
+		/// <inheritdoc />
 		public bool Equals(Type x, Type y)
 		{
 			if (x == null && y == null)
@@ -77,6 +81,7 @@ namespace JPB.DataAccess.MetaApi.Model.Equatable
 			return false;
 		}
 
+		/// <inheritdoc />
 		public int GetHashCode(Type obj)
 		{
 			return obj.GetHashCode();

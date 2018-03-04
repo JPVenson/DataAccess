@@ -20,13 +20,21 @@ namespace JPB.DataAccess.MetaApi.Model
 	[DebuggerDisplay("{Type.Name}")]
 	[Serializable]
 	public abstract class ClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
-			: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg>
-		where TProp : class, IPropertyInfoCache<TAttr>, new()
+			: IClassInfoCache<TProp, TAttr, TMeth, TCtor, TArg> where TProp : class, IPropertyInfoCache<TAttr>, new()
 		where TAttr : class, IAttributeInfoCache, new()
 		where TMeth : class, IMethodInfoCache<TAttr, TArg>, new()
 		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
+		/// <summary>
+		/// The MsCoreLib Assembly used for checking of an Framework Type
+		/// </summary>
+		public static readonly Assembly MsCoreLibAssembly = typeof(string).Assembly;
+		/// <summary>
+		/// The MsCoreLib Assembly used for checking of an Framework Type
+		/// </summary>
+		public static readonly Assembly CollectionAssembly = typeof(ICollection<>).Assembly;
+
 		internal ClassInfoCache(Type type, bool anon = false)
 		{
 			//this is ok.
@@ -48,6 +56,31 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		private Type _type;
+
+		/// <summary>
+		/// Makes on demand check in the domain for all system prefixed assemblies
+		/// </summary>
+		/// <returns></returns>
+		public bool IsFrameworkType()
+		{
+			if (IsMsCoreFrameworkType)
+			{
+				return true;
+			}
+
+			if (Type.Assembly == CollectionAssembly)
+			{
+				return true;
+			}
+
+			return AppDomain.CurrentDomain.GetAssemblies().Where(f => f.FullName.StartsWith("System"))
+			                .FirstOrDefault(e => e == Type.Assembly) != null;
+		}
+
+		/// <summary>
+		/// Is this type Located in the MsCoreLib Assembly
+		/// </summary>
+		public bool IsMsCoreFrameworkType { get; private set; }
 
 		/// <summary>
 		///     The default constructor that takes no arguments if known
@@ -72,13 +105,19 @@ namespace JPB.DataAccess.MetaApi.Model
 				throw new ArgumentNullException("type");
 			}
 
-			if (!string.IsNullOrEmpty(Name))
+			if (!String.IsNullOrEmpty(Name))
 			{
 				throw new InvalidOperationException("The object is already Initialed. A Change is not allowed");
 			}
 
 			Name = type.FullName;
 			Type = type;
+
+			if (Type.IsInterface)
+			{
+				anon = true;
+			}
+
 			Attributes = new HashSet<TAttr>(type
 					.GetCustomAttributes(true)
 					.Where(s => s is Attribute)
@@ -98,6 +137,8 @@ namespace JPB.DataAccess.MetaApi.Model
 					                 BindingFlags.NonPublic | BindingFlags.Instance)
 					.Select(s => new TCtor().Init(s) as TCtor));
 			var defaultConstructor = Constructors.FirstOrDefault(f => !f.Arguments.Any());
+
+			IsMsCoreFrameworkType = type.Assembly == MsCoreLibAssembly;
 
 			//if (type.IsValueType)
 			//{
@@ -195,21 +236,27 @@ namespace JPB.DataAccess.MetaApi.Model
 			return Expression.Lambda(Expression.Default(Type)).Compile().DynamicInvoke();
 		}
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+		/// <summary>
+		/// Comparers IClassInfoCache to type and to IClassInfoCache
+		/// </summary>
+		public static readonly ClassInfoEquatableComparer Comparer = new ClassInfoEquatableComparer();
+
+		/// <inheritdoc />
 		public bool Equals(IClassInfoCache other)
 		{
-			return new ClassInfoEquatableComparer().Equals(this, other);
+			return Comparer.Equals(this, other);
 		}
 
+		/// <inheritdoc />
 		public int CompareTo(IClassInfoCache other)
 		{
-			return new ClassInfoEquatableComparer().Compare(this, other);
+			return Comparer.Compare(this, other);
 		}
 
+		/// <inheritdoc />
 		public bool Equals(Type other)
 		{
-			return new ClassInfoEquatableComparer().Equals(Type, other);
+			return Comparer.Equals(Type, other);
 		}
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 	}
 }
