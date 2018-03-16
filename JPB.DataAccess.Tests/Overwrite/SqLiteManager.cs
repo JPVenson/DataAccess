@@ -46,6 +46,7 @@ namespace JPB.DataAccess.Tests
 				GC.Collect();
 				File.Delete(_dbFilePath);
 			}
+			File.Create(_dbFilePath).Dispose();
 			var connection = string.Format(ConnectionString, _dbFilePath);
 
 			//var file = MemoryMappedFile.CreateNew(dbname, 10000, MemoryMappedFileAccess.ReadWrite);
@@ -73,7 +74,14 @@ namespace JPB.DataAccess.Tests
 				GC.Collect();
 				GC.WaitForPendingFinalizers();
 				GC.Collect();
-				File.Delete(_dbFilePath);
+				try
+				{
+					File.Delete(_dbFilePath);
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("Could not cleanup the SqLite File");
+				}
 			}
 		}
 	}
