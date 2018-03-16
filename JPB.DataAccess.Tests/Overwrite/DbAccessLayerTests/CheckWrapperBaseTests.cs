@@ -57,19 +57,19 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 
 			var elements = DbAccess.Query()
-			                       .QueryText("SELECT")
-			                       .QueryText("res." + UsersMeta.PrimaryKeyName)
-			                       .QueryText(",res." + UsersMeta.ContentName)
-			                       .QueryText(",")
-			                       .InBracket(
-			                       s =>
-				                       s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
-				                        .ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
-			                       .QueryText("AS Subs")
-			                       .QueryText("FROM")
-			                       .QueryText(UsersMeta.TableName)
-			                       .QueryText("AS res")
-			                       .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
+								   .QueryText("SELECT")
+								   .QueryText("res." + UsersMeta.PrimaryKeyName)
+								   .QueryText(",res." + UsersMeta.ContentName)
+								   .QueryText(",")
+								   .InBracket(
+								   s =>
+									   s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
+										.ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+								   .QueryText("AS Subs")
+								   .QueryText("FROM")
+								   .QueryText(UsersMeta.TableName)
+								   .QueryText("AS res")
+								   .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
 
 			var result = elements.ToArray();
 
@@ -88,17 +88,17 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 
 			var query = DbAccess.Query()
-			                    .QueryText("SELECT")
-			                    .QueryText("res." + UsersMeta.PrimaryKeyName)
-			                    .QueryText(",res." + UsersMeta.ContentName)
-			                    .QueryText(",")
-			                    .InBracket(s =>
-				                    s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
-				                     .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
-			                    .QueryText("AS Sub")
-			                    .QueryText("FROM")
-			                    .QueryText(UsersMeta.TableName)
-			                    .QueryText("AS res");
+								.QueryText("SELECT")
+								.QueryText("res." + UsersMeta.PrimaryKeyName)
+								.QueryText(",res." + UsersMeta.ContentName)
+								.QueryText(",")
+								.InBracket(s =>
+									s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
+									 .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+								.QueryText("AS Sub")
+								.QueryText("FROM")
+								.QueryText(UsersMeta.TableName)
+								.QueryText("AS res");
 			var elements =
 					query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
 
@@ -145,10 +145,10 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			var selTestUser =
 					DbAccess.Select<Users_StaticQueryFactoryForSelectWithArugments>(new object[] { testUser.UserId })
-					        .FirstOrDefault();
+							.FirstOrDefault();
 			Assert.That(selTestUser, Is.Not.Null
-			                           .And.Property("UserName").EqualTo(testUser.UserName)
-			                           .And.Property("UserId").EqualTo(testUser.UserId));
+									   .And.Property("UserName").EqualTo(testUser.UserName)
+									   .And.Property("UserId").EqualTo(testUser.UserId));
 		}
 
 
@@ -230,9 +230,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Unchanged));
 
 			Assert.That(() => DbAccess.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
-			                                                                .Property("User_ID").EqualTo(user25.User_ID)
-			                                                                .And
-			                                                                .Property("UserName").EqualTo(user25.UserName));
+																			.Property("User_ID").EqualTo(user25.User_ID)
+																			.And
+																			.Property("UserName").EqualTo(user25.UserName));
 		}
 
 
@@ -331,6 +331,10 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		public void SharedTransactionCounter()
 		{
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
+				return;
+			}
 			var dbOne = new DefaultDatabaseAccess(new ThreadConnectionController());
 			dbOne.Attach(new MsSql(DbAccess.Database.ConnectionString));
 			var rootAccess = new DbAccessLayer(dbOne, DbAccess.Config);
@@ -348,8 +352,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(rootAccess.Database, Is.Not.EqualTo(nestedAccess.Database));
 			Assert.That(rootAccess.Database.ConnectionController, Is.Not.EqualTo(nestedAccess.Database.ConnectionController));
 
-			DbAccess.ExecuteGenericCommand("ALTER DATABASE " + DbAccess.Database.DatabaseName +
-			                               " SET ALLOW_SNAPSHOT_ISOLATION ON");
+			if (base.Type == DbAccessType.MsSql)
+			{
+				DbAccess.ExecuteGenericCommand("ALTER DATABASE " + DbAccess.Database.DatabaseName +
+										   " SET ALLOW_SNAPSHOT_ISOLATION ON");
+			}
 
 			rootAccess.Database.RunInTransaction(d =>
 			{
