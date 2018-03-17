@@ -46,7 +46,21 @@ namespace JPB.DataAccess.Tests
 			var arguments =
 					additionalArguments.Select(
 					                           f =>
-						                           f?.GetHashCode().ToString() ?? TestContext.CurrentContext.Random.NextShort().ToString())
+					                           {
+						                           var hash = "";
+
+						                           if (f == null)
+						                           {
+							                           return TestContext.CurrentContext.Random.NextShort().ToString();
+						                           }
+
+						                           if (typeof(string).Assembly.GetTypes().Contains(f.GetType()))
+						                           {
+							                           return f.ToString();
+						                           }
+
+						                           return f.GetHashCode().ToString();
+					                           })
 					                   .ToArray();
 
 			if (arguments.Any())

@@ -83,6 +83,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DisposableAction.cs" />
+    <Compile Include="SqLiteConnectionCounter.cs" />
     <Compile Include="SqLiteDataConverterPager.cs" />
     <Compile Include="SqLiteDataPager.cs" />
     <Compile Include="SqLiteUntypedDataPager.cs" />

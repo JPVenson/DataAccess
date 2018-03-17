@@ -7,12 +7,14 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 */
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using System.Text.RegularExpressions;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DebuggerHelper;
@@ -26,10 +28,17 @@ namespace JPB.DataAccess.SqLite
 	/// <seealso cref="JPB.DataAccess.Contacts.IDatabaseStrategy" />
 	public class SqLite : IDatabaseStrategy
 	{
+		static SqLite()
+		{
+			ConnectionCounter = new ConcurrentDictionary<string, SqLiteConnectionCounter>();
+		}
+
+		internal static ConcurrentDictionary<string, SqLiteConnectionCounter> ConnectionCounter { get; }
+
 		/// <summary>
 		/// The connection string
 		/// </summary>
-		private string _connStr = string.Empty;
+		private string _connStr;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SqLite"/> class.
@@ -59,13 +68,14 @@ namespace JPB.DataAccess.SqLite
 			set { _connStr = value; }
 		}
 
+		private static Regex _fileNameRegex = new Regex("[.]*Data Source=(.*);");
+
 		/// <summary>
 		/// Optional used when connecting to a Local file
 		/// </summary>
-		/// <exception cref="Exception">The method or operation is not implemented.</exception>
 		public string DatabaseFile
 		{
-			get { throw new Exception("The method or operation is not implemented."); }
+			get { return _fileNameRegex.Match(ConnectionString)?.Groups[1]?.Value; }
 		}
 
 		/// <summary>
@@ -75,7 +85,7 @@ namespace JPB.DataAccess.SqLite
 		{
 			get
 			{
-				using (var cn = (SQLiteConnection) CreateConnection())
+				using (var cn = (SQLiteConnection)CreateConnection())
 				{
 					return cn.DataSource;
 				}
@@ -88,8 +98,10 @@ namespace JPB.DataAccess.SqLite
 		/// <returns></returns>
 		public IDbConnection CreateConnection()
 		{
-			var SQLiteConnection = new SQLiteConnection(_connStr);
-			return SQLiteConnection;
+			var sqLiteConnection = new SQLiteConnection(_connStr);
+			var counter = ConnectionCounter.GetOrAdd(DatabaseFile, s => new SqLiteConnectionCounter(s));
+			counter.AddConnection(sqLiteConnection);
+			return sqLiteConnection;
 		}
 
 		/// <summary>
@@ -526,6 +538,11 @@ namespace JPB.DataAccess.SqLite
 
 		public void CloseAllConnections()
 		{
+			foreach (var sqLiteConnectionCounter in ConnectionCounter.Where(f => f.Key.Equals(DatabaseFile)))
+			{
+				sqLiteConnectionCounter.Value.Dispose();
+			}
+			ConnectionCounter.Clear();
 			GC.Collect();
 			GC.WaitForPendingFinalizers();
 			GC.Collect();

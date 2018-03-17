@@ -67,16 +67,18 @@ namespace JPB.DataAccess.Tests
 			}
 
 			var users = new List<object>();
-			for (var i = 0; i < number; i++)
+			mgr.Database.RunInTransaction((dd) =>
 			{
-				dynamic user = typeCache.New();
-				if (defaulting != null)
+				for (var i = 0; i < number; i++)
 				{
-					defaulting(user);
+					var user = typeCache.New();
+					if (defaulting != null)
+					{
+						defaulting(user);
+					}
+					users.Add(mgr.InsertWithSelect(poco, user));
 				}
-				users.Add(mgr.InsertWithSelect(poco, user));
-			}
-
+			});
 			mgr.RaiseEvents = true;
 			return users.Select(f => typeCache.PrimaryKeyProperty.Getter.Invoke(f)).ToArray();
 		}
@@ -85,12 +87,15 @@ namespace JPB.DataAccess.Tests
 		{
 			mgr.RaiseEvents = false;
 			var users = new List<Users>();
-			for (var i = 0; i < number; i++)
+			mgr.Database.RunInTransaction(d =>
 			{
-				var user = new Users();
-				user.UserName = Guid.NewGuid().ToString();
-				users.Add(mgr.InsertWithSelect(user));
-			}
+				for (var i = 0; i < number; i++)
+				{
+					var user = new Users();
+					user.UserName = Guid.NewGuid().ToString();
+					users.Add(mgr.InsertWithSelect(user));
+				}
+			});
 			mgr.RaiseEvents = true;
 			return users.Select(f => f.User_ID).ToArray();
 		}
@@ -99,12 +104,15 @@ namespace JPB.DataAccess.Tests
 		{
 			mgr.RaiseEvents = false;
 			var books = new List<Book>();
-			for (var i = 0; i < number; i++)
+			mgr.Database.RunInTransaction(d =>
 			{
-				var book = new Book();
-				book.BookName = Guid.NewGuid().ToString();
-				books.Add(mgr.InsertWithSelect(book));
-			}
+				for (var i = 0; i < number; i++)
+				{
+					var book = new Book();
+					book.BookName = Guid.NewGuid().ToString();
+					books.Add(mgr.InsertWithSelect(book));
+				}
+			});
 			mgr.RaiseEvents = true;
 			return books.Select(f => f.BookId).ToArray();
 		}
@@ -113,21 +121,24 @@ namespace JPB.DataAccess.Tests
 		{
 			mgr.RaiseEvents = false;
 			var books = new List<Book>();
-			for (var i = 0; i < number; i++)
+			mgr.Database.RunInTransaction(d =>
 			{
-				var book = new Book();
-				book.BookName = Guid.NewGuid().ToString();
-				books.Add(book = mgr.InsertWithSelect(book));
-
-				for (var j = 0; j < imagesPerBook; j++)
+				for (var i = 0; i < number; i++)
 				{
-					mgr.Insert(new Image
+					var book = new Book();
+					book.BookName = Guid.NewGuid().ToString();
+					books.Add(book = mgr.InsertWithSelect(book));
+
+					for (var j = 0; j < imagesPerBook; j++)
 					{
-						Text = Guid.NewGuid().ToString(),
-						IdBook = book.BookId
-					});
+						mgr.Insert(new Image
+						{
+							Text = Guid.NewGuid().ToString(),
+							IdBook = book.BookId
+						});
+					}
 				}
-			}
+			});
 			mgr.RaiseEvents = true;
 			return books.Select(f => f.BookId).ToArray();
 		}
@@ -136,13 +147,16 @@ namespace JPB.DataAccess.Tests
 		{
 			mgr.RaiseEvents = false;
 			var images = new List<ImageNullable>();
-			for (var i = 0; i < number; i++)
+			mgr.Database.RunInTransaction(d =>
 			{
-				var image = new ImageNullable();
-				image.Text = Guid.NewGuid().ToString();
-				image.IdBook = null;
-				images.Add(mgr.InsertWithSelect(image));
-			}
+				for (var i = 0; i < number; i++)
+				{
+					var image = new ImageNullable();
+					image.Text = Guid.NewGuid().ToString();
+					image.IdBook = null;
+					images.Add(mgr.InsertWithSelect(image));
+				}
+			});
 			mgr.RaiseEvents = true;
 			return images.Select(f => f.ImageId).ToArray();
 		}

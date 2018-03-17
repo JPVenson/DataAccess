@@ -21,25 +21,28 @@ namespace JPB.DataAccess.Tests
 		}
 
 		[Test]
-		[TestCase(UsersMeta.TableName, typeof(Users))]
-		[TestCase(UsersMeta.TableName, typeof(Users_Col))]
-		[TestCase(UsersMeta.TableName, typeof(UsersWithoutProperties))]
-		[TestCase(UsersMeta.TableName, typeof(Base.TestModels.CheckWrapperBaseTests.Users))]
-		[TestCase(UsersMeta.TableName, typeof(UsersAutoGenerateConstructor))]
-		[TestCase(UsersMeta.TableName, typeof(UsersAutoGenerateNullableConstructor))]
-		[TestCase(UsersMeta.TableName, typeof(GeneratedUsers))]
-		[TestCase(UsersMeta.TableName, typeof(ConfigLessUserInplaceConfig))]
-		[TestCase(UsersMeta.TableName, typeof(ConfigLessUserInplaceDirectConfig))]
-		[TestCase(UsersMeta.TableName, typeof(Users_PK))]
-		[TestCase(UsersMeta.TableName, typeof(Users_PK_UFM))]
-		[TestCase(UsersMeta.TableName, typeof(Users_PK_IDFM))]
-		[TestCase(UsersMeta.TableName, typeof(Users_PK_IDFM_CLASSEL))]
-		[TestCase(UsersMeta.TableName, typeof(Users_PK_IDFM_FUNCSELECT))]
-		[TestCase(UsersMeta.TableName, typeof(Users_PK_IDFM_FUNCSELECTFAC))]
-		[TestCase(UsersMeta.TableName, typeof(Users_PK_IDFM_FUNCSELECTFACWITHPARAM))]
-		[TestCase(UsersMeta.TableName, typeof(Users_StaticQueryFactoryForSelect))]
-		public void AddGenericTest(string tableName, Type type)
+		[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+		[TestCase(typeof(Users))]
+		[TestCase(typeof(Users_Col))]
+		[TestCase(typeof(UsersWithoutProperties))]
+		[TestCase(typeof(Base.TestModels.CheckWrapperBaseTests.Users))]
+		[TestCase(typeof(UsersAutoGenerateConstructor))]
+		[TestCase(typeof(UsersAutoGenerateNullableConstructor))]
+		[TestCase(typeof(GeneratedUsers))]
+		[TestCase(typeof(ConfigLessUserInplaceConfig))]
+		[TestCase(typeof(ConfigLessUserInplaceDirectConfig))]
+		[TestCase(typeof(Users_PK))]
+		[TestCase(typeof(Users_PK_UFM))]
+		[TestCase(typeof(Users_PK_IDFM))]
+		[TestCase(typeof(Users_PK_IDFM_CLASSEL))]
+		[TestCase(typeof(Users_PK_IDFM_FUNCSELECT))]
+		[TestCase(typeof(Users_PK_IDFM_FUNCSELECTFAC))]
+		[TestCase(typeof(Users_PK_IDFM_FUNCSELECTFACWITHPARAM))]
+		[TestCase(typeof(Users_StaticQueryFactoryForSelect))]
+		public void AddGenericTest(Type type)
 		{
+			var tableName = DbAccess.Config.GetOrCreateClassInfoCache(type).TableName;
+
 			Assert.That(() => DataMigrationHelper.ClearDb(DbAccess), Throws.Nothing);
 			Assert.That(() => DbAccess.Database.Run(s => s.GetSkalar("SELECT COUNT(1) FROM " + tableName)), Is.Zero);
 			Assert.That(DataMigrationHelper.AddEntity(DbAccess, 200, type), Is.Not.Empty.And.Unique);

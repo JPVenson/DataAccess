@@ -30,7 +30,10 @@ namespace JPB.DataAccess.AdoWrapper
 			ConnectionController = connectionController;
 		}
 
-		private IDatabaseStrategy _strategy;
+		/// <summary>
+		/// The Database Strategy.
+		/// </summary>
+		public IDatabaseStrategy Strategy { get; private set; }
 
 		/// <summary>
 		/// Controlls the current Transaction Behavior
@@ -92,7 +95,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				var counter = 0;
 				using (
-				var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection,
+				var cmd = Strategy.CreateCommand(strSql, ConnectionController.Connection,
 				param.Select(s => CreateParameter(counter++.ToString(), s)).ToArray()))
 				{
 					if (ConnectionController.Transaction != null)
@@ -110,7 +113,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			return Run(d =>
 			{
-				using (var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection))
+				using (var cmd = Strategy.CreateCommand(strSql, ConnectionController.Connection))
 				{
 					if (ConnectionController.Transaction != null)
 					{
@@ -127,7 +130,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			return Run(d =>
 			{
-				using (var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection))
+				using (var cmd = Strategy.CreateCommand(strSql, ConnectionController.Connection))
 				{
 					if (ConnectionController.Transaction != null)
 					{
@@ -150,7 +153,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IWrapperDataPager<T, TE> CreatePager<T, TE>()
 		{
-			return _strategy.CreateConverterPager<T, TE>();
+			return Strategy.CreateConverterPager<T, TE>();
 		}
 
 		//private QueryDebugger CreateQueryDebuggerAuto(IDbCommand cmd)
@@ -186,7 +189,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IDataPager<T> CreatePager<T>()
 		{
-			return _strategy.CreatePager<T>();
+			return Strategy.CreatePager<T>();
 		}
 
 		/// <summary>
@@ -195,7 +198,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public void Attach(IDatabaseStrategy strategy)
 		{
-			_strategy = strategy;
+			Strategy = strategy;
 			CloseConnection();
 		}
 
@@ -206,11 +209,11 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				if (_strategy == null)
+				if (Strategy == null)
 				{
 					return DbAccessType.Unknown;
 				}
-				return _strategy.SourceDatabase;
+				return Strategy.SourceDatabase;
 			}
 		}
 
@@ -219,7 +222,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public bool IsAttached
 		{
-			get { return _strategy != null; }
+			get { return Strategy != null; }
 		}
 
 		/// <summary>
@@ -227,7 +230,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public string ConnectionString
 		{
-			get { return null == _strategy ? null : _strategy.ConnectionString; }
+			get { return null == Strategy ? null : Strategy.ConnectionString; }
 		}
 
 		/// <summary>
@@ -235,7 +238,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public string DatabaseFile
 		{
-			get { return null == _strategy ? null : _strategy.DatabaseFile; }
+			get { return null == Strategy ? null : Strategy.DatabaseFile; }
 		}
 
 		/// <summary>
@@ -251,7 +254,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public string ServerName
 		{
-			get { return null == _strategy ? string.Empty : _strategy.ServerName; }
+			get { return null == Strategy ? string.Empty : Strategy.ServerName; }
 		}
 
 		/// <summary>
@@ -262,7 +265,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IDbConnection GetConnection()
 		{
-			return ConnectionController.Connection ?? (ConnectionController.Connection = _strategy.CreateConnection());
+			return ConnectionController.Connection ?? (ConnectionController.Connection = Strategy.CreateConnection());
 		}
 
 		/// <summary>
@@ -388,7 +391,6 @@ namespace JPB.DataAccess.AdoWrapper
 						}
 						ConnectionController.Transaction = null;
 					}
-					ConnectionController.Connection.Close();
 				}
 				ConnectionController.Connection = null;
 			}
@@ -422,7 +424,7 @@ namespace JPB.DataAccess.AdoWrapper
 					ConnectionController.Connection = null;
 				}
 
-				_strategy.CloseAllConnections();
+				Strategy.CloseAllConnections();
 			}
 		}
 
@@ -435,7 +437,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IDbCommand CreateCommand(string strSql, params IDataParameter[] fields)
 		{
-			var cmd = _strategy.CreateCommand(strSql, ConnectionController.Connection, fields);
+			var cmd = Strategy.CreateCommand(strSql, ConnectionController.Connection, fields);
 			cmd.Connection = ConnectionController.Connection;
 			if (ConnectionController.Transaction != null)
 			{
@@ -453,7 +455,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IDataParameter CreateParameter(string strName, object value)
 		{
-			return _strategy.CreateParameter(strName, value);
+			return Strategy.CreateParameter(strName, value);
 		}
 
 		/// <summary>
@@ -490,7 +492,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <exception cref="Exception">DB2.ExecuteNonQuery: void connection</exception>
 		public IDbCommand GetlastInsertedIdCommand()
 		{
-			return _strategy.GetlastInsertedID_Cmd(ConnectionController.Connection);
+			return Strategy.GetlastInsertedID_Cmd(ConnectionController.Connection);
 		}
 
 		/// <summary>
@@ -500,7 +502,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public string FormartCommandToQuery(IDbCommand comm)
 		{
-			return _strategy.FormartCommandToQuery(comm);
+			return Strategy.FormartCommandToQuery(comm);
 		}
 
 		/// <summary>
@@ -510,7 +512,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public string ConvertParameter(DbType type)
 		{
-			return _strategy.ConvertParameter(type);
+			return Strategy.ConvertParameter(type);
 		}
 
 		/// <summary>
@@ -570,7 +572,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IDatabase Clone()
 		{
 			var db = new DefaultDatabaseAccess(ConnectionController);
-			db.Attach((IDatabaseStrategy)_strategy.Clone());
+			db.Attach((IDatabaseStrategy)Strategy.Clone());
 			return db;
 		}
 

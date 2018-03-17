@@ -1,8 +1,10 @@
 #region
 
 using System;
+using System.Data;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Linq;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
@@ -63,10 +65,28 @@ namespace JPB.DataAccess.Tests
 
 		public void FlushErrorData()
 		{
+			Console.WriteLine($"Error Data for '{_dbFilePath}'");
 		}
 
 		public void Clear()
 		{
+			if (SqLite.SqLite.ConnectionCounter.Any(f => f.Key == expectWrapper.Database.DatabaseFile))
+			{
+				Console.WriteLine("Clear detected Undisposed Connections");
+				foreach (var sqLiteConnectionCounter in SqLite.SqLite.ConnectionCounter.Where(f => f.Key == expectWrapper.Database.DatabaseFile))
+				{
+					Console.WriteLine(" o File: '" + sqLiteConnectionCounter.Key);
+					foreach (var openConnection in sqLiteConnectionCounter.Value.Connections)
+					{
+						IDbConnection connection;
+						if (openConnection.Key.TryGetTarget(out connection))
+						{
+							Console.WriteLine("\t - " + connection.State);
+						}
+					}
+				}
+			}
+
 			expectWrapper.Database.CloseAllConnection();
 
 			if (File.Exists(_dbFilePath))

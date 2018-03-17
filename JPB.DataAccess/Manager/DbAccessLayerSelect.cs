@@ -98,7 +98,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected object Select(Type type, object pk, bool egarLoading)
 		{
-			return Select(type, CreateSelect(type, pk), egarLoading).FirstOrDefault();
+			return Database.Run(d => Select(type, CreateSelect(type, pk), egarLoading).FirstOrDefault());
 		}
 
 		/// <summary>
@@ -145,7 +145,10 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected object[] Select(Type type, bool egarLoading, params object[] parameter)
 		{
-			return Select(type, CreateSelectQueryFactory(GetClassInfo(type), parameter), egarLoading);
+			return Database.Run(d =>
+			{
+				return Select(type, CreateSelectQueryFactory(GetClassInfo(type), parameter), egarLoading);
+			});
 		}
 
 		/// <summary>
@@ -177,7 +180,8 @@ namespace JPB.DataAccess.Manager
 		#region CreateCommands
 
 		/// <summary>
-		///     Creates a Select with appended query
+		///     Creates a Select with appended query.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, string query)
@@ -188,7 +192,8 @@ namespace JPB.DataAccess.Manager
 
 
 		/// <summary>
-		///     Creates a Select with appended query
+		///     Creates a Select with appended query.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect<T>(string query)
@@ -197,7 +202,8 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Select with appended query and inclueded QueryCommand Paramater
+		///     Creates a Select with appended query and inclueded QueryCommand Paramater.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, string query, IEnumerable<IQueryParameter> paramenter)
@@ -476,7 +482,8 @@ namespace JPB.DataAccess.Manager
 
 
 		/// <summary>
-		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater
+		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, object pk)
@@ -494,7 +501,8 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater
+		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -551,7 +559,8 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Select by using a Factory mehtod or auto generated querys
+		///     Creates a Select by using a Factory mehtod or auto generated querys.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -561,7 +570,8 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Creates a Select by using a Factory mehtod or auto generated querys
+		///     Creates a Select by using a Factory mehtod or auto generated querys.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		private static IDbCommand CreateSelect(DbClassInfoCache type, IDatabase db)
@@ -575,7 +585,8 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Executes a Selectstatement and Parse the Output into
-		///     <paramref name="type" />
+		///     <paramref name="type" />.
+		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable RunDynamicSelect(Type type, IDbCommand query)
@@ -682,6 +693,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="where" />
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
 		public object[] SelectWhere(Type type, string where)
 		{
 			return SelectWhere(type, where, null);
@@ -693,6 +705,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
 		public T[] SelectWhere<T>(string where)
 		{
 			return SelectWhere(typeof(T), where).Cast<T>().ToArray();
@@ -705,6 +718,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="paramenter" />
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
 		public object[] SelectWhere(Type type, string where, IEnumerable<IQueryParameter> paramenter)
 		{
 			if (!where.StartsWith("WHERE"))
@@ -724,6 +738,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
 		public T[] SelectWhere<T>(string where, IEnumerable<IQueryParameter> paramenter)
 		{
 			return SelectWhere(typeof(T), where, paramenter).Cast<T>().ToArray();
@@ -736,6 +751,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="paramenter" />
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
 		public object[] SelectWhere(Type type, string where, dynamic paramenter)
 		{
 			//Concret declaration is nessesary because we are working with dynmaics, so the compiler has ne space to guess the type wrong
@@ -750,6 +766,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
 		public T[] SelectWhere<T>(string where, dynamic paramenter)
 		{
 			object[] selectWhere = SelectWhere(typeof(T), where, paramenter);
@@ -780,6 +797,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
 		public object[] RunPrimetivSelect(Type type, string query, IEnumerable<IQueryParameter> paramerter)
 		{
 			return RunPrimetivSelect(type, Database.CreateCommandWithParameterValues(query, paramerter));
@@ -792,6 +810,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
 		public object[] RunPrimetivSelect(Type type, string query)
 		{
 			return RunPrimetivSelect(type, query, new List<IQueryParameter>());
@@ -805,6 +824,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
 		public T[] RunPrimetivSelect<T>(string query, dynamic parameters)
 		{
 			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(parameters);
@@ -820,6 +840,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
 		public T[] RunPrimetivSelect<T>(string query, IEnumerable<IQueryParameter> parameters)
 		{
 			return RunPrimetivSelect(typeof(T), query, parameters).Cast<T>().ToArray();
@@ -833,6 +854,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
 		public T[] RunPrimetivSelect<T>(string query)
 		{
 			return RunPrimetivSelect<T>(query, new List<IQueryParameter>());

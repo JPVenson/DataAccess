@@ -316,8 +316,9 @@
     <Compile Include="Query\Operators\SetValueForUpdateQuery.cs" />
     <Compile Include="Query\Operators\UpdateColumnSetters.cs" />
     <Compile Include="Query\Operators\UpdateQuery.cs" />
-    <Compile Include="Query\QueryBuilder.cs" />
+    <Compile Include="Query\QueryBuilderContainer.cs" />
     <Compile Include="Query\QueryBuilderExtentions.cs" />
+    <Compile Include="Query\QueryBuilderX.cs" />
     <Compile Include="Query\QueryEagerEnumerator.cs" />
     <Compile Include="Query\QueryEnumerator.cs" />
     <Compile Include="Query\QueryLazyEnumerator.cs" />

@@ -28,11 +28,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		private readonly bool _egarLoading;
 
-		public SelectionTests(DbAccessType type) : base(type)
-		{
-		}
-
-		public SelectionTests(DbAccessType type, bool egarLoading) : base(type, egarLoading)
+		public SelectionTests(DbAccessType type, bool egarLoading) : base(type, egarLoading.ToString())
 		{
 			_egarLoading = egarLoading;
 		}

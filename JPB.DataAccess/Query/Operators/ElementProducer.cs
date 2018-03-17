@@ -16,6 +16,10 @@ using JPB.DataAccess.Query.Operators.Orders;
 
 namespace JPB.DataAccess.Query.Operators
 {
+	/// <summary>
+	/// Defines a Query that can contain and Handle an Alias
+	/// </summary>
+	/// <typeparam name="TPoco"></typeparam>
 	public class IdentifyableQuery<TPoco> : QueryBuilderX
 	{
 		/// <summary>
@@ -51,6 +55,9 @@ namespace JPB.DataAccess.Query.Operators
 		/// </value>
 		public string CurrentIdentifier { get; private set; }
 
+		/// <summary>
+		/// Sets the Interal Alias to a new Uniq value
+		/// </summary>
 		protected void CreateNewIdentifier()
 		{
 			CurrentIdentifier = string.Format("{0}_{1}", Cache.TableName, ContainerObject.GetNextParameterId());
@@ -83,7 +90,7 @@ namespace JPB.DataAccess.Query.Operators
 		///     Adds an SQL ORDER BY Statement
 		/// </summary>
 		/// <returns></returns>
-		public OrderStatementQuery<TPoco> Order
+		public virtual OrderStatementQuery<TPoco> Order
 		{
 			get { return new OrderStatementQuery<TPoco>(this.QueryText("ORDER BY")); }
 		}
@@ -93,7 +100,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <param name="limit"></param>
 		/// <returns></returns>
-		public ElementProducer<TPoco> LimitBy(int limit)
+		public virtual ElementProducer<TPoco> LimitBy(int limit)
 		{
 			QueryBuilderX wrapper;
 			switch (ContainerObject.AccessLayer.DbAccessType)
@@ -215,7 +222,7 @@ namespace JPB.DataAccess.Query.Operators
 		///     should be followed by Column()
 		/// </summary>
 		/// <returns></returns>
-		public ConditionalQuery<TPoco> Where
+		public virtual ConditionalQuery<TPoco> Where
 		{
 			get { return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier)); }
 		}

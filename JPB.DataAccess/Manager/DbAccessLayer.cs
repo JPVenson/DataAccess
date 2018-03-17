@@ -816,10 +816,6 @@ namespace JPB.DataAccess.Manager
 							RaiseFailedQuery(this, query, ex);
 							throw;
 						}
-						finally
-						{
-							dr.Close();
-						}
 					}
 				}
 
@@ -865,10 +861,6 @@ namespace JPB.DataAccess.Manager
 						{
 							RaiseFailedQuery(this, query, ex);
 							throw;
-						}
-						finally
-						{
-							dr.Close();
 						}
 					}
 				}

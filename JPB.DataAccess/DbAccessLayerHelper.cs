@@ -119,10 +119,10 @@ namespace JPB.DataAccess
 			if (pessimistic)
 			{
 				var parameter =
-					@base.Parameters.Cast<IDataParameter>()
-						.Select(item => new QueryParameter(item.ParameterName, item.Value, item.DbType))
-						.Cast<IQueryParameter>()
-						.ToList();
+						@base.Parameters.Cast<IDataParameter>()
+						     .Select(item => new QueryParameter(item.ParameterName, item.Value, item.DbType))
+						     .Cast<IQueryParameter>()
+						     .ToList();
 
 
 				foreach (var item in last.Parameters.Cast<IDataParameter>())
@@ -153,11 +153,11 @@ namespace JPB.DataAccess
 				}
 
 				return db.CreateCommandWithParameterValues(@base.CommandText + (insertDelimiter ? "; " : " ") + commandText,
-					parameter);
+				parameter);
 			}
 			var arguments = new List<IDataParameter>(@base
-				.Parameters
-				.Cast<IDataParameter>());
+					.Parameters
+					.Cast<IDataParameter>());
 			arguments.AddRange(last.Parameters.Cast<IDataParameter>());
 			return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, arguments);
 		}
@@ -343,7 +343,7 @@ namespace JPB.DataAccess
 
 			if (parameter is IQueryParameter)
 			{
-				return new[] {parameter as IQueryParameter};
+				return new[] { parameter as IQueryParameter };
 			}
 
 			if (parameter is IEnumerable<IQueryParameter>)

@@ -60,6 +60,17 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			get { return _dbAccess; }
 		}
 
+		[Test]
+		public void SelectSingleColumnTest()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(10, DbAccessLayer);
+
+			var userses = DbAccessLayer.Query().Select.Only<Users>().Column(f => f.UserID).ForResult<long>().ToArray();
+
+			Assert.That(userses.Length == addUsers.Length, Is.True);
+			CollectionAssert.AreEqual(addUsers, userses);
+		}
+
 
 		[Category("MsSQL")]
 		[Test]
