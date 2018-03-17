@@ -80,7 +80,7 @@ namespace JPB.DataAccess.Tests
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("Could not cleanup the SqLite File");
+					Console.WriteLine($"Could not cleanup the SqLite File '{_dbFilePath}'");
 				}
 			}
 		}

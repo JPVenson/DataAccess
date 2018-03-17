@@ -16,6 +16,7 @@ namespace JPB.DataAccess.Tests.MetaApiTests
 {
 	[TestFixture]
 	[SuppressMessage("ReSharper", "LocalizableElement")]
+	[Explicit]
 	public class MetaApiSpeedTest
 	{
 		private TimeSpan Measure(Action target)
