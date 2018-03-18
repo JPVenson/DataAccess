@@ -15,14 +15,14 @@
 			<DockPanel>
 				<Menu DockPanel.Dock="Top">
 					<MenuItem DockPanel.Dock="Right" Command="{Binding ConnectToDatabaseCommand}" Header="Connect"/>
-					<MenuItem Command="{Binding SaveConfigCommand}" Header="Save"></MenuItem>
-					<MenuItem Command="{Binding LoadConfigCommand}" Header="Load"></MenuItem>
-					<MenuItem Command="{Binding CompileCommand}" Header="Compile"></MenuItem>
-					<MenuItem Command="{Binding AdjustNamesCommand}" Header="Rename(C# Like)"></MenuItem>
-					<MenuItem Command="{Binding OpenInfoWindowCommand}" Header="Info"></MenuItem>
+					<MenuItem Command="{Binding SaveConfigCommand}" Header="Save" />
+					<MenuItem Command="{Binding LoadConfigCommand}" Header="Load" />
+					<MenuItem Command="{Binding CompileCommand}" Header="Compile" />
+					<MenuItem Command="{Binding AdjustNamesCommand}" Header="Rename(C# Like)" />
+					<MenuItem Command="{Binding OpenInfoWindowCommand}" Header="Info" />
 				</Menu>
 				<DockPanel Dock="Bottom">
-					<Label Content="{Binding Status}"></Label>
+					<Label Content="{Binding Status}" />
 				</DockPanel>
 				<DockPanel Dock="Top">
 					<xctk:PropertyGrid Width="200" Margin="10"
@@ -41,19 +41,34 @@
 
 					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
 						<DockPanel>
-							<DockPanel>
-								<Button DockPanel.Dock="Top" Content="Preview" Command="{Binding SelectedTable.CreatePreviewCommand}" />
-								<DockPanel Dock="Bottom">
-									<Button Content="Add" Command="{Binding AddTableCommand}"/>
-									<Button Content="Remove" Command="{Binding DeleteSelectedTableCommand}"/>
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="50*" MinHeight="25"/>
+									<RowDefinition Height="50*" MinHeight="25"/>
+								</Grid.RowDefinitions>
+								<DockPanel Grid.Row="0">
+									<Button DockPanel.Dock="Top" Content="Preview" Command="{Binding SelectedTable.CreatePreviewCommand}" />
+									<DockPanel Dock="Bottom">
+										<Button Content="Add" Command="{Binding AddTableCommand}"/>
+										<Button Content="Remove" Command="{Binding DeleteSelectedTableCommand}"/>
+									</DockPanel>
+									<xcdg:DataGridControl AutoCreateColumns="False" DockPanel.Dock="Left" ItemsSource="{Binding Tables}" SelectedItem="{Binding SelectedTable}">
+										<xcdg:DataGridControl.Columns>
+											<xcdg:Column FieldName="Info.TableName" Title="Table name" ReadOnly="True"/>
+											<xcdg:Column FieldName="NewTableName" Title="C# Name"/>
+										</xcdg:DataGridControl.Columns>
+									</xcdg:DataGridControl>
 								</DockPanel>
-								<xcdg:DataGridControl AutoCreateColumns="False" DockPanel.Dock="Left" ItemsSource="{Binding Tables}" SelectedItem="{Binding SelectedTable}">
-									<xcdg:DataGridControl.Columns>
-										<xcdg:Column FieldName="Info.TableName" Title="Table name" ReadOnly="True"/>
-										<xcdg:Column FieldName="NewTableName" Title="C# Name"/>
-									</xcdg:DataGridControl.Columns>
-								</xcdg:DataGridControl>
-							</DockPanel>
+								<DockPanel Grid.Row="1">
+									<Button DockPanel.Dock="Top" Content="Preview" Command="{Binding SelectedTable.CreatePreviewCommand}" />
+									<xcdg:DataGridControl AutoCreateColumns="False" DockPanel.Dock="Left" ItemsSource="{Binding Views}" SelectedItem="{Binding SelectedTable}">
+										<xcdg:DataGridControl.Columns>
+											<xcdg:Column FieldName="Info.TableName" Title="View name" ReadOnly="True"/>
+											<xcdg:Column FieldName="NewTableName" Title="C# Name"/>
+										</xcdg:DataGridControl.Columns>
+									</xcdg:DataGridControl>
+								</DockPanel>
+							</Grid>
 
 							<DockPanel Dock="Left" DataContext="{Binding SelectedTable}">
 								<xctk:BusyIndicator IsBusy="{Binding IsWorking}">
@@ -72,8 +87,7 @@
 														TargetProperties="Info"
 														DisplayName="Table Name"
 														IsExpandable="True"
-														Description="The SQL Table name">
-													</xctk:PropertyDefinition>
+														Description="The SQL Table name" />
 													<xctk:PropertyDefinition
 														TargetProperties="Exclude"
 														Description="If set this class will be skiped" />
