@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Helper
 		public QueryParameter(string name, object value)
 		{
 			Name = name;
-			Value = value;
+			Value = value ?? DBNull.Value;
 			if (value != null)
 			{
 				SourceType = value.GetType();

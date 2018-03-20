@@ -38,7 +38,7 @@ namespace JPB.DataAccess.Query
 			ContainerObject = database.Clone();
 		}
 
-		internal QueryBuilderContainer(IQueryBuilder database) : this(database.ContainerObject.Clone())
+		internal QueryBuilderContainer(IQueryBuilder database) : this(database.ContainerObject)
 		{
 			if (database == null)
 			{
@@ -46,7 +46,7 @@ namespace JPB.DataAccess.Query
 			}
 		}
 
-		internal QueryBuilderContainer(IQueryBuilder database, Type type) : this(database.ContainerObject.Clone())
+		internal QueryBuilderContainer(IQueryBuilder database, Type type) : this(database.ContainerObject)
 		{
 			if (database == null)
 			{

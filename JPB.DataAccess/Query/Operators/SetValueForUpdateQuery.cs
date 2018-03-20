@@ -88,12 +88,23 @@ namespace JPB.DataAccess.Query.Operators
 		{
 		}
 
+		/// <summary>
+		/// Declares the value to set the given column
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
 		public NextUpdateOrCondtionQuery<TPoco> Value(object value)
 		{
 			var arg = "@setArg" + base.ContainerObject.GetNextParameterId();
 			return new NextUpdateOrCondtionQuery<TPoco>(this.QueryQ(" = " + arg, new QueryParameter(arg, value)));
 		}
 
+		/// <summary>
+		/// Sets the Column defined to the result of the query
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="arguments"></param>
+		/// <returns></returns>
 		public NextUpdateOrCondtionQuery<TPoco> QueryValue(string value, params IQueryParameter[] arguments)
 		{
 			return new NextUpdateOrCondtionQuery<TPoco>(this.QueryQ(" = " + value, arguments.ToArray()));

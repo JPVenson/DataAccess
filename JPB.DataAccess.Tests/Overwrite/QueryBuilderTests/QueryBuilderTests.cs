@@ -389,6 +389,14 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			user = DbAccessLayer.Select<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));
+
+			DbAccessLayer.Query().Update.Table<Users>().Set
+			             .Column(f => f.UserName).Value(null)
+			             .ExecuteNonQuery();
+
+			user = DbAccessLayer.Select<Users>(addUsers);
+			Assert.That(user.UserID, Is.EqualTo(userIdPre));
+			Assert.That(user.UserName, Is.Null);
 		}
 	}
 }
