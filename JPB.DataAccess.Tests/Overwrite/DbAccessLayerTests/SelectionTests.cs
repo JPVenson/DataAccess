@@ -139,31 +139,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		[Category("MsSQL")]
 		[Category("SqLite")]
-		public void SelectPrimitivSelectNullHandling()
-		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
-			DataMigrationHelper.AddUsers(1, DbAccess);
-			Assert.That(() =>
-			{
-				DbAccess.RunPrimetivSelect<long>(
-					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-					new QueryParameter("paramA", null));
-			}, Throws.Exception);
-
-			Assert.That(() =>
-			{
-				string n = null;
-				DbAccess.RunPrimetivSelect<long>(
-					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA", new {paramA = n});
-			}, Throws.Exception);
-		}
-
-		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectPropertyLessPoco()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
