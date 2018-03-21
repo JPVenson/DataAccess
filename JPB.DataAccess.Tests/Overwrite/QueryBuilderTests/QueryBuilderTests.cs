@@ -398,5 +398,14 @@ namespace JPB.DataAccess.Tests.QueryBuilderTests
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Null);
 		}
+
+		[Test]
+		public void ForginKeyTest()
+		{
+			var addBooksWithImage = DataMigrationHelper.AddBooksWithImage(1, 20, DbAccessLayer);
+			var array = DbAccessLayer.Query().Select.Table<Image>().Where.ForginKey<Book>().Is.Not.Null.ToArray();
+			Assert.That(array, Is.Not.Empty);
+			Assert.That(array[0].IdBook, Is.EqualTo(addBooksWithImage[0]));
+		}
 	}
 }

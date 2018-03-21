@@ -70,20 +70,23 @@ namespace JPB.DataAccess.Tests
 
 		public void Clear()
 		{
-			if (SqLite.SqLite.ConnectionCounter.Any(f => f.Key == expectWrapper.Database.DatabaseFile))
+			var connectionCounter = SqLite.SqLite.ConnectionCounter.Where(f => f.Key == expectWrapper.Database.DatabaseFile)
+			                              .SelectMany(e => e.Value.Connections)
+			                              .Select(e =>
+			                              {
+				                              IDbConnection conn;
+				                              e.Key.TryGetTarget(out conn);
+				                              return conn;
+			                              })
+			                              .Where(f => f != null)
+			                              .ToArray();
+
+			if (connectionCounter.Any())
 			{
 				Console.WriteLine("Clear detected Undisposed Connections");
-				foreach (var sqLiteConnectionCounter in SqLite.SqLite.ConnectionCounter.Where(f => f.Key == expectWrapper.Database.DatabaseFile))
+				foreach (var sqLiteConnectionCounter in connectionCounter)
 				{
-					Console.WriteLine(" o File: '" + sqLiteConnectionCounter.Key);
-					foreach (var openConnection in sqLiteConnectionCounter.Value.Connections)
-					{
-						IDbConnection connection;
-						if (openConnection.Key.TryGetTarget(out connection))
-						{
-							Console.WriteLine("\t - " + connection.State);
-						}
-					}
+					Console.WriteLine("\t - " + sqLiteConnectionCounter.State);
 				}
 			}
 

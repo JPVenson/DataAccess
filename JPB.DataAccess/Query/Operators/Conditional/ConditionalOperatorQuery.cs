@@ -54,6 +54,25 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		}
 
 		/// <summary>
+		///		Adds an Null check
+		/// </summary>
+		public ConditionalEvalQuery<TPoco> Null
+		{
+			get
+			{
+				switch (State.Operator)
+				{
+					case Operator.Is:
+						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"));
+					case Operator.Not:
+						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"));
+					default:
+						throw new NotSupportedException("Invalid value");
+				}
+			}
+		}
+
+		/// <summary>
 		///     Adds an IN or NOT BEWEEN statement for the given collection of values
 		/// </summary>
 		/// <typeparam name="TValue">The type of the value.</typeparam>
