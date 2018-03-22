@@ -83,13 +83,7 @@ namespace JPB.DataAccess.SqLite
 		/// </summary>
 		public string ServerName
 		{
-			get
-			{
-				using (var cn = (SQLiteConnection)CreateConnection())
-				{
-					return cn.DataSource;
-				}
-			}
+			get { return DatabaseFile; }
 		}
 
 		/// <summary>
@@ -148,40 +142,6 @@ namespace JPB.DataAccess.SqLite
 		}
 
 		/// <summary>
-		/// Creates the data adapter.
-		/// </summary>
-		/// <param name="cmd">The command.</param>
-		/// <returns></returns>
-		public IDbDataAdapter CreateDataAdapter(IDbCommand cmd)
-		{
-			var adapter = new SQLiteDataAdapter();
-			adapter.SelectCommand = (SQLiteCommand)cmd;
-			return adapter;
-		}
-
-		/// <summary>
-		/// Creates a data table.
-		/// </summary>
-		/// <param name="name">The name.</param>
-		/// <param name="cmd">The command.</param>
-		/// <returns></returns>
-		public DataTable CreateDataTable(string name, IDbCommand cmd)
-		{
-			using (var adapter = new SQLiteDataAdapter())
-			{
-				adapter.SelectCommand = (SQLiteCommand)cmd;
-
-				var table = new DataTable(name);
-				adapter.Fill(table);
-
-				cmd.Dispose();
-				adapter.Dispose();
-
-				return table;
-			}
-		}
-
-		/// <summary>
 		/// Getlasts a inserted identifier command.
 		/// </summary>
 		/// <param name="conn">The connection.</param>
@@ -220,7 +180,7 @@ namespace JPB.DataAccess.SqLite
 		/// <returns></returns>
 		public string FormartCommandToQuery(IDbCommand command)
 		{
-			return CommandAsMsSql(command);
+			return CommandAsSqLite(command);
 		}
 
 		/// <summary>
@@ -245,199 +205,11 @@ namespace JPB.DataAccess.SqLite
 		}
 
 		/// <summary>
-		/// Compacts the database.
-		/// </summary>
-		/// <param name="strSource">The string source.</param>
-		/// <param name="strDest">The string dest.</param>
-		/// <exception cref="NotImplementedException">The method or operation is not implemented.</exception>
-		public void CompactDatabase(string strSource, string strDest)
-		{
-			throw new NotImplementedException("The method or operation is not implemented.");
-		}
-
-		/// <summary>
-		/// Shrinks the database.
-		/// </summary>
-		/// <param name="strConnectionString">The string connection string.</param>
-		/// <exception cref="NotImplementedException">The method or operation is not implemented.</exception>
-		public void ShrinkDatabase(string strConnectionString)
-		{
-			throw new NotImplementedException("The method or operation is not implemented.");
-		}
-
-		/// <summary>
-		/// Prepares the query.
-		/// </summary>
-		/// <param name="conn">The connection.</param>
-		/// <param name="strSql">The string SQL.</param>
-		/// <exception cref="NotImplementedException">The method or operation is not implemented.</exception>
-		public void PrepareQuery(IDbConnection conn, string strSql)
-		{
-			throw new NotImplementedException("The method or operation is not implemented.");
-		}
-
-		/// <summary>
-		/// Imports the specified dt.
-		/// </summary>
-		/// <param name="dt">The dt.</param>
-		/// <param name="cmd">The command.</param>
-		public void Import(DataTable dt, IDbCommand cmd)
-		{
-			using (var adapter = new SQLiteDataAdapter())
-			{
-				adapter.SelectCommand = (SQLiteCommand)cmd;
-
-				foreach (DataRow row in dt.Rows)
-				{
-					row.SetAdded();
-				}
-
-				adapter.Update(dt);
-			}
-		}
-
-		/// <summary>
-		/// Gets the time stamp.
-		/// </summary>
-		/// <returns></returns>
-		public string GetTimeStamp()
-		{
-			return GetTimeStamp(DateTime.Now);
-		}
-
-		/// <summary>
-		/// Gets the time stamp.
-		/// </summary>
-		/// <param name="dtValue">The dt value.</param>
-		/// <returns></returns>
-		public string GetTimeStamp(DateTime dtValue)
-		{
-			var dt = dtValue;
-
-			return string.Format(
-				"CONVERT(datetime,'{0:d4}-{1:d2}-{2:d2} {3:d2}:{4:d2}:{5:d2}',120)",
-				dt.Year, dt.Month, dt.Day,
-				dt.Hour, dt.Minute, dt.Second);
-		}
-
-		/// <summary>
-		/// Gets the tables.
-		/// </summary>
-		/// <param name="conn">The connection.</param>
-		/// <param name="strFilter">The string filter.</param>
-		/// <returns></returns>
-		public string[] GetTables(IDbConnection conn, String strFilter)
-		{
-			const string sql = "select NAME from SYSOBJECTS where TYPE = 'U' AND NAME <> 'dtproperties' order by NAME";
-			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
-			using (IDataReader dr = cmd.ExecuteReader())
-			{
-				var list = new List<string>();
-				while (dr.Read())
-				{
-					list.Add((string)dr[0]);
-				}
-				return list.ToArray();
-			}
-		}
-
-		/// <summary>
-		/// Gets the table columns.
-		/// </summary>
-		/// <param name="conn">The connection.</param>
-		/// <param name="strTableName">Name of the string table.</param>
-		/// <param name="exclude">The exclude.</param>
-		/// <returns></returns>
-		public string[] GetTableColumns(IDbConnection conn, string strTableName, params object[] exclude)
-		{
-			var sql = string.Format(
-				"select NAME from SYSCOLUMNS where ID=(select ID from SYSOBJECTS where TYPE = 'U' AND NAME = '{0}')",
-				strTableName);
-			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
-			using (IDataReader dr = cmd.ExecuteReader())
-			{
-				var list = new List<string>();
-				while (dr.Read())
-				{
-					list.Add((string)dr[0]);
-				}
-				return list.ToArray();
-			}
-		}
-
-		/// <summary>
-		/// Drops the table.
-		/// </summary>
-		/// <param name="conn">The connection.</param>
-		/// <param name="strTableName">Name of the string table.</param>
-		/// <returns></returns>
-		public int DropTable(IDbConnection conn, String strTableName)
-		{
-			var sql = String.Format("DROP TABLE {0}", strTableName);
-			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
-			{
-				return cmd.ExecuteNonQuery();
-			}
-		}
-
-		/// <summary>
-		/// Gets the views SQL.
-		/// </summary>
-		/// <param name="strName">Name of the string.</param>
-		/// <returns></returns>
-		public string GetViewsSql(String strName)
-		{
-			return string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
-		}
-
-		/// <summary>
-		/// Gets the stored procedure SQL.
-		/// </summary>
-		/// <param name="strName">Name of the string.</param>
-		/// <returns></returns>
-		public string GetStoredProcedureSql(String strName)
-		{
-			return string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
-		}
-
-		/// <summary>
-		/// Supportses the view.
-		/// </summary>
-		/// <param name="conn">The connection.</param>
-		/// <param name="strName">Name of the string.</param>
-		/// <returns></returns>
-		public bool SupportsView(IDbConnection conn, String strName)
-		{
-			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'V') AND name LIKE '{0}'", strName);
-			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
-			using (IDataReader dr = cmd.ExecuteReader())
-			{
-				return (dr.Read());
-			}
-		}
-
-		/// <summary>
-		/// Supportses the stored procedure.
-		/// </summary>
-		/// <param name="conn">The connection.</param>
-		/// <param name="strName">Name of the string.</param>
-		/// <returns></returns>
-		public bool SupportsStoredProcedure(IDbConnection conn, String strName)
-		{
-			var sql = string.Format("SELECT name FROM sysobjects WHERE type in (N'P') AND name LIKE '{0}'", strName);
-			using (var cmd = new SQLiteCommand(sql, (SQLiteConnection)conn))
-			using (IDataReader dr = cmd.ExecuteReader())
-			{
-				return (dr.Read());
-			}
-		}
-
-		/// <summary>
 		/// Commands as ms SQL.
 		/// </summary>
 		/// <param name="sc">The sc.</param>
 		/// <returns></returns>
-		public static String CommandAsMsSql(IDbCommand sc)
+		public static String CommandAsSqLite(IDbCommand sc)
 		{
 			if (!(sc is SQLiteCommand))
 			{
