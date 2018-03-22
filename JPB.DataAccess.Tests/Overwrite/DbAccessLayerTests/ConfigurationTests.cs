@@ -12,7 +12,7 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class ConfigurationTests : BaseTest
+	public class ConfigurationTests : DatabaseBaseTest
 	{
 		public ConfigurationTests(DbAccessType type) : base(type)
 		{

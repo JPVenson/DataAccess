@@ -88,7 +88,7 @@ namespace JPB.DataAccess.Query
 
 			return ctors.Invoke(new object[] { instance }) as IQueryBuilder;
 
-			return Activator.CreateInstance(t, BindingFlags.Default, null, instance as IQueryBuilder) as IQueryBuilder;
+			//return Activator.CreateInstance(t, BindingFlags.Default, null, instance as IQueryBuilder) as IQueryBuilder;
 		}
 	}
 }

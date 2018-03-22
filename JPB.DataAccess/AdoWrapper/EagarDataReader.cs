@@ -32,8 +32,6 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <summary>
 		///     Initializes a new instance of the <see cref="EagarDataReader" /> class.
 		/// </summary>
-		/// <param name="sourceRecord">The source record.</param>
-		/// <param name="configuration">The access layer.</param>
 		public EagarDataReader(IDataRecord sourceRecord, DbConfig configuration, Type exepctedType)
 			: base(sourceRecord, configuration)
 		{

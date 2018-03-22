@@ -14,7 +14,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class InsertTests : BaseTest
+	public class InsertTests : DatabaseBaseTest
 	{
 		public InsertTests(DbAccessType type) : base(type)
 		{

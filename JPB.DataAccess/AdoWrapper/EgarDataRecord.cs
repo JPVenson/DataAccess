@@ -12,24 +12,6 @@ using JPB.DataAccess.DbInfoConfig;
 namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
-	///		A EgarDataRecord that returns <c>null</c> instedt of <c>DbNull</c> on null fields
-	/// </summary>
-	public class EgarNullableWrappedRecord : EgarDataRecord
-	{
-		public EgarNullableWrappedRecord(IDataRecord sourceRecord, DbConfig configuration)
-			: base(sourceRecord, configuration)
-		{
-
-		}
-
-		protected internal override object GetValueInternal(int i)
-		{
-			var val = base.GetValueInternal(i);
-			return val == DBNull.Value ? null : val;
-		}
-	}
-
-	/// <summary>
 	///     Provides an IDataRecord Access that enumerates the Source record. Not ThreadSave
 	/// </summary>
 	/// <seealso cref="System.Data.IDataRecord" />
@@ -40,8 +22,6 @@ namespace JPB.DataAccess.AdoWrapper
 		///     The access layer
 		/// </summary>
 		internal readonly DbConfig _configStore;
-
-		private IDictionary<int, string> _dataOrder;
 
 		/// <summary>
 		///     Enumerates all items in the source record
@@ -137,6 +117,11 @@ namespace JPB.DataAccess.AdoWrapper
 			return GetValueInternal(i);
 		}
 
+		/// <summary>
+		///		If overwritten provides the object on index <c>i</c>
+		/// </summary>
+		/// <param name="i"></param>
+		/// <returns></returns>
 		protected internal virtual object GetValueInternal(int i)
 		{
 			return Objects.GetValue(i);
@@ -476,7 +461,6 @@ namespace JPB.DataAccess.AdoWrapper
 			get
 			{
 				return GetValueInternal(GetOrdinal(name));
-				throw new IndexOutOfRangeException("Name is unkown");
 			}
 		}
 

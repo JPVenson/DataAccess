@@ -4,14 +4,8 @@ using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
+namespace JPB.DataAccess.Helper.LocalDb.Constraints.Contracts
 {
-	/// <summary>
-	/// </summary>
-	public interface IConstraintCollectionInternal
-	{
-	}
-
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>

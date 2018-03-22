@@ -33,6 +33,10 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		DbType SourceDbType { get; set; }
 
+		/// <summary>
+		///		Creates a Copy of the Current parameter
+		/// </summary>
+		/// <returns></returns>
 		IQueryParameter Clone();
 	}
 }

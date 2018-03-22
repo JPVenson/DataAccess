@@ -22,8 +22,6 @@ namespace JPB.DataAccess.MetaApi.Model
 	public class PropertyInfoCache<TAtt> : IPropertyInfoCache<TAtt>
 		where TAtt : class, IAttributeInfoCache, new()
 	{
-		private bool _anonymous;
-
 		/// <summary>
 		///     For internal use Only
 		/// </summary>

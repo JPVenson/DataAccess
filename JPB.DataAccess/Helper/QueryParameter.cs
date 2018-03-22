@@ -137,6 +137,7 @@ namespace JPB.DataAccess.Helper
 		/// </summary>
 		public DbType SourceDbType { get; set; }
 
+		/// <inheritdoc />
 		public IQueryParameter Clone()
 		{
 			return new QueryParameter(Name, Value, SourceDbType);

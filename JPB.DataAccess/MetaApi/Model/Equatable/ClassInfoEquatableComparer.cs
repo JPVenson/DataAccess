@@ -8,6 +8,9 @@ using JPB.DataAccess.Contacts.MetaApi;
 
 namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
+	/// <summary>
+	///		Compares IClassInfoCache
+	/// </summary>
 	public class ClassInfoEquatableComparer
 		: IEqualityComparer<IClassInfoCache>,
 			IEqualityComparer<Type>,

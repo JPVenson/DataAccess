@@ -23,18 +23,6 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <returns></returns>
 		IEnumerable<TE> ForResult<TE>(bool async = true);
 
-		/// <summary>
-		///     Enumerates the current query for a type <typeparamref name="TE" />
-		/// </summary>
-		/// <typeparam name="TE"></typeparam>
-		/// <returns></returns>
-		//Task<IEnumerable<TE>> ForAsyncResult<TE>();
-
-		/// <summary>
-		///     Clones all items inside the current Builder into a new One
-		/// </summary>
-		/// <returns></returns>
-		//IQueryBuilder Clone();
 
 		/// <summary>
 		///     Gets an enumerator for the Current Query

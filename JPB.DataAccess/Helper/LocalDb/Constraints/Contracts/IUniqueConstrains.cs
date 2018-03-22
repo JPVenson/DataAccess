@@ -2,11 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 
 #endregion
 
-namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
+namespace JPB.DataAccess.Helper.LocalDb.Constraints.Contracts
 {
 	/// <summary>
 	/// </summary>

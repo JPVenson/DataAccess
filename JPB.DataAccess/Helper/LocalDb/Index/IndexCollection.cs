@@ -8,7 +8,7 @@ using JPB.DataAccess.Helper.LocalDb.Trigger;
 
 namespace JPB.DataAccess.Helper.LocalDb.Index
 {
-	public class IndexCollection<T> : IIndexCollectionInteralUsage<T>
+	internal class IndexCollection<T> : IIndexCollectionInteralUsage<T>
 	{
 		public IndexCollection()
 		{

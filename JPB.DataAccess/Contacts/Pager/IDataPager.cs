@@ -11,32 +11,6 @@ using JPB.DataAccess.Manager;
 namespace JPB.DataAccess.Contacts.Pager
 {
 	/// <summary>
-	///     Defines the Output of an Pager
-	/// </summary>
-	public interface IDataPagerInfo
-	{
-		/// <summary>
-		///     Id of Current page beween 1 and MaxPage
-		/// </summary>
-		long CurrentPage { get; set; }
-
-		/// <summary>
-		///     The last possible Page
-		/// </summary>
-		long MaxPage { get; }
-
-		/// <summary>
-		///     Items to load on one page
-		/// </summary>
-		int PageSize { get; set; }
-
-		/// <summary>
-		///     Get the complete ammount of all items listend
-		/// </summary>
-		long TotalItemCount { get; }
-	}
-
-	/// <summary>
 	///     Base pager
 	/// </summary>
 	public interface IDataPager : IDisposable, IDataPagerInfo

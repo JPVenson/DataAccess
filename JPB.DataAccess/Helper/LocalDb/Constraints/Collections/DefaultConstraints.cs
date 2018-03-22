@@ -15,7 +15,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
-	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Constraints.Collections.IDefaultConstraints{TEntity}" />
+	/// <seealso cref="IDefaultConstraints{TEntity}" />
 	public class DefaultConstraints<TEntity> : IDefaultConstraints<TEntity>
 	{
 		/// <summary>

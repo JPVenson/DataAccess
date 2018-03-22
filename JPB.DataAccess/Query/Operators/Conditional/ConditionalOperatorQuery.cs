@@ -35,7 +35,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		///     Initializes a new instance of the <see cref="ConditionalOperatorQuery{TPoco}" /> class.
 		/// </summary>
 		/// <param name="builder">The builder.</param>
-		/// <param name="state">The state.</param>
 		public ConditionalOperatorQuery(IQueryBuilder builder) : base(builder)
 		{
 			State = new CondtionBuilderState(null);
@@ -274,7 +273,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		///     Creates a statement that will check the Column for equality or not
 		/// </summary>
-		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> True()
@@ -293,7 +291,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <summary>
 		///     Creates a statement that will check the Column for equality or not
 		/// </summary>
-		/// <param name="value">The value.</param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> False()

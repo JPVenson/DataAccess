@@ -118,8 +118,8 @@
     <Compile Include="Overwrite\AllTestContextHelper.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
     <Compile Include="Overwrite\DataMigrationTests.cs" />
-    <Compile Include="Overwrite\DbAccessLayerTests\BaseTest.cs" />
-    <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperBaseTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\DatabaseBaseTest.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperDatabaseBaseTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\ConfigurationTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\EventTest.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\InsertTests.cs" />

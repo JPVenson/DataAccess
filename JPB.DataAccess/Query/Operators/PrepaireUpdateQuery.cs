@@ -4,35 +4,41 @@ using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators
 {
+	/// <summary>
+	///		Select a Target for an Update query
+	/// </summary>
 	public class PrepaireUpdateQuery : QueryBuilderX
 	{
+		/// <inheritdoc />
 		public PrepaireUpdateQuery(DbAccessLayer database, Type type) : base(database, type)
 		{
 		}
 
+		/// <inheritdoc />
 		public PrepaireUpdateQuery(IQueryContainer database) : base(database)
 		{
 		}
 
+		/// <inheritdoc />
 		public PrepaireUpdateQuery(IQueryBuilder database) : base(database)
 		{
 		}
 
+		/// <inheritdoc />
 		public PrepaireUpdateQuery(IQueryBuilder database, Type type) : base(database, type)
 		{
 		}
 
+		/// <inheritdoc />
 		public PrepaireUpdateQuery(DbAccessLayer database) : base(database)
 		{
 		}
 
 		/// <summary>
-		///     Creates a Select statement for a given Poco
+		///     Creates a Update statement for a given type
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
-		/// <param name="argumentsForFactory">The arguments for factory.</param>
 		/// <returns></returns>
-		/// <exception cref="ArgumentNullException">argumentsForFactory</exception>
 		public UpdateColumnSetters<TPoco> Table<TPoco>()
 		{
 			var tableName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).TableName;

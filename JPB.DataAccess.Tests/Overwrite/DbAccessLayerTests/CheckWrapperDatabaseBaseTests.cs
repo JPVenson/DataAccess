@@ -20,9 +20,9 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class CheckWrapperBaseTests : BaseTest
+	public class CheckWrapperDatabaseBaseTests : DatabaseBaseTest
 	{
-		public CheckWrapperBaseTests(DbAccessType type) : base(type)
+		public CheckWrapperDatabaseBaseTests(DbAccessType type) : base(type)
 		{
 		}
 

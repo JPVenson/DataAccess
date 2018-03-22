@@ -5,6 +5,10 @@ using JPB.DataAccess.Query.Operators.Conditional;
 
 namespace JPB.DataAccess.Query.Operators
 {
+	/// <summary>
+	///		Defines an End-Point of an Conditional Query where the query can ether be executed or other conditons can be attached
+	/// </summary>
+	/// <typeparam name="TPoco"></typeparam>
 	public class NextUpdateOrCondtionQuery<TPoco> : QueryBuilderX
 	{
 		/// <inheritdoc />

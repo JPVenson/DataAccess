@@ -8,16 +8,6 @@ using JPB.DataAccess.DbEventArgs;
 
 namespace JPB.DataAccess.Manager
 {
-	/// <summary>
-	///     A database operation has to be done
-	/// </summary>
-	public delegate void DatabaseActionHandler(object sender, DatabaseActionEvent e);
-
-	/// <summary>
-	///     A database operation is done with an exception
-	/// </summary>
-	public delegate void DatabaseExceptionActionHandler(object sender, DatabaseActionEvent e, Exception ex);
-
 	partial class DbAccessLayer
 	{
 		/// <summary>

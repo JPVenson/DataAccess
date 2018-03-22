@@ -22,12 +22,12 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		///     Initializes a new instance of the <see cref="ConditionalEvalQuery{TPoco}" /> class.
 		/// </summary>
 		/// <param name="database">The database.</param>
-		/// <param name="state">The state.</param>
 		public ConditionalEvalQuery(ConditionalEvalQuery<TPoco> database) : base(database)
 		{
 			State = database.State;
 		}
 
+		/// <inheritdoc />
 		public ConditionalEvalQuery(IQueryBuilder builder) : base(builder)
 		{
 			State = new CondtionBuilderState(null);

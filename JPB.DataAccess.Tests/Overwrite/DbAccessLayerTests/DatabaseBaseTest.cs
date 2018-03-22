@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]
-	public abstract class BaseTest
+	public abstract class DatabaseBaseTest
 	{
 		[SetUp]
 		public void Init()
@@ -65,7 +65,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public object[] AdditionalArguments { get; }
 		private DbAccessLayer _dbAccess;
 
-		protected BaseTest(DbAccessType type, params object[] additionalArguments)
+		protected DatabaseBaseTest(DbAccessType type, params object[] additionalArguments)
 		{
 			AdditionalArguments = additionalArguments;
 			Type = type;

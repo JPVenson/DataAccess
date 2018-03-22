@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 
 #endregion
@@ -13,7 +14,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
-	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Constraints.Collections.ICheckConstraints{TEntity}" />
+	/// <seealso cref="ICheckConstraints{TEntity}" />
 	public class CheckConstraints<TEntity> : ICheckConstraints<TEntity>
 	{
 		/// <summary>

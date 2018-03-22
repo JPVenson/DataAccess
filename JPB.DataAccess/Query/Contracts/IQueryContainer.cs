@@ -14,6 +14,9 @@ namespace JPB.DataAccess.Query.Contracts
 	/// </summary>
 	public interface IQueryContainer
 	{
+		/// <summary>
+		///		Property bag for Query generation related Infos
+		/// </summary>
 		IDictionary<string, object> QueryInfos { get; }
 
 		/// <summary>

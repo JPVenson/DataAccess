@@ -712,7 +712,6 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <summary>
 		///     Runs the in transaction.
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
 		/// <param name="func">The function.</param>
 		/// <returns></returns>
 		public async Task RunInTransactionAsync(Func<IDatabase, Task> func)

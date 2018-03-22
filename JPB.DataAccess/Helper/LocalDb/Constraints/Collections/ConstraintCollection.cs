@@ -1,6 +1,7 @@
 #region
 
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 
 #endregion
 
@@ -9,7 +10,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="TEntity">The type of the entity.</typeparam>
-	/// <seealso cref="JPB.DataAccess.Helper.LocalDb.Constraints.Collections.IConstraintCollection{TEntity}" />
+	/// <seealso cref="IConstraintCollection{TEntity}" />
 	public class ConstraintCollection<TEntity> : IConstraintCollection<TEntity>
 	{
 		/// <summary>

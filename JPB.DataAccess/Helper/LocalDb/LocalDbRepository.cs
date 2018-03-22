@@ -16,6 +16,7 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper.LocalDb.Constraints;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Collections;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 using JPB.DataAccess.Helper.LocalDb.Index;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Helper.LocalDb.Trigger;
@@ -354,7 +355,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					}
 					TriggersUsage.After.OnDelete(item);
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					Base.Add(id, item);
 					throw;

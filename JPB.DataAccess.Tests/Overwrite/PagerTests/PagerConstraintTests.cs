@@ -12,7 +12,7 @@ namespace JPB.DataAccess.Tests.PagerTests
 {
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]
-	public class PagerConstraintTests : BaseTest
+	public class PagerConstraintTests : DatabaseBaseTest
 	{
 		public PagerConstraintTests(DbAccessType type) : base(type)
 		{

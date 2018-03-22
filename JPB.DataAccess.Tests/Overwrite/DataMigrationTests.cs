@@ -14,7 +14,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 namespace JPB.DataAccess.Tests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class DataMigrationTests : BaseTest
+	public class DataMigrationTests : DatabaseBaseTest
 	{
 		public DataMigrationTests(DbAccessType type) : base(type)
 		{

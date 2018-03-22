@@ -18,7 +18,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[TestFixture(DbAccessType.MsSql, false)]
 	[TestFixture(DbAccessType.SqLite, false)]
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class SelectionTests : BaseTest
+	public class SelectionTests : DatabaseBaseTest
 	{
 		[SetUp]
 		public void InitEgarLoading()

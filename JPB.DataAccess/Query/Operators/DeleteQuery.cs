@@ -5,24 +5,33 @@ using JPB.DataAccess.Query.Operators.Conditional;
 
 namespace JPB.DataAccess.Query.Operators
 {
+	/// <summary>
+	///		Defines a Delete query root
+	/// </summary>
+	/// <typeparam name="TPoco"></typeparam>
 	public class DeleteQuery<TPoco> : QueryBuilderX
 	{
+		/// <inheritdoc />
 		public DeleteQuery(DbAccessLayer database, Type type) : base(database, type)
 		{
 		}
 
+		/// <inheritdoc />
 		public DeleteQuery(IQueryContainer database) : base(database)
 		{
 		}
 
+		/// <inheritdoc />
 		public DeleteQuery(IQueryBuilder database) : base(database)
 		{
 		}
 
+		/// <inheritdoc />
 		public DeleteQuery(IQueryBuilder database, Type type) : base(database, type)
 		{
 		}
 
+		/// <inheritdoc />
 		public DeleteQuery(DbAccessLayer database) : base(database)
 		{
 		}

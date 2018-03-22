@@ -2,17 +2,12 @@
 
 using System.Collections;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Helper.LocalDb;
 
 #endregion
 
-namespace JPB.DataAccess.Helper.LocalDb
+namespace JPB.DataAccess.Contacts
 {
-	internal interface ILocalDbReposetoryBaseInternalUsage : ILocalDbReposetoryBase
-	{
-		new bool ReposetoryCreated { get; set; }
-		bool IsMigrating { get; set; }
-	}
-
 	/// <summary>
 	/// </summary>
 	/// <seealso cref="System.Collections.ICollection" />

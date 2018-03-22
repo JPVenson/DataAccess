@@ -23,7 +23,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		///     Initializes a new instance of the <see cref="ConditionalColumnQuery{TPoco}" /> class.
 		/// </summary>
 		/// <param name="database">The database.</param>
-		/// <param name="state">The state.</param>
 		public ConditionalColumnQuery(ConditionalColumnQuery<TPoco> database) : base(database)
 		{
 			State = database.State;

@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.None)]
-	public class EventTest : BaseTest
+	public class EventTest : DatabaseBaseTest
 	{
 		public EventTest(DbAccessType type) : base(type)
 		{

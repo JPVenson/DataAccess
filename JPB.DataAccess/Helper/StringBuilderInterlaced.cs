@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
@@ -363,6 +364,11 @@ namespace JPB.DataAccess.Helper
 			return this._source.GetEnumerator();
 		}
 
+		/// <summary>
+		/// throws NotImplementedException
+		/// </summary>
+		/// <param name="array"></param>
+		/// <param name="index"></param>
 		public void CopyTo(Array array, int index)
 		{
 			throw new NotImplementedException();
@@ -375,8 +381,11 @@ namespace JPB.DataAccess.Helper
 		/// Returns the internal String length
 		/// </summary>
 		public int Length { get; set; }
+
+		/// <inheritdoc />
 		public object SyncRoot { get; private set; }
 
+		/// <inheritdoc />
 		public bool IsSynchronized
 		{
 			get { return Monitor.IsEntered(SyncRoot); }
@@ -418,33 +427,6 @@ namespace JPB.DataAccess.Helper
 					return _text;
 				}
 			}
-		}
-	}
-
-	public class ConsoleStringBuilderInterlaced : StringBuilderInterlaced<ConsoleColorWrapper>
-	{
-		/// <summary>
-		///     Writes to console.
-		/// </summary>
-		public virtual void WriteToConsole()
-		{
-			WriteToSteam(Console.Out, color => Console.ForegroundColor = color,
-				() => Console.ForegroundColor = ConsoleColor.White);
-		}
-	}
-
-	public class ConsoleColorWrapper
-	{
-		public ConsoleColor Value { get; private set; }
-
-		public static implicit operator ConsoleColor(ConsoleColorWrapper wrapper)
-		{
-			return wrapper.Value;
-		}
-
-		public static implicit operator ConsoleColorWrapper(ConsoleColor wrapper)
-		{
-			return new ConsoleColorWrapper() { Value = wrapper };
 		}
 	}
 }
