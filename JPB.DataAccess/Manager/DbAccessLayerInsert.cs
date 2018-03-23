@@ -154,6 +154,7 @@ namespace JPB.DataAccess.Manager
 		///     if possible
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Will be removed in Future")]
 		public IDbCommand CreateInsert(Type type, object entry, params object[] parameter)
 		{
 			return CreateInsertQueryFactory(GetClassInfo(type), entry, parameter);

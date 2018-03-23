@@ -43,10 +43,10 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.Run(s =>
 			{
-				var query = CreateDeleteSimple(Database, GetClassInfo(typeof(T)), primaryKey);
-				RaiseDelete(null, query);
-				Database.PrepaireRemoteExecution(query);
-				s.ExecuteNonQuery(query);
+				var dbCommand = Query().Delete<T>().Where.PrimaryKey().Is.EqualsTo(primaryKey).ContainerObject.Compile();
+				RaiseDelete(null, dbCommand);
+				Database.PrepaireRemoteExecution(dbCommand);
+				s.ExecuteNonQuery(dbCommand);
 			});
 		}
 
@@ -58,6 +58,7 @@ namespace JPB.DataAccess.Manager
 		/// <param name="primaryKey"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
+		[Obsolete("Duplicate. Use CreateDelete.", true)]
 		public static IDbCommand CreateDeleteSimple(IDatabase db, DbClassInfoCache classInfo, object primaryKey)
 		{
 			if (primaryKey == null)

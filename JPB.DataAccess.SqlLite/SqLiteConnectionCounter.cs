@@ -18,8 +18,6 @@ namespace JPB.DataAccess.SqLite
 		public string FileName { get; private set; }
 		private ConditionalWeakTable<IDbConnection, DisposableAction> DbConnectionCounter { get; set; }
 
-
-
 		public void AddConnection(IDbConnection connection)
 		{
 			var refToConnection = new WeakReference<IDbConnection>(connection);

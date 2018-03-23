@@ -341,7 +341,7 @@ namespace JPB.DataAccess.Manager
 					type.Mehtods
 						.Where(s => s.Attributes.Any(e => e.Attribute is TE && (!IsMultiProviderEnvironment
 						                                                        ||
-						                                                        (e.Attribute as TE).TargetDatabase ==
+						                                                        ((TE) e.Attribute).TargetDatabase ==
 						                                                        Database.TargetDatabase)))
 						.ToArray();
 
@@ -506,6 +506,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Will be Removed in future.")]
 		public IDbCommand CreateSelect<T>(object pk)
 		{
 			return CreateSelect(typeof(T), pk);
@@ -516,6 +517,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Will be Removed in future.")]
 		public string CreateSelect(Type type)
 		{
 			return CreateSelect(GetClassInfo(type));
@@ -594,30 +596,6 @@ namespace JPB.DataAccess.Manager
 			RaiseSelect(query);
 			var typeInfo = GetClassInfo(type);
 			return EnumerateDataRecords(query, LoadCompleteResultBeforeMapping, typeInfo);
-
-			//if (egarLoading)
-			//{
-			//	var recordToNameMapping = new Dictionary<int, DbPropertyInfoCache>();
-
-			//	if (!results.Any())
-			//		return new ArrayList();
-
-			//	var anyReader = results.First();
-
-			//	for (var i = 0; i < anyReader.FieldCount; i++)
-			//	{
-			//		DbPropertyInfoCache val = null;
-			//		typeInfo.Propertys.TryGetValue(typeInfo.SchemaMappingDatabaseToLocal(anyReader.GetName(i)),
-			//			out val);
-			//		recordToNameMapping.Add(i, val);
-			//	}
-
-			//	return
-			//		results
-			//			.Select(record => SetPropertysViaReflection(typeInfo, record, recordToNameMapping))
-			//			.ToArray();
-			//}
-			//return EnumerateDirectDataRecords(query, typeInfo);
 		}
 
 		/// <summary>
@@ -648,6 +626,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[Obsolete("Will be Removed in future.")]
 		public object[] RunSelect(Type type, string queryString,
 			IEnumerable<IQueryParameter> paramenter)
 		{
@@ -679,6 +658,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Will be Removed in future.")]
 		public T[] RunSelect<T>(string query, IEnumerable<IQueryParameter> paramenter)
 		{
 			return RunSelect(typeof(T), query, paramenter).Cast<T>().ToArray();
@@ -1046,6 +1026,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[Obsolete("Will be Removed in future.")]
 		public T[] SelectNative<T>(string query, IEnumerable<IQueryParameter> paramenter)
 		{
 			return RunSelect<T>(query, paramenter);

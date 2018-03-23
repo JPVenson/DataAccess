@@ -84,6 +84,7 @@ namespace JPB.DataAccess.Query
 		/// <param name="cteName">Name of the cte.</param>
 		/// <param name="useStarOperator">if set to <c>true</c> [use star operator].</param>
 		/// <returns></returns>
+		[Obsolete("Will be Removed in Future")]
 		public static RootQuery WithCteForType(this RootQuery query, Type target, string cteName,
 			bool useStarOperator = false)
 		{

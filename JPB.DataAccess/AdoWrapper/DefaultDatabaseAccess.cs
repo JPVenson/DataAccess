@@ -585,6 +585,19 @@ namespace JPB.DataAccess.AdoWrapper
 		///     Opens a Connection or reuse an existing one and then execute the action
 		/// </summary>
 		/// <param name="action"></param>
+		public void Run(Action action)
+		{
+			Run((dd) =>
+			{
+				action();
+			});
+		}
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		/// <param name="action"></param>
 		public void Run(Action<IDatabase> action)
 		{
 			Run((dd) =>
@@ -592,6 +605,18 @@ namespace JPB.DataAccess.AdoWrapper
 				action(dd);
 				return (object) null;
 			});
+		}
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="func"></param>
+		/// <returns></returns>
+		public T Run<T>(Func<T> func)
+		{
+			return Run((d) => func());
 		}
 
 		/// <summary>
@@ -621,6 +646,17 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		/// <param name="func"></param>
 		/// <returns></returns>
+		public async Task RunAsync(Func<Task> func)
+		{
+			await RunAsync((d) => func());
+		}
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		/// <param name="func"></param>
+		/// <returns></returns>
 		public async Task RunAsync(Func<IDatabase, Task> func)
 		{
 			await RunAsync(async (dd) =>
@@ -628,6 +664,17 @@ namespace JPB.DataAccess.AdoWrapper
 				await func(dd);
 				return (object)null;
 			});
+		}
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		/// <param name="func"></param>
+		/// <returns></returns>
+		public async Task<T> RunAsync<T>(Func<Task<T>> func)
+		{
+			return await RunAsync((d) => func());
 		}
 
 		/// <summary>
@@ -653,9 +700,29 @@ namespace JPB.DataAccess.AdoWrapper
 		///     Creates a new Transaction and executes the Action inside it. Then closes the Transaction
 		/// </summary>
 		/// <param name="action"></param>
+		public void RunInTransaction(Action action)
+		{
+			RunInTransaction((d) => action);
+		}
+
+		/// <summary>
+		///     Creates a new Transaction and executes the Action inside it. Then closes the Transaction
+		/// </summary>
+		/// <param name="action"></param>
 		public void RunInTransaction(Action<IDatabase> action)
 		{
 			RunInTransaction(action, GetDefaultTransactionLevel());
+		}
+
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		/// <param name="action"></param>
+		/// <param name="transaction"></param>
+		public void RunInTransaction(Action action, IsolationLevel transaction)
+		{
+			RunInTransaction((d) => action(), transaction);
 		}
 
 		/// <summary>
@@ -693,10 +760,37 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="func">The function.</param>
 		/// <param name="transaction">The transaction.</param>
 		/// <returns></returns>
+		public T RunInTransaction<T>(Func<T> func, IsolationLevel transaction)
+		{
+			return RunInTransaction((d) => func(), transaction);
+		}
+
+
+		/// <summary>
+		///     Runs the in transaction.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="func">The function.</param>
+		/// <param name="transaction">The transaction.</param>
+		/// <returns></returns>
 		public T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction)
 		{
 			return RunInTransactionAsync(async (dd) => await Task.FromResult(func(dd)), transaction).Result;
 		}
+
+
+
+		/// <summary>
+		///     Runs the in transaction.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="func">The function.</param>
+		/// <returns></returns>
+		public async Task<T> RunInTransactionAsync<T>(Func<Task<T>> func)
+		{
+			return await RunInTransactionAsync<T>(new Func<IDatabase, Task<T>>(d => func()));
+		}
+
 
 		/// <summary>
 		///     Runs the in transaction.
@@ -707,6 +801,16 @@ namespace JPB.DataAccess.AdoWrapper
 		public async Task<T> RunInTransactionAsync<T>(Func<IDatabase, Task<T>> func)
 		{
 			return await RunInTransactionAsync(func, GetDefaultTransactionLevel());
+		}
+
+		/// <summary>
+		///     Runs the in transaction.
+		/// </summary>
+		/// <param name="func">The function.</param>
+		/// <returns></returns>
+		public async Task RunInTransactionAsync(Func<Task> func)
+		{
+			await RunInTransactionAsync((d) => func());
 		}
 
 		/// <summary>
