@@ -12,11 +12,11 @@ namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	///     Compares 2 Pocos based on there PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey
-	///     attribute
-	///     When both of the instances are of the same reference: return true
-	///     When one of the instances is default(T): return false
-	///     When both of the instances Primary Key has the assertNotDatabaseMember: return false
-	///     When both of the instances Primary Key are Equals: return true
+	///     attribute.
+	///     When both of the instances are of the same reference: return true.
+	///     When one of the instances is default(T): return false.
+	///     When both of the instances Primary Key has the assertNotDatabaseMember: return false.
+	///     When both of the instances Primary Key are Equals: return true.
 	///     return false
 	/// </summary>
 	/// <typeparam name="T"></typeparam>

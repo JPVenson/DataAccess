@@ -15,12 +15,6 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 	[Serializable]
 	public class ColumnInfo : IColumnInfo
 	{
-		public ColumnInfo()
-		{
-			;
-			;
-		}
-
 		[ForModel("DATA_TYPE")]
 		[ValueConverter(typeof(EnumMemberConverter))]
 		public SqlDbType SqlType { get; set; }

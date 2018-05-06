@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess", "JPB.DataAccess\JPB.DataAccess.csproj", "{46E06D7F-F55A-4B10-978D-13607BE17CB9}"
 EndProject
@@ -12,6 +12,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Tests", "JPB.DataAccess.Tests\JPB.DataAccess.Tests.csproj", "{33ACDF31-634C-4183-BBD9-F3B25AC1F601}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.MySql", "JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj", "{3AA3990D-FFA4-4EE5-82BE-E30970FFD0FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{18172732-D06C-404A-9637-EF8E69F91CA7}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,5 +82,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{33ACDF31-634C-4183-BBD9-F3B25AC1F601} = {456F719E-2DB1-4D01-82E8-01E4175492B6}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8E5EF341-6D52-45BD-B527-2BD75348CF49}
 	EndGlobalSection
 EndGlobal

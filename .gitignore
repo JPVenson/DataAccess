@@ -71,3 +71,5 @@ bld/
 /_ReSharper.Caches
 /JPB.DataAccess.Tests/JPB.DataAccess.Tests.csproj.user
 /JPB.DataAccess/.vs/JPB.DataAccess/v14/.suo
+/.vs
+*.suo

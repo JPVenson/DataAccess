@@ -25,7 +25,6 @@ namespace JPB.DataAccess.ModelsAnotations
 			ConverterInstance.Add(para, runtimeSupport);
 		}
 
-
 		/// <summary>
 		/// </summary>
 		/// <param name="converter" />

@@ -9,6 +9,7 @@ using JPB.DataAccess.Contacts;
 namespace JPB.DataAccess.Helper
 {
 	/// <summary>
+	///		Standart number to Enum converter for Enum fields
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Contacts.IValueConverter" />
 	public class EnumMemberConverter : IValueConverter
