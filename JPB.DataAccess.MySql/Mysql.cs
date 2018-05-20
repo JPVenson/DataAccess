@@ -259,5 +259,15 @@ namespace JPB.DataAccess.MySql
 		{
 			MySqlConnection.ClearAllPools();
 		}
+
+		public IDbCommand EnableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			return CreateCommand("", conn);
+		}
+
+		public IDbCommand DisableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			return CreateCommand("", conn);
+		}
 	}
 }

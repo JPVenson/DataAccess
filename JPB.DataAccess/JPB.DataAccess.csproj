@@ -233,7 +233,7 @@
     <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbLongPkProvider.cs" />
     <Compile Include="Helper\LocalDb\ReproMappings.cs" />
     <Compile Include="Helper\LocalDb\Scopes\DatabaseScope.cs" />
-    <Compile Include="Helper\LocalDb\Scopes\IdentityInsertScope.cs" />
+    <Compile Include="Helper\LocalDb\Scopes\DbReposetoryIdentityInsertScope.cs" />
     <Compile Include="Helper\LocalDb\Scopes\ReplicationScope.cs" />
     <Compile Include="Helper\LocalDb\TransactionalItem.cs" />
     <Compile Include="Helper\LocalDb\Trigger\IIndexCollection.cs" />

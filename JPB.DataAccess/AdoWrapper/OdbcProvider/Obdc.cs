@@ -122,6 +122,16 @@ namespace JPB.DataAccess.AdoWrapper.OdbcProvider
 			throw new NotImplementedException();
 		}
 
+		public IDbCommand EnableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IDbCommand DisableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			throw new NotImplementedException();
+		}
+
 		public IDbCommand CreateCommand(string strSql, IDbConnection conn)
 		{
 			return new OdbcCommand(strSql, (OdbcConnection) (conn is OdbcConnection ? conn : CreateConnection()));

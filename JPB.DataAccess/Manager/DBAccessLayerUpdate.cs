@@ -9,6 +9,7 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion
 
@@ -168,13 +169,18 @@ namespace JPB.DataAccess.Manager
 			}
 			var pk = classInfo.SchemaMappingLocalToDatabase(pkProperty.PropertyName);
 
+			var identityInsert = DbIdentityInsertScope.Current != null;
 			var ignore =
 				classInfo
 					.Propertys
 					.Select(f => f.Value)
-					.Where(s => s.PrimaryKeyAttribute != null || s.InsertIgnore || s.UpdateIgnore || s.ForginKeyAttribute != null)
+					.Where(s => (!identityInsert && s.PrimaryKeyAttribute != null) || s.InsertIgnore || s.UpdateIgnore || s.ForginKeyAttribute != null)
 					.Select(s => s.DbName)
 					.ToArray();
+			if (identityInsert)
+			{
+				DbIdentityInsertScope.Current.EnableIdentityModfiy(classInfo.TableName, database);
+			}
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
 

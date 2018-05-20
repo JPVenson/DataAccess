@@ -2,7 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using JetBrains.dotMemoryUnit;
+using JetBrains.dotMemoryUnit.Kernel;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Manager;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -28,11 +32,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]
+	[DotMemoryUnitAttribute(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
+		MemoryCheckPoint memoryCheckPoint;
 		[SetUp]
 		public void Init()
 		{
+			Warn.If(dotMemoryApi.IsEnabled, () => "WARNING DOTMEMORY IS NOT ENABLED");
+			memoryCheckPoint = dotMemory.Check();
 			Mgr = new Manager();
 		}
 
@@ -59,7 +67,16 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			}
 			Mgr = null;
 			DbAccess = null;
+			//ThreadConnection.UseTransactionCurrent = false;
 			Assert.That(failed, Is.False, () => "Invalid Connection State");
+
+			dotMemory.Check(mem =>
+			{
+				Assert.That(mem.GetObjects(e => e.Type.Is<DbAccessLayer>()).ObjectsCount, Is.Zero);
+				Assert.That(mem.GetObjects(e => e.LeakedOnEventHandler()).ObjectsCount, Is.Zero);
+				Assert.That(mem.GetObjects(e => e.Interface.Is<IDbConnection>()).ObjectsCount, Is.Zero);
+				Assert.That(mem.GetObjects(e => e.Interface.Is<IDbCommand>()).ObjectsCount, Is.Zero);
+			});
 		}
 
 		public object[] AdditionalArguments { get; }

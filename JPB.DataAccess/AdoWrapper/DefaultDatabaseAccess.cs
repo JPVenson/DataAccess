@@ -309,6 +309,9 @@ namespace JPB.DataAccess.AdoWrapper
 					ConnectionController.Connection.Open();
 				}
 
+				//We created a Connection and proceed now with the DB access
+				ConnectionController.InstanceCounter++;
+
 				//This is the First call of connect so we Could
 				//define it as Transaction
 				if (levl != null)
@@ -318,9 +321,6 @@ namespace JPB.DataAccess.AdoWrapper
 						ConnectionController.Transaction = ConnectionController.Connection.BeginTransaction(levl.GetValueOrDefault());
 					}
 				}
-
-				//We created a Connection and proceed now with the DB access
-				ConnectionController.InstanceCounter++;
 			}
 
 			//Interlocked.Increment(ref _handlecounter);
@@ -391,6 +391,7 @@ namespace JPB.DataAccess.AdoWrapper
 						}
 						ConnectionController.Transaction = null;
 					}
+					ConnectionController.Connection.Close();
 				}
 				ConnectionController.Connection = null;
 			}
@@ -603,7 +604,7 @@ namespace JPB.DataAccess.AdoWrapper
 			Run((dd) =>
 			{
 				action(dd);
-				return (object) null;
+				return (object)null;
 			});
 		}
 
@@ -765,7 +766,6 @@ namespace JPB.DataAccess.AdoWrapper
 			return RunInTransaction((d) => func(), transaction);
 		}
 
-
 		/// <summary>
 		///     Runs the in transaction.
 		/// </summary>
@@ -777,8 +777,6 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			return RunInTransactionAsync(async (dd) => await Task.FromResult(func(dd)), transaction).Result;
 		}
-
-
 
 		/// <summary>
 		///     Runs the in transaction.
@@ -844,16 +842,18 @@ namespace JPB.DataAccess.AdoWrapper
 
 				return await func(this);
 			}
-			catch
+			catch (Exception e)
 			{
+				e.ToString();
 				TransactionRollback();
 				throw;
 			}
 			finally
 			{
-				if (preState < ConnectionController.InstanceCounter)
+				CloseConnection();
+				if (preState != ConnectionController.InstanceCounter)
 				{
-					CloseConnection();
+					throw new InvalidOperationException("Invalid Counter handling detected. Connection was closed");
 				}
 			}
 		}

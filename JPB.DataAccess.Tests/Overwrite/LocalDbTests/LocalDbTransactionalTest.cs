@@ -85,7 +85,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				using (var transaction = new TransactionScope())
 				{
-					using (new IdentityInsertScope())
+					using (DbReposetoryIdentityInsertScope.CreateOrObtain())
 					{
 						var image = new Image();
 						image.ImageId = 10;
@@ -113,7 +113,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				using (var transaction = new TransactionScope())
 				{
-					using (new IdentityInsertScope(true))
+					using (DbReposetoryIdentityInsertScope.CreateOrObtain(true))
 					{
 						var image = new Image();
 						image.ImageId = 10;
@@ -197,7 +197,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 				using (var transaction = new TransactionScope())
 				{
 					var completedFlag = false;
-					using (var scope = new IdentityInsertScope())
+					using (var scope = DbReposetoryIdentityInsertScope.CreateOrObtain())
 					{
 						var book = new Book();
 						var image = new ImageNullable();
@@ -225,7 +225,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				using (var transaction = new TransactionScope())
 				{
-					using (new IdentityInsertScope())
+					using (DbReposetoryIdentityInsertScope.CreateOrObtain())
 					{
 						var book = new Book();
 						var image = new ImageNullable();
@@ -246,14 +246,14 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 			{
 				using (var scope = new TransactionScope())
 				{
-					using (var identityInsertScope = new IdentityInsertScope())
+					using (var identityInsertScope = DbReposetoryIdentityInsertScope.CreateOrObtain())
 					{
-						using (var insertScope = new IdentityInsertScope())
+						using (var insertScope = DbReposetoryIdentityInsertScope.CreateOrObtain())
 						{
 						}
 					}
 				}
-			}, Throws.Exception.TypeOf<InvalidOperationException>());
+			}, Throws.Nothing);
 		}
 
 		[Test]
@@ -261,7 +261,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 		{
 			Assert.That(() =>
 			{
-				using (var identityInsertScope = new IdentityInsertScope())
+				using (var identityInsertScope = DbReposetoryIdentityInsertScope.CreateOrObtain())
 				{
 				}
 			}, Throws.Exception.TypeOf<InvalidOperationException>());

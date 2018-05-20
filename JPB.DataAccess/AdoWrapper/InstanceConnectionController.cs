@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Transactions;
 
 namespace JPB.DataAccess.AdoWrapper
 {
@@ -44,5 +47,25 @@ namespace JPB.DataAccess.AdoWrapper
 
 		/// <inheritdoc />
 		public object LockRoot { get; private set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (Connection != null)
+					Connection.Dispose();
+			}
+		}
+
+		/// <inheritdoc />
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 	}
 }

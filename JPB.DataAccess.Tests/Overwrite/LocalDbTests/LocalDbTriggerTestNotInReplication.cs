@@ -170,7 +170,7 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 				inserted = true;
 				using (var tr = new TransactionScope())
 				{
-					using (new IdentityInsertScope())
+					using (DbReposetoryIdentityInsertScope.CreateOrObtain())
 					{
 						token.Table.Add(token.Item);
 					}

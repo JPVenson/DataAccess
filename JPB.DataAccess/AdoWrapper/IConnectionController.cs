@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 
 namespace JPB.DataAccess.AdoWrapper
@@ -5,7 +6,7 @@ namespace JPB.DataAccess.AdoWrapper
 	/// <summary>
 	/// Defines how Transactions are handeld
 	/// </summary>
-	public interface IConnectionController
+	public interface IConnectionController : IDisposable
 	{
 		/// <summary>
 		/// Returns a Transaction or null

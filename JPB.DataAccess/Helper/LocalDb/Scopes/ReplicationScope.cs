@@ -54,16 +54,35 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 			get { return _current; }
 		}
 
+		private void ReleaseUnmanagedResources()
+		{
+
+		}
 		/// <summary>
 		///     Submits all pending changes
 		/// </summary>
-		public void Dispose()
+		protected virtual void Dispose(bool disposing)
 		{
+			ReleaseUnmanagedResources();
+
 			foreach (var localDbReposetoryBase in LocalDbManager.Scope.Database)
 			{
 				localDbReposetoryBase.Value.IsMigrating = false;
 			}
 			_current = null;
+		}
+
+		/// <inheritdoc />
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		/// <inheritdoc />
+		~ReplicationScope()
+		{
+			Dispose(false);
 		}
 	}
 }

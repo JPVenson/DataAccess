@@ -96,5 +96,19 @@ namespace JPB.DataAccess.Contacts
 		///     Calls the API to close all open Connections and free the Database
 		/// </summary>
 		void CloseAllConnections();
+
+		///  <summary>
+		/// 		Enables the Identity Insert/Update on a single table
+		///  </summary>
+		///  <param name="classInfoTableName"></param>
+		/// <param name="conn"></param>
+		IDbCommand EnableIdentityInsert(string classInfoTableName, IDbConnection conn);
+
+		///  <summary>
+		/// 		Disables the Identity Insert/Update on a single table
+		///  </summary>
+		///  <param name="classInfoTableName"></param>
+		/// <param name="conn"></param>
+		IDbCommand DisableIdentityInsert(string classInfoTableName, IDbConnection conn);
 	}
 }

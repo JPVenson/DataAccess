@@ -320,6 +320,16 @@ namespace JPB.DataAccess.SqLite
 			GC.Collect();
 		}
 
+		public IDbCommand EnableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			return CreateCommand("", conn);
+		}
+
+		public IDbCommand DisableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			return CreateCommand("", conn);
+		}
+
 		#endregion
 	}
 }

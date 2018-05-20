@@ -101,13 +101,19 @@ namespace JPB.DataAccess.Tests
 			if (_expectWrapper != null)
 			{
 				_expectWrapper.Database.CloseAllConnection();
-
+				
 				var redesginDatabase = string.Format(
-				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
+				"IF EXISTS (select * from sys.databases where name=\'{0}\') ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE",
 				_dbname);
 
 				var masterWrapper = new DbAccessLayer(DbAccessType,
 				string.Format(ConnectionString + "Initial Catalog=master;"), new DbConfig(true));
+
+				masterWrapper.ExecuteGenericCommand(masterWrapper.Database.CreateCommand(redesginDatabase));
+
+				redesginDatabase = string.Format(
+				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
+				_dbname);
 
 				masterWrapper.ExecuteGenericCommand(masterWrapper.Database.CreateCommand(redesginDatabase));
 

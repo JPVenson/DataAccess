@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion
 
@@ -113,15 +114,20 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="entry" />
 		/// </summary>
 		/// <returns></returns>
-		public static IDbCommand CreateInsert(IDatabase db, DbClassInfoCache classInfo, object entry)
+		public static IDbCommand CreateInsert(IDatabase database, DbClassInfoCache classInfo, object entry)
 		{
+			var identityInsert = DbIdentityInsertScope.Current != null;
 			var ignore =
 				classInfo
 					.Propertys
 					.Select(s => s.Value)
-					.Where(f => f.PrimaryKeyAttribute != null || f.InsertIgnore)
+					.Where(f => f.InsertIgnore || (!identityInsert && f.PrimaryKeyAttribute != null))
 					.Select(s => s.DbName)
 					.ToArray();
+			if (identityInsert)
+			{
+				DbIdentityInsertScope.Current.EnableIdentityModfiy(classInfo.TableName, database);
+			}
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
 			var csvprops = classInfo.CreatePropertyCsv(ignore);
@@ -143,7 +149,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var orignialProps = classInfo.GetPropertysViaRefection(ignore).ToArray();
-			return db.CreateCommandWithParameterValues(classInfo, query, orignialProps, entry);
+			return database.CreateCommandWithParameterValues(classInfo, query, orignialProps, entry);
 		}
 
 		/// <summary>

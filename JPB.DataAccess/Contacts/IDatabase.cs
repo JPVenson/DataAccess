@@ -18,11 +18,11 @@ namespace JPB.DataAccess.Contacts
 	public interface IDatabase : IDisposable
 	{
 		/// <summary>
-		/// The Database Strategy.
+		/// Gets The Database Strategy.
 		/// </summary>
 		IDatabaseStrategy Strategy { get; }
 		/// <summary>
-		/// Holds control over Current Transactions and Connections
+		/// Gets the control over Current Transactions and Connections
 		/// </summary>
 		IConnectionController ConnectionController { get; }
 

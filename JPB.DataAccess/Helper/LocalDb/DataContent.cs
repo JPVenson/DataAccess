@@ -99,7 +99,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			reader.ReadStartElement(DatabaseContent);
 			using (var transaction = new TransactionScope())
 			{
-				using (new IdentityInsertScope())
+				using (DbReposetoryIdentityInsertScope.CreateOrObtain())
 				{
 					do
 					{

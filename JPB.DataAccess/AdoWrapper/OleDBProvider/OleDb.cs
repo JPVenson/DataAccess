@@ -210,6 +210,18 @@ namespace JPB.DataAccess.AdoWrapper.OleDBProvider
 			throw new NotImplementedException();
 		}
 
+		/// <inheritdoc />
+		public IDbCommand EnableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <inheritdoc />
+		public IDbCommand DisableIdentityInsert(string classInfoTableName, IDbConnection conn)
+		{
+			throw new NotImplementedException();
+		}
+
 		/// <summary>
 		///     Creates a command.
 		/// </summary>

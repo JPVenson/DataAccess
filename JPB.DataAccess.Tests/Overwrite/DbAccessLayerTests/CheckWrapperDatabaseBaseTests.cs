@@ -239,7 +239,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		public void TransactionTestRollback()
 		{
-			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -259,7 +259,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		public void TransactionTestExceptional()
 		{
-			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -279,7 +279,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		public async Task TransactionAsyncTest()
 		{
-			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -301,7 +301,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		public void TransactionAsyncTestExceptional()
 		{
-			base.DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -329,6 +329,30 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		public void NestedTransactionWithSharedInInstanceCounter()
+		{
+			if (DbAccess.DbAccessType != DbAccessType.MsSql)
+			{
+				return;
+			}
+			//ThreadConnectionController.UseTransactionClass();
+			var dbOne = new DefaultDatabaseAccess(new ThreadConnectionController());
+			dbOne.Attach(new MsSql(DbAccess.Database.ConnectionString));
+			var rootAccess = new DbAccessLayer(dbOne, DbAccess.Config);
+
+			rootAccess.Database.RunInTransaction(d =>
+			{
+				Assert.That(() =>
+				{
+					DbAccess.Database.RunInTransaction(dd =>
+					{
+						DbAccess.Select<Users>();
+					});
+				}, Throws.Nothing);
+			});
+		}
+
+		[Test]
 		public void SharedTransactionCounter()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)
@@ -349,14 +373,23 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(nestedAccess.Database.ConnectionController.LockRoot, Is.EqualTo(dbOne.ConnectionController.LockRoot));
 			Assert.That(nestedAccess.Database.ConnectionController.Transaction, Is.Null);
 
+			Assert.That(DbAccess.Database.ConnectionController, Is.Not.EqualTo(dbOne.ConnectionController));
+			Assert.That(DbAccess.Database.ConnectionController.LockRoot, Is.Not.EqualTo(dbOne.ConnectionController.LockRoot));
+
 			Assert.That(rootAccess.Database, Is.Not.EqualTo(nestedAccess.Database));
 			Assert.That(rootAccess.Database.ConnectionController, Is.Not.EqualTo(nestedAccess.Database.ConnectionController));
 
-			if (base.Type == DbAccessType.MsSql)
+			if (Type == DbAccessType.MsSql)
 			{
 				DbAccess.ExecuteGenericCommand("ALTER DATABASE " + DbAccess.Database.DatabaseName +
 										   " SET ALLOW_SNAPSHOT_ISOLATION ON");
 			}
+
+			DbAccess.Database.RunInTransaction((de) =>
+			{
+				Assert.That(DbAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
+				Assert.That(DbAccess.Select<Users>().Length, Is.EqualTo(0));
+			}, IsolationLevel.Snapshot);
 
 			rootAccess.Database.RunInTransaction(d =>
 			{
@@ -364,20 +397,26 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				Assert.That(rootAccess.Database.ConnectionController.Transaction, Is.EqualTo(nestedAccess.Database.ConnectionController.Transaction));
 				Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
 				DataMigrationHelper.AddUsers(10, rootAccess);
+				Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
 
+				//the nested database runs with the same TransactionCounter as the RootAccess so it should use
+				//the same transaction and connection
 				nestedAccess.Database.RunInTransaction((de) =>
 				{
 					Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(2));
 					Assert.That(nestedAccess.Select<Users>().Length, Is.EqualTo(10));
 					DataMigrationHelper.AddUsers(10, nestedAccess);
+					Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(2));
 				});
 
 				Assert.That(nestedAccess.Select<Users>().Length, Is.EqualTo(20));
+
 				DbAccess.Database.RunInTransaction((de) =>
 				{
 					Assert.That(DbAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
 					Assert.That(DbAccess.Select<Users>().Length, Is.EqualTo(0));
 				}, IsolationLevel.Snapshot);
+
 			}, IsolationLevel.Snapshot);
 			DbAccess.Database.RunInTransaction((de) =>
 			{

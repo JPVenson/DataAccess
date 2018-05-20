@@ -13,6 +13,8 @@ using JPB.DataAccess.Helper.LocalDb.Scopes;
 namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
+	///		Access class for DbOperations and DbSettings.
+	///		Use a Database Scope to acces it
 	/// </summary>
 	public class LocalDbManager
 	{

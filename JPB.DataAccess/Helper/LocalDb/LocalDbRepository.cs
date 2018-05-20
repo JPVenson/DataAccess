@@ -93,7 +93,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private readonly List<TransactionalItem<TEntity>> _transactionalItems = new List<TransactionalItem<TEntity>>();
 		internal readonly object LockRoot = new object();
 		private DbConfig _config;
-		private IdentityInsertScope _currentIdentityInsertScope;
+		private DbReposetoryIdentityInsertScope _currentDbReposetoryIdentityInsertScope;
 		private Transaction _currentTransaction;
 		private LocalDbManager _databaseDatabase;
 		private bool _isMigrating;
@@ -701,14 +701,15 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private object SetNextId(object item)
 		{
 			var idVal = GetId(item);
-			if (IdentityInsertScope.Current != null && _currentIdentityInsertScope == null)
+			if (DbReposetoryIdentityInsertScope.Current != null && _currentDbReposetoryIdentityInsertScope == null)
 			{
-				_currentIdentityInsertScope = IdentityInsertScope.Current;
+				_currentDbReposetoryIdentityInsertScope = DbReposetoryIdentityInsertScope.Current;
+				_currentDbReposetoryIdentityInsertScope.EnsureTransaction();
 			}
 
-			if (_currentIdentityInsertScope != null)
+			if (_currentDbReposetoryIdentityInsertScope != null)
 			{
-				if (idVal.Equals(Constraints.PrimaryKey.GetUninitilized()) && !_currentIdentityInsertScope.RewriteDefaultValues)
+				if (idVal.Equals(Constraints.PrimaryKey.GetUninitilized()) && !_currentDbReposetoryIdentityInsertScope.RewriteDefaultValues)
 				{
 					return idVal;
 				}
@@ -836,7 +837,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			lock (LockRoot)
 			{
 				_currentTransaction = null;
-				_currentIdentityInsertScope = null;
+				_currentDbReposetoryIdentityInsertScope = null;
 				if (e.Transaction.TransactionInformation.Status == TransactionStatus.Aborted)
 				{
 					_currentTransaction_Rollback();

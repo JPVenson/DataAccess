@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
@@ -40,6 +42,45 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		[Test]
 		[Category("MsSQL")]
+		[Category("MySql")]
+		[Category("SqLite")]
+		public void InsertIdentity()
+		{
+			DbAccess.Database.RunInTransaction(f =>
+			{
+				using (new DbIdentityInsertScope())
+				{
+					DbAccess.Insert(new Users() { UserID = 999999, UserName = "TEST" });
+				}
+			});
+
+			var nineNineNineNineNineNine = DbAccess.Select<Users>(999999);
+			Assert.That(nineNineNineNineNineNine, Is.Not.Null);
+
+			//check cleanup
+			Assert.That(DbIdentityInsertScope.Current, Is.Null);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("MySql")]
+		[Category("SqLite")]
+		public void InsertIdentityOnWrongScope()
+		{
+			//ThreadConnectionController.UseTransactionClass();
+			DbAccess.Database.RunInTransaction(f =>
+			{
+				Assert.That(() =>
+				{
+					using (DbReposetoryIdentityInsertScope.CreateOrObtain())
+					{
+					}
+				}, Throws.Exception);
+			});
+		}
+
+		[Test]
+		[Category("MsSQL")]
 		[Category("SqLite")]
 		public void InsertFactoryTest()
 		{
@@ -47,7 +88,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 			DbAccess.IsMultiProviderEnvironment = true;
-			DbAccess.Insert(new UsersWithStaticInsert {UserName = insGuid});
+			DbAccess.Insert(new UsersWithStaticInsert { UserName = insGuid });
 			DbAccess.IsMultiProviderEnvironment = false;
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
 			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
@@ -74,7 +115,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			for (var i = 0; i < 10000; i++)
 			{
-				containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
+				containingList.Add(new Users { UserName = Guid.NewGuid().ToString("N") });
 			}
 
 			DbAccess.RangerInsertPation = 1;
@@ -101,7 +142,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			for (var i = 0; i < 10000; i++)
 			{
-				containingList.Add(new Users {UserName = Guid.NewGuid().ToString("N")});
+				containingList.Add(new Users { UserName = Guid.NewGuid().ToString("N") });
 			}
 
 			var stopWatch = new Stopwatch();
@@ -131,7 +172,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			for (var i = 0; i < upperCountTestUsers; i++)
 			{
-				testUers.Add(new Users {UserName = insGuid});
+				testUers.Add(new Users { UserName = insGuid });
 			}
 
 			DbAccess.InsertRange(testUers);
@@ -152,7 +193,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void InsertTest()
 		{
 			var insGuid = Guid.NewGuid().ToString();
-			DbAccess.Insert(new Users {UserName = insGuid});
+			DbAccess.Insert(new Users { UserName = insGuid });
 			var selectUsernameFromWhere = string.Format("SELECT UserName FROM {0}", UsersMeta.TableName);
 			var selectTest = DbAccess.Database.Run(s => s.GetSkalar(selectUsernameFromWhere));
 
@@ -165,7 +206,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Category("SqLite")]
 		public void InsertWithSelect()
 		{
-			var val = new Users {UserName = "test"};
+			var val = new Users { UserName = "test" };
 			var refSelect = DbAccess.InsertWithSelect(val);
 
 			Assert.AreEqual(refSelect.UserName, val.UserName);
@@ -181,7 +222,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-			var expectedUser = DbAccess.InsertWithSelect(new Users {UserName = insGuid});
+			var expectedUser = DbAccess.InsertWithSelect(new Users { UserName = insGuid });
 			Assert.IsNotNull(expectedUser);
 			Assert.AreEqual(expectedUser.UserName, insGuid);
 			Assert.AreNotEqual(expectedUser.UserID, default(long));
@@ -196,7 +237,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			DbAccess.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 
-			var expectedUser = DbAccess.InsertWithSelect(new Users {UserName = insGuid});
+			var expectedUser = DbAccess.InsertWithSelect(new Users { UserName = insGuid });
 			Assert.IsNotNull(expectedUser);
 			Assert.AreEqual(expectedUser.UserName, insGuid);
 			Assert.AreNotEqual(expectedUser.UserID, default(long));

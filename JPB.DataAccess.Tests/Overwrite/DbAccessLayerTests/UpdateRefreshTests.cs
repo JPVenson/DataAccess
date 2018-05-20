@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base;
@@ -16,6 +17,22 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	{
 		public UpdateRefreshTests(DbAccessType type) : base(type)
 		{
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("MySql")]
+		[Category("SqLite")]
+		public void InsertIdentity()
+		{
+			Assert.That(() => DbAccess.Database.RunInTransaction(f =>
+			{
+				using (DbReposetoryIdentityInsertScope.CreateOrObtain())
+				{
+					DbAccess.Insert(new Users() { UserID = 999999, UserName = "TEST" });
+					DbAccess.Query().Update.Table<Users>().Set.Column(g => g.UserID).Value(666).ExecuteNonQuery();
+				}
+			}), Throws.Exception);
 		}
 
 		[Test]
