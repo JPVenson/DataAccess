@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+#if !DEBUG
+using System.Diagnostics;
+#endif
 using System.Linq;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig;
