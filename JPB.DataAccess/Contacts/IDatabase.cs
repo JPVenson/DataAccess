@@ -203,7 +203,13 @@ namespace JPB.DataAccess.Contacts
 		///     Required
 		///     Opens a Connection or reuse an existing one and then execute the action
 		/// </summary>
-		Task RunAsync(Func<IDatabase, Task> func);
+		Task RunAsync(Func<IDatabase, Task> func);		
+		
+		/// <summary>
+		///     Required
+		///     Opens a Connection or reuse an existing one and then execute the action
+		/// </summary>
+		Task<T> RunAsync<T>(Func<IDatabase, Task<T>> func);
 
 		/// <summary>
 		///     Required

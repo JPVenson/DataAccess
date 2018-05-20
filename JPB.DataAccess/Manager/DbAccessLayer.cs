@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -142,7 +143,6 @@ namespace JPB.DataAccess.Manager
 			AnonymousPocoManager = new AnonymousPocoManager(_config);
 			LoadCompleteResultBeforeMapping = true;
 			CheckFactoryArguments = true;
-			SelectDbAccessLayer();
 			UpdateDbAccessLayer();
 		}
 
@@ -481,7 +481,7 @@ namespace JPB.DataAccess.Manager
 
 			if (classInfo.WrapNullables != null && !(reader is EgarNullableWrappedRecord) && reader is EgarDataRecord)
 			{
-				reader = new EgarNullableWrappedRecord(reader, ((EgarDataRecord) reader)._configStore);
+				reader = new EgarNullableWrappedRecord(reader, ((EgarDataRecord)reader)._configStore);
 			}
 
 			if (classInfo.Factory != null)
@@ -758,20 +758,85 @@ namespace JPB.DataAccess.Manager
 			return instance;
 		}
 
-		internal IEnumerable EnumerateDataRecords(IDbCommand query, bool direct, DbClassInfoCache type)
+		internal async Task<IEnumerable<object>> EnumerateDataRecordsAsync(IDbCommand query,
+				bool egarLoading,
+				DbClassInfoCache type,
+				CommandBehavior executionHint = CommandBehavior.Default)
 		{
-			if (direct)
+			var resultList = new List<object>();
+
+			if (egarLoading)
 			{
-				return EnumerateDataRecords(query)
-						.Select(f => AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(type, f)))
-						.ToArray();
+				await EnumerateAsync(query,
+				record => { resultList.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(type, record))); },
+				executionHint);
 			}
-			return EnumerateDirectDataRecords(query, type);
+			else
+			{
+				var recordCache = new List<IDataRecord>();
+				await EnumerateAsync(query,
+				record => { recordCache.Add(RecordGenerator(record, Config)); }, executionHint);
+				resultList.AddRange(recordCache
+				                    .Select(f => AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(type, f)))
+				                    .ToArray());
+			}
+
+			return resultList;
 		}
 
-		internal List<IDataRecord> EnumerateDataRecords(IDbCommand query)
+		internal List<IDataRecord> EnumerateDataRecordsAsync(IDbCommand query)
 		{
 			return EnumerateMarsDataRecords(query).FirstOrDefault();
+		}
+
+		internal async Task EnumerateAsync(IDbCommand query, Action<IDataReader> onRecord, CommandBehavior executionHint = CommandBehavior.Default)
+		{
+			Database.PrepaireRemoteExecution(query);
+			await Database.RunAsync(
+			async s =>
+			{
+				using (query)
+				{
+					query.Connection = query.Connection ?? s.GetConnection();
+					query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
+
+					IDataReader dr = null;
+					try
+					{
+						var command = query as DbCommand;
+						if (command != null)
+						{
+							dr = await command.ExecuteReaderAsync(executionHint);
+						}
+						else
+						{
+							dr = query.ExecuteReader(executionHint);
+						}
+						do
+						{
+							var reader = dr as DbDataReader;
+							while (reader != null ? (await reader.ReadAsync()) : dr.Read())
+							{
+								onRecord(dr);
+							}
+						} while (dr.NextResult());
+					}
+					catch (Exception ex)
+					{
+						RaiseFailedQuery(this, query, ex);
+						throw;
+					}
+					finally
+					{
+						if (dr != null)
+						{
+							dr.Dispose();
+						}
+					}
+				}
+
+				return new object();
+			});
 		}
 
 		/// <summary>
@@ -799,7 +864,6 @@ namespace JPB.DataAccess.Manager
 					{
 						try
 						{
-							var typeIndex = 0;
 							do
 							{
 								var resultSet = new List<IDataRecord>();
@@ -808,7 +872,6 @@ namespace JPB.DataAccess.Manager
 									resultSet.Add(RecordGenerator(dr, Config));
 								}
 								records.Add(resultSet);
-								typeIndex++;
 							} while (dr.NextResult());
 						}
 						catch (Exception ex)
@@ -833,39 +896,39 @@ namespace JPB.DataAccess.Manager
 			return type.SetPropertysViaReflection(reader, DbAccessType, Config);
 		}
 
-		internal ArrayList EnumerateDirectDataRecords(IDbCommand query,
-			DbClassInfoCache info)
-		{
-			Database.PrepaireRemoteExecution(query);
-			return Database.Run(
-			s =>
-			{
-				var records = new ArrayList();
-				using (query)
-				{
-					query.Connection = query.Connection ?? s.GetConnection();
-					query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
-					using (var dr = query.ExecuteReader())
-					{
-						try
-						{
-							do
-							{
-								while (dr.Read())
-								{
-									records.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(info, dr)));
-								}
-							} while (dr.NextResult());
-						}
-						catch (Exception ex)
-						{
-							RaiseFailedQuery(this, query, ex);
-							throw;
-						}
-					}
-				}
-				return records;
-			});
-		}
+		//internal ArrayList EnumerateDirectDataRecords(IDbCommand query,
+		//	DbClassInfoCache info)
+		//{
+		//	Database.PrepaireRemoteExecution(query);
+		//	return Database.Run(
+		//	s =>
+		//	{
+		//		var records = new ArrayList();
+		//		using (query)
+		//		{
+		//			query.Connection = query.Connection ?? s.GetConnection();
+		//			query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
+		//			using (var dr = query.ExecuteReader())
+		//			{
+		//				try
+		//				{
+		//					do
+		//					{
+		//						while (dr.Read())
+		//						{
+		//							records.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(info, dr)));
+		//						}
+		//					} while (dr.NextResult());
+		//				}
+		//				catch (Exception ex)
+		//				{
+		//					RaiseFailedQuery(this, query, ex);
+		//					throw;
+		//				}
+		//			}
+		//		}
+		//		return records;
+		//	});
+		//}
 	}
 }

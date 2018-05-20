@@ -10,6 +10,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 	{
 		public const string TableName = "Users";
 		public const string SelectStatement = "SELECT * FROM " + TableName;
+		public const string SelectPrimaryKeyStatement = "SELECT " + PrimaryKeyName + " FROM " + TableName;
 		public const string PrimaryKeyName = "User_ID";
 		public const string ContentName = "UserName";
 		public static readonly string CreateMsSql;

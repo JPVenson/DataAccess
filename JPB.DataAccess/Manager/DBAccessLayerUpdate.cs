@@ -69,6 +69,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T Refresh<T>(T entry)
 		{
+			//TODO make async
 			return Database.RunInTransaction(s =>
 			{
 				if (!CheckRowVersion(entry))
@@ -93,6 +94,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public bool RefreshKeepObject<T>(T entry)
 		{
+			//TODO Make async
 			return Database.RunInTransaction(s =>
 			{
 				if (!CheckRowVersion(entry))

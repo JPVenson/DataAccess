@@ -105,7 +105,7 @@ namespace JPB.DataAccess.Query
 		{
 			var query = _queryContainer.Compile();
 			_queryContainer.AccessLayer.RaiseSelect(query);
-			_enumerateDataRecords = _queryContainer.AccessLayer.EnumerateDataRecords(query);
+			_enumerateDataRecords = _queryContainer.AccessLayer.EnumerateDataRecordsAsync(query);
 		}
 	}
 

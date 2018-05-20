@@ -117,7 +117,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public void SelectPrimitivSelect()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
-			var refSelect = DbAccess.RunPrimetivSelect<long>(UsersMeta.SelectStatement);
+			var refSelect = DbAccess.RunPrimetivSelect<long>(UsersMeta.SelectPrimaryKeyStatement);
 			Assert.IsTrue(refSelect.Any());
 
 			var anyId = refSelect.FirstOrDefault();
@@ -125,13 +125,13 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 			refSelect =
 				DbAccess.RunPrimetivSelect<long>(
-					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
+					UsersMeta.SelectPrimaryKeyStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
 					new QueryParameter("paramA", anyId));
 			Assert.IsTrue(refSelect.Length > 0);
 
 			refSelect =
 				DbAccess.RunPrimetivSelect<long>(
-					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
+					UsersMeta.SelectPrimaryKeyStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
 					new {paramA = anyId});
 			Assert.IsTrue(refSelect.Length > 0);
 		}

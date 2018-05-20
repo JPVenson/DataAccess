@@ -122,7 +122,8 @@ namespace JPB.DataAccess.Manager
 		{
 			var command = CreateProcedureCall(GetClassInfo(procParamType), procParam, Database);
 			var typeInfo = GetClassInfo(resultType);
-			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping, typeInfo);
+			//TODO Make Async
+			return EnumerateDataRecordsAsync(command, LoadCompleteResultBeforeMapping, typeInfo).Result;
 			//if (LoadCompleteResultBeforeMapping)
 			//{
 			//	return EnumerateDataRecords(command)
@@ -141,7 +142,7 @@ namespace JPB.DataAccess.Manager
 		public object[] ExecuteProcedurePrimetiv(Type procParamType, Type resultType, object procParam)
 		{
 			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
-			return EnumerateDataRecords(command)
+			return EnumerateDataRecordsAsync(command)
 				.Select(dataRecord => dataRecord[0])
 				.ToArray();
 		}

@@ -329,6 +329,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[Parallelizable(ParallelScope.None)]
 		public void NestedTransactionWithSharedInInstanceCounter()
 		{
 			if (DbAccess.DbAccessType != DbAccessType.MsSql)

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
 using System.Transactions;
 
 #endregion
@@ -45,16 +46,16 @@ namespace JPB.DataAccess.AdoWrapper
 	/// </summary>
 	public class ThreadConnectionController : IConnectionController
 	{
-		[ThreadStatic]
-		private static ThreadConnection _threadConnectionInfo;
+		private static readonly AsyncLocal<ThreadConnection> _threadConnectionInfo 
+				= new AsyncLocal<ThreadConnection>();
 
 		/// <summary>
 		///		Contains infos about the Current ThreadConnection Infos
 		/// </summary>
 		public static ThreadConnection ThreadConnectionInfo
 		{
-			get { return _threadConnectionInfo; }
-			private set { _threadConnectionInfo = value; }
+			get { return _threadConnectionInfo.Value; }
+			private set { _threadConnectionInfo.Value = value; }
 		}
 
 		/// <summary>
