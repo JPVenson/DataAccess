@@ -27,5 +27,11 @@ namespace JPB.DataAccess.AdoWrapper
 		/// The sync root for Parallel access
 		/// </summary>
 		object LockRoot { get; }
+
+		/// <summary>
+		///		Clones the current ConnectionController
+		/// </summary>
+		/// <returns></returns>
+		IConnectionController Clone();
 	}
 }

@@ -48,6 +48,12 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <inheritdoc />
 		public object LockRoot { get; private set; }
 
+		/// <inheritdoc />
+		public IConnectionController Clone()
+		{
+			return new InstanceConnectionController();
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>

@@ -129,6 +129,12 @@ namespace JPB.DataAccess.AdoWrapper
 			get { return ThreadConnectionInfo.LockRoot; }
 		}
 
+		/// <inheritdoc />
+		public IConnectionController Clone()
+		{
+			return new ThreadConnectionController();
+		}
+
 		///// <summary>
 		/////     Sets the UseTransactionCurrent to true
 		///// </summary>
