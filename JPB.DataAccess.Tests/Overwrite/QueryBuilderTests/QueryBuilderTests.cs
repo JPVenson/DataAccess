@@ -10,6 +10,7 @@ using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.DbAccessLayerTests;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
+#pragma warning disable 618
 
 #endregion
 

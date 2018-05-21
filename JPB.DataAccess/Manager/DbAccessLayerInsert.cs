@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
@@ -183,12 +184,21 @@ namespace JPB.DataAccess.Manager
 		///     Creates and Executes a Insert statement for a given
 		///     <paramref name="entry" />
 		/// </summary>
-		public void Insert(Type type, object entry, IDatabase db)
+		public int Insert(Type type, object entry, IDatabase db)
+		{
+			return InsertAsync(type, entry, db).Result;
+		}	
+		
+		/// <summary>
+		///     Creates and Executes a Insert statement for a given
+		///     <paramref name="entry" />
+		/// </summary>
+		public async Task<int> InsertAsync(Type type, object entry, IDatabase db)
 		{
 			var query = CreateInsertQueryFactory(GetClassInfo(type), entry);
 			Database.PrepaireRemoteExecution(query);
 			RaiseInsert(entry, query);
-			db.Run(s => { s.ExecuteNonQuery(query); });
+			return await db.ExecuteNonQueryAsync(query);
 		}
 
 		/// <summary>

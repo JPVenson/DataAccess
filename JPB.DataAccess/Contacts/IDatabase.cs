@@ -276,5 +276,12 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <returns></returns>
 		string ConvertParameter(DbType type);
+
+		/// <summary>
+		///     Executes a Query that returns no data
+		/// </summary>
+		/// <param name="query">The command.</param>
+		/// <returns></returns>
+		Task<int> ExecuteNonQueryAsync(IDbCommand query);
 	}
 }

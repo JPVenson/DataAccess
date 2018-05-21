@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[DotMemoryUnitAttribute(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
-		MemoryCheckPoint memoryCheckPoint;
+		//MemoryCheckPoint memoryCheckPoint;
 		[SetUp]
 		public void Init()
 		{

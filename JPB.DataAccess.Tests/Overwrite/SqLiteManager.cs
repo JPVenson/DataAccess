@@ -101,7 +101,7 @@ namespace JPB.DataAccess.Tests
 				{
 					File.Delete(_dbFilePath);
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					Console.WriteLine($"Could not cleanup the SqLite File '{_dbFilePath}'");
 				}

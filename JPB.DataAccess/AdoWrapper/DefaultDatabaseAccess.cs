@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -465,7 +466,16 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public int ExecuteNonQuery(IDbCommand cmd)
 		{
-			return Run(d =>
+			return ExecuteNonQueryAsync(cmd).Result;
+		}		
+		
+		/// <summary>
+		///     Executes a query against the database
+		/// </summary>
+		/// <returns></returns>
+		public async Task<int> ExecuteNonQueryAsync(IDbCommand cmd)
+		{
+			return await RunAsync(async d =>
 			{
 				cmd.Connection = GetConnection();
 				if (ConnectionController.Transaction != null)
@@ -473,6 +483,12 @@ namespace JPB.DataAccess.AdoWrapper
 					cmd.Transaction = ConnectionController.Transaction;
 				}
 				AttachQueryDebugger(cmd);
+
+				if (cmd is DbCommand)
+				{
+					return await (cmd as DbCommand).ExecuteNonQueryAsync();
+				}
+
 				return cmd.ExecuteNonQuery();
 			});
 		}
@@ -842,9 +858,8 @@ namespace JPB.DataAccess.AdoWrapper
 
 				return await func(this);
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
-				e.ToString();
 				TransactionRollback();
 				throw;
 			}

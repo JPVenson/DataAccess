@@ -768,7 +768,7 @@ namespace JPB.DataAccess.Manager
 			if (egarLoading)
 			{
 				await EnumerateAsync(query,
-				record => { resultList.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(type, record))); },
+				record => { resultList.Add(SetPropertysViaReflection(type, record)); },
 				executionHint);
 			}
 			else
@@ -777,7 +777,7 @@ namespace JPB.DataAccess.Manager
 				await EnumerateAsync(query,
 				record => { recordCache.Add(RecordGenerator(record, Config)); }, executionHint);
 				resultList.AddRange(recordCache
-				                    .Select(f => AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(type, f)))
+				                    .Select(f => SetPropertysViaReflection(type, f))
 				                    .ToArray());
 			}
 

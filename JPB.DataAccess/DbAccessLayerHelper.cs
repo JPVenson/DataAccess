@@ -49,7 +49,9 @@ namespace JPB.DataAccess
 				config = new DbConfig(true);
 			}
 
+#pragma warning disable 618
 			return DbAccessLayer.ReflectionPropertySet(config, source, type, reader, null, accessType);
+#pragma warning restore 618
 		}
 
 		/// <summary>

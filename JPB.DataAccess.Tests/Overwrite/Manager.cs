@@ -47,8 +47,6 @@ namespace JPB.DataAccess.Tests
 					additionalArguments.Select(
 					                           f =>
 					                           {
-						                           var hash = "";
-
 						                           if (f == null)
 						                           {
 							                           return TestContext.CurrentContext.Random.NextShort().ToString();

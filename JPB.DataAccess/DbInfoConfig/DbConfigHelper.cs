@@ -15,12 +15,13 @@ using JPB.DataAccess.MetaApi;
 
 namespace JPB.DataAccess.DbInfoConfig
 {
+
+	/// <summary>
+	/// Defines a Helper for Reflection on DbAccessLayer level
+	/// </summary>
 #if !DEBUG
 	[DebuggerStepThrough]
 #endif
-
-	/// <summary>
-	/// </summary>
 	public static class DbConfigHelper
 	{
 		static DbConfigHelper()

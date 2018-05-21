@@ -167,7 +167,9 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 
 			if (string.IsNullOrEmpty(SqlVersion))
 			{
+#pragma warning disable 618
 				SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+#pragma warning restore 618
 			}
 
 			SyncHelper(CurrentPageItems.Clear);
