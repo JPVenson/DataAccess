@@ -52,6 +52,7 @@ namespace JPB.DataAccess.Manager
 		{
 			SProcedureDbAccessLayer();
 			ProviderCollection = new PreDefinedProviderCollection();
+			AsyncDefault = true;
 		}
 
 		internal DbAccessLayer(DbConfig config = null)
@@ -62,6 +63,7 @@ namespace JPB.DataAccess.Manager
 			LoadCompleteResultBeforeMapping = true;
 			CheckFactoryArguments = true;
 			UpdateDbAccessLayer();
+			Async = AsyncDefault;
 		}
 
 		/// <summary>
@@ -773,6 +775,16 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public static bool ConfigureAwait { get; set; }
 
+		/// <summary>
+		///		If set the System will never execute a Async method. Set this static flag to effect all NEW DbAccessLayer instances
+		/// </summary>
+		public static bool AsyncDefault { get; set; }
+
+		/// <summary>
+		///		If set the System will never execute a Async method
+		/// </summary>
+		public bool Async { get; set; }
+
 		internal async Task<IEnumerable<object>> EnumerateDataRecordsAsync(IDbCommand query,
 				bool egarLoading,
 				DbClassInfoCache type,
@@ -820,7 +832,7 @@ namespace JPB.DataAccess.Manager
 					try
 					{
 						var command = query as DbCommand;
-						if (command != null)
+						if (command != null && Async)
 						{
 							dr = await command.ExecuteReaderAsync(executionHint).ConfigureAwait(ConfigureAwait);
 						}
@@ -832,7 +844,7 @@ namespace JPB.DataAccess.Manager
 						do
 						{
 							var reader = dr as DbDataReader;
-							while (reader != null ? await reader.ReadAsync().ConfigureAwait(ConfigureAwait) : dr.Read())
+							while (reader != null && Async ? await reader.ReadAsync().ConfigureAwait(ConfigureAwait) : dr.Read())
 							{
 								onRecord(dr);
 							}

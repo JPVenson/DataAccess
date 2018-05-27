@@ -39,7 +39,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[SetUp]
 		public void Init()
 		{
-			Warn.If(dotMemoryApi.IsEnabled, () => "WARNING DOTMEMORY IS NOT ENABLED");
+			//Warn.If(dotMemoryApi.IsEnabled, () => "WARNING DOTMEMORY IS NOT ENABLED");
 			//memoryCheckPoint = dotMemory.Check();
 			Mgr = new Manager();
 		}

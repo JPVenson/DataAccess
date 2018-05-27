@@ -7,7 +7,9 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.SqLite;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using NUnit.Framework;
 
 #endregion
 
@@ -36,8 +38,10 @@ namespace JPB.DataAccess.Tests
 			{
 				expectWrapper.Database.CloseAllConnection();
 			}
-			//load SqLite in domain
-			var type1 = typeof(SqLite.SqLite);
+
+			Assert.That(SqLiteInteroptWrapper.EnsureSqLiteInteropt());
+
+			Assert.That(SqLiteInteroptWrapper.EnsureSqLiteInteropt(), Is.True);
 			//string dbname = "testDB";
 			//var sqlLiteFileName = dbname + ".sqlite";
 			_dbFilePath = string.Format("YAORM_SqLite_{0}.db", testName);
@@ -48,6 +52,7 @@ namespace JPB.DataAccess.Tests
 				GC.Collect();
 				File.Delete(_dbFilePath);
 			}
+
 			File.Create(_dbFilePath).Dispose();
 			var connection = string.Format(ConnectionString, _dbFilePath);
 
@@ -59,7 +64,6 @@ namespace JPB.DataAccess.Tests
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
 			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
-			var userses = expectWrapper.Select<Users>();
 			return expectWrapper;
 		}
 
@@ -108,4 +112,5 @@ namespace JPB.DataAccess.Tests
 			}
 		}
 	}
+
 }

@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.QueryBuilderTests
 {
 	[TestFixture]
-	[Explicit("Could be longrunning. Does not test Function")]
+	[Explicit("Long running Performance tests")]
 	public class QueryPerfTests
 	{
 		public QueryPerfTests()

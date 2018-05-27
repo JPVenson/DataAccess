@@ -2,6 +2,7 @@
 
 using System;
 using System.Configuration;
+using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
@@ -14,6 +15,7 @@ namespace JPB.DataAccess.Tests
 	{
 		private DbAccessLayer _expectWrapper;
 		private string _connectionString;
+		private readonly StringBuilder _errorText = new StringBuilder();
 
 		public MySqlManager()
 		{
@@ -80,15 +82,17 @@ namespace JPB.DataAccess.Tests
 					return _connectionString;
 				}
 				_connectionString = ConfigurationManager.ConnectionStrings[ConnectionType].ConnectionString;
-				Console.WriteLine("-------------------------------------------");
-				Console.WriteLine("Connection String");
-				Console.WriteLine(_connectionString);
+				_errorText.AppendLine("-------------------------------------------");
+				_errorText.AppendLine("Connection String");
+				_errorText.AppendLine(_connectionString);
 				return _connectionString;
 			}
 		}
 
 		public void FlushErrorData()
 		{
+			Console.WriteLine(_errorText.ToString());
+			_errorText.Clear();
 		}
 
 		public void Clear()
