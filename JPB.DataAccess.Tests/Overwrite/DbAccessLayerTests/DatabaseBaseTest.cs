@@ -1,12 +1,7 @@
 ﻿#region
 
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using JetBrains.dotMemoryUnit;
-using JetBrains.dotMemoryUnit.Kernel;
-using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Manager;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -32,7 +27,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]
-	[DotMemoryUnitAttribute(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
+	[DotMemoryUnit(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
 		//MemoryCheckPoint memoryCheckPoint;
@@ -56,6 +51,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 					failed = true;
 				}
 			}
+
 			if (Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Failure) ||
 			    Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Error))
 			{
@@ -65,6 +61,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			{
 				Mgr?.Clear();
 			}
+
 			Mgr = null;
 			DbAccess = null;
 			//ThreadConnection.UseTransactionCurrent = false;
