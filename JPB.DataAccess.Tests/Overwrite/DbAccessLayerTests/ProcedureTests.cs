@@ -12,9 +12,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class ProcedureTests : DatabaseBaseTest
 	{
-		public ProcedureTests(DbAccessType type) : base(type)
-		{
-		}
 
 		[Test]
 		[Category("MsSQL")]
@@ -63,6 +60,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			{
 				Number = 10
 			}), Is.Not.Null.And.Property("Length").EqualTo(9));
+		}
+
+		/// <inheritdoc />
+		public ProcedureTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		{
 		}
 	}
 }

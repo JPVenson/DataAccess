@@ -13,7 +13,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class DataMigrationTests : DatabaseBaseTest
 	{
-		public DataMigrationTests(DbAccessType type) : base(type)
+		public DataMigrationTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
 		{
 		}
 

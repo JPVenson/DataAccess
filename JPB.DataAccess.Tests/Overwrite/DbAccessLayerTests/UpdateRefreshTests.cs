@@ -15,9 +15,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class UpdateRefreshTests : DatabaseBaseTest
 	{
-		public UpdateRefreshTests(DbAccessType type) : base(type)
-		{
-		}
 
 		[Test]
 		[Category("MsSQL")]
@@ -127,6 +124,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsNotNull(refEntity);
 			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
 			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);
+		}
+
+		/// <inheritdoc />
+		public UpdateRefreshTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		{
 		}
 	}
 }

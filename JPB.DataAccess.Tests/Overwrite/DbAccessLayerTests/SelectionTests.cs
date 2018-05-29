@@ -14,10 +14,15 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-	[TestFixture(DbAccessType.MsSql, true)]
-	[TestFixture(DbAccessType.SqLite, true)]
-	[TestFixture(DbAccessType.MsSql, false)]
-	[TestFixture(DbAccessType.SqLite, false)]
+	[TestFixture(DbAccessType.MsSql, true, true)]
+	[TestFixture(DbAccessType.SqLite, true, true)]
+	[TestFixture(DbAccessType.MsSql, false, true)]
+	[TestFixture(DbAccessType.SqLite, false, true)]
+	[TestFixture(DbAccessType.MsSql, true, false)]
+	[TestFixture(DbAccessType.SqLite, true, false)]
+	[TestFixture(DbAccessType.MsSql, false, false)]
+	[TestFixture(DbAccessType.SqLite, false, false)]
+
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class SelectionTests : DatabaseBaseTest
 	{
@@ -29,7 +34,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		private readonly bool _egarLoading;
 
-		public SelectionTests(DbAccessType type, bool egarLoading) : base(type, egarLoading.ToString())
+		public SelectionTests(DbAccessType type, bool egarLoading, bool asyncExecution) : base(type, asyncExecution, egarLoading.ToString())
 		{
 			_egarLoading = egarLoading;
 		}
@@ -55,12 +60,12 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsTrue(refSelect.Length > 0);
 
 			var testInsertName = Guid.NewGuid().ToString();
-			var testUser = DbAccess.InsertWithSelect(new Users {UserName = testInsertName});
+			var testUser = DbAccess.InsertWithSelect(new Users { UserName = testInsertName });
 			Assert.IsNotNull(testUser);
 			Assert.AreNotEqual(testUser.UserID, default(long));
 
 			var selTestUser =
-				DbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] {testUser.UserID}).FirstOrDefault();
+				DbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] { testUser.UserID }).FirstOrDefault();
 			Assert.That(selTestUser, Is.Not.Null);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserId, testUser.UserID);
@@ -108,7 +113,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			refSelect =
 				DbAccess.SelectNative<Users>(
 					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-					new {paramA = anyId});
+					new { paramA = anyId });
 			Assert.IsTrue(refSelect.Length > 0);
 		}
 
@@ -133,7 +138,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			refSelect =
 				DbAccess.RunPrimetivSelect<long>(
 					UsersMeta.SelectPrimaryKeyStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-					new {paramA = anyId});
+					new { paramA = anyId });
 			Assert.IsTrue(refSelect.Length > 0);
 		}
 
@@ -156,11 +161,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsTrue(refSelect.Length > 0);
 
 			var testInsertName = Guid.NewGuid().ToString();
-			var testUser = DbAccess.InsertWithSelect(new Users {UserName = testInsertName});
+			var testUser = DbAccess.InsertWithSelect(new Users { UserName = testInsertName });
 			Assert.IsNotNull(testUser);
 			Assert.AreNotEqual(testUser.UserID, default(long));
 
-			var selTestUser = DbAccess.SelectWhere<Users>("User_ID = @id", new {id = testUser.UserID}).FirstOrDefault();
+			var selTestUser = DbAccess.SelectWhere<Users>("User_ID = @id", new { id = testUser.UserID }).FirstOrDefault();
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserID, testUser.UserID);
 		}
@@ -175,12 +180,12 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsTrue(refSelect.Length > 0);
 
 			var testInsertName = Guid.NewGuid().ToString();
-			var testUser = DbAccess.InsertWithSelect(new Users {UserName = testInsertName});
+			var testUser = DbAccess.InsertWithSelect(new Users { UserName = testInsertName });
 			Assert.IsNotNull(testUser);
 			Assert.AreNotEqual(testUser.UserID, default(long));
 
 			var selTestUser =
-				DbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] {testUser.UserID}).FirstOrDefault();
+				DbAccess.Select<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(new object[] { testUser.UserID }).FirstOrDefault();
 			Assert.That(selTestUser, Is.Not.Null);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserId, testUser.UserID);

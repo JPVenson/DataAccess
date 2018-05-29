@@ -18,9 +18,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class InsertTests : DatabaseBaseTest
 	{
-		public InsertTests(DbAccessType type) : base(type)
-		{
-		}
 
 		[Test]
 		[Category("MsSQL")]
@@ -241,6 +238,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.IsNotNull(expectedUser);
 			Assert.AreEqual(expectedUser.UserName, insGuid);
 			Assert.AreNotEqual(expectedUser.UserID, default(long));
+		}
+
+		/// <inheritdoc />
+		public InsertTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		{
 		}
 	}
 }

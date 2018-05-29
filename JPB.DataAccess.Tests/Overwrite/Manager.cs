@@ -39,7 +39,8 @@ namespace JPB.DataAccess.Tests
 			_errorData.AppendLine("Found " + type);
 
 			Assert.That(new DbConfig().SClassInfoCaches, Is.Empty, () => "The Global Class cache is not empty");
-			var testClassName = TestContext.CurrentContext.Test.ClassName.Replace(typeof(Manager).Namespace, "") + "." +
+			var testClassName = TestContext.CurrentContext.Test.ClassName.Replace(typeof(Manager).Namespace, "").Where(e => char.IsUpper(e)).Select(e => e.ToString())
+			                               .Aggregate((e,f) => e + f) + "." +
 			                    TestContext.CurrentContext.Test.MethodName;
 
 
@@ -63,7 +64,7 @@ namespace JPB.DataAccess.Tests
 
 			if (arguments.Any())
 			{
-				testClassName = testClassName + "_ARG_" + arguments.Aggregate((e, f) => e + f).GetHashCode();
+				testClassName = testClassName + "_" + arguments.Aggregate((e, f) => e + f).GetHashCode();
 			}
 			testClassName = new Regex("[^a-zA-Z0-9]").Replace(testClassName, "_");
 			_errorData.AppendLine($"Attach to Database: {testClassName}");

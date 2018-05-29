@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Linq;
 using JetBrains.dotMemoryUnit;
 using JPB.DataAccess.Manager;
 using NUnit.Framework;
@@ -25,8 +26,10 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 	}
 
-	[TestFixture(DbAccessType.MsSql)]
-	[TestFixture(DbAccessType.SqLite)]
+	[TestFixture(DbAccessType.MsSql, true)]
+	[TestFixture(DbAccessType.SqLite, true)]
+	[TestFixture(DbAccessType.MsSql, false)]
+	[TestFixture(DbAccessType.SqLite, false)]
 	[DotMemoryUnit(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
@@ -53,7 +56,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			}
 
 			if (Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Failure) ||
-			    Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Error))
+				Equals(TestContext.CurrentContext.Result.Outcome, ResultState.Error))
 			{
 				Mgr?.FlushErrorData();
 			}
@@ -79,10 +82,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public object[] AdditionalArguments { get; }
 		private DbAccessLayer _dbAccess;
 
-		protected DatabaseBaseTest(DbAccessType type, params object[] additionalArguments)
+		protected DatabaseBaseTest(DbAccessType type, bool asyncExecution, params object[] additionalArguments)
 		{
-			AdditionalArguments = additionalArguments;
+			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0" }).ToArray();
 			Type = type;
+			AsyncExecution = asyncExecution;
 		}
 
 		public DbAccessLayer DbAccess
@@ -93,5 +97,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		public IManager Mgr { get; private set; }
 		public DbAccessType Type { get; }
+		public bool AsyncExecution { get; }
 	}
 }

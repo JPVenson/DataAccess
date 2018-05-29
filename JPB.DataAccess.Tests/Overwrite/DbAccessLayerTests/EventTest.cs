@@ -13,7 +13,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[Parallelizable(ParallelScope.None)]
 	public class EventTest : DatabaseBaseTest
 	{
-		public EventTest(DbAccessType type) : base(type)
+		public EventTest(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
 		{
 		}
 

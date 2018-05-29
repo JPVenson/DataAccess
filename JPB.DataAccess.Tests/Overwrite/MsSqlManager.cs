@@ -75,16 +75,16 @@ namespace JPB.DataAccess.Tests
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(BookMeta.CreateMsSQl));
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
 
-			//_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
-			//                                                                         "AS BEGIN " +
-			//                                                                         "SELECT * FROM Users " +
-			//                                                                         "END"));
+			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
+																					 "AS BEGIN " +
+																					 "SELECT * FROM Users " +
+																					 "END"));
 
-			//_expectWrapper.ExecuteGenericCommand(
-			//	_expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
-			//	                                     "AS BEGIN " +
-			//	                                     "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
-			//	                                     "END "));
+			_expectWrapper.ExecuteGenericCommand(
+				_expectWrapper.Database.CreateCommand("CREATE PROC TestProcB @bigThen INT " +
+													 "AS BEGIN " +
+													 "SELECT * FROM Users us WHERE @bigThen > us.User_ID " +
+													 "END "));
 
 
 			return _expectWrapper;

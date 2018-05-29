@@ -15,22 +15,32 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 {
-	[TestFixture(DbAccessType.MsSql, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MsSql, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, true, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, true, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, true, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, true, false, EnumerationMode.OnCall)]
 
-	[TestFixture(DbAccessType.SqLite, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.SqLite, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, true, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, true, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, true, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, true, false, EnumerationMode.OnCall)]
+
+	[TestFixture(DbAccessType.MsSql, false, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, false, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, false, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, false, false, EnumerationMode.OnCall)]
+
+	[TestFixture(DbAccessType.SqLite, false, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, false, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, false, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, false, false, EnumerationMode.OnCall)]
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class QueryBuilderTests : DatabaseBaseTest
 	{
 		private readonly EnumerationMode _enumerationMode;
 		private readonly bool _asyncEnumeration;
 
-		public QueryBuilderTests(DbAccessType type, bool asyncEnumeration, EnumerationMode enumerationMode) : base(type, enumerationMode, asyncEnumeration)
+		public QueryBuilderTests(DbAccessType type, bool asyncExecution, bool asyncEnumeration, EnumerationMode enumerationMode) : base(type, asyncExecution, enumerationMode, asyncEnumeration)
 		{
 			_enumerationMode = enumerationMode;
 			_asyncEnumeration = asyncEnumeration;
@@ -61,7 +71,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
 			Assert.That(
 			() => CreateQuery().Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>()
-			              .ForResult(_asyncEnumeration).ToArray(), Is.Not.Empty);
+						  .ForResult(_asyncEnumeration).ToArray(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
 			Users_PK_IDFM_FUNCSELECTFACWITHPARAM testUser = null;
@@ -70,7 +80,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 					testUser =
 							DbAccess.InsertWithSelect(new Users_PK_IDFM_FUNCSELECTFACWITHPARAM
 							{
-									UserName = testInsertName
+								UserName = testInsertName
 							}),
 			Is.Not.Null
 			  .And.Property("UserId").Not.EqualTo(0));
@@ -101,7 +111,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 						DbAccess.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 								[0];
 				forResult = CreateQuery().Select.Table<Users>().CountInt()
-				                         .ForResult(_asyncEnumeration).FirstOrDefault();
+										 .ForResult(_asyncEnumeration).FirstOrDefault();
 			}
 
 			if (DbAccess.DbAccessType == DbAccessType.SqLite)
@@ -111,7 +121,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 								[0];
 				forResult = (int)CreateQuery().Select.Table<Users>().CountLong()
-				                          .ForResult(_asyncEnumeration).FirstOrDefault();
+										  .ForResult(_asyncEnumeration).FirstOrDefault();
 			}
 
 			if (DbAccess.DbAccessType == DbAccessType.MySql)
@@ -121,7 +131,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 								[0];
 				forResult = (int)CreateQuery().Count<Users>().ForResult<long>(_asyncEnumeration)
-				                          .FirstOrDefault();
+										  .FirstOrDefault();
 			}
 
 			Assert.That(runPrimetivSelect, Is.EqualTo(forResult));
@@ -155,15 +165,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 
 			var elementProducer =
 					CreateQuery()
-					        .Select.Table<Users>()
-					        .Where.Column(f => f.UserID)
-					        .Is.In(elementsToRead.ToArray())
+							.Select.Table<Users>()
+							.Where.Column(f => f.UserID)
+							.Is.In(elementsToRead.ToArray())
 							.ForResult(_asyncEnumeration)
 							.ToArray();
 			var directQuery = DbAccess.SelectNative<Users>(UsersMeta.SelectStatement
-			                                               + string.Format(" WHERE User_ID IN ({0})",
-			                                               elementsToRead.Select(f => f.ToString())
-			                                                             .Aggregate((e, f) => e + "," + f)));
+														   + string.Format(" WHERE User_ID IN ({0})",
+														   elementsToRead.Select(f => f.ToString())
+																		 .Aggregate((e, f) => e + "," + f)));
 
 			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
 
@@ -184,8 +194,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 			DataMigrationHelper.AddUsers(maxItems, DbAccess);
 			var elementProducer =
 					CreateQuery().Select.Table<Users>().Order.By(s => s.UserName)
-					        .ThenBy(f => f.UserID)
-					             .ForResult(_asyncEnumeration).ToArray();
+							.ThenBy(f => f.UserID)
+								 .ForResult(_asyncEnumeration).ToArray();
 			var directQuery =
 					DbAccess.SelectNative<Users>(UsersMeta.SelectStatement + " ORDER BY UserName, User_ID");
 
@@ -215,8 +225,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 
 			var queryPager = CreateQuery()
 									 .Select.Table<Users>()
-			                         .Order.By(f => f.UserID)
-			                         .ForPagedResult(1, basePager.PageSize);
+									 .Order.By(f => f.UserID)
+									 .ForPagedResult(1, basePager.PageSize);
 			queryPager.LoadPage(DbAccess);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
@@ -238,11 +248,11 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 			Assert.That(basePager.MaxPage, Is.EqualTo(Math.Ceiling(25F / basePager.PageSize)));
 
 			var queryPager = CreateQuery().Select.Table<Users>()
-			                         .Where
-			                         .Column(f => f.UserID)
-			                         .IsQueryOperatorValue("< 25")
-			                         .Order.By(f => f.UserID)
-			                         .ForPagedResult(1, basePager.PageSize);
+									 .Where
+									 .Column(f => f.UserID)
+									 .IsQueryOperatorValue("< 25")
+									 .Order.By(f => f.UserID)
+									 .ForPagedResult(1, basePager.PageSize);
 			queryPager.LoadPage(DbAccess);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
@@ -366,15 +376,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 			var usernamePre = user.UserName;
 			user.UserName = Guid.NewGuid().ToString();
 			CreateQuery().Update.Table<Users>().Set
-			        .Column(f => f.UserName).Value(user.UserName)
-			        .ExecuteNonQuery();
+					.Column(f => f.UserName).Value(user.UserName)
+					.ExecuteNonQuery();
 			user = DbAccess.Select<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));
 
 			CreateQuery().Update.Table<Users>().Set
-			        .Column(f => f.UserName).Value(null)
-			        .ExecuteNonQuery();
+					.Column(f => f.UserName).Value(null)
+					.ExecuteNonQuery();
 
 			user = DbAccess.Select<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));

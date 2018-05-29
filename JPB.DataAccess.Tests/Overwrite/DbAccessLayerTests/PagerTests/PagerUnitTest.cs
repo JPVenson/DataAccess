@@ -9,11 +9,11 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
 {
-	[TestFixture(DbAccessType.MsSql)]
-	[TestFixture(DbAccessType.SqLite)]
 	public class PagerUnitTest : DatabaseBaseTest
 	{
-		public PagerUnitTest(DbAccessType type) : base(type)
+		/// <inheritdoc />
+		public PagerUnitTest(DbAccessType type, bool asyncExecution) : base(type,
+		asyncExecution)
 		{
 		}
 

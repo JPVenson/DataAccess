@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class CheckWrapperDatabaseBaseTests : DatabaseBaseTest
 	{
-		public CheckWrapperDatabaseBaseTests(DbAccessType type) : base(type)
+		public CheckWrapperDatabaseBaseTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
 		{
 		}
 
