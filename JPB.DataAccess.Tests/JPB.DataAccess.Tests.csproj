@@ -120,7 +120,7 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_UsernameAnonymous.cs" />
     <Compile Include="Overwrite\AllTestContextHelper.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
-    <Compile Include="Overwrite\DataMigrationTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\DataMigrationTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\DatabaseBaseTest.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\CheckWrapperDatabaseBaseTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\ConfigurationTests.cs" />
@@ -148,13 +148,13 @@
     <Compile Include="Overwrite\MetaApiTests\MetaApiTest.cs" />
     <Compile Include="Overwrite\MsSqlManager.cs" />
     <Compile Include="Overwrite\MySqlManager.cs" />
-    <Compile Include="Overwrite\PagerTests\PagerConstraintTests.cs" />
-    <Compile Include="Overwrite\PagerTests\PagerUnitTest.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\PagerTests\PagerConstraintTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\PagerTests\PagerUnitTest.cs" />
     <Compile Include="Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
-    <Compile Include="Overwrite\QueryBuilderTests\ColumChooserTest.cs" />
-    <Compile Include="Overwrite\QueryBuilderTests\QueryPerfTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\QueryBuilderTests\ColumChooserTest.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\QueryBuilderTests\QueryPerfTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Overwrite\QueryBuilderTests\QueryBuilderTests.cs" />
+    <Compile Include="Overwrite\DbAccessLayerTests\QueryBuilderTests\QueryBuilderTests.cs" />
     <Compile Include="Overwrite\SqLiteManager.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\FooTest.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Image.cs" />

@@ -12,7 +12,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.QueryBuilderTests
+namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 {
 	[TestFixture]
 	public class ColumChooserTest

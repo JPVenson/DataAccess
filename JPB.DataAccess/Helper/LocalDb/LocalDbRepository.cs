@@ -479,22 +479,22 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		///     Determines whether the specified fk value for table x contains identifier.
 		/// </summary>
-		/// <param name="fkValueForTableX">The fk value for table x.</param>
+		/// <param name="id">The fk value for table x.</param>
 		/// <returns>
 		///     <c>true</c> if the specified fk value for table x contains identifier; otherwise, <c>false</c>.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">fkValueForTableX</exception>
-		public bool ContainsId(object fkValueForTableX)
+		public bool ContainsId(object id)
 		{
-			if (fkValueForTableX == null)
+			if (id == null)
 			{
-				throw new ArgumentNullException("fkValueForTableX");
+				throw new ArgumentNullException("id");
 			}
 
-			var local = Base.ContainsKey(fkValueForTableX);
+			var local = Base.ContainsKey(id);
 			if (!local)
 			{
-				local = Base.ContainsKey(Convert.ChangeType(fkValueForTableX, _typeInfo.PrimaryKeyProperty.PropertyType));
+				local = Base.ContainsKey(Convert.ChangeType(id, _typeInfo.PrimaryKeyProperty.PropertyType));
 			}
 
 			return local;

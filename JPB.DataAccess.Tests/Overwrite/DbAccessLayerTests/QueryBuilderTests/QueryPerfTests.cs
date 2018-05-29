@@ -4,7 +4,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 
-namespace JPB.DataAccess.Tests.QueryBuilderTests
+namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 {
 	[TestFixture]
 	[Explicit("Long running Performance tests")]

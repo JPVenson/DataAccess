@@ -2,13 +2,12 @@
 
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
-using JPB.DataAccess.Tests.DbAccessLayerTests;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.PagerTests
+namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
 {
 	[TestFixture(DbAccessType.MsSql)]
 	[TestFixture(DbAccessType.SqLite)]

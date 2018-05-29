@@ -1,17 +1,14 @@
 ﻿#region
 
 using System;
-using System.Diagnostics;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
-using JPB.DataAccess.Tests.DbAccessLayerTests;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests
+namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class DataMigrationTests : DatabaseBaseTest

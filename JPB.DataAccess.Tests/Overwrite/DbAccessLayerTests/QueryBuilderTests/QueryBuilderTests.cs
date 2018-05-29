@@ -7,14 +7,13 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
-using JPB.DataAccess.Tests.DbAccessLayerTests;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 #pragma warning disable 618
 
 #endregion
 
-namespace JPB.DataAccess.Tests.QueryBuilderTests
+namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 {
 	[TestFixture(DbAccessType.MsSql, true, EnumerationMode.FullOnLoad)]
 	[TestFixture(DbAccessType.MsSql, true, EnumerationMode.OnCall)]

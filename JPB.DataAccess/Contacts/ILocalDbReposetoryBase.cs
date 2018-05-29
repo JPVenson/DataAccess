@@ -86,11 +86,11 @@ namespace JPB.DataAccess.Contacts
 		/// <summary>
 		///     Determines whether the specified fk value for table x contains identifier.
 		/// </summary>
-		/// <param name="fkValueForTableX">The fk value for table x.</param>
+		/// <param name="id">The fk value for table x.</param>
 		/// <returns>
 		///     <c>true</c> if the specified fk value for table x contains identifier; otherwise, <c>false</c>.
 		/// </returns>
-		bool ContainsId(object fkValueForTableX);
+		bool ContainsId(object id);
 
 		/// <summary>
 		///     Removes the specified item.

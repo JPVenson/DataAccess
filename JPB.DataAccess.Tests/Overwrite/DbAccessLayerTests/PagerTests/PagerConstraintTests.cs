@@ -2,12 +2,11 @@
 
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base;
-using JPB.DataAccess.Tests.DbAccessLayerTests;
 using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.PagerTests
+namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
 
 {
 	[TestFixture(DbAccessType.MsSql)]
