@@ -39,9 +39,7 @@ namespace JPB.DataAccess.Tests
 				expectWrapper.Database.CloseAllConnection();
 			}
 
-			Assert.That(SqLiteInteroptWrapper.EnsureSqLiteInteropt());
-
-			Assert.That(SqLiteInteroptWrapper.EnsureSqLiteInteropt(), Is.True);
+			SqLiteInteroptWrapper.EnsureSqLiteInteropt();
 			//string dbname = "testDB";
 			//var sqlLiteFileName = dbname + ".sqlite";
 			_dbFilePath = string.Format("YAORM_SqLite_{0}.db", testName);

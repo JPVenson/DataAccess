@@ -34,6 +34,8 @@ namespace JPB.DataAccess.MySql
 
 		public MySql(string strServer, string strDatabase, string strLogin, string strPassword)
 		{
+			ServerName = strServer;
+			DatabaseFile = strDatabase;
 			if (0 == strLogin.Trim().Length && 0 == strPassword.Trim().Length)
 			{
 				ConnectionString = string.Format(TEMPLATE_MSSQL_TRUSTED, strServer.Trim(), strDatabase.Trim());
@@ -92,18 +94,6 @@ namespace JPB.DataAccess.MySql
 		public IDbDataAdapter CreateDataAdapter(IDbCommand cmd)
 		{
 			return new MySqlDataAdapter(cmd as MySqlCommand);
-		}
-
-		public DataTable CreateDataTable(string name, IDbCommand cmd)
-		{
-			var adapter = CreateDataAdapter(cmd) as MySqlDataAdapter;
-			var table = new DataTable(name);
-			adapter.Fill(table);
-
-			cmd.Dispose();
-			adapter.Dispose();
-
-			return table;
 		}
 
 		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)

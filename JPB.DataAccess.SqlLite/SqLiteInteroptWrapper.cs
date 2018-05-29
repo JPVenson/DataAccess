@@ -72,7 +72,7 @@ namespace JPB.DataAccess.SqLite
 					File.Copy(pathTodll, SqliteInteropDll);
 					return true;
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					return false;
 				}
@@ -93,7 +93,7 @@ namespace JPB.DataAccess.SqLite
 					File.WriteAllBytes(SqliteInteropDll, buffer);
 				}
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				return false;
 			}
