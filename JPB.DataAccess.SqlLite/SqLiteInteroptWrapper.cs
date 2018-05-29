@@ -78,25 +78,25 @@ namespace JPB.DataAccess.SqLite
 				}
 			}
 
-			try
-			{
-				var path = typeof(SqLiteInteroptWrapper).Namespace + "." + pathTodll.Replace("\\", ".");
-				using (var sqLite = Assembly.GetExecutingAssembly().GetManifestResourceStream(path))
-				{
-					if (sqLite == null)
-					{
-						return false;
-					}
+			//try
+			//{
+			//	var path = typeof(SqLiteInteroptWrapper).Namespace + "." + pathTodll.Replace("\\", ".");
+			//	using (var sqLite = Assembly.GetExecutingAssembly().GetManifestResourceStream(path))
+			//	{
+			//		if (sqLite == null)
+			//		{
+			//			return false;
+			//		}
 
-					var buffer = new byte[sqLite.Length];
-					sqLite.Read(buffer, 0, buffer.Length);
-					File.WriteAllBytes(SqliteInteropDll, buffer);
-				}
-			}
-			catch (Exception)
-			{
-				return false;
-			}
+			//		var buffer = new byte[sqLite.Length];
+			//		sqLite.Read(buffer, 0, buffer.Length);
+			//		File.WriteAllBytes(SqliteInteropDll, buffer);
+			//	}
+			//}
+			//catch (Exception)
+			//{
+			//	return false;
+			//}
 
 			return File.Exists(SqliteInteropDll);
 		}

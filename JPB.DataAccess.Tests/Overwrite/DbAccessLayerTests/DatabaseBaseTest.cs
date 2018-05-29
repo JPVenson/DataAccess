@@ -40,6 +40,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			//Warn.If(dotMemoryApi.IsEnabled, () => "WARNING DOTMEMORY IS NOT ENABLED");
 			//memoryCheckPoint = dotMemory.Check();
 			Mgr = new Manager();
+			
 		}
 
 		[TearDown]
@@ -91,7 +92,16 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		public DbAccessLayer DbAccess
 		{
-			get { return _dbAccess ?? (_dbAccess = Mgr.GetWrapper(Type, AdditionalArguments)); }
+			get
+			{
+				if (_dbAccess == null)
+				{
+					_dbAccess = Mgr.GetWrapper(Type, AdditionalArguments);
+					_dbAccess.Async = AsyncExecution;
+				}
+
+				return _dbAccess;
+			}
 			private set { _dbAccess = value; }
 		}
 
