@@ -262,7 +262,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 				case Operator.Not:
 					if (value == null)
 					{
-						return new ConditionalEvalQuery<TPoco>(this.QueryText("NOT NULL"), State);
+						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"), State);
 					}
 					return QueryOperatorValue("<>", value);
 				default:

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
@@ -354,7 +355,7 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     For StackOverflow detection
 		/// </summary>
-		[ThreadStatic] private static bool _isIndented;
+		private static AsyncLocal<bool> _isIndented = new AsyncLocal<bool>();
 
 		internal IDbCommand CreateSelectQueryFactory(DbClassInfoCache type,
 			params object[] parameter)
@@ -412,7 +413,7 @@ namespace JPB.DataAccess.Manager
 
 			try
 			{
-				if (_isIndented)
+				if (_isIndented.Value)
 				{
 					if (Multipath)
 					{
@@ -424,7 +425,7 @@ namespace JPB.DataAccess.Manager
 						"This method is not allowed in the context of any FactoryMethod. Enable Multipath to allow the Intiligent Query creation");
 					}
 				}
-				_isIndented = true;
+				_isIndented.Value = true;
 
 				var arguments = parameter.ToList();
 
@@ -554,7 +555,7 @@ namespace JPB.DataAccess.Manager
 			}
 			finally
 			{
-				_isIndented = false;
+				_isIndented.Value = false;
 			}
 		}
 

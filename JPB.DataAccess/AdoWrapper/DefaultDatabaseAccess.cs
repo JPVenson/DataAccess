@@ -466,14 +466,14 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public int ExecuteNonQuery(IDbCommand cmd)
 		{
-			return ExecuteNonQueryAsync(cmd).Result;
+			return ExecuteNonQueryAsync(cmd, false).Result;
 		}		
 		
 		/// <summary>
 		///     Executes a query against the database
 		/// </summary>
 		/// <returns></returns>
-		public async Task<int> ExecuteNonQueryAsync(IDbCommand cmd)
+		public async Task<int> ExecuteNonQueryAsync(IDbCommand cmd, bool runAsync = true)
 		{
 			return await RunAsync(async d =>
 			{
@@ -484,13 +484,13 @@ namespace JPB.DataAccess.AdoWrapper
 				}
 				AttachQueryDebugger(cmd);
 
-				if (cmd is DbCommand)
+				if (cmd is DbCommand && runAsync)
 				{
 					return await (cmd as DbCommand).ExecuteNonQueryAsync();
 				}
 
 				return cmd.ExecuteNonQuery();
-			});
+			}).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -791,7 +791,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction)
 		{
-			return RunInTransactionAsync(async (dd) => await Task.FromResult(func(dd)), transaction).Result;
+			return RunInTransactionAsync((dd) => Task.FromResult(func(dd)), transaction).Result;
 		}
 
 		/// <summary>
@@ -802,7 +802,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public async Task<T> RunInTransactionAsync<T>(Func<Task<T>> func)
 		{
-			return await RunInTransactionAsync<T>(new Func<IDatabase, Task<T>>(d => func()));
+			return await RunInTransactionAsync(d => func());
 		}
 
 
@@ -840,7 +840,6 @@ namespace JPB.DataAccess.AdoWrapper
 				return "";
 			}, GetDefaultTransactionLevel());
 		}
-
 
 		/// <summary>
 		///     Runs the in transaction.

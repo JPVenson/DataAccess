@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var riseFlag = false;
 			DatabaseActionHandler handler = (sender, eventx) =>
 			{
-				Assert.That(riseFlag, Is.False, "The wrong event or the wrong ammount of events are risen");
+				Assert.That(riseFlag, Is.False, "The wrong event or the wrong ammount of events are risen. Raise: " + DbAccess.RaiseEvents);
 				riseFlag = true;
 			};
 			eventType(handler);

@@ -198,7 +198,7 @@ namespace JPB.DataAccess.Manager
 			var query = CreateInsertQueryFactory(GetClassInfo(type), entry);
 			Database.PrepaireRemoteExecution(query);
 			RaiseInsert(entry, query);
-			return await db.ExecuteNonQueryAsync(query);
+			return await db.ExecuteNonQueryAsync(query, Async);
 		}
 
 		/// <summary>

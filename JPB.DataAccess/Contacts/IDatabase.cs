@@ -281,7 +281,8 @@ namespace JPB.DataAccess.Contacts
 		///     Executes a Query that returns no data
 		/// </summary>
 		/// <param name="query">The command.</param>
+		/// <param name="runAsync">If set to false the query will never run async</param>
 		/// <returns></returns>
-		Task<int> ExecuteNonQueryAsync(IDbCommand query);
+		Task<int> ExecuteNonQueryAsync(IDbCommand query, bool runAsync = true);
 	}
 }
