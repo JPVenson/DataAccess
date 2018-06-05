@@ -27,12 +27,12 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Update<T>(T entry, IDatabase db)
 		{
-			db.RunInTransaction(s =>
+			db.Run(f =>
 			{
-				var query = CreateUpdate(entry, s);
+				var query = CreateUpdate(entry, f);
 				RaiseUpdate(entry, query);
 				Database.PrepaireRemoteExecution(query);
-				s.ExecuteNonQuery(query);
+				f.ExecuteNonQuery(query);
 			});
 		}
 
@@ -43,18 +43,20 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public bool Update<T>(T entry, bool checkRowVersion = false)
 		{
-			return Database.RunInTransaction(s =>
+			if (checkRowVersion)
 			{
-				if (checkRowVersion)
+				return Database.RunInTransaction(s =>
 				{
 					if (!CheckRowVersion(entry))
 					{
 						return false;
 					}
-				}
-				Update(entry, Database);
-				return true;
-			});
+					Update(entry, Database);
+					return true;
+				});
+			}
+			Update(entry, Database);
+			return true;
 		}
 
 		/// <summary>

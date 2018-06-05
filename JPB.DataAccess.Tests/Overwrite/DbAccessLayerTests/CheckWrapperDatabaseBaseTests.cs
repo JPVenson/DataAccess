@@ -257,6 +257,29 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		public void NestedTransactionTestRollback()
+		{
+			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+
+			DataMigrationHelper.AddUsers(250, DbAccess);
+			var count =
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+
+			DbAccess.Database.RunInTransaction(dd =>
+			{
+				DbAccess.Database.RunInTransaction(ddx =>
+				{
+					DbAccess.Delete<Users>();
+					ddx.TransactionRollback();
+				});
+			});
+
+			var countAfter =
+					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+			Assert.That(count, Is.EqualTo(countAfter));
+		}
+
+		[Test]
 		public void TransactionTestExceptional()
 		{
 			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;

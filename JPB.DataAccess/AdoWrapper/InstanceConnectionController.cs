@@ -63,7 +63,9 @@ namespace JPB.DataAccess.AdoWrapper
 			if (disposing)
 			{
 				if (Connection != null)
+				{
 					Connection.Dispose();
+				}
 			}
 		}
 

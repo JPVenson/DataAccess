@@ -317,7 +317,7 @@ namespace JPB.DataAccess.AdoWrapper
 				//define it as Transaction
 				if (levl != null)
 				{
-					if (ConnectionController.Transaction == null || ConnectionController.Transaction != null && AllowNestedTransactions)
+					if (ConnectionController.Transaction == null || (ConnectionController.Transaction != null && AllowNestedTransactions))
 					{
 						ConnectionController.Transaction = ConnectionController.Connection.BeginTransaction(levl.GetValueOrDefault());
 					}
@@ -338,7 +338,6 @@ namespace JPB.DataAccess.AdoWrapper
 				//Force all open connections to close
 				ConnectionController.Transaction.Rollback();
 				ConnectionController.Transaction = null;
-				CloseConnection();
 			}
 		}
 
@@ -355,6 +354,11 @@ namespace JPB.DataAccess.AdoWrapper
 					ConnectionController.Transaction = null;
 				}
 			}
+		}
+
+		private bool ConnectionOpen()
+		{
+			return ConnectionController.Connection != null && ConnectionController.Connection.State != ConnectionState.Closed;
 		}
 
 		/// <inheritdoc />
@@ -645,16 +649,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public T Run<T>(Func<IDatabase, T> func)
 		{
-			try
-			{
-				Connect();
-
-				return func(this);
-			}
-			finally
-			{
-				CloseConnection();
-			}
+			return RunAsync((dd) => Task.FromResult(func(dd))).Result;
 		}
 
 		/// <summary>
@@ -854,7 +849,6 @@ namespace JPB.DataAccess.AdoWrapper
 			try
 			{
 				Connect(transaction);
-
 				return await func(this);
 			}
 			catch (Exception)
@@ -864,10 +858,14 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 			finally
 			{
-				CloseConnection();
-				if (preState != ConnectionController.InstanceCounter)
+				if (ConnectionOpen())
 				{
-					throw new InvalidOperationException("Invalid Counter handling detected. Connection was closed");
+					CloseConnection();
+
+					if (preState != ConnectionController.InstanceCounter)
+					{
+						throw new InvalidOperationException("Invalid Counter handling detected. Connection was closed");
+					}
 				}
 			}
 		}
