@@ -31,8 +31,7 @@ namespace JPB.DataAccess.Manager
 			{
 				var query = CreateUpdate(entry, f);
 				RaiseUpdate(entry, query);
-				Database.PrepaireRemoteExecution(query);
-				f.ExecuteNonQuery(query);
+				ExecuteGenericCommand(query);
 			});
 		}
 

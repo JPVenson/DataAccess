@@ -153,6 +153,24 @@ namespace JPB.DataAccess.Tests.LocalDbTests
 				xmlSer.Serialize(memStream, serializableContent);
 				var content = Encoding.ASCII.GetString(memStream.ToArray());
 				Assert.That(content, Is.Not.Null.And.Not.Empty);
+				memStream.Seek(0, SeekOrigin.Begin);
+
+				LocalDbRepository<Book> booksN;
+				LocalDbRepository<Image> imagesN;
+				using (new DatabaseScope())
+				{
+					booksN = new LocalDbRepository<Book>(new DbConfig(true));
+					imagesN = new LocalDbRepository<Image>(new DbConfig(true));
+					Assert.IsFalse(booksN.ReposetoryCreated);
+					Assert.IsFalse(imagesN.ReposetoryCreated);
+					using (new TransactionScope())
+					{
+						using (new ReplicationScope())
+						{
+							xmlSer.Deserialize(memStream);
+						}
+					}
+				}
 			}
 		}
 

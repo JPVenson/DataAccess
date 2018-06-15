@@ -26,10 +26,12 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 	}
 
-	[TestFixture(DbAccessType.MsSql, true)]
-	[TestFixture(DbAccessType.SqLite, true)]
-	[TestFixture(DbAccessType.MsSql, false)]
-	[TestFixture(DbAccessType.SqLite, false)]
+	[TestFixture(DbAccessType.MsSql, true, false)]
+	[TestFixture(DbAccessType.SqLite, true, false)]
+	[TestFixture(DbAccessType.MsSql, false, false)]
+	[TestFixture(DbAccessType.SqLite, false, false)]
+	[TestFixture(DbAccessType.MsSql, false, true)]
+	[TestFixture(DbAccessType.SqLite, false, true)]
 	[DotMemoryUnit(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
@@ -83,12 +85,15 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		public object[] AdditionalArguments { get; }
 		private DbAccessLayer _dbAccess;
 
-		protected DatabaseBaseTest(DbAccessType type, bool asyncExecution, params object[] additionalArguments)
+		protected DatabaseBaseTest(DbAccessType type, bool asyncExecution, bool syncronised, params object[] additionalArguments)
 		{
-			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0" }).ToArray();
+			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0", Synronised ? "1" : "0" }).ToArray();
 			Type = type;
 			AsyncExecution = asyncExecution;
+			Synronised = syncronised;
 		}
+
+		public bool Synronised { get; set; }
 
 		public DbAccessLayer DbAccess
 		{
@@ -98,6 +103,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 				{
 					_dbAccess = Mgr.GetWrapper(Type, AdditionalArguments);
 					_dbAccess.Async = AsyncExecution;
+					_dbAccess.ThreadSave = Synronised;
 				}
 
 				return _dbAccess;

@@ -127,7 +127,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		/// <inheritdoc />
-		public UpdateRefreshTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		public UpdateRefreshTests(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
 		{
 		}
 	}

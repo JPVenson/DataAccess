@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -59,8 +60,7 @@ namespace JPB.DataAccess.Manager
 				{
 					curr += RangerInsertPation;
 					RaiseInsert(entry.Skip((int) curr).Take((int) RangerInsertPation), query);
-					Database.PrepaireRemoteExecution(query);
-					c.ExecuteNonQuery(query);
+					ExecuteGenericCommand(query);
 				}
 			});
 		}
@@ -196,9 +196,8 @@ namespace JPB.DataAccess.Manager
 		public async Task<int> InsertAsync(Type type, object entry, IDatabase db)
 		{
 			var query = CreateInsertQueryFactory(GetClassInfo(type), entry);
-			Database.PrepaireRemoteExecution(query);
 			RaiseInsert(entry, query);
-			return await db.ExecuteNonQueryAsync(query, Async);
+			return await ExecuteGenericCommandAsync(query);
 		}
 
 		/// <summary>
@@ -222,7 +221,24 @@ namespace JPB.DataAccess.Manager
 			{
 				var mergeCommands = CreateInsertWithSelectCommand(type, entry);
 				RaiseInsert(entry, mergeCommands);
-				return Select(type, s.GetSkalar(mergeCommands));
+				object result;
+				try
+				{
+					if (ThreadSave)
+					{
+						Monitor.Enter(_lockRoot);
+					}
+
+					result = s.GetSkalar(mergeCommands);
+				}
+				finally
+				{
+					if (ThreadSave)
+					{
+						Monitor.Exit(_lockRoot);
+					}
+				}
+				return Select(type, result);
 			});
 		}
 

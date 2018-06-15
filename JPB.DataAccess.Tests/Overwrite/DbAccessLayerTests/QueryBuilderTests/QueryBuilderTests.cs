@@ -15,32 +15,43 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 {
-	[TestFixture(DbAccessType.MsSql, true, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, true, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MsSql, true, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, true, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, true , false, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, true , false, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, true , false, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, true , false, false, EnumerationMode.OnCall)]
+										  
+	[TestFixture(DbAccessType.SqLite, true, false, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, true, false, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, true, false, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, true, false, false, EnumerationMode.OnCall)]
 
-	[TestFixture(DbAccessType.SqLite, true, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, true, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.SqLite, true, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, true, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, false, false, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, false, false, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, false, false, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, false, false, false, EnumerationMode.OnCall)]
 
-	[TestFixture(DbAccessType.MsSql, false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MsSql, false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, false, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, false, false, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, false, false, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, false, false, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, false, false, false, EnumerationMode.OnCall)]
 
-	[TestFixture(DbAccessType.SqLite, false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.SqLite, false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, false, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, false, true, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, false, true, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, false, true, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.MsSql, false, true, false, EnumerationMode.OnCall)]
+
+	[TestFixture(DbAccessType.SqLite, false, true, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, false, true, true, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, false, true, false, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, false, true, false, EnumerationMode.OnCall)]
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class QueryBuilderTests : DatabaseBaseTest
 	{
 		private readonly EnumerationMode _enumerationMode;
 		private readonly bool _asyncEnumeration;
 
-		public QueryBuilderTests(DbAccessType type, bool asyncExecution, bool asyncEnumeration, EnumerationMode enumerationMode) : base(type, asyncExecution, enumerationMode, asyncEnumeration)
+		public QueryBuilderTests(DbAccessType type, bool asyncExecution, bool syncronised, bool asyncEnumeration, EnumerationMode enumerationMode) 
+				: base(type, asyncExecution, syncronised, enumerationMode, asyncEnumeration)
 		{
 			_enumerationMode = enumerationMode;
 			_asyncEnumeration = asyncEnumeration;

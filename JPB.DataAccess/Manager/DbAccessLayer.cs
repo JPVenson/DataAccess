@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using JPB.DataAccess.AdoWrapper;
@@ -152,6 +153,13 @@ namespace JPB.DataAccess.Manager
 		{
 			get { return _config; }
 		}
+
+		/// <summary>
+		///		If Enabled the enumeration of Commands will happen in a Thread save way
+		/// </summary>
+		public bool ThreadSave { get; set; }
+
+		private readonly object _lockRoot = new object();
 
 		/// <summary>
 		///     Defines a set of Providers that are inclueded in this DLL or are weak refernced.
@@ -365,7 +373,6 @@ namespace JPB.DataAccess.Manager
 			{
 				Database.LastExecutedQuery.Refresh();
 			}
-
 			return ExecuteGenericCommand(command);
 		}
 
@@ -393,7 +400,37 @@ namespace JPB.DataAccess.Manager
 		public int ExecuteGenericCommand(IDbCommand query)
 		{
 			Database.PrepaireRemoteExecution(query);
-			return Database.Run(s => s.ExecuteNonQuery(query));
+			return Database.Run(s =>
+			{
+				try
+				{
+					if (ThreadSave)
+					{
+						Monitor.Enter(_lockRoot);
+					}
+					return s.ExecuteNonQuery(query);
+				}
+				finally
+				{
+					if (ThreadSave)
+					{
+						Monitor.Exit(_lockRoot);
+					}
+				}
+			});
+		}	
+		
+		/// <summary>
+		///     Execute a QueryCommand without Paramters
+		/// </summary>
+		/// <returns></returns>
+		public async Task<int> ExecuteGenericCommandAsync(IDbCommand query)
+		{
+			Database.PrepaireRemoteExecution(query);
+			return await Database.RunAsync(async s =>
+			{
+				return await s.ExecuteNonQueryAsync(query, Async);
+			});
 		}
 
 		/// <summary>
@@ -820,52 +857,70 @@ namespace JPB.DataAccess.Manager
 				CommandBehavior executionHint = CommandBehavior.Default)
 		{
 			Database.PrepaireRemoteExecution(query);
-			await Database.RunAsync(
-			async s =>
+			try
 			{
-				using (query)
+				if (ThreadSave)
 				{
-					query.Connection = query.Connection ?? s.GetConnection();
-					query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
-
-					IDataReader dr = null;
-					try
+					if (Async)
 					{
-						var command = query as DbCommand;
-						if (command != null && Async)
-						{
-							dr = await command.ExecuteReaderAsync(executionHint).ConfigureAwait(ConfigureAwait);
-						}
-						else
-						{
-							dr = query.ExecuteReader(executionHint);
-						}
-
-						do
-						{
-							var reader = dr as DbDataReader;
-							while (reader != null && Async ? await reader.ReadAsync().ConfigureAwait(ConfigureAwait) : dr.Read())
-							{
-								onRecord(dr);
-							}
-						} while (dr.NextResult());
+						throw new InvalidOperationException("You cannot run a command async AND thread save. thats just not possible sory.");
 					}
-					catch (Exception ex)
-					{
-						RaiseFailedQuery(this, query, ex);
-						throw;
-					}
-					finally
-					{
-						if (dr != null)
-						{
-							dr.Dispose();
-						}
-					}
+					Monitor.Enter(_lockRoot);
 				}
+				await Database.RunAsync(
+				async s =>
+				{
+					using (query)
+					{
+						query.Connection = query.Connection ?? s.GetConnection();
+						query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
 
-				return new object();
-			});
+						IDataReader dr = null;
+						try
+						{
+							var command = query as DbCommand;
+							if (command != null && Async)
+							{
+								dr = await command.ExecuteReaderAsync(executionHint).ConfigureAwait(ConfigureAwait);
+							}
+							else
+							{
+								dr = query.ExecuteReader(executionHint);
+							}
+
+							do
+							{
+								var reader = dr as DbDataReader;
+								while (reader != null && Async ? await reader.ReadAsync().ConfigureAwait(ConfigureAwait) : dr.Read())
+								{
+									onRecord(dr);
+								}
+							} while (dr.NextResult());
+						}
+						catch (Exception ex)
+						{
+							RaiseFailedQuery(this, query, ex);
+							throw;
+						}
+						finally
+						{
+							if (dr != null)
+							{
+								dr.Dispose();
+							}
+						}
+					}
+
+					return new object();
+				});
+			}
+			finally
+			{
+				if (ThreadSave)
+				{
+					Monitor.Exit(_lockRoot);
+				}
+			}
 		}
 
 		/// <summary>
@@ -881,39 +936,54 @@ namespace JPB.DataAccess.Manager
 				IDbCommand query)
 		{
 			Database.PrepaireRemoteExecution(query);
-			return Database.Run(
-			s =>
+			try
 			{
-				var records = new List<List<IDataRecord>>();
-				using (query)
+				if (ThreadSave)
 				{
-					query.Connection = query.Connection ?? s.GetConnection();
-					query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
-					using (var dr = query.ExecuteReader())
+					Monitor.Enter(_lockRoot);
+				}
+				return Database.Run(
+				s =>
+				{
+					var records = new List<List<IDataRecord>>();
+					using (query)
 					{
-						try
+						query.Connection = query.Connection ?? s.GetConnection();
+						query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
+						using (var dr = query.ExecuteReader())
 						{
-							do
+							try
 							{
-								var resultSet = new List<IDataRecord>();
-								while (dr.Read())
+								do
 								{
-									resultSet.Add(RecordGenerator(dr, Config));
-								}
+									var resultSet = new List<IDataRecord>();
+									while (dr.Read())
+									{
+										resultSet.Add(RecordGenerator(dr, Config));
+									}
 
-								records.Add(resultSet);
-							} while (dr.NextResult());
-						}
-						catch (Exception ex)
-						{
-							RaiseFailedQuery(this, query, ex);
-							throw;
+									records.Add(resultSet);
+								} while (dr.NextResult());
+							}
+							catch (Exception ex)
+							{
+								RaiseFailedQuery(this, query, ex);
+								throw;
+							}
 						}
 					}
-				}
 
-				return records;
-			});
+					return records;
+				});
+			}
+			finally
+			{
+				if (ThreadSave)
+				{
+					Monitor.Exit(_lockRoot);
+				}
+			}
+
 		}
 
 		/// <summary>
@@ -925,40 +995,5 @@ namespace JPB.DataAccess.Manager
 		{
 			return type.SetPropertysViaReflection(reader, DbAccessType, Config);
 		}
-
-		//internal ArrayList EnumerateDirectDataRecords(IDbCommand query,
-		//	DbClassInfoCache info)
-		//{
-		//	Database.PrepaireRemoteExecution(query);
-		//	return Database.Run(
-		//	s =>
-		//	{
-		//		var records = new ArrayList();
-		//		using (query)
-		//		{
-		//			query.Connection = query.Connection ?? s.GetConnection();
-		//			query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
-		//			using (var dr = query.ExecuteReader())
-		//			{
-		//				try
-		//				{
-		//					do
-		//					{
-		//						while (dr.Read())
-		//						{
-		//							records.Add(AnonymousPocoManager.GenerateAnonymousClass(SetPropertysViaReflection(info, dr)));
-		//						}
-		//					} while (dr.NextResult());
-		//				}
-		//				catch (Exception ex)
-		//				{
-		//					RaiseFailedQuery(this, query, ex);
-		//					throw;
-		//				}
-		//			}
-		//		}
-		//		return records;
-		//	});
-		//}
 	}
 }

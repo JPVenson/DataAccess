@@ -44,28 +44,29 @@ namespace JPB.DataAccess.Tests
 			                    TestContext.CurrentContext.Test.MethodName;
 
 
-			var arguments =
-					additionalArguments.Select(
-					                           f =>
-					                           {
-						                           if (f == null)
-						                           {
-							                           return TestContext.CurrentContext.Random.NextShort().ToString();
-						                           }
+			//var arguments =
+			//		additionalArguments.Select(
+			//		                           f =>
+			//		                           {
+			//			                           if (f == null)
+			//			                           {
+			//				                           return TestContext.CurrentContext.Random.NextShort().ToString();
+			//			                           }
 
-						                           if (typeof(string).Assembly.GetTypes().Contains(f.GetType()))
-						                           {
-							                           return f.ToString();
-						                           }
+			//			                           if (typeof(string).Assembly.GetTypes().Contains(f.GetType()))
+			//			                           {
+			//				                           return f.ToString();
+			//			                           }
 
-						                           return f.GetHashCode().ToString();
-					                           })
-					                   .ToArray();
+			//			                           return f.GetHashCode().ToString();
+			//		                           })
+			//		                   .ToArray();
 
-			if (arguments.Any())
-			{
-				testClassName = testClassName + "_" + arguments.Aggregate((e, f) => e + f).GetHashCode();
-			}
+			//if (arguments.Any())
+			//{
+			//	testClassName =
+			//}
+			testClassName = testClassName + "_" + Guid.NewGuid().ToString("N");
 			testClassName = new Regex("[^a-zA-Z0-9]").Replace(testClassName, "_");
 			_errorData.AppendLine($"Attach to Database: {testClassName}");
 

@@ -1,7 +1,7 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.DbEventArgs;
+using System.Threading;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
@@ -11,24 +11,32 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.None)]
-	[Category("IgnoreCI")]
 	public class EventTest : DatabaseBaseTest
 	{
-		public EventTest(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		public EventTest(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
 		{
 		}
 
 		public void TestEvent(Action<DatabaseActionHandler> eventType, Action shouldRaiseEvent, bool shouldInvoke)
 		{
+			var eventDone = new AutoResetEvent(false);
 			DbAccess.RaiseEvents = true;
+			var setState = new OnDatabaseActionHandler((sender, evenat, handlerDone) =>
+			{
+				eventDone.Set();
+			});
+			DbAccess.HandlerRaised += setState;
 			var riseFlag = false;
 			DatabaseActionHandler handler = (sender, eventx) =>
 			{
-				Assert.That(riseFlag, Is.False, "The wrong event or the wrong ammount of events are risen. Raise: " + DbAccess.RaiseEvents);
+				Assert.That(riseFlag, Is.False,
+				"The wrong event or the wrong ammount of events are risen. Raise: " + DbAccess.RaiseEvents);
 				riseFlag = true;
 			};
 			eventType(handler);
 			shouldRaiseEvent();
+			Assert.That(eventDone.WaitOne(TimeSpan.FromSeconds(20)), Is.True, "The eventhandler did not respond in a timely manner");
+
 			Assert.That(riseFlag, Is.EqualTo(shouldInvoke), "First call should be succeed but did not");
 
 			DbAccess.RaiseEvents = false;
@@ -40,52 +48,53 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			DbAccess.OnDelete -= handler;
 			DbAccess.OnInsert -= handler;
 			DbAccess.OnUpdate -= handler;
-		}
-
-		[Test]
-		public void TestOnSelect()
-		{
-			TestEvent((evtArg) => DbAccess.OnSelect += evtArg, () => DbAccess.Insert(new Users()), false);
-			Users entity = null;
-			TestEvent((evtArg) => DbAccess.OnSelect += evtArg, () => entity = DbAccess.InsertWithSelect(new Users()), true);
-			TestEvent((evtArg) => DbAccess.OnSelect += evtArg, () => DbAccess.Select<Users>(), true);
-			TestEvent((evtArg) => DbAccess.OnSelect += evtArg, () => DbAccess.Update(entity), false);
-			TestEvent((evtArg) => DbAccess.OnSelect += evtArg, () => DbAccess.Delete(entity), false);
+			DbAccess.HandlerRaised -= setState;
 		}
 
 		[Test]
 		public void TestOnDelete()
 		{
-			TestEvent((evtArg) => DbAccess.OnDelete += evtArg, () => DbAccess.Insert(new Users()), false);
+			TestEvent(evtArg => DbAccess.OnDelete += evtArg, () => DbAccess.Insert(new Users()), false);
 			Users entity = null;
-			TestEvent((evtArg) => DbAccess.OnDelete += evtArg, () => entity = DbAccess.InsertWithSelect(new Users()), false);
-			TestEvent((evtArg) => DbAccess.OnDelete += evtArg, () => DbAccess.Select<Users>(), false);
-			TestEvent((evtArg) => DbAccess.OnDelete += evtArg, () => DbAccess.Update(entity), false);
-			TestEvent((evtArg) => DbAccess.OnDelete += evtArg, () => DbAccess.Delete(entity), true);
+			TestEvent(evtArg => DbAccess.OnDelete += evtArg, () => entity = DbAccess.InsertWithSelect(new Users()), false);
+			TestEvent(evtArg => DbAccess.OnDelete += evtArg, () => DbAccess.Select<Users>(), false);
+			TestEvent(evtArg => DbAccess.OnDelete += evtArg, () => DbAccess.Update(entity), false);
+			TestEvent(evtArg => DbAccess.OnDelete += evtArg, () => DbAccess.Delete(entity), true);
 		}
 
 		[Test]
 		public void TestOnInsert()
 		{
-			TestEvent((evtArg) => DbAccess.OnInsert += evtArg, () => DbAccess.Insert(new Users()), true);
+			TestEvent(evtArg => DbAccess.OnInsert += evtArg, () => DbAccess.Insert(new Users()), true);
 			Users entity = null;
-			TestEvent((evtArg) => DbAccess.OnInsert += evtArg, 
+			TestEvent(evtArg => DbAccess.OnInsert += evtArg,
 			() => entity = DbAccess.InsertWithSelect(new Users()), true);
-			TestEvent((evtArg) => DbAccess.OnInsert += evtArg, () => DbAccess.Select<Users>(), false);
-			TestEvent((evtArg) => DbAccess.OnInsert += evtArg, () => DbAccess.Update(entity), false);
-			TestEvent((evtArg) => DbAccess.OnInsert += evtArg, () => DbAccess.Delete(entity), false);
+			TestEvent(evtArg => DbAccess.OnInsert += evtArg, () => DbAccess.Select<Users>(), false);
+			TestEvent(evtArg => DbAccess.OnInsert += evtArg, () => DbAccess.Update(entity), false);
+			TestEvent(evtArg => DbAccess.OnInsert += evtArg, () => DbAccess.Delete(entity), false);
+		}
+
+		[Test]
+		public void TestOnSelect()
+		{
+			TestEvent(evtArg => DbAccess.OnSelect += evtArg, () => DbAccess.Insert(new Users()), false);
+			Users entity = null;
+			TestEvent(evtArg => DbAccess.OnSelect += evtArg, () => entity = DbAccess.InsertWithSelect(new Users()), true);
+			TestEvent(evtArg => DbAccess.OnSelect += evtArg, () => DbAccess.Select<Users>(), true);
+			TestEvent(evtArg => DbAccess.OnSelect += evtArg, () => DbAccess.Update(entity), false);
+			TestEvent(evtArg => DbAccess.OnSelect += evtArg, () => DbAccess.Delete(entity), false);
 		}
 
 		[Test]
 		public void TestOnUpdate()
 		{
-			TestEvent((evtArg) => DbAccess.OnUpdate += evtArg, () => DbAccess.Insert(new Users()), false);
+			TestEvent(evtArg => DbAccess.OnUpdate += evtArg, () => DbAccess.Insert(new Users()), false);
 			Users entity = null;
-			TestEvent((evtArg) => DbAccess.OnUpdate += evtArg, 
+			TestEvent(evtArg => DbAccess.OnUpdate += evtArg,
 			() => entity = DbAccess.InsertWithSelect(new Users()), false);
-			TestEvent((evtArg) => DbAccess.OnUpdate += evtArg, () => DbAccess.Select<Users>(), false);
-			TestEvent((evtArg) => DbAccess.OnUpdate += evtArg, () => DbAccess.Update(entity), true);
-			TestEvent((evtArg) => DbAccess.OnUpdate += evtArg, () => DbAccess.Delete(entity), false);
+			TestEvent(evtArg => DbAccess.OnUpdate += evtArg, () => DbAccess.Select<Users>(), false);
+			TestEvent(evtArg => DbAccess.OnUpdate += evtArg, () => DbAccess.Update(entity), true);
+			TestEvent(evtArg => DbAccess.OnUpdate += evtArg, () => DbAccess.Delete(entity), false);
 		}
 	}
 }

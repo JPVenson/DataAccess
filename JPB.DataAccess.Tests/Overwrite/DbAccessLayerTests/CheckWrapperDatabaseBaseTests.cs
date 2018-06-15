@@ -22,7 +22,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class CheckWrapperDatabaseBaseTests : DatabaseBaseTest
 	{
-		public CheckWrapperDatabaseBaseTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		public CheckWrapperDatabaseBaseTests(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
 		{
 		}
 
@@ -259,7 +259,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		[Test]
 		public void NestedTransactionTestRollback()
 		{
-			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			//DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =

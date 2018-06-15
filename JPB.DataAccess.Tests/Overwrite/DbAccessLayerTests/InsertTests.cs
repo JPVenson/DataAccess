@@ -241,7 +241,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		/// <inheritdoc />
-		public InsertTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		public InsertTests(DbAccessType type, bool asyncExecution,bool syncronised) : base(type, asyncExecution, syncronised)
 		{
 		}
 	}

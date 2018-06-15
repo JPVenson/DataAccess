@@ -63,7 +63,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		/// <inheritdoc />
-		public ProcedureTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		public ProcedureTests(DbAccessType type, bool asyncExecution ,bool syncronised) : base(type, asyncExecution, syncronised)
 		{
 		}
 	}

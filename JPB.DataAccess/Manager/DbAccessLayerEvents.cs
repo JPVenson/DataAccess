@@ -45,6 +45,8 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public event DatabaseActionHandler OnInsert;
 
+		internal event OnDatabaseActionHandler HandlerRaised;
+
 		internal void InvokeAsync(DatabaseActionHandler handler, object sender, IDbCommand query)
 		{
 			if (!RaiseEvents)
@@ -58,7 +60,11 @@ namespace JPB.DataAccess.Manager
 				foreach (var t in eventListeners)
 				{
 					var methodToInvoke = (DatabaseActionHandler) t;
-					methodToInvoke.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(Database)), ar => { }, null);
+					var databaseActionEvent = new DatabaseActionEvent(query.CreateQueryDebugger(Database));
+					methodToInvoke.BeginInvoke(sender, databaseActionEvent, ar =>
+					{
+						OnHandlerRaised(databaseActionEvent, handler);
+					}, null);
 				}
 			}
 		}
@@ -100,6 +106,13 @@ namespace JPB.DataAccess.Manager
 					methodToInvoke.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(Database)), ex, ar => { }, null);
 				}
 			}
+		}
+
+		internal void OnHandlerRaised(DatabaseActionEvent e, DatabaseActionHandler eventhandler)
+		{
+			var handler = HandlerRaised;
+			if (handler != null)
+				handler(this, e, eventhandler);
 		}
 	}
 }

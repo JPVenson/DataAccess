@@ -14,14 +14,18 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
-	[TestFixture(DbAccessType.MsSql, true, true)]
-	[TestFixture(DbAccessType.SqLite, true, true)]
-	[TestFixture(DbAccessType.MsSql, false, true)]
-	[TestFixture(DbAccessType.SqLite, false, true)]
-	[TestFixture(DbAccessType.MsSql, true, false)]
-	[TestFixture(DbAccessType.SqLite, true, false)]
-	[TestFixture(DbAccessType.MsSql, false, false)]
-	[TestFixture(DbAccessType.SqLite, false, false)]
+	[TestFixture(DbAccessType.MsSql, true, true, false)]
+	[TestFixture(DbAccessType.SqLite, true, true, false)]
+	[TestFixture(DbAccessType.MsSql, false, true, false)]
+	[TestFixture(DbAccessType.SqLite, false, true, false)]
+	[TestFixture(DbAccessType.MsSql, true, false, false)]
+	[TestFixture(DbAccessType.SqLite, true, false, false)]
+	[TestFixture(DbAccessType.MsSql, false, false, false)]
+	[TestFixture(DbAccessType.SqLite, false, false, false)]
+	[TestFixture(DbAccessType.MsSql, true, false, true)]
+	[TestFixture(DbAccessType.SqLite, true, false, true)]
+	[TestFixture(DbAccessType.MsSql, false, false, true)]
+	[TestFixture(DbAccessType.SqLite, false, false, true)]
 
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class SelectionTests : DatabaseBaseTest
@@ -34,7 +38,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		private readonly bool _egarLoading;
 
-		public SelectionTests(DbAccessType type, bool egarLoading, bool asyncExecution) : base(type, asyncExecution, egarLoading.ToString())
+		public SelectionTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised, egarLoading.ToString())
 		{
 			_egarLoading = egarLoading;
 		}

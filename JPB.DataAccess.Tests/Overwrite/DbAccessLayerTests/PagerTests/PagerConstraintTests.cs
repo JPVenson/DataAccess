@@ -7,8 +7,9 @@ using NUnit.Framework;
 #endregion
 
 namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
-
 {
+	[TestFixture(DbAccessType.SqLite)]
+	[TestFixture(DbAccessType.MsSql)]
 	public class PagerConstraintTests : DatabaseBaseTest
 	{
 
@@ -22,7 +23,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
 		}
 
 		/// <inheritdoc />
-		public PagerConstraintTests(DbAccessType type, bool asyncExecution) : base(type, asyncExecution)
+		public PagerConstraintTests(DbAccessType type) : base(type, false, false)
 		{
 		}
 	}

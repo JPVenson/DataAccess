@@ -196,6 +196,11 @@ namespace JPB.DataAccess.DebuggerHelper
 		{
 			var retval = "";
 
+			if (sp.Value == null)
+			{
+				return "NULL";
+			}
+
 			switch (sp.DbType)
 			{
 				case DbType.VarNumeric:

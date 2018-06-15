@@ -12,8 +12,8 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
 	public class PagerUnitTest : DatabaseBaseTest
 	{
 		/// <inheritdoc />
-		public PagerUnitTest(DbAccessType type, bool asyncExecution) : base(type,
-		asyncExecution)
+		public PagerUnitTest(DbAccessType type, bool asyncExecution, bool syncronised) : base(type,
+		asyncExecution, syncronised)
 		{
 		}
 

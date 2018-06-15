@@ -19,8 +19,7 @@ namespace JPB.DataAccess.Manager
 		{
 			var query = CreateDeleteQueryFactory(GetClassInfo(typeof(T)), null);
 			RaiseDelete(null, query);
-			Database.PrepaireRemoteExecution(query);
-			Database.Run(s => { s.ExecuteNonQuery(query); });
+			Database.Run(s => { ExecuteGenericCommand(query); });
 		}
 
 		/// <summary>
@@ -31,8 +30,7 @@ namespace JPB.DataAccess.Manager
 		{
 			var query = CreateDeleteQueryFactory(GetClassInfo(entry.GetType()), entry);
 			RaiseDelete(entry, query);
-			Database.PrepaireRemoteExecution(query);
-			Database.Run(s => { s.ExecuteNonQuery(query); });
+			Database.Run(s => { ExecuteGenericCommand(query); });
 		}
 
 		/// <summary>
@@ -45,8 +43,7 @@ namespace JPB.DataAccess.Manager
 			{
 				var dbCommand = Query().Delete<T>().Where.PrimaryKey().Is.EqualsTo(primaryKey).ContainerObject.Compile();
 				RaiseDelete(null, dbCommand);
-				Database.PrepaireRemoteExecution(dbCommand);
-				s.ExecuteNonQuery(dbCommand);
+				ExecuteGenericCommand(dbCommand);
 			});
 		}
 
@@ -114,8 +111,7 @@ namespace JPB.DataAccess.Manager
 			{
 				var query = CreateDeleteQueryFactory(GetClassInfo(entry.GetType()), entry, parameter);
 				RaiseDelete(entry, query);
-				Database.PrepaireRemoteExecution(query);
-				s.ExecuteNonQuery(query);
+				ExecuteGenericCommand(query);
 			});
 		}
 	}
