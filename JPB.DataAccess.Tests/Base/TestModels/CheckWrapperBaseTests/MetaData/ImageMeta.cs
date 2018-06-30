@@ -1,8 +1,10 @@
+using System;
 using System.Text;
+using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {
-	public class ImageMeta
+	public class ImageMeta : IDatabaseMeta
 	{
 		public const string TableName = "Image";
 		public const string SelectStatement = "SELECT * FROM " + TableName;
@@ -10,7 +12,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public const string ContentName = "Text";
 		public const string ForgeinKeyName = "IdBook";
 
-		public static readonly string CreateMsSQl;
+		public static readonly string CreateMsSql;
 		public static readonly string CreateSqLite;
 		public static readonly string CreateMySql;
 
@@ -24,7 +26,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			sb.AppendLine(string.Format(" CONSTRAINT [ImageToBook] FOREIGN KEY ({0}) REFERENCES {1}({2})",
 			ForgeinKeyName, BookMeta.TableName, BookMeta.PrimaryKeyName));
 			sb.AppendLine(");");
-			CreateMsSQl = sb.ToString();
+			CreateMsSql = sb.ToString();
 
 			sb = new StringBuilder();
 			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
@@ -46,6 +48,22 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			BookMeta.PrimaryKeyName));
 			sb.AppendLine(")");
 			CreateMySql = sb.ToString();
+		}
+
+		/// <inheritdoc />
+		public string CreationCommand(DbAccessType accessType)
+		{
+			switch (accessType)
+			{
+				case DbAccessType.MsSql:
+					return CreateMsSql;
+				case DbAccessType.MySql:
+					return CreateMySql;
+				case DbAccessType.SqLite:
+					return CreateSqLite;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(accessType), accessType, null);
+			}
 		}
 	}
 }

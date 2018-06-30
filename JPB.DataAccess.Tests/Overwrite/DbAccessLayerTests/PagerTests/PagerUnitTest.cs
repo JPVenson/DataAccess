@@ -2,6 +2,7 @@
 
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 

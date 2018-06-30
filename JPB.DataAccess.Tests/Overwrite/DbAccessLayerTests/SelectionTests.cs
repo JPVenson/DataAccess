@@ -6,6 +6,7 @@ using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 #pragma warning disable 618
@@ -193,6 +194,17 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			Assert.That(selTestUser, Is.Not.Null);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserId, testUser.UserID);
+		}
+
+		[Test]
+		[Category("MsSQL")]
+		[Category("SqLite")]
+		public void SelectBooksWithXmlImages()
+		{
+			DataMigrationHelper.AddBooksWithImage(5, 10, DbAccess);
+			var bookXmls = DbAccess.Select<BookXml>();
+			Assert.That(bookXmls, Is.Not.Null);
+			Assert.That(bookXmls.Length, Is.EqualTo(5));
 		}
 	}
 }

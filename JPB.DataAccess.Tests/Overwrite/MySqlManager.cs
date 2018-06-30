@@ -6,6 +6,7 @@ using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
@@ -41,22 +42,14 @@ namespace JPB.DataAccess.Tests
 				dbname);
 
 			_expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
-			//try
-			//{
-			//	_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(string.Format("ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE ", dbname)));
-			//}
-			//catch (Exception)
-			//{
-			//	Console.WriteLine("Db does not exist");
-			//}
-
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(redesginDatabase));
 			_expectWrapper.ExecuteGenericCommand(
 				_expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0};", dbname)));
 			_expectWrapper = new DbAccessLayer(DbAccessType, string.Format(ConnectionString + "Database={0};", dbname));
-			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(UsersMeta.CreateMySql));
-			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(BookMeta.CreateMySql));
-			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(ImageMeta.CreateMySql));
+			foreach (var databaseMeta in MetaManager.DatabaseMetas)
+			{
+				_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(databaseMeta.Value.CreationCommand(DbAccessType)));
+			}
 			//_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
 			//																		 "AS BEGIN " +
 			//																		 "SELECT * FROM Users " +

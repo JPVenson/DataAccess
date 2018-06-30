@@ -7,6 +7,7 @@ using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Query.Operators.Selection;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 

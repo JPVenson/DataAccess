@@ -90,13 +90,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Book.cs" />
-    <Compile Include="Base\TestModels\CheckWrapperBaseTests\BookMeta.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\BookXml.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\MetaData\BookMeta.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUser.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceConfig.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\ConfigLessUserInplaceDirectConfig.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\GeneratedUsers.cs" />
-    <Compile Include="Base\TestModels\CheckWrapperBaseTests\ImageMeta.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\MetaData\IDatabaseMeta.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\MetaData\ImageMeta.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\ImageNullable.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\MetaData\MetaManager.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcBParams.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcBParamsDirect.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users.cs" />
@@ -104,7 +107,7 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructorWithMultiXml.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateConstructorWithSingleXml.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersAutoGenerateNullableConstructor.cs" />
-    <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersMeta.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\MetaData\UsersMeta.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersWithoutProperties.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\UsersWithStaticInsert.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Users_PK.cs" />

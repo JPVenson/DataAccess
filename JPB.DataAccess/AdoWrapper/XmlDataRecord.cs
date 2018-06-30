@@ -7,11 +7,46 @@ using System.Linq;
 using System.Xml.Linq;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.ModelsAnotations;
 
 #endregion
 
 namespace JPB.DataAccess.AdoWrapper
 {
+	/// <summary>
+	///		Wrapper for the XmlDataRecord to comply with the WrapDbNullAttribute
+	/// </summary>
+	public class NullWrapperXmlDataRecord : XmlDataRecord
+	{
+		/// <inheritdoc />
+		internal NullWrapperXmlDataRecord(string xmlStream, Type target, DbConfig config) : base(xmlStream, target, config)
+		{
+		}
+
+		/// <inheritdoc />
+		internal NullWrapperXmlDataRecord(XDocument baseElement, Type target, DbConfig config = null) : base(baseElement, target, config)
+		{
+		}
+
+		/// <inheritdoc />
+		internal NullWrapperXmlDataRecord(string xmlStream, DbClassInfoCache target) : base(xmlStream, target)
+		{
+		}
+
+		/// <inheritdoc />
+		internal NullWrapperXmlDataRecord(XDocument baseElement, DbClassInfoCache target) : base(baseElement, target)
+		{
+		}
+
+		/// <inheritdoc />
+		public override object GetValue(int i)
+		{
+			var value = base.GetValue(i);
+
+			return value == DBNull.Value ? null : value;
+		}
+	}
+
 	/// <summary>
 	///     This is an Helper for reading Xml Based columns in a way as a Ado.net Constructor is written
 	/// </summary>
@@ -26,7 +61,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <summary>
 		///     The base element
 		/// </summary>
-		private readonly XElement baseElement;
+		private readonly XElement _baseElement;
 
 		/// <summary>
 		///     Initializes a new instance of the <see cref="XmlDataRecord" /> class.
@@ -63,11 +98,11 @@ namespace JPB.DataAccess.AdoWrapper
 			_target = target;
 			if (string.IsNullOrEmpty(xmlStream))
 			{
-				baseElement = new XElement("faild");
+				_baseElement = new XElement("faild");
 				return;
 			}
 
-			baseElement = XDocument.Parse(xmlStream).Elements().ElementAt(0);
+			_baseElement = XDocument.Parse(xmlStream).Elements().ElementAt(0);
 		}
 
 		/// <summary>
@@ -78,7 +113,7 @@ namespace JPB.DataAccess.AdoWrapper
 		internal XmlDataRecord(XDocument baseElement, DbClassInfoCache target)
 		{
 			_target = target;
-			this.baseElement = baseElement.Elements().ElementAt(0);
+			this._baseElement = baseElement.Elements().ElementAt(0);
 		}
 
 		/// <summary>
@@ -90,7 +125,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public string GetName(int i)
 		{
-			return baseElement.Elements().ElementAt(i).Name.LocalName;
+			return _baseElement.Elements().ElementAt(i).Name.LocalName;
 		}
 
 		/// <summary>
@@ -100,13 +135,13 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns>
 		///     The <see cref="T:System.Object" /> which will contain the field value upon return.
 		/// </returns>
-		public object GetValue(int i)
+		public virtual object GetValue(int i)
 		{
 			if (i == -1)
 			{
 				return DBNull.Value;
 			}
-			if (i >= baseElement.Elements().Count())
+			if (i >= _baseElement.Elements().Count())
 			{
 				return DBNull.Value;
 			}
@@ -122,7 +157,7 @@ namespace JPB.DataAccess.AdoWrapper
 			}
 
 			var propertyType = firstOrDefault.PropertyType;
-			var xElement = baseElement.Elements().ElementAt(i);
+			var xElement = _baseElement.Elements().ElementAt(i);
 
 			if (xElement.HasElements)
 			{
@@ -138,7 +173,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public int FieldCount
 		{
-			get { return baseElement.Elements().Count(); }
+			get { return _baseElement.Elements().Count(); }
 		}
 
 		/// <summary>
@@ -180,7 +215,11 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public IEnumerable<XmlDataRecord> CreateListOfItems()
 		{
-			var xNodes = baseElement.Elements();
+			var xNodes = _baseElement.Elements();
+			if (_target.Attributes.Any(e => e.Attribute is WrapDbNullablesAttribute))
+			{
+				return xNodes.Select(xNode => new NullWrapperXmlDataRecord(xNode.ToString(), _target));
+			}
 			return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), _target));
 		}
 
@@ -262,7 +301,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetOrdinal(string name)
 		{
-			var elements = baseElement.Elements().ToArray();
+			var elements = _baseElement.Elements().ToArray();
 			for (var i = 0; i < elements.Count(); i++)
 			{
 				var item = elements[i];

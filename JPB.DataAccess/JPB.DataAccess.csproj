@@ -154,7 +154,7 @@
     <Compile Include="Contacts\ILoadFromXmlStrategy.cs" />
     <Compile Include="Contacts\ILocalDbCheckConstraint.cs" />
     <Compile Include="Contacts\ILocalDbConstraint.cs" />
-    <Compile Include="Contacts\IPrimaryKeyIndex.cs" />
+    <Compile Include="Contacts\ILocalDbPrimaryKeyConstraint.cs" />
     <Compile Include="Contacts\ILocalDbReposetoryBaseInternalUsage.cs" />
     <Compile Include="Contacts\ILogger.cs" />
     <Compile Include="Contacts\IQueryFactoryResult.cs" />
@@ -228,10 +228,10 @@
     <Compile Include="Helper\LocalDb\LocalDataPager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbManager.cs" />
     <Compile Include="Helper\LocalDb\LocalDbRepository.cs" />
-    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\BytePkProvider.cs" />
-    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\GuidPkProvider.cs" />
-    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\IntPkProvider.cs" />
-    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LongPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbBytePkProvider.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbGuidPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbIntPkProvider.cs" />
+    <Compile Include="Helper\LocalDb\PrimaryKeyProvider\LocalDbLongPkProvider.cs" />
     <Compile Include="Helper\LocalDb\ReproMappings.cs" />
     <Compile Include="Helper\LocalDb\Scopes\DatabaseScope.cs" />
     <Compile Include="Helper\LocalDb\Scopes\DbReposetoryIdentityInsertScope.cs" />

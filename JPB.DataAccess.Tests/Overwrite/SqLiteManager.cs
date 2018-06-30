@@ -9,6 +9,7 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.SqLite;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;
 
 #endregion
@@ -18,7 +19,7 @@ namespace JPB.DataAccess.Tests
 	public class SqLiteManager : IManagerImplementation
 	{
 		public const string SConnectionString = "Data Source={0};";
-		private DbAccessLayer expectWrapper;
+		private DbAccessLayer _expectWrapper;
 
 		private string _dbFilePath;
 
@@ -34,9 +35,9 @@ namespace JPB.DataAccess.Tests
 
 		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
-			if (expectWrapper != null)
+			if (_expectWrapper != null)
 			{
-				expectWrapper.Database.CloseAllConnection();
+				_expectWrapper.Database.CloseAllConnection();
 			}
 
 			SqLiteInteroptWrapper.EnsureSqLiteInteropt();
@@ -58,11 +59,12 @@ namespace JPB.DataAccess.Tests
 
 			//tempPath = Path.GetTempFileName() + dbname + "sqLite";
 
-			expectWrapper = new DbAccessLayer(new SqLite.SqLite(connection), new DbConfig(true));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(UsersMeta.CreateSqLite));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(BookMeta.CreateSqLite));
-			expectWrapper.ExecuteGenericCommand(expectWrapper.Database.CreateCommand(ImageMeta.CreateSqLite));
-			return expectWrapper;
+			_expectWrapper = new DbAccessLayer(new SqLite.SqLite(connection), new DbConfig(true));
+			foreach (var databaseMeta in MetaManager.DatabaseMetas)
+			{
+				_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(databaseMeta.Value.CreationCommand(DbAccessType)));
+			}
+			return _expectWrapper;
 		}
 
 		public void FlushErrorData()
@@ -72,7 +74,7 @@ namespace JPB.DataAccess.Tests
 
 		public void Clear()
 		{
-			var connectionCounter = SqLite.SqLite.ConnectionCounter.Where(f => f.Key == expectWrapper.Database.DatabaseFile)
+			var connectionCounter = SqLite.SqLite.ConnectionCounter.Where(f => f.Key == _expectWrapper.Database.DatabaseFile)
 			                              .SelectMany(e => e.Value.Connections)
 			                              .Select(e =>
 			                              {
@@ -92,7 +94,7 @@ namespace JPB.DataAccess.Tests
 				}
 			}
 
-			expectWrapper.Database.CloseAllConnection();
+			_expectWrapper.Database.CloseAllConnection();
 
 			if (File.Exists(_dbFilePath))
 			{

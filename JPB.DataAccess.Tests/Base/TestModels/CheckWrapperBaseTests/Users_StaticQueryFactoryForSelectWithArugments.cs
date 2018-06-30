@@ -3,6 +3,7 @@
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 

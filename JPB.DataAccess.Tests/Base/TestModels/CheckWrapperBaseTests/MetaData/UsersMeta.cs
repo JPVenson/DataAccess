@@ -1,12 +1,14 @@
 ﻿#region
 
+using System;
 using System.Text;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {
-	public static class UsersMeta
+	public class UsersMeta : IDatabaseMeta
 	{
 		public const string TableName = "Users";
 		public const string SelectStatement = "SELECT * FROM " + TableName;
@@ -41,6 +43,22 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 			sb.AppendLine(")");
 			sb.AppendLine(";");
 			CreateMySql = sb.ToString();
+		}
+
+		/// <inheritdoc />
+		public string CreationCommand(DbAccessType accessType)
+		{
+			switch (accessType)
+			{
+				case DbAccessType.MsSql:
+					return CreateMsSql;
+				case DbAccessType.MySql:
+					return CreateMySql;
+				case DbAccessType.SqLite:
+					return CreateSqLite;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(accessType), accessType, null);
+			}
 		}
 	}
 }

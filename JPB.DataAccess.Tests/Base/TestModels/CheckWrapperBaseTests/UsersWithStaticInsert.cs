@@ -2,6 +2,7 @@
 
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 

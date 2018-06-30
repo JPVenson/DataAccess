@@ -6,6 +6,7 @@ using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
@@ -71,9 +72,11 @@ namespace JPB.DataAccess.Tests
 
 			_expectWrapper = new DbAccessLayer(DbAccessType,
 				string.Format(ConnectionString + "Initial Catalog={0};", _dbname), new DbConfig(true));
-			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(UsersMeta.CreateMsSql));
-			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(BookMeta.CreateMsSQl));
-			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(ImageMeta.CreateMsSQl));
+
+			foreach (var databaseMeta in MetaManager.DatabaseMetas)
+			{
+				_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(databaseMeta.Value.CreationCommand(DbAccessType)));
+			}
 
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand("CREATE PROC TestProcA " +
 																					 "AS BEGIN " +
