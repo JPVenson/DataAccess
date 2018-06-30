@@ -42,7 +42,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			//Warn.If(dotMemoryApi.IsEnabled, () => "WARNING DOTMEMORY IS NOT ENABLED");
 			//memoryCheckPoint = dotMemory.Check();
 			Mgr = new Manager();
-			
 		}
 
 		[TearDown]
@@ -87,6 +86,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		protected DatabaseBaseTest(DbAccessType type, bool asyncExecution, bool syncronised, params object[] additionalArguments)
 		{
+			TestContext.CurrentContext.Test.Properties.Add("Type", type);
 			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0", Synronised ? "1" : "0" }).ToArray();
 			Type = type;
 			AsyncExecution = asyncExecution;

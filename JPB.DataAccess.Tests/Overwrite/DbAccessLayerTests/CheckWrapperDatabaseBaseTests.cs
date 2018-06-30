@@ -13,6 +13,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
@@ -43,70 +44,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 			var elements = DbAccess.Select<UsersAutoGenerateConstructor>();
 			Assert.IsNotNull(elements);
 			Assert.IsNotEmpty(elements);
-		}
-
-		[Test]
-		public void AutoGenFactoryTestXmlMulti()
-		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
-
-			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
-			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
-			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
-
-			var elements = DbAccess.Query()
-								   .QueryText("SELECT")
-								   .QueryText("res." + UsersMeta.PrimaryKeyName)
-								   .QueryText(",res." + UsersMeta.ContentName)
-								   .QueryText(",")
-								   .InBracket(
-								   s =>
-									   s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
-										.ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
-								   .QueryText("AS Subs")
-								   .QueryText("FROM")
-								   .QueryText(UsersMeta.TableName)
-								   .QueryText("AS res")
-								   .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
-
-			var result = elements.ToArray();
-
-			Assert.IsNotNull(result);
-			Assert.IsNotEmpty(result);
-		}
-
-		[Test]
-		public void AutoGenFactoryTestXmlSingle()
-		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
-
-			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
-
-			var query = DbAccess.Query()
-								.QueryText("SELECT")
-								.QueryText("res." + UsersMeta.PrimaryKeyName)
-								.QueryText(",res." + UsersMeta.ContentName)
-								.QueryText(",")
-								.InBracket(s =>
-									s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
-									 .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
-								.QueryText("AS Sub")
-								.QueryText("FROM")
-								.QueryText(UsersMeta.TableName)
-								.QueryText("AS res");
-			var elements =
-					query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
-
-			var result = elements.ToArray();
-
-			Assert.IsNotNull(result);
-			Assert.IsNotEmpty(result);
 		}
 
 		[Test]
@@ -354,12 +291,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		[Test]
 		[Parallelizable(ParallelScope.None)]
+		[DbCategory(DbAccessType.MsSql)]
 		public void NestedTransactionWithSharedInInstanceCounter()
 		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
 			//ThreadConnectionController.UseTransactionClass();
 			var dbOne = new DefaultDatabaseAccess(new ThreadConnectionController());
 			dbOne.Attach(new MsSql(DbAccess.Database.ConnectionString));
@@ -378,12 +312,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
+		[DbCategory(DbAccessType.MsSql)]
 		public void SharedTransactionCounter()
 		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
 			var dbOne = new DefaultDatabaseAccess(new ThreadConnectionController());
 			dbOne.Attach(new MsSql(DbAccess.Database.ConnectionString));
 			var rootAccess = new DbAccessLayer(dbOne, DbAccess.Config);

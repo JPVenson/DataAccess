@@ -20,8 +20,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void ConfigLess()
 		{
 			var insGuid = Guid.NewGuid().ToString();
@@ -48,8 +46,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void ConfigLessFail()
 		{
 			DbConfig.Clear();
@@ -78,8 +74,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void ConfigLessInplace()
 		{
 			var insGuid = Guid.NewGuid().ToString();

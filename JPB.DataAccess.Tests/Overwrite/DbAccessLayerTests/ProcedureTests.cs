@@ -3,6 +3,7 @@
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
@@ -15,13 +16,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	{
 
 		[Test]
-		[Category("MsSQL")]
+		[DbCategory(DbAccessType.MsSql)]
 		public void ProcedureDirectParamTest()
 		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
 			DataMigrationHelper.AddUsers(100, DbAccess);
 
 			Assert.That(() => DbAccess.Select<TestProcBParamsDirect>(new object[] {10}),
@@ -29,13 +26,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
+		[DbCategory(DbAccessType.MsSql)]
 		public void ProcedureParamLessTest()
 		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
 			DataMigrationHelper.AddUsers(100, DbAccess);
 			var expectedUser = DbAccess.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
@@ -48,13 +41,9 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
+		[DbCategory(DbAccessType.MsSql)]
 		public void ProcedureParamTest()
 		{
-			if (DbAccess.DbAccessType != DbAccessType.MsSql)
-			{
-				return;
-			}
 			DataMigrationHelper.AddUsers(100, DbAccess);
 
 			Assert.That(() => DbAccess.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams

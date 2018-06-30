@@ -7,6 +7,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 #pragma warning disable 618
@@ -45,8 +46,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectAnonymous()
 		{
 			DataMigrationHelper.AddEntity<Users, long>(DbAccess, 5, f => f.UserName = "Test");
@@ -56,8 +55,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectBase()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -77,8 +74,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectModelsSelect()
 		{
 			DataMigrationHelper.AddUsers(100, DbAccess);
@@ -97,8 +92,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectNative()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -123,8 +116,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectPrimitivSelect()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -148,8 +139,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectPropertyLessPoco()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -157,8 +146,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectWhereBase()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -176,8 +163,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void SelectWithEgarLoading()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -197,14 +182,69 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
+		[DbCategory(DbAccessType.MsSql)]
 		public void SelectBooksWithXmlImages()
 		{
 			DataMigrationHelper.AddBooksWithImage(5, 10, DbAccess);
 			var bookXmls = DbAccess.Select<BookXml>();
 			Assert.That(bookXmls, Is.Not.Null);
 			Assert.That(bookXmls.Length, Is.EqualTo(5));
+		}
+
+		[Test]
+		[DbCategory(DbAccessType.MsSql)]
+		public void AutoGenFactoryTestXmlMulti()
+		{
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
+
+			var elements = DbAccess.Query()
+			                       .QueryText("SELECT")
+			                       .QueryText("res." + UsersMeta.PrimaryKeyName)
+			                       .QueryText(",res." + UsersMeta.ContentName)
+			                       .QueryText(",")
+			                       .InBracket(
+			                       s =>
+					                       s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
+					                        .ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+			                       .QueryText("AS Subs")
+			                       .QueryText("FROM")
+			                       .QueryText(UsersMeta.TableName)
+			                       .QueryText("AS res")
+			                       .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
+
+			var result = elements.ToArray();
+
+			Assert.IsNotNull(result);
+			Assert.IsNotEmpty(result);
+		}
+
+		[Test]
+		[DbCategory(DbAccessType.MsSql)]
+		public void AutoGenFactoryTestXmlSingle()
+		{
+			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
+
+			var query = DbAccess.Query()
+			                    .QueryText("SELECT")
+			                    .QueryText("res." + UsersMeta.PrimaryKeyName)
+			                    .QueryText(",res." + UsersMeta.ContentName)
+			                    .QueryText(",")
+			                    .InBracket(s =>
+					                    s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
+					                     .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+			                    .QueryText("AS Sub")
+			                    .QueryText("FROM")
+			                    .QueryText(UsersMeta.TableName)
+			                    .QueryText("AS res");
+			var elements =
+					query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
+
+			var result = elements.ToArray();
+
+			Assert.IsNotNull(result);
+			Assert.IsNotEmpty(result);
 		}
 	}
 }

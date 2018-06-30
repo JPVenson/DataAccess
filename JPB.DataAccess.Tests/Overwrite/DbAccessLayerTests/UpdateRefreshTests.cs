@@ -17,9 +17,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 	{
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("MySql")]
-		[Category("SqLite")]
 		public void InsertIdentity()
 		{
 			Assert.That(() => DbAccess.Database.RunInTransaction(f =>
@@ -33,8 +30,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void Refresh()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -66,8 +61,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void RefreshInplace()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -98,8 +91,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 		}
 
 		[Test]
-		[Category("MsSQL")]
-		[Category("SqLite")]
 		public void Update()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);

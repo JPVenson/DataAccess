@@ -99,6 +99,12 @@ namespace JPB.DataAccess.Tests
 				                          _errorData.AppendLine();
 			                          };
 
+			expectWrapper.OnFailedQuery += (sender, eventArg, exception) =>
+			{
+				_errorData.AppendFormat(@"Query Failed: \r\n{0}\r\n{1}", eventArg.QueryDebugger, exception);
+				_errorData.AppendLine();
+			};
+
 			Assert.NotNull(expectWrapper, "This test cannot run as no Database Variable is defined");
 			var checkDatabase = expectWrapper.CheckDatabase();
 			Assert.IsTrue(checkDatabase);
