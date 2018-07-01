@@ -452,25 +452,7 @@ namespace JPB.DataAccess.Manager
 		{
 			return new RootQuery(this);
 		}
-
-		///// <summary>
-		/////     Creates a Strong typed query that awaits a Result
-		///// </summary>
-		///// <returns></returns>
-		//public RootQuery Query(Type targetType)
-		//{
-		//	return new RootQuery(this, targetType);
-		//}
-
-		///// <summary>
-		/////     Creates a Strong typed query that awaits a Result
-		///// </summary>
-		///// <returns></returns>
-		//public RootQuery Query<T>()
-		//{
-		//	return new RootQuery(this, typeof(T));
-		//}
-
+		
 		/// <summary>
 		///     Creates a new Instance based on possible Ctor's and the given
 		///     <paramref name="reader" />

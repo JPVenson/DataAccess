@@ -96,7 +96,7 @@ namespace JPB.DataAccess.Query
 			cteBuilder.Append(") AS (");
 			cteBuilder.Append(query.ContainerObject.AccessLayer.CreateSelect(target));
 			cteBuilder.Append(")");
-			return query.Add(new CteQueryPart(cteBuilder.ToString()));
+			return query.Add(new CteQueryPartBase(cteBuilder.ToString()));
 		}
 
 		/// <summary>
@@ -128,7 +128,7 @@ namespace JPB.DataAccess.Query
 			var lod = query.ContainerObject.Parts.LastOrDefault();
 			var prefix = string.Empty;
 
-			if (lod is CteQueryPart || subCte)
+			if (lod is CteQueryPartBase || subCte)
 			{
 				prefix = string.Format(", {0} AS", cteName);
 			}
@@ -137,7 +137,7 @@ namespace JPB.DataAccess.Query
 				prefix = string.Format("WITH {0} AS ", cteName);
 			}
 
-			return new RootQuery(query.Add(new GenericQueryPart(prefix)).InBracket(cteAction).Add(new CteQueryPart("")));
+			return new RootQuery(query.Add(new QueryPartBase(prefix)).InBracket(cteAction).Add(new CteQueryPartBase("")));
 		}
 
 
@@ -162,7 +162,7 @@ namespace JPB.DataAccess.Query
 				cp = cp.Add(genericQueryPart);
 			}
 
-			return new ElementProducer<TN>(cp.Add(new CteQueryPart(")")).QueryText(string.Format("SELECT {1} FROM {0}", cteName,
+			return new ElementProducer<TN>(cp.Add(new CteQueryPartBase(")")).QueryText(string.Format("SELECT {1} FROM {0}", cteName,
 				query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TN))
 					.GetSchemaMapping()
 					.Aggregate((e, f) => e + ", " + f))), query.CurrentIdentifier);

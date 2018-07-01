@@ -32,7 +32,7 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <summary>
 		///     Defines all elements added by the Add Method
 		/// </summary>
-		List<GenericQueryPart> Parts { get; }
+		List<QueryPartBase> Parts { get; }
 
 		/// <summary>
 		///     Defines the Way how the Data will be loaded

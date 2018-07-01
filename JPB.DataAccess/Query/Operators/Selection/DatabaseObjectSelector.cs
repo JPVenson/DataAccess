@@ -65,7 +65,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 			var cmd =
 				ContainerObject.AccessLayer.CreateSelectQueryFactory(ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),
 					argumentsForFactory);
-			return new SelectQuery<TPoco>(this.QueryCommand(cmd), null);
+			return new SelectQuery<TPoco>(this.Add(new SelectQueryPart(this, cmd)), null);
 		}
 
 		/// <summary>

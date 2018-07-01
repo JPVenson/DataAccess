@@ -129,11 +129,13 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public SelectQuery<T> Execute<T>(params object[] argumentsForFactory)
 		{
-			var cmd = ContainerObject
-				.AccessLayer
-				.CreateSelectQueryFactory(
-					ContainerObject.AccessLayer.GetClassInfo(typeof(T)), argumentsForFactory);
-			return new SelectQuery<T>(this.QueryCommand(cmd));
+			throw new NotImplementedException();
+
+			//var cmd = ContainerObject
+			//	.AccessLayer
+			//	.CreateSelectQueryFactory(
+			//		ContainerObject.AccessLayer.GetClassInfo(typeof(T)), argumentsForFactory);
+			//return new SelectQuery<T>(this.QueryCommand(cmd));
 		}
 
 		/// <summary>
@@ -155,13 +157,14 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public SelectQuery<T> Distinct<T>()
 		{
-			var cmd = DbAccessLayer.CreateSelect(ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "DISTINCT");
-			return new SelectQuery<T>(this.QueryText(cmd));
+			throw new NotImplementedException();
+			//var cmd = DbAccessLayer.CreateSelect(ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "DISTINCT");
+			//return new SelectQuery<T>(this.QueryText(cmd));
 		}
 
 		/// <summary>
 		///     Adds a Update - Statement
-		///     Uses reflection or a Factory mehtod to create an update statement that will check for the id of the obj
+		///     Uses reflection or a Factory mehtod to create an update statement that will check for the id of the object
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -184,11 +187,12 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public UpdateQuery<T> UpdateStatement<T>(T obj)
 		{
-			return new UpdateQuery<T>(this
-				.QueryCommand(
-					DbAccessLayer
-						.CreateUpdateSimple(ContainerObject
-							.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
+			throw new NotImplementedException();
+			//return new UpdateQuery<T>(this
+			//	.QueryCommand(
+			//		DbAccessLayer
+			//			.CreateUpdateSimple(ContainerObject
+			//				.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
 		}
 
 		/// <summary>

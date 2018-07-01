@@ -23,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\JPB.DataAccess.XML</DocumentationFile>
     <NoWarn>618</NoWarn>
-    <LangVersion>5</LangVersion>
+    <LangVersion>6</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
@@ -37,6 +37,7 @@
     <DocumentationFile>bin\Release\JPB.DataAccess.XML</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ExternalRelease|AnyCPU'">
     <OutputPath>..\..\Release\</OutputPath>
@@ -46,6 +47,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
@@ -336,9 +338,9 @@
     <Compile Include="Query\Contracts\IStateQuery.cs" />
     <Compile Include="Query\Contracts\IUpdateQuery.cs" />
     <Compile Include="Query\Contracts\QueryBuilder.cs" />
-    <Compile Include="Query\CteQueryPart.cs" />
+    <Compile Include="Query\CteQueryPartBase.cs" />
     <Compile Include="Query\EnumerationMode.cs" />
-    <Compile Include="Query\GenericQueryPart.cs" />
+    <Compile Include="Query\QueryPartBase.cs" />
     <Compile Include="Query\InternalContainerContainer.cs" />
     <Compile Include="Query\MsQueryBuilderExtentions.cs" />
     <Compile Include="Query\Operators\Conditional\ConditionalColumnQuery.cs" />

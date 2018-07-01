@@ -10,13 +10,13 @@ namespace JPB.DataAccess.Query
 	/// <summary>
 	///     Maker for CTS in MSSQL
 	/// </summary>
-	public class CteQueryPart : GenericQueryPart
+	public class CteQueryPartBase : QueryPartBase
 	{
 		/// <summary>
 		/// </summary>
 		/// <param name="prefix"></param>
 		/// <param name="parameters"></param>
-		public CteQueryPart(string prefix, IEnumerable<IQueryParameter> parameters)
+		public CteQueryPartBase(string prefix, IEnumerable<IQueryParameter> parameters)
 			: base(prefix, parameters, null)
 		{
 		}
@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// </summary>
 		/// <param name="prefix"></param>
-		public CteQueryPart(string prefix)
+		public CteQueryPartBase(string prefix)
 			: base(prefix)
 		{
 		}

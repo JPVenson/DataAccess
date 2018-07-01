@@ -38,7 +38,7 @@ namespace JPB.DataAccess.Query
 		public InternalContainerContainer(DbAccessLayer database)
 		{
 			AccessLayer = database;
-			Parts = new List<GenericQueryPart>();
+			Parts = new List<QueryPartBase>();
 			QueryInfos = new Dictionary<string, object>();
 		}
 
@@ -47,7 +47,7 @@ namespace JPB.DataAccess.Query
 			AccessLayer = pre.AccessLayer;
 			ForType = pre.ForType;
 			AutoParameterCounter = pre.AutoParameterCounter;
-			Parts = pre.Parts.Select(f => f.Clone(null) as GenericQueryPart).ToList();
+			Parts = pre.Parts.Select(f => f.Clone(null) as QueryPartBase).ToList();
 			EnumerationMode = pre.EnumerationMode;
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 			QueryInfos = pre.QueryInfos.Select(f => f).ToDictionary(f => f.Key, f => f.Value);
@@ -79,7 +79,7 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		///     Defines all elements added by the Add Method
 		/// </summary>
-		public List<GenericQueryPart> Parts { get; private set; }
+		public List<QueryPartBase> Parts { get; private set; }
 
 		/// <summary>
 		///     Defines the Way how the Data will be loaded

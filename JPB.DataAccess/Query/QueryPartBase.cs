@@ -16,39 +16,18 @@ namespace JPB.DataAccess.Query
 	/// <summary>
 	///     Wrapper for Generic QueryCommand parts
 	/// </summary>
-	public class GenericQueryPart
+	public abstract class QueryPartBase
 	{
 		private readonly IQueryBuilder _builder;
 
 		/// <summary>
 		///     Creates a generic query part that can be used for any query
 		/// </summary>
-		/// <param name="prefix"></param>
-		/// <param name="parameters"></param>
 		/// <param name="builder">The type of building object</param>
-		public GenericQueryPart(string prefix, IEnumerable<IQueryParameter> parameters, IQueryBuilder builder)
+		protected QueryPartBase(IQueryBuilder builder)
 		{
 			_builder = builder;
-			Debug.Assert(prefix != null, "prefix != null");
-			Prefix = prefix;
-			QueryParameters = parameters;
 		}
-
-		/// <summary>
-		///     Creates a generic query part that can be used for any query
-		/// </summary>
-		/// <param name="prefix"></param>
-		public GenericQueryPart(string prefix)
-		{
-			Debug.Assert(prefix != null, "prefix != null");
-			Prefix = prefix;
-			QueryParameters = new IQueryParameter[0];
-		}
-
-		/// <summary>
-		///     The Partial SQL QueryCommand that is contained inside this part
-		/// </summary>
-		public string Prefix { get; internal set; }
 
 		/// <summary>
 		///     If used the Parameters that are used for this Prefix
@@ -69,22 +48,9 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// </summary>
 		/// <returns></returns>
-		public object Clone(IQueryBuilder builder)
+		public virtual object Clone(IQueryBuilder builder)
 		{
-			return new GenericQueryPart(Prefix, QueryParameters.Select(e => e.Clone()).ToList(), builder);
-		}
-
-		/// <summary>
-		///     Wrapps the given <paramref name="command" /> into a new QueryPart by storing its QueryCommand statement and
-		///     parameter
-		/// </summary>
-		/// <param name="command"></param>
-		/// <param name="builder"></param>
-		/// <returns></returns>
-		public static GenericQueryPart FromCommand(IDbCommand command, IQueryElement builder)
-		{
-			return new GenericQueryPart(command.CommandText,
-				command.Parameters.Cast<IDataParameter>().Select(s => new QueryParameter(s.ParameterName, s.Value)), builder);
+			throw new NotImplementedException();
 		}
 
 		/// <summary>
@@ -107,7 +73,6 @@ namespace JPB.DataAccess.Query
 			sb
 				.AppendInterlacedLine("new GenericQueryPart {")
 				.Up()
-				.AppendInterlacedLine("QueryCommand = \"{0}\",", Prefix)
 				.AppendInterlacedLine("Builder = \"{0}\",", Builder != null ? Builder.GetType().Name : "{NULL}")
 				.AppendInterlaced("Parameter[{0}] = ", QueryParameters.Count());
 			if (QueryParameters.Any())
@@ -137,6 +102,71 @@ namespace JPB.DataAccess.Query
 		public override string ToString()
 		{
 			return Render();
+		}
+
+		/// <summary>
+		///		Should return an Compiled version of this query 
+		/// </summary>
+		/// <returns></returns>
+		public abstract IDbCommand Parse();
+	}
+
+	/// <inheritdoc />
+	public class SelectQueryPart : QueryPartBase
+	{
+		private readonly IDbCommand _command;
+
+		/// <inheritdoc />
+		public SelectQueryPart(IQueryBuilder builder, string table, string[] columns) : base(builder)
+		{
+			_command = builder.ContainerObject.AccessLayer.Database.CreateCommand(
+			$"SELECT {columns.Select(e => $"[{e}]").Aggregate((e, f) => e + "," + f)} FROM {table}");
+		}
+
+		/// <inheritdoc />
+		public SelectQueryPart(IQueryBuilder builder, IDbCommand command) : base(builder)
+		{
+			_command = command;
+		}
+
+		/// <inheritdoc />
+		public override IDbCommand Parse()
+		{
+			return _command;
+		}
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public class UpdateQueryPart : QueryPartBase
+	{
+		/// <inheritdoc />
+		public UpdateQueryPart(IQueryBuilder builder) : base(builder)
+		{
+		}
+
+		/// <inheritdoc />
+		public override IDbCommand Parse()
+		{
+			
+		}
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public class ExecuteProcedureQueryPart : QueryPartBase
+	{
+		/// <inheritdoc />
+		public ExecuteProcedureQueryPart(IQueryBuilder builder) : base(builder)
+		{
+		}
+
+		/// <inheritdoc />
+		public override IDbCommand Parse()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

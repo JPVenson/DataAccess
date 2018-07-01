@@ -20,13 +20,13 @@ namespace JPB.DataAccess.Query
 		///     Adds a QueryCommand part to the Local collection
 		/// </summary>
 		/// <returns></returns>
-		public static TQuery Add<TQuery>(this TQuery query, GenericQueryPart part)
+		public static TQuery Add<TQuery>(this TQuery query, QueryPartBase partBase)
 			where TQuery : class, IQueryBuilder
 		{
 			var clone = query.CloneWith(query) as TQuery;
 			if (clone.ContainerObject.AllowParamterRenaming)
 			{
-				foreach (var queryParameter in part.QueryParameters)
+				foreach (var queryParameter in partBase.QueryParameters)
 				{
 					var fod =
 							clone.ContainerObject.Parts.SelectMany(s => s.QueryParameters)
@@ -40,69 +40,69 @@ namespace JPB.DataAccess.Query
 					//parameter is existing ... renaming new Parameter to Auto gen and renaming all ref in the QueryCommand
 					var name = fod.Name;
 					var newName = clone.ContainerObject.GetNextParameterId().ToString().CheckParamter();
-					part.Prefix = part.Prefix.Replace(name, newName);
+					partBase.Prefix = partBase.Prefix.Replace(name, newName);
 					queryParameter.Name = newName;
 				}
 			}
-			clone.ContainerObject.Parts.Add(part);
+			clone.ContainerObject.Parts.Add(partBase);
 			return clone;
 		}
 
-		/// <summary>
-		///     Adds a QueryCommand part to <paramref name="builder" />
-		/// </summary>
-		/// <returns></returns>
-		public static E QueryQ<E>(this E builder, string query, params IQueryParameter[] parameters)
-			where E : class, IQueryBuilder
-		{
-			return builder.Add(new GenericQueryPart(query, parameters, builder));
-		}
+		///// <summary>
+		/////     Adds a QueryCommand part to <paramref name="builder" />
+		///// </summary>
+		///// <returns></returns>
+		//public static E QueryQ<E>(this E builder, string query, params IQueryParameter[] parameters)
+		//	where E : class, IQueryBuilder
+		//{
+		//	return builder.Add(new QueryPartBase(query, parameters, builder));
+		//}
 
-		/// <summary>
-		///     Adds a QueryCommand part to <paramref name="builder" />
-		/// </summary>
-		/// <returns></returns>
-		public static TQuery QueryD<TQuery>(this TQuery builder, string query, dynamic paramerters)
-			where TQuery : class, IQueryBuilder
-		{
-			if (paramerters != null)
-			{
-				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-				return builder.Add(new GenericQueryPart(query, parameters, builder));
-			}
+		///// <summary>
+		/////     Adds a QueryCommand part to <paramref name="builder" />
+		///// </summary>
+		///// <returns></returns>
+		//public static TQuery QueryD<TQuery>(this TQuery builder, string query, dynamic paramerters)
+		//	where TQuery : class, IQueryBuilder
+		//{
+		//	if (paramerters != null)
+		//	{
+		//		IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+		//		return builder.Add(new QueryPartBase(query, parameters, builder));
+		//	}
 
-			return builder.Add(new GenericQueryPart(query));
-		}
+		//	return builder.Add(new QueryPartBase(query));
+		//}
 
-		/// <summary>
-		///     Adds a QueryCommand part to <paramref name="builder" />
-		/// </summary>
-		/// <returns></returns>
-		public static TQuery QueryD<TQuery>(this TQuery builder, string query)
-			where TQuery : class, IQueryBuilder
-		{
-			return QueryD(builder, query, null);
-		}
+		///// <summary>
+		/////     Adds a QueryCommand part to <paramref name="builder" />
+		///// </summary>
+		///// <returns></returns>
+		//public static TQuery QueryD<TQuery>(this TQuery builder, string query)
+		//	where TQuery : class, IQueryBuilder
+		//{
+		//	return QueryD(builder, query, null);
+		//}
 
-		/// <summary>
-		///     Adds a QueryCommand part to <paramref name="builder" />
-		/// </summary>
-		/// <returns></returns>
-		public static TQuery QueryCommand<TQuery>(this TQuery builder, IDbCommand command)
-			where TQuery : class, IQueryBuilder
-		{
-			return builder.Add(GenericQueryPart.FromCommand(command, null));
-		}
+		///// <summary>
+		/////     Adds a QueryCommand part to <paramref name="builder" />
+		///// </summary>
+		///// <returns></returns>
+		//public static TQuery QueryCommand<TQuery>(this TQuery builder, IDbCommand command)
+		//	where TQuery : class, IQueryBuilder
+		//{
+		//	return builder.Add(QueryPartBase.FromCommand(command, null));
+		//}
 
-		/// <summary>
-		///     Adds a QueryCommand part to <paramref name="builder" />
-		/// </summary>
-		/// <returns></returns>
-		public static TQuery QueryText<TQuery>(this TQuery builder, string query, params object[] args)
-			where TQuery : class, IQueryBuilder
-		{
-			return builder.QueryQ(string.Format(query, args));
-		}
+		///// <summary>
+		/////     Adds a QueryCommand part to <paramref name="builder" />
+		///// </summary>
+		///// <returns></returns>
+		//public static TQuery QueryText<TQuery>(this TQuery builder, string query, params object[] args)
+		//	where TQuery : class, IQueryBuilder
+		//{
+		//	return builder.QueryQ(string.Format(query, args));
+		//}
 
 		/// <summary>
 		///     Inserts and Appends brackets after the delegate
@@ -147,15 +147,15 @@ namespace JPB.DataAccess.Query
 			return dbAccess;
 		}
 
-		/// <summary>
-		///     Adds Parameter to the QueryCommand object without adding a Statement
-		/// </summary>
-		/// <returns></returns>
-		public static TQuery WithParamerters<TQuery>(this TQuery query, dynamic paramerters)
-			where TQuery : class, IQueryBuilder
-		{
-			IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
-			return query.QueryQ(string.Empty, parameters.ToArray());
-		}
+		///// <summary>
+		/////     Adds Parameter to the QueryCommand object without adding a Statement
+		///// </summary>
+		///// <returns></returns>
+		//public static TQuery WithParamerters<TQuery>(this TQuery query, dynamic paramerters)
+		//	where TQuery : class, IQueryBuilder
+		//{
+		//	IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+		//	return query.QueryQ(string.Empty, parameters.ToArray());
+		//}
 	}
 }
