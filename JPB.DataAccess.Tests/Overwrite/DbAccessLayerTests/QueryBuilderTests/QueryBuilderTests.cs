@@ -160,7 +160,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
-
 		public void In()
 		{
 			var maxItems = 250;
@@ -199,7 +198,6 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
-
 		public void OrderBy()
 		{
 			var maxItems = 250;
@@ -316,18 +314,20 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 			DataMigrationHelper.AddUsers(250, DbAccess);
 
 			var runPrimetivSelect = -1;
-			if (DbAccess.DbAccessType == DbAccessType.MsSql)
+			switch (DbAccess.DbAccessType)
 			{
-				runPrimetivSelect =
-						DbAccess.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
-								[0];
+				case DbAccessType.MsSql:
+					runPrimetivSelect =
+						DbAccess.RunPrimetivSelect<int>($"SELECT COUNT(1) FROM {UsersMeta.TableName}")
+							[0];
+					break;
 			}
 
 			if (DbAccess.DbAccessType == DbAccessType.SqLite)
 			{
 				runPrimetivSelect =
 						(int)
-						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
+						DbAccess.RunPrimetivSelect<long>($"SELECT COUNT(1) FROM {UsersMeta.TableName}")
 								[0];
 			}
 
@@ -335,7 +335,7 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 			{
 				runPrimetivSelect =
 						(int)
-						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
+						DbAccess.RunPrimetivSelect<long>($"SELECT COUNT(1) FROM {UsersMeta.TableName}")
 								[0];
 			}
 
@@ -352,6 +352,16 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 				Assert.That(userse.UserID, Is.EqualTo(userbe.UserID));
 				Assert.That(userse.UserName, Is.EqualTo(userbe.UserName));
 			}
+		}
+
+		[Test]
+		public void SelectedLimit()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(10, DbAccess);
+			var userses = CreateQuery().Select.Table<Users>().Where.PrimaryKey().Is.In(addUsers)
+				.LimitBy(3)
+				.ToArray();
+			Assert.That(userses.Length, Is.EqualTo(3));
 		}
 
 		[Test]

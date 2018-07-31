@@ -24,7 +24,12 @@ namespace JPB.DataAccess.Query
 			where TQuery : class, IQueryBuilder
 		{
 			var clone = query.CloneWith(query) as TQuery;
-			if (clone.ContainerObject.AllowParamterRenaming)
+		    if (clone == null)
+		    {
+		        throw new InvalidCastException("Could not cast the Clone of Query into typeof(TQuery)");
+		    }
+
+		    if (clone.ContainerObject.AllowParamterRenaming)
 			{
 				foreach (var queryParameter in part.QueryParameters)
 				{
