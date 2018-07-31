@@ -11,6 +11,7 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.None)]
+	[Explicit]
 	public class EventTest : DatabaseBaseTest
 	{
 		public EventTest(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
