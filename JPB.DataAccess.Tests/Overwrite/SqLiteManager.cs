@@ -1,10 +1,12 @@
 #region
 
 using System;
+using System.Configuration;
 using System.Data;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Text.RegularExpressions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.SqLite;
@@ -43,8 +45,15 @@ namespace JPB.DataAccess.Tests
 			SqLiteInteroptWrapper.EnsureSqLiteInteropt();
 			//string dbname = "testDB";
 			//var sqlLiteFileName = dbname + ".sqlite";
-			_dbFilePath = string.Format("YAORM_SqLite_{0}.db", testName);
-			if (File.Exists(_dbFilePath))
+
+		    var sqLiteConnection = Environment.ExpandEnvironmentVariables(ConfigurationManager
+		        .ConnectionStrings["DefaultConnectionSqLite"].ConnectionString);
+		    var connectionRegex = new Regex("Data Source=(.*);").Match(sqLiteConnection);
+		    
+            _dbFilePath = Path.Combine(connectionRegex.Groups[1].Value, string.Format("YAORM_SqLite_{0}.db", testName));
+		    var connection = sqLiteConnection.Replace(connectionRegex.Groups[1].Value, _dbFilePath);
+
+            if (File.Exists(_dbFilePath))
 			{
 				GC.Collect();
 				GC.WaitForPendingFinalizers();
@@ -53,7 +62,6 @@ namespace JPB.DataAccess.Tests
 			}
 
 			File.Create(_dbFilePath).Dispose();
-			var connection = string.Format(ConnectionString, _dbFilePath);
 
 			//var file = MemoryMappedFile.CreateNew(dbname, 10000, MemoryMappedFileAccess.ReadWrite);
 

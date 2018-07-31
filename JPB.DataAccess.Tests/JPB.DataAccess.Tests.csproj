@@ -81,6 +81,7 @@
     <Reference Include="System.Data.SQLite, Version=1.0.108.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Data.SQLite.Core.1.0.108.0\lib\net46\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -133,11 +134,6 @@
     <Compile Include="Overwrite\DbAccessLayerTests\SelectionTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\UpdateRefreshTests.cs" />
     <Compile Include="Overwrite\DbCollectionTests\DbCollection.cs" />
-    <Compile Include="Base\DbLoaderResouces.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DbLoaderResouces.resx</DependentUpon>
-    </Compile>
     <Compile Include="Overwrite\IManager.cs" />
     <Compile Include="Overwrite\LocalDbTests\DatabaseSerializerTest.cs" />
     <Compile Include="Overwrite\LocalDbTests\LocalDbTest.cs" />
@@ -186,12 +182,6 @@
     </None>
     <None Include="Base\packages.config" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Base\DbLoaderResouces.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>DbLoaderResouces.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

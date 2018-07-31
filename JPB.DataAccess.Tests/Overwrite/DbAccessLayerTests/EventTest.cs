@@ -19,38 +19,44 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests
 
 		public void TestEvent(Action<DatabaseActionHandler> eventType, Action shouldRaiseEvent, bool shouldInvoke)
 		{
+			var riseFlag = false;
 			var eventDone = new AutoResetEvent(false);
-			DbAccess.RaiseEvents = true;
+			DatabaseActionHandler handler = (sender, eventx) =>
+			{
+				Assert.That(riseFlag, Is.False,
+					"The wrong event or the wrong ammount of events are risen. Raise: " + DbAccess.RaiseEvents);
+				riseFlag = true;
+				eventDone.Set();
+			};
 			var setState = new OnDatabaseActionHandler((sender, evenat, handlerDone) =>
 			{
 				eventDone.Set();
 			});
-			DbAccess.HandlerRaised += setState;
-			var riseFlag = false;
-			DatabaseActionHandler handler = (sender, eventx) =>
+
+			try
 			{
-				Assert.That(riseFlag, Is.False,
-				"The wrong event or the wrong ammount of events are risen. Raise: " + DbAccess.RaiseEvents);
-				riseFlag = true;
-			};
-			eventType(handler);
-			shouldRaiseEvent();
-			Assert.That(eventDone.WaitOne(TimeSpan.FromSeconds(20)), Is.True, "The eventhandler did not respond in a timely manner");
+				DbAccess.RaiseEvents = true;
+				DbAccess.HandlerRaised += setState;
+				eventType(handler);
+				shouldRaiseEvent();
+				Assert.That(eventDone.WaitOne(TimeSpan.FromSeconds(20)), Is.True, "The eventhandler did not respond in a timely manner");
+				Assert.That(riseFlag, Is.EqualTo(shouldInvoke), "First call should be succeed but did not");
 
-			Assert.That(riseFlag, Is.EqualTo(shouldInvoke), "First call should be succeed but did not");
-
-			DbAccess.RaiseEvents = false;
-			riseFlag = false;
-			shouldRaiseEvent();
-			Assert.That(riseFlag, Is.EqualTo(false), "Last call should not succeed but did");
-
-			DbAccess.OnSelect -= handler;
-			DbAccess.OnDelete -= handler;
-			DbAccess.OnInsert -= handler;
-			DbAccess.OnUpdate -= handler;
-			DbAccess.HandlerRaised -= setState;
+				DbAccess.RaiseEvents = false;
+				riseFlag = false;
+				shouldRaiseEvent();
+				Assert.That(riseFlag, Is.EqualTo(false), "Last call should not succeed but did");
+			}
+			finally
+			{
+				DbAccess.OnSelect -= handler;
+				DbAccess.OnDelete -= handler;
+				DbAccess.OnInsert -= handler;
+				DbAccess.OnUpdate -= handler;
+				DbAccess.HandlerRaised -= setState;
+			}
 		}
-
+		
 		[Test]
 		public void TestOnDelete()
 		{

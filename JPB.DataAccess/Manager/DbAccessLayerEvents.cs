@@ -56,15 +56,24 @@ namespace JPB.DataAccess.Manager
 
 			if (handler != null)
 			{
-				var eventListeners = handler.GetInvocationList();
-				foreach (var t in eventListeners)
+				if (Async && !ThreadSave)
 				{
-					var methodToInvoke = (DatabaseActionHandler) t;
-					var databaseActionEvent = new DatabaseActionEvent(query.CreateQueryDebugger(Database));
-					methodToInvoke.BeginInvoke(sender, databaseActionEvent, ar =>
+					var eventListeners = handler.GetInvocationList();
+					foreach (var t in eventListeners)
 					{
-						OnHandlerRaised(databaseActionEvent, handler);
-					}, null);
+						var methodToInvoke = (DatabaseActionHandler)t;
+						var databaseActionEvent = new DatabaseActionEvent(query.CreateQueryDebugger(Database));
+						methodToInvoke.BeginInvoke(sender, databaseActionEvent, ar =>
+						{
+							OnHandlerRaised(databaseActionEvent, handler);
+						}, null);
+					}
+				}
+				else
+				{
+					var eventArgs = new DatabaseActionEvent(query.CreateQueryDebugger(Database));
+					handler(sender, eventArgs);
+					OnHandlerRaised(eventArgs, handler);
 				}
 			}
 		}
@@ -99,11 +108,18 @@ namespace JPB.DataAccess.Manager
 			var handler = OnFailedQuery;
 			if (handler != null)
 			{
-				var eventListeners = handler.GetInvocationList();
-				foreach (var t in eventListeners)
+				if (Async && !ThreadSave)
 				{
-					var methodToInvoke = (DatabaseExceptionActionHandler)t;
-					methodToInvoke.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(Database)), ex, ar => { }, null);
+					var eventListeners = handler.GetInvocationList();
+					foreach (var t in eventListeners)
+					{
+						var methodToInvoke = (DatabaseExceptionActionHandler)t;
+						methodToInvoke.BeginInvoke(sender, new DatabaseActionEvent(query.CreateQueryDebugger(Database)), ex, ar => { }, null);
+					}
+				}
+				else
+				{
+					handler(sender, new DatabaseActionEvent(query.CreateQueryDebugger(Database)), ex);
 				}
 			}
 		}

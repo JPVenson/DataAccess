@@ -103,6 +103,8 @@ namespace JPB.DataAccess.Helper.LocalDb
 				{
 					do
 					{
+						
+
 						var indexOfElementString = reader.GetAttribute("Index");
 						if (indexOfElementString == null)
 						{
@@ -116,6 +118,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 						{
 							throw new InvalidDataException("Invalid Database config for Db import. There is no Table for the type " + type);
 						}
+						reader.ReadStartElement(TableContentElementsList);
 						do
 						{
 							object emptyElement = table.TypeInfo.DefaultFactory();
@@ -142,6 +145,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 						} while (reader.Name == table.TypeInfo.TableName);
 
 						reader.ReadEndElement();
+						//for newer indexer tags. Currently unsupported
+						if (reader.Name == IndexerIncluded)
+						{
+							reader.ReadStartElement(IndexerIncluded);
+							reader.ReadEndElement();
+						}
+
 					} while (reader.Name != DatabaseContent);
 					transaction.Complete();
 				}

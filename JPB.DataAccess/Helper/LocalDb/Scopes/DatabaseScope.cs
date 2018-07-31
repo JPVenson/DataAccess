@@ -38,8 +38,14 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		/// </summary>
 		public void Dispose()
 		{
-			LocalDbManager.Scope.OnSetupDone();
-			LocalDbManager.Scope = null;
+			try
+			{
+				LocalDbManager.Scope.OnSetupDone();
+			}
+			finally
+			{
+				LocalDbManager.Scope = null;
+			}
 		}
 
 		/// <summary>
