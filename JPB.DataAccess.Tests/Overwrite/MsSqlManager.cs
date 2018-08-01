@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Tests
 			}
 			if (Environment.GetEnvironmentVariable("build.with") == "VSTS")
 			{
-				ConnectionType = "CiConnection";
+				ConnectionType = "VSTSConnection";
 			}
 		}
 
