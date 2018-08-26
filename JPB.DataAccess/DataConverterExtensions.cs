@@ -339,6 +339,28 @@ namespace JPB.DataAccess
 					value = Encoding.Default.GetBytes(value as string);
 				}
 			}
+			else if (typeof(DateTimeOffset).IsAssignableFrom(t))
+			{
+				if (value is string)
+				{
+					DateTimeOffset val;
+					if (DateTimeOffset.TryParse(value.ToString(), out val))
+					{
+						return val;
+					}
+				}
+			}
+			else if (typeof(DateTime).IsAssignableFrom(t))
+			{
+				if (value is string)
+				{
+					DateTime val;
+					if (DateTime.TryParse(value.ToString(), out val))
+					{
+						return val;
+					}
+				}
+			}
 
 			return Convert.ChangeType(value, t);
 		}
