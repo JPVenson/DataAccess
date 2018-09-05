@@ -10,7 +10,6 @@ using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using JPB.DataAccess.Tests.TestFramework;
@@ -19,7 +18,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class CheckWrapperDatabaseBaseTests : DatabaseBaseTest

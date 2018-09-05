@@ -10,7 +10,7 @@ using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests
+namespace JPB.DataAccess.Tests.Overwrite
 {
 	public static class DataMigrationHelper
 	{

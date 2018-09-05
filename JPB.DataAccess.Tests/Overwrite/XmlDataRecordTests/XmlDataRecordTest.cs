@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.XmlDataRecordTests
+namespace JPB.DataAccess.Tests.Overwrite.XmlDataRecordTests
 
 {
 	[TestFixture]

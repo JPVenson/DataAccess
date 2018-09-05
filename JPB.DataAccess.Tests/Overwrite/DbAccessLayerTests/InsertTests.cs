@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
@@ -14,7 +13,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class InsertTests : DatabaseBaseTest

@@ -3,21 +3,19 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Transactions;
 using System.Xml.Serialization;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Tests.Base;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.LocalDbTests
+namespace JPB.DataAccess.Tests.Overwrite.LocalDbTests
 {
     [TestFixture]
     public class DatabaseSerializerTest

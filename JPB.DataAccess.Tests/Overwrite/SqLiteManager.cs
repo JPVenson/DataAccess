@@ -4,19 +4,16 @@ using System;
 using System.Configuration;
 using System.Data;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Text.RegularExpressions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.SqLite;
-using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
-using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests
+namespace JPB.DataAccess.Tests.Overwrite
 {
 	public class SqLiteManager : IManagerImplementation
 	{

@@ -45,7 +45,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// <summary>
 		/// Sets the Interal Alias to a new Uniq value
 		/// </summary>
-		protected void CreateNewIdentifier()
+		public void CreateNewIdentifier()
 		{
 			CurrentIdentifier = string.Format("{0}_{1}", Cache.TableName, ContainerObject.GetNextParameterId());
 		}

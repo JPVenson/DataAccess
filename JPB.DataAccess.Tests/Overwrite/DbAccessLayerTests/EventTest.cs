@@ -8,7 +8,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.None)]
 	[Explicit]

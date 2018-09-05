@@ -187,6 +187,21 @@ namespace JPB.DataAccess.Query
 
 
 		/// <summary>
+		///     Creates an closed sub select
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <param name="subSelect">The sub select.</param>
+		/// <param name="identifyer">The Identifyer for this SubQuery</param>
+		/// <returns></returns>
+		public static SelectQuery<T> SubSelect<T>(this RootQuery query,
+			Func<SelectQuery<T>> subSelect, string identifyer)
+		{
+			return new SelectQuery<T>(new SelectQuery<T>(query.QueryD("SELECT * FROM ").InBracket(f => f.Append(subSelect()))).As(identifyer));
+		}
+
+
+		/// <summary>
 		///     Creates a QueryCommand that uses the * Operator to select all date from the inner query
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.PocoPkEquallityTests
+namespace JPB.DataAccess.Tests.Overwrite.PocoPkEquallityTests
 
 {
 	[TestFixture]

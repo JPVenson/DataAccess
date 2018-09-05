@@ -14,7 +14,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.LocalDbTests
+namespace JPB.DataAccess.Tests.Overwrite.LocalDbTests
 
 {
 	[TestFixture]

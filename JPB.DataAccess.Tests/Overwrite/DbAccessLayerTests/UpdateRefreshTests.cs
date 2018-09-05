@@ -4,13 +4,12 @@ using System;
 using System.Linq;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class UpdateRefreshTests : DatabaseBaseTest

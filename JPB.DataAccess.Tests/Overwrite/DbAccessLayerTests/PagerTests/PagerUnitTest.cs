@@ -1,14 +1,13 @@
 ﻿#region
 
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 {
 	public class PagerUnitTest : DatabaseBaseTest
 	{

@@ -4,7 +4,7 @@ using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Tests
+namespace JPB.DataAccess.Tests.Overwrite
 {
 	public interface IManager
 	{

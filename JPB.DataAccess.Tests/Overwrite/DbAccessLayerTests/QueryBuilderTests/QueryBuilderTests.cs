@@ -14,7 +14,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 {
 	[TestFixture(DbAccessType.MsSql, true , false, true, EnumerationMode.FullOnLoad)]
 	[TestFixture(DbAccessType.MsSql, true , false, true, EnumerationMode.OnCall)]
@@ -362,6 +362,24 @@ namespace JPB.DataAccess.Tests.DbAccessLayerTests.QueryBuilderTests
 				.LimitBy(3)
 				.ToArray();
 			Assert.That(userses.Length, Is.EqualTo(3));
+		}
+
+		[Test]
+		public void SelectWithFactory()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(10, DbAccess);
+
+			foreach (var addUser in addUsers)
+			{
+				var query = CreateQuery().Select.Table<Users_StaticQueryFactoryForSelectWithArugments>(addUser);
+				var subQuery = CreateQuery().SubSelect(() => query, "query");
+				var user = subQuery
+					.Where
+					.Column(f => f.UserName).Is.Not.Null
+					.FirstOrDefault();
+				Assert.That(user, Is.Not.Null);
+				Assert.That(user.UserId, Is.EqualTo(addUser));
+			}
 		}
 
 		[Test]

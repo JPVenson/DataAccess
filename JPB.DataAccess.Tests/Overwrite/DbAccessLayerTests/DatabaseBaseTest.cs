@@ -9,7 +9,7 @@ using NUnit.Framework.Interfaces;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	public class ManagerScope : IDisposable
 	{

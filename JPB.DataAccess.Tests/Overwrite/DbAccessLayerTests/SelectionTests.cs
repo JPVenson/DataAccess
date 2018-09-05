@@ -14,7 +14,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[TestFixture(DbAccessType.MsSql, true, true, false)]
 	[TestFixture(DbAccessType.SqLite, true, true, false)]

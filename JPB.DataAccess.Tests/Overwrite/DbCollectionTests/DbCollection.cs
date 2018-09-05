@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbCollectionTests
+namespace JPB.DataAccess.Tests.Overwrite.DbCollectionTests
 {
 	[TestFixture]
 	public class DbCollection

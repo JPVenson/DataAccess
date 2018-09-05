@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,11 +10,10 @@ using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
-using System.Collections.Generic;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.LocalDbTests
+namespace JPB.DataAccess.Tests.Overwrite.LocalDbTests
 {
 	[TestFixture(false)]
 	[TestFixture(true)]

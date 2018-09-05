@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.DbAccessLayerTests.PagerTests
+namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 {
 	[TestFixture(DbAccessType.SqLite)]
 	[TestFixture(DbAccessType.MsSql)]

@@ -146,6 +146,7 @@
     <Compile Include="Overwrite\Manager.cs" />
     <Compile Include="Overwrite\MetaApiTests\MetaApiSpeedTest.cs" />
     <Compile Include="Overwrite\MetaApiTests\MetaApiTest.cs" />
+    <Compile Include="Overwrite\Misc\DataConverterTests.cs" />
     <Compile Include="Overwrite\MsSqlManager.cs" />
     <Compile Include="Overwrite\MySqlManager.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\PagerTests\PagerConstraintTests.cs" />

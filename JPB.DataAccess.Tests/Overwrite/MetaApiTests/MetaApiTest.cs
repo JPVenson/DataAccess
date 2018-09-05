@@ -14,7 +14,7 @@ using NUnit.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.MetaApiTests
+namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 
 {
 	[TestFixture]
