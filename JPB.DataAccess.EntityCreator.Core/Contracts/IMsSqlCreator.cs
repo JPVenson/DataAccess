@@ -4,7 +4,6 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 {
 	public interface IMsSqlCreator : IEntryCreator
 	{
-
 		IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
 		IEnumerable<ITableInfoModel> Tables { get; set; }
 		IEnumerable<Dictionary<int, string>> Enums { get; }
@@ -15,6 +14,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool GenerateForgeinKeyDeclarations { get; set; }
 		bool GenerateCompilerHeader { get; set; }
 		bool GenerateConfigMethod { get; set; }
+		bool SplitByType { get; set; }
 		string Namespace { get; set; }
 		string SqlVersion { get; set; }
 		bool WrapNullables { get; set; }

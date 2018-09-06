@@ -114,6 +114,9 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			Add(FactoryHelper.GenerateTypeConstructor(ColumninfosToInfoCache(columnInfos), Namespace));
 		}
 
+		/// <inheritdoc />
+		public override string Type { get; set; } = "Table";
+
 		public override void PreCompile()
 		{
 			_base.IsClass = true;

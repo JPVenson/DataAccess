@@ -35,6 +35,7 @@
 							<xctk:PropertyDefinition TargetProperties="GenerateForgeinKeyDeclarations" Description="Create ForeignKeyDeclarationAttribute attribute on ForgeinKey Propertys" />
 							<xctk:PropertyDefinition TargetProperties="GenerateConfigMethod" Description="Creates an Method that Manipulates the ConfigStore. This removes all Attributes from all propertys and the class. It also remove (if exists) the Ado.net Constructor" />
 							<xctk:PropertyDefinition TargetProperties="GenerateCompilerHeader" Description="Creates an Comment with the current Date and Creating user" />
+							<xctk:PropertyDefinition TargetProperties="SplitByType" Description="Splits Tables into a Table folder, views into a Views folder and so on." />
 							<xctk:PropertyDefinition TargetProperties="WrapNullables" Description="Wraps all DbNullables to C# NULL values" />
 						</xctk:PropertyGrid.PropertyDefinitions>
 					</xctk:PropertyGrid>

@@ -52,6 +52,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public bool GenerateForgeinKeyDeclarations { get; set; }
 		public bool GenerateCompilerHeader { get; set; }
 		public bool GenerateConfigMethod { get; set; }
+
+		/// <inheritdoc />
+		public bool SplitByType { get; set; }
 		public string Namespace { get; set; }
 
 		public void CreateEntrys(string connection, string outputPath, string database)
@@ -133,7 +136,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				}
 
 				Console.WriteLine("Compile Procedure {0}", compiler.Name);
-				compiler.Compile(new List<ColumInfoModel>());
+				compiler.Compile(new List<ColumInfoModel>(), SplitByType);
 			}
 
 			Console.WriteLine("Created all files");

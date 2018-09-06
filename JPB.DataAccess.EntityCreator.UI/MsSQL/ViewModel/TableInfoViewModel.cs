@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿#region
+
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
+using JPB.DataAccess.EntityCreator.UI.MsSQL.Services;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models;
 using JPB.ErrorValidation.ViewModelProvider;
@@ -11,13 +14,18 @@ using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
+#endregion
+
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
-	[DebuggerDisplay("{GetClassName()}")]
+	[DebuggerDisplay("{" + nameof(GetClassName) + "()}")]
 	public class TableInfoViewModel : AsyncErrorProviderBase<TableInfoModelErrorProvider>, ITableInfoModel
 	{
 		private readonly SqlEntityCreatorViewModel _compilerOptions;
-		public ITableInfoModel SourceElement { get; set; }
+
+		private ThreadSaveObservableCollection<ColumnInfoViewModel> _columnInfoModels;
+
+		private ColumnInfoViewModel _selectedColumn;
 
 		public TableInfoViewModel(ITableInfoModel sourceElement, SqlEntityCreatorViewModel compilerOptions)
 		{
@@ -27,8 +35,10 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			AddColumnCommand = new DelegateCommand(AddColumnExecute, CanAddColumnExecute);
 			RemoveColumnCommand = new DelegateCommand(RemoveColumnExecute, CanRemoveColumnExecute);
 			ColumnInfoModels = new ThreadSaveObservableCollection<ColumnInfoViewModel>();
-			this.Refresh();
+			Refresh();
 		}
+
+		public ITableInfoModel SourceElement { get; set; }
 
 		[ExpandableObject]
 		public ITableInformations Info
@@ -51,8 +61,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		private ColumnInfoViewModel _selectedColumn;
-
 		public ColumnInfoViewModel SelectedColumn
 		{
 			get { return _selectedColumn; }
@@ -63,8 +71,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				SendPropertyChanged(() => SelectedColumn);
 			}
 		}
-
-		private ThreadSaveObservableCollection<ColumnInfoViewModel> _columnInfoModels;
 
 		public ThreadSaveObservableCollection<ColumnInfoViewModel> ColumnInfoModels
 		{
@@ -88,6 +94,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.NewTableName = value;
+				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -98,6 +105,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.Exclude = value;
+				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -108,6 +116,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.CreateFallbackProperty = value;
+				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -118,6 +127,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.CreateSelectFactory = value;
+				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -128,6 +138,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.CreateDataRecordLoader = value;
+				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -138,55 +149,55 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.WrapNullables = value;
+				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
+
+		public DelegateCommand RemoveColumnCommand { get; private set; }
+
+		public DelegateCommand AddColumnCommand { get; private set; }
+
+		public DelegateCommand CreatePreviewCommand { get; private set; }
 
 		public string GetClassName()
 		{
 			return SourceElement.GetClassName();
 		}
 
-		public DelegateCommand RemoveColumnCommand { get; private set; }
-
 		private void RemoveColumnExecute(object sender)
 		{
-			this.ColumnInfoModels.Remove(this.SelectedColumn);
+			ColumnInfoModels.Remove(SelectedColumn);
+			MementoService.Instance.SetOption(new RemoveColumnAction(Info.TableName, SelectedColumn.ColumnInfo.ColumnName));
 		}
 
 		private bool CanRemoveColumnExecute(object sender)
 		{
-			return this.SelectedColumn != null;
+			return SelectedColumn != null;
 		}
-
-		public DelegateCommand AddColumnCommand { get; private set; }
 
 		private void AddColumnExecute(object sender)
 		{
-			var columnData = new ColumnInfo()
+			var columnData = new ColumnInfo
 			{
 				ColumnName = "New Column",
-				TargetType = typeof(object),
-				//TargetType2 = SqlDbType.Binary.ToString()
+				TargetType = typeof(object)
 			};
+			MementoService.Instance.SetOption(new AddColumnAction(Info.TableName, "New Column"));
 			AddColumn(columnData);
 		}
 
 		public void AddColumn(IColumnInfo column)
 		{
 			var columnMeta = new ColumInfoModel(column);
-
 			var collumnVm = new ColumnInfoViewModel(columnMeta);
-
-			this.ColumnInfoModels.Add(collumnVm);
+			ColumnInfoModels.Add(collumnVm);
 		}
 
 		private bool CanAddColumnExecute(object sender)
 		{
 			return true;
 		}
-
-		public DelegateCommand CreatePreviewCommand { get; private set; }
 
 		private void CreatePreviewExecute(object sender)
 		{
@@ -197,7 +208,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		private bool CanCreatePreviewExecute(object sender)
 		{
-			return this._compilerOptions.SelectedTable != null;
+			return _compilerOptions.SelectedTable != null;
 		}
 
 		public void Refresh()
@@ -207,6 +218,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				ColumnInfoModels.Add(result);
 			}
+
 			SendPropertyChanged(string.Empty);
 		}
 	}

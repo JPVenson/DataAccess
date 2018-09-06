@@ -16,6 +16,8 @@ using JPB.DataAccess.EntityCreator.Core;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
+using JPB.DataAccess.EntityCreator.UI.MsSQL.Services;
+using JPB.DataAccess.EntityCreator.UI.Shared.Model;
 using JPB.DataAccess.Manager;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
@@ -31,6 +33,22 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
 	public class SqlEntityCreatorViewModel : AsyncViewModelBase, IMsSqlCreator
 	{
+		private bool _connected;
+		private string _connectionString;
+		private ThreadSaveObservableCollection<Dictionary<int, string>> _enums;
+		private bool _generateCompilerHeader;
+		private bool _generateConfigMethod;
+		private bool _generateConstructor;
+		private bool _generateForgeinKeyDeclarations;
+		private bool _isEnumeratingDatabase;
+		private string _namespace;
+		private ITableInfoModel _selectedTable;
+		private string _status;
+		private ThreadSaveObservableCollection<IStoredPrcInfoModel> _storedProcs;
+		private ThreadSaveObservableCollection<TableInfoViewModel> _tables;
+		private ThreadSaveObservableCollection<TableInfoViewModel> _views;
+		private bool _wrapNullables;
+
 		public SqlEntityCreatorViewModel()
 		{
 			AdjustNamesCommand = new DelegateCommand(AdjustNamesExecute, CanAdjustNamesExecute);
@@ -47,42 +65,25 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			StoredProcs = new ThreadSaveObservableCollection<IStoredPrcInfoModel>();
 			Enums = new ThreadSaveObservableCollection<Dictionary<int, string>>();
 			SharedInterfaces = new ThreadSaveObservableCollection<ISharedInterface>();
-
 			SharedMethods.Logger = new DelegateLogger(message => Status = message);
 		}
 
-		private bool _connected;
-
-		private string _connectionString;
-
-		private ThreadSaveObservableCollection<Dictionary<int, string>> _enums;
-
-		private bool _generateCompilerHeader;
-
-		private bool _generateConfigMethod;
-		private bool _generateConstructor;
-
-		private bool _generateForgeinKeyDeclarations;
-
-		private bool _isEnumeratingDatabase;
-
-		private string _namespace;
-
-		private ITableInfoModel _selectedTable;
-
-		private string _status;
-
-		private ThreadSaveObservableCollection<IStoredPrcInfoModel> _storedProcs;
-
-		private ThreadSaveObservableCollection<TableInfoViewModel> _tables;
-
-		private ThreadSaveObservableCollection<TableInfoViewModel> _views;
-
 		public DelegateCommand OpenInfoWindowCommand { get; set; }
-
 		public DelegateCommand LoadConfigCommand { get; private set; }
-
 		public DelegateCommand SaveConfigCommand { get; private set; }
+		private bool _splitByType;
+
+		public bool SplitByType
+		{
+			get { return _splitByType; }
+			set
+			{
+				SendPropertyChanging(() => SplitByType);
+				_splitByType = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
+				SendPropertyChanged(() => SplitByType);
+			}
+		}
 
 		public ITableInfoModel SelectedTable
 		{
@@ -146,6 +147,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => ConnectionString);
 				_connectionString = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => ConnectionString);
 			}
 		}
@@ -181,6 +183,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 							string.Format("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action",
 							Tables.Count, Views.Count, StoredProcs.Count);
 				}
+
 				SendPropertyChanging(() => IsEnumeratingDatabase);
 				_isEnumeratingDatabase = value;
 				SendPropertyChanged(() => IsEnumeratingDatabase);
@@ -222,13 +225,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		IEnumerable<Dictionary<int, string>> IMsSqlCreator.Enums { get; }
 
-		public void CreateEntrys(string connection, string outputPath, string database)
-		{
-			var entrysAsync = CreateEntrysAsync(connection, outputPath, database);
-		}
-
-		private bool _wrapNullables;
-
 		public bool WrapNullables
 		{
 			get { return _wrapNullables; }
@@ -236,8 +232,85 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => WrapNullables);
 				_wrapNullables = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => WrapNullables);
 			}
+		}
+
+		IEnumerable<IStoredPrcInfoModel> IMsSqlCreator.StoredProcs
+		{
+			get { return StoredProcs; }
+		}
+
+		public string TargetDir { get; set; }
+
+		public bool GenerateConstructor
+		{
+			get { return _generateConstructor; }
+			set
+			{
+				SendPropertyChanging(() => GenerateConstructor);
+				_generateConstructor = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
+				SendPropertyChanged(() => GenerateConstructor);
+			}
+		}
+
+		public string SqlVersion { get; set; }
+
+		public string Namespace
+		{
+			get { return _namespace; }
+			set
+			{
+				SendPropertyChanging(() => Namespace);
+				_namespace = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
+				SendPropertyChanged(() => Namespace);
+			}
+		}
+
+		public bool GenerateForgeinKeyDeclarations
+		{
+			get { return _generateForgeinKeyDeclarations; }
+			set
+			{
+				SendPropertyChanging(() => GenerateForgeinKeyDeclarations);
+				_generateForgeinKeyDeclarations = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
+				SendPropertyChanged(() => GenerateForgeinKeyDeclarations);
+			}
+		}
+
+		public bool GenerateConfigMethod
+		{
+			get { return _generateConfigMethod; }
+			set
+			{
+				SendPropertyChanging(() => GenerateConfigMethod);
+				_generateConfigMethod = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
+				SendPropertyChanged(() => GenerateConfigMethod);
+			}
+		}
+
+		public bool GenerateCompilerHeader
+		{
+			get { return _generateCompilerHeader; }
+			set
+			{
+				SendPropertyChanging(() => GenerateCompilerHeader);
+				_generateCompilerHeader = value;
+				MementoService.Instance.SetOption(new SetPropertyAction(value));
+				SendPropertyChanged(() => GenerateCompilerHeader);
+			}
+		}
+
+		public IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
+
+		public void CreateEntrys(string connection, string outputPath, string database)
+		{
+			var entrysAsync = CreateEntrysAsync(connection, outputPath, database);
 		}
 
 		public void Compile()
@@ -275,6 +348,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 					Status = string.Format("Compiling Table '{0}'", tableInfoModel.GetClassName());
 					SharedMethods.CompileTable(tableInfoModel, this);
 				}
+
 				foreach (var tableInfoModel in Views)
 				{
 					Status = string.Format("Compiling View '{0}'", tableInfoModel.GetClassName());
@@ -283,72 +357,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		IEnumerable<IStoredPrcInfoModel> IMsSqlCreator.StoredProcs
-		{
-			get { return StoredProcs; }
-		}
-
-		public string TargetDir { get; set; }
-
-		public bool GenerateConstructor
-		{
-			get { return _generateConstructor; }
-			set
-			{
-				SendPropertyChanging(() => GenerateConstructor);
-				_generateConstructor = value;
-				SendPropertyChanged(() => GenerateConstructor);
-			}
-		}
-
-		public string SqlVersion { get; set; }
-
-		public string Namespace
-		{
-			get { return _namespace; }
-			set
-			{
-				SendPropertyChanging(() => Namespace);
-				_namespace = value;
-				SendPropertyChanged(() => Namespace);
-			}
-		}
-
-		public bool GenerateForgeinKeyDeclarations
-		{
-			get { return _generateForgeinKeyDeclarations; }
-			set
-			{
-				SendPropertyChanging(() => GenerateForgeinKeyDeclarations);
-				_generateForgeinKeyDeclarations = value;
-				SendPropertyChanged(() => GenerateForgeinKeyDeclarations);
-			}
-		}
-
-		public bool GenerateConfigMethod
-		{
-			get { return _generateConfigMethod; }
-			set
-			{
-				SendPropertyChanging(() => GenerateConfigMethod);
-				_generateConfigMethod = value;
-				SendPropertyChanged(() => GenerateConfigMethod);
-			}
-		}
-
-		public bool GenerateCompilerHeader
-		{
-			get { return _generateCompilerHeader; }
-			set
-			{
-				SendPropertyChanging(() => GenerateCompilerHeader);
-				_generateCompilerHeader = value;
-				SendPropertyChanged(() => GenerateCompilerHeader);
-			}
-		}
-
-		public IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
-
 		public async Task CreateEntrysAsync(string connection, string outputPath, string database)
 		{
 			Status = "Try to connect";
@@ -356,6 +364,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			IsEnumeratingDatabase = true;
 			TargetDir = outputPath;
 			Manager = new DbAccessLayer(DbAccessType.MsSql, connection);
+			Manager.Async = false;
+			Manager.ThreadSave = true;
 			DbConfig.EnableGlobalThreadSafety = true;
 			try
 			{
@@ -373,6 +383,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				Status = "Database not accessible. Maybe wrong Connection or no Selected Database?";
 				return;
 			}
+
 			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
 			if (string.IsNullOrEmpty(databaseName))
 			{
@@ -381,6 +392,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				Connected = false;
 				return;
 			}
+
 			Status = "Connection OK ... Reading Server Version ...";
 
 			SqlVersion = Manager.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
@@ -392,8 +404,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				var tables = new DbAccessLayer(DbAccessType.MsSql, connection).Select<TableInformations>()
 				                                                              .Select(
 				                                                              s =>
-					                                                              new TableInfoModel(s, databaseName,
-					                                                              new DbAccessLayer(DbAccessType.MsSql, connection)))
+						                                                              new TableInfoModel(s, databaseName,
+						                                                              new DbAccessLayer(DbAccessType.MsSql, connection)))
 				                                                              .Select(s => new TableInfoViewModel(s, this))
 				                                                              .ToList();
 				foreach (var source in tables)
@@ -485,63 +497,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 					ConnectionString = options.SourceConnectionString;
 					CreateEntrysAsync(ConnectionString, "", string.Empty).ContinueWith(task =>
 					{
-						var mapper = new Mapper(new MapperConfiguration(config =>
+						foreach (var optionsAction in options.Actions)
 						{
-							config.CreateMissingTypeMaps = true;
-
-							config.CreateMap<TableInfoModel, TableInfoModel>();
-							config.CreateMap<ColumInfoModel, ColumInfoModel>();
-							config.CreateMap<ColumnInfo, ColumnInfo>().ForMember(f => f.TargetType, f => f.Ignore());
-							config.CreateMap<EnumDeclarationModel, EnumDeclarationModel>();
-							config.CreateMap<ForgeinKeyInfoModel, ForgeinKeyInfoModel>();
-							config.CreateMap<TableInformations, TableInformations>();
-							config.CreateMap<StoredPrcInfoModel, StoredPrcInfoModel>();
-						}));
-
-						var defaultContextMapper = mapper.DefaultContext.Mapper;
-
-						foreach (var fileTable in options.Tables.ToArray())
-						{
-							var originalTable = Tables.FirstOrDefault(s => s.Info.TableName == fileTable.Info.TableName);
-							if (originalTable != null)
-							{
-								defaultContextMapper.Map(fileTable, originalTable);
-								foreach (var fileColumn in fileTable.ColumnInfos.ToArray())
-								{
-									var origianlColumn =
-											originalTable.ColumnInfos.FirstOrDefault(f => f.GetPropertyName() == fileColumn.GetPropertyName());
-
-									//if (origianlColumn == null)
-									//{
-									//	originalTable.AddColumn(fileColumn.ColumnInfo);
-									//}
-									//else
-									//{
-									//	defaultContextMapper.Map(fileColumn, origianlColumn);
-									//}
-								}
-
-								//originalTable.Refresh();
-							}
-							else
-							{
-								Tables.Add(new TableInfoViewModel(fileTable, this));
-							}
+							optionsAction.Replay(this);
 						}
-						SelectedTable = Tables.FirstOrDefault();
 					});
 				}
-
-				//foreach (var option in options.StoredPrcInfoModels)
-				//{
-				//	StoredProcs.Add(option);
-				//}
-				GenerateConstructor = options.GenerateConstructor;
-				GenerateForgeinKeyDeclarations = options.GenerateForgeinKeyDeclarations;
-				GenerateCompilerHeader = options.GenerateCompilerHeader;
-				GenerateConfigMethod = options.GenerateConfigMethod;
-				Namespace = options.Namespace;
-				TargetDir = options.TargetDir;
 			}
 		}
 
@@ -560,16 +521,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			if (fileResult == DialogResult.OK)
 			{
 				var options = new ConfigStore();
-				options.StoredPrcInfoModels = StoredProcs.ToList();
-				options.Views = Views.Select(f => f.SourceElement).ToList();
-				options.Tables = Tables.Select(f => f.SourceElement).ToList();
-
-				options.GenerateConstructor = GenerateConstructor;
-				options.GenerateForgeinKeyDeclarations = GenerateForgeinKeyDeclarations;
-				options.GenerateCompilerHeader = GenerateCompilerHeader;
-				options.GenerateConfigMethod = GenerateConfigMethod;
-				options.Namespace = Namespace;
-				options.TargetDir = TargetDir;
+				options.Actions = MementoService.Instance.Actions;
 
 				var version = typeof(SharedMethods).Assembly.GetName().Version;
 
@@ -584,6 +536,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				{
 					File.Delete(fileDialog.FileName);
 				}
+
 				using (var fs = fileDialog.OpenFile())
 				{
 					new BinaryFormatter().Serialize(fs, options);
@@ -629,11 +582,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		{
 			Tables.Add(new TableInfoViewModel(new TableInfoModel
 			{
-				Info = new TableInformations
-				{
-					TableName = "New Table"
-				}
+					Info = new TableInformations
+					{
+							TableName = "New Table"
+					}
 			}, this));
+			MementoService.Instance.SetOption(new CreateTableAction("New Table"));
 		}
 
 		private bool CanAddTableExecute(object sender)
@@ -644,6 +598,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private void DeleteSelectedTableExecute(object sender)
 		{
 			Tables.Remove(SelectedTable);
+			MementoService.Instance.SetOption(new CreateTableAction(SelectedTable.Info.TableName));
+			SelectedTable = null;
 		}
 
 		private bool CanDeleteSelectedTableExecute(object sender)
@@ -653,7 +609,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		private void CompileExecute(object sender)
 		{
-			SimpleWork(() => { Compile(); });
+			SimpleWork(Compile);
 		}
 
 		private bool CanCompileExecute(object sender)
@@ -675,12 +631,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 	public class DelegateLogger : ILogger
 	{
+		private readonly Action<string> _resolve;
+
 		public DelegateLogger(Action<string> resolve)
 		{
 			_resolve = resolve;
 		}
-
-		private readonly Action<string> _resolve;
 
 		public void Write(string content, params object[] arguments)
 		{
@@ -694,6 +650,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				_resolve(Environment.NewLine);
 				return;
 			}
+
 			_resolve(string.Format(content, arguments));
 			_resolve(Environment.NewLine);
 		}

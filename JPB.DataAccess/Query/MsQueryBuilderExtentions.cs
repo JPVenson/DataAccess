@@ -194,10 +194,10 @@ namespace JPB.DataAccess.Query
 		/// <param name="subSelect">The sub select.</param>
 		/// <param name="identifyer">The Identifyer for this SubQuery</param>
 		/// <returns></returns>
-		public static SelectQuery<T> SubSelect<T>(this RootQuery query,
-			Func<SelectQuery<T>> subSelect, string identifyer)
+		public static ElementProducer<T> SubSelect<T>(this RootQuery query,
+			Func<ElementProducer<T>> subSelect, string identifyer)
 		{
-			return new SelectQuery<T>(new SelectQuery<T>(query.QueryD("SELECT * FROM ").InBracket(f => f.Append(subSelect()))).As(identifyer));
+			return new ElementProducer<T>(new ElementProducer<T>(query.QueryD("SELECT * FROM ").InBracket(f => f.Append(subSelect()))).As(identifyer));
 		}
 
 

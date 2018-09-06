@@ -62,6 +62,11 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		public string Name { get { return _base.Name; } }
 
+		/// <summary>
+		///		What type of Element is this. e.g. Table/View/StoredProcedure
+		/// </summary>
+		public abstract string Type { get; set; }
+
 		public bool CompileHeader { get; set; }
 
 		public bool GenerateConfigMethod { get; set; }
@@ -141,7 +146,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			return dic;
 		}
 
-		public virtual void Compile(IEnumerable<IColumInfoModel> columnInfos, Stream to = null)
+		public virtual void Compile(IEnumerable<IColumInfoModel> columnInfos, bool splitByType, Stream to = null)
 		{
 			if (to != null)
 			{
@@ -151,7 +156,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 					throw new InvalidOperationException("The stream must be writeable");
 			}
 
-			this.PreCompile();
+			PreCompile();
 			if (string.IsNullOrEmpty(TableName))
 			{
 				TableName = TargetCsName;
@@ -159,8 +164,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 			var comments = (new[]
 			{
-				new CodeCommentStatement("Created by " + Environment.UserDomainName + @"\" + Environment.UserName),
-				new CodeCommentStatement("Created on " + DateTime.Now.ToString("yyyy MMMM dd"))
+				new CodeCommentStatement("<author>"),
+				new CodeCommentStatement("<created-by>" + Environment.UserDomainName + @"\" + Environment.UserName + "</created-by>"),
+				new CodeCommentStatement("<created-on> " + DateTime.Now.ToString("yyyy MMMM dd") + "<created-on>"),
+				new CodeCommentStatement("</author>"),
 			}).ToArray();
 
 			//Create DOM class
@@ -185,7 +192,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			}
 
 			//Add Code Generated Attribute
-			var generatedCodeAttribute = new GeneratedCodeAttribute(AttrbuteHeader, "1.0.0.9");
+			var generatedCodeAttribute = new GeneratedCodeAttribute(AttrbuteHeader, "1.0.0.91");
 			var codeAttrDecl = new CodeAttributeDeclaration(generatedCodeAttribute.GetType().Name,
 				new CodeAttributeArgument(
 					new CodePrimitiveExpression(generatedCodeAttribute.Tool)),
@@ -252,7 +259,14 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 				//check if hascodes are diverent
 				var hasher = MD5.Create();
 				var neuHash = hasher.ComputeHash(memStream.ToArray());
-				var targetFileName = Path.Combine(TargetDir, _base.Name + ".cs");
+				var targetDirectory = TargetDir;
+
+				if (splitByType)
+				{
+					targetDirectory = Path.Combine(targetDirectory, Type);
+				}
+
+				var targetFileName = Path.Combine(targetDirectory, _base.Name + ".cs");
 				if (to == null)
 				{
 					using (var fileStream = new FileStream(targetFileName, FileMode.OpenOrCreate))

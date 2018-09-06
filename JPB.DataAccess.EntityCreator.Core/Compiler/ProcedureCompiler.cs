@@ -17,7 +17,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		}
 
-		public override void Compile(IEnumerable<IColumInfoModel> columnInfos, Stream to = null)
+		/// <inheritdoc />
+		public override string Type { get; set; } = "StoredProcedure";
+
+		public override void Compile(IEnumerable<IColumInfoModel> columnInfos, bool splitByType, Stream to = null)
 		{
 			if (string.IsNullOrEmpty(TableName))
 			{

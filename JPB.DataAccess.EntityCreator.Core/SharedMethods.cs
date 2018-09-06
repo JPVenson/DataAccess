@@ -35,11 +35,21 @@ namespace JPB.DataAccess.EntityCreator.Core
 				}
 			}
 			sharedProps = sharedProps.Where(f => f.Value.Count > 1)
-			                         .ToDictionary(f => f.Key, f => f.Value.ToDictionary(g => g.Key, g => g.Value));
+									 .ToDictionary(f => f.Key, f => f.Value.ToDictionary(g => g.Key, g => g.Value));
 			return sharedProps.Select(f => new SharedInterface("IHas" + f.Key, null, f.Value.Select(e => e.Value).ToList())).ToList();
 		}
 
+		public static void CompileView(ITableInfoModel tableInfoModel, IMsSqlCreator sourceCreator, Stream to = null)
+		{
+			CompileTableLike(tableInfoModel, sourceCreator, "View", to);
+		}
+
 		public static void CompileTable(ITableInfoModel tableInfoModel, IMsSqlCreator sourceCreator, Stream to = null)
+		{
+			CompileTableLike(tableInfoModel, sourceCreator, "Table", to);
+		}
+
+		private static void CompileTableLike(ITableInfoModel tableInfoModel, IMsSqlCreator sourceCreator, string typeName, Stream to = null)
 		{
 			if (tableInfoModel.Exclude)
 				return;
@@ -47,6 +57,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 			var targetCsName = tableInfoModel.GetClassName();
 
 			var compiler = new ClassCompiler(sourceCreator.TargetDir, targetCsName);
+			compiler.Type = typeName;
 			compiler.CompileHeader = sourceCreator.GenerateCompilerHeader;
 			compiler.Namespace = sourceCreator.Namespace;
 			compiler.TableName = tableInfoModel.Info.TableName;
@@ -117,7 +128,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 			}
 
 			Logger.WriteLine("Compile Class {0}", compiler.Name);
-			compiler.Compile(tableInfoModel.ColumnInfos, to);
+			compiler.Compile(tableInfoModel.ColumnInfos, sourceCreator.SplitByType, to);
 		}
 
 		public static void AutoAlignNames(IEnumerable<ITableInfoModel> tableNames)
@@ -163,21 +174,21 @@ namespace JPB.DataAccess.EntityCreator.Core
 			Logger.WriteLine("Renaming is done");
 		}
 
-		private static readonly char[] unvalid = { '_', ' ', '.' };
+		private static readonly char[] _invalidColumnChars = { '_', ' ', '.' };
 
 		public static string CheckOrAlterName(string name)
 		{
 			var newName = name;
 
-			foreach (var unvalidPart in unvalid)
+			foreach (var unvalidPart in _invalidColumnChars)
 			{
-				if (newName.Contains(unvalidPart))
+				while (newName.Contains(unvalidPart))
 				{
 					var indexOfElement = newName.IndexOf(unvalidPart.ToString(CultureInfo.InvariantCulture), System.StringComparison.Ordinal) + 1;
 					if (indexOfElement < newName.Length)
 					{
 						var elementAt = newName.ElementAt(indexOfElement);
-						if (!unvalid.Contains(elementAt))
+						if (!_invalidColumnChars.Contains(elementAt))
 						{
 							var remove = newName.Remove(indexOfElement, 1);
 							newName = remove.Insert(indexOfElement, elementAt.ToString(CultureInfo.InvariantCulture).ToUpper());
