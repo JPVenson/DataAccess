@@ -75,13 +75,13 @@ namespace JPB.DataAccess.Manager
 		{
 			if (dbAccessType == DbAccessType.Unknown)
 			{
-				throw new InvalidEnumArgumentException("dbAccessType", (int) DbAccessType.Unknown, typeof(DbAccessType));
+				throw new InvalidEnumArgumentException("dbAccessType", (int)DbAccessType.Unknown, typeof(DbAccessType));
 			}
 
 			DbAccessType = dbAccessType;
 			Database = new DefaultDatabaseAccess(new InstanceConnectionController());
 			var database =
-					GenerateStrategy(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value, connection);
+					GenerateStrategyFromExternal(ProviderCollection.FirstOrDefault(s => s.Key == dbAccessType).Value, connection);
 			Database.Attach(database);
 			DatabaseStrategy = database;
 		}
@@ -100,7 +100,7 @@ namespace JPB.DataAccess.Manager
 
 			ResolveDbType(fullTypeNameToIDatabaseStrategy);
 
-			var database = GenerateStrategy(fullTypeNameToIDatabaseStrategy, string.Concat((object) connection));
+			var database = GenerateStrategyFromExternal(fullTypeNameToIDatabaseStrategy, connection);
 
 			Database = new DefaultDatabaseAccess(new InstanceConnectionController());
 			Database.Attach(database);
@@ -167,7 +167,7 @@ namespace JPB.DataAccess.Manager
 		public static PreDefinedProviderCollection ProviderCollection { get; private set; }
 
 		/// <summary>
-		///     if set the created reader of an read operation will be completely stored then the open connection will be closed
+		///     if set the created reader of an read operation will be completely stored in memory then the open connection will be closed
 		///     Default is true
 		/// </summary>
 		public bool LoadCompleteResultBeforeMapping { get; set; }
@@ -251,7 +251,7 @@ namespace JPB.DataAccess.Manager
 			return new DbAccessLayer(_database.Clone(), Config);
 		}
 
-		internal IDatabaseStrategy GenerateStrategy(string fullValidIdentifyer, string connection)
+		internal IDatabaseStrategy GenerateStrategyFromExternal(string fullValidIdentifyer, string connection)
 		{
 			if (string.IsNullOrEmpty(fullValidIdentifyer))
 			{
@@ -261,35 +261,49 @@ namespace JPB.DataAccess.Manager
 			var type = Type.GetType(fullValidIdentifyer);
 			if (type == null)
 			{
-				var parallelQuery = Directory.EnumerateFiles(DefaultLookupPath, "*.dll",
-				SearchOption.TopDirectoryOnly);
+				List<string> parts = fullValidIdentifyer.Split(',')
+					.Select(x => x.Trim())
+					.ToList();
 
-				//Assembly assam = null;
+				string name = parts[0];
+				string assembly = parts.Count < 2 ? null : parts[1];
+				string version = parts.Count < 3 ? null : parts[2];
+				string culture = parts.Count < 4 ? null : parts[3];
+				string token = parts.Count < 5 ? null : parts[4];
 
-				Parallel.ForEach(parallelQuery, (s, e) =>
+				if (version != null && !version.StartsWith("Version="))
 				{
-					Assembly loadFile;
-					try
-					{
-						loadFile = Assembly.LoadFile(s);
-					}
-					catch (Exception)
-					{
-						return;
-					}
+					throw new ArgumentException("Invalid version: " + version);
+				}
 
-					var resolve = loadFile.GetType(fullValidIdentifyer);
-					if (resolve != null)
-					{
-						type = resolve;
-						//assam = loadFile;
-						e.Break();
-					}
-				});
-
-				if (type == null)
+				if (assembly == null)
 				{
-					throw new ArgumentException("Type was not found");
+					throw new ArgumentException("Invalid Assembly declaration, Not existing: " + fullValidIdentifyer);
+				}
+
+				Assembly loadFile;
+				try
+				{
+					var assemblyName = new AssemblyName(fullValidIdentifyer);
+					assemblyName.CodeBase = Path.Combine(DefaultLookupPath, assemblyName.CodeBase);
+					loadFile = Assembly.Load(assemblyName);
+					type = Type.GetType(fullValidIdentifyer);
+					if (type == null)
+					{
+						throw new DllNotFoundException("Could not load the requested type from loaded Assembly.")
+						{
+							Data =
+							{
+								{"Assembly", assemblyName},
+								{"Type", name},
+								{"fullValidIdentifyer", fullValidIdentifyer},
+							}
+						};
+					}
+				}
+				catch (Exception ex)
+				{
+					throw new AggregateException("Could not load the requested DatabaseStrategy from dll", ex);
 				}
 			}
 
@@ -303,11 +317,11 @@ namespace JPB.DataAccess.Manager
 			//try constructor injection
 			var ctOfType =
 					type.GetConstructors()
-					    .FirstOrDefault(
-					    s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
+						.FirstOrDefault(
+						s => s.GetParameters().Length == 1 && s.GetParameters().First().ParameterType == typeof(string));
 			if (ctOfType != null)
 			{
-				return ctOfType.Invoke(new object[] {connection}) as IDatabaseStrategy;
+				return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
 			}
 
 			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
@@ -324,8 +338,8 @@ namespace JPB.DataAccess.Manager
 		{
 			// ReSharper disable once PossibleInvalidOperationException
 			var firstOrDefault =
-					ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
-					                  .FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
+					ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?)s)
+									  .FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
 			DbAccessType = firstOrDefault == null ? DbAccessType.Unknown : firstOrDefault.Value.Key;
 		}
 
@@ -390,7 +404,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			return ExecuteGenericCommand(query,
-			(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
+			(IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
 		}
 
 		/// <summary>
@@ -418,8 +432,8 @@ namespace JPB.DataAccess.Manager
 					}
 				}
 			});
-		}	
-		
+		}
+
 		/// <summary>
 		///     Execute a QueryCommand without Paramters
 		/// </summary>
@@ -533,7 +547,7 @@ namespace JPB.DataAccess.Manager
 
 			if (classInfo.WrapNullables != null && !(reader is EgarNullableWrappedRecord) && reader is EgarDataRecord)
 			{
-				reader = new EgarNullableWrappedRecord(reader, ((EgarDataRecord) reader)._configStore);
+				reader = new EgarNullableWrappedRecord(reader, ((EgarDataRecord)reader)._configStore);
 			}
 
 			if (classInfo.Factory != null)
@@ -544,16 +558,16 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var objectFactorys = classInfo.Constructors.Where(s =>
-					                              s.Arguments.Count == 1
-					                              && s.Arguments.First().Type == typeof(IDataRecord))
-			                              .ToArray();
+												  s.Arguments.Count == 1
+												  && s.Arguments.First().Type == typeof(IDataRecord))
+										  .ToArray();
 
 			var constructor = objectFactorys.FirstOrDefault(s =>
 					s.Attributes.Any(f =>
 							f.Attribute is ObjectFactoryMethodAttribute
 							&&
 							(!accessType.HasValue ||
-							 ((ObjectFactoryMethodAttribute) f.Attribute).TargetDatabase == accessType.Value)));
+							 ((ObjectFactoryMethodAttribute)f.Attribute).TargetDatabase == accessType.Value)));
 
 			if (constructor == null)
 			{
@@ -567,7 +581,7 @@ namespace JPB.DataAccess.Manager
 				if (constructor.Arguments.Count == 1 && constructor.Arguments.First().Type == typeof(IDataRecord))
 				{
 					classInfo.FullFactory = true;
-					classInfo.Factory = s => constructor.Invoke(new object[] {s});
+					classInfo.Factory = s => constructor.Invoke(new object[] { s });
 					return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 				}
 			}
@@ -576,7 +590,7 @@ namespace JPB.DataAccess.Manager
 				//check for a Factory mehtod
 				var factory =
 						classInfo.Mehtods
-						         .FirstOrDefault(s => s.Attributes.Any(f => f.Attribute is ObjectFactoryMethodAttribute));
+								 .FirstOrDefault(s => s.Attributes.Any(f => f.Attribute is ObjectFactoryMethodAttribute));
 
 				if (factory != null)
 				{
@@ -590,10 +604,10 @@ namespace JPB.DataAccess.Manager
 							if (returnType != null && returnType.ParameterType == classInfo.Type)
 							{
 								if (factory.Arguments.Count == 1 &&
-								    factory.Arguments.First().Type == typeof(IDataRecord))
+									factory.Arguments.First().Type == typeof(IDataRecord))
 								{
 									classInfo.FullFactory = true;
-									classInfo.Factory = s => factory.Invoke(new object[] {reader});
+									classInfo.Factory = s => factory.Invoke(new object[] { reader });
 									return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 								}
 							}
@@ -619,8 +633,8 @@ namespace JPB.DataAccess.Manager
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
 		[Obsolete("This mehtod is replaced by several FASTER equal ones. " +
-		          "It may be replaced, updated or deleted. But it will change that is for sure. " +
-		          "legacy or Fallback support only")]
+				  "It may be replaced, updated or deleted. But it will change that is for sure. " +
+				  "legacy or Fallback support only")]
 		public static object ReflectionPropertySet(
 				DbConfig config,
 				object instance,
@@ -714,19 +728,19 @@ namespace JPB.DataAccess.Manager
 							object castedList;
 
 							if (genericArguments.Type.IsClass &&
-							    genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
+								genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
 							{
 								var caster =
 										typeof(DbCollection<>).MakeGenericType(genericArguments.Type)
-										                      .GetConstructor(new[] {typeof(IEnumerable)});
-								castedList = caster.Invoke(new object[] {enumerableOfItems});
+															  .GetConstructor(new[] { typeof(IEnumerable) });
+								castedList = caster.Invoke(new object[] { enumerableOfItems });
 							}
 							else
 							{
 								var caster =
 										typeof(NonObservableDbCollection<>).MakeGenericType(genericArguments.Type)
-										                                   .GetConstructor(new[] {typeof(IEnumerable)});
-								castedList = caster.Invoke(new object[] {enumerableOfItems});
+																		   .GetConstructor(new[] { typeof(IEnumerable) });
+								castedList = caster.Invoke(new object[] { enumerableOfItems });
 							}
 
 							property.Setter.Invoke(instance, castedList);
@@ -734,8 +748,8 @@ namespace JPB.DataAccess.Manager
 						else
 						{
 							var classInfo = config.GetOrCreateClassInfoCache(property
-							                                                 .PropertyInfo
-							                                                 .PropertyType);
+																			 .PropertyInfo
+																			 .PropertyType);
 
 							var xmlDataRecord = XmlDataRecord.TryParse(xmlStream, property.PropertyInfo.PropertyType,
 							true, config);
@@ -748,7 +762,7 @@ namespace JPB.DataAccess.Manager
 					}
 					else if (value is DBNull || value == null)
 					{
-						property.Setter.Invoke(instance, new object[] {null});
+						property.Setter.Invoke(instance, new object[] { null });
 					}
 					else
 					{
@@ -782,7 +796,7 @@ namespace JPB.DataAccess.Manager
 						if (maybeFallbackProperty.Value != null)
 						{
 							instanceOfFallbackList =
-									(Dictionary<string, object>) maybeFallbackProperty.Value.Getter.Invoke(instance);
+									(Dictionary<string, object>)maybeFallbackProperty.Value.Getter.Invoke(instance);
 							if (instanceOfFallbackList == null)
 							{
 								instanceOfFallbackList = new Dictionary<string, object>();
@@ -841,8 +855,8 @@ namespace JPB.DataAccess.Manager
 				await EnumerateAsync(query,
 				record => { recordCache.Add(RecordGenerator(record, Config)); }, executionHint);
 				resultList.AddRange(recordCache
-				                    .Select(f => SetPropertysViaReflection(type, f))
-				                    .ToArray());
+									.Select(f => SetPropertysViaReflection(type, f))
+									.ToArray());
 			}
 
 			return resultList;

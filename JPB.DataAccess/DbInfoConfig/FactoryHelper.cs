@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Security;
 using System.Text;
+using System.Text.RegularExpressions;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -72,9 +73,10 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Generates a Function with a Full ado.net constructor beavior.
 		///     It Creates a new Instance of
-		///     <param name="target"></param>
+		///     <paramref name="target"></paramref>
 		///     and then fills all public properties
 		/// </summary>
+		/// <param name="target"></param>
 		/// <param name="settings"></param>
 		/// <param name="importNameSpace"></param>
 		/// <returns></returns>
@@ -440,6 +442,23 @@ namespace JPB.DataAccess.DbInfoConfig
 			return writer.ToString();
 		}
 
+		private static Regex _pessimisticCreatedDllSyntax = new Regex(@"([a-zA-Z0-9]*_Poco\.dll)", RegexOptions.Compiled);
+
+		/// <summary>
+		/// Lists all dlls that are created by the Framework at any time when using the <code>CollisonDetectionMode.Pessimistic</code>
+		/// Settings
+		/// </summary>
+		/// <returns></returns>
+		public static IEnumerable<string> ListPessimisticCreatedDlls()
+		{
+			foreach (var fileInDirectory in Directory.EnumerateFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))
+			{
+				if (_pessimisticCreatedDllSyntax.IsMatch(fileInDirectory))
+				{
+					yield return fileInDirectory;
+				}
+			}
+		}
 
 		[SecurityCritical]
 		internal static Func<IDataRecord, object> CreateFactory(DbClassInfoCache target, FactoryHelperSettings settings)
@@ -506,7 +525,6 @@ namespace JPB.DataAccess.DbInfoConfig
 
 			settings.TempFileData.Add(cp.OutputAssembly);
 
-			Assembly compiledAssembly;
 			ConstructorInfo[] constructorInfos = null;
 			TypeInfo targetType = null;
 
@@ -599,7 +617,7 @@ namespace JPB.DataAccess.DbInfoConfig
 					throw ex;
 				}
 
-				compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
+				var compiledAssembly = compileAssemblyFromDom.CompiledAssembly;
 
 				targetType = compiledAssembly.DefinedTypes.First();
 				constructorInfos = targetType.GetConstructors();

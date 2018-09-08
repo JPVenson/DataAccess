@@ -2,6 +2,9 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using JPB.DataAccess.AdoWrapper.MsSqlProvider;
+using JPB.DataAccess.AdoWrapper.OdbcProvider;
+using JPB.DataAccess.AdoWrapper.OleDBProvider;
 
 #endregion
 
@@ -14,11 +17,11 @@ namespace JPB.DataAccess.Manager
 	{
 		private readonly Dictionary<DbAccessType, string> _preDefinedProvider = new Dictionary<DbAccessType, string>
 		{
-			{DbAccessType.MsSql, "JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql"},
-			{DbAccessType.OleDb, "JPB.DataAccess.AdoWrapper.OdbcProvider.OleDb"},
-			{DbAccessType.Obdc, "JPB.DataAccess.AdoWrapper.OleDBProvider.Obdc"},
-			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite"},
-			{DbAccessType.MySql, "JPB.DataAccess.MySql.MySql"}
+			{DbAccessType.MsSql, typeof(MsSql).AssemblyQualifiedName},
+			{DbAccessType.OleDb, typeof(OleDb).AssemblyQualifiedName},
+			{DbAccessType.Obdc, typeof(Obdc).AssemblyQualifiedName},
+			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite, JPB.DataAccess.SqLite"},
+			{DbAccessType.MySql, "JPB.DataAccess.MySql.MySql, JPB.DataAccess.MySql"}
 		};
 
 		/// <summary>

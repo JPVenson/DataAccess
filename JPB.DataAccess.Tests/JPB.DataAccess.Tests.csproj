@@ -135,6 +135,7 @@
     <Compile Include="Overwrite\DbAccessLayerTests\SelectionTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\UpdateRefreshTests.cs" />
     <Compile Include="Overwrite\DbCollectionTests\DbCollection.cs" />
+    <Compile Include="Overwrite\GlobalTestContext.cs" />
     <Compile Include="Overwrite\IManager.cs" />
     <Compile Include="Overwrite\LocalDbTests\DatabaseSerializerTest.cs" />
     <Compile Include="Overwrite\LocalDbTests\LocalDbTest.cs" />
@@ -166,6 +167,7 @@
     <Compile Include="Base\TestModels\XmlDataRecordTest\InstanceMock.cs" />
     <Compile Include="Base\Users.cs" />
     <Compile Include="Overwrite\XmlDataRecordTests\XmlDataRecordTest.cs" />
+    <Compile Include="TempTests\ChargaTests.cs" />
     <Compile Include="TestFramework\DbCategory.cs" />
   </ItemGroup>
   <ItemGroup>
