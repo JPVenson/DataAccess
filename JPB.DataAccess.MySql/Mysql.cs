@@ -228,7 +228,7 @@ namespace JPB.DataAccess.MySql
 					break;
 
 				default:
-					retval = "'" + sp.Value.ToString().Replace("'", "''") + "'";
+					retval = "'" + sp.Value?.ToString().Replace("'", "''") + "'";
 					break;
 			}
 
