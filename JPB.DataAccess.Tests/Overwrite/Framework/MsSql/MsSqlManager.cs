@@ -20,14 +20,14 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 		public MsSqlManager()
 		{
-			ConnectionType = "DefaultConnection";
+			ConnectionType = "RDBMS.MsSql.DefaultConnection";
 			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
 			{
-				ConnectionType = "CiConnection";
+				ConnectionType = "RDBMS.MsSql.CiConnection";
 			}
 			if (Environment.GetEnvironmentVariable("build.with") == "VSTS")
 			{
-				ConnectionType = "VSTSConnection";
+				ConnectionType = "RDBMS.MsSql.VSTSConnection";
 			}
 		}
 

@@ -44,7 +44,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 			//var sqlLiteFileName = dbname + ".sqlite";
 
 		    var sqLiteConnection = Environment.ExpandEnvironmentVariables(ConfigurationManager
-		        .ConnectionStrings["DefaultConnectionSqLite"].ConnectionString);
+		        .ConnectionStrings["RDBMS.SqLite.DefaultConnection"].ConnectionString);
 		    var connectionRegex = new Regex("Data Source=(.*);").Match(sqLiteConnection);
 		    
             _dbFilePath = Path.Combine(connectionRegex.Groups[1].Value, string.Format("YAORM_SqLite_{0}.db", testName));

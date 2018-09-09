@@ -252,12 +252,12 @@ namespace JPB.DataAccess.MySql
 
 		public IDbCommand EnableIdentityInsert(string classInfoTableName, IDbConnection conn)
 		{
-			return CreateCommand("", conn);
+			return null;
 		}
 
 		public IDbCommand DisableIdentityInsert(string classInfoTableName, IDbConnection conn)
 		{
-			return CreateCommand("", conn);
+			return null;
 		}
 	}
 }

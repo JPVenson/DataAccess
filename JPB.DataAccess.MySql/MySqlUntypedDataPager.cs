@@ -3,9 +3,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
+using System.Linq;
+using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 
 #endregion
 
@@ -13,68 +20,46 @@ namespace JPB.DataAccess.MySql
 {
 	public class MySqlUntypedDataPager<T> : IDataPager<T>
 	{
+		/// <summary>
+		///     The cache
+		/// </summary>
 		private bool _cache;
+
+		/// <summary>
+		///     The check run
+		/// </summary>
+		private bool? _checkRun;
+
+		/// <summary>
+		///     The current page
+		/// </summary>
 		private long _currentPage;
 
+		/// <summary>
+		///     The synchronize helper
+		/// </summary>
 		private Action<Action> _syncHelper;
 
-		public MySqlUntypedDataPager()
-		{
-			CurrentPage = 0;
-			PageSize = 10;
+		/// <summary>
+		///     The pk
+		/// </summary>
+		private string pk;
 
-			FirstID = -1;
-			LastID = -1;
-			SyncHelper = action => action();
-		}
+		/// <summary>
+		///     The SQL version
+		/// </summary>
+		protected string SqlVersion;
 
-		public bool Cache
-		{
-			get { return _cache; }
-			set
-			{
-				if (value)
-				{
-					throw new Exception("To be supported ... sory");
-				}
-
-				_cache = value;
-			}
-		}
-
-		public bool RaiseEvents { get; set; }
-		public List<IDbCommand> AppendedComands { get; set; }
-
-		public long FirstID { get; private set; }
-		public long LastID { get; private set; }
-
-		public long CurrentPage
-		{
-			get { return _currentPage; }
-			set
-			{
-				if (value >= 0)
-				{
-					_currentPage = value;
-				}
-			}
-		}
-
-		public long MaxPage { get; private set; }
-
-		public int PageSize { get; set; }
-
-		public Type TargetType { get; set; }
-
+		/// <summary>
+		///     Typed list of all Elements
+		/// </summary>
 		IEnumerable IDataPager.CurrentPageItems
 		{
 			get { return CurrentPageItems; }
 		}
 
-		public IDbCommand BaseQuery { get; set; }
-
-		public virtual ICollection<T> CurrentPageItems { get; protected set; }
-
+		/// <summary>
+		/// </summary>
 		public Action<Action> SyncHelper
 		{
 			get { return _syncHelper; }
@@ -87,26 +72,139 @@ namespace JPB.DataAccess.MySql
 			}
 		}
 
-		public long TotalItemCount
+		/// <summary>
+		///     Initializes a new instance of the <see cref="MsSqlUntypedDataPager{T}" /> class.
+		/// </summary>
+		public MySqlUntypedDataPager()
 		{
-			get { throw new NotImplementedException(); }
+			CurrentPage = 1;
+			PageSize = 10;
+			AppendedComands = new List<IDbCommand>();
+			CurrentPageItems = new ObservableCollection<T>();
+
+			SyncHelper = action => action();
 		}
 
+		/// <summary>
+		///     For Advanced querys including Order statements
+		/// </summary>
+		/// <value>
+		///     The command query.
+		/// </value>
+		public IElementProducer<T> CommandQuery { get; set; }
+
+		/// <summary>
+		///     Not Implimented
+		/// </summary>
+		/// <exception cref="Exception">To be supported ... sory</exception>
+		public bool Cache
+		{
+			get { return _cache; }
+			set
+			{
+				if (value)
+				{
+					throw new Exception("To be supported ... sory");
+				}
+
+				_cache = false;
+			}
+		}
+
+		/// <summary>
+		///     Base query to get a collection of <typeparamref name="T" /> Can NOT contain an Order Statement. Please use the
+		///     CommandQuery property for this
+		/// </summary>
+		public IDbCommand BaseQuery { get; set; }
+
+		/// <summary>
+		///     Should raise Events
+		/// </summary>
+		public bool RaiseEvents { get; set; }
+
+		/// <summary>
+		///     Raised if new Page is loading
+		/// </summary>
 		public event Action NewPageLoading;
+
+		/// <summary>
+		///     Raised if new page is Loaded
+		/// </summary>
 		public event Action NewPageLoaded;
 
-		private void RaiseNewPageLoading()
+		/// <summary>
+		///     Commands that are sequencely attached to the main pager command
+		/// </summary>
+		public List<IDbCommand> AppendedComands { get; set; }
+
+		/// <summary>
+		///     Id of Current page beween 1 and MaxPage
+		/// </summary>
+		/// <exception cref="InvalidOperationException">The current page must be bigger or equals 1</exception>
+		public long CurrentPage
 		{
-			var handler = NewPageLoading;
+			get { return _currentPage; }
+			set
+			{
+				if (value >= 1)
+				{
+					_currentPage = value;
+				}
+				else
+				{
+					throw new InvalidOperationException("The current page must be bigger or equals 1");
+				}
+			}
+		}
+
+		/// <summary>
+		///     The last possible Page
+		/// </summary>
+		public long MaxPage { get; private set; }
+
+		/// <summary>
+		///     Items to load on one page
+		/// </summary>
+		public int PageSize { get; set; }
+
+		/// <summary>
+		///     Get the complete ammount of all items listend
+		/// </summary>
+		public long TotalItemCount { get; private set; }
+
+		/// <summary>
+		///     Typed list of all Elements
+		/// </summary>
+		public ICollection<T> CurrentPageItems { get; protected set; }
+		
+		/// <summary>
+		///     Raises the new page loaded.
+		/// </summary>
+		protected virtual void RaiseNewPageLoaded()
+		{
+			if (!RaiseEvents)
+			{
+				return;
+			}
+
+			var handler = NewPageLoaded;
 			if (handler != null)
 			{
 				handler();
 			}
 		}
 
-		private void RaiseNewPageLoaded()
+		/// <summary>
+		///     Raises the new page loading.
+		/// </summary>
+		protected virtual void RaiseNewPageLoading()
 		{
-			var handler = NewPageLoaded;
+			if (!RaiseEvents)
+			{
+				return;
+			}
+
+			var handler = NewPageLoading;
 			if (handler != null)
 			{
 				handler();
@@ -115,73 +213,109 @@ namespace JPB.DataAccess.MySql
 
 		public virtual void LoadPage(DbAccessLayer dbAccess)
 		{
-			throw new NotImplementedException();
-			//		RaiseNewPageLoading();
-			//		SyncHelper(() => CurrentPageItems.Clear());
+			RaiseNewPageLoading();
+			SyncHelper(CurrentPageItems.Clear);
+			if (pk == null)
+			{
+				pk = typeof(T).GetPK(dbAccess.Config);
+			}
+			IDbCommand finalAppendCommand;
 
-			//		var pk = TargetType.GetPK();
+			if (CommandQuery != null)
+			{
+				TotalItemCount = new ElementProducer<T>(CommandQuery).CountInt().FirstOrDefault();
+				MaxPage = (long) Math.Ceiling((decimal) TotalItemCount / PageSize);
 
-			//		var targetQuery = BaseQuery;
-			//		if (targetQuery == null)
-			//		{
-			//			targetQuery = dbAccess.Database.CreateCommand(TargetType.GetClassInfo().TableName);
-			//		}
+				RaiseNewPageLoading();
+				var elements =
+					new ElementProducer<T>(CommandQuery).QueryD("LIMIT @PagedRows, @PageSize",
+						new
+						{
+							PagedRows = (CurrentPage - 1) * PageSize,
+							PageSize
+						}).ToArray();
 
-			//		IDbCommand FirstIdCommand = targetQuery;
-			//		if (AppendedComands.Any())
-			//		{
-			//			FirstIdCommand = this.AppendedComands.Aggregate(FirstIdCommand,
-			//				(e, f) => dbAccess.ConcatCommands(dbAccess.Database, e, f));
-			//		}
+				foreach (var item in elements)
+				{
+					var item1 = item;
+					SyncHelper(() => CurrentPageItems.Add(item1));
+				}
 
-			//		if (FirstID == -1 || LastID == -1)
-			//		{
-			//			var firstOrDefault = dbAccess.RunPrimetivSelect(typeof(long),
-			//				dbAccess.Create(dbAccess.Database,
-			//					("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
-			//			if (firstOrDefault != null)
-			//				FirstID = (long)firstOrDefault;
+				RaiseNewPageLoaded();
+			}
+			else
+			{
+				if (AppendedComands.Any())
+				{
+					if (BaseQuery == null)
+					{
+						BaseQuery = dbAccess.CreateSelect<T>();
+					}
 
-			//			var lastId = dbAccess.RunPrimetivSelect(typeof(long),
-			//				dbAccess.InsertCommands(dbAccess.Database,
-			//				("SELECT " + pk + " FROM ( {0} ) ORDER BY " + pk + " DESC LIMIT 1").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
-			//			if (lastId != null)
-			//				LastID = (long)lastId;
-			//		}
+					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
+						(current, comand) =>
+							dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
+				}
+				else
+				{
+					if (BaseQuery == null)
+					{
+						BaseQuery = dbAccess.CreateSelect<T>();
+					}
 
-			//		var maxItems = dbAccess.RunPrimetivSelect(typeof(long),
-			//DbAccessLayer.InsertCommands(dbAccess.Database,
-			//("SELECT COUNT( * ) AS NR FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand)).FirstOrDefault();
+					finalAppendCommand = BaseQuery;
+				}
+				var selectMaxCommand = dbAccess
+					.Query()
+					.QueryText("WITH CTE AS")
+					.InBracket(query => query.QueryCommand(finalAppendCommand))
+					.QueryText("SELECT COUNT(1) FROM CTE")
+					.ContainerObject
+					.Compile();
 
-			//		if (maxItems != null)
-			//		{
-			//			long parsedCount;
-			//			long.TryParse(maxItems.ToString(), out parsedCount);
-			//			MaxPage = ((long)parsedCount) / PageSize;
-			//		}
+				////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
 
-			//		var realSelect = DbAccessLayer.InsertCommands(dbAccess.Database,
-			//			("SELECT * FROM {0}").CreateCommand(dbAccess.Database), FirstIdCommand);
+				//if (finalAppendCommand != null)
+				//    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
 
-			//		var selectWhere = dbAccess.SelectNative(this.TargetType, realSelect, new
-			//		{
-			//			PagedRows = CurrentPage * PageSize,
-			//			PageSize
-			//		});
+				var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
+				if (maxItems != null)
+				{
+					long parsedCount;
+					long.TryParse(maxItems.ToString(), out parsedCount);
+					TotalItemCount = parsedCount;
+					MaxPage = (long) Math.Ceiling((decimal) parsedCount / PageSize);
+				}
 
-			//		//var selectWhere = dbAccess.SelectWhere(TargetType, " ORDER BY " + pk + " ASC LIMIT @PagedRows, @PageSize", new
-			//		//{
-			//		//    PagedRows = CurrentPage * PageSize,
-			//		//    PageSize
-			//		//});
+				//Check select strategy
+				//IF version is or higher then 11.0.2100.60 we can use OFFSET and FETCH
+				//esle we need to do it the old way
 
-			//		foreach (var item in selectWhere)
-			//		{
-			//			dynamic item1 = item;
-			//			SyncHelper(() => CurrentPageItems.Add(item1));
-			//		}
+				RaiseNewPageLoading();
+				IDbCommand command;
+				command = dbAccess
+					.Query()
+					.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
+					.QueryText("SELECT * FROM")
+					.QueryText("CTE")
+					.QueryD("LIMIT @PagedRows, @PageSize;", new
+					{
+						PagedRows = (CurrentPage - 1) * PageSize,
+						PageSize
+					})
+					.ContainerObject
+					.Compile();
 
-			//		RaiseNewPageLoaded();
+				var selectWhere = dbAccess.SelectNative(typeof(T), command, true).Cast<T>().ToArray();
+
+				foreach (var item in selectWhere)
+				{
+					var item1 = item;
+					SyncHelper(() => CurrentPageItems.Add(item1));
+				}
+
+				RaiseNewPageLoaded();
+			}
 		}
 
 		public void Dispose()

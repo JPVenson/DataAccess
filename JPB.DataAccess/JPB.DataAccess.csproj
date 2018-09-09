@@ -341,6 +341,7 @@
     <Compile Include="Query\GenericQueryPart.cs" />
     <Compile Include="Query\InternalContainerContainer.cs" />
     <Compile Include="Query\MsQueryBuilderExtentions.cs" />
+    <Compile Include="Query\MySqlQueryBuilderExtentions.cs" />
     <Compile Include="Query\Operators\Conditional\ConditionalColumnQuery.cs" />
     <Compile Include="Query\Operators\Conditional\ConditionalEvalQuery.cs" />
     <Compile Include="Query\Operators\Conditional\ConditionalOperatorQuery.cs" />

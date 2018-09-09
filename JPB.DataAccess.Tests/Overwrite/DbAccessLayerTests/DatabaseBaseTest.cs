@@ -27,11 +27,16 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 	}
 
 	[TestFixture(DbAccessType.MsSql, true, false)]
-	[TestFixture(DbAccessType.SqLite, true, false)]
 	[TestFixture(DbAccessType.MsSql, false, false)]
-	[TestFixture(DbAccessType.SqLite, false, false)]
 	[TestFixture(DbAccessType.MsSql, false, true)]
+	
+	[TestFixture(DbAccessType.SqLite, true, false)]
+	[TestFixture(DbAccessType.SqLite, false, false)]
 	[TestFixture(DbAccessType.SqLite, false, true)]
+	
+	[TestFixture(DbAccessType.MySql, true, false)]
+	[TestFixture(DbAccessType.MySql, false, false)]
+	[TestFixture(DbAccessType.MySql, false, true)]
 	[DotMemoryUnit(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{

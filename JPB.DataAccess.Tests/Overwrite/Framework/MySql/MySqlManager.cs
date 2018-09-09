@@ -6,6 +6,8 @@ using System.Text;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using NUnit.Framework.Internal.Commands;
+using JPB.DataAccess.Tests.Overwrite.Framework.MySql;
 
 #endregion
 
@@ -19,7 +21,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 		public MySqlManager()
 		{
-			ConnectionType = "DefaultConnectionMySQL";
+			ConnectionType = "RDBMS.MySql.DefaultConnection";
 			if (Environment.GetEnvironmentVariable("APPVEYOR") == "True")
 			{
 				ConnectionType = "CiConnectionMySQL";
@@ -30,10 +32,24 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
-			var dbname = string.Format("YAORM_TestDb_Test_MySQL_{0}", testName);
+			if (ConfigurationManager.AppSettings["RDBMS.MySql.StartManagedServer"] == "True")
+			{
+				if (!MySqlConnectorInstance.Instance.HasStarted)
+				{
+					MySqlConnectorInstance.Instance.CreateDatabaseFiles().Wait();
+					MySqlConnectorInstance.Instance.RunMySql();
+				}
+			}
+			var dbname = string.Format("YAORM_TestDb_{0}", testName);
 			if (_expectWrapper != null)
 			{
 				_expectWrapper.Database.CloseAllConnection();
+			}
+
+			//Darn MySql with only 64 chars?
+			if (dbname.Length > 64)
+			{
+				dbname = dbname.Substring(dbname.Length - 64);
 			}
 
 			var redesginDatabase = string.Format(

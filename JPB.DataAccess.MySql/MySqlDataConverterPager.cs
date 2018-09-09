@@ -16,24 +16,45 @@ namespace JPB.DataAccess.MySql
 {
     public class MySqlDataConverterPager<T, TE> : MySqlDataPager<T>, IWrapperDataPager<T,TE>
     {
-        public MySqlDataConverterPager()
-        {
-            CurrentPageItems = new ObservableCollection<TE>();
-        }
+	    /// <summary>
+	    /// </summary>
+	    public MySqlDataConverterPager()
+	    {
+		    SyncHelper = action => action();
+		    NewPageLoaded += OnNewPageLoaded;
+		    base.RaiseEvents = true;
+		    CurrentPageItems = new ObservableCollection<TE>();
+	    }
 
-        public Func<T, TE> Converter { get; set; }
-        public new ICollection<TE> CurrentPageItems { get; set; }
+	    /// <summary>
+	    /// </summary>
+	    public new bool RaiseEvents
+	    {
+		    get { return true; }
+		    set { }
+	    }
 
-        public override void LoadPage(DbAccessLayer dbAccess)
-        {
-            base.LoadPage(dbAccess);
+	    /// <summary>
+	    ///     Function to convert all items from T to TE
+	    /// </summary>
+	    public Func<T, TE> Converter { get; set; }
 
-            CurrentPageItems.Clear();
+	    /// <summary>
+	    ///     Gets or sets the current page items.
+	    /// </summary>
+	    /// <value>
+	    ///     The current page items.
+	    /// </value>
+	    public new ICollection<TE> CurrentPageItems { get; protected set; }
 
-            foreach (T currentPageItem in base.CurrentPageItems)
-            {
-                CurrentPageItems.Add(Converter(currentPageItem));
-            }
-        }
+	    private void OnNewPageLoaded()
+	    {
+		    CurrentPageItems.Clear();
+
+		    foreach (var currentPageItem in base.CurrentPageItems)
+		    {
+			    CurrentPageItems.Add(Converter(currentPageItem));
+		    }
+	    }
     }
 }

@@ -135,7 +135,9 @@
     <Compile Include="Overwrite\DbAccessLayerTests\SelectionTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\UpdateRefreshTests.cs" />
     <Compile Include="Overwrite\DbCollectionTests\DbCollection.cs" />
-    <Compile Include="Overwrite\GlobalTestContext.cs" />
+    <Compile Include="GlobalTestContext.cs" />
+    <Compile Include="Overwrite\Framework\MySql\StartMySqlServerContext.cs" />
+    <Compile Include="Overwrite\Framework\MySql\MySqlLogline.cs" />
     <Compile Include="Overwrite\IManager.cs" />
     <Compile Include="Overwrite\LocalDbTests\DatabaseSerializerTest.cs" />
     <Compile Include="Overwrite\LocalDbTests\LocalDbTest.cs" />
@@ -148,16 +150,17 @@
     <Compile Include="Overwrite\MetaApiTests\MetaApiSpeedTest.cs" />
     <Compile Include="Overwrite\MetaApiTests\MetaApiTest.cs" />
     <Compile Include="Overwrite\Misc\DataConverterTests.cs" />
-    <Compile Include="Overwrite\MsSqlManager.cs" />
-    <Compile Include="Overwrite\MySqlManager.cs" />
+    <Compile Include="Overwrite\Framework\MsSql\MsSqlManager.cs" />
+    <Compile Include="Overwrite\Framework\MySql\MySqlManager.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\PagerTests\PagerConstraintTests.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\PagerTests\PagerUnitTest.cs" />
     <Compile Include="Overwrite\PocoPkEquallityTests\PocoPkEqualityComparerTest.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\QueryBuilderTests\ColumChooserTest.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\QueryBuilderTests\QueryPerfTests.cs" />
+    <Compile Include="Overwrite\Framework\MySql\StartMySqlServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\QueryBuilderTests\QueryBuilderTests.cs" />
-    <Compile Include="Overwrite\SqLiteManager.cs" />
+    <Compile Include="Overwrite\Framework\SqLite\SqLiteManager.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\FooTest.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Image.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\TestProcAParams.cs" />
@@ -171,6 +174,10 @@
     <Compile Include="TestFramework\DbCategory.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj">
+      <Project>{3aa3990d-ffa4-4ee5-82be-e30970ffd0fa}</Project>
+      <Name>JPB.DataAccess.MySql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess.SqlLite\JPB.DataAccess.SqLite.csproj">
       <Project>{de42f7ed-51b5-4118-831b-05efeeecd7ac}</Project>
       <Name>JPB.DataAccess.SqLite</Name>
@@ -185,10 +192,33 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Base\packages.config" />
+    <None Include="Dependencies\MySql\engine\mySqlConfig.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Dependencies\MySql\share\errmsg.sys">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dependencies\MySql\engine\libeay32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dependencies\MySql\engine\libmecab.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dependencies\MySql\engine\mysqld.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dependencies\MySql\engine\ssleay32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dependencies\MySql\data\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets')" />

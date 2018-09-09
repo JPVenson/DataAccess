@@ -1,0 +1,10 @@
+2018-09-08T19:57:19.132468Z 0 [Warning] [MY-010915] [Server] 'NO_ZERO_DATE', 'NO_ZERO_IN_DATE' and 'ERROR_FOR_DIVISION_BY_ZERO' sql modes should be used with strict mode. They will be merged with strict mode in a future release.
+2018-09-08T19:57:19.132543Z 0 [System] [MY-010116] [Server] Z:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests\Dependencies\MySql\engine\mysqld.exe (mysqld 8.0.12) starting as process 4576
+2018-09-08T19:57:19.148746Z 1 [ERROR] [MY-011011] [Server] Failed to find valid data directory.
+2018-09-08T19:57:19.149579Z 0 [ERROR] [MY-010020] [Server] Data Dictionary initialization failed.
+2018-09-08T19:57:19.150262Z 0 [ERROR] [MY-010119] [Server] Aborting
+2018-09-08T19:57:19.151339Z 0 [System] [MY-010910] [Server] Z:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests\Dependencies\MySql\engine\mysqld.exe: Shutdown complete (mysqld 8.0.12)  MySQL Community Server - GPL.
+2018-09-08T19:59:57.975448Z 0 [Warning] [MY-010915] [Server] 'NO_ZERO_DATE', 'NO_ZERO_IN_DATE' and 'ERROR_FOR_DIVISION_BY_ZERO' sql modes should be used with strict mode. They will be merged with strict mode in a future release.
+2018-09-08T19:59:57.975516Z 0 [System] [MY-010116] [Server] Z:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests\Dependencies\MySql\engine\mysqld.exe (mysqld 8.0.12) starting as process 13256
+2018-09-08T19:59:59.475549Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+2018-09-08T19:59:59.503697Z 0 [System] [MY-010931] [Server] Z:\Users\ger-d\Source\Repos\DataAccess\JPB.DataAccess.Tests\Dependencies\MySql\engine\mysqld.exe: ready for connections. Version: '8.0.12'  socket: ''  port: 55555  MySQL Community Server - GPL.

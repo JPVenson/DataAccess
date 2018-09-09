@@ -101,10 +101,18 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 			onOnIdentityInsertCompleted = (sender, e) =>
 			{
 				OnIdentityInsertCompleted -= onOnIdentityInsertCompleted;
-				db.ExecuteNonQuery(db.Strategy.DisableIdentityInsert(classInfoTableName, db.GetConnection()));
+				var disableIdentityInsert = db.Strategy.DisableIdentityInsert(classInfoTableName, db.GetConnection());
+				if (disableIdentityInsert != null)
+				{
+					db.ExecuteNonQuery(disableIdentityInsert);
+				}
 			};
 			OnIdentityInsertCompleted += onOnIdentityInsertCompleted;
-			db.ExecuteNonQuery(db.Strategy.EnableIdentityInsert(classInfoTableName, db.GetConnection()));
+			var enableIdentityInsert = db.Strategy.EnableIdentityInsert(classInfoTableName, db.GetConnection());
+			if (enableIdentityInsert != null)
+			{
+				db.ExecuteNonQuery(enableIdentityInsert);
+			}
 		}
 
 		private void ReleaseUnmanagedResources()

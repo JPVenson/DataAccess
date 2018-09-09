@@ -21,7 +21,7 @@ namespace JPB.DataAccess.Manager
 			{DbAccessType.OleDb, typeof(OleDb).AssemblyQualifiedName},
 			{DbAccessType.Obdc, typeof(Obdc).AssemblyQualifiedName},
 			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite, JPB.DataAccess.SqLite"},
-			{DbAccessType.MySql, "JPB.DataAccess.MySql.MySql, JPB.DataAccess.MySql"}
+			{DbAccessType.MySql, "JPB.DataAccess.MySql.MySql, JPB.DataAccess.MySql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"}
 		};
 
 		/// <summary>

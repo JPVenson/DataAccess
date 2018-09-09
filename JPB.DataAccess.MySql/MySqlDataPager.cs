@@ -14,18 +14,15 @@ namespace JPB.DataAccess.MySql
 {
     public class MySqlDataPager<T> : MySqlUntypedDataPager<T>
     {
-        public MySqlDataPager()
-            : base()
-        {
-            TargetType = typeof(T);
-            CurrentPageItems = new ObservableCollection<T>();
-        }
-
-        public override ICollection<T> CurrentPageItems { get; protected set; }
-
-        public override void LoadPage(DbAccessLayer dbAccess)
-        {
-            base.LoadPage(dbAccess);
-        }
+	    /// <summary>
+	    ///     Gets the current page items.
+	    /// </summary>
+	    /// <value>
+	    ///     The current page items.
+	    /// </value>
+	    public new ICollection<T> CurrentPageItems
+	    {
+		    get { return base.CurrentPageItems; }
+	    }
     }
 }

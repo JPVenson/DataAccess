@@ -45,7 +45,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// <summary>
 		///     The pk
 		/// </summary>
-		string pk;
+		private string pk;
 
 		/// <summary>
 		///     The SQL version
@@ -86,6 +86,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				{
 					throw new Exception("To be supported ... sory");
 				}
+
 				_cache = false;
 			}
 		}
@@ -168,7 +169,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			if (string.IsNullOrEmpty(SqlVersion))
 			{
 #pragma warning disable 618
-				SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+				SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')")
+					.FirstOrDefault();
 #pragma warning restore 618
 			}
 
@@ -181,15 +183,16 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			if (CommandQuery != null)
 			{
 				TotalItemCount = new ElementProducer<T>(CommandQuery).CountInt().FirstOrDefault();
-				MaxPage = (long)Math.Ceiling((decimal)TotalItemCount / PageSize);
+				MaxPage = (long) Math.Ceiling((decimal) TotalItemCount / PageSize);
 
 				RaiseNewPageLoading();
 				var elements =
-					new ElementProducer<T>(CommandQuery).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
-					{
-						PagedRows = (CurrentPage - 1) * PageSize,
-						PageSize
-					}).ToArray();
+					new ElementProducer<T>(CommandQuery).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY",
+						new
+						{
+							PagedRows = (CurrentPage - 1) * PageSize,
+							PageSize
+						}).ToArray();
 
 				foreach (var item in elements)
 				{
@@ -209,7 +212,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					}
 
 					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
-						(current, comand) => dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
+						(current, comand) =>
+							dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
 				}
 				else
 				{
@@ -240,7 +244,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					long parsedCount;
 					long.TryParse(maxItems.ToString(), out parsedCount);
 					TotalItemCount = parsedCount;
-					MaxPage = (long)Math.Ceiling((decimal)parsedCount / PageSize);
+					MaxPage = (long) Math.Ceiling((decimal) parsedCount / PageSize);
 				}
 
 				//Check select strategy
@@ -277,45 +281,44 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 							{
 								return baseCte.Select.Table<T>();
 							}
-							else
-							{
-								return new SelectQuery<T>(baseCte.QueryCommand(finalAppendCommand));
-							}
+
+							return new SelectQuery<T>(baseCte.QueryCommand(finalAppendCommand));
 						})
 						.WithCte("CTE", cte =>
 						{
 							return new SelectQuery<T>(cte.QueryText("SELECT * FROM (")
-														 .Select.Table<T>()
-														 .RowNumberOrder("@pk")
-														 .WithParamerters(new { Pk = pk })
-														 .QueryText("AS RowNr")
-														 .QueryText(", BASECTE.* FROM BASECTE")
-														 .QueryText(")")
-														 .As("TBL")
-														 .Where
-														 .Column("RowNr")
-														 .Is
-														 .Between(page =>
-														 {
-															 return page.QueryText("@PagedRows * @PageSize + 1")
-																  .WithParamerters(new
-																  {
-																	  PagedRows = CurrentPage - 1,
-																	  PageSize
-																  });
-														 },
-														 maxPage =>
-														 {
-															 return maxPage
-																	  .InBracket(calc => { return calc.QueryText("@PagedRows + 1"); })
-																	  .QueryText("* @PageSize");
-														 }
-														 ));
+								.Select.Table<T>()
+								.RowNumberOrder("@pk")
+								.WithParamerters(new {Pk = pk})
+								.QueryText("AS RowNr")
+								.QueryText(", BASECTE.* FROM BASECTE")
+								.QueryText(")")
+								.As("TBL")
+								.Where
+								.Column("RowNr")
+								.Is
+								.Between(page =>
+									{
+										return page.QueryText("@PagedRows * @PageSize + 1")
+											.WithParamerters(new
+											{
+												PagedRows = CurrentPage - 1,
+												PageSize
+											});
+									},
+									maxPage =>
+									{
+										return maxPage
+											.InBracket(calc => { return calc.QueryText("@PagedRows + 1"); })
+											.QueryText("* @PageSize");
+									}
+								));
 						}, true)
 						.QueryText("SELECT * FROM CTE");
 
 					command = selectQuery.ContainerObject.Compile();
 				}
+
 				selectWhere = dbAccess.SelectNative(typeof(T), command, true).Cast<T>().ToArray();
 
 				foreach (var item in selectWhere)
@@ -359,6 +362,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			{
 				return;
 			}
+
 			var handler = NewPageLoaded;
 			if (handler != null)
 			{
@@ -375,6 +379,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			{
 				return;
 			}
+
 			var handler = NewPageLoading;
 			if (handler != null)
 			{

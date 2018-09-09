@@ -58,8 +58,10 @@ namespace JPB.DataAccess.Query.Operators
                     break;
                 case DbAccessType.SqLite:
                 case DbAccessType.MySql:
-                    wrapper = new QueryBuilderX(ContainerObject.AccessLayer)
-                              .QueryD("SELECT * FROM (").Append(this).QueryD(string.Format(") LIMIT {0}", limit));
+	                CreateNewIdentifier();
+					wrapper = new RootQuery(ContainerObject.AccessLayer)
+						.SubSelect(() => new ElementProducer<TPoco>(this), CurrentIdentifier)
+						.QueryD(string.Format(" LIMIT {0}", limit));
                     break;
                 default:
                     throw new NotImplementedException(string.Format("Invalid Target Database {0}",
