@@ -170,7 +170,6 @@
     <Compile Include="Base\TestModels\XmlDataRecordTest\InstanceMock.cs" />
     <Compile Include="Base\Users.cs" />
     <Compile Include="Overwrite\XmlDataRecordTests\XmlDataRecordTest.cs" />
-    <Compile Include="TempTests\ChargaTests.cs" />
     <Compile Include="TestFramework\DbCategory.cs" />
   </ItemGroup>
   <ItemGroup>
