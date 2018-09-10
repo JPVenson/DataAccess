@@ -46,20 +46,20 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 	[TestFixture(DbAccessType.SqLite, true, false, false, EnumerationMode.FullOnLoad)]
 	[TestFixture(DbAccessType.SqLite, true, false, false, EnumerationMode.OnCall)]
 
-	[TestFixture(DbAccessType.MySql, false, true, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MySql, false, true, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MySql, false, true, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MySql, false, true, false, EnumerationMode.OnCall)]
+	//[TestFixture(DbAccessType.MySql, false, true, true, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, false, true, true, EnumerationMode.OnCall)]
+	//[TestFixture(DbAccessType.MySql, false, true, false, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, false, true, false, EnumerationMode.OnCall)]
 
-	[TestFixture(DbAccessType.MySql, false, false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MySql, false, false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MySql, false, false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MySql, false, false, false, EnumerationMode.OnCall)]
+	//[TestFixture(DbAccessType.MySql, false, false, true, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, false, false, true, EnumerationMode.OnCall)]
+	//[TestFixture(DbAccessType.MySql, false, false, false, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, false, false, false, EnumerationMode.OnCall)]
 										  
-	[TestFixture(DbAccessType.MySql, true, false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MySql, true, false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MySql, true, false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MySql, true, false, false, EnumerationMode.OnCall)]
+	//[TestFixture(DbAccessType.MySql, true, false, true, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, true, false, true, EnumerationMode.OnCall)]
+	//[TestFixture(DbAccessType.MySql, true, false, false, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, true, false, false, EnumerationMode.OnCall)]
 
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class QueryBuilderTests : DatabaseBaseTest
