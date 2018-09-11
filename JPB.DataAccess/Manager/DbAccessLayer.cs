@@ -255,7 +255,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (string.IsNullOrEmpty(fullValidIdentifyer))
 			{
-				throw new ArgumentException("Type was not found");
+				throw new ArgumentException("The used type: " + fullValidIdentifyer+ " was not found");
 			}
 
 			var type = Type.GetType(fullValidIdentifyer);

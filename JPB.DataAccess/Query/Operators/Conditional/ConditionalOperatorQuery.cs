@@ -96,7 +96,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 					prefix = "IN";
 					break;
 				case Operator.Not:
-					prefix = "NOT BETWEEN";
+					prefix = "NOT IN";
 					break;
 				default:
 					throw new NotSupportedException("Invalid value");
