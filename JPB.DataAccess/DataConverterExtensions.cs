@@ -206,6 +206,10 @@ namespace JPB.DataAccess
 			var pk = config.GetOrCreateClassInfoCache(typeof(T)).PrimaryKeyProperty.PropertyName;
 			DbPropertyInfoCache val;
 			config.GetOrCreateClassInfoCache(typeof(T)).Propertys.TryGetValue(pk, out val);
+			if (val == null)
+			{
+				throw new InvalidOperationException("This Operation requires and Primary Key attribute on the entity to succeed");
+			}
 			return val.GetConvertedValue(source);
 		}
 

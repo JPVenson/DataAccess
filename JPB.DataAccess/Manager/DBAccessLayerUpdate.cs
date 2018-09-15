@@ -128,26 +128,33 @@ namespace JPB.DataAccess.Manager
 				GetClassInfo(entry
 						.GetType())
 					.RowVersionProperty;
-			if (rowVersion != null)
+			if (rowVersion == null)
 			{
-				var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
-				if (rowversionValue != null ||
-				    entry.GetPK(Config) == DataConverterExtensions.GetDefault(type.PrimaryKeyProperty.PropertyType))
-				{
-					var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
-					var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +
-					                       type.GetPK(Config) + " = " + entry.GetPK(Config);
-
-					var skalar = Database.GetSkalar(staticRowVersion);
-					if (skalar == null)
-					{
-						return false;
-					}
-					return ((byte[]) skalar).SequenceEqual(rowversionValue);
-				}
 				return false;
 			}
-			return false;
+
+			if (type.PrimaryKeyProperty == null)
+			{
+				throw new InvalidOperationException("This Operation requires and Primary Key attribute on the entity to succeed");
+			}
+
+			var rowversionValue = rowVersion.GetConvertedValue(entry) as byte[];
+			if (rowversionValue == null && entry.GetPK(Config) !=
+			    DataConverterExtensions.GetDefault(type.PrimaryKeyProperty.PropertyType))
+			{
+				return false;
+			}
+
+			var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
+			var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +
+			                       type.PrimaryKeyProperty.DbName + " = " + entry.GetPK(Config);
+
+			var skalar = Database.GetSkalar(staticRowVersion);
+			if (skalar == null)
+			{
+				return false;
+			}
+			return ((byte[]) skalar).SequenceEqual(rowversionValue);
 		}
 
 		private IDbCommand CreateUpdateQueryFactory<T>(T entry, params object[] parameter)
