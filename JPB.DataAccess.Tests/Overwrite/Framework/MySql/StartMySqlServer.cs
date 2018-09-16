@@ -282,7 +282,6 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 		{
 			lock (this)
 			{
-				Path.GetFullPath()
 				if (!HasStarted)
 				{
 					var createDatabaseResultCode = CreateDatabaseFiles().Result;
