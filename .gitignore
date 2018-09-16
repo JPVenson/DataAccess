@@ -95,3 +95,4 @@ bld/
 /JPB.DataAccess.Tests/Dependencies/MySql/data/binlog.index
 /JPB.DataAccess.Tests/Dependencies/MySql/data/binlog.000001
 /JPB.DataAccess.Tests/Dependencies/MySql/data/auto.cnf
+/JPB.DataAccess.Tests/TestResults/testResult.xml

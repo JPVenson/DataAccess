@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using JetBrains.dotMemoryUnit;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
@@ -26,20 +27,80 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		}
 	}
 
-	[TestFixture(DbAccessType.MsSql, true, false)]
-	[TestFixture(DbAccessType.MsSql, false, false)]
-	[TestFixture(DbAccessType.MsSql, false, true)]
-	
-	[TestFixture(DbAccessType.SqLite, true, false)]
-	[TestFixture(DbAccessType.SqLite, false, false)]
-	[TestFixture(DbAccessType.SqLite, false, true)]
-	
-	//[TestFixture(DbAccessType.MySql, true, false)]
-	//[TestFixture(DbAccessType.MySql, false, false)]
-	//[TestFixture(DbAccessType.MySql, false, true)]
+	[TestFixture(DbAccessType.MsSql, true, true, false)]
+	[TestFixture(DbAccessType.MsSql, true, false, false)]
+	[TestFixture(DbAccessType.MsSql, true, false, true)]
+	[TestFixture(DbAccessType.MsSql, false, true, false)]
+	[TestFixture(DbAccessType.MsSql, false, false, false)]
+	[TestFixture(DbAccessType.MsSql, false, false, true)]
+
+	[TestFixture(DbAccessType.SqLite, true, true, false)]
+	[TestFixture(DbAccessType.SqLite, true, false, false)]
+	[TestFixture(DbAccessType.SqLite, true, false, true)]
+	[TestFixture(DbAccessType.SqLite, false, true, false)]
+	[TestFixture(DbAccessType.SqLite, false, false, false)]
+	[TestFixture(DbAccessType.SqLite, false, false, true)]
+
+	[TestFixture(DbAccessType.MySql, true, true, false)]
+	[TestFixture(DbAccessType.MySql, true, false, false)]
+	[TestFixture(DbAccessType.MySql, true, false, true)]
+	[TestFixture(DbAccessType.MySql, false, true, false)]
+	[TestFixture(DbAccessType.MySql, false, false, false)]
+	[TestFixture(DbAccessType.MySql, false, false, true)]
+	//[TestFixtureSource(typeof(StandardDatabaseTests))]
+	public abstract class DatabaseStandardTest : DatabaseBaseTest
+	{
+		protected DatabaseStandardTest(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised,
+			params object[] additionalArguments) : base(type, egarLoading, asyncExecution, syncronised, additionalArguments)
+		{
+		}
+	}
+
+
 	[DotMemoryUnit(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
+		private readonly bool _egarLoading;
+		private DbAccessLayer _dbAccess;
+
+		protected DatabaseBaseTest(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised,
+			params object[] additionalArguments)
+		{
+			_egarLoading = egarLoading;
+			TestContext.CurrentContext.Test.Properties.Add("Type", type);
+			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0", Synronised ? "1" : "0" })
+				.ToArray();
+			Type = type;
+			AsyncExecution = asyncExecution;
+			Synronised = syncronised;
+		}
+
+		public object[] AdditionalArguments { get; }
+
+		public bool Synronised { get; set; }
+
+		public DbAccessLayer DbAccess
+		{
+			get
+			{
+				if (_dbAccess == null)
+				{
+					_dbAccess = Mgr.GetWrapper(Type, AdditionalArguments);
+					_dbAccess.Async = AsyncExecution;
+					_dbAccess.ThreadSave = Synronised;
+					_dbAccess.LoadCompleteResultBeforeMapping = _egarLoading;
+				}
+
+				return _dbAccess;
+			}
+			private set => _dbAccess = value;
+		}
+
+		public IManager Mgr { get; private set; }
+		public DbAccessType Type { get; }
+
+		public bool AsyncExecution { get; }
+
 		//MemoryCheckPoint memoryCheckPoint;
 		[SetUp]
 		public void Init()
@@ -57,7 +118,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			{
 				if (_dbAccess.Database.ConnectionController.InstanceCounter != 0)
 				{
-					TestContext.Error.WriteLine("Invalid State Detected. Some connections are Still open. Proceed with Cleanup");
+					TestContext.Error.WriteLine(
+						"Invalid State Detected. Some connections are Still open. Proceed with Cleanup");
 					failed = true;
 				}
 			}
@@ -85,39 +147,5 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			//	Assert.That(mem.GetObjects(e => e.Interface.Is<IDbCommand>()).ObjectsCount, Is.Zero);
 			//});
 		}
-
-		public object[] AdditionalArguments { get; }
-		private DbAccessLayer _dbAccess;
-
-		protected DatabaseBaseTest(DbAccessType type, bool asyncExecution, bool syncronised, params object[] additionalArguments)
-		{
-			TestContext.CurrentContext.Test.Properties.Add("Type", type);
-			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0", Synronised ? "1" : "0" }).ToArray();
-			Type = type;
-			AsyncExecution = asyncExecution;
-			Synronised = syncronised;
-		}
-
-		public bool Synronised { get; set; }
-
-		public DbAccessLayer DbAccess
-		{
-			get
-			{
-				if (_dbAccess == null)
-				{
-					_dbAccess = Mgr.GetWrapper(Type, AdditionalArguments);
-					_dbAccess.Async = AsyncExecution;
-					_dbAccess.ThreadSave = Synronised;
-				}
-
-				return _dbAccess;
-			}
-			private set { _dbAccess = value; }
-		}
-
-		public IManager Mgr { get; private set; }
-		public DbAccessType Type { get; }
-		public bool AsyncExecution { get; }
 	}
 }

@@ -16,33 +16,11 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
-	[TestFixture(DbAccessType.MsSql, true, true, false)]
-	[TestFixture(DbAccessType.SqLite, true, true, false)]
-	[TestFixture(DbAccessType.MsSql, false, true, false)]
-	[TestFixture(DbAccessType.SqLite, false, true, false)]
-	[TestFixture(DbAccessType.MsSql, true, false, false)]
-	[TestFixture(DbAccessType.SqLite, true, false, false)]
-	[TestFixture(DbAccessType.MsSql, false, false, false)]
-	[TestFixture(DbAccessType.SqLite, false, false, false)]
-	[TestFixture(DbAccessType.MsSql, true, false, true)]
-	[TestFixture(DbAccessType.SqLite, true, false, true)]
-	[TestFixture(DbAccessType.MsSql, false, false, true)]
-	[TestFixture(DbAccessType.SqLite, false, false, true)]
-
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class SelectionTests : DatabaseBaseTest
+	public class SelectionTests : DatabaseStandardTest
 	{
-		[SetUp]
-		public void InitEgarLoading()
-		{
-			DbAccess.LoadCompleteResultBeforeMapping = _egarLoading;
-		}
-
-		private readonly bool _egarLoading;
-
-		public SelectionTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised, egarLoading.ToString())
-		{
-			_egarLoading = egarLoading;
+		public SelectionTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised){
 		}
 
 		[Test]
@@ -200,19 +178,19 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithMultiXml());
 
 			var elements = DbAccess.Query()
-			                       .QueryText("SELECT")
-			                       .QueryText("res." + UsersMeta.PrimaryKeyName)
-			                       .QueryText(",res." + UsersMeta.ContentName)
-			                       .QueryText(",")
-			                       .InBracket(
-			                       s =>
-					                       s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
-					                        .ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
-			                       .QueryText("AS Subs")
-			                       .QueryText("FROM")
-			                       .QueryText(UsersMeta.TableName)
-			                       .QueryText("AS res")
-			                       .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
+								   .QueryText("SELECT")
+								   .QueryText("res." + UsersMeta.PrimaryKeyName)
+								   .QueryText(",res." + UsersMeta.ContentName)
+								   .QueryText(",")
+								   .InBracket(
+								   s =>
+										   s.Select.Table<UsersAutoGenerateConstructorWithMultiXml>()
+											.ForXml(typeof(UsersAutoGenerateConstructorWithMultiXml)))
+								   .QueryText("AS Subs")
+								   .QueryText("FROM")
+								   .QueryText(UsersMeta.TableName)
+								   .QueryText("AS res")
+								   .ForResult<UsersAutoGenerateConstructorWithMultiXml>();
 
 			var result = elements.ToArray();
 
@@ -227,17 +205,17 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			DbAccess.Insert(new UsersAutoGenerateConstructorWithSingleXml());
 
 			var query = DbAccess.Query()
-			                    .QueryText("SELECT")
-			                    .QueryText("res." + UsersMeta.PrimaryKeyName)
-			                    .QueryText(",res." + UsersMeta.ContentName)
-			                    .QueryText(",")
-			                    .InBracket(s =>
-					                    s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
-					                     .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
-			                    .QueryText("AS Sub")
-			                    .QueryText("FROM")
-			                    .QueryText(UsersMeta.TableName)
-			                    .QueryText("AS res");
+								.QueryText("SELECT")
+								.QueryText("res." + UsersMeta.PrimaryKeyName)
+								.QueryText(",res." + UsersMeta.ContentName)
+								.QueryText(",")
+								.InBracket(s =>
+										s.Select.Table<UsersAutoGenerateConstructorWithSingleXml>()
+										 .ForXml(typeof(UsersAutoGenerateConstructorWithSingleXml)))
+								.QueryText("AS Sub")
+								.QueryText("FROM")
+								.QueryText(UsersMeta.TableName)
+								.QueryText("AS res");
 			var elements =
 					query.ForResult<UsersAutoGenerateConstructorWithSingleXml>();
 

@@ -13,15 +13,13 @@ using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Overwrite
+namespace JPB.DataAccess.Tests.Overwrite.Framework.SqLite
 {
 	public class SqLiteManager : IManagerImplementation
 	{
 		public const string SConnectionString = "Data Source={0};";
 		private DbAccessLayer _expectWrapper;
-
-		private string _dbFilePath;
-
+		
 		public DbAccessType DbAccessType
 		{
 			get { return DbAccessType.SqLite; }
@@ -31,6 +29,8 @@ namespace JPB.DataAccess.Tests.Overwrite
 		{
 			get { return SConnectionString; }
 		}
+
+		public string DatabaseName { get; set; }
 
 		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
@@ -47,24 +47,24 @@ namespace JPB.DataAccess.Tests.Overwrite
 		        .ConnectionStrings["RDBMS.SqLite.DefaultConnection"].ConnectionString);
 		    var connectionRegex = new Regex("Data Source=(.*);").Match(sqLiteConnection);
 		    
-            _dbFilePath = Path.Combine(connectionRegex.Groups[1].Value, string.Format("YAORM_SqLite_{0}.db", testName));
-		    var connection = sqLiteConnection.Replace(connectionRegex.Groups[1].Value, _dbFilePath);
+			DatabaseName = Path.Combine(connectionRegex.Groups[1].Value, string.Format("YAORM_SqLite_{0}.db", testName));
+		    var connection = sqLiteConnection.Replace(connectionRegex.Groups[1].Value, DatabaseName);
 
-            if (File.Exists(_dbFilePath))
+            if (File.Exists(DatabaseName))
 			{
 				GC.Collect();
 				GC.WaitForPendingFinalizers();
 				GC.Collect();
-				File.Delete(_dbFilePath);
+				File.Delete(DatabaseName);
 			}
 
-			File.Create(_dbFilePath).Dispose();
+			File.Create(DatabaseName).Dispose();
 
 			//var file = MemoryMappedFile.CreateNew(dbname, 10000, MemoryMappedFileAccess.ReadWrite);
 
 			//tempPath = Path.GetTempFileName() + dbname + "sqLite";
 
-			_expectWrapper = new DbAccessLayer(new SqLite.SqLite(connection), new DbConfig(true));
+			_expectWrapper = new DbAccessLayer(new DataAccess.SqLite.SqLite(connection), new DbConfig(true));
 			foreach (var databaseMeta in MetaManager.DatabaseMetas)
 			{
 				_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(databaseMeta.Value.CreationCommand(DbAccessType)));
@@ -74,12 +74,12 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 		public void FlushErrorData()
 		{
-			Console.WriteLine($"Error Data for '{_dbFilePath}'");
+			Console.WriteLine($"Error Data for '{DatabaseName}'");
 		}
 
 		public void Clear()
 		{
-			var connectionCounter = SqLite.SqLite.ConnectionCounter.Where(f => f.Key == _expectWrapper.Database.DatabaseFile)
+			var connectionCounter = DataAccess.SqLite.SqLite.ConnectionCounter.Where(f => f.Key == _expectWrapper.Database.DatabaseFile)
 			                              .SelectMany(e => e.Value.Connections)
 			                              .Select(e =>
 			                              {
@@ -101,18 +101,18 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 			_expectWrapper.Database.CloseAllConnection();
 
-			if (File.Exists(_dbFilePath))
+			if (File.Exists(DatabaseName))
 			{
 				GC.Collect();
 				GC.WaitForPendingFinalizers();
 				GC.Collect();
 				try
 				{
-					File.Delete(_dbFilePath);
+					File.Delete(DatabaseName);
 				}
 				catch (Exception)
 				{
-					Console.WriteLine($"Could not cleanup the SqLite File '{_dbFilePath}'");
+					Console.WriteLine($"Could not cleanup the SqLite File '{DatabaseName}'");
 				}
 			}
 		}

@@ -4,6 +4,7 @@ using System;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
@@ -12,10 +13,10 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class DataMigrationTests : DatabaseBaseTest
+	public class DataMigrationTests : DatabaseStandardTest
 	{
-		public DataMigrationTests(DbAccessType type, bool asyncExecution,bool syncronised) : base(type, asyncExecution, syncronised)
-		{
+		public DataMigrationTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised){
 		}
 
 		[Test]

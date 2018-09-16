@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,9 +8,28 @@ using JPB.DataAccess.Manager;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Builders;
 
 namespace JPB.DataAccess.Tests.TestFramework
 {
+	public class StandardDatabaseTests : IEnumerable
+	{
+		public IEnumerator GetEnumerator()
+		{
+			yield return new object[] {DbAccessType.MsSql, true, false };
+			yield return new object[] {DbAccessType.MsSql, false, false };
+			yield return new object[] {DbAccessType.MsSql, false, true };
+
+			yield return new object[] {DbAccessType.SqLite, true, false };
+			yield return new object[] {DbAccessType.SqLite, false, false };
+			yield return new object[] {DbAccessType.SqLite, false, true };
+
+			yield return new object[] {DbAccessType.MySql, true, false };
+			yield return new object[] {DbAccessType.MySql, false, false };
+			yield return new object[] {DbAccessType.MySql, false, true };
+		}
+	}
+
 	/// <summary>
 	/// Excludes the method from been used by all DbAccessTypes not given in the constructor
 	/// </summary>

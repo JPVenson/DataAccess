@@ -5,6 +5,7 @@ using System.Linq;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 
 #endregion
@@ -12,9 +13,8 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class UpdateRefreshTests : DatabaseBaseTest
+	public class UpdateRefreshTests : DatabaseStandardTest
 	{
-
 		[Test]
 		public void InsertIdentity()
 		{
@@ -117,8 +117,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		}
 
 		/// <inheritdoc />
-		public UpdateRefreshTests(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
-		{
+		public UpdateRefreshTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised){
 		}
 	}
 }

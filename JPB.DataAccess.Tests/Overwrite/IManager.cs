@@ -18,6 +18,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 	{
 		DbAccessType DbAccessType { get; }
 		string ConnectionString { get; }
+		string DatabaseName { get; }
 		DbAccessLayer GetWrapper(DbAccessType type, string instanceName);
 		void FlushErrorData();
 		void Clear();

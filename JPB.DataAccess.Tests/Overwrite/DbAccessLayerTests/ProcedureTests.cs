@@ -12,7 +12,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class ProcedureTests : DatabaseBaseTest
+	public class ProcedureTests : DatabaseStandardTest
 	{
 
 		[Test]
@@ -53,8 +53,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		}
 
 		/// <inheritdoc />
-		public ProcedureTests(DbAccessType type, bool asyncExecution ,bool syncronised) : base(type, asyncExecution, syncronised)
-		{
+		public ProcedureTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised){
 		}
 	}
 }

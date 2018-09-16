@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 
 #endregion
@@ -12,10 +13,10 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.None)]
 	[Explicit]
-	public class EventTest : DatabaseBaseTest
+	public class EventTest : DatabaseStandardTest
 	{
-		public EventTest(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
-		{
+		public EventTest(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised){
 		}
 
 		public void TestEvent(Action<DatabaseActionHandler> eventType, Action shouldRaiseEvent, bool shouldInvoke)

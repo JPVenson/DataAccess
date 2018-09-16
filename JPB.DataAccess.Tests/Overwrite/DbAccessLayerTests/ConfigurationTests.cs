@@ -6,6 +6,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 
 #endregion
@@ -13,9 +14,10 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class ConfigurationTests : DatabaseBaseTest
+	public class ConfigurationTests : DatabaseStandardTest
 	{
-		public ConfigurationTests(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
+		public ConfigurationTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised)
 		{
 		}
 

@@ -8,6 +8,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Tests.Overwrite.Framework.MsSql;
+using JPB.DataAccess.Tests.Overwrite.Framework.MySql;
+using JPB.DataAccess.Tests.Overwrite.Framework.SqLite;
 using NUnit.Framework;
 
 #endregion
@@ -43,34 +46,12 @@ namespace JPB.DataAccess.Tests.Overwrite
 			                               .Aggregate((e,f) => e + f) + "." +
 			                    TestContext.CurrentContext.Test.MethodName;
 
-
-			//var arguments =
-			//		additionalArguments.Select(
-			//		                           f =>
-			//		                           {
-			//			                           if (f == null)
-			//			                           {
-			//				                           return TestContext.CurrentContext.Random.NextShort().ToString();
-			//			                           }
-
-			//			                           if (typeof(string).Assembly.GetTypes().Contains(f.GetType()))
-			//			                           {
-			//				                           return f.ToString();
-			//			                           }
-
-			//			                           return f.GetHashCode().ToString();
-			//		                           })
-			//		                   .ToArray();
-
-			//if (arguments.Any())
-			//{
-			//	testClassName =
-			//}
 			testClassName = testClassName + "_" + Guid.NewGuid().ToString("N");
 			testClassName = new Regex("[^a-zA-Z0-9]").Replace(testClassName, "_");
 			_errorData.AppendLine($"Attach to Database: {testClassName}");
 
 			expectWrapper = (_selectedMgr = _managers[type]()).GetWrapper(type, testClassName);
+			_errorData.AppendLine($"Name of Database: {_selectedMgr.DatabaseName}");
 			expectWrapper.Config.EnableInstanceThreadSafety = true;
 
 

@@ -8,6 +8,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
@@ -16,9 +17,8 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
-	public class InsertTests : DatabaseBaseTest
+	public class InsertTests : DatabaseStandardTest
 	{
-
 		[Test]
 		[Category("MsSQL")]
 		[Category("SqLite")]
@@ -241,8 +241,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		}
 
 		/// <inheritdoc />
-		public InsertTests(DbAccessType type, bool asyncExecution,bool syncronised) : base(type, asyncExecution, syncronised)
-		{
+		public InsertTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised){
 		}
 	}
 }

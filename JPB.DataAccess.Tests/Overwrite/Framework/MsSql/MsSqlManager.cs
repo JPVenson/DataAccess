@@ -9,7 +9,7 @@ using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Overwrite
+namespace JPB.DataAccess.Tests.Overwrite.Framework.MsSql
 {
 	public class MsSqlManager : IManagerImplementation
 	{
@@ -54,11 +54,12 @@ namespace JPB.DataAccess.Tests.Overwrite
 			}
 		}
 
-		private string _dbname;
+		public string DatabaseName { get; set; }
+
 
 		public DbAccessLayer GetWrapper(DbAccessType type, string testName)
 		{
-			_dbname = string.Format("YAORM_2_TestDb_Test_MsSQL_{0}", testName);
+			DatabaseName = string.Format("YAORM_2_TestDb_Test_MsSQL_{0}", testName);
 			if (_expectWrapper != null)
 			{
 				_expectWrapper.Database.CloseAllConnection();
@@ -67,14 +68,14 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 			var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-				_dbname);
+				DatabaseName);
 
 			_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(redesginDatabase));
 			_expectWrapper.ExecuteGenericCommand(
-				_expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", _dbname)));
+				_expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", DatabaseName)));
 
 			_expectWrapper = new DbAccessLayer(DbAccessType,
-				string.Format(ConnectionString + "Initial Catalog={0};", _dbname), new DbConfig(true));
+				string.Format(ConnectionString + "Initial Catalog={0};", DatabaseName), new DbConfig(true));
 
 			foreach (var databaseMeta in MetaManager.DatabaseMetas)
 			{
@@ -110,7 +111,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 				
 				var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE",
-				_dbname);
+				DatabaseName);
 
 				var masterWrapper = new DbAccessLayer(DbAccessType,
 				string.Format(ConnectionString + "Initial Catalog=master;"), new DbConfig(true));
@@ -119,7 +120,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 				redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
-				_dbname);
+				DatabaseName);
 
 				masterWrapper.ExecuteGenericCommand(masterWrapper.Database.CreateCommand(redesginDatabase));
 

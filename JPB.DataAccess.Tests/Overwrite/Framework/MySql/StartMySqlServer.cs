@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -38,6 +39,7 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 		public MySqlConnector()
 		{
 			StopMySql = new ManualResetEventSlim();
+			Listener = new ConcurrentDictionary<LoggerDelegate, LoggerDelegate>();
 		}
 
 		public void Init(string pathToEngineAssembly)
@@ -98,7 +100,7 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 		}
 
 		private string EmitDefaultValues()
-		{		
+		{
 			var relPathToData = Path.Combine(Path.GetDirectoryName(PathToEngineAssembly), "..", "data");
 			var pathToData = Path.GetFullPath(relPathToData);
 			var sb = new StringBuilder();
@@ -109,6 +111,7 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 			sb.Append("--log-error=\"../share/error_log.err\" ");
 			sb.Append("--user=\"root\" ");
 			sb.Append("--log_syslog=0 ");
+			sb.Append("--back_log=65535 ");
 			return sb.ToString();
 		}
 
@@ -230,11 +233,73 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 
 		internal Task AwaitMySqlStop { get; set; }
 		public ManualResetEventSlim StopMySql { get; private set; }
+		Process startMySqlExecutable;
+
+		private ConcurrentDictionary<LoggerDelegate, LoggerDelegate> Listener { get; }
+
+		public class LoggerDelegate : IDisposable
+		{
+			private readonly Action _detatch;
+
+			public LoggerDelegate(Action detatch)
+			{
+				_detatch = detatch;
+				LogLines = new List<MySqlLogline>();
+			}
+
+			public event EventHandler<MySqlLogline> OnLogLine;
+
+			public IList<MySqlLogline> LogLines { get; private set; }
+
+			public void Dispose()
+			{
+				_detatch();
+			}
+
+			internal void OnOnLogLine(MySqlLogline e)
+			{
+				OnLogLine?.Invoke(this, e);
+			}
+		}
+
+		private void DispatchLogLine(MySqlLogline logLine)
+		{
+			foreach (var loggerDelegate in Listener)
+			{
+				loggerDelegate.Value.LogLines.Add(logLine);
+				loggerDelegate.Value.OnOnLogLine(logLine);
+			}
+		}
+
+		public LoggerDelegate AttachLogger()
+		{
+			LoggerDelegate logger = null;
+			logger = new LoggerDelegate(() => Listener.TryRemove(logger, out logger));
+			return Listener.GetOrAdd(logger, logger);
+		}
+
+		public void CreateAndRunIfNot()
+		{
+			lock (this)
+			{
+				Path.GetFullPath()
+				if (!HasStarted)
+				{
+					var createDatabaseResultCode = CreateDatabaseFiles().Result;
+					if (createDatabaseResultCode != CreateDatabaseResultCode.Ok)
+					{
+						throw new InvalidOperationException("Could not create the Database files");
+					}
+
+					RunMySql();
+				}
+			}
+		}
 
 		public void RunMySql()
 		{
 			var logLines = new List<MySqlLogline>();
-			var startMySqlExecutable = StartMySqlExecutable(EmitDefaultValues() + " --console");
+			startMySqlExecutable = StartMySqlExecutable(EmitDefaultValues() + " --console");
 			HasStarted = true;
 			startMySqlExecutable.Start();
 
@@ -245,6 +310,8 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 				{
 					TestContext.Error.WriteLine(logLine.Orginal);
 				}
+
+				DispatchLogLine(logLine);
 			}, startMySqlExecutable);
 
 			AttachLogParserToProcessError(logLine =>
@@ -254,6 +321,7 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 				{
 					TestContext.Error.WriteLine(logLine.Orginal);
 				}
+				DispatchLogLine(logLine);
 			}, startMySqlExecutable);
 
 			AwaitMySqlStop = Task.Run(async () =>

@@ -2,17 +2,15 @@
 
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base;
+using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 
 #endregion
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 {
-	[TestFixture(DbAccessType.SqLite)]
-	[TestFixture(DbAccessType.MsSql)]
-	public class PagerConstraintTests : DatabaseBaseTest
+	public class PagerConstraintTests : DatabaseStandardTest
 	{
-
 		[Test]
 		public void CurrentPageBiggerOrEqualsOne()
 		{
@@ -23,8 +21,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 		}
 
 		/// <inheritdoc />
-		public PagerConstraintTests(DbAccessType type) : base(type, false, false)
-		{
+		public PagerConstraintTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 
+			: base(type, egarLoading, asyncExecution, syncronised){
 		}
 	}
 }
