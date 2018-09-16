@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using JetBrains.dotMemoryUnit;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Tests.Overwrite.Framework.MySql;
 using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -131,7 +132,10 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			}
 			else
 			{
-				Mgr?.Clear();
+				lock (MySqlConnectorInstance.Instance)
+				{
+					Mgr?.Clear();
+				}
 			}
 
 			Mgr = null;
