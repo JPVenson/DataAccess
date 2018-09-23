@@ -289,7 +289,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			Assert.That(() => DbAccess.Database.CloseConnection(false), Throws.Nothing);
 		}
 
-		//[Test]
+		[Test]
 		[Parallelizable(ParallelScope.None)]
 		[DbCategory(DbAccessType.MsSql)]
 		public void NestedTransactionWithSharedInInstanceCounter()

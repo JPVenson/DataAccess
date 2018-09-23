@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -36,7 +37,7 @@ namespace JPB.DataAccess.Tests.TestFramework
 	/// <seealso cref="NUnit.Framework.NUnitAttribute" />
 	/// <seealso cref="NUnit.Framework.Interfaces.IApplyToTest" />
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-	public class DbCategoryAttribute : NUnitAttribute, ISimpleTestBuilder, IApplyToTest, IImplyFixture, IApplyToContext
+	public class DbCategoryAttribute : NUnitAttribute, ITestAction
 	{
 		public DbCategoryAttribute(params DbAccessType[] dbAccessTypes)
 		{
@@ -45,14 +46,33 @@ namespace JPB.DataAccess.Tests.TestFramework
 
 		public DbAccessType[] DbAccessTypes { get; private set; }
 
-		///// <inheritdoc />
+		public void BeforeTest(ITest test)
+		{
+			var databaseStandardTest = test.Fixture as DatabaseStandardTest;
+			if (DbAccessTypes.Any(e => !e.Equals(databaseStandardTest.Type)))
+			{
+				Assert.Ignore("Test Excluded because opt-out Database-Category");
+			}
+		}
+
+		public void AfterTest(ITest test)
+		{
+		}
+
+		public ActionTargets Targets { get; } = ActionTargets.Test;
+	}
+}
+
+
+/*
+ * <inheritdoc />
 		public void ApplyToContext(TestExecutionContext context)
 		{
-			//if (DbAccessTypes.Any(e => !e.Equals((context.CurrentTest.Parent as TestFixture)?.Arguments.FirstOrDefault())))
-			//{
-			//	context.CurrentTest.RunState = RunState.NotRunnable;
-			//	context.CurrentTest.Properties.Set("_SKIPREASON", "Test Excluded because opt-out");
-			//}
+			if (DbAccessTypes.Any(e => !e.Equals((context.CurrentTest as TestFixture ?? context.CurrentTest.Parent as TestFixture)?.Arguments.FirstOrDefault())))
+			{
+				context.CurrentTest.RunState = RunState.Skipped;
+				context.CurrentTest.Properties.Set("_SKIPREASON", "Test Excluded because opt-out Database-Category");
+			}
 		}
 
 		private readonly NUnitTestCaseBuilder _builder = new NUnitTestCaseBuilder();
@@ -121,9 +141,11 @@ namespace JPB.DataAccess.Tests.TestFramework
 			{
 				suite.RunState = RunState.Skipped;
 				suite.Properties.Set("_SKIPREASON", "Test Excluded because opt-out Database-Category");
+				return null;
 			}
 
 			return BuildFromBase(method, suite);
 		}
-	}
-}
+ *
+ *
+ */
