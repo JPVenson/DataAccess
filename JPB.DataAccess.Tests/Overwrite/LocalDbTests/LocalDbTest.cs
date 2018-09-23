@@ -164,11 +164,10 @@ namespace JPB.DataAccess.Tests.Overwrite.LocalDbTests
 		}
 
 		[Test]
-		[TestCase(999)]
-		[TestCase(9999)]
-		[TestCase(99999)]
-		[TestCase(999999)]
-		[Explicit("Long running Performance tests")]
+		[TestCase(999, Explicit = true)]
+		[TestCase(9999, Explicit = true)]
+		[TestCase(99999, Explicit = true)]
+		[TestCase(999999, Explicit = true)]
 		public void SimpleParallelAccess(int limit)
 		{
 			Assert.That(() => { Parallel.For(0, limit, new ParallelOptions() { MaxDegreeOfParallelism = 6 }, d => { _users.Add(new Users()); }); }, Throws.Nothing);
@@ -180,9 +179,9 @@ namespace JPB.DataAccess.Tests.Overwrite.LocalDbTests
 				idCounter++;
 			}
 		}
-
-		[TestCase(2, new[] { 999, 9999, 99999, 999999 })]
-		[Explicit("Long running Performance tests")]
+		
+		[Test]
+		[TestCase(2, new[] { 999, 9999, 99999, 999999 }, Explicit = true)]
 		public void ParallelAccessSpeedEval(int iterateCount, int[] limits)
 		{
 			var results = new List<Tuple<int, long>>();

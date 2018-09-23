@@ -16,17 +16,17 @@ namespace JPB.DataAccess.Tests.TestFramework
 	{
 		public IEnumerator GetEnumerator()
 		{
-			yield return new object[] {DbAccessType.MsSql, true, false };
-			yield return new object[] {DbAccessType.MsSql, false, false };
-			yield return new object[] {DbAccessType.MsSql, false, true };
+			yield return new object[] { DbAccessType.MsSql, true, false };
+			yield return new object[] { DbAccessType.MsSql, false, false };
+			yield return new object[] { DbAccessType.MsSql, false, true };
 
-			yield return new object[] {DbAccessType.SqLite, true, false };
-			yield return new object[] {DbAccessType.SqLite, false, false };
-			yield return new object[] {DbAccessType.SqLite, false, true };
+			yield return new object[] { DbAccessType.SqLite, true, false };
+			yield return new object[] { DbAccessType.SqLite, false, false };
+			yield return new object[] { DbAccessType.SqLite, false, true };
 
-			yield return new object[] {DbAccessType.MySql, true, false };
-			yield return new object[] {DbAccessType.MySql, false, false };
-			yield return new object[] {DbAccessType.MySql, false, true };
+			yield return new object[] { DbAccessType.MySql, true, false };
+			yield return new object[] { DbAccessType.MySql, false, false };
+			yield return new object[] { DbAccessType.MySql, false, true };
 		}
 	}
 
@@ -36,7 +36,7 @@ namespace JPB.DataAccess.Tests.TestFramework
 	/// <seealso cref="NUnit.Framework.NUnitAttribute" />
 	/// <seealso cref="NUnit.Framework.Interfaces.IApplyToTest" />
 	[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-	public class DbCategoryAttribute : NUnitAttribute, IApplyToTest
+	public class DbCategoryAttribute : NUnitAttribute, ISimpleTestBuilder, IApplyToTest, IImplyFixture, IApplyToContext
 	{
 		public DbCategoryAttribute(params DbAccessType[] dbAccessTypes)
 		{
@@ -46,23 +46,84 @@ namespace JPB.DataAccess.Tests.TestFramework
 		public DbAccessType[] DbAccessTypes { get; private set; }
 
 		///// <inheritdoc />
-		//public void ApplyToContext(TestExecutionContext context)
-		//{
-		//	if (DbAccessTypes.Any(e => !e.Equals((context.CurrentTest.Parent as TestFixture)?.Arguments.FirstOrDefault())))
-		//	{
-		//		context.CurrentTest.RunState = RunState.NotRunnable;
-		//		context.CurrentTest.Properties.Set("_SKIPREASON", "Test Excluded because opt-out");
-		//	}
-		//}
+		public void ApplyToContext(TestExecutionContext context)
+		{
+			//if (DbAccessTypes.Any(e => !e.Equals((context.CurrentTest.Parent as TestFixture)?.Arguments.FirstOrDefault())))
+			//{
+			//	context.CurrentTest.RunState = RunState.NotRunnable;
+			//	context.CurrentTest.Properties.Set("_SKIPREASON", "Test Excluded because opt-out");
+			//}
+		}
 
-		/// <inheritdoc />
+		private readonly NUnitTestCaseBuilder _builder = new NUnitTestCaseBuilder();
+		private object _expectedResult;
+
+		/// <summary>Descriptive text for this test</summary>
+		public string Description { get; set; }
+
+		/// <summary>The author of this test</summary>
+		public string Author { get; set; }
+
+		/// <summary>The type that this test is testing</summary>
+		public Type TestOf { get; set; }
+
+		/// <summary>
+		/// Modifies a test by adding a description, if not already set.
+		/// </summary>
+		/// <param name="test">The test to modify</param>
 		public void ApplyToTest(Test test)
 		{
-			if (DbAccessTypes.Any(e => !e.Equals((test.Parent as TestFixture)?.Arguments.FirstOrDefault())))
+			if (!test.Properties.ContainsKey("Description") && this.Description != null)
+				test.Properties.Set("Description", (object)this.Description);
+			if (!test.Properties.ContainsKey("Author") && this.Author != null)
+				test.Properties.Set("Author", (object)this.Author);
+			if (test.Properties.ContainsKey("TestOf") || !(this.TestOf != (Type)null))
+				return;
+			test.Properties.Set("TestOf", (object)this.TestOf.FullName);
+		}
+
+		/// <summary>Gets or sets the expected result.</summary>
+		/// <value>The result.</value>
+		public object ExpectedResult
+		{
+			get
 			{
-				test.RunState = RunState.Skipped;
-				test.Properties.Set("_SKIPREASON", "Test Excluded because opt-out Category");
+				return this._expectedResult;
 			}
+			set
+			{
+				this._expectedResult = value;
+				this.HasExpectedResult = true;
+			}
+		}
+
+		/// <summary>Returns true if an expected result has been set</summary>
+		public bool HasExpectedResult { get; private set; }
+
+		/// <summary>Construct a TestMethod from a given method.</summary>
+		/// <param name="method">The method for which a test is to be constructed.</param>
+		/// <param name="suite">The suite to which the test will be added.</param>
+		/// <returns>A TestMethod</returns>
+		public TestMethod BuildFromBase(IMethodInfo method, Test suite)
+		{
+			TestCaseParameters parms = (TestCaseParameters)null;
+			if (this.HasExpectedResult)
+			{
+				parms = new TestCaseParameters();
+				parms.ExpectedResult = this.ExpectedResult;
+			}
+			return this._builder.BuildTestMethod(method, suite, parms);
+		}
+
+		public TestMethod BuildFrom(IMethodInfo method, Test suite)
+		{
+			if (DbAccessTypes.Any(e => !e.Equals((suite as TestFixture ?? suite.Parent as TestFixture)?.Arguments.FirstOrDefault())))
+			{
+				suite.RunState = RunState.Skipped;
+				suite.Properties.Set("_SKIPREASON", "Test Excluded because opt-out Database-Category");
+			}
+
+			return BuildFromBase(method, suite);
 		}
 	}
 }
