@@ -1,4 +1,6 @@
-﻿namespace JPB.DataAccess.Tests.Base.TestModels.MetaAPI
+﻿using System;
+
+namespace JPB.DataAccess.Tests.Base.TestModels.MetaAPI
 {
 	public struct StructCreating
 	{
@@ -8,6 +10,21 @@
 		}
 
 		public string PropString { get; private set; }
+	}
+
+	public class NestedClassTest
+	{
+		public string PropString { get; set; }
+
+		class PrivateNestedClass
+		{
+			public int PropInt { get; set; }
+		}
+
+		public static Type GetNestedClassType()
+		{
+			return typeof(PrivateNestedClass);
+		}
 	}
 
 	public class ClassCreating

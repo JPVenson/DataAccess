@@ -21,6 +21,28 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 	public class MetaApiTest
 	{
 		[Test]
+		public void NestedClassAccess()
+		{
+			var cache = new DbConfig(true);
+			var parentClass = cache.GetOrCreateClassInfoCache(typeof(NestedClassTest));
+			Assert.That(() => parentClass.Propertys, Contains.Key(nameof(NestedClassTest.PropString)));
+			var parentClassInstance = parentClass.DefaultFactory() as NestedClassTest;
+
+			Assert.That(() => parentClass.Propertys[nameof(NestedClassTest.PropString)].Setter.Invoke(parentClassInstance, "TEST"), Throws.Nothing);
+
+			var nestedClass = NestedClassTest.GetNestedClassType();
+
+			var nestedClassCache = cache.GetOrCreateClassInfoCache(nestedClass);
+			Assert.That(nestedClassCache, Is.Not.Null);
+			var nestedClassInstance = nestedClassCache.DefaultFactory();
+			Assert.That(nestedClassCache.Propertys, Contains.Key("PropInt"));
+			var propInt = nestedClassCache.Propertys["PropInt"];
+
+			Assert.That(() => propInt.Getter.Invoke(nestedClassInstance), Is.EqualTo(default(int)));
+
+		}
+
+		[Test]
 		public void DictionaryClassCreating()
 		{
 			var cache = new DbConfig(true);
@@ -33,6 +55,7 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 			Assert.That(orCreateClassInfoCache.Propertys, Is.Not.Null);
 			Assert.That(orCreateClassInfoCache.Propertys, Contains.Key("Keys"));
 			Assert.That(orCreateClassInfoCache.Propertys, Contains.Key("Values"));
+			//indexer are currently no supported
 			Assert.That(orCreateClassInfoCache.Propertys, !Contains.Key("Item"));
 			var nTestDic = orCreateClassInfoCache.DefaultFactory();
 			Assert.That(nTestDic, Is.Not.Null);

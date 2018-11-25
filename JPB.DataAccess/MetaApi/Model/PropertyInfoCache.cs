@@ -65,9 +65,11 @@ namespace JPB.DataAccess.MetaApi.Model
 				var isStatic = getMethod != null
 					? getMethod.Attributes.HasFlag(MethodAttributes.Static)
 					: setMethod.Attributes.HasFlag(MethodAttributes.Static);
-				var builder = typeof(Expression)
-						.GetMethods()
-						.First(s => s.Name == "Lambda" && s.ContainsGenericParameters);
+				//var builder = typeof(Expression)
+				//		.GetMethods()
+				//		.First(s => s.Name == "Lambda" && s.ContainsGenericParameters);
+				//
+				//var builder = new Func<LambdaExpression>(() => Expression.Lambda());
 
 				if (isStatic)
 				{
@@ -77,16 +79,17 @@ namespace JPB.DataAccess.MetaApi.Model
 
 					if (getMethod != null)
 					{
-						var getExpression = builder
-								.MakeGenericMethod(GetterDelegate)
-								.Invoke(null, new object[]
-								{
-									accessField, null
-								}) as dynamic;
 
-						var getterDelegate = getExpression.Compile();
+						//var getExpression = builder
+						//		.MakeGenericMethod(GetterDelegate)
+						//		.Invoke(null, new object[]
+						//		{
+						//			accessField, null
+						//		}) as dynamic;
 						Getter = new PropertyHelper<TAtt>(getMethod);
-						((PropertyHelper<TAtt>) Getter).SetGet(getterDelegate);
+						((PropertyHelper<TAtt>) Getter).SetGet(Expression
+							.Lambda(GetterDelegate, accessField, true)
+							.Compile());
 					}
 					if (setMethod != null)
 					{
@@ -95,20 +98,22 @@ namespace JPB.DataAccess.MetaApi.Model
 						accessField,
 						valueRef);
 
-						var setExpression = builder
-								.MakeGenericMethod(SetterDelegate)
-								.Invoke(null, new object[]
-								{
-									setter,
-									new[]
-									{
-										valueRef
-									}
-								}) as dynamic;
+						//var setExpression = builder
+						//		.MakeGenericMethod(SetterDelegate)
+						//		.Invoke(null, new object[]
+						//		{
+						//			setter,
+						//			new[]
+						//			{
+						//				valueRef
+						//			}
+						//		}) as dynamic;
 
-						var setterDelegate = setExpression.Compile();
+						//var setterDelegate = setExpression.Compile();
 						Setter = new PropertyHelper<TAtt>(setMethod);
-						((PropertyHelper<TAtt>) Setter).SetSet(setterDelegate);
+						((PropertyHelper<TAtt>) Setter).SetSet(Expression
+							.Lambda(SetterDelegate, setter, true, valueRef)
+							.Compile());
 					}
 				}
 				else
@@ -122,17 +127,17 @@ namespace JPB.DataAccess.MetaApi.Model
 
 					if (getMethod != null)
 					{
-						var getExpression = builder
-								.MakeGenericMethod(GetterDelegate)
-								.Invoke(null, new object[]
-								{
-									accessField,
-									new[] {thisRef}
-								}) as dynamic;
+						//var getExpression = builder
+						//		.MakeGenericMethod(GetterDelegate)
+						//		.Invoke(null, new object[]
+						//		{
+						//			accessField,
+						//			new[] {thisRef}
+						//		}) as Delegate;
 
-						var getterDelegate = getExpression.Compile();
+						//var getterDelegate = getExpression.Compile();
 						Getter = new PropertyHelper<TAtt>(getMethod);
-						((PropertyHelper<TAtt>) Getter).SetGet(getterDelegate);
+						((PropertyHelper<TAtt>) Getter).SetGet(Expression.Lambda(GetterDelegate, accessField, true, thisRef).Compile());
 					}
 					if (setMethod != null)
 					{
@@ -144,17 +149,21 @@ namespace JPB.DataAccess.MetaApi.Model
 						var retunLabel = Expression.Label(makeRetunLabel, Expression.Default(propertyInfo.DeclaringType));
 						var returnMaybeValueType = Expression.Return(makeRetunLabel, thisRef);
 
-						var setExpression = builder
-								.MakeGenericMethod(SetterDelegate)
-								.Invoke(null, new object[]
-								{
-									Expression.Block(setter, returnMaybeValueType, retunLabel),
-									new[] {thisRef, valueRef}
-								}) as dynamic;
+						//var setExpression = builder
+						//		.MakeGenericMethod(SetterDelegate)
+						//		.Invoke(null, new object[]
+						//		{
+						//			Expression.Block(setter, returnMaybeValueType, retunLabel),
+						//			new[] {thisRef, valueRef}
+						//		}) as dynamic;
 
-						var setterDelegate = setExpression.Compile();
+						//var setterDelegate = setExpression.Compile();
 						Setter = new PropertyHelper<TAtt>(setMethod);
-						((PropertyHelper<TAtt>) Setter).SetSet(setterDelegate);
+						((PropertyHelper<TAtt>) Setter)
+							.SetSet(Expression.Lambda(
+								SetterDelegate,
+								Expression.Block(setter, returnMaybeValueType, retunLabel),
+								true, thisRef, valueRef).Compile());
 					}
 				}
 			}

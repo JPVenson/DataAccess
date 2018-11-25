@@ -14,4 +14,4 @@ $nunit = Get-ChildItem "$PackagesDir" -Filter nunit3-console.exe -Recurse | % { 
 $tests = (Get-ChildItem "$OutDir\JPB.DataAccess.Tests\bin\Release\" -Recurse -Include *.Tests.dll)
 "Test Path: $tests"
 # Run tests
-& $nunit $tests /framework:"net-4.0" /result:"$OutDir\Tests.nunit.xml" --dispose-runners
+& $nunit $tests /framework:"net-4.0" /result:"$OutDir\Tests.nunit.xml" --dispose-runners | Write-Host
