@@ -13,21 +13,31 @@ using NUnit.Framework.Internal.Builders;
 
 namespace JPB.DataAccess.Tests.TestFramework
 {
+	/// <summary>
+	///		Returns the list of Standard variations that any test must accept
+	/// </summary>
+	/// <seealso cref="System.Collections.IEnumerable" />
 	public class StandardDatabaseTests : IEnumerable
 	{
+		public StandardDatabaseTests()
+		{
+			DbAccessTypes = new[] { DbAccessType.MsSql, DbAccessType.SqLite, DbAccessType.MySql };
+		}
+
+		public DbAccessType[] DbAccessTypes { get; set; }
+
 		public IEnumerator GetEnumerator()
 		{
-			yield return new object[] { DbAccessType.MsSql, true, false };
-			yield return new object[] { DbAccessType.MsSql, false, false };
-			yield return new object[] { DbAccessType.MsSql, false, true };
-
-			yield return new object[] { DbAccessType.SqLite, true, false };
-			yield return new object[] { DbAccessType.SqLite, false, false };
-			yield return new object[] { DbAccessType.SqLite, false, true };
-
-			yield return new object[] { DbAccessType.MySql, true, false };
-			yield return new object[] { DbAccessType.MySql, false, false };
-			yield return new object[] { DbAccessType.MySql, false, true };
+			foreach (var dbAccessType in DbAccessTypes)
+			{
+				//egarLoading, asyncExecution, syncronised
+				yield return new object[] { dbAccessType, true, true, false };
+				yield return new object[] { dbAccessType, true, false, false };
+				yield return new object[] { dbAccessType, true, false, true };
+				yield return new object[] { dbAccessType, false, true, false };
+				yield return new object[] { dbAccessType, false, false, false };
+				yield return new object[] { dbAccessType, false, false, true };
+			}
 		}
 	}
 

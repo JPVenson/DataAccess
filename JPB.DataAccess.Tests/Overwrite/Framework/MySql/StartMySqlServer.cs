@@ -105,7 +105,7 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MySql
 			var pathToData = Path.GetFullPath(relPathToData);
 			var sb = new StringBuilder();
 			sb.Append($"--datadir=\"{pathToData}\" ");
-			sb.Append("--port=\"55555\" ");
+			//sb.Append("--port=\"55555\" ");
 			sb.Append("--sql_mode=\"NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES\" ");
 			sb.Append("--default_authentication_plugin=\"mysql_native_password\" ");
 			sb.Append("--log-error=\"../share/error_log.err\" ");

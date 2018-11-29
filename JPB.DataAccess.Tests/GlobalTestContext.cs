@@ -13,6 +13,8 @@ namespace JPB.DataAccess.Tests
 // ReSharper disable once CheckNamespace
 	public class GlobalTestContext
 	{
+		public const ParallelScope MainParallelScope = ParallelScope.Fixtures;
+
 		public GlobalTestContext()
 		{
 			SetUpActions = new List<Action>();

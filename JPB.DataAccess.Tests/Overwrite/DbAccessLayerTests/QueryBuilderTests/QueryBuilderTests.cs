@@ -93,8 +93,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 	[TestFixture(DbAccessType.MySql, false, true, false, true, EnumerationMode.OnCall)]
 	[TestFixture(DbAccessType.MySql, false, true, false, false, EnumerationMode.FullOnLoad)]
 	[TestFixture(DbAccessType.MySql, false, true, false, false, EnumerationMode.OnCall)]
-
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	
+	[Parallelizable(GlobalTestContext.MainParallelScope)]
 	public class QueryBuilderTests : DatabaseBaseTest
 	{
 		private readonly EnumerationMode _enumerationMode;

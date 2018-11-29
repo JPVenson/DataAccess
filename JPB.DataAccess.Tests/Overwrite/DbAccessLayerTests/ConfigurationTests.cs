@@ -13,7 +13,7 @@ using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	[Parallelizable(GlobalTestContext.MainParallelScope)]
 	public class ConfigurationTests : DatabaseStandardTest
 	{
 		public ConfigurationTests(DbAccessType type, bool egarLoading, bool asyncExecution, bool syncronised) 

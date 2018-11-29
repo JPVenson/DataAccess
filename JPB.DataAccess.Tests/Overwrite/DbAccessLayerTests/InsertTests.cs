@@ -16,7 +16,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	[Parallelizable(GlobalTestContext.MainParallelScope)]
 	public class InsertTests : DatabaseStandardTest
 	{
 		[Test]

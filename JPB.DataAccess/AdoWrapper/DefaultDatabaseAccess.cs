@@ -20,7 +20,7 @@ namespace JPB.DataAccess.AdoWrapper
 	/// <summary>
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Contacts.IDatabase" />
-	[DebuggerDisplay("OpenRuns {TransactionController.InstanceCounter}, IsConnectionOpen {_conn2 != null ? _conn2.State.ToString() : \"Closed\"}, IsTransactionOpen {TransactionController.Transaction != null}")]
+	[DebuggerDisplay("OpenRuns {ConnectionController.InstanceCounter}, IsConnectionOpen {ConnectionController.Connection != null ? ConnectionController.Connection.State.ToString() : \"Closed\"}, IsTransactionOpen {ConnectionController.Transaction != null}")]
 	public sealed partial class DefaultDatabaseAccess : IDatabase
 	{
 		/// <summary>

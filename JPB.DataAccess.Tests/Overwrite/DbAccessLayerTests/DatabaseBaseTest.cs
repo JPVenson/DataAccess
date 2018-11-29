@@ -1,8 +1,8 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using JetBrains.dotMemoryUnit;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Overwrite.Framework.MySql;
 using JPB.DataAccess.Tests.TestFramework;
@@ -13,21 +13,6 @@ using NUnit.Framework.Interfaces;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
-	public class ManagerScope : IDisposable
-	{
-		private readonly Action _then;
-
-		public ManagerScope(Action then)
-		{
-			_then = then;
-		}
-
-		public void Dispose()
-		{
-			_then();
-		}
-	}
-
 	[TestFixture(DbAccessType.MsSql, true, true, false)]
 	[TestFixture(DbAccessType.MsSql, true, false, false)]
 	[TestFixture(DbAccessType.MsSql, true, false, true)]
@@ -57,8 +42,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		}
 	}
 
-
-	[DotMemoryUnit(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
 		private readonly bool _egarLoading;
@@ -68,7 +51,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			params object[] additionalArguments)
 		{
 			_egarLoading = egarLoading;
-			TestContext.CurrentContext.Test.Properties.Add("Type", type);
+			//TestContext.CurrentContext.Test.Properties["Type"] = type;
 			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0", Synronised ? "1" : "0" })
 				.ToArray();
 			Type = type;
@@ -87,6 +70,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 				if (_dbAccess == null)
 				{
 					_dbAccess = Mgr.GetWrapper(Type, AdditionalArguments);
+					
 					_dbAccess.Async = AsyncExecution;
 					_dbAccess.ThreadSave = Synronised;
 					_dbAccess.LoadCompleteResultBeforeMapping = _egarLoading;
@@ -132,9 +116,12 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			}
 			else
 			{
-				lock (MySqlConnectorInstance.Instance)
+				if (Type == DbAccessType.MySql)
 				{
-					Mgr?.Clear();
+					lock (MySqlConnectorInstance.Instance)
+					{
+						Mgr?.Clear();
+					}
 				}
 			}
 

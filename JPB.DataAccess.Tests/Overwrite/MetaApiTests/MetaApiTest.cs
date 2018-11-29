@@ -20,6 +20,9 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 	[TestFixture]
 	public class MetaApiTest
 	{
+		/// <summary>
+		///		Tests that nested classes can be accessed 
+		/// </summary>
 		[Test]
 		public void NestedClassAccess()
 		{
@@ -39,7 +42,6 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 			var propInt = nestedClassCache.Propertys["PropInt"];
 
 			Assert.That(() => propInt.Getter.Invoke(nestedClassInstance), Is.EqualTo(default(int)));
-
 		}
 
 		[Test]
