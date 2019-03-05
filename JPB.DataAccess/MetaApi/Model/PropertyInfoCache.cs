@@ -17,7 +17,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// <summary>
 	///     Infos about the Property
 	/// </summary>
-	[DebuggerDisplay("{PropertyName}")]
+	[DebuggerDisplay("{" + nameof(PropertyName) + "}")]
 	[Serializable]
 	public class PropertyInfoCache<TAtt> : IPropertyInfoCache<TAtt>
 		where TAtt : class, IAttributeInfoCache, new()
@@ -288,7 +288,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			if (attributes == null)
 			{
-				throw new ArgumentNullException("attributes");
+				throw new ArgumentNullException(nameof(attributes));
 			}
 
 			PropertyName = name;

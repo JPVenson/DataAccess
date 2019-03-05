@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion
@@ -186,7 +187,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public int Insert(Type type, object entry, IDatabase db)
 		{
-			return InsertAsync(type, entry, db).Result;
+			return AsyncHelper.WaitSingle(InsertAsync(type, entry, db));
 		}	
 		
 		/// <summary>
@@ -207,7 +208,7 @@ namespace JPB.DataAccess.Manager
 		public IDbCommand CreateInsertWithSelectCommand(Type type, object entry)
 		{
 			var dbCommand = CreateInsertQueryFactory(GetClassInfo(type), entry);
-			return Database.MergeCommands(dbCommand, Database.GetlastInsertedIdCommand());
+			return Database.MergeCommands(dbCommand, Database.GetLastInsertedIdCommand());
 		}
 
 		/// <summary>

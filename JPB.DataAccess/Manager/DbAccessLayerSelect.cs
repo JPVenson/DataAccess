@@ -58,7 +58,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object Select(Type type, object pk)
 		{
-			return SelectAsync(type, pk).Result;
+			return AsyncHelper.WaitSingle(SelectAsync(type, pk));
 		}		
 		
 		/// <summary>
@@ -103,7 +103,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T Select<T>(object pk)
 		{
-			return SelectAsync<T>(pk).Result;
+			return AsyncHelper.WaitSingle(SelectAsync<T>(pk));
 		}		
 		
 		/// <summary>
@@ -125,7 +125,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected object Select(Type type, object pk, bool egarLoading)
 		{
-			return SelectAsync(type, pk, egarLoading).Result;
+			return AsyncHelper.WaitSingle(SelectAsync(type, pk, egarLoading));
 		}	
 		
 		/// <summary>
@@ -147,7 +147,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected T Select<T>(object pk, bool egarLoading)
 		{
-			return SelectAsync<T>(pk, egarLoading).Result;
+			return AsyncHelper.WaitSingle(SelectAsync<T>(pk, egarLoading));
 		}	
 		
 		/// <summary>
@@ -169,7 +169,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] Select(Type type, params object[] parameter)
 		{
-			return SelectAsync(type, parameter).Result;
+			return AsyncHelper.WaitSingle(SelectAsync(type, parameter));
 		}		
 		
 		/// <summary>
@@ -190,7 +190,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T[] Select<T>(object[] parameter)
 		{
-			return SelectAsync<T>(parameter).Result;
+			return AsyncHelper.WaitSingle(SelectAsync<T>(parameter));
 		}		
 		
 		/// <summary>
@@ -214,7 +214,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected object[] Select(Type type, bool egarLoading, params object[] parameter)
 		{
-			return SelectAsync(type, egarLoading, parameter).Result;
+			return AsyncHelper.WaitSingle(SelectAsync(type, egarLoading, parameter));
 		}		
 		
 		/// <summary>
@@ -238,7 +238,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected object[] Select(Type type, IDbCommand command, bool egarLoading)
 		{
-			return SelectAsync(type, command, egarLoading).Result;
+			return AsyncHelper.WaitSingle(SelectAsync(type, command, egarLoading));
 		}		
 		
 		/// <summary>
@@ -262,7 +262,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected T[] Select<T>(IDbCommand command, bool egarLoading)
 		{
-			return SelectAsync<T>(command, egarLoading).Result;
+			return AsyncHelper.WaitSingle(SelectAsync<T>(command, egarLoading));
 		}	
 		
 		/// <summary>
@@ -402,11 +402,11 @@ namespace JPB.DataAccess.Manager
 		{
 			if (type == null)
 			{
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 			}
 			if (fallback == null)
 			{
-				throw new ArgumentNullException("fallback");
+				throw new ArgumentNullException(nameof(fallback));
 			}
 
 			var factoryAttribute = typeof(TE);
@@ -695,7 +695,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public IEnumerable RunDynamicSelect(Type type, IDbCommand query)
 		{
-			return RunDynamicSelectAsync(type, query).Result;
+			return AsyncHelper.WaitSingle(RunDynamicSelectAsync(type, query));
 		}
 
 		/// <summary>
@@ -728,7 +728,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] RunSelect(Type type, IDbCommand query)
 		{
-			return RunSelectAsync(type, query).Result;
+			return AsyncHelper.WaitSingle(RunSelectAsync(type, query));
 		}
 
 		/// <summary>
@@ -750,7 +750,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T[] RunSelect<T>(IDbCommand query)
 		{
-			return RunSelectAsync<T>(query).Result;
+			return AsyncHelper.WaitSingle(RunSelectAsync<T>(query));
 		}
 
 		/// <summary>
@@ -774,10 +774,8 @@ namespace JPB.DataAccess.Manager
 						{
 							query.Parameters.AddWithValue(item.Name, item.Value, s);
 						}
-						if (Database.LastExecutedQuery != null)
-						{
-							Database.LastExecutedQuery.Refresh();
-						}
+
+						Database.LastExecutedQuery?.Refresh();
 						Database.PrepaireRemoteExecution(query);
 						return RunSelect(type, query);
 					}
@@ -900,7 +898,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] RunPrimetivSelect(Type type, IDbCommand command)
 		{
-			return RunPrimetivSelectAsync(type, command).Result;
+			return AsyncHelper.WaitSingle(RunPrimetivSelectAsync(type, command));
 		}		
 		
 		/// <summary>
@@ -996,7 +994,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T[] SelectNative<T>(string query)
 		{
-			return SelectNativeAsync<T>(query).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync<T>(query));
 		}
 
 		/// <summary>
@@ -1021,7 +1019,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectNative(Type type, string query)
 		{
-			return SelectNativeAsync(type, query).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync(type, query));
 		}
 
 		/// <summary>
@@ -1046,7 +1044,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectNative(Type type, IDbCommand command, bool multiRow)
 		{
-			return SelectNativeAsync(type, command, multiRow).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command, multiRow));
 		}
 
 		/// <summary>
@@ -1175,7 +1173,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectNative(Type type, IDbCommand command)
 		{
-			return SelectNativeAsync(type, command).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command));
 		}
 
 		/// <summary>
@@ -1209,7 +1207,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectNative(Type type, string query, IEnumerable<IQueryParameter> paramenter)
 		{
-			return SelectNativeAsync(type, query, paramenter).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync(type, query, paramenter));
 		}
 
 		/// <summary>
@@ -1248,7 +1246,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectNative(Type type, string query, dynamic paramenter)
 		{
-			return SelectNativeAsync(type, query, paramenter).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync(type, query, paramenter));
 		}
 
 		/// <summary>
@@ -1273,7 +1271,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public object[] SelectNative(Type type, IDbCommand command, dynamic paramenter)
 		{
-			return SelectNativeAsync(type, command, paramenter).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command, paramenter));
 		}		
 		
 		/// <summary>
@@ -1305,7 +1303,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T[] SelectNative<T>(string query, dynamic paramenter)
 		{
-			return SelectNativeAsync<T>(query, paramenter).Result;
+			return AsyncHelper.WaitSingle(SelectNativeAsync<T>(query, paramenter));
 		}
 		
 		/// <summary>

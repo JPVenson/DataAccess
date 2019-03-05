@@ -63,7 +63,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			if (resultType == null)
 			{
-				throw new ArgumentNullException("resultType");
+				throw new ArgumentNullException(nameof(resultType));
 			}
 			ContainerObject.ForType = resultType;
 			return this;

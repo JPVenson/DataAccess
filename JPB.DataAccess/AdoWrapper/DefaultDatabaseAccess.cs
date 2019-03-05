@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 
 #endregion
@@ -298,8 +299,8 @@ namespace JPB.DataAccess.AdoWrapper
 		///     Required
 		///     When a new Connection is requested this function is used
 		/// </summary>
-		/// <param name="levl"></param>
-		public void Connect(IsolationLevel? levl = null)
+		/// <param name="transactionLevel"></param>
+		public void Connect(IsolationLevel? transactionLevel = null)
 		{
 			ConnectionController.Connection = GetConnection();
 			//Connection exists check for open
@@ -315,11 +316,11 @@ namespace JPB.DataAccess.AdoWrapper
 
 				//This is the First call of connect so we Could
 				//define it as Transaction
-				if (levl != null)
+				if (transactionLevel != null)
 				{
 					if (ConnectionController.Transaction == null || (ConnectionController.Transaction != null && AllowNestedTransactions))
 					{
-						ConnectionController.Transaction = ConnectionController.Connection.BeginTransaction(levl.GetValueOrDefault());
+						ConnectionController.Transaction = ConnectionController.Connection.BeginTransaction(transactionLevel.Value);
 					}
 				}
 			}
@@ -470,7 +471,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public int ExecuteNonQuery(IDbCommand cmd)
 		{
-			return ExecuteNonQueryAsync(cmd, false).Result;
+			return AsyncHelper.WaitSingle(ExecuteNonQueryAsync(cmd, false));
 		}		
 		
 		/// <summary>
@@ -511,7 +512,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		/// <returns></returns>
 		/// <exception cref="Exception">DB2.ExecuteNonQuery: void connection</exception>
-		public IDbCommand GetlastInsertedIdCommand()
+		public IDbCommand GetLastInsertedIdCommand()
 		{
 			return Strategy.GetlastInsertedID_Cmd(ConnectionController.Connection);
 		}
@@ -521,7 +522,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		/// <param name="comm"></param>
 		/// <returns></returns>
-		public string FormartCommandToQuery(IDbCommand comm)
+		public string FormatCommand(IDbCommand comm)
 		{
 			return Strategy.FormartCommandToQuery(comm);
 		}
@@ -649,7 +650,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public T Run<T>(Func<IDatabase, T> func)
 		{
-			return RunAsync((dd) => Task.FromResult(func(dd))).Result;
+			return AsyncHelper.WaitSingle(RunAsync((dd) => Task.FromResult(func(dd))));
 		}
 
 		/// <summary>
@@ -786,7 +787,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction)
 		{
-			return RunInTransactionAsync((dd) => Task.FromResult(func(dd)), transaction).Result;
+			return AsyncHelper.WaitSingle(RunInTransactionAsync((dd) => Task.FromResult(func(dd)), transaction));
 		}
 
 		/// <summary>

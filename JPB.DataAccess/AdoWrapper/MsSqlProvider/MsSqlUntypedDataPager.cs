@@ -364,10 +364,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 
 			var handler = NewPageLoaded;
-			if (handler != null)
-			{
-				handler();
-			}
+			handler?.Invoke();
 		}
 
 		/// <summary>
@@ -381,10 +378,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 
 			var handler = NewPageLoading;
-			if (handler != null)
-			{
-				handler();
-			}
+			handler?.Invoke();
 		}
 
 		/// <summary>

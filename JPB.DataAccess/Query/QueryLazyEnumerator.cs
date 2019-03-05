@@ -56,10 +56,7 @@ namespace JPB.DataAccess.Query
 
 		public void Dispose()
 		{
-			if (_startupTask != null)
-			{
-				_startupTask.Wait();
-			}
+			_startupTask?.Wait();
 			if (_executeReader != null)
 			{
 				_executeReader.Close();
@@ -71,10 +68,7 @@ namespace JPB.DataAccess.Query
 
 		public bool MoveNext()
 		{
-			if (_startupTask != null)
-			{
-				_startupTask.Wait();
-			}
+			_startupTask?.Wait();
 			_preObject = null;
 			if (_executeReader.IsClosed)
 			{

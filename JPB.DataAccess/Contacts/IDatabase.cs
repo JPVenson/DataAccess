@@ -21,6 +21,7 @@ namespace JPB.DataAccess.Contacts
 		/// Gets The Database Strategy.
 		/// </summary>
 		IDatabaseStrategy Strategy { get; }
+
 		/// <summary>
 		/// Gets the control over Current Transactions and Connections
 		/// </summary>
@@ -112,7 +113,7 @@ namespace JPB.DataAccess.Contacts
 		///     Required
 		///     When a new Connection is requested this function is used
 		/// </summary>
-		void Connect(IsolationLevel? levl = null);
+		void Connect(IsolationLevel? transactionLevel = null);
 
 		/// <summary>
 		///     rollback the current Transaction.
@@ -123,7 +124,7 @@ namespace JPB.DataAccess.Contacts
 		///     Required
 		///     Closing a open Connection
 		/// </summary>
-		/// <param name="forceExisting">If set true additonal checks for existing connections are made</param>
+		/// <param name="forceExisting">If set true additional checks for existing connections are made</param>
 		void CloseConnection(bool forceExisting = false);
 
 		/// <summary>
@@ -131,30 +132,14 @@ namespace JPB.DataAccess.Contacts
 		///     Closing all Connections that maybe open
 		/// </summary>
 		void CloseAllConnection();
-
-		/// <summary>
-		///     Executes a Query that returns no data
-		/// </summary>
-		/// <param name="strSql">The SQL.</param>
-		/// <param name="obj">Arguments</param>
-		/// <returns></returns>
-		int ExecuteNonQuery(string strSql, params object[] obj);
-
+		
 		/// <summary>
 		///     Executes a Query that returns no data
 		/// </summary>
 		/// <param name="cmd">The command.</param>
 		/// <returns></returns>
 		int ExecuteNonQuery(IDbCommand cmd);
-
-		/// <summary>
-		///     Gets the data reader for the given Sql Statement.
-		/// </summary>
-		/// <param name="strSql">The SQL.</param>
-		/// <param name="obj">Arguments.</param>
-		/// <returns></returns>
-		IDataReader GetDataReader(string strSql, params object[] obj);
-
+		
 		/// <summary>
 		///     Gets a single Value from the Query
 		/// </summary>
@@ -168,6 +153,7 @@ namespace JPB.DataAccess.Contacts
 		/// <param name="strSql">The string SQL.</param>
 		/// <param name="obj">The object.</param>
 		/// <returns></returns>
+		[Obsolete("Please use the IDatabase.GetSkalar(IDbCommand cmd) method instead")]
 		object GetSkalar(string strSql, params object[] obj);
 
 		//DataTable GetDataTable(string name, string strSql);
@@ -263,19 +249,13 @@ namespace JPB.DataAccess.Contacts
 		///     Getlasts the inserted identifier command.
 		/// </summary>
 		/// <returns></returns>
-		IDbCommand GetlastInsertedIdCommand();
+		IDbCommand GetLastInsertedIdCommand();
 
 		/// <summary>
 		///     Formarts a Command to a executable QueryCommand
 		/// </summary>
 		/// <returns></returns>
-		string FormartCommandToQuery(IDbCommand comm);
-
-		/// <summary>
-		///     Converts the Generic SourceDbType to the Specific represntation
-		/// </summary>
-		/// <returns></returns>
-		string ConvertParameter(DbType type);
+		string FormatCommand(IDbCommand comm);
 
 		/// <summary>
 		///     Executes a Query that returns no data

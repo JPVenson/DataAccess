@@ -20,7 +20,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	///     Use the <code>FakeMethodInfoCache</code> to create a direct delgate cache that will reuse the delegate pointer and
 	///     the declaring class
 	/// </summary>
-	[DebuggerDisplay("{MethodName}")]
+	[DebuggerDisplay("{" + nameof(MethodName) + "}")]
 	[Serializable]
 	public class MethodInfoCache<TAtt, TArg> :
 		IMethodInfoCache<TAtt, TArg>
@@ -162,7 +162,7 @@ namespace JPB.DataAccess.MetaApi.Model
 
 			if (mehtodInfo == null)
 			{
-				throw new ArgumentNullException("mehtodInfo");
+				throw new ArgumentNullException(nameof(mehtodInfo));
 			}
 			MethodInfo = mehtodInfo;
 			if (mehtodInfo is MethodInfo)

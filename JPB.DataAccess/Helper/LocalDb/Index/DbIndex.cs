@@ -47,7 +47,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Index
 			_lockRoot = new object();
 			if (name == null)
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 			}
 			Name = name;
 			_indexer = column;

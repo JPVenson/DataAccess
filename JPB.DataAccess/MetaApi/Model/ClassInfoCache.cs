@@ -102,7 +102,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		{
 			if (type == null)
 			{
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 			}
 
 			if (!String.IsNullOrEmpty(Name))

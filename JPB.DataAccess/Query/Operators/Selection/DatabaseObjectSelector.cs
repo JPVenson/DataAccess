@@ -44,7 +44,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		{
 			if (alias == null)
 			{
-				throw new ArgumentNullException("alias");
+				throw new ArgumentNullException(nameof(alias));
 			}
 			return new DatabaseObjectSelector(this, alias);
 		}
@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		{
 			if (argumentsForFactory == null)
 			{
-				throw new ArgumentNullException("argumentsForFactory");
+				throw new ArgumentNullException(nameof(argumentsForFactory));
 			}
 			var cmd =
 				ContainerObject.AccessLayer.CreateSelectQueryFactory(ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),

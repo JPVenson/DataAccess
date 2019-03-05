@@ -49,11 +49,11 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 			LockRoot = new object();
 			if (name == null)
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 			}
 			if (getKey == null)
 			{
-				throw new ArgumentNullException("getKey");
+				throw new ArgumentNullException(nameof(getKey));
 			}
 			Name = name;
 			_getKey = getKey;

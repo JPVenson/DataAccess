@@ -70,7 +70,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			if (alias == null)
 			{
-				throw new ArgumentNullException("alias");
+				throw new ArgumentNullException(nameof(alias));
 			}
 			return new UpdateQuery<TPoco>(this, alias);
 		}

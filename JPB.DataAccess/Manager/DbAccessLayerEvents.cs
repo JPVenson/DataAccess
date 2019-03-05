@@ -127,8 +127,7 @@ namespace JPB.DataAccess.Manager
 		internal void OnHandlerRaised(DatabaseActionEvent e, DatabaseActionHandler eventhandler)
 		{
 			var handler = HandlerRaised;
-			if (handler != null)
-				handler(this, e, eventhandler);
+			handler?.Invoke(this, e, eventhandler);
 		}
 	}
 }

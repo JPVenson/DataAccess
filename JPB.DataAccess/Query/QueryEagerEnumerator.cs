@@ -34,14 +34,8 @@ namespace JPB.DataAccess.Query
 
 		public void Dispose()
 		{
-			if (_task != null)
-			{
-				_task.Dispose();
-			}
-			if (_enumerateDataRecords != null)
-			{
-				_enumerateDataRecords.Clear();
-			}
+			_task?.Dispose();
+			_enumerateDataRecords?.Clear();
 			_elements.Clear();
 		}
 

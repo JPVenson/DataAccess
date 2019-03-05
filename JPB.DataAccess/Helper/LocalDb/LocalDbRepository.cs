@@ -117,7 +117,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				if (primaryKey == null)
 				{
-					throw new ArgumentNullException("primaryKey");
+					throw new ArgumentNullException(nameof(primaryKey));
 				}
 				TEntity value;
 				if (Base.TryGetValue(primaryKey, out value))
@@ -197,7 +197,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (item == null)
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 			var elementToAdd = item;
 			CheckCreatedElseThrow();
@@ -285,7 +285,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (item == null)
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 			CheckCreatedElseThrow();
 			var pk = GetId(item);
@@ -308,7 +308,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (array == null)
 			{
-				throw new ArgumentNullException("array");
+				throw new ArgumentNullException(nameof(array));
 			}
 			lock (SyncRoot)
 			{
@@ -326,7 +326,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (item == null)
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 
 			CheckCreatedElseThrow();
@@ -447,7 +447,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (array == null)
 			{
-				throw new ArgumentNullException("array");
+				throw new ArgumentNullException(nameof(array));
 			}
 			lock (LockRoot)
 			{
@@ -488,7 +488,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (id == null)
 			{
-				throw new ArgumentNullException("id");
+				throw new ArgumentNullException(nameof(id));
 			}
 
 			var local = Base.ContainsKey(id);
@@ -583,7 +583,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (config == null)
 			{
-				throw new ArgumentNullException("config");
+				throw new ArgumentNullException(nameof(config));
 			}
 			if (_config != null)
 			{
@@ -773,12 +773,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 							                                   localDbReposetory.TypeInfo.TableName)
 						         .Value;
 
-				if (fkPropForTypeX == null)
-				{
-					continue;
-				}
-
-				var fkValueForTableX = fkPropForTypeX.Getter.Invoke(refItem);
+				var fkValueForTableX = fkPropForTypeX?.Getter.Invoke(refItem);
 				if (fkValueForTableX != null && !localDbReposetory.ContainsId(fkValueForTableX))
 				{
 					return new ForginKeyConstraintException(
@@ -912,7 +907,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		{
 			if (item == null)
 			{
-				throw new ArgumentNullException("item");
+				throw new ArgumentNullException(nameof(item));
 			}
 			TriggersUsage.For.OnUpdate(item);
 			Constraints.Check.Enforce(item);

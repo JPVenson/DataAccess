@@ -20,11 +20,11 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			if (name == null)
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 			}
 			if (attributes == null)
 			{
-				throw new ArgumentNullException("attributes");
+				throw new ArgumentNullException(nameof(attributes));
 			}
 
 			PropertyName = name;
@@ -54,7 +54,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		{
 			if (attributes == null)
 			{
-				throw new ArgumentNullException("attributes");
+				throw new ArgumentNullException(nameof(attributes));
 			}
 
 			PropertyName = name;

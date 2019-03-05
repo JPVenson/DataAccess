@@ -20,11 +20,11 @@ namespace JPB.DataAccess.Query
 		{
 			if (database == null)
 			{
-				throw new ArgumentNullException("database", "Please use a valid Database");
+				throw new ArgumentNullException(nameof(database), "Please use a valid Database");
 			}
 			if (database == null)
 			{
-				throw new ArgumentNullException("type", "Please use a valid Type");
+				throw new ArgumentNullException(nameof(type), "Please use a valid Type");
 			}
 		}
 
@@ -32,7 +32,7 @@ namespace JPB.DataAccess.Query
 		{
 			if (database == null)
 			{
-				throw new ArgumentNullException("database", "Please use a valid Database");
+				throw new ArgumentNullException(nameof(database), "Please use a valid Database");
 			}
 
 			ContainerObject = database.Clone();
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.Query
 		{
 			if (database == null)
 			{
-				throw new ArgumentNullException("database", "Please use a valid Database");
+				throw new ArgumentNullException(nameof(database), "Please use a valid Database");
 			}
 		}
 
@@ -50,11 +50,11 @@ namespace JPB.DataAccess.Query
 		{
 			if (database == null)
 			{
-				throw new ArgumentNullException("database", "Please use a valid Database");
+				throw new ArgumentNullException(nameof(database), "Please use a valid Database");
 			}
 			if (database == null)
 			{
-				throw new ArgumentNullException("type", "Please use a valid Type");
+				throw new ArgumentNullException(nameof(type), "Please use a valid Type");
 			}
 
 			ContainerObject.ForType = type;
@@ -68,7 +68,7 @@ namespace JPB.DataAccess.Query
 		{
 			if (database == null)
 			{
-				throw new ArgumentNullException("database", "Please use a valid DbAccess Layer");
+				throw new ArgumentNullException(nameof(database), "Please use a valid DbAccess Layer");
 			}
 		}
 

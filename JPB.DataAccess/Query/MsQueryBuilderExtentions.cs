@@ -369,7 +369,7 @@ namespace JPB.DataAccess.Query
 				throw new InvalidOperationException(string.Format("Invalid Target Database {0} by using the MSSQL extentions", query.ContainerObject.AccessLayer.Database.TargetDatabase));
 			}
 
-			QueryBuilderX wrapper = new QueryBuilderX(query.ContainerObject.AccessLayer).QueryD(string.Format("SELECT TOP {0} * FROM (", top)).Append(query).QueryD(")");
+			var wrapper = new QueryBuilderX(query.ContainerObject.AccessLayer).QueryD(string.Format("SELECT TOP {0} * FROM (", top)).Append(query).QueryD(")");
 			return new ElementProducer<TPoco>(wrapper);
 		}
 

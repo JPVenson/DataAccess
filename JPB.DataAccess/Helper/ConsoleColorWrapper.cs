@@ -17,7 +17,7 @@ namespace JPB.DataAccess.Helper
 		/// <inheritdoc />
 		public static implicit operator ConsoleColorWrapper(ConsoleColor wrapper)
 		{
-			return new ConsoleColorWrapper() { Value = wrapper };
+			return new ConsoleColorWrapper {Value = wrapper};
 		}
 	}
 }

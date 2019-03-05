@@ -155,10 +155,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Trigger
 		protected void InvokeTrigger(EventHandler<ISequentialToken<TEntity>> trigger, TEntity obj)
 		{
 			var token = new SequentialToken<TEntity>(obj);
-			if (trigger != null)
-			{
-				trigger.Invoke(this, token);
-			}
+			trigger?.Invoke(this, token);
 			if (token.Canceled)
 			{
 				throw new TriggerException<TEntity>(token.Reason, Tabel);

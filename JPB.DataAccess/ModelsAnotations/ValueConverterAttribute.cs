@@ -34,7 +34,7 @@ namespace JPB.DataAccess.ModelsAnotations
 
 			if (!typeof(IValueConverter).IsAssignableFrom(converter))
 			{
-				throw new ArgumentException("converter must be Inhert from IValueConverter", "converter");
+				throw new ArgumentException("converter must be Inhert from IValueConverter", nameof(converter));
 			}
 
 			Parameter = string.Empty;

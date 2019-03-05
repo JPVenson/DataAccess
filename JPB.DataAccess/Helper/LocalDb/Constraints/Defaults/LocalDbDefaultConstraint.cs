@@ -34,15 +34,15 @@ namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 		{
 			if (name == null)
 			{
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 			}
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException(nameof(value));
 			}
 			if (set == null)
 			{
-				throw new ArgumentNullException("set");
+				throw new ArgumentNullException(nameof(set));
 			}
 			_value = value;
 			_set = set;

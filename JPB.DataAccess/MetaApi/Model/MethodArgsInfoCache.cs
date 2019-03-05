@@ -15,7 +15,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// <summary>
 	///     Infos about Arguments delcared on a Mehtod
 	/// </summary>
-	[DebuggerDisplay("{ArgumentName}")]
+	[DebuggerDisplay("{" + nameof(ArgumentName) + "}")]
 	[Serializable]
 	public class MethodArgsInfoCache<TAtt>
 		: IMethodArgsInfoCache<TAtt>

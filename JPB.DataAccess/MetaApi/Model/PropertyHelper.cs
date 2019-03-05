@@ -9,7 +9,7 @@ using JPB.DataAccess.Contacts.MetaApi;
 
 namespace JPB.DataAccess.MetaApi.Model
 {
-	[DebuggerDisplay("{MethodName}")]
+	[DebuggerDisplay("{" + nameof(MethodName) + "}")]
 	[Serializable]
 	internal sealed class PropertyHelper<TAtt> : MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>
 		where TAtt : class, IAttributeInfoCache, new()

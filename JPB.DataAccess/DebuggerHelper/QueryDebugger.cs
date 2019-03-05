@@ -20,7 +20,7 @@ namespace JPB.DataAccess.DebuggerHelper
 	///     Generates a easy debuggable object that contains all infos about the Generated Query.
 	///     <b>Hint</b>: This class consumes a lot of time to load. Disable it in Production.
 	/// </summary>
-	[DebuggerDisplay("QueryCommand : {DebuggerQuery}", Name = "QueryCommand")]
+	[DebuggerDisplay("QueryCommand : {" + nameof(DebuggerQuery) + "}", Name = "QueryCommand")]
 	public class QueryDebugger : IDisposable
 	{
 		/// <summary>
@@ -278,7 +278,7 @@ namespace JPB.DataAccess.DebuggerHelper
 			{
 				var debugquery = new StringBuilder(_command.CommandText);
 				var formartCommandToQuery = _source != null
-					? _source.FormartCommandToQuery(_command)
+					? _source.FormatCommand(_command)
 					: GenericCommandToQuery(_command);
 
 				DebuggerQuery = debugquery.ToString();

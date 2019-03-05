@@ -207,17 +207,17 @@ namespace JPB.DataAccess.AdoWrapper
 			var value = (byte[]) GetValue(i);
 			if (fieldOffset > value.Length)
 			{
-				throw new ArgumentOutOfRangeException("fieldOffset");
+				throw new ArgumentOutOfRangeException(nameof(fieldOffset));
 			}
 
 			if (bufferoffset > buffer.Length)
 			{
-				throw new ArgumentOutOfRangeException("bufferoffset");
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 			}
 
 			if (length > value.Length)
 			{
-				throw new ArgumentOutOfRangeException("bufferoffset");
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 			}
 
 			long j;
@@ -264,17 +264,17 @@ namespace JPB.DataAccess.AdoWrapper
 			var value = (char[]) GetValue(i);
 			if (fieldoffset > value.Length)
 			{
-				throw new ArgumentOutOfRangeException("fieldoffset");
+				throw new ArgumentOutOfRangeException(nameof(fieldoffset));
 			}
 
 			if (bufferoffset > buffer.Length)
 			{
-				throw new ArgumentOutOfRangeException("bufferoffset");
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 			}
 
 			if (length > value.Length)
 			{
-				throw new ArgumentOutOfRangeException("bufferoffset");
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 			}
 
 			long j;

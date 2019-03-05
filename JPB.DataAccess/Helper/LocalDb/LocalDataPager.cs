@@ -132,10 +132,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoading;
-				if (handler != null)
-				{
-					handler();
-				}
+				handler?.Invoke();
 			}
 
 			TotalItemCount = _localDbRepository.Count;
@@ -155,10 +152,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoaded;
-				if (handler != null)
-				{
-					handler();
-				}
+				handler?.Invoke();
 			}
 		}
 

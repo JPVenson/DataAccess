@@ -11,7 +11,9 @@ using JPB.DataAccess.AdoWrapper.OleDBProvider;
 namespace JPB.DataAccess.Manager
 {
 	/// <summary>
-	///     A list that contains all kown Provider and there Basic implimentation
+	///     A KeyValue list of providers that can be loaded with the DbAccessLayer where Key is a
+	/// <see cref="DbAccessType"/> and value the Fully Qualified type name to an
+	/// instance of <seealso cref="JPB.DataAccess.Contacts.IDatabaseStrategy"/>
 	/// </summary>
 	public class PreDefinedProviderCollection : IReadOnlyCollection<KeyValuePair<DbAccessType, string>>
 	{

@@ -84,10 +84,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		internal void OnOnIdentityInsertCompleted()
 		{
 			var handler = OnIdentityInsertCompleted;
-			if (handler != null)
-			{
-				handler(this, EventArgs.Empty);
-			}
+			handler?.Invoke(this, EventArgs.Empty);
 		}
 
 		internal void EnableIdentityModfiy(string classInfoTableName, IDatabase db)

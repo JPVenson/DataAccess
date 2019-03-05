@@ -134,7 +134,7 @@ namespace JPB.DataAccess
 						//Parameter is found twice in both commands so rename it
 						if (!autoRename)
 						{
-							throw new ArgumentOutOfRangeException("base",
+							throw new ArgumentOutOfRangeException(nameof(@base),
 							string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
 							item.ParameterName));
 						}
@@ -296,10 +296,8 @@ namespace JPB.DataAccess
 				dbDataParameter.ParameterName = queryParameter.Name.CheckParamter();
 				cmd.Parameters.Add(dbDataParameter);
 			}
-			if (db.LastExecutedQuery != null)
-			{
-				db.LastExecutedQuery.Refresh();
-			}
+
+			db.LastExecutedQuery?.Refresh();
 			return cmd;
 		}
 
@@ -329,10 +327,8 @@ namespace JPB.DataAccess
 				dbDataParameter.ParameterName = queryParameter.ParameterName;
 				cmd.Parameters.Add(dbDataParameter);
 			}
-			if (db.LastExecutedQuery != null)
-			{
-				db.LastExecutedQuery.Refresh();
-			}
+
+			db.LastExecutedQuery?.Refresh();
 			return cmd;
 		}
 

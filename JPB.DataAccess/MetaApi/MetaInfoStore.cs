@@ -141,7 +141,7 @@ namespace JPB.DataAccess.MetaApi
 		{
 			if (type == null)
 			{
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 			}
 			newCreated = false;
 			TClass element;
@@ -187,7 +187,7 @@ namespace JPB.DataAccess.MetaApi
 		{
 			if (string.IsNullOrEmpty(typeName))
 			{
-				throw new ArgumentException("Value cannot be null or empty.", "typeName");
+				throw new ArgumentException("Value cannot be null or empty.", nameof(typeName));
 			}
 			newCreated = false;
 			TClass element;
@@ -236,7 +236,7 @@ namespace JPB.DataAccess.MetaApi
 		{
 			if (string.IsNullOrEmpty(typeName))
 			{
-				throw new ArgumentException("Value cannot be null or empty.", "typeName");
+				throw new ArgumentException("Value cannot be null or empty.", nameof(typeName));
 			}
 			var isThreadSave = EnableInstanceThreadSafety || EnableGlobalThreadSafety;
 			try

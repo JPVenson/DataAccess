@@ -23,7 +23,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\JPB.DataAccess.XML</DocumentationFile>
     <NoWarn>618</NoWarn>
-    <LangVersion>5</LangVersion>
+    <LangVersion>7.3</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
@@ -194,6 +194,7 @@
     <Compile Include="DbInfoConfig\FactoryHelperSettings.cs" />
     <Compile Include="DebuggerHelper\QueryDebugger.cs" />
     <Compile Include="Helper\Any.cs" />
+    <Compile Include="Helper\AsyncHelper.cs" />
     <Compile Include="Helper\ConsoleColorWrapper.cs" />
     <Compile Include="Helper\ConsoleStringBuilderInterlaced.cs" />
     <Compile Include="Helper\DbPropertyDescriptor.cs" />
