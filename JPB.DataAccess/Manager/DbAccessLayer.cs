@@ -404,7 +404,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			return ExecuteGenericCommand(query,
-			(IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumarateFromDynamics(paramenter));
+			(IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter));
 		}
 
 		/// <summary>

@@ -98,7 +98,7 @@ namespace JPB.DataAccess.AdoWrapper
 			_target = target;
 			if (string.IsNullOrEmpty(xmlStream))
 			{
-				_baseElement = new XElement("faild");
+				_baseElement = new XElement("failed to load XML Stream");
 				return;
 			}
 
@@ -141,6 +141,7 @@ namespace JPB.DataAccess.AdoWrapper
 			{
 				return DBNull.Value;
 			}
+
 			if (i >= _baseElement.Elements().Count())
 			{
 				return DBNull.Value;
@@ -148,9 +149,9 @@ namespace JPB.DataAccess.AdoWrapper
 
 			var name = GetName(i);
 
-			var mapEntiysPropToSchema = _target.GetDbToLocalSchemaMapping(name);
+			var mapEntities = _target.GetDbToLocalSchemaMapping(name);
 
-			var firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntiysPropToSchema);
+			var firstOrDefault = _target.GetPropertiesEx().FirstOrDefault(s => s.Name == mapEntities);
 			if (firstOrDefault == null)
 			{
 				return DBNull.Value;

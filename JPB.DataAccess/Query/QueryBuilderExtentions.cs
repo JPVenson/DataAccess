@@ -72,7 +72,7 @@ namespace JPB.DataAccess.Query
 		{
 			if (paramerters != null)
 			{
-				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+				IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramerters);
 				return builder.Add(new GenericQueryPart(query, parameters, builder));
 			}
 
@@ -159,7 +159,7 @@ namespace JPB.DataAccess.Query
 		public static TQuery WithParamerters<TQuery>(this TQuery query, dynamic paramerters)
 			where TQuery : class, IQueryBuilder
 		{
-			IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumarateFromDynamics(paramerters);
+			IEnumerable<IQueryParameter> parameters = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramerters);
 			return query.QueryQ(string.Empty, parameters.ToArray());
 		}
 	}

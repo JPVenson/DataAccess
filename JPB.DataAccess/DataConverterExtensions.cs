@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using JetBrains.Annotations;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -66,7 +67,7 @@ namespace JPB.DataAccess
 		///     or
 		///     name
 		/// </exception>
-		internal static object GetParamaterValue(this object source, DbConfig config, string name)
+		internal static object GetParameterValue(this object source, DbConfig config, string name)
 		{
 			if (source == null)
 			{
@@ -287,10 +288,9 @@ namespace JPB.DataAccess
 			return GetNavigationProps(typeof(T), config);
 		}
 
-		internal static object ChangeType(object value, Type conversion)
+		internal static object ChangeType(object value, [NotNull] Type conversion)
 		{
 			var t = conversion;
-
 			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
 				if (value == null)

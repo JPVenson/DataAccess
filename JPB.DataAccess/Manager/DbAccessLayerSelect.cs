@@ -869,7 +869,7 @@ namespace JPB.DataAccess.Manager
 		public object[] SelectWhere(Type type, string where, dynamic paramenter)
 		{
 			//Concret declaration is nessesary because we are working with dynmaics, so the compiler has ne space to guess the type wrong
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
+			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
 			return SelectWhere(type, where, enumarateFromDynamics);
 		}
 
@@ -953,7 +953,7 @@ namespace JPB.DataAccess.Manager
 		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
 		public T[] RunPrimetivSelect<T>(string query, dynamic parameters)
 		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(parameters);
+			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(parameters);
 			var runPrimetivSelect = RunPrimetivSelect(typeof(T), query, enumarateFromDynamics);
 			return runPrimetivSelect.Cast<T>().ToArray();
 		}
@@ -1127,7 +1127,7 @@ namespace JPB.DataAccess.Manager
 				}
 				else
 				{
-					var fkproperty = source.GetParamaterValue(Config, firstOrDefault.KeyName);
+					var fkproperty = source.GetParameterValue(Config, firstOrDefault.KeyName);
 
 					if (fkproperty == null)
 					{
@@ -1260,7 +1260,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public async Task<object[]> SelectNativeAsync(Type type, string query, dynamic paramenter)
 		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
+			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
 			return await SelectNativeAsync(type, query, enumarateFromDynamics);
 		}
 
@@ -1285,7 +1285,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public async Task<object[]> SelectNativeAsync(Type type, IDbCommand command, dynamic paramenter)
 		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumarateFromDynamics(paramenter);
+			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
 
 			foreach (var enumarateFromDynamic in enumarateFromDynamics)
 			{

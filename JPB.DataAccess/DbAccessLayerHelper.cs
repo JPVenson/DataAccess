@@ -223,7 +223,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static IDbCommand CreateCommand(this string commandText, IDatabase db, object param = null)
 		{
-			return db.CreateCommand(commandText, EnumarateFromDynamics(param).FromUserDefinedToSystemParameters(db));
+			return db.CreateCommand(commandText, EnumerateFromUnknownParameter(param).FromUserDefinedToSystemParameters(db));
 		}
 
 		internal static IDataParameter[] FromUserDefinedToSystemParameters(this IEnumerable<IQueryParameter> parma,
@@ -336,7 +336,7 @@ namespace JPB.DataAccess
 			return cmd;
 		}
 
-		internal static IEnumerable<IQueryParameter> EnumarateFromDynamics(this object parameter)
+		internal static IEnumerable<IQueryParameter> EnumerateFromUnknownParameter(this object parameter)
 		{
 			if (parameter == null)
 			{
@@ -359,7 +359,7 @@ namespace JPB.DataAccess
 				var elements = new List<IQueryParameter>();
 				foreach (var dynProperty in dynType.Propertys)
 				{
-					var convertedParam = parameter.GetParamaterValue(dbConfig, dynProperty.Key);
+					var convertedParam = parameter.GetParameterValue(dbConfig, dynProperty.Key);
 					elements.Add(new QueryParameter(dynProperty.Key.CheckParamter(), convertedParam));
 				}
 				return elements;
