@@ -94,7 +94,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.NewTableName = value;
-				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -105,7 +104,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.Exclude = value;
-				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -116,7 +114,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.CreateFallbackProperty = value;
-				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -127,7 +124,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.CreateSelectFactory = value;
-				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -138,7 +134,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.CreateDataRecordLoader = value;
-				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -149,7 +144,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			set
 			{
 				SourceElement.WrapNullables = value;
-				MementoService.Instance.SetOption(new TableChangePropertyAction(Info.TableName, value));
 				SendPropertyChanged();
 			}
 		}
@@ -168,7 +162,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private void RemoveColumnExecute(object sender)
 		{
 			ColumnInfoModels.Remove(SelectedColumn);
-			MementoService.Instance.SetOption(new RemoveColumnAction(Info.TableName, SelectedColumn.ColumnInfo.ColumnName));
 		}
 
 		private bool CanRemoveColumnExecute(object sender)
@@ -183,7 +176,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				ColumnName = "New Column",
 				TargetType = typeof(object)
 			};
-			MementoService.Instance.SetOption(new AddColumnAction(Info.TableName, "New Column"));
 			AddColumn(columnData);
 		}
 

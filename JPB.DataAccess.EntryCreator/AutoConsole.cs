@@ -35,12 +35,12 @@ namespace JPB.DataAccess.EntityCreator
 				return SetNextOption();
 			if (Options.Actions.Length > index)
 				return Options.Actions[index++];
-			return Console.ReadLine();
+			return System.Console.ReadLine();
 		}
 
 		public string SetNextOption()
 		{
-			var action = Console.ReadLine();
+			var action = System.Console.ReadLine();
 			_op.Add(action);
 			return action;
 		}
@@ -65,7 +65,12 @@ namespace JPB.DataAccess.EntityCreator
 
 		public void SaveStorage(string path)
 		{
-			using (var fs = new FileStream("out.xml", FileMode.OpenOrCreate))
+			if (File.Exists(path))
+			{
+				File.Delete(path);
+			}
+
+			using (var fs = new FileStream("out.xml", FileMode.CreateNew))
 			{
 				var serilizer = new XmlSerializer(typeof(Options));
 

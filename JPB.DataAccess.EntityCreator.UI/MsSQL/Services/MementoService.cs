@@ -12,7 +12,6 @@ using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.Services
 {
-
 	public class MementoService
 	{
 		private static MementoService _instance;
@@ -32,54 +31,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.Services
 		public void SetOption(IMementoAction action)
 		{
 			Actions.Push(action);
-		}
-	}
-
-
-	public class RemoveColumnAction : IMementoAction
-	{
-		private readonly string _currentTableName;
-		private readonly string _columnName;
-
-		public RemoveColumnAction(string currentTableName, string columnName)
-		{
-			_currentTableName = currentTableName;
-			_columnName = columnName;
-		}
-
-		public void Replay(SqlEntityCreatorViewModel creator)
-		{
-			var table = creator.Tables.FirstOrDefault(e => e.Info.TableName.Equals(_currentTableName));
-			if (table != null)
-			{
-				table.ColumnInfoModels.Remove(
-					table.ColumnInfoModels.FirstOrDefault(e => e.ColumnInfo.ColumnName.Equals(_columnName)));
-			}
-		}
-	}
-
-	public class AddColumnAction : IMementoAction
-	{
-		private readonly string _currentTableName;
-		private readonly string _columnName;
-
-		public AddColumnAction(string currentTableName, string columnName)
-		{
-			_currentTableName = currentTableName;
-			_columnName = columnName;
-		}
-
-		public void Replay(SqlEntityCreatorViewModel creator)
-		{
-			var table = creator.Tables.FirstOrDefault(e => e.Info.TableName.Equals(_currentTableName));
-			if (table != null)
-			{
-				table.AddColumn(new ColumnInfo()
-				{
-					ColumnName = _columnName,
-					TargetType = typeof(object)
-				});
-			}
 		}
 	}
 }

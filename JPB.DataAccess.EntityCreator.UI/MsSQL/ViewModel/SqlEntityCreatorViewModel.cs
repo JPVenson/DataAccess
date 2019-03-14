@@ -80,7 +80,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => SplitByType);
 				_splitByType = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => SplitByType);
 			}
 		}
@@ -147,7 +146,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => ConnectionString);
 				_connectionString = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => ConnectionString);
 			}
 		}
@@ -232,7 +230,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => WrapNullables);
 				_wrapNullables = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => WrapNullables);
 			}
 		}
@@ -251,7 +248,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => GenerateConstructor);
 				_generateConstructor = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => GenerateConstructor);
 			}
 		}
@@ -265,7 +261,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => Namespace);
 				_namespace = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => Namespace);
 			}
 		}
@@ -277,7 +272,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => GenerateForgeinKeyDeclarations);
 				_generateForgeinKeyDeclarations = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => GenerateForgeinKeyDeclarations);
 			}
 		}
@@ -289,7 +283,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => GenerateConfigMethod);
 				_generateConfigMethod = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => GenerateConfigMethod);
 			}
 		}
@@ -301,7 +294,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			{
 				SendPropertyChanging(() => GenerateCompilerHeader);
 				_generateCompilerHeader = value;
-				MementoService.Instance.SetOption(new SetPropertyAction(value));
 				SendPropertyChanged(() => GenerateCompilerHeader);
 			}
 		}
@@ -587,7 +579,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 							TableName = "New Table"
 					}
 			}, this));
-			MementoService.Instance.SetOption(new CreateTableAction("New Table"));
 		}
 
 		private bool CanAddTableExecute(object sender)
@@ -598,7 +589,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private void DeleteSelectedTableExecute(object sender)
 		{
 			Tables.Remove(SelectedTable);
-			MementoService.Instance.SetOption(new CreateTableAction(SelectedTable.Info.TableName));
 			SelectedTable = null;
 		}
 

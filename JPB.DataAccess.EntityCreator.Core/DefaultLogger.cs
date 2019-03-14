@@ -22,7 +22,14 @@ namespace JPB.DataAccess.EntityCreator.Core
 		/// <param name="arguments"></param>
 		public void WriteLine(string content = null, params object[] arguments)
 		{
-			Console.WriteLine(content, arguments);
+			if (content == null)
+			{
+				Console.WriteLine();
+			}
+			else
+			{
+				Console.WriteLine(content, arguments);
+			}
 		}
 	}
 }

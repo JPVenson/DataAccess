@@ -6,4 +6,17 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.Services
 	{
 		void Replay(SqlEntityCreatorViewModel creator);
 	}
+
+	public class SetPropertyAction : IMementoAction
+	{
+		public SetPropertyAction()
+		{
+			
+		}
+
+		public void Replay(SqlEntityCreatorViewModel creator)
+		{
+			throw new System.NotImplementedException();
+		}
+	}
 }

@@ -17,9 +17,12 @@ using JPB.DataAccess.EntityCreator.MsSql;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
+using JPB.Console.Helper.Grid;
 using Clipboard = System.Windows.Clipboard;
 using MessageBox = System.Windows.MessageBox;
 using TextDataFormat = System.Windows.TextDataFormat;
+using WinConsole = System.Console;
 
 namespace JPB.DataAccess.EntityCreator
 {
@@ -32,7 +35,6 @@ namespace JPB.DataAccess.EntityCreator
 			var prog = new Program();
 
 			var pathToCommandSet = "";
-			string outputDir = "";
 			string connectionString = "";
 
 			if (args.Count() == 1)
@@ -43,11 +45,14 @@ namespace JPB.DataAccess.EntityCreator
 					AutoConsole = new AutoConsole(pathToCommandSet);
 
 					var version = Assembly.GetExecutingAssembly().GetName().Version;
-					if (new Version(AutoConsole.Options.Version) != version)
+					if (AutoConsole.Options.Version == null || new Version(AutoConsole.Options.Version) != version)
 					{
-						Console.WriteLine("WARNING");
-						Console.WriteLine(string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.", version, AutoConsole.Options.Version));
-						Console.WriteLine("There might be errors or unexpected Behavor");
+						new StringBuilderInterlaced()
+							.ForgroundColor(ConsoleColor.Yellow)
+							.AppendLine("Warning")
+							.AppendLine(string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.", version, AutoConsole.Options.Version))
+							.AppendLine("There might be errors or unexpected Behavor")
+							.WriteToConsole();
 					}
 				}
 				else
@@ -59,22 +64,8 @@ namespace JPB.DataAccess.EntityCreator
 			{
 				AutoConsole = new AutoConsole(null);
 			}
-
-			Console.WriteLine("Enter output dir");
-
-			outputDir = AutoConsole.GetNextOption();
-			if(outputDir == "temp")
-			{
-				outputDir = Path.GetTempPath();
-			}
-
-			if (string.IsNullOrEmpty(outputDir) || !Directory.Exists(outputDir))
-			{
-				Console.WriteLine("Invalid Directory ...");
-				Console.ReadKey();
-				return;
-			}
-			Console.WriteLine(@"Enter Connection string or type \explore to search for a server [ToBeSupported]");
+			
+			WinConsole.WriteLine(@"Enter Connection string or type \explore to search for a server [Only MSSQL supported]");
 			if (Clipboard.ContainsText() && AutoConsole.Options == null)
 			{
 				var maybeConnection = Clipboard.GetText(TextDataFormat.Text);
@@ -82,9 +73,9 @@ namespace JPB.DataAccess.EntityCreator
 				var any = strings.Any(s => s.ToLower().Contains("data source=") || s.ToLower().Contains("initial catalog="));
 				if (any)
 				{
-					Console.WriteLine("Use clipboard content?");
-					var consoleKeyInfo = Console.ReadKey();
-					if (char.ToLower(consoleKeyInfo.KeyChar) == 'y')
+					WinConsole.WriteLine("Use clipboard content? [(y|Enter*) | no]");
+					var WinConsoleKeyInfo = System.Console.ReadKey();
+					if (char.ToLower(WinConsoleKeyInfo.KeyChar) == 'y' || WinConsoleKeyInfo.Key == ConsoleKey.Enter)
 					{
 						connectionString = maybeConnection;
 						AutoConsole.SetNextOption(connectionString);
@@ -111,37 +102,69 @@ namespace JPB.DataAccess.EntityCreator
 					if (connectionString == @"\explore")
 					{
 						SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
-						Console.WriteLine("Search for data Sources in current network");
+						WinConsole.WriteLine("Search for data Sources in current network");
 
 						var table = instance.GetDataSources();
-						Console.WriteLine("Row count {0}", table.Rows.Count);
+						WinConsole.WriteLine("Row count {0}", table.Rows.Count);
 
 						foreach (var column in table.Columns.Cast<DataColumn>())
 						{
-							Console.Write(column.ColumnName + "|");
+							WinConsole.Write(column.ColumnName + "|");
 						}
 
 						for (int i = 0; i < table.Rows.Count; i++)
 						{
 							var row = table.Rows[i];
 
-							Console.Write("o {0} |", i);
+							WinConsole.Write("o {0} |", i);
 
-							foreach (System.Data.DataColumn col in table.Columns)
+							foreach (DataColumn col in table.Columns)
 							{
-								Console.Write(" {0} = {1} |", col.ColumnName, row[col]);
+								WinConsole.Write(" {0} = {1} |", col.ColumnName, row[col]);
 							}
-							Console.WriteLine("============================");
+							WinConsole.WriteLine("============================");
 						}
-						Console.WriteLine();
+						WinConsole.WriteLine();
 					}
 				} while (string.IsNullOrEmpty(connectionString) || connectionString.ToLower().Contains(@"\explore"));
 
+			try
+			{
+				new MsSqlCreator().CreateEntrys(connectionString, "", string.Empty);
+			}
+			catch (Exception e)
+			{
+				if (AutoConsole.Options == null)
+				{
+					new StringBuilderInterlaced().
+						AppendLine("Error while executing the MsSQLEntity Creator:")
+						.Up()
+						.AppendInterlacedLine(e.ToString(), ConsoleColor.Red)
+						.Down()
+						.AppendLine("Press any key to stop the application")
+						.WriteToConsole();
 
-			new MsSqlCreator().CreateEntrys(connectionString, outputDir, string.Empty);
+					WinConsole.ReadKey(true);
+				}
+				else
+				{
+					new StringBuilderInterlaced().
+						AppendLine("Error while executing the MsSQLEntity Creator:")
+						.Up()
+						.AppendInterlacedLine(e.ToString(), ConsoleColor.Red)
+						.Down()
+						.AppendLine("Application will shutdown in 5 seconds")
+						.WriteToConsole();
+					Thread.Sleep(5000);
+				}
+
+				return;
+			}
+			
 			if (AutoConsole.Options == null && pathToCommandSet != null)
+			{
 				AutoConsole.SaveStorage(pathToCommandSet);
-
+			}
 		}
 	}
 }

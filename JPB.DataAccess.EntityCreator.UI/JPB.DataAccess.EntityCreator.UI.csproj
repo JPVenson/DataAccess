@@ -116,12 +116,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MsSQL\Services\CreateTableAction.cs" />
-    <Compile Include="MsSQL\Services\DeleteTableAction.cs" />
     <Compile Include="MsSQL\Services\IMementoAction.cs" />
     <Compile Include="MsSQL\Services\MementoService.cs" />
-    <Compile Include="MsSQL\Services\SetPropertyAction.cs" />
-    <Compile Include="MsSQL\Services\TableChangePropertyAction.cs" />
     <Compile Include="Shared\Model\ConfigStore.cs" />
     <Compile Include="Shared\SearchControl.xaml.cs">
       <DependentUpon>SearchControl.xaml</DependentUpon>
