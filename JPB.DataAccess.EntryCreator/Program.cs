@@ -17,8 +17,9 @@ using JPB.DataAccess.EntityCreator.MsSql;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using System.Threading;
-using JPB.Console.Helper.Grid;
+using CommandLine;
 using Clipboard = System.Windows.Clipboard;
 using MessageBox = System.Windows.MessageBox;
 using TextDataFormat = System.Windows.TextDataFormat;
@@ -28,41 +29,66 @@ namespace JPB.DataAccess.EntityCreator
 {
 	public class Program
 	{
+		public class Options
+		{
+			[Option('c', "commands", Required = false, HelpText = "The XML file of all commands")]
+			public string InputFile { get; set; }
+
+			[Option('v', "include-vs-project", Required = false, HelpText = "Search for a single .csproj file and update its content")]
+			public bool IncludeInVsProject { get; set; }
+
+			[Option('a', "argument", Required = false, HelpText = "A set of Variables that are replaced within the Auto Console arguments. Syntax: Name:Value")]
+			public IEnumerable<string> Variables { get; set; }
+		}
+
 		public static AutoConsole AutoConsole { get; set; }
+
 		[STAThread]
 		static void Main(string[] args)
 		{
 			var prog = new Program();
 
-			var pathToCommandSet = "";
-			string connectionString = "";
-
-			if (args.Count() == 1)
-			{
-				pathToCommandSet = args[0];
-				if (File.Exists(pathToCommandSet))
+			Options options = null;
+			var parserResult = Parser.Default.ParseArguments<Options>(args)				
+				.WithParsed(f => { options = f; })
+				.WithNotParsed(f =>
 				{
-					AutoConsole = new AutoConsole(pathToCommandSet);
+					foreach (var error in f)
+					{
+						Console.WriteLine($"ERROR: {error}");
+					}
+				});
+			if (options == null)
+			{
+				Thread.Sleep(5000);
+				return;
+			}
+			string connectionString = "";
+			string outputDirectory = null;
+			if (!string.IsNullOrWhiteSpace(options.InputFile))
+			{
+				Console.WriteLine($"Specified command file: '{options.InputFile}'");
+				if (File.Exists(options.InputFile))
+				{
+					AutoConsole = new AutoConsole(options.InputFile, options.Variables);
 
 					var version = Assembly.GetExecutingAssembly().GetName().Version;
 					if (AutoConsole.Options.Version == null || new Version(AutoConsole.Options.Version) != version)
 					{
-						new StringBuilderInterlaced()
-							.ForgroundColor(ConsoleColor.Yellow)
-							.AppendLine("Warning")
-							.AppendLine(string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.", version, AutoConsole.Options.Version))
-							.AppendLine("There might be errors or unexpected Behavor")
-							.WriteToConsole();
+						Console.WriteLine("WARNING");
+						Console.WriteLine(string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.", version, AutoConsole.Options.Version));
+						Console.WriteLine("There might be errors or unexpected Behavor");
 					}
 				}
 				else
 				{
-					AutoConsole = new AutoConsole(null);
+					Console.WriteLine("The commandfile does not exist");
+					AutoConsole = new AutoConsole(null, new string[0]);
 				}
 			}
 			else
 			{
-				AutoConsole = new AutoConsole(null);
+				AutoConsole = new AutoConsole(null, new string[0]);
 			}
 			
 			WinConsole.WriteLine(@"Enter Connection string or type \explore to search for a server [Only MSSQL supported]");
@@ -130,40 +156,21 @@ namespace JPB.DataAccess.EntityCreator
 
 			try
 			{
-				new MsSqlCreator().CreateEntrys(connectionString, "", string.Empty);
+				new MsSqlCreator(options.IncludeInVsProject).CreateEntrys(connectionString, outputDirectory, string.Empty);
 			}
 			catch (Exception e)
 			{
-				if (AutoConsole.Options == null)
-				{
-					new StringBuilderInterlaced().
-						AppendLine("Error while executing the MsSQLEntity Creator:")
-						.Up()
-						.AppendInterlacedLine(e.ToString(), ConsoleColor.Red)
-						.Down()
-						.AppendLine("Press any key to stop the application")
-						.WriteToConsole();
-
-					WinConsole.ReadKey(true);
-				}
-				else
-				{
-					new StringBuilderInterlaced().
-						AppendLine("Error while executing the MsSQLEntity Creator:")
-						.Up()
-						.AppendInterlacedLine(e.ToString(), ConsoleColor.Red)
-						.Down()
-						.AppendLine("Application will shutdown in 5 seconds")
-						.WriteToConsole();
-					Thread.Sleep(5000);
-				}
+				WinConsole.WriteLine("Error while executing the MsSQLEntity Creator:");
+				WinConsole.WriteLine(e.ToString());
+				WinConsole.WriteLine("Press any key to stop the application");
+				Thread.Sleep(5000);
 
 				return;
 			}
 			
-			if (AutoConsole.Options == null && pathToCommandSet != null)
+			if (AutoConsole.Options == null && options.InputFile != null)
 			{
-				AutoConsole.SaveStorage(pathToCommandSet);
+				AutoConsole.SaveStorage(options.InputFile);
 			}
 		}
 	}

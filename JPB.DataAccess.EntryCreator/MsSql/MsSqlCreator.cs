@@ -1,6 +1,8 @@
 ﻿
 
-using JPB.Console.Helper.Grid;
+using System.Text;
+using System.Xml;
+using Microsoft.Build.Evaluation;
 
 #region
 
@@ -23,6 +25,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 {
 	public class MsSqlCreator : IMsSqlCreator
 	{
+		private readonly bool _optionsIncludeInVsProject;
+
 		private readonly string[] usings =
 		{
 			"JPB.DataAccess.ModelsAnotations",
@@ -33,6 +37,11 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		private bool _is2000;
 		private bool _is2014;
 		public DbAccessLayer Manager;
+
+		public MsSqlCreator(bool optionsIncludeInVsProject)
+		{
+			_optionsIncludeInVsProject = optionsIncludeInVsProject;
+		}
 
 		public bool Is2000
 		{
@@ -112,7 +121,14 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		{
 			WinConsole.WriteLine("Start compiling with selected options");
 			WinConsole.WriteLine("Please define a output Directory");
-			TargetDir = Program.AutoConsole.GetNextOption();
+			if (string.IsNullOrWhiteSpace(TargetDir))
+			{
+				TargetDir = Program.AutoConsole.GetNextOption();
+			}
+
+			TargetDir = Path.GetFullPath(TargetDir);
+
+			Console.WriteLine($"Selected '{TargetDir}'");
 			if (TargetDir == "temp")
 			{
 				TargetDir = Path.GetTempPath();
@@ -124,7 +140,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				return;
 			}
 
-			var elements = Tables.Concat(Views);
+			var elements = Tables.Concat(Views).ToArray();
 
 			foreach (var tableInfoModel in elements)
 			{
@@ -158,6 +174,53 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				compiler.Compile(new List<ColumInfoModel>(), SplitByType);
 			}
 
+			if (_optionsIncludeInVsProject)
+			{
+				WinConsole.WriteLine("Update csproj file");
+				Console.WriteLine("Search for csproj file");
+				var realPath = Path.GetFullPath(TargetDir)
+					.Split('\\');
+				for (var index = 0; index < realPath.Length; index++)
+				{
+					var fullPath = realPath.Take(realPath.Length - index).Aggregate((e, f) => e + "\\" + f);
+					Console.WriteLine($"Search in: '{fullPath}'");
+					var hasCsProject = Directory.EnumerateFiles(fullPath, "*.csproj").FirstOrDefault();
+					if (!string.IsNullOrWhiteSpace(hasCsProject))
+					{
+						Console.WriteLine($"Found csproj file '{hasCsProject}'");
+						using (var collection = new ProjectCollection())
+						{
+							var proj = collection.LoadProject(hasCsProject);
+							var csFiles = proj.Items.Where(e => e.ItemType == "Compile").ToArray();
+
+							var inProjectFolderName = TargetDir.Remove(0, fullPath.Length);
+
+							foreach (var projectItem in csFiles)
+							{
+								if (Path.GetDirectoryName(projectItem.EvaluatedInclude)
+									.Trim('\\').Equals(inProjectFolderName.Trim('\\')))
+								{
+									proj.RemoveItem(projectItem);
+								}
+							}
+
+							foreach (var tableInfoModel in elements)
+							{
+								proj.AddItem("Compile",
+									Path.Combine(inProjectFolderName.Trim('\\'), tableInfoModel.GetClassName() + ".cs"));
+							}
+
+							proj.MarkDirty();
+
+							proj.Save(hasCsProject);
+						}
+						
+						
+						break;
+					}
+				}
+			}
+
 			WinConsole.WriteLine("Created all files");
 			RenderMenuAction();
 		}
@@ -166,79 +229,47 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private void RenderMenu()
 		{
-			var ddbWinConsole = new StringBuilderInterlaced();
-			ddbWinConsole.AppendLine("Tables: ");
+			Console.WriteLine("Tables:");
 			var i = 0;
-			ddbWinConsole.Up();
-
 			for (; i < Tables.Count(); i++)
 			{
-				ddbWinConsole.AppendInterlacedLine("{0} \t {1}", i, Tables.ToArray()[i].Info.TableName);
+				Console.WriteLine("{0} \t {1}", i, Tables.ToArray()[i].Info.TableName);
 			}
 
-			ddbWinConsole.Down();
-			ddbWinConsole.AppendInterlacedLine("Views:");
-			ddbWinConsole.Up();
+			Console.WriteLine("Views:");
 			var j = i;
 			for (; j < Views.Count() + i; j++)
 			{
-				ddbWinConsole.AppendInterlaced(j.ToString(), ConsoleColor.Gray);
-				ddbWinConsole.AppendLine("\t {1}", j, Views.ToArray()[j - i].Info.TableName);
+				Console.WriteLine("{0} \t {1}", j, Views.ToArray()[j - i].Info.TableName);
 			}
 
-			ddbWinConsole.Down();
-			ddbWinConsole.AppendInterlacedLine("Procedures:");
-			ddbWinConsole.Up();
-
+			Console.WriteLine("Procedures:");
 			var k = j;
 			for (; k < StoredProcs.Count() + j; k++)
 			{
-				ddbWinConsole.AppendInterlaced(k.ToString(), ConsoleColor.Gray);
-				ddbWinConsole.AppendLine("\t {1}", j, StoredProcs.ToArray()[k - j].Parameter.TableName);
+				Console.WriteLine("{0} \t {1}", k, StoredProcs.ToArray()[k - j].Parameter.TableName);
 			}
 
-			ddbWinConsole.Down();
-			ddbWinConsole.AppendInterlacedLine("Actions: ");
-			ddbWinConsole.Up();
+			Console.WriteLine("Actions: ");
 
-			ddbWinConsole
-				.AppendInterlacedLine(@"[Name | Number]", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Edit table")
-				.Down()
-				.AppendInterlacedLine(@"\compile", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Starts the Compiling of all Tables")
-				.Down()
-				.AppendInterlacedLine(@"\ns", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Defines a default Namespace")
-				.Down()
-				.AppendInterlacedLine(@"\fkGen", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Generates ForgeinKeyDeclarations")
-				.Down()
-				.AppendInterlacedLine(@"\addConfigMethod", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Moves all attributes from Propertys and Methods into a single ConfigMethod")
-				.Down()
-				.AppendInterlacedLine(@"\withAutoCtor", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Generates Loader Constructors")
-				.Down()
-				.AppendInterlacedLine(@"\autoGenNames", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Defines all names after a common naming convention")
-				.Down()
-				.AppendInterlacedLine(@"\addCompilerHeader", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Adds a Timestamp and a created user on each POCO")
-				.Down()
-				.AppendInterlacedLine(@"\exit", ConsoleColor.Blue)
-				.Up()
-				.AppendInterlacedLine("Stops the execution of the program");
-
-			ddbWinConsole.WriteToConsole(true);
+			Console.WriteLine(@"[Name | Number]");
+			Console.WriteLine("		Edit table");
+			Console.WriteLine(@"\compile");
+			Console.WriteLine("		Starts the Compiling of all Tables");
+			Console.WriteLine(@"\ns");
+			Console.WriteLine("		Defines a default Namespace");
+			Console.WriteLine(@"\fkGen");
+			Console.WriteLine("		Generates ForgeinKeyDeclarations");
+			Console.WriteLine(@"\addConfigMethod");
+			Console.WriteLine("		Moves all attributes from Propertys and Methods into a single ConfigMethod");
+			Console.WriteLine(@"\withAutoCtor");
+			Console.WriteLine("		Generates Loader Constructors");
+			Console.WriteLine(@"\autoGenNames");
+			Console.WriteLine("		Defines all names after a common naming convention");
+			Console.WriteLine(@"\addCompilerHeader	");
+			Console.WriteLine("		Adds a Timestamp and a created user on each POCO");
+			Console.WriteLine(@"\exit");
+			Console.WriteLine("		Stops the execution of the program");
 			RenderMenuAction();
 		}
 

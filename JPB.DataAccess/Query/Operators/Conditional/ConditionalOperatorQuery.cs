@@ -72,7 +72,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		}
 
 		/// <summary>
-		///     Adds an IN or NOT BEWEEN statement for the given collection of values
+		///     Adds an IN or NOT BETWEEN statement for the given collection of values
 		/// </summary>
 		/// <typeparam name="TValue">The type of the value.</typeparam>
 		/// <param name="values">The values.</param>
@@ -103,17 +103,18 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 
 			var prefixElement = this.QueryText(prefix + "(");
-
-			foreach (var value in values)
+			if (values.Any())
 			{
-				var valId = prefixElement.ContainerObject.GetNextParameterId();
-				prefixElement = prefixElement.QueryQ(string.Format("@m_val{0},", valId),
-					new QueryParameter(string.Format("@m_val{0}", valId), value));
+				foreach (var value in values)
+				{
+					var valId = prefixElement.ContainerObject.GetNextParameterId();
+					prefixElement = prefixElement.QueryQ(string.Format("@m_val{0},", valId),
+						new QueryParameter(string.Format("@m_val{0}", valId), value));
+				}
+
+				prefixElement.ContainerObject.Parts.Last().Prefix = prefixElement.ContainerObject.Parts.Last()
+					.Prefix.Replace(",", "");
 			}
-
-			prefixElement.ContainerObject.Parts.Last().Prefix = prefixElement.ContainerObject.Parts.Last()
-				.Prefix.Replace(",", "");
-
 			prefixElement = prefixElement.QueryText(")");
 			return new ConditionalEvalQuery<TPoco>(prefixElement, State);
 		}

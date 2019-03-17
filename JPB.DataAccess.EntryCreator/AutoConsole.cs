@@ -20,9 +20,23 @@ namespace JPB.DataAccess.EntityCreator
 {
 	public class AutoConsole
 	{
-		public AutoConsole(string path)
+		public AutoConsole(string path, IEnumerable<string> variables)
 		{
 			LoadStorage(path);
+
+			foreach (var item in variables)
+			{
+				var args = item.Split('=');
+				var name = args[0];
+				var value = args[1];
+
+				var operations = new List<string>();
+				foreach (var operation in Options.Actions)
+				{
+					operations.Add(operation.Replace($"{{{name}}}", value));
+				}
+				Options.Actions = operations.ToArray();
+			}
 		}
 
 		int index = 0;
@@ -34,7 +48,11 @@ namespace JPB.DataAccess.EntityCreator
 			if (Options == null)
 				return SetNextOption();
 			if (Options.Actions.Length > index)
-				return Options.Actions[index++];
+			{
+				var nextCommand = Options.Actions[index++];
+				Console.WriteLine("Command: " + nextCommand);
+				return nextCommand;
+			}
 			return System.Console.ReadLine();
 		}
 
@@ -70,11 +88,13 @@ namespace JPB.DataAccess.EntityCreator
 				File.Delete(path);
 			}
 
-			using (var fs = new FileStream("out.xml", FileMode.CreateNew))
+			using (var fs = new FileStream(path, FileMode.CreateNew))
 			{
 				var serilizer = new XmlSerializer(typeof(Options));
-
-				serilizer.Serialize(fs, new Options() { Actions = _op.ToArray() });
+				serilizer.Serialize(fs, new Options()
+				{
+					Actions = _op.ToArray()
+				});
 			}
 		}
 	}

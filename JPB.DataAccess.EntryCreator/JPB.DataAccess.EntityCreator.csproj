@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JPB.DataAccess.EntityCreator</RootNamespace>
     <AssemblyName>JPB.DataAccess.EntityCreator</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -74,10 +74,12 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JPB.Console.Helper.Grid, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\JPB.Console.Helper.Grid.dll</HintPath>
+    <Reference Include="CommandLine, Version=2.4.3.0, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.4.3\lib\netstandard2.0\CommandLine.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Build, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Build.Engine" />
+    <Reference Include="Microsoft.Build.Utilities.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.SqlServer.Types, Version=12.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Microsoft SQL Server\120\SDK\Assemblies\Microsoft.SqlServer.Types.dll</HintPath>
@@ -126,6 +128,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="JPB.DataAccess.EntryCreator.licenseheader" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JPB.DataAccess.EntityCreator.Core\JPB.DataAccess.EntityCreator.Core.csproj">
@@ -136,9 +139,6 @@
       <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
       <Name>JPB.DataAccess</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="JPB.Console.Helper.Grid.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
