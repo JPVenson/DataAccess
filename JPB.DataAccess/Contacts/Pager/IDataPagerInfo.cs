@@ -8,12 +8,12 @@
 		/// <summary>
 		///     Id of Current page beween 1 and MaxPage
 		/// </summary>
-		long CurrentPage { get; set; }
+		int CurrentPage { get; set; }
 
 		/// <summary>
 		///     The last possible Page
 		/// </summary>
-		long MaxPage { get; }
+		int MaxPage { get; }
 
 		/// <summary>
 		///     Items to load on one page

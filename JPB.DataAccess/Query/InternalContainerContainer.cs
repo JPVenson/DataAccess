@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -21,8 +24,10 @@ namespace JPB.DataAccess.Query
 	///     Stores the Query data produced by an QueryBuilder element
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IQueryContainer" />
-	public class InternalContainerContainer : IQueryContainer
+	public class InternalContainerContainer : IQueryContainer, IQueryContainerValues
 	{
+		private readonly List<IQueryPart> _parts;
+
 		/// <summary>
 		///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
 		/// </summary>
@@ -38,31 +43,40 @@ namespace JPB.DataAccess.Query
 		public InternalContainerContainer(DbAccessLayer database)
 		{
 			AccessLayer = database;
-			Parts = new List<GenericQueryPart>();
+			_parts = new List<IQueryPart>();
 			QueryInfos = new Dictionary<string, object>();
+			Interceptors = new List<IQueryCommandInterceptor>();
+			PostProcessors = new List<IEntityProcessor>();
+			TableAlias = new Dictionary<string, string>();
+			Identifiers = new List<QueryIdentifier>();
 		}
 
 		internal InternalContainerContainer(IQueryContainer pre)
 		{
 			AccessLayer = pre.AccessLayer;
 			ForType = pre.ForType;
-			AutoParameterCounter = pre.AutoParameterCounter;
-			Parts = pre.Parts.Select(f => f.Clone(null) as GenericQueryPart).ToList();
+			AutoParameterCounter = (pre as IQueryContainerValues)?.AutoParameterCounter ?? 0;
+			TableAlias = (pre as IQueryContainerValues)?.TableAlias ?? new Dictionary<string, string>();
+			Identifiers = (pre as IQueryContainerValues)?.Identifiers ?? new List<QueryIdentifier>();
+			_parts = pre.Parts.ToList();
 			EnumerationMode = pre.EnumerationMode;
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 			QueryInfos = pre.QueryInfos.Select(f => f).ToDictionary(f => f.Key, f => f.Value);
+			Interceptors = pre.Interceptors;
+			PostProcessors = pre.PostProcessors;
 		}
+		
+		/// <inheritdoc />
+		public List<IEntityProcessor> PostProcessors { get; }
+
+		/// <inheritdoc />
+		public List<IQueryCommandInterceptor> Interceptors { get; }
 
 		/// <summary>
 		/// Provides internal formatting infos about the current query
 		/// </summary>
 		public IDictionary<string, object> QueryInfos { get; private set; }
-
-		/// <summary>
-		///     If enabled the IQueryContainer will insert linebreaks after some Commands
-		/// </summary>
-		public bool AutoLinebreak { get; set; }
-
+		
 		/// <summary>
 		/// </summary>
 		public DbAccessLayer AccessLayer { get; private set; }
@@ -71,35 +85,57 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		public Type ForType { get; set; }
 
-		/// <summary>
-		///     Gets the current number of used SQL Parameter. This value is used for Autogeneration
-		/// </summary>
+		/// <inheritdoc />
 		public int AutoParameterCounter { get; private set; }
 
-		/// <summary>
-		///     Defines all elements added by the Add Method
-		/// </summary>
-		public List<GenericQueryPart> Parts { get; private set; }
+		/// <inheritdoc />
+		public IDictionary<string, string> TableAlias { get; }
 
-		/// <summary>
-		///     Defines the Way how the Data will be loaded
-		/// </summary>
+		/// <inheritdoc />
+		public IEnumerable<IQueryPart> Parts
+		{
+			get { return _parts; }
+		}
+
+		/// <inheritdoc />
 		public EnumerationMode EnumerationMode { get; set; }
 
-		/// <summary>
-		///     If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
-		/// </summary>
+		/// <inheritdoc />
 		public bool AllowParamterRenaming { get; set; }
 
-
-		/// <summary>
-		///     Will concat all QueryParts into a statement and will check for Spaces
-		/// </summary>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public IDbCommand Compile()
 		{
-			var query = CompileFlat();
-			return AccessLayer.Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
+			var commands = new List<IDbCommand>();
+			foreach (var queryPart in Parts)
+			{
+				commands.Add(queryPart.Process(this));
+			}
+
+			return DbAccessLayerHelper.ConcatCommands(AccessLayer.Database, true, commands.ToArray());
+
+			//var query = CompileFlat();
+			//return AccessLayer.Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
+		}
+
+		/// <inheritdoc />
+		public IList<QueryIdentifier> Identifiers { get; private set; }
+
+		/// <inheritdoc />
+		public QueryIdentifier GetAlias(QueryIdentifier.QueryIdTypes table)
+		{
+			var identifier = new QueryIdentifier();
+			identifier.QueryIdType = table;
+			identifier.Value =
+				$"[{identifier.QueryIdType.ToString()}_{Identifiers.Count(g => g.QueryIdType.Equals(identifier.QueryIdType))}]";
+			Identifiers.Add(identifier);
+			return identifier;
+		}
+
+		/// <inheritdoc />
+		public void SetTableAlias(string table, string alias)
+		{
+			TableAlias[table.Trim('[', ']')] = alias;
 		}
 
 		/// <summary>
@@ -110,24 +146,23 @@ namespace JPB.DataAccess.Query
 		{
 			var sb = new StringBuilder();
 			var queryParts = Parts.ToArray();
-			string prefRender = null;
+			
 			var param = new List<IQueryParameter>();
 
 			foreach (var queryPart in queryParts)
 			{
-				//take care of spaces
-				//check if the last statement ends with a space or the next will start with one
-				var renderCurrent = queryPart.Prefix;
-				if (prefRender != null)
+				var command = queryPart.Process(this);
+
+				param.AddRange(command.Parameters.AsQueryParameter());
+				if (command.CommandText != null)
 				{
-					if (!prefRender.EndsWith(" ", true, CultureInfo.InvariantCulture) || !renderCurrent.StartsWith(" ", true, CultureInfo.InvariantCulture))
+					if (!command.CommandText.EndsWith(" ", true, CultureInfo.InvariantCulture) || !command.CommandText.StartsWith(" ", true, CultureInfo.InvariantCulture))
 					{
-						renderCurrent = " " + renderCurrent;
+						command.CommandText = " " + command.CommandText;
 					}
 				}
-				sb.Append(renderCurrent);
-				param.AddRange(queryPart.QueryParameters);
-				prefRender = renderCurrent;
+
+				sb.Append(command.CommandText);
 			}
 
 			return new Tuple<string, IEnumerable<IQueryParameter>>(sb.ToString(), param);
@@ -143,6 +178,16 @@ namespace JPB.DataAccess.Query
 			return ++AutoParameterCounter;
 		}
 
+		/// <inheritdoc />
+		public string GetTableAlias(string target)
+		{
+			if (TableAlias.ContainsKey(target))
+			{
+				return TableAlias[target];
+			}
+			return $"[{target}]";
+		}
+
 		//public object Clone()
 		//{
 		//	return new InternalContainerContainer(this);
@@ -155,6 +200,18 @@ namespace JPB.DataAccess.Query
 		public IQueryContainer Clone()
 		{
 			return new InternalContainerContainer(this);
+		}
+
+		/// <inheritdoc />
+		public T Search<T>() where T : IQueryPart
+		{
+			return Parts.OfType<T>().LastOrDefault();
+		}
+
+		/// <inheritdoc />
+		public void Add(IQueryPart queryPart)
+		{
+			_parts.Add(queryPart);
 		}
 
 		/// <summary>
@@ -232,15 +289,15 @@ namespace JPB.DataAccess.Query
 				.AppendInterlacedLine("AutoParameterCounter = {0},", AutoParameterCounter)
 				.AppendInterlacedLine("QueryDebugger = ")
 				.Insert(new QueryDebugger(Compile(), AccessLayer.Database).Render)
-				.AppendInterlacedLine("Parts[{0}] = ", Parts.Count)
+				.AppendInterlacedLine("Parts[{0}] = ", Parts.Count())
 				.AppendInterlacedLine("{")
 				.Up();
 
-			foreach (var genericQueryPart in Parts)
-			{
-				genericQueryPart.Render(sb);
-				sb.AppendLine(",");
-			}
+			//foreach (var genericQueryPart in Parts)
+			//{
+			//	genericQueryPart.Render(sb);
+			//	sb.AppendLine(",");
+			//}
 
 			sb.Down()
 				.AppendInterlacedLine("}")

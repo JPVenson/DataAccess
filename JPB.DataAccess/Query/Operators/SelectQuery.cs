@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
@@ -22,19 +23,17 @@ namespace JPB.DataAccess.Query.Operators
 		/// <param name="database">The database.</param>
 		public SelectQuery(IQueryBuilder database) : base(database)
 		{
-			//if (CurrentIdentifier != null)
-			//	this.ContainerObject.Parts.Add(new GenericQueryPart("AS " + CurrentIdentifier));
+			CreateNewIdentifier();
 		}
 
 		/// <summary>
-		///     Initializes a new instance of the <see cref="SelectQuery{TPoco}" /> class.
+		///		Selects items Distinct
 		/// </summary>
-		/// <param name="database">The database.</param>
-		/// <param name="ident">The ident.</param>
-		public SelectQuery(IQueryBuilder database, string ident) : base(database, ident)
+		/// <returns></returns>
+		public SelectQuery<TPoco> Distinct()
 		{
-			//if (CurrentIdentifier != null)
-			//	this.ContainerObject.Parts.Add(new GenericQueryPart("AS " + CurrentIdentifier));
+			ContainerObject.Search<ISelectableQueryPart>().Distinct = true;
+			return this;
 		}
 
 		/// <summary>
@@ -50,7 +49,6 @@ namespace JPB.DataAccess.Query.Operators
 			var pkValue = teCache.PrimaryKeyProperty.Getter.Invoke(element);
 			return In<TEPoco>(pkValue);
 		}
-
 
 		/// <summary>
 		///     Retuns a collection of all Entites that are referenced by element

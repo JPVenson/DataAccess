@@ -79,18 +79,18 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			return DbAccess.Query().ConfigEnumerationMode(_enumerationMode);
 		}
 
-		[Test]
-		public void AsCte()
-		{
-			var maxItems = 250;
-			DataMigrationHelper.AddUsers(maxItems, DbAccess);
-			Assert.That(() =>
-			{
-				var elementProducer = CreateQuery().Select.Table<Users>().AsCte<Users, Users>("cte");
-				var query = elementProducer.ContainerObject.Compile();
-				Assert.That(query, Is.Not.Null);
-			}, Throws.Nothing);
-		}
+		//[Test]
+		//public void AsCte()
+		//{
+		//	var maxItems = 250;
+		//	DataMigrationHelper.AddUsers(maxItems, DbAccess);
+		//	Assert.That(() =>
+		//	{
+		//		var elementProducer = CreateQuery().Select.Table<Users>().AsCte<Users, Users>("cte");
+		//		var query = elementProducer.ContainerObject.Compile();
+		//		Assert.That(query, Is.Not.Null);
+		//	}, Throws.Nothing);
+		//}
 
 		[Test]
 
@@ -127,7 +127,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 
 		public void Count()
 		{
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
+			Assert.That(addUsers.Length, Is.EqualTo(250));
 
 			var runPrimetivSelect = -1;
 			var forResult = -1;
@@ -138,8 +139,9 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				runPrimetivSelect =
 						DbAccess.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 								[0];
-				forResult = CreateQuery().Select.Table<Users>().CountInt()
-										 .ForResult(_asyncEnumeration).FirstOrDefault();
+				forResult = CreateQuery().Count.Table<Users>()
+										 .ForResult(_asyncEnumeration)
+										 .FirstOrDefault();
 			}
 
 			if (DbAccess.DbAccessType == DbAccessType.SqLite)
@@ -148,7 +150,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 						(int)
 						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 								[0];
-				forResult = (int)CreateQuery().Select.Table<Users>().CountLong()
+				forResult = (int)CreateQuery().Count.Table<Users>()
 										  .ForResult(_asyncEnumeration).FirstOrDefault();
 			}
 
@@ -158,8 +160,9 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 						(int)
 						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 								[0];
-				forResult = (int)CreateQuery().Count<Users>().ForResult<long>(_asyncEnumeration)
-										  .FirstOrDefault();
+				forResult = (int) CreateQuery().Count.Table<Users>()
+					.ForResult<long>(_asyncEnumeration)
+					.FirstOrDefault();
 			}
 
 			Assert.That(runPrimetivSelect, Is.EqualTo(forResult));
@@ -242,47 +245,40 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var maxItems = 250;
 
 			DataMigrationHelper.AddUsers(maxItems, DbAccess);
-			var basePager = DbAccess.Database.CreatePager<Users>();
-			basePager.PageSize = 10;
+			var basePager = CreateQuery()
+				.Select.Table<Users>()
+				.ForPagedResult(1, 10);
 			basePager.LoadPage(DbAccess);
 
 			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
 			Assert.That(basePager.MaxPage, Is.EqualTo(maxItems / basePager.PageSize));
-
-			var queryPager = CreateQuery()
-									 .Select.Table<Users>()
-									 .Order.By(f => f.UserID)
-									 .ForPagedResult(1, basePager.PageSize);
-			queryPager.LoadPage(DbAccess);
-
-			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
-			Assert.That(basePager.MaxPage, Is.EqualTo(queryPager.MaxPage));
 		}
 
 		[Test]
 		public void PagerWithCondtion()
 		{
 			var maxItems = 250;
-			DataMigrationHelper.AddUsers(maxItems, DbAccess);
+			var pageSize = 25;
 
-			var basePager = DbAccess.Database.CreatePager<Users>();
-			basePager.BaseQuery = DbAccess.CreateSelect<Users>(" WHERE User_ID < 25");
-			basePager.PageSize = 10;
-			basePager.LoadPage(DbAccess);
-
-			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
-			Assert.That(basePager.MaxPage, Is.EqualTo(Math.Ceiling(25F / basePager.PageSize)));
+			var addUsers = DataMigrationHelper.AddUsers(maxItems, DbAccess).Skip(pageSize).ToArray();
+			var beginWithId = addUsers.FirstOrDefault();
 
 			var queryPager = CreateQuery().Select.Table<Users>()
 									 .Where
-									 .Column(f => f.UserID)
-									 .IsQueryOperatorValue("< 25")
-									 .Order.By(f => f.UserID)
-									 .ForPagedResult(1, basePager.PageSize);
+									 .Column(f => f.UserID).Is.BiggerThen(beginWithId)
+									 .Or
+									 .Column(f => f.UserID).Is.EqualsTo(beginWithId)
+									 .ForPagedResult(1, pageSize);
 			queryPager.LoadPage(DbAccess);
 
-			Assert.That(basePager.CurrentPage, Is.EqualTo(queryPager.CurrentPage));
-			Assert.That(basePager.MaxPage, Is.EqualTo(queryPager.MaxPage));
+			Assert.That(1, Is.EqualTo(queryPager.CurrentPage));
+			Assert.That(Math.Ceiling((double)addUsers.Length / pageSize), Is.EqualTo(queryPager.MaxPage));
+
+			for (int i = 0; i < pageSize; i++)
+			{
+				var queryPageItem = queryPager.CurrentPageItems.ElementAt(i);
+				Assert.That(queryPageItem.UserID, Is.EqualTo(addUsers[i]));
+			}
 		}
 
 		[Test]
@@ -388,7 +384,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			foreach (var addUser in addUsers)
 			{
 				var query = CreateQuery().Select.Table<Users_StaticQueryFactoryForSelectWithArugments>(addUser);
-				var subQuery = CreateQuery().SubSelect(() => query, "query");
+				var subQuery = CreateQuery().SubSelect(() => query);
 				var user = subQuery
 					.Where
 					.Column(f => f.UserName).Is.Not.Null
@@ -396,17 +392,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				Assert.That(user, Is.Not.Null);
 				Assert.That(user.UserId, Is.EqualTo(addUser));
 			}
-		}
-
-		[Test]
-		public void SelectSingleColumnTest()
-		{
-			var addUsers = DataMigrationHelper.AddUsers(10, DbAccess);
-
-			var userses = CreateQuery().Select.Only<Users>().Column(f => f.UserID).ForResult<long>(_asyncEnumeration).ToArray();
-
-			Assert.That(userses.Length == addUsers.Length, Is.True);
-			CollectionAssert.AreEqual(addUsers, userses);
 		}
 
 		[Test]
@@ -431,9 +416,10 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var userIdPre = user.UserID;
 			var usernamePre = user.UserName;
 			user.UserName = Guid.NewGuid().ToString();
-			CreateQuery().Update.Table<Users>().Set
-					.Column(f => f.UserName).Value(user.UserName)
-					.ExecuteNonQuery();
+			CreateQuery().Update.Table<Users>()
+				.Set
+				.Column(f => f.UserName).Value(user.UserName)
+				.ExecuteNonQuery();
 			user = DbAccess.Select<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));

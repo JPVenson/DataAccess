@@ -1,9 +1,10 @@
 ﻿#region
 
+using System;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Tests.Base;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;
-using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion
 
@@ -13,7 +14,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 	{
 		/// <inheritdoc />
 		public PagerUnitTest(DbAccessType type, bool asyncExecution, bool syncronised) : base(type,
-		asyncExecution, syncronised)
+			asyncExecution, syncronised)
 		{
 		}
 
@@ -23,18 +24,18 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 			var testUsers = DataMigrationHelper.AddUsers(250, DbAccess);
 
 			var refSelect =
-					DbAccess.Database.Run(
-					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
+				int.Parse(DbAccess.Database.Run(
+					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName))).ToString());
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
-			using (var pager = DbAccess.Database.CreatePager<Users>())
+			using (var pager = DbAccess.Query().Select.Table<Users>().ForPagedResult(1, 25))
 			{
 				Assert.That(pager, Is.Not.Null);
 
 				pager.CurrentPage = 1;
 				pager.PageSize = 25;
 
-				Assert.That(pager.MaxPage, Is.EqualTo(0));
+				Assert.That(pager.MaxPage, Is.EqualTo(Math.Ceiling((int)refSelect / 25D)));
 
 				#region CheckEvents
 
@@ -82,21 +83,19 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 			var testUsers = DataMigrationHelper.AddUsers(250, DbAccess);
 
 			var refSelect =
-					DbAccess.Database.Run(
+				DbAccess.Database.Run(
 					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName)));
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
-			using (var pager = DbAccess.Database.CreatePager<Users>())
+			using (var pager = DbAccess.Query().Select.Table<Users>().Where.Column(f => f.UserID).Is
+				.EqualsTo(testUsers[0]).ForPagedResult(1, 1))
 			{
-				pager.AppendedComands.Add(
-				DbAccess.Database.CreateCommand(string.Format("WHERE User_ID = {0}", testUsers[0])));
-
 				Assert.That(pager, Is.Not.Null);
 
 				pager.CurrentPage = 1;
 				pager.PageSize = 25;
 
-				Assert.That(pager.MaxPage, Is.EqualTo(0));
+				Assert.That(pager.MaxPage, Is.EqualTo(1));
 
 				#region CheckEvents
 

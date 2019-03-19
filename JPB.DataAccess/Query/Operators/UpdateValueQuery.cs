@@ -4,6 +4,7 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
 namespace JPB.DataAccess.Query.Operators
 {
@@ -11,31 +12,16 @@ namespace JPB.DataAccess.Query.Operators
 	///		Defines mehtods for setting a Column
 	/// </summary>
 	/// <typeparam name="TPoco"></typeparam>
-	public class UpdateValueQuery<TPoco> : QueryBuilderX
+	public class UpdateValueQuery<TPoco>
 	{
-		/// <inheritdoc />
-		public UpdateValueQuery(DbAccessLayer database, Type type) : base(database, type)
-		{
-		}
+		private readonly IQueryBuilder _queryBuilder;
+		private readonly UpdateTableWithQueryPart.ColumnAssignment _columnAssignment;
 
 		/// <inheritdoc />
-		public UpdateValueQuery(IQueryContainer database) : base(database)
+		internal UpdateValueQuery(IQueryBuilder queryBuilder, UpdateTableWithQueryPart.ColumnAssignment columnAssignment)
 		{
-		}
-
-		/// <inheritdoc />
-		public UpdateValueQuery(IQueryBuilder database) : base(database)
-		{
-		}
-
-		/// <inheritdoc />
-		public UpdateValueQuery(IQueryBuilder database, Type type) : base(database, type)
-		{
-		}
-
-		/// <inheritdoc />
-		public UpdateValueQuery(DbAccessLayer database) : base(database)
-		{
+			_queryBuilder = queryBuilder;
+			_columnAssignment = columnAssignment;
 		}
 
 		/// <summary>
@@ -45,8 +31,10 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public NextUpdateOrCondtionQuery<TPoco> Value(object value)
 		{
-			var arg = "@setArg" + base.ContainerObject.GetNextParameterId();
-			return new NextUpdateOrCondtionQuery<TPoco>(this.QueryQ(" = " + arg, new QueryParameter(arg, value)));
+			var paramValue = $"@setArg{_queryBuilder.ContainerObject.GetNextParameterId()}";
+			var queryParameter = new QueryParameter(paramValue, value);
+
+			return QueryValue(paramValue, queryParameter);
 		}
 
 		/// <summary>
@@ -57,7 +45,12 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public NextUpdateOrCondtionQuery<TPoco> QueryValue(string value, params IQueryParameter[] arguments)
 		{
-			return new NextUpdateOrCondtionQuery<TPoco>(this.QueryQ(" = " + value, arguments.ToArray()));
+			_columnAssignment.Value = value;
+			_columnAssignment.QueryParameters.AddRange(arguments);
+			_queryBuilder.ContainerObject.Search<UpdateTableWithQueryPart>()
+				.ColumnAssignments
+				.Add(_columnAssignment);
+			return new NextUpdateOrCondtionQuery<TPoco>(_queryBuilder);
 		}
 	}
 }

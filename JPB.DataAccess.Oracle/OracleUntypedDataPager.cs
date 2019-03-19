@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
 using System.Collections;
 using System.Data;
+using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Oracle
 {
     public class OracleUntypedDataPager<T> : IDataPager<T>
     {
         private bool _cache;
-        private long _currentPage;
+        private int _currentPage;
 
         private Action<Action> _syncHelper;
 
@@ -47,7 +48,7 @@ namespace JPB.DataAccess.Oracle
         public long FirstID { get; private set; }
         public long LastID { get; private set; }
 
-        public long CurrentPage
+        public int CurrentPage
         {
             get { return _currentPage; }
             set
@@ -60,8 +61,9 @@ namespace JPB.DataAccess.Oracle
         }
 
         public virtual ICollection<T> CurrentPageItems { get; protected set; }
+        public IElementProducer<T> CommandQuery { get; set; }
 
-        public long MaxPage { get; private set; }
+        public int MaxPage { get; private set; }
 
         public int PageSize { get; set; }
 
@@ -88,12 +90,6 @@ namespace JPB.DataAccess.Oracle
                 throw new NotImplementedException();
             }
         }
-
-        IEnumerable IDataPager.CurrentPageItems
-        {
-            get { return CurrentPageItems; }
-        }
-
 
         public event Action NewPageLoaded;
         public event Action NewPageLoading;

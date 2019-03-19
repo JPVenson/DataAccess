@@ -2,9 +2,13 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -15,33 +19,27 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 	/// <typeparam name="TPoco">The type of the poco.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IConditionalOperatorQuery{TPoco}" />
-	public class ConditionalOperatorQuery<TPoco> : QueryBuilderX, IConditionalOperatorQuery<TPoco>
+	public class ConditionalOperatorQuery<TPoco> : IConditionalOperatorQuery<TPoco>
 	{
-#pragma warning disable 1591
-		public readonly CondtionBuilderState State;
-#pragma warning restore 1591
+		private readonly IQueryBuilder _builder;
+		private readonly ExpressionConditionPart _expression;
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public readonly Operator State;
 
 		/// <summary>
 		///     Initializes a new instance of the <see cref="ConditionalOperatorQuery{TPoco}" /> class.
 		/// </summary>
 		/// <param name="builder">The builder.</param>
+		/// <param name="expression"></param>
 		/// <param name="state">The state.</param>
-		public ConditionalOperatorQuery(IQueryBuilder builder, CondtionBuilderState state) : base(builder)
+		internal ConditionalOperatorQuery(IQueryBuilder builder, ExpressionConditionPart expression, Operator state)
 		{
+			_builder = builder;
+			_expression = expression;
 			State = state;
-		}
-
-		/// <summary>
-		///     Initializes a new instance of the <see cref="ConditionalOperatorQuery{TPoco}" /> class.
-		/// </summary>
-		/// <param name="builder">The builder.</param>
-		public ConditionalOperatorQuery(IQueryBuilder builder) : base(builder)
-		{
-			State = new CondtionBuilderState(null);
-			if (builder is ConditionalOperatorQuery<TPoco>)
-			{
-				State = ((ConditionalOperatorQuery<TPoco>)builder).State;
-			}
 		}
 
 		/// <summary>
@@ -49,7 +47,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// </summary>
 		public ConditionalOperatorQuery<TPoco> Not
 		{
-			get { return new ConditionalOperatorQuery<TPoco>(this, State.ToOperator(Operator.Not)); }
+			get { return new ConditionalOperatorQuery<TPoco>(_builder, _expression, Operator.Not); }
 		}
 
 		/// <summary>
@@ -59,15 +57,20 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			get
 			{
-				switch (State.Operator)
+				switch (State)
 				{
 					case Operator.Is:
-						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"));
+						_expression.Operator = "IS";
+						_expression.Value = "NULL";
+						break;
 					case Operator.Not:
-						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"));
+						_expression.Operator = "IS NOT";
+						_expression.Value = "NULL";
+						break;
 					default:
 						throw new NotSupportedException("Invalid value");
 				}
+				return new ConditionalEvalQuery<TPoco>(_builder);
 			}
 		}
 
@@ -89,34 +92,27 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 				throw new InvalidOperationException(
 				"Enumerations are not allowed. Did you forgot to call ToArray on the Linq expression?");
 			}
-			var prefix = "";
-			switch (State.Operator)
+
+			switch (State)
 			{
 				case Operator.Is:
-					prefix = "IN";
+					_expression.Operator = "IN";
 					break;
 				case Operator.Not:
-					prefix = "NOT IN";
+					_expression.Operator = "NOT IN";
 					break;
 				default:
 					throw new NotSupportedException("Invalid value");
 			}
 
-			var prefixElement = this.QueryText(prefix + "(");
-			if (values.Any())
+			var arguments = new List<IQueryParameter>();
+			foreach (var value in values)
 			{
-				foreach (var value in values)
-				{
-					var valId = prefixElement.ContainerObject.GetNextParameterId();
-					prefixElement = prefixElement.QueryQ(string.Format("@m_val{0},", valId),
-						new QueryParameter(string.Format("@m_val{0}", valId), value));
-				}
-
-				prefixElement.ContainerObject.Parts.Last().Prefix = prefixElement.ContainerObject.Parts.Last()
-					.Prefix.Replace(",", "");
+				var valId = _builder.ContainerObject.GetNextParameterId();
+				arguments.Add(new QueryParameter($"@m_val{valId}", value));
 			}
-			prefixElement = prefixElement.QueryText(")");
-			return new ConditionalEvalQuery<TPoco>(prefixElement, State);
+			_expression.Value = new ExpressionValue($"({arguments.Select(e => e.Name).Aggregate((e, f) => e + "," + f)})", arguments.ToArray());
+			return new ConditionalEvalQuery<TPoco>(_builder);
 		}
 
 		/// <summary>
@@ -128,25 +124,24 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> Between(object valueA, object valueB)
 		{
-			var prefix = "";
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
-					prefix = "BETWEEN";
+					_expression.Operator = "BETWEEN";
 					break;
 				case Operator.Not:
-					prefix = "NOT BETWEEN";
+					_expression.Operator = "NOT BETWEEN";
 					break;
 				default:
 					throw new NotSupportedException("Invalid value");
 			}
 
-			var valAId = ContainerObject.GetNextParameterId();
-			var valBId = ContainerObject.GetNextParameterId();
-			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ(string.Format("{0} @m_val{1} AND @m_val{2}", prefix, valAId, valBId),
-					new QueryParameter(string.Format("@m_val{0}", valAId), valueA),
-					new QueryParameter(string.Format("@m_val{0}", valBId), valueB)), State);
+			var valAId = new QueryParameter($"@m_val{_builder.ContainerObject.GetNextParameterId()}", valueA);
+			var valBId = new QueryParameter($"@m_val{_builder.ContainerObject.GetNextParameterId()}", valueB);
+
+			_expression.Value = new ExpressionValue($"{valAId.Name} AND {valBId.Name}", valAId, valBId);
+
+			return new ConditionalEvalQuery<TPoco>(_builder);
 		}
 
 		/// <summary>
@@ -157,7 +152,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> Like(string value)
 		{
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
 					return QueryOperatorValue("LIKE ", "%" + value + "%");
@@ -176,7 +171,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> StartWith(string value)
 		{
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
 					return QueryOperatorValue("LIKE ", value + "%");
@@ -195,7 +190,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> EndWith(string value)
 		{
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
 					return QueryOperatorValue("LIKE ", "%" + value);
@@ -214,7 +209,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> BiggerThen(object value)
 		{
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
 					return QueryOperatorValue(">", value);
@@ -233,7 +228,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> SmallerThen(object value)
 		{
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
 					return QueryOperatorValue("<", value);
@@ -252,19 +247,16 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> EqualsTo(object value)
 		{
-			switch (State.Operator)
+			if (value == null)
+			{
+				return Null;
+			}
+
+			switch (State)
 			{
 				case Operator.Is:
-					if (value == null)
-					{
-						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
-					}
 					return QueryOperatorValue("=", value);
 				case Operator.Not:
-					if (value == null)
-					{
-						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NOT NULL"), State);
-					}
 					return QueryOperatorValue("<>", value);
 				default:
 					throw new NotSupportedException("Invalid value");
@@ -278,7 +270,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> True()
 		{
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
 					return QueryOperatorValue("=", 1);
@@ -296,7 +288,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <exception cref="NotSupportedException">Invalid value</exception>
 		public ConditionalEvalQuery<TPoco> False()
 		{
-			switch (State.Operator)
+			switch (State)
 			{
 				case Operator.Is:
 					return QueryOperatorValue("=", 0);
@@ -307,47 +299,43 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			}
 		}
 
-		/// <summary>
-		///     Creates an Equal to statement by using a subquery
-		/// </summary>
-		/// <typeparam name="TGPoco">The type of the g poco.</typeparam>
-		/// <param name="value">The value.</param>
-		/// <returns></returns>
-		/// <exception cref="NotSupportedException">Invalid value</exception>
-		public ConditionalEvalQuery<TPoco> EqualsTo<TGPoco>(ElementProducer<TGPoco> value)
-		{
-			switch (State.Operator)
-			{
-				case Operator.Is:
-					if (value == null)
-					{
-						return new ConditionalEvalQuery<TPoco>(this.QueryText("IS NULL"), State);
-					}
-					return QueryOperatorValue("=", value);
-				case Operator.Not:
-					if (value == null)
-					{
-						return new ConditionalEvalQuery<TPoco>(this.QueryText("NOT NULL"), State);
-					}
-					return QueryOperatorValue("<>", value);
-				default:
-					throw new NotSupportedException("Invalid value");
-			}
-		}
+		///// <summary>
+		/////     Creates an Equal to statement by using a subquery
+		///// </summary>
+		///// <typeparam name="TGPoco">The type of the g poco.</typeparam>
+		///// <param name="value">The value.</param>
+		///// <returns></returns>
+		///// <exception cref="NotSupportedException">Invalid value</exception>
+		//public ConditionalEvalQuery<TPoco> EqualsTo<TGPoco>(ElementProducer<TGPoco> value)
+		//{
+		//	if (value == null)
+		//	{
+		//		return Null;
+		//	}
+		//	switch (State)
+		//	{
+		//		case Operator.Is:
+		//			return QueryOperatorValue("=", value);
+		//		case Operator.Not:
+		//			return QueryOperatorValue("<>", value);
+		//		default:
+		//			throw new NotSupportedException("Invalid value");
+		//	}
+		//}
 
-		/// <summary>
-		///     Prepaires an Conditional Query
-		/// </summary>
-		public ConditionalEvalQuery<TPoco> QueryOperatorValue<TGPoco>(string operators, ElementProducer<TGPoco> sub)
-		{
-			var eval = this.QueryText(operators + "(");
-			foreach (var genericQueryPart in sub.ContainerObject.Parts)
-			{
-				eval = eval.Add(genericQueryPart);
-			}
-			eval = this.QueryText(")");
-			return new ConditionalEvalQuery<TPoco>(eval, State);
-		}
+		///// <summary>
+		/////     Prepaires an Conditional Query
+		///// </summary>
+		//public ConditionalEvalQuery<TPoco> QueryOperatorValue<TGPoco>(string operators, ElementProducer<TGPoco> sub)
+		//{
+		//	var eval = this.QueryText(operators + "(");
+		//	foreach (var genericQueryPart in sub.ContainerObject.Parts)
+		//	{
+		//		eval = eval.Add(genericQueryPart);
+		//	}
+		//	eval = this.QueryText(")");
+		//	return new ConditionalEvalQuery<TPoco>(eval);
+		//}
 
 
 		/// <summary>
@@ -355,10 +343,10 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// </summary>
 		public ConditionalEvalQuery<TPoco> QueryOperatorValue(string operators, object value)
 		{
-			var nextParameterId = ContainerObject.GetNextParameterId();
-			return new ConditionalEvalQuery<TPoco>(this
-				.QueryQ(string.Format("{1} @m_val{0}", nextParameterId, operators),
-					new QueryParameter(string.Format("@m_val{0}", nextParameterId), value)), State);
+			_expression.Operator = operators;
+			var valueParameter = new QueryParameter($"@val_{_builder.ContainerObject.GetNextParameterId()}", value);
+			_expression.Value = new ExpressionValue(valueParameter.Name, valueParameter);
+			return new ConditionalEvalQuery<TPoco>(_builder);
 		}
 	}
 }

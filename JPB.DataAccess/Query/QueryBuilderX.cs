@@ -36,28 +36,7 @@ namespace JPB.DataAccess.Query
 		public QueryBuilderX(DbAccessLayer database) : base(database)
 		{
 		}
-
-		/// <summary>
-		///     Appends the specified query Builder.
-		/// </summary>
-		/// <param name="right">The right.</param>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public QueryBuilderX Append(QueryBuilderX right)
-		{
-			if (right.ContainerObject == ContainerObject)
-			{
-				return this;
-			}
-
-			var builder = this;
-			foreach (var part in right.ContainerObject.Parts)
-			{
-				builder = builder.Add(part);
-			}
-			return builder;
-		}
-
+		
 		/// <inheritdoc />
 		//public override IQueryBuilder Clone()
 		//{

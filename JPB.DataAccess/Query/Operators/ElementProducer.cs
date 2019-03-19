@@ -2,6 +2,8 @@
 
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -18,13 +20,13 @@ namespace JPB.DataAccess.Query.Operators
 		/// <inheritdoc />
 		public ElementProducer(IQueryBuilder database, string currentIdentifier) : base(database, currentIdentifier)
 		{
+
 		}
 
 		/// <inheritdoc />
 		public ElementProducer(IQueryBuilder database) : base(database)
 		{
 		}
-
 
 		/// <summary>
 		///     Adds a SQL WHERE statement
@@ -34,7 +36,10 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public virtual ConditionalQuery<TPoco> Where
 		{
-			get { return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(CurrentIdentifier)); }
+			get
+			{
+				return new ConditionalQuery<TPoco>(Add(new ConditionStatementQueryPart()));
+			}
 		}
 	}
 }

@@ -8,31 +8,14 @@ namespace JPB.DataAccess.Query.Operators
 	///		Defines mehtods for an UPDATE query
 	/// </summary>
 	/// <typeparam name="TPoco"></typeparam>
-	public class UpdateColumnSetters<TPoco> : QueryBuilderX
+	public class UpdateColumnSetters<TPoco>
 	{
-		/// <inheritdoc />
-		public UpdateColumnSetters(DbAccessLayer database, Type type) : base(database, type)
-		{
-		}
+		private readonly IQueryBuilder _queryBuilder;
 
 		/// <inheritdoc />
-		public UpdateColumnSetters(IQueryContainer database) : base(database)
+		public UpdateColumnSetters(IQueryBuilder queryBuilder)
 		{
-		}
-
-		/// <inheritdoc />
-		public UpdateColumnSetters(IQueryBuilder database) : base(database)
-		{
-		}
-
-		/// <inheritdoc />
-		public UpdateColumnSetters(IQueryBuilder database, Type type) : base(database, type)
-		{
-		}
-
-		/// <inheritdoc />
-		public UpdateColumnSetters(DbAccessLayer database) : base(database)
-		{
+			_queryBuilder = queryBuilder;
 		}
 
 		/// <summary>
@@ -42,7 +25,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			get
 			{
-				return new SetValueForUpdateQuery<TPoco>(this.QueryD("SET"));
+				return new SetValueForUpdateQuery<TPoco>(_queryBuilder);
 			}
 		}
 	}

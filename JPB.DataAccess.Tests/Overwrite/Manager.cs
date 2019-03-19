@@ -99,6 +99,12 @@ namespace JPB.DataAccess.Tests.Overwrite
 				                          _errorData.AppendLine();
 			                          };
 
+			expectWrapper.OnNonResultQuery += (sender, eventArg) =>
+			                          {
+										  _errorData.AppendFormat(@"Query: \r\n{0}", eventArg.QueryDebugger);
+				                          _errorData.AppendLine();
+			                          };
+
 			expectWrapper.OnFailedQuery += (sender, eventArg, exception) =>
 			{
 				_errorData.AppendFormat(@"Query Failed: \r\n{0}\r\n{1}", eventArg.QueryDebugger, exception);

@@ -13,10 +13,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Query.QueryItems;
 
 namespace JPB.DataAccess.SqLite
 {
@@ -26,8 +30,9 @@ namespace JPB.DataAccess.SqLite
 	public class SqLiteUntypedDataPager<T> : IDataPager<T>
 	{
 		private bool _cache;
-		private long _currentPage;
+		private int _currentPage;
 		private Action<Action> _syncHelper;
+		private string _pk;
 
 		/// <summary>
 		/// </summary>
@@ -35,16 +40,10 @@ namespace JPB.DataAccess.SqLite
 		{
 			CurrentPage = 1;
 			PageSize = 10;
-			AppendedComands = new List<IDbCommand>();
 			CurrentPageItems = new ObservableCollection<T>();
 
 			SyncHelper = action => action();
 		}
-
-		/// <summary>
-		///     Internal Use
-		/// </summary>
-		public Type TargetType { get; set; }
 
 		public bool Cache
 		{
@@ -58,9 +57,7 @@ namespace JPB.DataAccess.SqLite
 				_cache = false;
 			}
 		}
-
-		public IDbCommand BaseQuery { get; set; }
-
+		
 		public bool RaiseEvents { get; set; }
 
 		/// <summary>
@@ -73,9 +70,7 @@ namespace JPB.DataAccess.SqLite
 		/// </summary>
 		public event Action NewPageLoaded;
 
-		public List<IDbCommand> AppendedComands { get; set; }
-
-		public long CurrentPage
+		public int CurrentPage
 		{
 			get { return _currentPage; }
 			set
@@ -91,90 +86,44 @@ namespace JPB.DataAccess.SqLite
 			}
 		}
 
-		public long MaxPage { get; private set; }
+		public int MaxPage { get; private set; }
 
 		public int PageSize { get; set; }
 		public long TotalItemCount { get; private set; }
 
 		public ICollection<T> CurrentPageItems { get; protected set; }
-
-		void IDataPager.LoadPage(DbAccessLayer dbAccess)
+		public IElementProducer<T> CommandQuery { get; set; }
+		public void LoadPage(DbAccessLayer dbAccess)
 		{
-			T[] selectWhere = null;
-			IDbCommand finalAppendCommand;
-			if (AppendedComands.Any())
-			{
-				if (BaseQuery == null)
-				{
-					BaseQuery = dbAccess.CreateSelect<T>();
-				}
-
-				finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
-					(current, comand) => dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
-			}
-			else
-			{
-				if (BaseQuery == null)
-				{
-					BaseQuery = dbAccess.CreateSelect<T>();
-				}
-
-				finalAppendCommand = BaseQuery;
-			}
-
 			SyncHelper(CurrentPageItems.Clear);
-
-			var pk = TargetType.GetPK(dbAccess.Config);
-
-			var selectMaxCommand = dbAccess
-				.Query()
-				.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
-				.QueryText("SELECT COUNT(*) FROM CTE")
-				.ContainerObject
-				.Compile();
-
-			var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
-			if (maxItems != null)
+			if (_pk == null)
 			{
-				long parsedCount;
-				long.TryParse(maxItems.ToString(), out parsedCount);
-				TotalItemCount = parsedCount;
-				MaxPage = (long)Math.Ceiling((decimal)parsedCount / PageSize);
+				_pk = typeof(T).GetPK(dbAccess.Config);
 			}
+
+			TotalItemCount = CommandQuery.CountInt().FirstOrDefault();
+			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 			RaiseNewPageLoading();
-			IDbCommand command;
-
-			command = dbAccess.Query()
-					.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
-					.QueryText("SELECT * FROM CTE")
-					.QueryD("ASC LIMIT @PageSize OFFSET @PagedRows", new
+			var elements = new SelectQuery<T>(dbAccess.Query()
+					.WithCte(CommandQuery, out var commandCte)
+					.Select
+					.Identifier<T>(commandCte)
+					.Order.By(_pk)
+					.Add(new SqLitePagerPart
 					{
-						PagedRows = (CurrentPage - 1) * PageSize,
-						PageSize
-					})
-					.ContainerObject
-					.Compile();
+						Page = CurrentPage,
+						PageSize = PageSize
+					}))
+				.ToArray();
 
-			selectWhere = dbAccess.SelectNative(TargetType, command, true).Cast<T>().ToArray();
-
-			foreach (T item in selectWhere)
+			foreach (var item in elements)
 			{
 				var item1 = item;
 				SyncHelper(() => CurrentPageItems.Add(item1));
 			}
 
-			if (CurrentPage > MaxPage)
-			{
-				CurrentPage = MaxPage;
-			}
-
 			RaiseNewPageLoaded();
-		}
-
-		IEnumerable IDataPager.CurrentPageItems
-		{
-			get { return CurrentPageItems; }
 		}
 
 		/// <summary>
@@ -223,8 +172,23 @@ namespace JPB.DataAccess.SqLite
 
 		public void Dispose()
 		{
-			BaseQuery.Dispose();
 			CurrentPageItems.Clear();
 		}
+	}
+
+	public class SqLitePagerPart : IQueryPart
+	{
+		public IDbCommand Process(IQueryContainer container)
+		{
+			return container.AccessLayer.Database.CreateCommandWithParameterValues("LIMIT @PageSize OFFSET @PagedRows",
+				new[]
+				{
+					new QueryParameter("@PagedRows", (Page - 1) * PageSize),
+					new QueryParameter("@PageSize", PageSize),
+				});
+		}
+
+		public int Page { get; set; }
+		public int PageSize { get; set; }
 	}
 }

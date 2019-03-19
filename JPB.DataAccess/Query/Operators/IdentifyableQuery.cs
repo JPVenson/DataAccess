@@ -40,8 +40,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <value>
 		///     The current identifier.
 		/// </value>
-		public string CurrentIdentifier { get; private set; }
-
+		public string CurrentIdentifier { get; internal set; }
+		
 		/// <summary>
 		/// Sets the Interal Alias to a new Uniq value
 		/// </summary>

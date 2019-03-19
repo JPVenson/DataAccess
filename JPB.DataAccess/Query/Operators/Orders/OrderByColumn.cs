@@ -4,6 +4,7 @@ using System;
 using System.Linq.Expressions;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
@@ -30,7 +31,11 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> Descending
 		{
-			get { return new OrderByColumn<TPoco>(this.QueryText("DESC")); }
+			get
+			{
+				ContainerObject.Search<OrderByColumnQueryPart>().Descending = true;
+				return new OrderByColumn<TPoco>(this);
+			}
 		}
 
 		/// <summary>
@@ -54,7 +59,8 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> ThenBy(string columnName)
 		{
-			return new OrderByColumn<TPoco>(this.QueryText("," + columnName));
+			ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnName);
+			return new OrderByColumn<TPoco>(this);
 		}
 
 		/// <summary>

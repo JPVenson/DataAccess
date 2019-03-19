@@ -1,6 +1,8 @@
 ﻿#region
 
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -53,7 +55,11 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> And
 		{
-			get { return new ConditionalQuery<TPoco>(this.QueryText("AND"), State); }
+			get
+			{
+				ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.And));
+				return new ConditionalQuery<TPoco>(this);
+			}
 		}
 
 		/// <summary>
@@ -62,22 +68,10 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> Or
 		{
-			get { return new ConditionalQuery<TPoco>(this.QueryText("OR"), State); }
-		}
-
-		/// <summary>
-		///     Closes an Parenthesis if any is open. When not leading ( is found noting happens
-		/// </summary>
-		/// <returns></returns>
-		public ConditionalEvalQuery<TPoco> ParenthesisClose
-		{
 			get
 			{
-				if (State.InBreaket)
-				{
-					return new ConditionalEvalQuery<TPoco>(this.QueryText(")"), State.ToInBreaket(true));
-				}
-				return new ConditionalEvalQuery<TPoco>(this, State);
+				ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.Or));
+				return new ConditionalQuery<TPoco>(this);
 			}
 		}
 	}

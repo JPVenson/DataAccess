@@ -2,6 +2,8 @@ using System;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 namespace JPB.DataAccess.Query.Operators
 {
@@ -44,7 +46,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public SetValueForUpdateQuery<TPoco> And
 		{
-			get { return new SetValueForUpdateQuery<TPoco>(this.QueryText(", ")); }
+			get { return new SetValueForUpdateQuery<TPoco>(this); }
 		}
 
 		/// <summary>
@@ -55,7 +57,10 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public ConditionalQuery<TPoco> Where
 		{
-			get { return new ConditionalQuery<TPoco>(this.QueryText("WHERE"), new CondtionBuilderState(null)); }
+			get
+			{
+				return new ConditionalQuery<TPoco>(Add(new ConditionStatementQueryPart()));
+			}
 		}
 	}
 }

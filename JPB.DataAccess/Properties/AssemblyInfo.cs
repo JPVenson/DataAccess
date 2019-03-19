@@ -43,8 +43,8 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("2.0.200.0")]
-[assembly: AssemblyFileVersion("2.0.200.0")]
+[assembly: AssemblyVersion("2.1.000.0")]
+[assembly: AssemblyFileVersion("2.1.000.0")]
 [assembly: InternalsVisibleTo("JPB.DataAccess.EntityCreator.Core")]
 [assembly: InternalsVisibleTo("JPB.DataAccess.Tests")]
 [assembly: InternalsVisibleTo("JPB.DataAccess.Tests.MsSQL")]

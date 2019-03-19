@@ -9,6 +9,7 @@ using System.Linq;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
@@ -26,14 +27,9 @@ namespace JPB.DataAccess.MySql
 		private bool _cache;
 
 		/// <summary>
-		///     The check run
-		/// </summary>
-		private bool? _checkRun;
-
-		/// <summary>
 		///     The current page
 		/// </summary>
-		private long _currentPage;
+		private int _currentPage;
 
 		/// <summary>
 		///     The synchronize helper
@@ -49,14 +45,6 @@ namespace JPB.DataAccess.MySql
 		///     The SQL version
 		/// </summary>
 		protected string SqlVersion;
-
-		/// <summary>
-		///     Typed list of all Elements
-		/// </summary>
-		IEnumerable IDataPager.CurrentPageItems
-		{
-			get { return CurrentPageItems; }
-		}
 
 		/// <summary>
 		/// </summary>
@@ -141,7 +129,7 @@ namespace JPB.DataAccess.MySql
 		///     Id of Current page beween 1 and MaxPage
 		/// </summary>
 		/// <exception cref="InvalidOperationException">The current page must be bigger or equals 1</exception>
-		public long CurrentPage
+		public int CurrentPage
 		{
 			get { return _currentPage; }
 			set
@@ -160,7 +148,7 @@ namespace JPB.DataAccess.MySql
 		/// <summary>
 		///     The last possible Page
 		/// </summary>
-		public long MaxPage { get; private set; }
+		public int MaxPage { get; private set; }
 
 		/// <summary>
 		///     Items to load on one page
@@ -213,109 +201,74 @@ namespace JPB.DataAccess.MySql
 
 		public virtual void LoadPage(DbAccessLayer dbAccess)
 		{
-			RaiseNewPageLoading();
-			SyncHelper(CurrentPageItems.Clear);
-			if (pk == null)
-			{
-				pk = typeof(T).GetPK(dbAccess.Config);
-			}
+			T[] selectWhere = null;
 			IDbCommand finalAppendCommand;
-
-			if (CommandQuery != null)
+			if (AppendedComands.Any())
 			{
-				TotalItemCount = new ElementProducer<T>(CommandQuery).CountInt().FirstOrDefault();
-				MaxPage = (long) Math.Ceiling((decimal) TotalItemCount / PageSize);
-
-				RaiseNewPageLoading();
-				var elements =
-					new ElementProducer<T>(CommandQuery).QueryD("LIMIT @PagedRows, @PageSize",
-						new
-						{
-							PagedRows = (CurrentPage - 1) * PageSize,
-							PageSize
-						}).ToArray();
-
-				foreach (var item in elements)
+				if (BaseQuery == null)
 				{
-					var item1 = item;
-					SyncHelper(() => CurrentPageItems.Add(item1));
+					BaseQuery = dbAccess.CreateSelect<T>();
 				}
 
-				RaiseNewPageLoaded();
+				finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
+					(current, comand) => dbAccess.Database.MergeTextToParameters(new[] { current, comand }));
 			}
 			else
 			{
-				if (AppendedComands.Any())
+				if (BaseQuery == null)
 				{
-					if (BaseQuery == null)
-					{
-						BaseQuery = dbAccess.CreateSelect<T>();
-					}
-
-					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
-						(current, comand) =>
-							dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
-				}
-				else
-				{
-					if (BaseQuery == null)
-					{
-						BaseQuery = dbAccess.CreateSelect<T>();
-					}
-
-					finalAppendCommand = BaseQuery;
-				}
-				var selectMaxCommand = dbAccess
-					.Query()
-					.QueryText("WITH CTE AS")
-					.InBracket(query => query.QueryCommand(finalAppendCommand))
-					.QueryText("SELECT COUNT(1) FROM CTE")
-					.ContainerObject
-					.Compile();
-
-				////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
-
-				//if (finalAppendCommand != null)
-				//    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
-
-				var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
-				if (maxItems != null)
-				{
-					long parsedCount;
-					long.TryParse(maxItems.ToString(), out parsedCount);
-					TotalItemCount = parsedCount;
-					MaxPage = (long) Math.Ceiling((decimal) parsedCount / PageSize);
+					BaseQuery = dbAccess.CreateSelect<T>();
 				}
 
-				//Check select strategy
-				//IF version is or higher then 11.0.2100.60 we can use OFFSET and FETCH
-				//esle we need to do it the old way
-
-				RaiseNewPageLoading();
-				IDbCommand command;
-				command = dbAccess
-					.Query()
-					.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
-					.QueryText("SELECT * FROM")
-					.QueryText("CTE")
-					.QueryD("LIMIT @PagedRows, @PageSize;", new
-					{
-						PagedRows = (CurrentPage - 1) * PageSize,
-						PageSize
-					})
-					.ContainerObject
-					.Compile();
-
-				var selectWhere = dbAccess.SelectNative(typeof(T), command, true).Cast<T>().ToArray();
-
-				foreach (var item in selectWhere)
-				{
-					var item1 = item;
-					SyncHelper(() => CurrentPageItems.Add(item1));
-				}
-
-				RaiseNewPageLoaded();
+				finalAppendCommand = BaseQuery;
 			}
+
+			SyncHelper(CurrentPageItems.Clear);
+
+			var selectMaxCommand = dbAccess.Database.MergeTextToParameters(new[]
+			{
+				dbAccess.Database.CreateCommand("WITH CTE ("),
+				finalAppendCommand,
+				dbAccess.Database.CreateCommand(") SELECT COUNT(*) FROM CTE"),
+			});
+
+			var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
+			if (maxItems != null)
+			{
+				long parsedCount;
+				long.TryParse(maxItems.ToString(), out parsedCount);
+				TotalItemCount = parsedCount;
+				MaxPage = (int)Math.Ceiling((decimal)parsedCount / PageSize);
+			}
+
+			RaiseNewPageLoading();
+			IDbCommand command = dbAccess.Database.MergeTextToParameters(new[]
+			{
+				dbAccess.Database.CreateCommand("WITH CTE ("),
+				finalAppendCommand,
+				dbAccess.Database.CreateCommand(") SELECT COUNT(*) FROM CTE"),
+				dbAccess.Database.CreateCommandWithParameterValues("ASC LIMIT @PageSize OFFSET @PagedRows",
+					new []
+					{
+						new QueryParameter("@PagedRows", (CurrentPage - 1) * PageSize),
+						new QueryParameter("@PageSize", PageSize),
+					}),
+			});
+
+			selectWhere = dbAccess.SelectNative(typeof(T), command, true).Cast<T>().ToArray();
+
+			foreach (T item in selectWhere)
+			{
+				var item1 = item;
+				SyncHelper(() => CurrentPageItems.Add(item1));
+			}
+
+			if (CurrentPage > MaxPage)
+			{
+				CurrentPage = MaxPage;
+			}
+
+			RaiseNewPageLoaded();
 		}
 
 		public void Dispose()

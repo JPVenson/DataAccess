@@ -45,6 +45,12 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public event DatabaseActionHandler OnInsert;
 
+		/// <summary>
+		///     Will be triggerd when any DbAccessLayer tries to handle a Statement that has no result.
+		///     Will only be triggerd when setting RaiseEvents to true
+		/// </summary>
+		public event DatabaseActionHandler OnNonResultQuery;
+
 		internal event OnDatabaseActionHandler HandlerRaised;
 
 		internal void InvokeAsync(DatabaseActionHandler handler, object sender, IDbCommand query)
@@ -96,6 +102,11 @@ namespace JPB.DataAccess.Manager
 		internal void RaiseInsert(object sender, IDbCommand query)
 		{
 			InvokeAsync(OnInsert, sender, query);
+		}
+
+		internal void RaiseNoResult(object sender, IDbCommand query)
+		{
+			InvokeAsync(OnNonResultQuery, sender, query);
 		}
 
 		internal void RaiseFailedQuery(object sender, IDbCommand query, Exception ex)

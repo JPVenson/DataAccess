@@ -14,18 +14,6 @@ namespace JPB.DataAccess.SqLite
 {
 	public class SqLiteDataPager<T> : SqLiteUntypedDataPager<T>
 	{
-		private static Type _type;
-
-		static SqLiteDataPager()
-		{
-			_type = typeof (T);
-		}
-
-		public SqLiteDataPager()
-		{
-			TargetType = _type;
-		}
-
 		public new ICollection<T> CurrentPageItems
 		{
 			get { return base.CurrentPageItems; }

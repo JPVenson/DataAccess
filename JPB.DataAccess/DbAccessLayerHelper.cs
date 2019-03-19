@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
@@ -66,11 +67,12 @@ namespace JPB.DataAccess
 		///     query generation otherwise querys might be invalid) if an collision is detected and this is false an exception will
 		///     be thrown
 		/// </param>
+		/// <param name="delimiter">Delimiter for separation of both commands</param>
 		/// <returns></returns>
 		public static IDbCommand MergeCommands(this IDatabase db, IDbCommand @base, IDbCommand last,
-			bool autoRename = false)
+			bool autoRename = false, string delimiter = "; ")
 		{
-			return db.MergeTextToParameters(@base, last, autoRename);
+			return db.MergeTextToParameters(new[] {@base, last}, autoRename, 1, true, delimiter);
 		}
 
 		internal static IDbCommand AppendSuffix(this IDatabase db, IDbCommand left, string suffix)
@@ -89,8 +91,7 @@ namespace JPB.DataAccess
 		///     Merges 2 Commands into one single New Command by optionaly renaming and Delimiter insert
 		/// </summary>
 		/// <param name="db"></param>
-		/// <param name="base">The left part of the query</param>
-		/// <param name="last">The right part of the query</param>
+		/// <param name="commmands">The right part of the query</param>
 		/// <param name="autoRename">
 		///     if the merge will find some conflics in arguments, shout it provide a new name or throw an
 		///     extention
@@ -109,59 +110,64 @@ namespace JPB.DataAccess
 		/// <param name="insertDelimiter">insert the SQL Delimiter between base and last or not</param>
 		/// <returns></returns>
 		public static IDbCommand MergeTextToParameters(this IDatabase db,
-			IDbCommand @base,
-			IDbCommand last,
+			IDbCommand[] commmands,
 			bool autoRename = false,
 			int seed = 1,
 			bool pessimistic = true,
-			bool insertDelimiter = true)
+			string insertDelimiter = null)
 		{
-			var commandText = last.CommandText;
+			var commandText = new StringBuilder();
+			var parameter = new List<IQueryParameter>();
+
+				//@base.Parameters.Cast<IDataParameter>()
+				//	.Select(item => new QueryParameter(item.ParameterName, item.Value, item.DbType))
+				//	.Cast<IQueryParameter>()
+				//	.ToList();
 
 			if (pessimistic)
 			{
-				var parameter =
-						@base.Parameters.Cast<IDataParameter>()
-						     .Select(item => new QueryParameter(item.ParameterName, item.Value, item.DbType))
-						     .Cast<IQueryParameter>()
-						     .ToList();
-
-
-				foreach (var item in last.Parameters.Cast<IDataParameter>())
+				foreach (var dbCommand in commmands)
 				{
-					if (parameter.Any(s => s.Name == item.ParameterName))
+					foreach (var item in dbCommand.Parameters.Cast<IDataParameter>())
 					{
-						//Parameter is found twice in both commands so rename it
-						if (!autoRename)
+						if (parameter.Any(s => s.Name == item.ParameterName))
 						{
-							throw new ArgumentOutOfRangeException(nameof(@base),
-							string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
-							item.ParameterName));
-						}
-						var counter = seed;
-						var parameterName = item.ParameterName;
-						var buffParam = parameterName;
-						while (parameter.Any(s => s.Name == buffParam))
-						{
-							buffParam = string.Format("{0}_{1}", parameterName, counter);
-							counter++;
-						}
-						commandText = commandText.Replace(item.ParameterName, buffParam);
+							//Parameter is found twice in both commands so rename it
+							if (!autoRename)
+							{
+								throw new ArgumentOutOfRangeException(nameof(commmands),
+									string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
+										item.ParameterName));
+							}
+							var counter = seed;
+							var parameterName = item.ParameterName;
+							var buffParam = parameterName;
+							while (parameter.Any(s => s.Name == buffParam))
+							{
+								buffParam = string.Format("{0}_{1}", parameterName, counter);
+								counter++;
+							}
+							dbCommand.CommandText = dbCommand.CommandText.Replace(item.ParameterName, buffParam);
 
-						item.ParameterName = buffParam;
+							item.ParameterName = buffParam;
+						}
+
+						parameter.Add(new QueryParameter(item.ParameterName, item.Value, item.DbType));
 					}
 
-					parameter.Add(new QueryParameter(item.ParameterName, item.Value, item.DbType));
+					commandText.Append((insertDelimiter ?? " ") + dbCommand.CommandText);
 				}
-
-				return db.CreateCommandWithParameterValues(@base.CommandText + (insertDelimiter ? "; " : " ") + commandText,
-				parameter);
 			}
-			var arguments = new List<IDataParameter>(@base
-					.Parameters
-					.Cast<IDataParameter>());
-			arguments.AddRange(last.Parameters.Cast<IDataParameter>());
-			return db.CreateCommandWithParameterValues(@base.CommandText + "; " + commandText, arguments);
+			else
+			{
+				foreach (var dbCommand in commmands)
+				{
+					parameter.AddRange(dbCommand.Parameters.AsQueryParameter());
+					commandText.Append((insertDelimiter ?? " ") + dbCommand.CommandText);
+				}
+			}
+			
+			return db.CreateCommandWithParameterValues(commandText.ToString(), parameter);
 		}
 
 		/// <summary>
@@ -382,15 +388,33 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="tableAlias"></param>
+		/// <param name="columnName"></param>
+		/// <returns></returns>
+		internal static string ColumnIdentifier(string tableAlias, string columnName)
+		{
+			var col = $"[{columnName.Trim('[', ']')}]";
+			if (tableAlias != null)
+			{
+				return $"[{tableAlias.Trim('[', ']')}].{col}";
+			}
+			return col;
+		}
+
+
+		/// <summary>
 		///     Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
 		/// </summary>
 		/// <returns></returns>
-		internal static string CreatePropertyCsv(this DbClassInfoCache type, params string[] ignore)
+		internal static string CreatePropertyCsv(this DbClassInfoCache type, string alias, params string[] ignore)
 		{
 			var filteredList = FilterDbSchemaMapping(type, ignore).ToArray();
+
 			if (filteredList.Any())
 			{
-				return filteredList.Aggregate((e, f) => e + ", " + f);
+				return filteredList.Select(e => ColumnIdentifier(alias, e)).Aggregate((e, f) => e + ", " + f);
 			}
 			return string.Empty;
 		}
@@ -399,9 +423,9 @@ namespace JPB.DataAccess
 		///     Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
 		/// </summary>
 		/// <returns></returns>
-		internal static string CreatePropertyCsv<T>(DbConfig config, params string[] ignore)
+		internal static string CreatePropertyCsv<T>(DbConfig config, string alias, params string[] ignore)
 		{
-			return CreatePropertyCsv(config.GetOrCreateClassInfoCache(typeof(T)), ignore);
+			return CreatePropertyCsv(config.GetOrCreateClassInfoCache(typeof(T)), alias, ignore);
 		}
 
 		/// <summary>
@@ -466,16 +490,30 @@ namespace JPB.DataAccess
 		/// <summary>
 		///     Not Connection save
 		///     Must be executed inside a Valid Connection
-		///     Takes <paramref name="base" /> as base of Connection propertys
-		///     Merges the Command text of Both commands sepperated by a space
-		///     Creats a new command based on
+		///     Takes <paramref name="base" /> as base of Connection properties
+		///     Merges the Command text of Both commands separated by a space
+		///     Creates a new command based on
 		///     <paramref name="db" />
-		///     and Adds the Merged Commandtext and all parameter to it
+		///     and Adds the Merged CommandText and all parameter to it
 		/// </summary>
 		/// <returns></returns>
 		public static IDbCommand ConcatCommands(IDatabase db, IDbCommand @base, IDbCommand last, bool autoRename = false)
 		{
-			return db.MergeTextToParameters(@base, last, autoRename);
+			return db.MergeTextToParameters(new[] { @base, last }, autoRename);
+		}
+
+		/// <summary>
+		///     Not Connection save
+		///     Must be executed inside a Valid Connection
+		///     Merges the Command text of all commands separated by a space
+		///     Creates a new command based on
+		///     <paramref name="db" />
+		///     and Adds the Merged CommandText and all parameter to it
+		/// </summary>
+		/// <returns></returns>
+		public static IDbCommand ConcatCommands(IDatabase db, bool autoRename, params IDbCommand[] commands)
+		{
+			return db.MergeTextToParameters(commands, autoRename);
 		}
 	}
 }

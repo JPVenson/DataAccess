@@ -1,6 +1,9 @@
 using System;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Conditional;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 namespace JPB.DataAccess.Query.Operators
 {
@@ -9,11 +12,6 @@ namespace JPB.DataAccess.Query.Operators
 	/// </summary>
 	public class PrepaireUpdateQuery : QueryBuilderX
 	{
-		/// <inheritdoc />
-		public PrepaireUpdateQuery(DbAccessLayer database, Type type) : base(database, type)
-		{
-		}
-
 		/// <inheritdoc />
 		public PrepaireUpdateQuery(IQueryContainer database) : base(database)
 		{
@@ -24,16 +22,6 @@ namespace JPB.DataAccess.Query.Operators
 		{
 		}
 
-		/// <inheritdoc />
-		public PrepaireUpdateQuery(IQueryBuilder database, Type type) : base(database, type)
-		{
-		}
-
-		/// <inheritdoc />
-		public PrepaireUpdateQuery(DbAccessLayer database) : base(database)
-		{
-		}
-
 		/// <summary>
 		///     Creates a Update statement for a given type
 		/// </summary>
@@ -41,8 +29,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public UpdateColumnSetters<TPoco> Table<TPoco>()
 		{
-			var tableName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).TableName;
-			return new UpdateColumnSetters<TPoco>(this.QueryText("UPDATE {0}", tableName));
+			return new UpdateColumnSetters<TPoco>(
+				this.Add(new UpdateTableWithQueryPart(ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)), ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table))));
 		}
 	}
 }

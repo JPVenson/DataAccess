@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Manager
 				foreach (var query in insertRangeCommand)
 				{
 					curr += RangerInsertPation;
-					RaiseInsert(entry.Skip((int) curr).Take((int) RangerInsertPation), query);
+					RaiseInsert(entry.Skip((int)curr).Take((int)RangerInsertPation), query);
 					ExecuteGenericCommand(query);
 				}
 			});
@@ -80,7 +80,7 @@ namespace JPB.DataAccess.Manager
 			var tokeAll = 0;
 			var type = GetClassInfo(typeof(T));
 
-			var compiledRange = RangerInsertPation == 0 ? 0.1 * entrys.Length : (int) RangerInsertPation;
+			var compiledRange = RangerInsertPation == 0 ? 0.1 * entrys.Length : (int)RangerInsertPation;
 
 			for (var i = 0; i < entrys.Count(); i++)
 			{
@@ -93,7 +93,7 @@ namespace JPB.DataAccess.Manager
 					continue;
 				}
 
-				insertRange = Database.MergeTextToParameters(insertRange, singelCommand, true, tokeAll, false);
+				insertRange = Database.MergeTextToParameters(new[] { insertRange, singelCommand }, false, tokeAll, false, "; ");
 				toke++;
 				tokeAll++;
 
@@ -132,12 +132,12 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
-			var csvprops = classInfo.CreatePropertyCsv(ignore);
+			var csvprops = classInfo.CreatePropertyCsv(null, ignore);
 			string query;
 
 			if (string.IsNullOrEmpty(csvprops))
 			{
-				query = "INSERT INTO " + classInfo.TableName + " DEFAULT VALUES";
+				query = $"INSERT INTO [{classInfo.TableName}] DEFAULT VALUES";
 			}
 			else
 			{
@@ -188,8 +188,8 @@ namespace JPB.DataAccess.Manager
 		public int Insert(Type type, object entry, IDatabase db)
 		{
 			return AsyncHelper.WaitSingle(InsertAsync(type, entry, db));
-		}	
-		
+		}
+
 		/// <summary>
 		///     Creates and Executes a Insert statement for a given
 		///     <paramref name="entry" />
@@ -252,7 +252,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public T InsertWithSelect<T>(T entry)
 		{
-			return (T) InsertWithSelect(typeof(T), entry);
+			return (T)InsertWithSelect(typeof(T), entry);
 		}
 	}
 }

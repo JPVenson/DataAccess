@@ -6,6 +6,8 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.Operators.Selection;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -127,36 +129,9 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <returns></returns>
 		[MustUseReturnValue]
-		public SelectQuery<T> Execute<T>(params object[] argumentsForFactory)
-		{
-			var cmd = ContainerObject
-				.AccessLayer
-				.CreateSelectQueryFactory(
-					ContainerObject.AccessLayer.GetClassInfo(typeof(T)), argumentsForFactory);
-			return new SelectQuery<T>(this.QueryCommand(cmd));
-		}
-
-		/// <summary>
-		///     Adds a Select - Statement
-		///     Uses reflection or a Factory mehtod to create
-		/// </summary>
-		/// <returns></returns>
-		[MustUseReturnValue]
 		public SelectQuery<T> SelectFactory<T>(params object[] argumentsForFactory)
 		{
 			return new DatabaseObjectSelector(this).Table<T>(argumentsForFactory);
-		}
-
-		/// <summary>
-		///     Adds a Select - Statement
-		///     Uses reflection or a Factory mehtod to create
-		/// </summary>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public SelectQuery<T> Distinct<T>()
-		{
-			var cmd = DbAccessLayer.CreateSelect(ContainerObject.AccessLayer.GetClassInfo(typeof(T)), "DISTINCT");
-			return new SelectQuery<T>(this.QueryText(cmd));
 		}
 
 		/// <summary>
@@ -168,27 +143,9 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public ConditionalEvalQuery<T> UpdateEntity<T>(T obj)
 		{
-			return new ConditionalEvalQuery<T>(new UpdateQuery<T>(this
-				.QueryCommand(
-					DbAccessLayer
-						.CreateUpdate(ContainerObject
-							.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj))));
-		}
-
-		/// <summary>
-		///     Adds a Update - Statement
-		///     Uses reflection or a Factory mehtod to create an update statement for the whole table based on the obj
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public UpdateQuery<T> UpdateStatement<T>(T obj)
-		{
-			return new UpdateQuery<T>(this
-				.QueryCommand(
-					DbAccessLayer
-						.CreateUpdateSimple(ContainerObject
-							.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
+			return new ConditionalEvalQuery<T>(
+				Add(new UpdateTableWithQueryPart(ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
+					ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table), obj)));
 		}
 
 		/// <summary>
@@ -198,13 +155,14 @@ namespace JPB.DataAccess.Query.Operators
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		[MustUseReturnValue]
-		public DeleteQuery<T> Delete<T>(T obj)
+		public ConditionalEvalQuery<T> Delete<T>(T obj)
 		{
-			return new DeleteQuery<T>(this
-				.QueryCommand(
-					DbAccessLayer
-						.CreateDelete(ContainerObject
-							.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)), obj)));
+			var classInfo = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
+			var primaryKey = classInfo.PrimaryKeyProperty.Getter.Invoke(obj);
+
+			return Delete<T>()
+				.Where
+				.PrimaryKey().Is.EqualsTo(primaryKey);
 		}
 
 		/// <summary>
@@ -216,11 +174,29 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public DeleteQuery<T> Delete<T>()
 		{
-			return new DeleteQuery<T>(this
-				.QueryCommand(
-					DbAccessLayer
-						.CreateDelete(ContainerObject
-							.AccessLayer.Database, ContainerObject.AccessLayer.GetClassInfo(typeof(T)))));
+			return new DeleteQuery<T>(Add(new DeleteTableQueryPart(ContainerObject.AccessLayer.GetClassInfo(typeof(T)))));
+		}
+
+		/// <summary>
+		///		Creates a CTE on the start of the Query
+		/// </summary>
+		/// <returns></returns>
+		public RootQuery WithCte<T>(IElementProducer<T> commandQuery, out QueryIdentifier cteName)
+		{
+			IQueryBuilder newQuery = new RootQuery(this);
+			foreach (var id in commandQuery.ContainerObject.Identifiers)
+			{
+				newQuery.ContainerObject.Identifiers.Add(id);
+			}
+
+			var cteQueryPart = commandQuery.ContainerObject.Search<CteQueryPart>();
+			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteQueryPart()));
+
+			var cteInfo = new CteQueryPart.CteInfo();
+			cteInfo.Name = (cteName = newQuery.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Cte));
+			cteInfo.CteContentParts.AddRange(commandQuery.ContainerObject.Parts);
+			cteQueryPart.CteInfos.Add(cteInfo);
+			return new RootQuery(newQuery);
 		}
 	}
 }

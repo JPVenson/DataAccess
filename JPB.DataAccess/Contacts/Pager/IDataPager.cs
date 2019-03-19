@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
 
 #endregion
 
@@ -16,13 +17,6 @@ namespace JPB.DataAccess.Contacts.Pager
 	public interface IDataPager : IDisposable, IDataPagerInfo
 	{
 		/// <summary>
-		///     The most simple Select that produces result data. An aditional QueryCommand will wrap to enable Pageing, this so be
-		///     aware
-		///     of it
-		/// </summary>
-		IDbCommand BaseQuery { get; set; }
-
-		/// <summary>
 		///     Not Implimented
 		/// </summary>
 		bool Cache { get; set; }
@@ -31,17 +25,7 @@ namespace JPB.DataAccess.Contacts.Pager
 		///     Should raise Events
 		/// </summary>
 		bool RaiseEvents { get; set; }
-
-		/// <summary>
-		///     Commands that are sequencely attached to the main pager command
-		/// </summary>
-		List<IDbCommand> AppendedComands { get; set; }
-
-		/// <summary>
-		///     Additional Commands to append to the base load command
-		/// </summary>
-		IEnumerable CurrentPageItems { get; }
-
+		
 		/// <summary>
 		/// </summary>
 		Action<Action> SyncHelper { get; set; }
@@ -55,11 +39,6 @@ namespace JPB.DataAccess.Contacts.Pager
 		///     Raised if new Page is loaded
 		/// </summary>
 		event Action NewPageLoaded;
-
-		/// <summary>
-		///     Loads the PageSize into CurrentPageItems
-		/// </summary>
-		void LoadPage(DbAccessLayer dbAccess);
 	}
 
 	/// <summary>
@@ -71,6 +50,19 @@ namespace JPB.DataAccess.Contacts.Pager
 		/// <summary>
 		///     Typed list of all Elements
 		/// </summary>
-		new ICollection<T> CurrentPageItems { get; }
+		ICollection<T> CurrentPageItems { get; }
+		
+		/// <summary>
+		///     For Advanced querys including Order statements
+		/// </summary>
+		/// <value>
+		///     The command query.
+		/// </value>
+		IElementProducer<T> CommandQuery { get; set; }
+
+		/// <summary>
+		///     Loads the PageSize into CurrentPageItems
+		/// </summary>
+		void LoadPage(DbAccessLayer dbAccess);
 	}
 }

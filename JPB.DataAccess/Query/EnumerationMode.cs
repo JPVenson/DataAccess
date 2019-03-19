@@ -6,8 +6,7 @@
 	public enum EnumerationMode
 	{
 		/// <summary>
-		///     At the first call of GetEnumerator all items will be enumerated and stored
-		///     Eager loading
+		///     The enumerator will convert the result that is obtained from the database immediately into a POCO
 		/// </summary>
 		FullOnLoad,
 

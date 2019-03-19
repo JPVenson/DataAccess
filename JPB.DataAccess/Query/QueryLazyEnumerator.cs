@@ -17,16 +17,16 @@ namespace JPB.DataAccess.Query
 	/// </summary>
 	internal class QueryLazyEnumerator : IEnumerator, IDisposable
 	{
-		private DbAccessLayer _accessLayer;
 		private IDataReader _executeReader;
 		private readonly DbClassInfoCache _type;
 		private object _preObject = null;
 		private Task _startupTask;
+		private readonly IQueryContainer _queryContainer;
 
 		internal QueryLazyEnumerator(IQueryContainer queryContainer, Type type, bool async)
 		{
+			_queryContainer = queryContainer;
 			_type = queryContainer.AccessLayer.GetClassInfo(type);
-			_accessLayer = queryContainer.AccessLayer;
 			if (async)
 			{
 				_startupTask = new Task(() => OpenReader(queryContainer));
@@ -40,16 +40,25 @@ namespace JPB.DataAccess.Query
 
 		private void OpenReader(IQueryContainer queryContainer)
 		{
-			_accessLayer.Database.Connect();
-			var command = queryContainer.Compile();
-			queryContainer.AccessLayer.RaiseSelect(command);
+			_queryContainer.AccessLayer.Database.Connect();
+			var dbCommand = queryContainer.Compile();
+			foreach (var queryCommandInterceptor in _queryContainer.Interceptors)
+			{
+				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
+
+				if (dbCommand == null)
+				{
+					throw new InvalidOperationException($"The Command interceptor: '{queryCommandInterceptor}' has returned null");
+				}
+			}
+			queryContainer.AccessLayer.RaiseSelect(dbCommand);
 			try
 			{
-				_executeReader = command.ExecuteReader();
+				_executeReader = dbCommand.ExecuteReader();
 			}
 			catch (Exception ex)
 			{
-				_accessLayer.RaiseFailedQuery(this, command, ex);
+				_queryContainer.AccessLayer.RaiseFailedQuery(this, dbCommand, ex);
 				throw;
 			}
 		}
@@ -63,7 +72,7 @@ namespace JPB.DataAccess.Query
 				_executeReader.Dispose();
 			}
 
-			_accessLayer.Database.CloseConnection(true);
+			_queryContainer.AccessLayer.Database.CloseConnection(true);
 		}
 
 		public bool MoveNext()
@@ -89,7 +98,7 @@ namespace JPB.DataAccess.Query
 
 		public object Current
 		{
-			get { return _preObject ?? (_preObject = _accessLayer.SetPropertysViaReflection(_type, _executeReader)); }
+			get { return _preObject ?? (_preObject = _queryContainer.AccessLayer.SetPropertysViaReflection(_type, _executeReader)); }
 		}
 	}
 
@@ -107,7 +116,14 @@ namespace JPB.DataAccess.Query
 
 		public new T Current
 		{
-			get { return (T) base.Current; }
+			get
+			{
+				if (base.Current is T)
+				{
+					return (T)base.Current;
+				}
+				return (T)Convert.ChangeType(base.Current, typeof(T));
+			}
 		}
 	}
 }

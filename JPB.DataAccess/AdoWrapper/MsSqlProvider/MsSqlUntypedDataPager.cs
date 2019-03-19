@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
@@ -35,7 +37,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// <summary>
 		///     The current page
 		/// </summary>
-		private long _currentPage;
+		private int _currentPage;
 
 		/// <summary>
 		///     The synchronize helper
@@ -59,9 +61,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		{
 			CurrentPage = 1;
 			PageSize = 10;
-			AppendedComands = new List<IDbCommand>();
 			CurrentPageItems = new ObservableCollection<T>();
-
 			SyncHelper = action => action();
 		}
 
@@ -92,12 +92,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		}
 
 		/// <summary>
-		///     Base query to get a collection of <typeparamref name="T" /> Can NOT contain an Order Statement. Please use the
-		///     CommandQuery property for this
-		/// </summary>
-		public IDbCommand BaseQuery { get; set; }
-
-		/// <summary>
 		///     Should raise Events
 		/// </summary>
 		public bool RaiseEvents { get; set; }
@@ -113,15 +107,10 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		public event Action NewPageLoaded;
 
 		/// <summary>
-		///     Commands that are sequencely attached to the main pager command
-		/// </summary>
-		public List<IDbCommand> AppendedComands { get; set; }
-
-		/// <summary>
 		///     Id of Current page beween 1 and MaxPage
 		/// </summary>
 		/// <exception cref="InvalidOperationException">The current page must be bigger or equals 1</exception>
-		public long CurrentPage
+		public int CurrentPage
 		{
 			get { return _currentPage; }
 			set
@@ -140,7 +129,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// <summary>
 		///     The last possible Page
 		/// </summary>
-		public long MaxPage { get; private set; }
+		public int MaxPage { get; private set; }
 
 		/// <summary>
 		///     Items to load on one page
@@ -161,11 +150,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		///     Loads the PageSize into CurrentPageItems
 		/// </summary>
 		/// <param name="dbAccess"></param>
-		void IDataPager.LoadPage(DbAccessLayer dbAccess)
+		void IDataPager<T>.LoadPage(DbAccessLayer dbAccess)
 		{
-			T[] selectWhere = null;
-			IDbCommand finalAppendCommand;
-
 			if (string.IsNullOrEmpty(SqlVersion))
 			{
 #pragma warning disable 618
@@ -180,163 +166,29 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 				pk = typeof(T).GetPK(dbAccess.Config);
 			}
 
-			if (CommandQuery != null)
-			{
-				TotalItemCount = new ElementProducer<T>(CommandQuery).CountInt().FirstOrDefault();
-				MaxPage = (long) Math.Ceiling((decimal) TotalItemCount / PageSize);
+			TotalItemCount = CommandQuery.CountInt().FirstOrDefault();
+			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
-				RaiseNewPageLoading();
-				var elements =
-					new ElementProducer<T>(CommandQuery).QueryD("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY",
-						new
-						{
-							PagedRows = (CurrentPage - 1) * PageSize,
-							PageSize
-						}).ToArray();
-
-				foreach (var item in elements)
-				{
-					var item1 = item;
-					SyncHelper(() => CurrentPageItems.Add(item1));
-				}
-
-				RaiseNewPageLoaded();
-			}
-			else
-			{
-				if (AppendedComands.Any())
-				{
-					if (BaseQuery == null)
+			RaiseNewPageLoading();
+			var elements = new SelectQuery<T>(dbAccess.Query()
+					.WithCte(CommandQuery, out var commandCte)
+					.Select
+					.Identifier<T>(commandCte)
+					.Order.By(pk)
+					.Add(new MsSqlPagerPart
 					{
-						BaseQuery = dbAccess.CreateSelect<T>();
-					}
+						Page = CurrentPage,
+						PageSize = PageSize
+					}))
+				.ToArray();
 
-					finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
-						(current, comand) =>
-							dbAccess.Database.MergeTextToParameters(current, comand, false, 1, true, false));
-				}
-				else
-				{
-					if (BaseQuery == null)
-					{
-						BaseQuery = dbAccess.CreateSelect<T>();
-					}
-
-					finalAppendCommand = BaseQuery;
-				}
-
-				var selectMaxCommand = dbAccess
-					.Query()
-					.QueryText("WITH CTE AS")
-					.InBracket(query => query.QueryCommand(finalAppendCommand))
-					.QueryText("SELECT COUNT(1) FROM CTE")
-					.ContainerObject
-					.Compile();
-
-				////var selectMaxCommand = DbAccessLayerHelper.CreateCommand(s, "SELECT COUNT( * ) AS NR FROM " + TargetType.GetTableName());
-
-				//if (finalAppendCommand != null)
-				//    selectMaxCommand = DbAccessLayer.ConcatCommands(s, selectMaxCommand, finalAppendCommand);
-
-				var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
-				if (maxItems != null)
-				{
-					long parsedCount;
-					long.TryParse(maxItems.ToString(), out parsedCount);
-					TotalItemCount = parsedCount;
-					MaxPage = (long) Math.Ceiling((decimal) parsedCount / PageSize);
-				}
-
-				//Check select strategy
-				//IF version is or higher then 11.0.2100.60 we can use OFFSET and FETCH
-				//esle we need to do it the old way
-
-				RaiseNewPageLoading();
-				IDbCommand command;
-
-				if (CheckVersionForFetch())
-				{
-					command = dbAccess
-						.Query()
-						.WithCte("CTE", cte => new SelectQuery<T>(cte.QueryCommand(finalAppendCommand)))
-						.QueryText("SELECT * FROM")
-						.QueryText("CTE")
-						.QueryText("ORDER BY")
-						.QueryD(pk)
-						.QueryD("ASC OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY", new
-						{
-							PagedRows = (CurrentPage - 1) * PageSize,
-							PageSize
-						})
-						.ContainerObject
-						.Compile();
-				}
-				else
-				{
-					// ReSharper disable ConvertToLambdaExpression
-					var selectQuery = dbAccess.Query()
-						.WithCte("BASECTE", baseCte =>
-						{
-							if (BaseQuery != null)
-							{
-								return baseCte.Select.Table<T>();
-							}
-
-							return new SelectQuery<T>(baseCte.QueryCommand(finalAppendCommand));
-						})
-						.WithCte("CTE", cte =>
-						{
-							return new SelectQuery<T>(cte.QueryText("SELECT * FROM (")
-								.Select.Table<T>()
-								.RowNumberOrder("@pk")
-								.WithParamerters(new {Pk = pk})
-								.QueryText("AS RowNr")
-								.QueryText(", BASECTE.* FROM BASECTE")
-								.QueryText(")")
-								.As("TBL")
-								.Where
-								.Column("RowNr")
-								.Is
-								.Between(page =>
-									{
-										return page.QueryText("@PagedRows * @PageSize + 1")
-											.WithParamerters(new
-											{
-												PagedRows = CurrentPage - 1,
-												PageSize
-											});
-									},
-									maxPage =>
-									{
-										return maxPage
-											.InBracket(calc => { return calc.QueryText("@PagedRows + 1"); })
-											.QueryText("* @PageSize");
-									}
-								));
-						}, true)
-						.QueryText("SELECT * FROM CTE");
-
-					command = selectQuery.ContainerObject.Compile();
-				}
-
-				selectWhere = dbAccess.SelectNative(typeof(T), command, true).Cast<T>().ToArray();
-
-				foreach (var item in selectWhere)
-				{
-					var item1 = item;
-					SyncHelper(() => CurrentPageItems.Add(item1));
-				}
-
-				RaiseNewPageLoaded();
+			foreach (var item in elements)
+			{
+				var item1 = item;
+				SyncHelper(() => CurrentPageItems.Add(item1));
 			}
-		}
 
-		/// <summary>
-		///     Typed list of all Elements
-		/// </summary>
-		IEnumerable IDataPager.CurrentPageItems
-		{
-			get { return CurrentPageItems; }
+			RaiseNewPageLoaded();
 		}
 
 		/// <summary>
@@ -351,6 +203,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 					_syncHelper = value;
 				}
 			}
+		}
+
+		/// <summary>
+		///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		public void Dispose()
+		{
+			CurrentPageItems.Clear();
 		}
 
 		/// <summary>
@@ -436,15 +296,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 
 			return _checkRun != null && _checkRun.Value;
-		}
-
-		/// <summary>
-		///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-		/// </summary>
-		public void Dispose()
-		{
-			BaseQuery.Dispose();
-			CurrentPageItems.Clear();
 		}
 	}
 }

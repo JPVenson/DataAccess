@@ -136,6 +136,7 @@
     <Compile Include="AdoWrapper\MsSqlProvider\MsSql.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataConverterPager.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataPager.cs" />
+    <Compile Include="AdoWrapper\MsSqlProvider\MsSqlPagerPart.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlUntypedDataPager.cs" />
     <Compile Include="AdoWrapper\ObjectDataRecord.cs" />
     <Compile Include="AdoWrapper\OdbcProvider\Obdc.cs" />
@@ -336,9 +337,16 @@
     <Compile Include="Query\Contracts\IStateQuery.cs" />
     <Compile Include="Query\Contracts\IUpdateQuery.cs" />
     <Compile Include="Query\Contracts\QueryBuilder.cs" />
-    <Compile Include="Query\CteQueryPart.cs" />
+    <Compile Include="Query\QueryItems\Conditional\ConditionalQueryBuilder.cs" />
+    <Compile Include="Query\QueryItems\Conditional\ConditionStatementQueryPart.cs" />
+    <Compile Include="Query\QueryItems\Conditional\ConditionStructurePart.cs" />
     <Compile Include="Query\EnumerationMode.cs" />
-    <Compile Include="Query\GenericQueryPart.cs" />
+    <Compile Include="Query\QueryItems\CountTargetQueryPart.cs" />
+    <Compile Include="Query\QueryItems\Conditional\QueryIdentifier.cs" />
+    <Compile Include="Query\QueryItems\CteQueryPart.cs" />
+    <Compile Include="Query\QueryItems\DeleteTableQueryPart.cs" />
+    <Compile Include="Query\QueryItems\Conditional\ExpressionConditionPart.cs" />
+    <Compile Include="Query\QueryItems\Conditional\ExpressionValue.cs" />
     <Compile Include="Query\InternalContainerContainer.cs" />
     <Compile Include="Query\MsQueryBuilderExtentions.cs" />
     <Compile Include="Query\MySqlQueryBuilderExtentions.cs" />
@@ -364,16 +372,18 @@
     <Compile Include="Query\Operators\SelectQuery.cs" />
     <Compile Include="Query\Operators\SetValueForUpdateQuery.cs" />
     <Compile Include="Query\Operators\UpdateColumnSetters.cs" />
-    <Compile Include="Query\Operators\UpdateQuery.cs" />
     <Compile Include="Query\Operators\UpdateValueQuery.cs" />
     <Compile Include="Query\QueryBuilderContainer.cs" />
-    <Compile Include="Query\QueryBuilderExtentions.cs" />
     <Compile Include="Query\QueryBuilderX.cs" />
     <Compile Include="Query\QueryEagerEnumerator.cs" />
     <Compile Include="Query\QueryEnumeratorEx.cs" />
+    <Compile Include="Query\QueryItems\Conditional\IConditionPart.cs" />
+    <Compile Include="Query\QueryItems\IQueryPart.cs" />
+    <Compile Include="Query\QueryItems\OrderByColumnQueryPart.cs" />
+    <Compile Include="Query\QueryItems\SelectTableQueryPart.cs" />
+    <Compile Include="Query\QueryItems\SubSelectQueryPart.cs" />
+    <Compile Include="Query\QueryItems\UpdateTableWithQueryPart.cs" />
     <Compile Include="Query\QueryLazyEnumerator.cs" />
-    <Compile Include="Query\TApplyMode.cs" />
-    <Compile Include="Query\TJoinMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="JPB.DataAccess.licenseheader" />

@@ -3,9 +3,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
@@ -60,10 +62,7 @@ namespace JPB.DataAccess.Query
 			ContainerObject.ForType = type;
 		}
 
-		/// <summary>
-		///     Creates a new Query
-		/// </summary>
-		/// <param name="database"></param>
+		/// <inheritdoc />
 		protected QueryBuilderContainer(DbAccessLayer database) : this(new InternalContainerContainer(database))
 		{
 			if (database == null)
@@ -72,16 +71,29 @@ namespace JPB.DataAccess.Query
 			}
 		}
 
-		/// <summary>
-		///     The interal value holder
-		/// </summary>
-		public IQueryContainer ContainerObject { get; protected set; }
+		/// <inheritdoc />
+		public IQueryBuilder Add(IQueryPart queryPart)
+		{
+			var target = CloneWith(this);
+			target.ContainerObject.Add(queryPart);
+			return target;
+		}
 
 		/// <summary>
-		///     Executes the Current QueryBuilder by setting the type
+		/// <see cref="IQueryContainer.Interceptors"/>
 		/// </summary>
-		/// <typeparam name="E"></typeparam>
-		/// <returns></returns>
+		public List<IQueryCommandInterceptor> Interceptors
+		{
+			get
+			{
+				return ContainerObject.Interceptors;
+			}
+		}
+
+		/// <inheritdoc />
+		public IQueryContainer ContainerObject { get; protected set; }
+
+		/// <inheritdoc />
 		public virtual IEnumerable<E> ForResult<E>(bool async = true)
 		{
 			return new QueryEnumeratorEx<E>(this, async);
@@ -93,6 +105,15 @@ namespace JPB.DataAccess.Query
 		public virtual void ExecuteNonQuery()
 		{
 			var dbCommand = ContainerObject.Compile();
+			foreach (var queryCommandInterceptor in Interceptors)
+			{
+				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
+
+				if (dbCommand == null)
+				{
+					throw new InvalidOperationException($"The Command interceptor: '{queryCommandInterceptor}' has returned null");
+				}
+			}
 			ContainerObject.AccessLayer.ExecuteGenericCommand(dbCommand);
 		}
 
@@ -105,7 +126,11 @@ namespace JPB.DataAccess.Query
 		/// <inheritdoc />
 		public virtual IEnumerator<TPoco> GetEnumerator<TPoco>(bool async)
 		{
-			if (ContainerObject.EnumerationMode == EnumerationMode.FullOnLoad)
+			var enumerationMode = ContainerObject.PostProcessors.Any()
+				? EnumerationMode.FullOnLoad
+				: ContainerObject.EnumerationMode;
+
+			if (enumerationMode == EnumerationMode.FullOnLoad)
 			{
 				return new QueryEagerEnumerator<TPoco>(ContainerObject, async);
 			}

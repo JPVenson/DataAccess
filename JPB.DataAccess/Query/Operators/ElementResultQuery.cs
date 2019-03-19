@@ -9,6 +9,7 @@ using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Orders;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
@@ -36,7 +37,7 @@ namespace JPB.DataAccess.Query.Operators
         /// <returns></returns>
         public virtual OrderStatementQuery<TPoco> Order
         {
-            get { return new OrderStatementQuery<TPoco>(this.QueryText("ORDER BY")); }
+            get { return new OrderStatementQuery<TPoco>(Add(new OrderByColumnQueryPart())); }
         }
 
         /// <summary>
@@ -46,29 +47,22 @@ namespace JPB.DataAccess.Query.Operators
         /// <returns></returns>
         public virtual ElementProducer<TPoco> LimitBy(int limit)
         {
-            QueryBuilderX wrapper;
             switch (ContainerObject.AccessLayer.DbAccessType)
             {
                 case DbAccessType.MsSql:
-                    CreateNewIdentifier();
-                    wrapper = new QueryBuilderX(ContainerObject.AccessLayer)
-                        .QueryD(string.Format("SELECT TOP {0} * FROM ", limit))
-                        .InBracket(e => e.Append(this))
-                        .QueryD("AS " + CurrentIdentifier);
+                    ContainerObject.Search<ISelectableQueryPart>().Limit = limit;
                     break;
+
                 case DbAccessType.SqLite:
                 case DbAccessType.MySql:
-	                CreateNewIdentifier();
-					wrapper = new RootQuery(ContainerObject.AccessLayer)
-						.SubSelect(() => new ElementProducer<TPoco>(this), CurrentIdentifier)
-						.QueryD(string.Format(" LIMIT {0}", limit));
-                    break;
-                default:
-                    throw new NotImplementedException(string.Format("Invalid Target Database {0}",
-                    ContainerObject.AccessLayer.Database.TargetDatabase));
-            }
+                    var elementProducer = new RootQuery(ContainerObject.AccessLayer)
+                        .WithCte(this, out var cteId)
+                        .Select.Identifier<TPoco>(cteId)
+                        .Add(new LimitByQueryPart(limit));
 
-            return new ElementProducer<TPoco>(wrapper);
+                    return new ElementProducer<TPoco>(elementProducer);
+            }
+            return new ElementProducer<TPoco>(this);
         }
 
         /// <summary>
@@ -110,34 +104,12 @@ namespace JPB.DataAccess.Query.Operators
         /// <returns></returns>
         public IDataPager<TPoco> ForPagedResult(int page, int pageSize)
         {
-            var command = ContainerObject.Compile();
             var pager = ContainerObject.AccessLayer.Database.CreatePager<TPoco>();
-            if (pager is MsSqlUntypedDataPager<TPoco>)
-            {
-                var msPager = pager as MsSqlUntypedDataPager<TPoco>;
-                msPager.CommandQuery = this;
-            }
-            else
-            {
-                pager.BaseQuery = command;
-            }
-
+            pager.CommandQuery = this;
             pager.PageSize = pageSize;
             pager.CurrentPage = page;
             pager.LoadPage(ContainerObject.AccessLayer);
             return pager;
-        }
-
-        /// <summary>
-        ///     Adds a SQL WHERE statement
-        ///     does not emit any conditional statement
-        ///     should be followed by Column()
-        /// </summary>
-        /// <param name="alias">The alias.</param>
-        /// <returns></returns>
-        public ElementProducer<TPoco> Alias(string alias)
-        {
-            return new ElementProducer<TPoco>(this, alias);
         }
 
         private class QueryBuilderContainerDebugView : ElementResultQuery<TPoco>

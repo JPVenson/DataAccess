@@ -4,6 +4,7 @@ using System;
 using System.Linq.Expressions;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
@@ -14,14 +15,13 @@ namespace JPB.DataAccess.Query.Operators.Orders
 	/// <typeparam name="TPoco">The type of the poco.</typeparam>
 	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IOrderdElementProducer{TPoco}" />
-	public class OrderStatementQuery<TPoco> : QueryBuilderX, IOrderdElementProducer<TPoco>
+	public class OrderStatementQuery<TPoco> : IOrderdElementProducer<TPoco>
 	{
-		/// <summary>
-		///     Initializes a new instance of the <see cref="OrderStatementQuery{TPoco}" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		public OrderStatementQuery(IQueryBuilder database) : base(database)
+		private readonly IQueryBuilder _queryBuilder;
+
+		internal OrderStatementQuery(IQueryBuilder queryBuilder)
 		{
+			_queryBuilder = queryBuilder;
 		}
 
 		/// <summary>
@@ -31,7 +31,8 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> By(string columnName)
 		{
-			return new OrderByColumn<TPoco>(this.QueryText(columnName));
+			_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnName);
+			return new OrderByColumn<TPoco>(_queryBuilder);
 		}
 
 		/// <summary>
@@ -44,7 +45,7 @@ namespace JPB.DataAccess.Query.Operators.Orders
 			Expression<Func<TPoco, TA>> columnName)
 		{
 			var member = columnName.GetPropertyInfoFromLamdba();
-			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
+			var propName = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
 			return By(propName.DbName);
 		}
 	}

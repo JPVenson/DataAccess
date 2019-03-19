@@ -4,6 +4,8 @@ using System.Text;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 namespace JPB.DataAccess.Query.Operators
 {
@@ -67,48 +69,14 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public ElementProducer<int> Table<TPoco>()
 		{
-			var sb = new StringBuilder();
-			sb.Append("SELECT COUNT( ");
-			if (DistinctMode)
+			return new SelectQuery<int>(Add(new CountTargetQueryPart(new QueryIdentifier()
 			{
-				sb.Append("DISTINCT");
-			}
-			sb.Append("1) FROM ");
-			sb.Append(ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName);
-			return new SelectQuery<int>(this.QueryText(sb.ToString()));
-		}
-
-		/// <summary>
-		///     Counts all elements from a table
-		/// </summary>
-		/// <typeparam name="TPoco">The type of the poco.</typeparam>
-		/// <typeparam name="TA">The type of a.</typeparam>
-		/// <param name="columnName">Name of the column.</param>
-		/// <returns></returns>
-		public ElementProducer<int> Column<TPoco, TA>(Expression<Func<TPoco, TA>> columnName)
-		{
-			var member = columnName.GetPropertyInfoFromLamdba();
-			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
-			return Column<TPoco>(propName.DbName);
-		}
-
-		/// <summary>
-		///     Counts all elements from a table
-		/// </summary>
-		/// <typeparam name="TPoco">The type of the poco.</typeparam>
-		/// <param name="columnName">Name of the column.</param>
-		/// <returns></returns>
-		public ElementProducer<int> Column<TPoco>(string columnName)
-		{
-			var sb = new StringBuilder();
-			sb.Append("SELECT COUNT( ");
-			if (DistinctMode)
+				Value = $"[{ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName}]",
+				QueryIdType = QueryIdentifier.QueryIdTypes.Table
+			})
 			{
-				sb.Append("DISTINCT");
-			}
-			sb.AppendFormat("{0}) FROM ", columnName);
-			sb.Append(ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName);
-			return new SelectQuery<int>(this.QueryText(sb.ToString()));
+				DistinctMode = DistinctMode
+			}));
 		}
 	}
 }

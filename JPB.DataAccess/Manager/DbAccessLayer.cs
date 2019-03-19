@@ -391,6 +391,7 @@ namespace JPB.DataAccess.Manager
 		public int ExecuteGenericCommand(IDbCommand query)
 		{
 			Database.PrepaireRemoteExecution(query);
+			RaiseNoResult(this, query);
 			return Database.Run(s =>
 			{
 				try
@@ -419,6 +420,7 @@ namespace JPB.DataAccess.Manager
 		public async Task<int> ExecuteGenericCommandAsync(IDbCommand query)
 		{
 			Database.PrepaireRemoteExecution(query);
+			RaiseNoResult(this, query);
 			return await Database.RunAsync(async s => { return await s.ExecuteNonQueryAsync(query, Async); });
 		}
 

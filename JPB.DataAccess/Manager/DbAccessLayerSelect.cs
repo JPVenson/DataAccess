@@ -27,7 +27,7 @@ namespace JPB.DataAccess.Manager
 		///     If enabled Related structures will be loaded into the source object
 		/// </summary>
 		public bool ProcessNavigationPropertys { get; set; }
-		
+
 		/// <summary>
 		///     Executes a IDbCommand that will return multibe result sets that will be parsed to the marsTypes in order they are
 		///     provided
@@ -59,8 +59,8 @@ namespace JPB.DataAccess.Manager
 		public object Select(Type type, object pk)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, pk));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Execute select on a database with a standard Where [Primary Key] = <paramref name="pk" />
 		/// </summary>
@@ -80,8 +80,8 @@ namespace JPB.DataAccess.Manager
 		public T[] Select<T>()
 		{
 			return Select(typeof(T)).Cast<T>().ToArray();
-		}		
-		
+		}
+
 		/// <summary>
 		///     Selectes a Entry by its PrimaryKey
 		///     Needs to define a PrimaryKey attribute inside
@@ -104,8 +104,8 @@ namespace JPB.DataAccess.Manager
 		public T Select<T>(object pk)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync<T>(pk));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Selectes a Entry by its PrimaryKey
 		///     Needs to define a PrimaryKey attribute inside
@@ -126,8 +126,8 @@ namespace JPB.DataAccess.Manager
 		protected object Select(Type type, object pk, bool egarLoading)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, pk, egarLoading));
-		}	
-		
+		}
+
 		/// <summary>
 		///     Selectes a Entry by its PrimaryKey
 		///     Needs to define a PrimaryKey attribute inside <paramref name="type" />
@@ -148,8 +148,8 @@ namespace JPB.DataAccess.Manager
 		protected T Select<T>(object pk, bool egarLoading)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync<T>(pk, egarLoading));
-		}	
-		
+		}
+
 		/// <summary>
 		///     Selectes a Entry by its PrimaryKey
 		///     Needs to define a PrimaryKey attribute inside
@@ -170,8 +170,8 @@ namespace JPB.DataAccess.Manager
 		public object[] Select(Type type, params object[] parameter)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, parameter));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Creates and Executes a Plain select over a
 		///     <paramref name="type" />
@@ -191,8 +191,8 @@ namespace JPB.DataAccess.Manager
 		public T[] Select<T>(object[] parameter)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync<T>(parameter));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Uses a Factory method to Generate a new set of T
 		///     When no Factory is found an Reflection based Factory is used
@@ -215,8 +215,8 @@ namespace JPB.DataAccess.Manager
 		protected object[] Select(Type type, bool egarLoading, params object[] parameter)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, egarLoading, parameter));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Creates and Executes a SelectStatement for a given
 		///     <paramref name="type" />
@@ -239,8 +239,8 @@ namespace JPB.DataAccess.Manager
 		protected object[] Select(Type type, IDbCommand command, bool egarLoading)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, command, egarLoading));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Creates and Executes a Select Statement for a given
 		///     <paramref name="type" />
@@ -263,8 +263,8 @@ namespace JPB.DataAccess.Manager
 		protected T[] Select<T>(IDbCommand command, bool egarLoading)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync<T>(command, egarLoading));
-		}	
-		
+		}
+
 		/// <summary>
 		///     Creates and Executes a Select Statement for
 		///     <typeparam name="T"></typeparam>
@@ -357,7 +357,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		private static AsyncLocal<bool> _isIndented = new AsyncLocal<bool>();
 
-		internal IDbCommand CreateSelectQueryFactory(DbClassInfoCache type,
+		internal IDbCommand CreateSelectQueryFactory(DbClassInfoCache type, Func<IDbCommand> fallback,
 			params object[] parameter)
 		{
 			if (!parameter.Any())
@@ -368,8 +368,14 @@ namespace JPB.DataAccess.Manager
 				}
 			}
 
-			return GenericQueryCreation<SelectFactoryMethodAttribute>(type, (e, f) => CreateSelect(type, Database), null,
+			return GenericQueryCreation<SelectFactoryMethodAttribute>(type, (e, f) => fallback(), null,
 				parameter);
+		}
+
+		internal IDbCommand CreateSelectQueryFactory(DbClassInfoCache type,
+			params object[] parameter)
+		{
+			return CreateSelectQueryFactory(type, () => CreateSelect(type, $"[{type.TableName}]", Database), parameter);
 		}
 
 		internal IDbCommand CreateInsertQueryFactory(DbClassInfoCache type,
@@ -564,7 +570,7 @@ namespace JPB.DataAccess.Manager
 		{
 			var invalidOperationException =
 				new InvalidOperationException(
-					"CheckFactoryArguments is activated and arguments are provided but no factory machtes the given arguments");
+					"CheckFactoryArguments is activated and arguments are provided but no factory matches the given arguments");
 			var types = new List<string>();
 			foreach (var argument in arguments)
 			{
@@ -596,69 +602,49 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var query = CreateSelectQueryFactory(GetClassInfo(type)).CommandText
-						+ " WHERE " + GetClassInfo(type).PrimaryKeyProperty.DbName + " = @pk";
+			            + $" WHERE [{GetClassInfo(type).PrimaryKeyProperty.DbName.Trim('[', ']')}] = @pk";
 			var cmd = Database.CreateCommand(query);
 			cmd.Parameters.AddWithValue("@pk", pk, Database);
 			return cmd;
 		}
 
 		/// <summary>
-		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater.
-		///		Should be only executed inside an open <code>Database.Run</code>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Will be Removed in future.")]
-		public IDbCommand CreateSelect<T>(object pk)
-		{
-			return CreateSelect(typeof(T), pk);
-		}
-
-		/// <summary>
-		///     Creates a Plain Select statement by using
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Will be Removed in future.")]
-		public string CreateSelect(Type type)
-		{
-			return CreateSelect(GetClassInfo(type));
-		}
-
-		/// <summary>
 		///     Creates a Plain Select statement by using
 		///     <paramref name="classType" />
 		/// </summary>
 		/// <returns></returns>
-		public static string CreateSelect(DbClassInfoCache classType, string prefix = null)
+		public static string CreateSelect(string source, DbClassInfoCache classType, string alias, string target)
 		{
-			return CreateSelectByColumns(classType, classType.CreatePropertyCsv(
+			return CreateSelectByColumns(source, classType.CreatePropertyCsv(alias,
 				classType
 					.Propertys
 					.Where(f => f.Value.ForginKeyAttribute != null ||
 								f.Value.FromXmlAttribute != null
 								&& f.Value.FromXmlAttribute.Attribute.LoadStrategy == LoadStrategy.NotIncludeInSelect)
 					.Select(f => f.Key)
-					.ToArray()), prefix);
+					.ToArray()), alias, target);
 		}
-
 
 		/// <summary>
 		///     Creates a Plain Select statement by using
-		///     <paramref name="classType" />
+		///     <paramref name="source" />
 		/// </summary>
 		/// <returns></returns>
-		public static string CreateSelectByColumns(DbClassInfoCache classType, string columns, string prefix = null)
+		public static string CreateSelectByColumns(string source, string columns, string alias, string modifier)
 		{
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
-			if (prefix != null)
+			if (modifier != null)
 			{
-				sb.Append(prefix + " ");
+				sb.Append(modifier + " ");
 			}
 			sb.Append(columns);
 			sb.Append(" FROM ");
-			sb.Append(classType.TableName);
+			sb.Append($"[{source.Trim('[', ']')}] ");
+			if (alias != null)
+			{
+				sb.Append($"AS [{alias.Trim('[', ']')}] ");
+			}
 			return sb.ToString();
 		}
 
@@ -670,7 +656,8 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public IDbCommand CreateSelect<T>()
 		{
-			return CreateSelect(Config.GetOrCreateClassInfoCache(typeof(T)), Database);
+			var classInfo = Config.GetOrCreateClassInfoCache(typeof(T));
+			return CreateSelect(classInfo, $"[{classInfo.TableName}]", Database);
 		}
 
 		/// <summary>
@@ -678,9 +665,9 @@ namespace JPB.DataAccess.Manager
 		///		Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
-		private static IDbCommand CreateSelect(DbClassInfoCache type, IDatabase db)
+		private static IDbCommand CreateSelect(DbClassInfoCache type, string alias, IDatabase db)
 		{
-			return db.CreateCommand(CreateSelect(type));
+			return db.CreateCommand(CreateSelect(type.TableName, type, alias, (string)null));
 		}
 
 		#endregion
@@ -899,8 +886,8 @@ namespace JPB.DataAccess.Manager
 		public object[] RunPrimetivSelect(Type type, IDbCommand command)
 		{
 			return AsyncHelper.WaitSingle(RunPrimetivSelectAsync(type, command));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Runs
 		///     <paramref name="command" />
@@ -1272,8 +1259,8 @@ namespace JPB.DataAccess.Manager
 		public object[] SelectNative(Type type, IDbCommand command, dynamic paramenter)
 		{
 			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command, paramenter));
-		}		
-		
+		}
+
 		/// <summary>
 		///     Runs
 		///     <paramref name="command" />
@@ -1305,7 +1292,7 @@ namespace JPB.DataAccess.Manager
 		{
 			return AsyncHelper.WaitSingle(SelectNativeAsync<T>(query, paramenter));
 		}
-		
+
 		/// <summary>
 		///     Runs
 		///     <paramref name="query" />

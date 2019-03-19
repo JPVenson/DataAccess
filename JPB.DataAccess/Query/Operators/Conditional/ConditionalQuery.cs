@@ -5,6 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -17,57 +19,13 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 	public class ConditionalQuery<TPoco> : QueryBuilderX, IConditionalQuery<TPoco>
 	{
 		/// <summary>
-		///     For Internal Usage only
-		/// </summary>
-		public readonly CondtionBuilderState State;
-
-		/// <summary>
 		///     Creates a new Instance based on the previus query
 		/// </summary>
 		/// <param name="queryText"></param>
-		/// <param name="state"></param>
-		public ConditionalQuery(IQueryBuilder queryText, CondtionBuilderState state) : base(queryText)
+		public ConditionalQuery(IQueryBuilder queryText) : base(queryText)
 		{
-			State = state;
 		}
-
-		/// <summary>
-		///     Creates a new Instance based on the previus query
-		/// </summary>
-		/// <param name="queryText"></param>
-		public ConditionalQuery(ConditionalQuery<TPoco> queryText) : base(queryText)
-		{
-			State = queryText.State;
-		}
-
-		/// <summary>
-		///     Opens a new Logical combined Query
-		/// </summary>
-		/// <returns></returns>
-		public ConditionalQuery<TPoco> Parenthesis
-		{
-			get { return new ConditionalQuery<TPoco>(this.QueryText("("), State.ToInBreaket(true)); }
-		}
-
-		/// <summary>
-		///     For Internal Usage only
-		/// </summary>
-		public string CurrentIdentifier
-		{
-			get { return State.Identifier; }
-		}
-
-		/// <summary>
-		///     Adds a SQL WHERE statement
-		///     does not emit any conditional statement
-		///     should be followed by Column()
-		/// </summary>
-		/// <returns></returns>
-		public ConditionalQuery<TPoco> Alias(string alias)
-		{
-			return new ConditionalQuery<TPoco>(this, State.ToAlias(alias));
-		}
-
+		
 		/// <summary>
 		///		Selects the current PrimaryKey
 		/// </summary>
@@ -100,7 +58,11 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <returns></returns>
 		public ConditionalColumnQuery<TPoco> Column(string columnName)
 		{
-			return new ConditionalColumnQuery<TPoco>(this.QueryText(columnName), State);
+			var currentAlias = ContainerObject.Search<IIdentifiableQueryPart>().Alias;
+			var expression = new ExpressionConditionPart(currentAlias, columnName);
+			ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(expression);
+
+			return new ConditionalColumnQuery<TPoco>(this, expression);
 		}
 
 		/// <summary>
@@ -113,10 +75,6 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			var member = columnName.GetPropertyInfoFromLamdba();
 			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
-			if (CurrentIdentifier != null)
-			{
-				return Column(CurrentIdentifier + "." + propName.DbName);
-			}
 			return Column(propName.DbName);
 		}
 	}

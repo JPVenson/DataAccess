@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.Query.Contracts;
@@ -14,12 +15,11 @@ namespace JPB.DataAccess.Query
 {
 	internal class QueryEagerEnumerator : IEnumerator, IDisposable
 	{
-		private readonly ArrayList _elements;
+		private IEnumerator _elements;
 		private readonly IQueryContainer _queryContainer;
 		private readonly Type _type;
 		private readonly bool _loadAsync;
-		private int _counter;
-		private List<IDataRecord> _enumerateDataRecords;
+
 		private Task _task;
 
 		internal QueryEagerEnumerator(IQueryContainer queryContainer, Type type, bool loadAsync)
@@ -27,56 +27,29 @@ namespace JPB.DataAccess.Query
 			_queryContainer = queryContainer;
 			_type = type;
 			_loadAsync = loadAsync;
-			_elements = new ArrayList();
-			_counter = 0;
 			Load();
 		}
 
 		public void Dispose()
 		{
 			_task?.Dispose();
-			_enumerateDataRecords?.Clear();
-			_elements.Clear();
 		}
 
 		public bool MoveNext()
 		{
 			_task.Wait();
-
-			try
-			{
-				_counter++;
-
-				if (_elements.Count >= _counter)
-				{
-					Current = _elements[_counter];
-					return true;
-				}
-
-				if (_enumerateDataRecords.Count < _counter)
-				{
-					return false;
-				}
-
-				var dataRecord = _enumerateDataRecords.ElementAt(_counter - 1);
-				Current = _queryContainer.AccessLayer.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),
-					dataRecord);
-				_elements.Add(Current);
-
-				return true;
-			}
-			catch (Exception)
-			{
-				throw;
-			}
+			return _elements.MoveNext();
 		}
 
 		public void Reset()
 		{
-			_counter = 0;
+			_elements.Reset();
 		}
 
-		public object Current { get; private set; }
+		public object Current
+		{
+			get { return _elements.Current; }
+		}
 
 		/// <summary>
 		///     Mehtod for async loading this will bring us some m secs
@@ -97,9 +70,62 @@ namespace JPB.DataAccess.Query
 
 		private void LoadResults()
 		{
-			var query = _queryContainer.Compile();
-			_queryContainer.AccessLayer.RaiseSelect(query);
-			_enumerateDataRecords = _queryContainer.AccessLayer.EnumerateDataRecordsAsync(query);
+			var dbCommand = _queryContainer.Compile();
+			foreach (var queryCommandInterceptor in _queryContainer.Interceptors)
+			{
+				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
+
+				if (dbCommand == null)
+				{
+					throw new InvalidOperationException($"The Command interceptor: '{queryCommandInterceptor}' has returned null");
+				}
+			}
+			_queryContainer.AccessLayer.RaiseSelect(dbCommand);
+			var dataRecords = _queryContainer.AccessLayer.EnumerateDataRecordsAsync(dbCommand);
+
+			if (_queryContainer.PostProcessors.Any())
+			{
+				var context = new QueryProcessingRecordsContext(); 
+				var processedRecords = new List<IDataRecord>();
+
+				foreach (var element in dataRecords)
+				{
+					var item = element;
+					foreach (var queryContainerPostProcessor in _queryContainer.PostProcessors)
+					{
+						item = queryContainerPostProcessor.Transform(item, _type, context);
+					}
+					processedRecords.Add(item);
+				}
+
+				dataRecords = processedRecords;
+			}
+
+			var records = dataRecords.Select(dataRecord => _queryContainer.AccessLayer.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),
+					dataRecord))
+				.ToArray();
+
+			var elements = new ArrayList();
+			if (_queryContainer.PostProcessors.Any())
+			{
+				var context = new QueryProcessingEntitiesContext(records);
+				foreach (var element in records)
+				{
+					var item = element;
+					foreach (var queryContainerPostProcessor in _queryContainer.PostProcessors)
+					{
+						item = queryContainerPostProcessor.Transform(item, _type, context);
+					}
+
+					elements.Add(item);
+				}
+			}
+			else
+			{
+				elements.AddRange(records);
+			}
+
+			_elements = elements.GetEnumerator();
 		}
 	}
 
@@ -117,7 +143,14 @@ namespace JPB.DataAccess.Query
 
 		public new T Current
 		{
-			get { return (T) base.Current; }
+			get
+			{
+				if (base.Current is T)
+				{
+					return (T)base.Current;
+				}
+				return (T)Convert.ChangeType(base.Current, typeof(T));
+			}
 		}
 	}
 }

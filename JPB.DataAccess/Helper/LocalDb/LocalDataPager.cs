@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
 
 #endregion
 
@@ -20,10 +21,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 	/// <seealso cref="JPB.DataAccess.Contacts.Pager.IDataPager{T}" />
 	public class LocalDataPager<T> : IDataPager<T>
 	{
-		/// <summary>
-		///     The current page
-		/// </summary>
-		private long _currentPage;
+		private int _currentPage;
 
 		/// <summary>
 		///     Initializes a new instance of the <see cref="LocalDataPager{T}" /> class.
@@ -58,7 +56,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		///     Id of Current page beween 1 and MaxPage
 		/// </summary>
 		/// <exception cref="InvalidOperationException">The current page must be bigger or equals 1</exception>
-		public long CurrentPage
+		public int CurrentPage
 		{
 			get { return _currentPage; }
 			set
@@ -79,10 +77,13 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// </summary>
 		public ICollection<T> CurrentPageItems { get; private set; }
 
+		/// <inheritdoc />
+		public IElementProducer<T> CommandQuery { get; set; }
+
 		/// <summary>
 		///     The last possible Page
 		/// </summary>
-		public long MaxPage { get; private set; }
+		public int MaxPage { get; private set; }
 
 		/// <summary>
 		///     Items to load on one page
@@ -102,15 +103,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		/// <summary>
 		/// </summary>
 		public Action<Action> SyncHelper { get; set; }
-
-		/// <summary>
-		///     Typed list of all Elements
-		/// </summary>
-		IEnumerable IDataPager.CurrentPageItems
-		{
-			get { return CurrentPageItems; }
-		}
-
+		
 		/// <summary>
 		///     Raised if new Page is loaded
 		/// </summary>
@@ -128,7 +121,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public void LoadPage(DbAccessLayer dbAccess)
 		{
 			SyncHelper(CurrentPageItems.Clear);
-			MaxPage = (long) Math.Ceiling((decimal) _localDbRepository.Count / PageSize);
+			MaxPage = (int) Math.Ceiling((decimal) _localDbRepository.Count / PageSize);
 			if (RaiseEvents)
 			{
 				var handler = NewPageLoading;

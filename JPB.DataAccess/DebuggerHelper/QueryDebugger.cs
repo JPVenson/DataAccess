@@ -264,6 +264,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		/// </returns>
 		public override string ToString()
 		{
+			_wokerTask.Wait();
 			var sb = new ConsoleStringBuilderInterlaced();
 			Render(sb);
 			return sb.ToString();

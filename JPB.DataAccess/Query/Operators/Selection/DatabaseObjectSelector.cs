@@ -3,6 +3,8 @@
 using System;
 using System.Collections.Generic;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -35,21 +37,6 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		}
 
 		/// <summary>
-		///     Changes the current Identitfyer
-		/// </summary>
-		/// <param name="alias">The alias.</param>
-		/// <returns></returns>
-		/// <exception cref="ArgumentNullException">alias</exception>
-		public DatabaseObjectSelector Alias(string alias)
-		{
-			if (alias == null)
-			{
-				throw new ArgumentNullException(nameof(alias));
-			}
-			return new DatabaseObjectSelector(this, alias);
-		}
-
-		/// <summary>
 		///     Creates a Select statement for a given Poco
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
@@ -62,25 +49,23 @@ namespace JPB.DataAccess.Query.Operators.Selection
 			{
 				throw new ArgumentNullException(nameof(argumentsForFactory));
 			}
-			var cmd =
-				ContainerObject.AccessLayer.CreateSelectQueryFactory(ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),
-					argumentsForFactory);
-			return new SelectQuery<TPoco>(this.QueryCommand(cmd), null);
+
+			var classInfo = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
+			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(
+				classInfo.TableName,
+				classInfo,
+				ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table), argumentsForFactory)));
 		}
 
 		/// <summary>
-		///     Creates an Column Chooser object to spezify columns to select
+		///		Selects all columns from the given Identifier
 		/// </summary>
-		/// <typeparam name="TPoco">The type of the poco.</typeparam>
 		/// <returns></returns>
-		public ColumnChooser<TPoco> Only<TPoco>()
+		public SelectQuery<TPoco> Identifier<TPoco>(QueryIdentifier identifier)
 		{
-			if (_currentIdent == null)
-			{
-				_currentIdent = string.Format("{0}_{1}", ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).TableName,
-				ContainerObject.GetNextParameterId());
-			}
-			return new ColumnChooser<TPoco>(this, new List<string>(), _currentIdent);
+			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(identifier.Value,
+				ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),
+				ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table))));
 		}
 	}
 }
