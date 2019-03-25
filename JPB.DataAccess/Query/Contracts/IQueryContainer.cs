@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.QueryItems;
@@ -34,7 +35,16 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <param name="entityType"></param>
 		/// <param name="context"></param>
 		/// <returns></returns>
-		IDataRecord Transform(IDataRecord reader, Type entityType, QueryProcessingRecordsContext context);
+		EagarDataRecord Transform(EagarDataRecord reader, Type entityType, QueryProcessingRecordsContext context);
+
+		/// <summary>
+		///		Transforms all DataReaders
+		/// </summary>
+		/// <param name="readers"></param>
+		/// <param name="entityType"></param>
+		/// <param name="context"></param>
+		/// <returns></returns>
+		EagarDataRecord[] Transform(EagarDataRecord[] readers, Type entityType, QueryProcessingRecordsContext context);
 	}
 
 	/// <summary>
@@ -58,9 +68,33 @@ namespace JPB.DataAccess.Query.Contracts
 	/// </summary>
 	public class QueryProcessingRecordsContext
 	{
-		internal QueryProcessingRecordsContext()
+		internal QueryProcessingRecordsContext(IQueryContainer queryContainer,
+			List<IEntityProcessor> queryContainerPostProcessors)
 		{
+			QueryContainer = queryContainer;
+			QueryContainerPostProcessors = queryContainerPostProcessors;
+			ColumnMappings = new Dictionary<string, string>();
 		}
+
+		/// <summary>
+		///		Defines the set of mapped columns where Key is the name of the column that is expected in the result of the query and its value should be the expected value in the POCO
+		/// </summary>
+		public IDictionary<string, string> ColumnMappings { get; private set; }
+
+		/// <summary>
+		///		The executing DbAccessLayer
+		/// </summary>
+		public IQueryContainer QueryContainer { get; private set; }
+
+		/// <summary>
+		///		Post Processors
+		/// </summary>
+		public List<IEntityProcessor> QueryContainerPostProcessors { get; }
+
+		/// <summary>
+		///		Can define a name remapping for columns. Key is the column name from the query where Value is the value recived from the object factory
+		/// </summary>
+		public IDictionary<string, string> ColumnRemappings { get; private set; }
 	}
 
 	internal interface IQueryContainerValues
@@ -115,12 +149,7 @@ namespace JPB.DataAccess.Query.Contracts
 		///		The list of all Identifiers
 		/// </summary>
 		IList<QueryIdentifier> Identifiers { get; }
-
-		/// <summary>
-		///     Defines the Way how the Data will be loaded
-		/// </summary>
-		EnumerationMode EnumerationMode { get; set; }
-
+		
 		/// <summary>
 		///     If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
 		/// </summary>
@@ -135,31 +164,19 @@ namespace JPB.DataAccess.Query.Contracts
 		///     Will concat all QueryParts into a statement and will check for Spaces
 		/// </summary>
 		/// <returns></returns>
-		IDbCommand Compile();
+		IDbCommand Compile(out IEnumerable<ColumnInfo> columns);
 
 		/// <summary>
 		///     Increment the counter +1 and return the value
 		/// </summary>
 		/// <returns></returns>
 		int GetNextParameterId();
-
-		/// <summary>
-		///     
-		/// </summary>
-		/// <returns></returns>
-		string GetTableAlias(string table);
 		
 		/// <summary>
 		///     Translates an Identifier object into the corresponding Sql Identifier
 		/// </summary>
 		/// <returns></returns>
 		QueryIdentifier GetAlias(QueryIdentifier.QueryIdTypes type);
-
-		/// <summary>
-		///     Increment the counter +1 and return the value
-		/// </summary>
-		/// <returns></returns>
-		void SetTableAlias(string table, string alias);
 
 		/// <summary>
 		///     Compiles the QueryCommand into a String|IEnumerable of Paramameter
@@ -179,6 +196,19 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		T Search<T>() where T : IQueryPart;
+
+		/// <summary>
+		///		Searches in the Parts collection for the nearest occurence of this Query Part
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		T Search<T>(Func<T, bool> filter) where T : IQueryPart;
+
+		/// <summary>
+		///		Searches in the Parts collection for an identifier
+		/// </summary>
+		/// <returns></returns>
+		ISelectableQueryPart Search(QueryIdentifier identifier);
 
 		/// <summary>
 		/// 

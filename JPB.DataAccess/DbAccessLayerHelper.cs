@@ -7,6 +7,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
@@ -29,7 +30,7 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		public static object SetPropertysViaReflection(
 			this DbClassInfoCache type,
-			IDataRecord reader,
+			EagarDataRecord reader,
 			DbAccessType? accessType = null,
 			DbConfig config = null)
 		{
@@ -410,13 +411,24 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static string CreatePropertyCsv(this DbClassInfoCache type, string alias, params string[] ignore)
 		{
+			var properties = CreateProperties(type, alias, ignore);
+			if (properties.Any())
+			{
+				return properties.Aggregate((e, f) => e + ", " + f);
+			}
+
+			return "";
+		}
+
+		internal static string[] CreateProperties(this DbClassInfoCache type, string alias, params string[] ignore)
+		{
 			var filteredList = FilterDbSchemaMapping(type, ignore).ToArray();
 
 			if (filteredList.Any())
 			{
-				return filteredList.Select(e => ColumnIdentifier(alias, e)).Aggregate((e, f) => e + ", " + f);
+				return filteredList.Select(e => ColumnIdentifier(alias, e)).ToArray();
 			}
-			return string.Empty;
+			return new string[0];
 		}
 
 		/// <summary>

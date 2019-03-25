@@ -7,7 +7,9 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
@@ -70,7 +72,7 @@ namespace JPB.DataAccess.Query
 
 		private void LoadResults()
 		{
-			var dbCommand = _queryContainer.Compile();
+			var dbCommand = _queryContainer.Compile(out var columns);
 			foreach (var queryCommandInterceptor in _queryContainer.Interceptors)
 			{
 				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
@@ -81,12 +83,13 @@ namespace JPB.DataAccess.Query
 				}
 			}
 			_queryContainer.AccessLayer.RaiseSelect(dbCommand);
-			var dataRecords = _queryContainer.AccessLayer.EnumerateDataRecordsAsync(dbCommand);
+			var dataRecords = _queryContainer.AccessLayer.EnumerateDataRecordsAsync(dbCommand)
+				.ToArray();
 
 			if (_queryContainer.PostProcessors.Any())
 			{
-				var context = new QueryProcessingRecordsContext(); 
-				var processedRecords = new List<IDataRecord>();
+				var context = new QueryProcessingRecordsContext(_queryContainer, _queryContainer.PostProcessors);
+				var processedRecords = new List<EagarDataRecord>();
 
 				foreach (var element in dataRecords)
 				{
@@ -98,8 +101,17 @@ namespace JPB.DataAccess.Query
 					processedRecords.Add(item);
 				}
 
-				dataRecords = processedRecords;
+				dataRecords = processedRecords.ToArray();
+
+				foreach (var queryContainerPostProcessor in _queryContainer.PostProcessors)
+				{
+					dataRecords = queryContainerPostProcessor.Transform(dataRecords, _type, context);
+				}
 			}
+
+			dataRecords = dataRecords.Select(record =>
+				new EagarDataRecord(columns.Select(f => f.NaturalName.Trim('[', ']')).ToArray(), record.Objects))
+				.ToArray();
 
 			var records = dataRecords.Select(dataRecord => _queryContainer.AccessLayer.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),
 					dataRecord))

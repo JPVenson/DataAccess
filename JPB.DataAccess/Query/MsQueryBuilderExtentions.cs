@@ -35,11 +35,10 @@ namespace JPB.DataAccess.Query
 		/// <param name="subSelect">The sub select.</param>
 		/// <returns></returns>
 		public static ElementProducer<T> SubSelect<T>(this RootQuery query,
-			Func<ElementProducer<T>> subSelect)
+			Func<ElementResultQuery<T>> subSelect)
 		{
 			var queryIdentifier = query.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.SubQuery);
-			var part = new SubSelectQueryPart(queryIdentifier);
-			part.SubSelectionQueryParts.AddRange(subSelect().ContainerObject.Parts);
+			var part = new SubSelectQueryPart(queryIdentifier, subSelect().ContainerObject.Parts, typeof(T));
 			return new ElementProducer<T>(query.Add(part));
 		}
 		
@@ -64,19 +63,19 @@ namespace JPB.DataAccess.Query
 		public static ElementProducer<TOut> Count<TPoco, TOut>(this IElementProducer<TPoco> query)
 		{
 			var cteName = query.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Cte);
-			var item = new CteQueryPart.CteInfo()
+			var item = new CteDefinitionQueryPart.CteInfo()
 			{
 				Name = cteName
 			};
 			item.CteContentParts.AddRange(query.ContainerObject.Parts.ToArray());
 
 			IQueryBuilder newQuery = new RootQuery(query.ContainerObject.AccessLayer);
-			var cteQueryPart = query.ContainerObject.Search<CteQueryPart>();
-			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteQueryPart()));
-			cteQueryPart.CteInfos.Add(item);
+			var cteQueryPart = query.ContainerObject.Search<CteDefinitionQueryPart>();
+			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()))
+				.Add(cteQueryPart.AddCte(item));
 
 			return new ElementProducer<TOut>(newQuery
-				.Add(new CountTargetQueryPart(cteName)));
+				.Add(new CountTargetQueryPart(cteName, query.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.SubQuery))));
 		}
 	}
 }

@@ -467,7 +467,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader)
+		public object SetPropertysViaReflection(DbClassInfoCache type, EagarDataRecord reader)
 		{
 			return SetPropertysViaReflection(type, reader, DbAccessType);
 		}
@@ -477,7 +477,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader,
+		public object SetPropertysViaReflection(DbClassInfoCache type, EagarDataRecord reader,
 			Dictionary<int, DbPropertyInfoCache> mapping)
 		{
 			bool created;
@@ -498,7 +498,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <returns></returns>
 		public static object CreateInstance(DbClassInfoCache classInfo,
-			IDataRecord reader)
+			EagarDataRecord reader)
 		{
 			bool loaded;
 			return CreateInstance(classInfo, reader, out loaded);
@@ -510,21 +510,21 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <returns></returns>
 		public static object CreateInstance(DbClassInfoCache classInfo,
-			IDataRecord reader,
+			EagarDataRecord reader,
 			out bool fullLoaded,
 			DbAccessType? accessType = null)
 		{
+			if (classInfo.WrapNullables != null)
+			{
+				reader.WrapNulls = true;
+			}
+
 			if (classInfo.IsMsCoreFrameworkType && reader.FieldCount == 1)
 			{
 				fullLoaded = true;
 				var plainValue = reader.GetValue(0);
 
 				return plainValue;
-			}
-
-			if (classInfo.WrapNullables != null && !(reader is EgarNullableWrappedRecord) && reader is EgarDataRecord)
-			{
-				reader = new EgarNullableWrappedRecord(reader, ((EgarDataRecord) reader)._configStore);
 			}
 
 			if (classInfo.Factory != null)
@@ -698,7 +698,7 @@ namespace JPB.DataAccess.Manager
 									property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault());
 							var enumerableOfItems =
 								xmlDataRecords.Select(
-									s => genericArguments.SetPropertysViaReflection(s, dbAccessType, config)).ToList();
+									s => genericArguments.SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(s), dbAccessType, config)).ToList();
 							object castedList;
 
 							if (genericArguments.Type.IsClass &&
@@ -729,7 +729,7 @@ namespace JPB.DataAccess.Manager
 								true, config);
 
 							//the t
-							var xmlSerilizedProperty = classInfo.SetPropertysViaReflection(xmlDataRecord, dbAccessType,
+							var xmlSerilizedProperty = classInfo.SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(xmlDataRecord), dbAccessType,
 								config);
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
 						}
@@ -820,14 +820,14 @@ namespace JPB.DataAccess.Manager
 			if (!egarLoading)
 			{
 				await EnumerateAsync(query,
-					record => { resultList.Add(SetPropertysViaReflection(type, record)); },
+					record => { resultList.Add(SetPropertysViaReflection(type, EagarDataRecord.WithExcludedFields(record))); },
 					executionHint);
 			}
 			else
 			{
-				var recordCache = new List<IDataRecord>();
+				var recordCache = new List<EagarDataRecord>();
 				await EnumerateAsync(query,
-					record => { recordCache.Add(RecordGenerator(record, Config)); }, executionHint);
+					record => { recordCache.Add(EagarDataRecord.WithExcludedFields(record)); }, executionHint);
 				resultList.AddRange(recordCache
 					.Select(f => SetPropertysViaReflection(type, f))
 					.ToArray());
@@ -836,7 +836,7 @@ namespace JPB.DataAccess.Manager
 			return resultList;
 		}
 
-		internal List<IDataRecord> EnumerateDataRecordsAsync(IDbCommand query)
+		internal List<EagarDataRecord> EnumerateDataRecordsAsync(IDbCommand query)
 		{
 			return EnumerateMarsDataRecords(query).FirstOrDefault();
 		}
@@ -913,16 +913,7 @@ namespace JPB.DataAccess.Manager
 			}
 		}
 
-		/// <summary>
-		///     Produces an IDataRecord for the given Reader
-		/// </summary>
-		/// <returns></returns>
-		protected virtual IDataRecord RecordGenerator(IDataReader reader, DbConfig config)
-		{
-			return new EgarDataRecord(reader, Config);
-		}
-
-		internal List<List<IDataRecord>> EnumerateMarsDataRecords(
+		internal List<List<EagarDataRecord>> EnumerateMarsDataRecords(
 			IDbCommand query)
 		{
 			Database.PrepaireRemoteExecution(query);
@@ -936,7 +927,7 @@ namespace JPB.DataAccess.Manager
 				return Database.Run(
 					s =>
 					{
-						var records = new List<List<IDataRecord>>();
+						var records = new List<List<EagarDataRecord>>();
 						using (query)
 						{
 							query.Connection = query.Connection ?? s.GetConnection();
@@ -947,10 +938,10 @@ namespace JPB.DataAccess.Manager
 								{
 									do
 									{
-										var resultSet = new List<IDataRecord>();
+										var resultSet = new List<EagarDataRecord>();
 										while (dr.Read())
 										{
-											resultSet.Add(RecordGenerator(dr, Config));
+											resultSet.Add(EagarDataRecord.WithExcludedFields(dr));
 										}
 
 										records.Add(resultSet);
@@ -981,7 +972,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public object SetPropertysViaReflection(DbClassInfoCache type, IDataRecord reader, DbAccessType? accessType)
+		public object SetPropertysViaReflection(DbClassInfoCache type, EagarDataRecord reader, DbAccessType? accessType)
 		{
 			return type.SetPropertysViaReflection(reader, DbAccessType, Config);
 		}

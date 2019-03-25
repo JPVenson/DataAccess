@@ -227,7 +227,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					bool fullyLoaded;
 					elementToAdd = (TEntity) DbAccessLayer.CreateInstance(
 					                                                      _typeInfo,
-					                                                      new ObjectDataRecord(item, _config, 0),
+					                                                      new EagerObjectReader(item, _config),
 					                                                      out fullyLoaded,
 					                                                      DbAccessType.Unknown);
 					if (!fullyLoaded || elementToAdd == null)
@@ -383,7 +383,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				                          bool fullyLoaded;
 				                          return (TEntity) DbAccessLayer.CreateInstance(
 				                                                                        _typeInfo,
-				                                                                        new ObjectDataRecord(s, _config, 0),
+				                                                                        new EagerObjectReader(s, _config),
 				                                                                        out fullyLoaded,
 				                                                                        DbAccessType.Unknown);
 			                          }).GetEnumerator();
@@ -956,7 +956,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 					                          bool fullyLoaded;
 					                          return (TEntity) DbAccessLayer.CreateInstance(
 					                                                                        _typeInfo,
-					                                                                        new ObjectDataRecord(s, _config, 0),
+					                                                                        new EagerObjectReader(s, _config),
 					                                                                        out fullyLoaded,
 					                                                                        DbAccessType.Unknown);
 				                          }).ToArray();

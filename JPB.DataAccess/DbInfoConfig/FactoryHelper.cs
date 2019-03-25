@@ -461,7 +461,8 @@ namespace JPB.DataAccess.DbInfoConfig
 		}
 
 		[SecurityCritical]
-		internal static Func<IDataRecord, object> CreateFactory(DbClassInfoCache target, FactoryHelperSettings settings)
+		internal static Func<IDataRecord, object> CreateFactory(DbClassInfoCache target, 
+			FactoryHelperSettings settings)
 		{
 			var configAttrCtorAtt = target.Attributes.FirstOrDefault(s => s.Attribute is AutoGenerateCtorAttribute);
 			AutoGenerateCtorAttribute classCtorAttr = null;

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
@@ -41,7 +42,7 @@ namespace JPB.DataAccess.Query
 		private void OpenReader(IQueryContainer queryContainer)
 		{
 			_queryContainer.AccessLayer.Database.Connect();
-			var dbCommand = queryContainer.Compile();
+			var dbCommand = queryContainer.Compile(out var columns);
 			foreach (var queryCommandInterceptor in _queryContainer.Interceptors)
 			{
 				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
@@ -98,7 +99,7 @@ namespace JPB.DataAccess.Query
 
 		public object Current
 		{
-			get { return _preObject ?? (_preObject = _queryContainer.AccessLayer.SetPropertysViaReflection(_type, _executeReader)); }
+			get { return _preObject ?? (_preObject = _queryContainer.AccessLayer.SetPropertysViaReflection(_type, EagarDataRecord.WithExcludedFields(_executeReader))); }
 		}
 	}
 

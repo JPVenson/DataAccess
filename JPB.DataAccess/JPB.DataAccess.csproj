@@ -128,9 +128,8 @@
   <ItemGroup>
     <Compile Include="AdoWrapper\DefaultDatabaseAccess.cs" />
     <Compile Include="AdoWrapper\DefaultTransactionScope.cs" />
-    <Compile Include="AdoWrapper\EagarDataReader.cs" />
-    <Compile Include="AdoWrapper\EgarDataRecord.cs" />
-    <Compile Include="AdoWrapper\EgarNullableWrappedRecord.cs" />
+    <Compile Include="AdoWrapper\EagerObjectReader.cs" />
+    <Compile Include="AdoWrapper\EagarDataRecord.cs" />
     <Compile Include="AdoWrapper\IConnectionController.cs" />
     <Compile Include="AdoWrapper\InstanceConnectionController.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSql.cs" />
@@ -337,13 +336,15 @@
     <Compile Include="Query\Contracts\IStateQuery.cs" />
     <Compile Include="Query\Contracts\IUpdateQuery.cs" />
     <Compile Include="Query\Contracts\QueryBuilder.cs" />
+    <Compile Include="Query\QueryItems\ColumnInfo.cs" />
+    <Compile Include="Query\QueryItems\ColumnMapper.cs" />
     <Compile Include="Query\QueryItems\Conditional\ConditionalQueryBuilder.cs" />
     <Compile Include="Query\QueryItems\Conditional\ConditionStatementQueryPart.cs" />
     <Compile Include="Query\QueryItems\Conditional\ConditionStructurePart.cs" />
     <Compile Include="Query\EnumerationMode.cs" />
     <Compile Include="Query\QueryItems\CountTargetQueryPart.cs" />
     <Compile Include="Query\QueryItems\Conditional\QueryIdentifier.cs" />
-    <Compile Include="Query\QueryItems\CteQueryPart.cs" />
+    <Compile Include="Query\QueryItems\CteDefinitionQueryPart.cs" />
     <Compile Include="Query\QueryItems\DeleteTableQueryPart.cs" />
     <Compile Include="Query\QueryItems\Conditional\ExpressionConditionPart.cs" />
     <Compile Include="Query\QueryItems\Conditional\ExpressionValue.cs" />
@@ -378,8 +379,13 @@
     <Compile Include="Query\QueryEagerEnumerator.cs" />
     <Compile Include="Query\QueryEnumeratorEx.cs" />
     <Compile Include="Query\QueryItems\Conditional\IConditionPart.cs" />
+    <Compile Include="Query\QueryItems\IIdentifiableQueryPart.cs" />
     <Compile Include="Query\QueryItems\IQueryPart.cs" />
+    <Compile Include="Query\QueryItems\ISelectableQueryPart.cs" />
+    <Compile Include="Query\QueryItems\JoinTableQueryPart.cs" />
+    <Compile Include="Query\QueryItems\LimitByQueryPart.cs" />
     <Compile Include="Query\QueryItems\OrderByColumnQueryPart.cs" />
+    <Compile Include="Query\QueryItems\RelationProcessor.cs" />
     <Compile Include="Query\QueryItems\SelectTableQueryPart.cs" />
     <Compile Include="Query\QueryItems\SubSelectQueryPart.cs" />
     <Compile Include="Query\QueryItems\UpdateTableWithQueryPart.cs" />

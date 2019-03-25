@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
@@ -31,7 +32,15 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> By(string columnName)
 		{
-			_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnName);
+			var columnInfos = _queryBuilder.ContainerObject.Search<ISelectableQueryPart>()
+				.Columns.ToArray();
+			var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
+			if (columnDefinitionPart == null)
+			{
+				throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
+			}
+
+			_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
 			return new OrderByColumn<TPoco>(_queryBuilder);
 		}
 

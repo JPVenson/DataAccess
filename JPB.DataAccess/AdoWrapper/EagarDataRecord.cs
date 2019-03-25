@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.Anonymous;
 using JPB.DataAccess.DbInfoConfig;
 
 #endregion
@@ -16,39 +17,82 @@ namespace JPB.DataAccess.AdoWrapper
 	/// </summary>
 	/// <seealso cref="System.Data.IDataRecord" />
 	/// <seealso cref="System.IDisposable" />
-	public class EgarDataRecord : IDataRecord, IDisposable
+	public class EagarDataRecord : IDataRecord, IDisposable
 	{
 		/// <summary>
-		///     The access layer
+		///		If set to true <value>DBNull</value> values are converted to regular .net null values
 		/// </summary>
-		internal readonly DbConfig _configStore;
+		public bool WrapNulls { get; set; }
 
-		/// <summary>
-		///     Enumerates all items in the source record
-		/// </summary>
-		/// <param name="sourceRecord">The source record.</param>
-		/// <param name="configuration">The access layer.</param>
-		public EgarDataRecord(IDataRecord sourceRecord, DbConfig configuration)
-			: this()
+		internal void Add(string name, object value)
 		{
-			_configStore = configuration;
+			MetaHeader = MetaHeader.Concat(new[] {name}).ToArray();
+			Objects.Add(name);
+		}
+
+		///  <summary>
+		/// 		Creates a new Eager Data Record that contains all fields from the SourceRecord but not therese defined in fieldsExcluded
+		///  </summary>
+		///  <param name="sourceRecord"></param>
+		///  <param name="fieldsExcluded"></param>
+		///  <returns></returns>
+		public static EagarDataRecord WithExcludedFields(IDataRecord sourceRecord, params string[] fieldsExcluded)
+		{
 			var buildList = new ArrayList();
 			var metaBuildList = new List<string>();
 			for (var i = 0; i < sourceRecord.FieldCount; i++)
 			{
-				var obj = sourceRecord.GetValue(i);
 				var name = sourceRecord.GetName(i);
+				if (fieldsExcluded.Contains(name))
+				{
+					continue;
+				}
+
+				var obj = sourceRecord.GetValue(i);
 				buildList.Add(obj);
 				metaBuildList.Add(name);
 			}
-			MetaHeader = metaBuildList.ToArray();
-			Objects = buildList.ToArray();
+			return new EagarDataRecord(metaBuildList.ToArray(), buildList);
+		}
+
+		///  <summary>
+		/// 		Creates a new Eager Data Record that contains all fields from the SourceRecord but only therese defined in fieldsIncluded
+		///  </summary>
+		///  <param name="sourceRecord"></param>
+		///  <param name="fieldsIncluded"></param>
+		///  <returns></returns>
+		public static EagarDataRecord WithIncludedFields(IDataRecord sourceRecord, params string[] fieldsIncluded)
+		{
+			var buildList = new ArrayList();
+			var metaBuildList = new List<string>();
+			for (var i = 0; i < sourceRecord.FieldCount; i++)
+			{
+				var name = sourceRecord.GetName(i);
+				if (!fieldsIncluded.Contains(name))
+				{
+					continue;
+				}
+
+				var obj = sourceRecord.GetValue(i);
+				buildList.Add(obj);
+				metaBuildList.Add(name);
+			}
+			return new EagarDataRecord(metaBuildList.ToArray(), buildList);
 		}
 
 		/// <summary>
-		///     Initializes a new instance of the <see cref="EgarDataRecord" /> class.
+		///     Enumerates all items in the source record
 		/// </summary>
-		protected internal EgarDataRecord()
+		internal EagarDataRecord(string[] fields, ArrayList values)
+		{
+			Objects = values;
+			MetaHeader = fields;
+		}
+
+		/// <summary>
+		///     Initializes a new instance of the <see cref="EagarDataRecord" /> class.
+		/// </summary>
+		protected internal EagarDataRecord()
 		{
 		}
 
@@ -58,14 +102,13 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <value>
 		///     The objects.
 		/// </value>
-		internal Array Objects { get; set; }
+		internal ArrayList Objects { get; set; }
 
 		/// <summary>
 		/// The Headers sorted by the occurence in the Class
 		/// (Sorted for Performance reasons)
 		/// </summary>
 		protected string[] MetaHeader { get; set; }
-
 
 		/// <summary>
 		///     Gets the name for the field to find.
@@ -124,7 +167,8 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		protected internal virtual object GetValueInternal(int i)
 		{
-			return Objects.GetValue(i);
+			var val = Objects[i];
+			return val == DBNull.Value && WrapNulls ? null : val;
 		}
 
 		/// <summary>
@@ -136,7 +180,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetValues(object[] values)
 		{
-			for (var i = 0; i < Objects.Length; i++)
+			for (var i = 0; i < Objects.Count; i++)
 			{
 				if (values.Length > i)
 				{
@@ -402,8 +446,9 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public IDataReader GetData(int i)
 		{
-			var val = GetValue(i);
-			return new EagarDataReader(val, _configStore);
+			throw new NotImplementedException();
+			//var val = GetValue(i);
+			//return new EagarDataReader(val);
 		}
 
 		/// <summary>
@@ -423,7 +468,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public int FieldCount
 		{
-			get { return Objects.Length; }
+			get { return Objects.Count; }
 		}
 
 		/// <summary>
@@ -434,7 +479,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </value>
 		/// <param name="i">The i.</param>
 		/// <returns></returns>
-		object IDataRecord.this[int i]
+		public object this[int i]
 		{
 			get
 			{
@@ -456,7 +501,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="name">The name.</param>
 		/// <returns></returns>
 		/// <exception cref="IndexOutOfRangeException">Name is unkown</exception>
-		object IDataRecord.this[string name]
+		public object this[string name]
 		{
 			get
 			{

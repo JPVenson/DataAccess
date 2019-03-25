@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.Query.QueryItems.Conditional;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
@@ -15,16 +14,5 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// <param name="container"></param>
 		/// <returns></returns>
 		IDbCommand Process(IQueryContainer container);
-	}
-
-	/// <summary>
-	///		Defines a query that declares an alias
-	/// </summary>
-	public interface IIdentifiableQueryPart : IQueryPart
-	{
-		/// <summary>
-		///		The alias
-		/// </summary>
-		QueryIdentifier Alias { get; }
 	}
 }

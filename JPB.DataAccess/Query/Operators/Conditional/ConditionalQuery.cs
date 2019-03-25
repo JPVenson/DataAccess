@@ -59,7 +59,15 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		public ConditionalColumnQuery<TPoco> Column(string columnName)
 		{
 			var currentAlias = ContainerObject.Search<IIdentifiableQueryPart>().Alias;
-			var expression = new ExpressionConditionPart(currentAlias, columnName);
+			var columnInfos = ContainerObject.Search<ISelectableQueryPart>()
+				.Columns.ToArray();
+
+			var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
+			if (columnDefinitionPart == null)
+			{
+				throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
+			}
+			var expression = new ExpressionConditionPart(currentAlias, columnDefinitionPart);
 			ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(expression);
 
 			return new ConditionalColumnQuery<TPoco>(this, expression);

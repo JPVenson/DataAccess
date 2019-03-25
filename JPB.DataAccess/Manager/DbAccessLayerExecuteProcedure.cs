@@ -136,17 +136,6 @@ namespace JPB.DataAccess.Manager
 			//}
 		}
 
-		/// <summary>
-		///     Executes a Procedure object into the Database
-		/// </summary>
-		public object[] ExecuteProcedurePrimetiv(Type procParamType, Type resultType, object procParam)
-		{
-			var command = CreateProcedureCall(procParamType.GetClassInfo(), procParam, Database);
-			return EnumerateDataRecordsAsync(command)
-				.Select(dataRecord => dataRecord[0])
-				.ToArray();
-		}
-
 		private IDbCommand CreateProcedureCall(DbClassInfoCache procParamType, object procParam, IDatabase db)
 		{
 			var sb = new StringBuilder();

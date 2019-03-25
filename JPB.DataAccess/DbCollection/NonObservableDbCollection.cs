@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 #endif
 using System.Linq;
+using JetBrains.Annotations;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig;
 
@@ -62,6 +63,7 @@ namespace JPB.DataAccess.DbCollection
 		/// </summary>
 		/// <param name="xml">The XML.</param>
 		/// <returns></returns>
+		[UsedImplicitly]
 		public static NonObservableDbCollection<T> FromXml(string xml)
 		{
 			return new NonObservableDbCollection<T>(
@@ -70,7 +72,7 @@ namespace JPB.DataAccess.DbCollection
 			             .CreateListOfItems()
 			             .Select(item => typeof(T)
 			                             .GetClassInfo()
-			                             .SetPropertysViaReflection(item)));
+			                             .SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(item))));
 		}
 	}
 }

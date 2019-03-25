@@ -41,7 +41,8 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.Run(s =>
 			{
-				var dbCommand = Query().Delete<T>().Where.PrimaryKey().Is.EqualsTo(primaryKey).ContainerObject.Compile();
+				var dbCommand = Query().Delete<T>().Where.PrimaryKey().Is.EqualsTo(primaryKey)
+					.ContainerObject.Compile(out var columns);
 				RaiseDelete(null, dbCommand);
 				ExecuteGenericCommand(dbCommand);
 			});

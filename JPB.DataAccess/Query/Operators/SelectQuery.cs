@@ -2,9 +2,11 @@
 
 using System;
 using System.Linq;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -36,6 +38,39 @@ namespace JPB.DataAccess.Query.Operators
 			return this;
 		}
 
+		/// <summary>
+		///		Includes the forgin table
+		/// </summary>
+		/// <param name="forginColumnName"></param>
+		/// <returns></returns>
+		public SelectQuery<TPoco> Include(string forginColumnName)
+		{
+			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
+			var forginColumn = teCache.Propertys.FirstOrDefault(e => e.Value.PropertyName.Equals(forginColumnName));
+			if (forginColumn.Value == null)
+			{
+				return this;
+			}
+
+			var currentAlias = ContainerObject.Search<ISelectableQueryPart>().Alias;
+			var parentAlias = ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table);
+			var childAlias = ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table);
+			var selfPrimaryKey = teCache.PrimaryKeyProperty.DbName;
+			var forginPrimaryKey = forginColumn.Value.ForginKeyAttribute.Attribute.KeyName;
+			var forginType = ContainerObject.AccessLayer.GetClassInfo(forginColumn.Value.PropertyType);
+			var forginColumns = DbAccessLayer.GetSelectableColumnsOf(forginType, childAlias.GetAlias());
+
+			var joinTableQueryPart = new JoinTableQueryPart(currentAlias, 
+				childAlias,
+				parentAlias,
+				typeof(TPoco),
+				selfPrimaryKey,
+				forginPrimaryKey, 
+				forginColumns);
+			ContainerObject.Search<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
+			return new SelectQuery<TPoco>(Add(joinTableQueryPart));
+		}
+		
 		/// <summary>
 		///     Retuns a collection of all Entites that are referenced by element
 		///     Needs a proper ForginKeyDeclartaion

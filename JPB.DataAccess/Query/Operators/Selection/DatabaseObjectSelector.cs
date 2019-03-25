@@ -40,21 +40,15 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		///     Creates a Select statement for a given Poco
 		/// </summary>
 		/// <typeparam name="TPoco">The type of the poco.</typeparam>
-		/// <param name="argumentsForFactory">The arguments for factory.</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentNullException">argumentsForFactory</exception>
-		public SelectQuery<TPoco> Table<TPoco>(params object[] argumentsForFactory)
+		public SelectQuery<TPoco> Table<TPoco>()
 		{
-			if (argumentsForFactory == null)
-			{
-				throw new ArgumentNullException(nameof(argumentsForFactory));
-			}
-
 			var classInfo = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(
 				classInfo.TableName,
 				classInfo,
-				ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table), argumentsForFactory)));
+				ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table))));
 		}
 
 		/// <summary>
@@ -63,7 +57,7 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		/// <returns></returns>
 		public SelectQuery<TPoco> Identifier<TPoco>(QueryIdentifier identifier)
 		{
-			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(identifier.Value,
+			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(ContainerObject.Search(identifier),
 				ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),
 				ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table))));
 		}

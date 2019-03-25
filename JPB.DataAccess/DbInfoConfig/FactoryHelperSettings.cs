@@ -16,8 +16,6 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		private static readonly string[] _defaultNamespaces;
 
-		private static FactoryHelperSettings _defaultSettings = new FactoryHelperSettings();
-
 		static FactoryHelperSettings()
 		{
 			_defaultNamespaces = new[]
@@ -44,11 +42,12 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Gets the Default settings that are applyed to the Factory Creation
 		/// </summary>
-		public static FactoryHelperSettings DefaultSettings
+		public static FactoryHelperSettings DefaultSettings { get; set; } = new FactoryHelperSettings()
 		{
-			get { return _defaultSettings; }
-			set { _defaultSettings = value; }
-		}
+			AssertDataNotDbNull = true,
+			EnforcePublicPropertys = true,
+			EnforceCreation = true,
+		};
 
 
 		internal ConcurrentBag<string> TempFileData { get; set; }

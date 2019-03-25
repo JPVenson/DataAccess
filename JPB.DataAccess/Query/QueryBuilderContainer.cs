@@ -104,7 +104,7 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		public virtual void ExecuteNonQuery()
 		{
-			var dbCommand = ContainerObject.Compile();
+			var dbCommand = ContainerObject.Compile(out var columns);
 			foreach (var queryCommandInterceptor in Interceptors)
 			{
 				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
@@ -126,15 +126,7 @@ namespace JPB.DataAccess.Query
 		/// <inheritdoc />
 		public virtual IEnumerator<TPoco> GetEnumerator<TPoco>(bool async)
 		{
-			var enumerationMode = ContainerObject.PostProcessors.Any()
-				? EnumerationMode.FullOnLoad
-				: ContainerObject.EnumerationMode;
-
-			if (enumerationMode == EnumerationMode.FullOnLoad)
-			{
-				return new QueryEagerEnumerator<TPoco>(ContainerObject, async);
-			}
-			return new QueryLazyEnumerator<TPoco>(ContainerObject, async);
+			return new QueryEagerEnumerator<TPoco>(ContainerObject, async);
 		}
 
 		/// <inheritdoc />

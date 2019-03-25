@@ -1,8 +1,11 @@
 #region
 
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.QueryFactory;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
@@ -19,12 +22,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public string UserName { get; set; }
 
 		[SelectFactoryMethod]
-		public static IQueryBuilder GetSelectStatement(RootQuery builder, long whereId)
+		public static IQueryFactoryResult GetSelectStatement(long whereId)
 		{
-			return builder.Select.Table<Users_StaticQueryFactoryForSelectWithArugments>()
-				.Where
-				.Column(s => s.UserId)
-				.Is.EqualsTo(whereId);
+			return new QueryFactoryResult($"SELECT * FROM {UsersMeta.TableName} WHERE {UsersMeta.PrimaryKeyName} = @arg", 
+				new QueryParameter("arg", whereId));
 		}
 	}
 }

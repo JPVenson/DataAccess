@@ -16,67 +16,53 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 {
-	[TestFixture(DbAccessType.MsSql, true , false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, true , false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MsSql, true , false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, true , false, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, true, false, true)]
+	[TestFixture(DbAccessType.MsSql, true, false, false)]
 
-	[TestFixture(DbAccessType.MsSql, false, false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, false, false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MsSql, false, false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, false, false, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, false, false, true)]
+	[TestFixture(DbAccessType.MsSql, false, false, false)]
 
-	[TestFixture(DbAccessType.MsSql, false, true, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, false, true, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.MsSql, false, true, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.MsSql, false, true, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.MsSql, false, true, true)]
+	[TestFixture(DbAccessType.MsSql, false, true, false)]
 
-	[TestFixture(DbAccessType.SqLite, false, true, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, false, true, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.SqLite, false, true, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, false, true, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, false, true, true)]
+	[TestFixture(DbAccessType.SqLite, false, true, false)]
 
-	[TestFixture(DbAccessType.SqLite, false, false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, false, false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.SqLite, false, false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, false, false, false, EnumerationMode.OnCall)]
-										  
-	[TestFixture(DbAccessType.SqLite, true, false, true, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, true, false, true, EnumerationMode.OnCall)]
-	[TestFixture(DbAccessType.SqLite, true, false, false, EnumerationMode.FullOnLoad)]
-	[TestFixture(DbAccessType.SqLite, true, false, false, EnumerationMode.OnCall)]
+	[TestFixture(DbAccessType.SqLite, false, false, true)]
+	[TestFixture(DbAccessType.SqLite, false, false, false)]
 
-	//[TestFixture(DbAccessType.MySql, false, true, true, EnumerationMode.FullOnLoad)]
+	[TestFixture(DbAccessType.SqLite, true, false, true)]
+	[TestFixture(DbAccessType.SqLite, true, false, false)]
+
+	//[TestFixture(DbAccessType.MySql, false, true, true)]
 	//[TestFixture(DbAccessType.MySql, false, true, true, EnumerationMode.OnCall)]
-	//[TestFixture(DbAccessType.MySql, false, true, false, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, false, true, false)]
 	//[TestFixture(DbAccessType.MySql, false, true, false, EnumerationMode.OnCall)]
 
-	//[TestFixture(DbAccessType.MySql, false, false, true, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, false, false, true)]
 	//[TestFixture(DbAccessType.MySql, false, false, true, EnumerationMode.OnCall)]
-	//[TestFixture(DbAccessType.MySql, false, false, false, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, false, false, false)]
 	//[TestFixture(DbAccessType.MySql, false, false, false, EnumerationMode.OnCall)]
-										  
-	//[TestFixture(DbAccessType.MySql, true, false, true, EnumerationMode.FullOnLoad)]
+
+	//[TestFixture(DbAccessType.MySql, true, false, true)]
 	//[TestFixture(DbAccessType.MySql, true, false, true, EnumerationMode.OnCall)]
-	//[TestFixture(DbAccessType.MySql, true, false, false, EnumerationMode.FullOnLoad)]
+	//[TestFixture(DbAccessType.MySql, true, false, false)]
 	//[TestFixture(DbAccessType.MySql, true, false, false, EnumerationMode.OnCall)]
 
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class QueryBuilderTests : DatabaseBaseTest
 	{
-		private readonly EnumerationMode _enumerationMode;
 		private readonly bool _asyncEnumeration;
 
-		public QueryBuilderTests(DbAccessType type, bool asyncExecution, bool syncronised, bool asyncEnumeration, EnumerationMode enumerationMode) 
-				: base(type, asyncExecution, syncronised, enumerationMode, asyncEnumeration)
+		public QueryBuilderTests(DbAccessType type, bool asyncExecution, bool syncronised, bool asyncEnumeration)
+				: base(type, asyncExecution, syncronised, asyncEnumeration)
 		{
-			_enumerationMode = enumerationMode;
 			_asyncEnumeration = asyncEnumeration;
 		}
 
 		private RootQuery CreateQuery()
 		{
-			return DbAccess.Query().ConfigEnumerationMode(_enumerationMode);
+			return DbAccess.Query();
 		}
 
 		//[Test]
@@ -92,39 +78,38 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		//	}, Throws.Nothing);
 		//}
 
+		//[Test]
+
+		//public void CheckFactory()
+		//{
+		//	var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
+		//	Assert.That(
+		//	() => CreateQuery().Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>()
+		//				  .ForResult(_asyncEnumeration).ToArray(), Is.Not.Empty);
+
+		//	var testInsertName = Guid.NewGuid().ToString();
+		//	Users_PK_IDFM_FUNCSELECTFACWITHPARAM testUser = null;
+		//	Assert.That(
+		//	() =>
+		//			testUser =
+		//					DbAccess.InsertWithSelect(new Users_PK_IDFM_FUNCSELECTFACWITHPARAM
+		//					{
+		//						UserName = testInsertName
+		//					}),
+		//	Is.Not.Null
+		//	  .And.Property("UserId").Not.EqualTo(0));
+
+		//	var selTestUser =
+		//			CreateQuery()
+		//					.Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.UserId)
+		//					.ForResult(_asyncEnumeration)
+		//					.FirstOrDefault();
+		//	Assert.That(selTestUser, Is.Not.Null);
+		//	Assert.That(selTestUser.UserName, Is.EqualTo(testUser.UserName));
+		//	Assert.That(selTestUser.UserId, Is.EqualTo(testUser.UserId));
+		//}
+
 		[Test]
-
-		public void CheckFactory()
-		{
-			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
-			Assert.That(
-			() => CreateQuery().Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>()
-						  .ForResult(_asyncEnumeration).ToArray(), Is.Not.Empty);
-
-			var testInsertName = Guid.NewGuid().ToString();
-			Users_PK_IDFM_FUNCSELECTFACWITHPARAM testUser = null;
-			Assert.That(
-			() =>
-					testUser =
-							DbAccess.InsertWithSelect(new Users_PK_IDFM_FUNCSELECTFACWITHPARAM
-							{
-								UserName = testInsertName
-							}),
-			Is.Not.Null
-			  .And.Property("UserId").Not.EqualTo(0));
-
-			var selTestUser =
-					CreateQuery()
-							.Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.UserId)
-							.ForResult(_asyncEnumeration)
-							.FirstOrDefault();
-			Assert.That(selTestUser, Is.Not.Null);
-			Assert.That(selTestUser.UserName, Is.EqualTo(testUser.UserName));
-			Assert.That(selTestUser.UserId, Is.EqualTo(testUser.UserId));
-		}
-
-		[Test]
-
 		public void Count()
 		{
 			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
@@ -160,7 +145,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 						(int)
 						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
 								[0];
-				forResult = (int) CreateQuery().Count.Table<Users>()
+				forResult = (int)CreateQuery().Count.Table<Users>()
 					.ForResult<long>(_asyncEnumeration)
 					.FirstOrDefault();
 			}
@@ -377,20 +362,20 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
-		public void SelectWithFactory()
+		public void SubSelect()
 		{
 			var addUsers = DataMigrationHelper.AddUsers(10, DbAccess);
 
 			foreach (var addUser in addUsers)
 			{
-				var query = CreateQuery().Select.Table<Users_StaticQueryFactoryForSelectWithArugments>(addUser);
-				var subQuery = CreateQuery().SubSelect(() => query);
+				var subQuery = CreateQuery()
+					.SubSelect(() => CreateQuery().Select.Table<Users>().Where.PrimaryKey().Is.EqualsTo(addUser));
 				var user = subQuery
 					.Where
 					.Column(f => f.UserName).Is.Not.Null
 					.FirstOrDefault();
 				Assert.That(user, Is.Not.Null);
-				Assert.That(user.UserId, Is.EqualTo(addUser));
+				Assert.That(user.UserID, Is.EqualTo(addUser));
 			}
 		}
 

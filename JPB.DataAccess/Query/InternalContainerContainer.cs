@@ -59,7 +59,6 @@ namespace JPB.DataAccess.Query
 			TableAlias = (pre as IQueryContainerValues)?.TableAlias ?? new Dictionary<string, string>();
 			Identifiers = (pre as IQueryContainerValues)?.Identifiers ?? new List<QueryIdentifier>();
 			_parts = pre.Parts.ToList();
-			EnumerationMode = pre.EnumerationMode;
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 			QueryInfos = pre.QueryInfos.Select(f => f).ToDictionary(f => f.Key, f => f.Value);
 			Interceptors = pre.Interceptors;
@@ -96,23 +95,22 @@ namespace JPB.DataAccess.Query
 		{
 			get { return _parts; }
 		}
-
-		/// <inheritdoc />
-		public EnumerationMode EnumerationMode { get; set; }
-
+		
 		/// <inheritdoc />
 		public bool AllowParamterRenaming { get; set; }
 
 		/// <inheritdoc />
-		public IDbCommand Compile()
+		public IDbCommand Compile(out IEnumerable<ColumnInfo> columns)
 		{
 			var commands = new List<IDbCommand>();
+			columns = new ColumnInfo[0];
 			foreach (var queryPart in Parts)
 			{
 				commands.Add(queryPart.Process(this));
+				columns = (queryPart as ISelectableQueryPart)?.Columns ?? columns;
 			}
 
-			return DbAccessLayerHelper.ConcatCommands(AccessLayer.Database, true, commands.ToArray());
+			return DbAccessLayerHelper.ConcatCommands(AccessLayer.Database, true, commands.Where(e => e != null).ToArray());
 
 			//var query = CompileFlat();
 			//return AccessLayer.Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
@@ -120,7 +118,7 @@ namespace JPB.DataAccess.Query
 
 		/// <inheritdoc />
 		public IList<QueryIdentifier> Identifiers { get; private set; }
-
+		
 		/// <inheritdoc />
 		public QueryIdentifier GetAlias(QueryIdentifier.QueryIdTypes table)
 		{
@@ -152,6 +150,10 @@ namespace JPB.DataAccess.Query
 			foreach (var queryPart in queryParts)
 			{
 				var command = queryPart.Process(this);
+				if (command == null)
+				{
+					continue;
+				}
 
 				param.AddRange(command.Parameters.AsQueryParameter());
 				if (command.CommandText != null)
@@ -178,16 +180,6 @@ namespace JPB.DataAccess.Query
 			return ++AutoParameterCounter;
 		}
 
-		/// <inheritdoc />
-		public string GetTableAlias(string target)
-		{
-			if (TableAlias.ContainsKey(target))
-			{
-				return TableAlias[target];
-			}
-			return $"[{target}]";
-		}
-
 		//public object Clone()
 		//{
 		//	return new InternalContainerContainer(this);
@@ -209,6 +201,18 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <inheritdoc />
+		public T Search<T>(Func<T, bool> filter) where T : IQueryPart
+		{
+			return Parts.OfType<T>().FirstOrDefault(filter);
+		}
+
+		/// <inheritdoc />
+		public ISelectableQueryPart Search(QueryIdentifier identifier)
+		{
+			return Parts.OfType<ISelectableQueryPart>().First(e => e.Alias.Equals(identifier));
+		}
+
+		/// <inheritdoc />
 		public void Add(IQueryPart queryPart)
 		{
 			_parts.Add(queryPart);
@@ -223,12 +227,7 @@ namespace JPB.DataAccess.Query
 			{
 				throw new ArgumentNullException("No type Supplied", new Exception());
 			}
-
-			if (EnumerationMode == EnumerationMode.FullOnLoad)
-			{
-				return new QueryEagerEnumerator(this, ForType, true);
-			}
-			return new QueryLazyEnumerator(this, ForType, true);
+			return new QueryEagerEnumerator(this, ForType, true);
 		}
 
 		/// <summary>
@@ -236,20 +235,9 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		public int Execute()
 		{
-			return Compile().ExecuteGenericCommand(AccessLayer.Database);
+			return Compile(out var columns).ExecuteGenericCommand(AccessLayer.Database);
 		}
-
-		/// <summary>
-		///     QueryCommand like setter for WithEnumerationMode
-		/// </summary>
-		/// <returns></returns>
-		public IQueryContainer WithEnumerationMode(EnumerationMode mode)
-		{
-			EnumerationMode = mode;
-			return this;
-		}
-
-
+		
 		/// <summary>
 		///     QueryCommand like setter for AllowParamterRenaming [Duplicate]
 		/// </summary>
@@ -288,7 +276,7 @@ namespace JPB.DataAccess.Query
 				.AppendInterlacedLine("AllowParamterRenaming = {0},", AllowParamterRenaming.ToString().ToLower())
 				.AppendInterlacedLine("AutoParameterCounter = {0},", AutoParameterCounter)
 				.AppendInterlacedLine("QueryDebugger = ")
-				.Insert(new QueryDebugger(Compile(), AccessLayer.Database).Render)
+				.Insert(new QueryDebugger(Compile(out var columns), AccessLayer.Database).Render)
 				.AppendInterlacedLine("Parts[{0}] = ", Parts.Count())
 				.AppendInterlacedLine("{")
 				.Up();

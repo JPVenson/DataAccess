@@ -117,9 +117,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DataMigrationHelper.AddUsers(100, DbAccess);
 
-			var baseQuery = DbAccess.Query().Select.Table<Users>();
-			var queryA = baseQuery.ContainerObject.Compile();
-			var queryB = baseQuery.ContainerObject.Compile();
+			var queryA = DbAccess.CreateSelect<Users>();
+			var queryB = DbAccess.CreateSelect<Users>();
 			Assert.IsNotNull(queryA);
 			Assert.IsNotNull(queryB);
 

@@ -72,18 +72,6 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
-		/// Changes how the result is enumerated in a Fluid syntax
-		/// </summary>
-		/// <param name="mode"></param>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public RootQuery ConfigEnumerationMode(EnumerationMode mode)
-		{
-			ContainerObject.EnumerationMode = mode;
-			return this;
-		}
-
-		/// <summary>
 		/// Changes the AllowParamterRenaming flag in a Fluid syntax
 		/// </summary>
 		/// <param name="mode"></param>
@@ -121,17 +109,6 @@ namespace JPB.DataAccess.Query.Operators
 		public PrepaireUpdateQuery Update
 		{
 			get { return new PrepaireUpdateQuery(this); }
-		}
-
-		/// <summary>
-		///     Adds a Select - Statement
-		///     Uses reflection or a Factory mehtod to create
-		/// </summary>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public SelectQuery<T> SelectFactory<T>(params object[] argumentsForFactory)
-		{
-			return new DatabaseObjectSelector(this).Table<T>(argumentsForFactory);
 		}
 
 		/// <summary>
@@ -184,19 +161,15 @@ namespace JPB.DataAccess.Query.Operators
 		public RootQuery WithCte<T>(IElementProducer<T> commandQuery, out QueryIdentifier cteName)
 		{
 			IQueryBuilder newQuery = new RootQuery(this);
-			foreach (var id in commandQuery.ContainerObject.Identifiers)
-			{
-				newQuery.ContainerObject.Identifiers.Add(id);
-			}
+			cteName = newQuery.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Cte);
 
-			var cteQueryPart = commandQuery.ContainerObject.Search<CteQueryPart>();
-			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteQueryPart()));
+			var cteQueryPart = commandQuery.ContainerObject.Search<CteDefinitionQueryPart>();
+			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()));
 
-			var cteInfo = new CteQueryPart.CteInfo();
-			cteInfo.Name = (cteName = newQuery.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Cte));
+			var cteInfo = new CteDefinitionQueryPart.CteInfo();
+			cteInfo.Name = cteName;
 			cteInfo.CteContentParts.AddRange(commandQuery.ContainerObject.Parts);
-			cteQueryPart.CteInfos.Add(cteInfo);
-			return new RootQuery(newQuery);
+			return new RootQuery(newQuery.Add(cteQueryPart.AddCte(cteInfo)));
 		}
 	}
 }

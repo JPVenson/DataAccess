@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
@@ -36,15 +37,18 @@ namespace JPB.DataAccess.Manager
 		public List<List<object>> ExecuteMARS(IDbCommand bulk, params Type[] marsTypes)
 		{
 			var mars = EnumerateMarsDataRecords(bulk);
-			var concatedMarsToType = new List<Tuple<DbClassInfoCache, List<IDataRecord>>>();
+			var concatedMarsToType = new List<Tuple<DbClassInfoCache, List<EagarDataRecord>>>();
 			for (var index = 0; index < mars.Count; index++)
 			{
 				var dataRecord = mars[index];
 				var expectedResult = marsTypes[index];
-				concatedMarsToType.Add(new Tuple<DbClassInfoCache, List<IDataRecord>>(GetClassInfo(expectedResult), dataRecord));
+				concatedMarsToType.Add(
+					new Tuple<DbClassInfoCache, List<EagarDataRecord>>(GetClassInfo(expectedResult), dataRecord));
 			}
+
 			var list =
-				concatedMarsToType.Select(s => s.Item2.Select(e => SetPropertysViaReflection(s.Item1, e)).AsParallel().ToList())
+				concatedMarsToType.Select(s =>
+						s.Item2.Select(e => SetPropertysViaReflection(s.Item1, e)).AsParallel().ToList())
 					.AsParallel()
 					.ToList();
 			return list;
@@ -115,7 +119,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public async Task<T> SelectAsync<T>(object pk)
 		{
-			return (T)(await SelectAsync(typeof(T), pk));
+			return (T) await SelectAsync(typeof(T), pk);
 		}
 
 		/// <summary>
@@ -135,7 +139,8 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected async Task<object> SelectAsync(Type type, object pk, bool egarLoading)
 		{
-			return await Database.RunAsync(async d => (await SelectAsync(type, CreateSelect(type, pk), egarLoading)).FirstOrDefault());
+			return await Database.RunAsync(async d =>
+				(await SelectAsync(type, CreateSelect(type, pk), egarLoading)).FirstOrDefault());
 		}
 
 		/// <summary>
@@ -159,7 +164,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected async Task<T> SelectAsync<T>(object pk, bool egarLoading)
 		{
-			return (T)(await SelectAsync(typeof(T), pk, egarLoading));
+			return (T) await SelectAsync(typeof(T), pk, egarLoading);
 		}
 
 		/// <summary>
@@ -226,7 +231,8 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		protected async Task<object[]> SelectAsync(Type type, bool egarLoading, params object[] parameter)
 		{
-			return await Database.RunAsync(async (d) => await SelectAsync(type, CreateSelectQueryFactory(GetClassInfo(type), parameter), egarLoading));
+			return await Database.RunAsync(async d =>
+				await SelectAsync(type, CreateSelectQueryFactory(GetClassInfo(type), parameter), egarLoading));
 		}
 
 		/// <summary>
@@ -283,7 +289,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Select with appended query.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, string query)
@@ -295,7 +301,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Select with appended query.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect<T>(string query)
@@ -305,7 +311,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Select with appended query and inclueded QueryCommand Paramater.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, string query, IEnumerable<IQueryParameter> paramenter)
@@ -319,6 +325,7 @@ namespace JPB.DataAccess.Manager
 					plainCommand.Parameters.AddWithValue(para.Name, para.Value, Database);
 				}
 			}
+
 			return plainCommand;
 		}
 
@@ -355,7 +362,7 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     For StackOverflow detection
 		/// </summary>
-		private static AsyncLocal<bool> _isIndented = new AsyncLocal<bool>();
+		private static readonly AsyncLocal<bool> _isIndented = new AsyncLocal<bool>();
 
 		internal IDbCommand CreateSelectQueryFactory(DbClassInfoCache type, Func<IDbCommand> fallback,
 			params object[] parameter)
@@ -382,21 +389,24 @@ namespace JPB.DataAccess.Manager
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => CreateInsert(Database, type, e), entity);
+			return GenericQueryCreation<InsertFactoryMethodAttribute>(type, (e, f) => CreateInsert(Database, type, e),
+				entity);
 		}
 
 		internal IDbCommand CreateUpdateQueryFactory(DbClassInfoCache type,
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<UpdateFactoryMethodAttribute>(type, (e, f) => CreateUpdate(Database, type, e), entity);
+			return GenericQueryCreation<UpdateFactoryMethodAttribute>(type, (e, f) => CreateUpdate(Database, type, e),
+				entity);
 		}
 
 		internal IDbCommand CreateDeleteQueryFactory(DbClassInfoCache type,
 			object entity,
 			params object[] parameter)
 		{
-			return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => CreateDelete(Database, type, e), entity);
+			return GenericQueryCreation<DeleteFactoryMethodAttribute>(type, (e, f) => CreateDelete(Database, type, e),
+				entity);
 		}
 
 		internal IDbCommand GenericQueryCreation<TE>(
@@ -410,6 +420,7 @@ namespace JPB.DataAccess.Manager
 			{
 				throw new ArgumentNullException(nameof(type));
 			}
+
 			if (fallback == null)
 			{
 				throw new ArgumentNullException(nameof(fallback));
@@ -428,9 +439,10 @@ namespace JPB.DataAccess.Manager
 					else
 					{
 						throw new InvalidOperationException(
-						"This method is not allowed in the context of any FactoryMethod. Enable Multipath to allow the Intiligent Query creation");
+							"This method is not allowed in the context of any FactoryMethod. Enable Multipath to allow the Intiligent Query creation");
 					}
 				}
+
 				_isIndented.Value = true;
 
 				var arguments = parameter.ToList();
@@ -439,7 +451,10 @@ namespace JPB.DataAccess.Manager
 				if (!arguments.Any())
 				{
 					if (factoryAttribute == typeof(SelectFactoryMethodAttribute) && type.SelectFactory != null
-						&& (!IsMultiProviderEnvironment || type.SelectFactory.Attribute.TargetDatabase == Database.TargetDatabase))
+					                                                             && (!IsMultiProviderEnvironment ||
+					                                                                 type.SelectFactory.Attribute
+						                                                                 .TargetDatabase ==
+					                                                                 Database.TargetDatabase))
 					{
 						return DbAccessLayerHelper.CreateCommand(Database, type.SelectFactory.Attribute.Query);
 					}
@@ -448,9 +463,9 @@ namespace JPB.DataAccess.Manager
 				var methods =
 					type.Mehtods
 						.Where(s => s.Attributes.Any(e => e.Attribute is TE && (!IsMultiProviderEnvironment
-																				||
-																				((TE)e.Attribute).TargetDatabase ==
-																				Database.TargetDatabase)))
+						                                                        ||
+						                                                        ((TE) e.Attribute).TargetDatabase ==
+						                                                        Database.TargetDatabase)))
 						.ToArray();
 
 				if (methods.Any())
@@ -471,16 +486,19 @@ namespace JPB.DataAccess.Manager
 							{
 								continue;
 							}
+
 							var tryParam = arguments[i];
 							if (tryParam == null)
 							{
 								return false;
 							}
+
 							if (!(para.Type == tryParam.GetType()))
 							{
 								return false;
 							}
 						}
+
 						return true;
 					}).ToArray();
 
@@ -490,20 +508,22 @@ namespace JPB.DataAccess.Manager
 						{
 							ThrowNoFactoryFoundException<TE>(arguments);
 						}
+
 						return fallback(entity, Database);
 					}
 
 					var method = searchMethodWithFittingParams.First();
 					//must be public static if its an Select otherwise it has to be an instance member
 					if (factoryAttribute == typeof(SelectFactoryMethodAttribute)
-						&& !method.MethodInfo.IsStatic
-						|| factoryAttribute != typeof(SelectFactoryMethodAttribute)
-						&& method.MethodInfo.IsStatic)
+					    && !method.MethodInfo.IsStatic
+					    || factoryAttribute != typeof(SelectFactoryMethodAttribute)
+					    && method.MethodInfo.IsStatic)
 					{
 						if (CheckFactoryArguments && arguments.Any())
 						{
 							ThrowNoFactoryFoundException<TE>(arguments);
 						}
+
 						return fallback(entity, Database);
 					}
 
@@ -514,7 +534,7 @@ namespace JPB.DataAccess.Manager
 					{
 						if (method.ReturnType != typeof(IQueryBuilder))
 						{
-							ThrowNoFactoryFoundException<TE>(arguments);
+							throw new InvalidOperationException("The feature of Query Factorys that return a IQueryBuilder has been retired. Please return an instance of IQueryFactoryResult (WITHOUT ROOTQUERY AS ARGUMENT) instead");
 						}
 
 						queryBuilder = Query();
@@ -535,17 +555,19 @@ namespace JPB.DataAccess.Manager
 					{
 						invoke = method.Invoke(entity);
 					}
+
 					if (invoke != null)
 					{
 						if (invoke is IQueryBuilder)
 						{
-							return (invoke as IQueryBuilder).ContainerObject.Compile();
+							throw new NotSupportedException($"The feature of Query Factorys that return a IQueryBuilder has been retired. Please return an instance of IQueryFactoryResult instead");
 						}
 
 						if (!string.IsNullOrEmpty(invoke as string))
 						{
 							return DbAccessLayerHelper.CreateCommand(Database, invoke as string);
 						}
+
 						if (invoke is IQueryFactoryResult)
 						{
 							var result = invoke as IQueryFactoryResult;
@@ -553,10 +575,12 @@ namespace JPB.DataAccess.Manager
 						}
 					}
 				}
+
 				if (CheckFactoryArguments && arguments.Any())
 				{
 					ThrowNoFactoryFoundException<TE>(arguments);
 				}
+
 				return fallback(entity, Database);
 			}
 			finally
@@ -582,6 +606,7 @@ namespace JPB.DataAccess.Manager
 			{
 				data.Add(argument.ToString());
 			}
+
 			invalidOperationException.Data.Add("FactoryType", typeof(TE));
 			invalidOperationException.Data.Add("Types", types);
 			invalidOperationException.Data.Add("Data", data);
@@ -591,14 +616,15 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, object pk)
 		{
 			if (GetClassInfo(type).PrimaryKeyProperty == null)
 			{
-				throw new NotSupportedException(string.Format("Class '{0}' does not define any Primary key", type.Name));
+				throw new NotSupportedException(string.Format("Class '{0}' does not define any Primary key",
+					type.Name));
 			}
 
 			var query = CreateSelectQueryFactory(GetClassInfo(type)).CommandText
@@ -615,14 +641,24 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public static string CreateSelect(string source, DbClassInfoCache classType, string alias, string target)
 		{
-			return CreateSelectByColumns(source, classType.CreatePropertyCsv(alias,
+			return CreateSelectByColumns(source,
+				GetSelectableColumnsOf(classType, alias).Aggregate((e, f) => e + ", " + f), alias, target);
+		}
+
+		/// <summary>
+		///     Gets a list of all columns that are selectable
+		/// </summary>
+		/// <returns></returns>
+		public static string[] GetSelectableColumnsOf(DbClassInfoCache classType, string alias)
+		{
+			return classType.CreateProperties(alias,
 				classType
 					.Propertys
 					.Where(f => f.Value.ForginKeyAttribute != null ||
-								f.Value.FromXmlAttribute != null
-								&& f.Value.FromXmlAttribute.Attribute.LoadStrategy == LoadStrategy.NotIncludeInSelect)
+					            f.Value.FromXmlAttribute != null
+					            && f.Value.FromXmlAttribute.Attribute.LoadStrategy == LoadStrategy.NotIncludeInSelect)
 					.Select(f => f.Key)
-					.ToArray()), alias, target);
+					.ToArray());
 		}
 
 		/// <summary>
@@ -638,6 +674,7 @@ namespace JPB.DataAccess.Manager
 			{
 				sb.Append(modifier + " ");
 			}
+
 			sb.Append(columns);
 			sb.Append(" FROM ");
 			sb.Append($"[{source.Trim('[', ']')}] ");
@@ -645,12 +682,13 @@ namespace JPB.DataAccess.Manager
 			{
 				sb.Append($"AS [{alias.Trim('[', ']')}] ");
 			}
+
 			return sb.ToString();
 		}
 
 		/// <summary>
 		///     Creates a Select by using a Factory mehtod or auto generated querys.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -662,12 +700,12 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Select by using a Factory mehtod or auto generated querys.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		private static IDbCommand CreateSelect(DbClassInfoCache type, string alias, IDatabase db)
 		{
-			return db.CreateCommand(CreateSelect(type.TableName, type, alias, (string)null));
+			return db.CreateCommand(CreateSelect(type.TableName, type, alias, null));
 		}
 
 		#endregion
@@ -677,7 +715,7 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Executes a Selectstatement and Parse the Output into
 		///     <paramref name="type" />.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IEnumerable RunDynamicSelect(Type type, IDbCommand query)
@@ -688,14 +726,15 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     Executes a Selectstatement and Parse the Output into
 		///     <paramref name="type" />.
-		///		Should be only executed inside an open <code>Database.Run</code>
+		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public async Task<IEnumerable> RunDynamicSelectAsync(Type type, IDbCommand query)
 		{
 			RaiseSelect(query);
 			var typeInfo = GetClassInfo(type);
-			return await EnumerateDataRecordsAsync(query, LoadCompleteResultBeforeMapping, typeInfo, CommandBehavior.SingleResult);
+			return await EnumerateDataRecordsAsync(query, LoadCompleteResultBeforeMapping, typeInfo,
+				CommandBehavior.SingleResult);
 		}
 
 		/// <summary>
@@ -822,7 +861,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (!where.StartsWith("WHERE"))
 			{
-				@where = @where.Insert(0, "WHERE ");
+				where = where.Insert(0, "WHERE ");
 			}
 
 			var query = CreateSelect(type, where, paramenter);
@@ -854,7 +893,8 @@ namespace JPB.DataAccess.Manager
 		public object[] SelectWhere(Type type, string where, dynamic paramenter)
 		{
 			//Concret declaration is nessesary because we are working with dynmaics, so the compiler has ne space to guess the type wrong
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
+			IEnumerable<IQueryParameter> enumarateFromDynamics =
+				DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
 			return SelectWhere(type, where, enumarateFromDynamics);
 		}
 
@@ -898,7 +938,8 @@ namespace JPB.DataAccess.Manager
 		public async Task<object[]> RunPrimetivSelectAsync(Type type, IDbCommand command)
 		{
 			RaiseSelect(command);
-			return (await EnumerateDataRecordsAsync(command, LoadCompleteResultBeforeMapping, GetClassInfo(type), CommandBehavior.SingleResult)).ToArray();
+			return (await EnumerateDataRecordsAsync(command, LoadCompleteResultBeforeMapping, GetClassInfo(type),
+				CommandBehavior.SingleResult)).ToArray();
 		}
 
 		/// <summary>
@@ -938,7 +979,8 @@ namespace JPB.DataAccess.Manager
 		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
 		public T[] RunPrimetivSelect<T>(string query, dynamic parameters)
 		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(parameters);
+			IEnumerable<IQueryParameter> enumarateFromDynamics =
+				DbAccessLayerHelper.EnumerateFromUnknownParameter(parameters);
 			var runPrimetivSelect = RunPrimetivSelect(typeof(T), query, enumarateFromDynamics);
 			return runPrimetivSelect.Cast<T>().ToArray();
 		}
@@ -1092,6 +1134,7 @@ namespace JPB.DataAccess.Manager
 				{
 					continue;
 				}
+
 				Type targetType = null;
 				if (propertyInfo.CheckForListInterface())
 				{
@@ -1129,15 +1172,16 @@ namespace JPB.DataAccess.Manager
 				if (orDefault.CheckForListInterface() && propertyInfo.CheckForListInterface())
 				{
 					var constructorInfo =
-						typeof(DbCollection<>).MakeGenericType(targetType).GetConstructor(new[] { typeof(IEnumerable) });
+						typeof(DbCollection<>).MakeGenericType(targetType).GetConstructor(new[] {typeof(IEnumerable)});
 
-					var reproCollection = constructorInfo.Invoke(new object[] { orDefault });
+					var reproCollection = constructorInfo.Invoke(new object[] {orDefault});
 					propertyInfo.Setter.Invoke(source, reproCollection);
 					foreach (var item in orDefault)
 					{
 						LoadNavigationProps(item);
 					}
 				}
+
 				if (propertyInfo.CheckForListInterface())
 				{
 					continue;
@@ -1245,7 +1289,8 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public async Task<object[]> SelectNativeAsync(Type type, string query, dynamic paramenter)
 		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
+			IEnumerable<IQueryParameter> enumarateFromDynamics =
+				DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
 			return await SelectNativeAsync(type, query, enumarateFromDynamics);
 		}
 
@@ -1270,7 +1315,8 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public async Task<object[]> SelectNativeAsync(Type type, IDbCommand command, dynamic paramenter)
 		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics = DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
+			IEnumerable<IQueryParameter> enumarateFromDynamics =
+				DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
 
 			foreach (var enumarateFromDynamic in enumarateFromDynamics)
 			{
@@ -1303,7 +1349,7 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		public async Task<T[]> SelectNativeAsync<T>(string query, dynamic paramenter)
 		{
-			var objects = (object[])await SelectNativeAsync(typeof(T), query, paramenter);
+			var objects = (object[]) await SelectNativeAsync(typeof(T), query, paramenter);
 			return objects.Cast<T>().ToArray();
 		}
 
