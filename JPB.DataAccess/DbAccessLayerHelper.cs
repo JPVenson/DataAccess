@@ -52,7 +52,7 @@ namespace JPB.DataAccess
 			}
 
 #pragma warning disable 618
-			return DbAccessLayer.ReflectionPropertySet(config, source, type, reader, null, accessType);
+			return DbAccessLayer.ReflectionPropertySet(config, source, type, reader, new DbAccessLayer.ReflectionSetCacheModel(), accessType);
 #pragma warning restore 618
 		}
 

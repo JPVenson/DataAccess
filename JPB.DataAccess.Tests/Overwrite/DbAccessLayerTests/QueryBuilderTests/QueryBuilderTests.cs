@@ -54,59 +54,53 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void JoinChilds()
 		{
 			var addBooksWithImage = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			Assert.That(() =>
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(nameof(BookWithFkImages.Images))
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+
+			for (var index = 0; index < books.Length; index++)
 			{
-				var books = CreateQuery()
-					.Select.Table<BookWithFkImages>()
-					.Join(nameof(BookWithFkImages.Images))
-					.ToArray();
+				var bookWithFkImagese = books[index];
+				var addBook = addBooksWithImage[index];
+				Assert.That(bookWithFkImagese.BookId, Is.EqualTo(addBook));
+				Assert.That(bookWithFkImagese.Images, Is.Not.Null);
+				Assert.That(bookWithFkImagese.Images.Count, Is.EqualTo(10));
+				var bookOnId = DbAccess.Select<Book>(addBook);
+				Assert.That(bookWithFkImagese.BookName, Is.EqualTo(bookOnId.BookName));
 
-				Assert.That(books, Is.Not.Null);
-
-				for (var index = 0; index < books.Length; index++)
+				var imagesOfThatBook = DbAccess.Query().Select.Table<Image>()
+					.Where
+					.Column(f => f.IdBook).Is.EqualsTo(addBook).ToArray();
+				foreach (var imageWithFkBook in bookWithFkImagese.Images)
 				{
-					var bookWithFkImagese = books[index];
-					var addBook = addBooksWithImage[index];
-					Assert.That(bookWithFkImagese.BookId, Is.EqualTo(addBook));
-					Assert.That(bookWithFkImagese.Images, Is.Not.Null);
-					Assert.That(bookWithFkImagese.Images.Count, Is.EqualTo(10));
-					var bookOnId = DbAccess.Select<Book>(addBook);
-					Assert.That(bookWithFkImagese.BookName, Is.EqualTo(bookOnId.BookName));
+					var img = imagesOfThatBook.FirstOrDefault(f => f.ImageId == imageWithFkBook.ImageId);
 
-					var imagesOfThatBook = DbAccess.Query().Select.Table<Image>()
-						.Where
-						.Column(f => f.IdBook).Is.EqualsTo(addBook).ToArray();
-					foreach (var imageWithFkBook in bookWithFkImagese.Images)
-					{
-						var img = imagesOfThatBook.FirstOrDefault(f => f.ImageId == imageWithFkBook.ImageId);
-
-						Assert.That(imageWithFkBook, Is.Not.Null);
-						Assert.That(imageWithFkBook.Text, Is.EqualTo(img.Text));
-					}
+					Assert.That(imageWithFkBook, Is.Not.Null);
+					Assert.That(imageWithFkBook.Text, Is.EqualTo(img.Text));
 				}
-			}, Throws.Nothing);
+			}
 		}
 
 		[Test]
 		public void JoinParent()
 		{
-			var addBooksWithImage = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			Assert.That(() =>
+			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.Select.Table<ImageWithFkBooks>()
+				.Join(nameof(ImageWithFkBooks.Book))
+				.ToArray());
+
+			foreach (var imageWithFkBookse in books)
 			{
-				var books = CreateQuery()
-					.Select.Table<ImageWithFkBooks>()
-					.Join(nameof(ImageWithFkBooks.Book))
-					.ToArray();
+				Assert.That(imageWithFkBookse.Book, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.BookName, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.BookId, Is.Not.Zero);
+			}
 
-				foreach (var imageWithFkBookse in books)
-				{
-					Assert.That(imageWithFkBookse.Book, Is.Not.Null);
-					Assert.That(imageWithFkBookse.Book.BookName, Is.Not.Null);
-					Assert.That(imageWithFkBookse.Book.BookId, Is.Not.Zero);
-				}
-
-				Assert.That(books, Is.Not.Null);
-			}, Throws.Nothing);
+			Assert.That(books, Is.Not.Null);
 		}
 
 		[Test]
@@ -125,13 +119,13 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				IdBook = book.BookId
 			});
 
-			var books = CreateQuery()
+			var books = Measure(() => CreateQuery()
 				.Select.Table<ImageWithFkBooks>()
 				.Join(nameof(ImageWithFkBooks.Book))
 				.Where
 				.Column(f => f.Book.BookName).Is.EqualsTo("Test")
 				.ToArray()
-				.FirstOrDefault();
+				.FirstOrDefault());
 
 			Assert.That(books, Is.Not.Null);
 			Assert.That(books.Book.BookName, Is.EqualTo("Test"));
@@ -141,10 +135,10 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void JoinParentAndThenChild()
 		{
 			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			var images = CreateQuery()
+			var images = Measure(() => CreateQuery()
 				.Select.Table<ImageWithFkBooks>()
 				.Join(f => f.Book.Images)
-				.ToArray();
+				.ToArray());
 
 			Assert.That(images, Is.Not.Null);
 
@@ -180,15 +174,32 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void JoinChildAndThenParent()
 		{
 			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			var images = CreateQuery()
+			var books = Measure(() => CreateQuery()
 				.Select.Table<BookWithFkImages>()
 				.Join(f => f.Images.Type.Book)
-				.ToArray();
+				.ToArray());
 
-			Assert.That(images, Is.Not.Null);
+			Assert.That(books, Is.Not.Null);
 
 			var allBooks = DbAccess.Select<Book>();
 			var allImages = DbAccess.Select<Image>();
+
+			foreach (var book in books)
+			{
+				Assert.That(book, Is.Not.Null);
+				Assert.That(book.BookName, Is.Not.Null);
+				
+				Assert.That(book.Images, Is.Not.Null);
+				Assert.That(book.Images, Is.Not.Empty);
+
+				var imgsOfBook = allImages.Where(f => f.IdBook == book.BookId);
+				foreach (var image in imgsOfBook)
+				{
+					var imageInBook = book.Images.FirstOrDefault(f => f.ImageId == image.ImageId);
+					Assert.That(imageInBook, Is.Not.Null);
+					Assert.That(imageInBook.Text, Is.EqualTo(image.Text));
+				}
+			}
 
 			//foreach (var imageWithFkBookse in images)
 			//{

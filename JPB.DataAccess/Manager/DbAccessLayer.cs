@@ -68,7 +68,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (dbAccessType == DbAccessType.Unknown)
 			{
-				throw new InvalidEnumArgumentException(nameof(dbAccessType), (int)DbAccessType.Unknown,
+				throw new InvalidEnumArgumentException(nameof(dbAccessType), (int) DbAccessType.Unknown,
 					typeof(DbAccessType));
 			}
 
@@ -153,7 +153,7 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     If Enabled the enumeration of Commands will happen in a Thread save way.
-		///		It Ensures that only one Operation will be execute at a time.
+		///     It Ensures that only one Operation will be execute at a time.
 		/// </summary>
 		public bool ThreadSave { get; set; }
 
@@ -298,10 +298,10 @@ namespace JPB.DataAccess.Manager
 				type.GetConstructors()
 					.FirstOrDefault(
 						s => s.GetParameters().Length == 1 &&
-							 s.GetParameters().First().ParameterType == typeof(string));
+						     s.GetParameters().First().ParameterType == typeof(string));
 			if (ctOfType != null)
 			{
-				return ctOfType.Invoke(new object[] { connection }) as IDatabaseStrategy;
+				return ctOfType.Invoke(new object[] {connection}) as IDatabaseStrategy;
 			}
 
 			var instanceOfType = Activator.CreateInstance(type) as IDatabaseStrategy;
@@ -318,7 +318,7 @@ namespace JPB.DataAccess.Manager
 		{
 			// ReSharper disable once PossibleInvalidOperationException
 			var firstOrDefault =
-				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?)s)
+				ProviderCollection.Select(s => (KeyValuePair<DbAccessType, string>?) s)
 					.FirstOrDefault(s => s.Value.Value == fullTypeNameToIDatabaseStrategy);
 			DbAccessType = firstOrDefault == null ? DbAccessType.Unknown : firstOrDefault.Value.Key;
 		}
@@ -381,7 +381,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			return ExecuteGenericCommand(query,
-				(IEnumerable<IQueryParameter>)DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter));
+				(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter));
 		}
 
 		/// <summary>
@@ -472,37 +472,37 @@ namespace JPB.DataAccess.Manager
 			return SetPropertysViaReflection(type, reader, DbAccessType);
 		}
 
-		/// <summary>
-		///     Creates a new Instance based on possible Ctor's and the given
-		///     <paramref name="reader" />
-		/// </summary>
-		/// <returns></returns>
-		public object SetPropertysViaReflection(DbClassInfoCache type, EagarDataRecord reader,
-			Dictionary<int, DbPropertyInfoCache> mapping)
-		{
-			bool created;
-			var source = CreateInstance(type, reader, out created);
-			if (created)
-			{
-				return source;
-			}
+//		/// <summary>
+//		///     Creates a new Instance based on possible Ctor's and the given
+//		///     <paramref name="reader" />
+//		/// </summary>
+//		/// <returns></returns>
+//		public object SetPropertysViaReflection(DbClassInfoCache type, EagarDataRecord reader,
+//			Dictionary<int, DbPropertyInfoCache> mapping)
+//		{
+//			bool created;
+//			var source = CreateInstance(type, reader, out created);
+//			if (created)
+//			{
+//				return source;
+//			}
 
-#pragma warning disable 618
-			return ReflectionPropertySet(Config, source, type, reader, mapping, DbAccessType);
-#pragma warning restore 618
-		}
+//#pragma warning disable 618
+//			return ReflectionPropertySet(Config, source, type, reader, mapping, DbAccessType);
+//#pragma warning restore 618
+//		}
 
-		/// <summary>
-		///     Creates an instance based on a Ctor injection or Reflection loading
-		///     or when using a MsCoreLib type direct enumeration
-		/// </summary>
-		/// <returns></returns>
-		public static object CreateInstance(DbClassInfoCache classInfo,
-			EagarDataRecord reader)
-		{
-			bool loaded;
-			return CreateInstance(classInfo, reader, out loaded);
-		}
+//		/// <summary>
+//		///     Creates an instance based on a Ctor injection or Reflection loading
+//		///     or when using a MsCoreLib type direct enumeration
+//		/// </summary>
+//		/// <returns></returns>
+//		public static object CreateInstance(DbClassInfoCache classInfo,
+//			EagarDataRecord reader)
+//		{
+//			bool loaded;
+//			return CreateInstance(classInfo, reader, out loaded);
+//		}
 
 		/// <summary>
 		///     Creates an instance based on a Ctor injection or Reflection loading
@@ -533,26 +533,27 @@ namespace JPB.DataAccess.Manager
 
 			var factories = classInfo.Constructors.Where(s =>
 					s.Arguments.Count == 1
-					&& s.Arguments.First().Type == typeof(IDataRecord))
+					&& s.Arguments.First().Type.IsAssignableFrom(typeof(EagarDataRecord)))
 				.ToArray();
 
 			var constructor = factories.FirstOrDefault(s =>
-								  s.Attributes.Any(f =>
-									  f.Attribute is ObjectFactoryMethodAttribute
-									  &&
-									  (!accessType.HasValue ||
-									   ((ObjectFactoryMethodAttribute)f.Attribute).TargetDatabase ==
-									   accessType.Value))) ??
-							  factories.FirstOrDefault();
+				                  s.Attributes.Any(f =>
+					                  f.Attribute is ObjectFactoryMethodAttribute attribute
+					                  &&
+					                  (!accessType.HasValue ||
+					                   attribute.TargetDatabase ==
+					                   accessType.Value))) ??
+			                  factories.FirstOrDefault();
 
 			//maybe single ctor with param
 
 			if (constructor != null)
 			{
-				if (constructor.Arguments.Count == 1 && constructor.Arguments.First().Type == typeof(IDataRecord))
+				if (constructor.Arguments.Count == 1 &&
+				    constructor.Arguments.First().Type.IsAssignableFrom(typeof(EagarDataRecord)))
 				{
 					classInfo.FullFactory = true;
-					classInfo.Factory = s => constructor.Invoke(new object[] { s });
+					classInfo.Factory = s => constructor.Invoke(new object[] {s});
 					return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 				}
 			}
@@ -575,10 +576,10 @@ namespace JPB.DataAccess.Manager
 							if (returnType != null && returnType.ParameterType == classInfo.Type)
 							{
 								if (factory.Arguments.Count == 1 &&
-									factory.Arguments.First().Type == typeof(IDataRecord))
+								    factory.Arguments.First().Type.IsAssignableFrom(typeof(EagarDataRecord)))
 								{
 									classInfo.FullFactory = true;
-									classInfo.Factory = s => factory.Invoke(new object[] { reader });
+									classInfo.Factory = s => factory.Invoke(new object[] {reader});
 									return CreateInstance(classInfo, reader, out fullLoaded, accessType);
 								}
 							}
@@ -601,17 +602,35 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
+		/// 
+		/// </summary>
+		public class ReflectionSetCacheModel
+		{
+			/// <summary>
+			/// 
+			/// </summary>
+			public ReflectionSetCacheModel()
+			{
+				Cache = new Dictionary<Type, IDictionary<int, DbPropertyInfoCache>>();
+			}
+			/// <summary>
+			/// 
+			/// </summary>
+			public IDictionary<Type, IDictionary<int, DbPropertyInfoCache>> Cache { get; private set; }
+		}
+
+		/// <summary>
 		///     Loads all propertys from a DataReader into the given Object
 		/// </summary>
-		[Obsolete("This mehtod is replaced by several FASTER equal ones. " +
-				  "It may be replaced, updated or deleted. But it will change that is for sure. " +
-				  "legacy or Fallback support only")]
+		[Obsolete("This method is replaced by several FASTER equal ones. " +
+		          "It may be replaced, updated or deleted. But it will change that is for sure. " +
+		          "legacy or Fallback support only")]
 		public static object ReflectionPropertySet(
 			DbConfig config,
 			object instance,
 			DbClassInfoCache info,
-			IDataRecord reader,
-			Dictionary<int, DbPropertyInfoCache> cache,
+			EagarDataRecord reader,
+			ReflectionSetCacheModel cacheModel,
 			DbAccessType? dbAccessType)
 		{
 			if (instance == null)
@@ -634,15 +653,25 @@ namespace JPB.DataAccess.Manager
 
 			var propertys = info.Propertys.ToArray();
 			var instanceOfFallbackList = new Dictionary<string, object>();
+			IDictionary<int, DbPropertyInfoCache> cache = new Dictionary<int, DbPropertyInfoCache>();
 
-			if (cache == null)
+			var containsKey = cacheModel?.Cache.ContainsKey(info.Type);
+			if (containsKey != true)
 			{
-				cache = new Dictionary<int, DbPropertyInfoCache>();
 				for (var i = 0; i < reader.FieldCount; i++)
 				{
 					info.Propertys.TryGetValue(info.SchemaMappingDatabaseToLocal(reader.GetName(i)), out var val);
 					cache.Add(i, val);
 				}
+
+				if (containsKey == false)
+				{
+					cacheModel.Cache[info.Type] = cache;
+				}
+			}
+			if (containsKey == true)
+			{
+				cache = cacheModel.Cache[info.Type];
 			}
 
 			for (var i = 0; i < reader.FieldCount; i++)
@@ -695,11 +724,13 @@ namespace JPB.DataAccess.Manager
 									property.PropertyInfo.PropertyType.GetGenericArguments().FirstOrDefault());
 							var enumerableOfItems =
 								xmlDataRecords.Select(
-									s => genericArguments.SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(s), dbAccessType, config)).ToList();
+									s => genericArguments
+										.SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(s),
+											dbAccessType, config)).ToList();
 							object castedList;
 
 							if (genericArguments.Type.IsClass &&
-								genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
+							    genericArguments.Type.GetInterface("INotifyPropertyChanged") != null)
 							{
 								var caster =
 									typeof(DbCollection<>).MakeGenericType(genericArguments.Type)
@@ -710,7 +741,7 @@ namespace JPB.DataAccess.Manager
 							{
 								var caster =
 									typeof(NonObservableDbCollection<>).MakeGenericType(genericArguments.Type)
-										.GetConstructor(new[] { typeof(IEnumerable) });
+										.GetConstructor(new[] {typeof(IEnumerable)});
 								castedList = caster.Invoke(new object[] {enumerableOfItems});
 							}
 
@@ -726,14 +757,15 @@ namespace JPB.DataAccess.Manager
 								true, config);
 
 							//the t
-							var xmlSerilizedProperty = classInfo.SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(xmlDataRecord), dbAccessType,
+							var xmlSerilizedProperty = classInfo.SetPropertysViaReflection(
+								EagarDataRecord.WithExcludedFields(xmlDataRecord), dbAccessType,
 								config);
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
 						}
 					}
 					else if (value is DBNull || value == null)
 					{
-						property.Setter.Invoke(instance, new object[] { null });
+						property.Setter.Invoke(instance, new object[] {null});
 					}
 					else if (value is IEnumerable<EagarDataRecord> navigationValue)
 					{
@@ -750,9 +782,8 @@ namespace JPB.DataAccess.Manager
 						{
 							targetType = property.PropertyType;
 						}
+
 						var classInfo = config.GetOrCreateClassInfoCache(targetType);
-
-
 						var enumeration = navigationValue.Select(subReader =>
 						{
 							bool created;
@@ -761,19 +792,15 @@ namespace JPB.DataAccess.Manager
 							{
 								return source;
 							}
-
-#pragma warning disable 618
-							return ReflectionPropertySet(config, source, classInfo, subReader, null, dbAccessType);
-#pragma warning restore 618
-						});
+							return ReflectionPropertySet(config, source, classInfo, subReader, cacheModel, dbAccessType);
+						}).ToArray();
 
 						if (property.CheckForListInterface())
 						{
-
 							var caster =
 								typeof(DbCollection<>).MakeGenericType(targetType)
-									.GetConstructor(new[] { typeof(IEnumerable) });
-							var castedList = caster.Invoke(new object[] { enumeration });
+									.GetConstructor(new[] {typeof(IEnumerable)});
+							var castedList = caster.Invoke(new object[] {enumeration});
 							property.Setter.Invoke(instance, castedList);
 						}
 						else
@@ -813,7 +840,7 @@ namespace JPB.DataAccess.Manager
 						if (maybeFallbackProperty.Value != null)
 						{
 							instanceOfFallbackList =
-								(Dictionary<string, object>)maybeFallbackProperty.Value.Getter.Invoke(instance);
+								(Dictionary<string, object>) maybeFallbackProperty.Value.Getter.Invoke(instance);
 							if (instanceOfFallbackList == null)
 							{
 								instanceOfFallbackList = new Dictionary<string, object>();
@@ -863,7 +890,10 @@ namespace JPB.DataAccess.Manager
 			if (!egarLoading)
 			{
 				await EnumerateAsync(query,
-					record => { resultList.Add(SetPropertysViaReflection(type, EagarDataRecord.WithExcludedFields(record))); },
+					record =>
+					{
+						resultList.Add(SetPropertysViaReflection(type, EagarDataRecord.WithExcludedFields(record)));
+					},
 					executionHint);
 			}
 			else

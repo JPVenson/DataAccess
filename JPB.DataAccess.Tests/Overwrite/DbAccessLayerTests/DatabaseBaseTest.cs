@@ -1,9 +1,13 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using JetBrains.dotMemoryUnit;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 
@@ -47,11 +51,60 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			//Warn.If(dotMemoryApi.IsEnabled, () => "WARNING DOTMEMORY IS NOT ENABLED");
 			//memoryCheckPoint = dotMemory.Check();
 			Mgr = new Manager();
+			Measurements = new List<TimeMeasurement>();
+		}
+
+		class TimeMeasurement
+		{
+			private readonly string _key;
+			private readonly TimeSpan _time;
+
+			public TimeMeasurement(string key, TimeSpan time)
+			{
+				_key = key;
+				_time = time;
+			}
+
+			public string Key
+			{
+				get { return _key; }
+			}
+
+			public TimeSpan Time
+			{
+				get { return _time; }
+			}
+		}
+
+		private IList<TimeMeasurement> Measurements { get; set; }
+
+		public void Measure(Action action, [CallerMemberName]string name = null)
+		{
+			Measure(() =>
+			{
+				action();
+				return (object) null;
+			}, name);
+		}
+
+		public T Measure<T>(Func<T> action, [CallerMemberName]string name = null)
+		{
+			var sw = new Stopwatch();
+			sw.Start();
+			var result = action();
+			sw.Stop();
+			Measurements.Add(new TimeMeasurement(name, sw.Elapsed));
+			return result;
 		}
 
 		[TearDown]
 		public void TestTearDown()
 		{
+			foreach (var timeMeasurement in Measurements)
+			{
+				TestContext.Out.WriteLine($"Measure: {timeMeasurement.Key} - '{timeMeasurement.Time:c}'");
+			}
+
 			var failed = false;
 			if (_dbAccess != null)
 			{

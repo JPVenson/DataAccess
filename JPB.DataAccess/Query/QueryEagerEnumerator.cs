@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -70,6 +71,12 @@ namespace JPB.DataAccess.Query
 			}
 		}
 
+		public static IEnumerable<List<T>> Partition<T>(IList<T> source, int size)
+		{
+			for (var i = 0; i < Math.Ceiling(source.Count / (Double)size); i++)
+				yield return new List<T>(source.Skip(size * i).Take(size));
+		}
+
 		private void LoadResults()
 		{
 			var dbCommand = _queryContainer.Compile(out var columns);
@@ -111,11 +118,15 @@ namespace JPB.DataAccess.Query
 			}
 
 			var columnNames = columns.Select(f => f.NaturalName.TrimAlias()).ToArray();
-			dataRecords = dataRecords.Select(record => new EagarDataRecord(columnNames, record.Objects))
+			dataRecords = dataRecords.Select(record =>
+					new EagarDataRecord(columnNames, record.MetaHeader.Values.ToArray()))
 				.ToArray();
 
-			var records = dataRecords.Select(dataRecord => _queryContainer.AccessLayer.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),
-					dataRecord))
+			var records = Partitioner.Create(dataRecords, true)
+				.AsParallel()
+				.Select(dataRecord => _queryContainer.AccessLayer
+					.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),
+						dataRecord))
 				.ToArray();
 
 			var elements = new ArrayList();

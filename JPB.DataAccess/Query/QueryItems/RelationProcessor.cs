@@ -48,24 +48,42 @@ namespace JPB.DataAccess.Query.QueryItems
 				e.IsEquivalentTo(targetTable.PrimaryKeyProperty.DbName.TrimAlias()) &&
 				e.Alias == _joinTableQueryPart.SourceTable);
 
-			var primaryKeyOrdinal = readers
-				.FirstOrDefault()
-				.GetOrdinal(primaryKeyColumn.ColumnIdentifier().TrimAlias());
-			var targetColumnOrdinal = readers
-				.FirstOrDefault()
-				.GetOrdinal(targetColumn.ColumnIdentifier().TrimAlias());
-
+			var columnMapping = new Dictionary<ColumnInfo, int>();
+			var sourceColumnsIndexMapping = context.Columns.ToArray().Select((item, index) => new
+			{
+				item,
+				index
+			}).ToDictionary(e => e.item, e => e.index);
 			var fieldsOfChild = context.Columns.Select(f => f.NaturalName.TrimAlias()).ToArray();
+
+			foreach (var fieldOfChild in fieldsOfChild)
+			{
+				var child = fieldOfChild;
+				var indexOfSource =
+					sourceColumnsIndexMapping
+						.FirstOrDefault(e => e.Key.IsEquivalentTo(child));
+				columnMapping.Add(indexOfSource.Key, indexOfSource.Value);
+			}
+
+			var primaryKeyOrdinal = sourceColumnsIndexMapping
+				.FirstOrDefault(f => f.Key == primaryKeyColumn)
+				.Value;
+
+			var targetColumnOrdinal = sourceColumnsIndexMapping
+					.FirstOrDefault(f => f.Key == targetColumn)
+					.Value;
+
+			var identifierNames = context.Columns.Select(e => e.ColumnIdentifier())
+				.ToArray();
 
 			var reducedRecords = readers
 				.GroupBy(e => e[primaryKeyOrdinal])
 				.Select(e => e.First())
 				.Select(record =>
 				{
-					var naturalReader = new EagarDataRecord(fieldsOfChild,
-						new ArrayList(context
-							.Columns
-							.Select(f => record[f.ColumnIdentifier().TrimAlias()])
+					var naturalReader = new EagarDataRecord(identifierNames,
+						new ArrayList(columnMapping
+							.Select(f => record[f.Value])
 							.ToArray()));
 					SetRelationOnRecord(outerMostCreatedForginKeys,
 						restRecords,
@@ -138,7 +156,6 @@ namespace JPB.DataAccess.Query.QueryItems
 			var fieldsOfChild = fields
 				.Select((item, index) => item.ColumnIdentifier().TrimAlias())
 				.ToArray();
-			//var naturalFieldNames = fields.Select(f => f.NaturalName.TrimAlias()).ToArray();
 
 			var columnMapping = new Dictionary<string, int>();
 			var sourceColumnsIndexMapping = context.Columns.ToArray().Select((item, index) => new

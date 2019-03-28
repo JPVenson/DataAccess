@@ -7,11 +7,94 @@ using System.Data;
 using System.Linq;
 using JPB.DataAccess.Anonymous;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
 namespace JPB.DataAccess.AdoWrapper
 {
+	internal class MultiValueDictionary<TKey1, TKey2, TValue> : IEnumerable<TValue>
+	{
+		public MultiValueDictionary()
+		{
+			DictA = new Dictionary<TKey1, TValue>();
+			DictB = new Dictionary<TKey2, TValue>();
+			DictC = new Dictionary<TKey2, TKey1>();
+			DictD = new Dictionary<TKey1, TKey2>();
+		}
+
+		public IDictionary<TKey1, TValue> DictA { get; private set; }
+		public IDictionary<TKey2, TValue> DictB { get; private set; }
+		public IDictionary<TKey2, TKey1> DictC { get; private set; }
+		public IDictionary<TKey1, TKey2> DictD { get; private set; }
+
+		public ICollection<TKey1> Key1s
+		{
+			get { return DictA.Keys; }
+		}
+
+		public ICollection<TKey2> Key2s
+		{
+			get { return DictB.Keys; }
+		}
+
+		public ICollection<TValue> Values
+		{
+			get { return DictA.Values; }
+		}
+
+		public int Count
+		{
+			get { return DictA.Count; }
+		}
+
+		public void Add(TKey1 key1, TKey2 key2, TValue value)
+		{
+			DictA.Add(key1, value);
+			DictB.Add(key2, value);
+			DictC.Add(key2, key1);
+			DictD.Add(key1, key2);
+		}
+		
+		public void Remove(TKey1 key, TKey2 key2)
+		{
+			DictA.Remove(key);
+			DictB.Remove(key2);
+			DictC.Remove(key2);
+			DictD.Remove(key);
+		}
+
+		public TKey1 FromKey(TKey2 key)
+		{
+			return DictC[key];
+		}
+
+		public TKey2 FromKey(TKey1 key)
+		{
+			return DictD[key];
+		}
+
+		public TValue this[TKey1 index]
+		{
+			get { return DictA[index]; }
+		}
+
+		public TValue this[TKey2 index]
+		{
+			get { return DictB[index]; }
+		}
+
+		public IEnumerator<TValue> GetEnumerator()
+		{
+			return DictA.Values.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+	}
+
 	/// <summary>
 	///     Provides an IDataRecord Access that enumerates the Source record. Not ThreadSave
 	/// </summary>
@@ -26,8 +109,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		internal void Add(string name, object value)
 		{
-			MetaHeader = MetaHeader.Concat(new[] {name}).ToArray();
-			Objects.Add(value);
+			MetaHeader.Add(MetaHeader.Count, name, value);
 		}
 
 		///  <summary>
@@ -55,38 +137,17 @@ namespace JPB.DataAccess.AdoWrapper
 			return new EagarDataRecord(metaBuildList.ToArray(), buildList);
 		}
 
-		///  <summary>
-		/// 		Creates a new Eager Data Record that contains all fields from the SourceRecord but only therese defined in fieldsIncluded
-		///  </summary>
-		///  <param name="sourceRecord"></param>
-		///  <param name="fieldsIncluded"></param>
-		///  <returns></returns>
-		public static EagarDataRecord WithIncludedFields(IDataRecord sourceRecord, params string[] fieldsIncluded)
-		{
-			var buildList = new ArrayList();
-			var metaBuildList = new List<string>();
-			for (var i = 0; i < sourceRecord.FieldCount; i++)
-			{
-				var name = sourceRecord.GetName(i);
-				if (!fieldsIncluded.Contains(name))
-				{
-					continue;
-				}
-
-				var obj = sourceRecord.GetValue(i);
-				buildList.Add(obj);
-				metaBuildList.Add(name);
-			}
-			return new EagarDataRecord(metaBuildList.ToArray(), buildList);
-		}
-
 		/// <summary>
 		///     Enumerates all items in the source record
 		/// </summary>
-		internal EagarDataRecord(string[] fields, ArrayList values)
+		internal EagarDataRecord(string[] fields, IList values)
 		{
-			Objects = values;
-			MetaHeader = fields;
+			MetaHeader = new MultiValueDictionary<int, string, object>();
+			for (var i = 0; i < fields.Length; i++)
+			{
+				var field = fields[i];
+				MetaHeader.Add(i, field, values[i]);
+			}
 		}
 
 		/// <summary>
@@ -96,19 +157,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 		}
 
-		/// <summary>
-		///     Gets or sets the objects.
-		/// </summary>
-		/// <value>
-		///     The objects.
-		/// </value>
-		internal ArrayList Objects { get; set; }
-
-		/// <summary>
-		/// The Headers sorted by the occurence in the Class
-		/// (Sorted for Performance reasons)
-		/// </summary>
-		protected string[] MetaHeader { get; set; }
+		internal MultiValueDictionary<int, string, object> MetaHeader { get; set; }
 
 		/// <summary>
 		///     Gets the name for the field to find.
@@ -119,7 +168,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public string GetName(int i)
 		{
-			return MetaHeader[i];
+			return MetaHeader.FromKey(i);
 		}
 
 		/// <summary>
@@ -161,13 +210,36 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		/// <summary>
+		///     Return the value of the specified field.
+		/// </summary>
+		/// <param name="name">The index of the field to find.</param>
+		/// <returns>
+		///     The <see cref="T:System.Object" /> which will contain the field value upon return.
+		/// </returns>
+		public object GetValue(string name)
+		{
+			return GetValueInternal(name);
+		}
+
+		/// <summary>
 		///		If overwritten provides the object on index <c>i</c>
 		/// </summary>
 		/// <param name="i"></param>
 		/// <returns></returns>
 		protected internal virtual object GetValueInternal(int i)
 		{
-			var val = Objects[i];
+			var val = MetaHeader[i];
+			return val == DBNull.Value && WrapNulls ? null : val;
+		}
+
+		/// <summary>
+		///		If overwritten provides the object on index <c>i</c>
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		protected internal virtual object GetValueInternal(string name)
+		{
+			var val = MetaHeader[name];
 			return val == DBNull.Value && WrapNulls ? null : val;
 		}
 
@@ -180,7 +252,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetValues(object[] values)
 		{
-			for (var i = 0; i < Objects.Count; i++)
+			for (var i = 0; i < MetaHeader.Count; i++)
 			{
 				if (values.Length > i)
 				{
@@ -200,7 +272,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetOrdinal(string name)
 		{
-			return Array.IndexOf(MetaHeader, name);
+			return MetaHeader.FromKey(name);
 		}
 
 		/// <summary>
@@ -212,7 +284,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public bool GetBoolean(int i)
 		{
-			return (bool) GetValue(i);
+			return (bool)GetValue(i);
 		}
 
 		/// <summary>
@@ -224,7 +296,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public byte GetByte(int i)
 		{
-			return (byte) GetValue(i);
+			return (byte)GetValue(i);
 		}
 
 		/// <summary>
@@ -248,7 +320,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </exception>
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			var value = (byte[]) GetValue(i);
+			var value = (byte[])GetValue(i);
 			if (fieldOffset > value.Length)
 			{
 				throw new ArgumentOutOfRangeException(nameof(fieldOffset));
@@ -281,7 +353,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public char GetChar(int i)
 		{
-			return (char) GetValue(i);
+			return (char)GetValue(i);
 		}
 
 		/// <summary>
@@ -305,7 +377,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </exception>
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			var value = (char[]) GetValue(i);
+			var value = (char[])GetValue(i);
 			if (fieldoffset > value.Length)
 			{
 				throw new ArgumentOutOfRangeException(nameof(fieldoffset));
@@ -338,7 +410,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public Guid GetGuid(int i)
 		{
-			return (Guid) GetValue(i);
+			return (Guid)GetValue(i);
 		}
 
 		/// <summary>
@@ -350,7 +422,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public short GetInt16(int i)
 		{
-			return (short) GetValue(i);
+			return (short)GetValue(i);
 		}
 
 		/// <summary>
@@ -362,7 +434,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetInt32(int i)
 		{
-			return (int) GetValue(i);
+			return (int)GetValue(i);
 		}
 
 		/// <summary>
@@ -374,7 +446,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public long GetInt64(int i)
 		{
-			return (long) GetValue(i);
+			return (long)GetValue(i);
 		}
 
 		/// <summary>
@@ -386,7 +458,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public float GetFloat(int i)
 		{
-			return (float) GetValue(i);
+			return (float)GetValue(i);
 		}
 
 		/// <summary>
@@ -398,7 +470,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public double GetDouble(int i)
 		{
-			return (double) GetValue(i);
+			return (double)GetValue(i);
 		}
 
 		/// <summary>
@@ -410,7 +482,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public string GetString(int i)
 		{
-			return (string) GetValue(i);
+			return (string)GetValue(i);
 		}
 
 		/// <summary>
@@ -422,7 +494,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public decimal GetDecimal(int i)
 		{
-			return (decimal) GetValue(i);
+			return (decimal)GetValue(i);
 		}
 
 		/// <summary>
@@ -434,7 +506,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public DateTime GetDateTime(int i)
 		{
-			return (DateTime) GetValue(i);
+			return (DateTime)GetValue(i);
 		}
 
 		/// <summary>
@@ -468,7 +540,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public int FieldCount
 		{
-			get { return Objects.Count; }
+			get { return MetaHeader.Count; }
 		}
 
 		/// <summary>
@@ -505,7 +577,7 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				return GetValueInternal(GetOrdinal(name));
+				return GetValue(name);
 			}
 		}
 
@@ -514,29 +586,6 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public void Dispose()
 		{
-			Objects = null;
 		}
-
-		/// <summary>
-		///     Gets the order of the Properties in the object
-		/// </summary>
-		/// <returns></returns>
-		public IDictionary<int, string> GetDataOrder()
-		{
-			return MetaHeader.Select((val, index) => new {index, val}).ToDictionary(f => f.index, f => f.val);
-		}
-
-		//	};
-		//		Objects = values
-		//	{
-		//	return new EgarDataRecord
-		//{
-		//public static EgarDataRecord FromDictionary(Dictionary<string, object> values)
-		///// <returns></returns>
-		///// <param name="values">The values.</param>
-		///// </summary>
-		/////     Creates a new Eagar recrod based on an Dictionary
-
-		///// <summary>
 	}
 }

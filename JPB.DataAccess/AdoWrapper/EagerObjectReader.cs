@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.DbInfoConfig;
@@ -25,9 +26,16 @@ namespace JPB.DataAccess.AdoWrapper
 		internal EagerObjectReader(object sourceObject, DbConfig configuration) 
 		{
 			var type = sourceObject.GetType();
-			var props = configuration.GetOrCreateClassInfoCache(type).Propertys;
-			MetaHeader = props.Select(f => f.Value.DbName).ToArray();
-			Objects = new ArrayList(props.Select(f => f.Value.Getter.Invoke(sourceObject)).ToArray());
+			var props = configuration.GetOrCreateClassInfoCache(type)
+				.Propertys
+				.ToArray();
+
+			MetaHeader = new MultiValueDictionary<int, string, object>();
+			for (var index = 0; index < props.Length; index++)
+			{
+				var name = props[index];
+				MetaHeader.Add(index, name.Value.DbName, name.Value.Getter.Invoke(sourceObject));
+			}
 		}
 	}
 }
