@@ -3,7 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.MetaApi.Model;
+using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
@@ -200,30 +203,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 					Assert.That(imageInBook.Text, Is.EqualTo(image.Text));
 				}
 			}
-
-			//foreach (var imageWithFkBookse in images)
-			//{
-			//	Assert.That(imageWithFkBookse.Text, Is.Not.Null);
-			//	Assert.That(imageWithFkBookse.Book, Is.Not.Null);
-
-			//	var book = allBooks.FirstOrDefault(e => e.BookId == imageWithFkBookse.IdBook);
-
-			//	Assert.That(imageWithFkBookse.Book.BookName, Is.EqualTo(book.BookName));
-
-			//	Assert.That(imageWithFkBookse.Book.Images, Is.Not.Null);
-			//	Assert.That(imageWithFkBookse.Book.Images, Is.Not.Empty);
-
-			//	var imgs = allImages.Where(f => f.IdBook == imageWithFkBookse.IdBook);
-			//	foreach (var image in imageWithFkBookse.Book.Images)
-			//	{
-			//		var img = imgs.FirstOrDefault(e => e.ImageId == image.ImageId);
-			//		Assert.That(image.Book, Is.Null);
-			//		Assert.That(image.Text, Is.Not.Null);
-			//		Assert.That(image.IdBook, Is.EqualTo(imageWithFkBookse.Book.BookId));
-			//		Assert.That(img, Is.Not.Null);
-			//		Assert.That(img.Text, Is.EqualTo(image.Text));
-			//	}
-			//}
 		}
 		
 		[Test]
@@ -232,40 +211,12 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
 			Assert.That(addUsers.Length, Is.EqualTo(250));
 
-			var runPrimetivSelect = -1;
+			var runPrimetivSelect = CountUsersSqlStatement();
 			var forResult = -1;
 			var deSelect = DbAccess.Select<Users>();
-
-			if (DbAccess.DbAccessType == DbAccessType.MsSql)
-			{
-				runPrimetivSelect =
-						DbAccess.RunPrimetivSelect<int>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
-								[0];
-				forResult = CreateQuery().Count.Table<Users>()
-										 .ForResult(_asyncEnumeration)
-										 .FirstOrDefault();
-			}
-
-			if (DbAccess.DbAccessType == DbAccessType.SqLite)
-			{
-				runPrimetivSelect =
-						(int)
-						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
-								[0];
-				forResult = (int)CreateQuery().Count.Table<Users>()
-										  .ForResult(_asyncEnumeration).FirstOrDefault();
-			}
-
-			if (DbAccess.DbAccessType == DbAccessType.MySql)
-			{
-				runPrimetivSelect =
-						(int)
-						DbAccess.RunPrimetivSelect<long>(string.Format("SELECT COUNT(1) FROM {0}", UsersMeta.TableName))
-								[0];
-				forResult = (int)CreateQuery().Count.Table<Users>()
-					.ForResult<long>(_asyncEnumeration)
-					.FirstOrDefault();
-			}
+			forResult = CreateQuery().Count.Table<Users>()
+				.ForResult(_asyncEnumeration)
+				.FirstOrDefault();
 
 			Assert.That(runPrimetivSelect, Is.EqualTo(forResult));
 			Assert.That(deSelect.Length, Is.EqualTo(forResult));
@@ -393,20 +344,20 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				if (DbAccess.DbAccessType == DbAccessType.MsSql)
 				{
 					countOfImages =
-							DbAccess.RunPrimetivSelect<int>(
+						DbAccess.RunPrimetivSelect<int>(
 							string.Format("SELECT COUNT(1) FROM {0} WHERE {0}.{1} = {2}",
-							ImageMeta.TableName, ImageMeta.ForgeinKeyName,
-							id))[0];
+								ImageMeta.TableName, ImageMeta.ForgeinKeyName,
+								id))[0];
 				}
 
 				if (DbAccess.DbAccessType == DbAccessType.SqLite)
 				{
 					countOfImages =
-							(int)
-							DbAccess.RunPrimetivSelect<long>(
+						(int)
+						DbAccess.RunPrimetivSelect<long>(
 							string.Format("SELECT COUNT(1) FROM {0} WHERE {0}.{1} = {2}",
-							ImageMeta.TableName, ImageMeta.ForgeinKeyName,
-							id))[0];
+								ImageMeta.TableName, ImageMeta.ForgeinKeyName,
+								id))[0];
 				}
 
 				Assert.That(countOfImages, Is.EqualTo(2));
@@ -422,41 +373,62 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			}
 		}
 
+		private int CountUsersSqlStatement(int? imageId = null)
+		{
+			string query;
+			query = $"SELECT COUNT(1) FROM {UsersMeta.TableName}";
+			switch (DbAccess.DbAccessType)
+			{
+				case DbAccessType.MsSql:
+					return DbAccess.RunPrimetivSelect<int>(query)[0];
+				case DbAccessType.SqLite:
+				case DbAccessType.MySql:
+					return (int)DbAccess.RunPrimetivSelect<long>(query)[0];
+			}
+
+			return -1;
+		}
+
 		[Test]
 		public void Select()
 		{
 			DataMigrationHelper.AddUsers(250, DbAccess);
 
-			var runPrimetivSelect = -1;
-			switch (DbAccess.DbAccessType)
-			{
-				case DbAccessType.MsSql:
-					runPrimetivSelect =
-						DbAccess.RunPrimetivSelect<int>($"SELECT COUNT(1) FROM {UsersMeta.TableName}")
-							[0];
-					break;
-			}
-
-			if (DbAccess.DbAccessType == DbAccessType.SqLite)
-			{
-				runPrimetivSelect =
-						(int)
-						DbAccess.RunPrimetivSelect<long>($"SELECT COUNT(1) FROM {UsersMeta.TableName}")
-								[0];
-			}
-
-			if (DbAccess.DbAccessType == DbAccessType.MySql)
-			{
-				runPrimetivSelect =
-						(int)
-						DbAccess.RunPrimetivSelect<long>($"SELECT COUNT(1) FROM {UsersMeta.TableName}")
-								[0];
-			}
+			var countOfImages = CountUsersSqlStatement();
 
 			var deSelect = DbAccess.Select<Users>();
 			var forResult = CreateQuery().Select.Table<Users>().ForResult(_asyncEnumeration).ToArray();
 
-			Assert.That(runPrimetivSelect, Is.EqualTo(forResult.Count()));
+			Assert.That(countOfImages, Is.EqualTo(forResult.Count()));
+			Assert.That(deSelect.Length, Is.EqualTo(forResult.Count()));
+
+			for (var index = 0; index < forResult.Length; index++)
+			{
+				var userse = forResult[index];
+				var userbe = deSelect[index];
+				Assert.That(userse.UserID, Is.EqualTo(userbe.UserID));
+				Assert.That(userse.UserName, Is.EqualTo(userbe.UserName));
+			}
+		}
+
+		[Test]
+		public void SelectWithEscapedInConfiguration()
+		{
+			DataMigrationHelper.AddUsers(250, DbAccess);
+
+			var userConfigCache = DbAccess.Config.GetOrCreateClassInfoCache(typeof(Users));
+			var dbPropertyInfoCache = userConfigCache.Propertys[nameof(Users.UserName)];
+			var newUserTextName = $"[{UsersMeta.ContentName}]";
+			dbPropertyInfoCache.Attributes.Add(new DbAttributeInfoCache(new ForModelAttribute(newUserTextName)));
+			dbPropertyInfoCache.Refresh();
+			Assert.That(dbPropertyInfoCache.DbName, Is.EqualTo(newUserTextName));
+
+			var countOfUsers = CountUsersSqlStatement();
+
+			var deSelect = DbAccess.Select<Users>();
+			var forResult = CreateQuery().Select.Table<Users>().ForResult(_asyncEnumeration).ToArray();
+
+			Assert.That(countOfUsers, Is.EqualTo(forResult.Count()));
 			Assert.That(deSelect.Length, Is.EqualTo(forResult.Count()));
 
 			for (var index = 0; index < forResult.Length; index++)

@@ -124,7 +124,8 @@ namespace JPB.DataAccess.Query
 
 			var records = Partitioner.Create(dataRecords, true)
 				.AsParallel()
-				.Select(dataRecord => _queryContainer.AccessLayer
+				.AsOrdered()
+				.Select((dataRecord) => _queryContainer.AccessLayer
 					.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),
 						dataRecord))
 				.ToArray();
