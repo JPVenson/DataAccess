@@ -1,8 +1,11 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems;
@@ -25,7 +28,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		public ConditionalQuery(IQueryBuilder queryText) : base(queryText)
 		{
 		}
-		
+
 		/// <summary>
 		///		Selects the current PrimaryKey
 		/// </summary>
@@ -33,7 +36,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		public ConditionalColumnQuery<TPoco> PrimaryKey()
 		{
 			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
-			return Column(tCache.PrimaryKeyProperty.DbName);
+			return Column(tCache.PrimaryKeyProperty.PropertyName);
 		}
 
 		/// <summary>
@@ -45,9 +48,9 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			var tProp = tCache.Propertys.Values
-			                  .Single(e =>
-				                  e.ForginKeyDeclarationAttribute != null &&
-				                  e.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TFkPoco));
+							  .Single(e =>
+								  e.ForginKeyDeclarationAttribute != null &&
+								  e.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TFkPoco));
 			return Column(tProp.DbName);
 		}
 
@@ -58,32 +61,80 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		/// <returns></returns>
 		public ConditionalColumnQuery<TPoco> Column(string columnName)
 		{
-			var currentAlias = ContainerObject.Search<IIdentifiableQueryPart>().Alias;
-			var columnInfos = ContainerObject.Search<ISelectableQueryPart>()
+			var cache = ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco));
+
+			return ConditionalColumnQueryByPath(new[]
+			{
+				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
+					.Propertys[columnName.TrimAlias()]),
+			});
+		}
+
+		private ConditionalColumnQuery<TPoco> ConditionalColumnQueryByPath(KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] columnPath)
+		{
+			var columnInfos = ContainerObject.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Columns.ToArray();
 
-			var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
-			if (columnDefinitionPart == null)
-			{
-				throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
-			}
-			var expression = new ExpressionConditionPart(currentAlias, columnDefinitionPart);
+			var aliasPath = columnPath.Take(columnPath.Length - 1)
+				.Select(e => e.Value.PropertyName)
+				.Aggregate(columnPath.First().Key.TableName, (e, f) => e + "." + f);
+			var dbName = columnPath.LastOrDefault().Value.DbName;
+
+			var columnDefinitionPart = columnInfos
+				.FirstOrDefault(e =>
+					e.IsEquivalentTo(dbName) &&
+					e.Alias.Equals(ContainerObject.SearchTableAlias(aliasPath)));
+
+			var expression = new ExpressionConditionPart(columnDefinitionPart);
 			ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(expression);
 
 			return new ConditionalColumnQuery<TPoco>(this, expression);
 		}
 
 		/// <summary>
-		///     Prepaires an Conditional Query that targets an single Column
+		///     Creates an Conditional Query that targets an single Column
 		/// </summary>
 		/// <param name="columnName"></param>
 		/// <returns></returns>
 		public ConditionalColumnQuery<TPoco> Column<TA>(
 			Expression<Func<TPoco, TA>> columnName)
 		{
-			var member = columnName.GetPropertyInfoFromLamdba();
-			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
-			return Column(propName.DbName);
+			var path = PropertyPath<TPoco>
+				.Get(columnName)
+				.Select(e =>
+				{
+					var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache, dbClassInfoCache.Propertys[e.Name]);
+				})
+				.ToArray();
+			return ConditionalColumnQueryByPath(path);
+		}
+	}
+
+	internal static class PropertyPath<TSource>
+	{
+		public static IReadOnlyList<MemberInfo> Get<TResult>(Expression<Func<TSource, TResult>> expression)
+		{
+			var visitor = new PropertyVisitor();
+			visitor.Visit(expression.Body);
+			visitor.Path.Reverse();
+			return visitor.Path;
+		}
+
+		private class PropertyVisitor : ExpressionVisitor
+		{
+			internal readonly List<MemberInfo> Path = new List<MemberInfo>();
+
+			protected override Expression VisitMember(MemberExpression node)
+			{
+				if (!(node.Member is PropertyInfo))
+				{
+					throw new ArgumentException("The path can only contain properties", nameof(node));
+				}
+
+				this.Path.Add(node.Member);
+				return base.VisitMember(node);
+			}
 		}
 	}
 }

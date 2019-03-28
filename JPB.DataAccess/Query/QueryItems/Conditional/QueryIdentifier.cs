@@ -49,21 +49,7 @@
 		/// <returns></returns>
 		public string GetAlias()
 		{
-			return Value.Trim('[', ']');
-		}
-
-		/// <summary>
-		///		Creates a new unobserved alias for the given column
-		/// </summary>
-		/// <param name="s"></param>
-		/// <returns></returns>
-		public QueryIdentifier GetColumnAlias(string s)
-		{
-			return new QueryIdentifier()
-			{
-				QueryIdType = QueryIdTypes.Column,
-				Value = s
-			};
+			return Value.TrimAlias();
 		}
 	}
 }

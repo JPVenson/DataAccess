@@ -37,8 +37,9 @@ namespace JPB.DataAccess.Query
 		public static ElementProducer<T> SubSelect<T>(this RootQuery query,
 			Func<ElementResultQuery<T>> subSelect)
 		{
-			var queryIdentifier = query.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.SubQuery);
-			var part = new SubSelectQueryPart(queryIdentifier, subSelect().ContainerObject.Parts, typeof(T));
+			var classInfo = query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(T));
+			var queryIdentifier = query.ContainerObject.CreateTableAlias(classInfo.TableName);
+			var part = new SubSelectQueryPart(queryIdentifier, subSelect().ContainerObject.Parts, typeof(T), query.ContainerObject);
 			return new ElementProducer<T>(query.Add(part));
 		}
 		
@@ -62,7 +63,7 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ElementProducer<TOut> Count<TPoco, TOut>(this IElementProducer<TPoco> query)
 		{
-			var cteName = query.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Cte);
+			var cteName = query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
 			var item = new CteDefinitionQueryPart.CteInfo()
 			{
 				Name = cteName
@@ -75,7 +76,7 @@ namespace JPB.DataAccess.Query
 				.Add(cteQueryPart.AddCte(item));
 
 			return new ElementProducer<TOut>(newQuery
-				.Add(new CountTargetQueryPart(cteName, query.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.SubQuery))));
+				.Add(new CountTargetQueryPart(cteName, query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.SubQuery))));
 		}
 	}
 }

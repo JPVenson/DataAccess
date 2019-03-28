@@ -27,7 +27,7 @@ namespace JPB.DataAccess.AdoWrapper
 		internal void Add(string name, object value)
 		{
 			MetaHeader = MetaHeader.Concat(new[] {name}).ToArray();
-			Objects.Add(name);
+			Objects.Add(value);
 		}
 
 		///  <summary>

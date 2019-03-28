@@ -1,7 +1,11 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using JPB.DataAccess.DbCollection;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
@@ -29,7 +33,7 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
-		///		Selects items Distinct
+		///     Selects items Distinct
 		/// </summary>
 		/// <returns></returns>
 		public SelectQuery<TPoco> Distinct()
@@ -39,11 +43,11 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
-		///		Includes the forgin table
+		///     Includes the forgin table
 		/// </summary>
 		/// <param name="forginColumnName"></param>
 		/// <returns></returns>
-		public SelectQuery<TPoco> Include(string forginColumnName)
+		public SelectQuery<TPoco> Join(string forginColumnName)
 		{
 			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			var forginColumn = teCache.Propertys.FirstOrDefault(e => e.Value.PropertyName.Equals(forginColumnName));
@@ -52,25 +56,115 @@ namespace JPB.DataAccess.Query.Operators
 				return this;
 			}
 
-			var currentAlias = ContainerObject.Search<ISelectableQueryPart>().Alias;
-			var parentAlias = ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table);
-			var childAlias = ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table);
-			var selfPrimaryKey = teCache.PrimaryKeyProperty.DbName;
-			var forginPrimaryKey = forginColumn.Value.ForginKeyAttribute.Attribute.KeyName;
-			var forginType = ContainerObject.AccessLayer.GetClassInfo(forginColumn.Value.PropertyType);
-			var forginColumns = DbAccessLayer.GetSelectableColumnsOf(forginType, childAlias.GetAlias());
-
-			var joinTableQueryPart = new JoinTableQueryPart(currentAlias, 
-				childAlias,
-				parentAlias,
-				typeof(TPoco),
-				selfPrimaryKey,
-				forginPrimaryKey, 
-				forginColumns);
-			ContainerObject.Search<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
-			return new SelectQuery<TPoco>(Add(joinTableQueryPart));
+			return JoinOn(new[]
+			{
+				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(teCache, forginColumn.Value)
+			});
 		}
-		
+
+		/// <summary>
+		///     Includes the forgin table
+		/// </summary>
+		/// <param name="forginColumnName"></param>
+		/// <returns></returns>
+		public SelectQuery<TPoco> Join<TProp>(Expression<Func<TPoco, TProp>> forginColumnName)
+			where TProp : class
+		{
+			var path = PropertyPath<TPoco>
+				.Get(forginColumnName)
+				.Where(e => !typeof(IDbCollection).IsAssignableFrom(e.DeclaringType))
+				.Select(e =>
+				{
+					var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
+						dbClassInfoCache.Propertys[e.Name]);
+				})
+				.ToArray();
+			return JoinOn(path);
+		}
+
+		private SelectQuery<TPoco> JoinOn(
+			KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path)
+		{
+			IQueryBuilder target = this;
+			var targetAlias = target.ContainerObject.Search<ISelectableQueryPart>().Alias;
+			JoinTableQueryPart parentJoinPart = null;
+			foreach (var keyValuePair in path)
+			{
+				Type referenceType;
+				if (keyValuePair.Value.CheckForListInterface())
+				{
+					referenceType = keyValuePair.Value.PropertyType.GetElementType();
+					if (referenceType == null)
+					{
+						referenceType = keyValuePair.Value.PropertyType.GetGenericArguments().FirstOrDefault();
+					}
+				}
+				else
+				{
+					referenceType = keyValuePair.Value.PropertyType;
+				}
+
+				var referencedTypeCache = target.ContainerObject.AccessLayer.GetClassInfo(referenceType);
+
+				var targetAliasOfJoin = new QueryIdentifier
+				{
+					QueryIdType = QueryIdentifier.QueryIdTypes.Table,
+					Value = referencedTypeCache.TableName
+				};
+
+				string onSourceTableKey;
+				string selfPrimaryKey;
+
+				var referenceColumn = keyValuePair.Value.ForginKeyAttribute?.Attribute;
+
+				if (referenceColumn == null)
+				{
+					throw new InvalidOperationException("There is no known reference from table " +
+					                                    $"'{keyValuePair.Key.Type}' " +
+					                                    "to table " +
+					                                    $"'{referenceType}'." +
+					                                    "Use a ForeignKeyDeclarationAttribute to connect both");
+				}
+
+				onSourceTableKey = referenceColumn.ReferenceKey;
+				selfPrimaryKey = referenceColumn.ForeignKey;
+
+				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache, null);
+				var pathOfJoin = target.ContainerObject.GetPathOf(targetAlias) + "." +
+				        keyValuePair.Value.PropertyName;
+				var parentAlias = target.ContainerObject
+					.CreateTableAlias(pathOfJoin);
+
+				var joinTableQueryPart = new JoinTableQueryPart(
+					targetAliasOfJoin,
+					targetAlias,
+					parentAlias,
+					keyValuePair.Key.Type,
+					onSourceTableKey,
+					selfPrimaryKey,
+					forginColumns, 
+					ContainerObject);
+
+				if (parentJoinPart != null)
+				{
+					parentJoinPart.DependingJoins.Add(joinTableQueryPart);
+				}
+				else
+				{
+					target.ContainerObject.Joins.Add(pathOfJoin, joinTableQueryPart);
+				}
+
+				parentJoinPart = joinTableQueryPart;
+
+				target.ContainerObject.Search<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
+				target = target.Add(joinTableQueryPart);
+				targetAlias = parentAlias;
+			}
+
+			return new SelectQuery<TPoco>(target);
+		}
+
 		/// <summary>
 		///     Retuns a collection of all Entites that are referenced by element
 		///     Needs a proper ForginKeyDeclartaion
@@ -104,7 +198,8 @@ namespace JPB.DataAccess.Query.Operators
 			if (fkPropertie == null)
 			{
 				throw new NotSupportedException(
-				string.Format("No matching Column was found for Forgin key declaration for table {0}", teCache.TableName));
+					string.Format("No matching Column was found for Forgin key declaration for table {0}",
+						teCache.TableName));
 			}
 
 			return Where.Column(fkPropertie.DbName).Is.EqualsTo(id);

@@ -73,7 +73,7 @@ namespace JPB.DataAccess.Query.Operators
 			{
 				Value = $"[{ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco)).TableName}]",
 				QueryIdType = QueryIdentifier.QueryIdTypes.Table
-			}, ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.SubQuery))
+			}, ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.SubQuery))
 			{
 				DistinctMode = DistinctMode
 			}));

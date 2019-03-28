@@ -14,10 +14,15 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.DbCollection
 {
+	internal interface IDbCollection
+	{
+
+	}
+
 	/// <summary>
 	///     WIP Observes the local collection and allows a Generic save update remove and insert
 	/// </summary>
-	public class DbCollection<T> : ICollection<T> where T : class, INotifyPropertyChanged
+	public class DbCollection<T> : ICollection<T>, IDbCollection where T : class
 	{
 		private readonly IDictionary<T, List<string>> _changeTracker;
 
@@ -31,20 +36,24 @@ namespace JPB.DataAccess.DbCollection
 #endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public DbCollection(IEnumerable subset)
+		public DbCollection(IEnumerable subset) 
+			: this(subset.OfType<T>())
 		{
-			_internalCollection = new Dictionary<T, CollectionStates>(new PocoPkComparer<T>());
-			_changeTracker = new Dictionary<T, List<string>>();
 
-			if (subset is IOrderedEnumerable<T>)
-			{
-				throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
-			}
+		}
 
-			foreach (T item in subset)
+		/// <summary>
+		///		You can include this Property in your Join(expression) expression to join all
+		///	items of this foreign key together.
+		///		Calling this Property from code will throw an exception.
+		/// </summary>
+		public T Type
+		{
+			get
 			{
-				Add(item, CollectionStates.Unchanged);
-				item.PropertyChanged += item_PropertyChanged;
+				throw new Exception(
+					"This Property is not intended to be called from your code. " +
+					"It should only be used in a Join Statement");
 			}
 		}
 
@@ -61,15 +70,14 @@ namespace JPB.DataAccess.DbCollection
 			_internalCollection = new Dictionary<T, CollectionStates>(new PocoPkComparer<T>());
 			_changeTracker = new Dictionary<T, List<string>>();
 
-			if (subset is IOrderedEnumerable<T>)
-			{
-				throw new NotImplementedException("This Collection has a Bag behavior and does not support a IOrderedEnumerable");
-			}
-
 			foreach (var item in subset)
 			{
 				Add(item, CollectionStates.Unchanged);
-				item.PropertyChanged += item_PropertyChanged;
+
+				if (item is INotifyPropertyChanged notifiableItem)
+				{
+					notifiableItem.PropertyChanged += item_PropertyChanged;
+				}
 			}
 		}
 
@@ -212,7 +220,10 @@ namespace JPB.DataAccess.DbCollection
 
 		public bool Remove(T item)
 		{
-			item.PropertyChanged -= item_PropertyChanged;
+			if (item is INotifyPropertyChanged notifiableItem)
+			{
+				notifiableItem.PropertyChanged -= item_PropertyChanged;
+			}
 			var currentState = GetEntryState(item);
 
 			if (currentState == CollectionStates.Added)
@@ -234,10 +245,13 @@ namespace JPB.DataAccess.DbCollection
 			get { return false; }
 		}
 
-		private void Add(T value, CollectionStates state)
+		private void Add(T item, CollectionStates state)
 		{
-			value.PropertyChanged += item_PropertyChanged;
-			_internalCollection.Add(value, state);
+			if (item is INotifyPropertyChanged notifiableItem)
+			{
+				notifiableItem.PropertyChanged += item_PropertyChanged;
+			}
+			_internalCollection.Add(item, state);
 		}
 
 		private void item_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -262,51 +276,5 @@ namespace JPB.DataAccess.DbCollection
 			}
 		}
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-		//	public StateHolder(T value, CollectionStates state)
-		//{
-
-		//private class StateHolder : IEquatable<StateHolder>
-		//	public CollectionStates State { get; set; }
-
-		//	public override int GetHashCode()
-		//	{
-		//		int hash = 13;
-		//		hash = (hash * 7) + Value.GetHashCode();
-		//		hash = (hash * 7) + State.GetHashCode();
-		//		return hash;
-		//	}
-
-		//	public override bool Equals(object obj)
-		//	{
-		//		return this.Equals((StateHolder)obj);
-		//	}
-
-		//	public bool Equals(StateHolder other)
-		//	{
-		//		if (ReferenceEquals(other, null))
-		//			return false;
-
-		//		if (other.Value == null)
-		//			return false;
-
-		//		return other.Value.Equals(Value) && State == other.State;
-		//	}
-
-		//	public static bool operator ==(StateHolder that, StateHolder other)
-		//	{
-		//		if (ReferenceEquals(that, null) && ReferenceEquals(other, null))
-		//			return true;
-
-		//		if (!ReferenceEquals(that, null))
-		//			return false;
-
-		//		return that.Equals(other);
-		//	}
-
-		//	public static bool operator !=(StateHolder that, StateHolder other)
-		//	{
-		//		return !(other == that);
-		//	}
-		//}
 	}
 }

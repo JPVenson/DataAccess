@@ -5,56 +5,44 @@ using System.Linq;
 using System.Text;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems.Conditional;
+#pragma warning disable 1591
 
 namespace JPB.DataAccess.Query.QueryItems
 {
-	internal class JoinTableQueryPart : ISelectableQueryPart
+	public class JoinTableQueryPart : ISelectableQueryPart
 	{
-		public string ParentColumn { get; }
-		public string ChildColumn { get; }
-
-		public JoinTableQueryPart(
-			QueryIdentifier parentOfJoin,
-			QueryIdentifier childOfJoin,
+		public string TargetColumn { get; }
+		public string SourceColumn { get; }
+		public JoinTableQueryPart(QueryIdentifier targetTable,
+			QueryIdentifier sourceTable,
 			QueryIdentifier joinAlias,
-			Type targetType,
-			string parentColumn,
-			string childColumn) 
-			: this(parentOfJoin, childOfJoin, joinAlias, targetType, parentColumn, childColumn, new string[0])
+			Type targetTargetTableType,
+			string targetColumn,
+			string sourceColumn,
+			IEnumerable<string> columns,
+			IQueryContainer queryContainer)
 		{
-		}
-
-		public JoinTableQueryPart(
-			QueryIdentifier parentOfJoin,
-			QueryIdentifier childOfJoin,
-			QueryIdentifier joinAlias,
-			Type targetType,
-			string parentColumn,
-			string childColumn,
-			IEnumerable<string> columns)
-		{
+			TargetTable = targetTable;
+			SourceTable = sourceTable;
 			Alias = joinAlias;
-			ParentColumn = parentColumn;
-			ChildColumn = childColumn;
-			ParentOfJoin = parentOfJoin;
-			ChildOfJoin = childOfJoin;
-			Columns = new List<ColumnInfo>(columns.Select(e => new ColumnInfo(e, Alias)));
-			Type = targetType;
-		}
+			TargetTableType = targetTargetTableType;
 
-		public QueryIdentifier ParentOfJoin { get; private set; }
-		public QueryIdentifier ChildOfJoin { get; private set; }
+			TargetColumn = targetColumn;
+			SourceColumn = sourceColumn;
+			Columns = new List<ColumnInfo>(columns.Select(e => new ColumnInfo(e, Alias, queryContainer)));
+			DependingJoins = new List<JoinTableQueryPart>();
+		}
+		public QueryIdentifier TargetTable { get; private set; }
+		public QueryIdentifier SourceTable { get; private set; }
 		public IEnumerable<ColumnInfo> Columns { get; private set; }
 
 		public IDbCommand Process(IQueryContainer container)
 		{
-			container.PostProcessors.Add(new RelationProcessor(this));
-
 			var joinBuilder = new StringBuilder();
-			joinBuilder.Append($"JOIN [{ParentOfJoin.GetAlias()}] AS [{Alias.GetAlias()}]" +
-			                   $"ON [{ParentOfJoin.GetAlias()}].[{ParentColumn}]" +
+			joinBuilder.Append($"JOIN [{TargetTable.GetAlias()}] AS [{Alias.GetAlias()}]" +
+			                   $" ON [{Alias.GetAlias()}].[{TargetColumn}]" +
 			                   $" = " +
-			                   $"[{ChildOfJoin.GetAlias()}].[{ChildColumn}]");
+			                   $"[{SourceTable.GetAlias()}].[{SourceColumn}]");
 
 			return container.AccessLayer.Database.CreateCommand(joinBuilder.ToString());
 		}
@@ -62,6 +50,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		public QueryIdentifier Alias { get; }
 		public bool Distinct { get; set; }
 		public int? Limit { get; set; }
-		public Type Type { get; set; }
+		public Type TargetTableType { get; set; }
+		public List<JoinTableQueryPart> DependingJoins { get; set; }
 	}
 }

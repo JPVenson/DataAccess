@@ -181,7 +181,10 @@ namespace JPB.DataAccess.DebuggerHelper
 				                 ParameterValue(parameter));
 				sql.AppendLine();
 			}
-			sql.Append(command.CommandText);
+			sql.Append(command.CommandText
+				.Replace(",", "," + Environment.NewLine + "\t")
+				.Replace("FROM ", Environment.NewLine + "\tFROM")
+				.Replace("JOIN ", Environment.NewLine + "\tJOIN"));
 
 			return sql.ToString();
 		}

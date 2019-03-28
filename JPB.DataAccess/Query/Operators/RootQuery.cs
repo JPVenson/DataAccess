@@ -122,7 +122,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			return new ConditionalEvalQuery<T>(
 				Add(new UpdateTableWithQueryPart(ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
-					ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table), obj)));
+					ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Table), obj)));
 		}
 
 		/// <summary>
@@ -161,7 +161,7 @@ namespace JPB.DataAccess.Query.Operators
 		public RootQuery WithCte<T>(IElementProducer<T> commandQuery, out QueryIdentifier cteName)
 		{
 			IQueryBuilder newQuery = new RootQuery(this);
-			cteName = newQuery.ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Cte);
+			cteName = newQuery.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
 
 			var cteQueryPart = commandQuery.ContainerObject.Search<CteDefinitionQueryPart>();
 			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()));
@@ -170,6 +170,16 @@ namespace JPB.DataAccess.Query.Operators
 			cteInfo.Name = cteName;
 			cteInfo.CteContentParts.AddRange(commandQuery.ContainerObject.Parts);
 			return new RootQuery(newQuery.Add(cteQueryPart.AddCte(cteInfo)));
+		}
+
+		/// <summary>
+		///		Creates a CTE on the start of the Query
+		/// </summary>
+		/// <returns></returns>
+		public RootQuery WithCte<T>(Func<RootQuery, IElementProducer<T>> commandQueryProducer,
+			out QueryIdentifier cteName)
+		{
+			return WithCte(commandQueryProducer(new RootQuery(this)), out cteName);
 		}
 	}
 }

@@ -14,7 +14,8 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public SubSelectQueryPart(QueryIdentifier queryAlias,
 			IEnumerable<IQueryPart> subSelectionQueryParts,
-			Type targetTable)
+			Type targetTable, 
+			IQueryContainer queryContainer)
 		{
 			_targetTable = targetTable;
 			Alias = queryAlias;
@@ -23,7 +24,7 @@ namespace JPB.DataAccess.Query.QueryItems
 				.OfType<ISelectableQueryPart>()
 				.LastOrDefault()?
 				.Columns
-				.Select(e => new ColumnInfo(e.ColumnIdentifier().Trim('[', ']'), e, Alias))
+				.Select(e => new ColumnInfo(e.ColumnIdentifier().TrimAlias(), e, Alias, queryContainer))
 				.ToArray();
 		}
 
@@ -31,9 +32,9 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public IDbCommand Process(IQueryContainer container)
 		{
-			ColumnMapper mapper;
-			container.PostProcessors.Add(mapper = new ColumnMapper());
-			mapper.Mappings[_targetTable] = Columns.ToArray();
+			//ColumnMapper mapper;
+			//container.PostProcessors.Add(mapper = new ColumnMapper());
+			//mapper.Mappings[_targetTable] = Columns.ToArray();
 
 			var subSelect =
 				container.AccessLayer.Database.MergeTextToParameters(

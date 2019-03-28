@@ -61,6 +61,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		///     If known the WrapDbNullablesAttribute attribute
 		/// </summary>
+		[Obsolete("This attribute is obsolete because null wrapping now happens by default", true)]
 		public DbAttributeInfoCache<WrapDbNullablesAttribute> WrapNullables { get; set; }
 
 		/// <summary>
@@ -173,7 +174,6 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			}
 
 			ForModel = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes);
-			WrapNullables = DbAttributeInfoCache<WrapDbNullablesAttribute>.WrapperOrNull(Attributes);
 			SelectFactory = DbAttributeInfoCache<SelectFactoryAttribute>.WrapperOrNull(Attributes);
 			var preConfig = MethodProxyAttribute == null;
 

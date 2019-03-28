@@ -21,7 +21,8 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public SelectTableQueryPart(string source,
 			DbClassInfoCache tableInfo,
-			QueryIdentifier alias)
+			QueryIdentifier alias, 
+			IQueryContainer queryContainer)
 		{
 			_source = source;
 			_tableInfo = tableInfo;
@@ -30,7 +31,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			Joins = new List<JoinTableQueryPart>();
 
 			_columns = DbAccessLayer.GetSelectableColumnsOf(_tableInfo, null)
-				.Select(e => new ColumnInfo(e, Alias))
+				.Select(e => new ColumnInfo(e, Alias, queryContainer))
 				.ToList();
 			ColumnMappings = new Dictionary<Type, ColumnInfo[]>();
 			ColumnMappings[_tableInfo.Type] = _columns.ToArray();
@@ -38,7 +39,8 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public SelectTableQueryPart(ISelectableQueryPart source,
 			DbClassInfoCache tableInfo,
-			QueryIdentifier alias)
+			QueryIdentifier alias, 
+			IQueryContainer queryContainer)
 		{
 			_source = source.Alias.Value;
 			_tableInfo = tableInfo;
@@ -47,7 +49,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			Joins = new List<JoinTableQueryPart>();
 
 			_columns = source.Columns
-				.Select(e => new ColumnInfo(e.ColumnIdentifier().Trim('[', ']'), e, Alias)).ToArray();
+				.Select(e => new ColumnInfo(e.ColumnIdentifier().TrimAlias(), e, Alias, queryContainer)).ToArray();
 			ColumnMappings = new Dictionary<Type, ColumnInfo[]>();
 			ColumnMappings[_tableInfo.Type] = _columns.ToArray();
 		}
@@ -61,7 +63,7 @@ namespace JPB.DataAccess.Query.QueryItems
 				_columns.Add(column);
 			}
 
-			ColumnMappings[join.Type] = columns.ToArray();
+			ColumnMappings[join.TargetTableType] = columns.ToArray();
 		}
 
 		public bool Distinct { get; set; }
@@ -77,12 +79,12 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public IDbCommand Process(IQueryContainer container)
 		{
-			ColumnMapper mappings;
-			container.PostProcessors.Add(mappings = new ColumnMapper());
-			foreach (var columnMapping in ColumnMappings)
-			{
-				mappings.Mappings.Add(columnMapping);
-			}
+			//ColumnMapper mappings;
+			//container.PostProcessors.Add(mappings = new ColumnMapper());
+			//foreach (var columnMapping in ColumnMappings)
+			//{
+			//	mappings.Mappings.Add(columnMapping);
+			//}
 
 			string modifier = null;
 

@@ -24,7 +24,7 @@ namespace JPB.DataAccess.Query
 	///     Stores the Query data produced by an QueryBuilder element
 	/// </summary>
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IQueryContainer" />
-	public class InternalContainerContainer : IQueryContainer, IQueryContainerValues
+	public class InternalContainerContainer : IQueryContainerValues
 	{
 		private readonly List<IQueryPart> _parts;
 
@@ -47,8 +47,9 @@ namespace JPB.DataAccess.Query
 			QueryInfos = new Dictionary<string, object>();
 			Interceptors = new List<IQueryCommandInterceptor>();
 			PostProcessors = new List<IEntityProcessor>();
-			TableAlias = new Dictionary<string, string>();
+			TableAlias = new Dictionary<string, QueryIdentifier>();
 			Identifiers = new List<QueryIdentifier>();
+			Joins = new Dictionary<string, JoinTableQueryPart>();
 		}
 
 		internal InternalContainerContainer(IQueryContainer pre)
@@ -56,8 +57,10 @@ namespace JPB.DataAccess.Query
 			AccessLayer = pre.AccessLayer;
 			ForType = pre.ForType;
 			AutoParameterCounter = (pre as IQueryContainerValues)?.AutoParameterCounter ?? 0;
-			TableAlias = (pre as IQueryContainerValues)?.TableAlias ?? new Dictionary<string, string>();
+			TableAlias = (pre as IQueryContainerValues)?.TableAlias ?? new Dictionary<string, QueryIdentifier>();
 			Identifiers = (pre as IQueryContainerValues)?.Identifiers ?? new List<QueryIdentifier>();
+			Joins = (pre as IQueryContainerValues)?.Joins ?? new Dictionary<string, JoinTableQueryPart>();
+			ColumnCounter = (pre as IQueryContainerValues)?.ColumnCounter ?? 0;
 			_parts = pre.Parts.ToList();
 			AllowParamterRenaming = pre.AllowParamterRenaming;
 			QueryInfos = pre.QueryInfos.Select(f => f).ToDictionary(f => f.Key, f => f.Value);
@@ -71,24 +74,28 @@ namespace JPB.DataAccess.Query
 		/// <inheritdoc />
 		public List<IQueryCommandInterceptor> Interceptors { get; }
 
-		/// <summary>
-		/// Provides internal formatting infos about the current query
-		/// </summary>
+		/// <inheritdoc />
 		public IDictionary<string, object> QueryInfos { get; private set; }
-		
-		/// <summary>
-		/// </summary>
+
+		/// <inheritdoc />
 		public DbAccessLayer AccessLayer { get; private set; }
 
-		/// <summary>
-		/// </summary>
+		/// <inheritdoc />
 		public Type ForType { get; set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public IDictionary<string, JoinTableQueryPart> Joins { get; }
 
 		/// <inheritdoc />
 		public int AutoParameterCounter { get; private set; }
 
 		/// <inheritdoc />
-		public IDictionary<string, string> TableAlias { get; }
+		public int ColumnCounter { get; private set; }
+
+		/// <inheritdoc />
+		public IDictionary<string, QueryIdentifier> TableAlias { get; }
 
 		/// <inheritdoc />
 		public IEnumerable<IQueryPart> Parts
@@ -107,20 +114,21 @@ namespace JPB.DataAccess.Query
 			foreach (var queryPart in Parts)
 			{
 				commands.Add(queryPart.Process(this));
-				columns = (queryPart as ISelectableQueryPart)?.Columns ?? columns;
+				var isSelectQuery = (queryPart is ISelectableQueryPart && !(queryPart is JoinTableQueryPart));
+				if (isSelectQuery)
+				{
+					columns = (queryPart as ISelectableQueryPart).Columns;
+				}
 			}
 
 			return DbAccessLayerHelper.ConcatCommands(AccessLayer.Database, true, commands.Where(e => e != null).ToArray());
-
-			//var query = CompileFlat();
-			//return AccessLayer.Database.CreateCommandWithParameterValues(query.Item1, query.Item2);
 		}
 
 		/// <inheritdoc />
 		public IList<QueryIdentifier> Identifiers { get; private set; }
 		
 		/// <inheritdoc />
-		public QueryIdentifier GetAlias(QueryIdentifier.QueryIdTypes table)
+		public QueryIdentifier CreateAlias(QueryIdentifier.QueryIdTypes table)
 		{
 			var identifier = new QueryIdentifier();
 			identifier.QueryIdType = table;
@@ -131,9 +139,23 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <inheritdoc />
-		public void SetTableAlias(string table, string alias)
+		public QueryIdentifier CreateTableAlias(string path)
 		{
-			TableAlias[table.Trim('[', ']')] = alias;
+			var alias = CreateAlias(QueryIdentifier.QueryIdTypes.Table);
+			TableAlias.Add(path, alias);
+			return alias;
+		}
+
+		/// <inheritdoc />
+		public QueryIdentifier SearchTableAlias(string path)
+		{
+			return TableAlias.FirstOrDefault(e => e.Key.Equals(path)).Value;
+		}
+
+		/// <inheritdoc />
+		public string GetPathOf(QueryIdentifier identifier)
+		{
+			return TableAlias.FirstOrDefault(e => e.Value.Equals(identifier)).Key;
 		}
 
 		/// <summary>
@@ -216,6 +238,12 @@ namespace JPB.DataAccess.Query
 		public void Add(IQueryPart queryPart)
 		{
 			_parts.Add(queryPart);
+		}
+
+		/// <inheritdoc />
+		public int GetNextColumnId()
+		{
+			return ++ColumnCounter;
 		}
 
 		/// <summary>

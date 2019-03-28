@@ -217,11 +217,7 @@ namespace JPB.DataAccess.AdoWrapper
 		public IEnumerable<XmlDataRecord> CreateListOfItems()
 		{
 			var xNodes = _baseElement.Elements();
-			if (_target.Attributes.Any(e => e.Attribute is WrapDbNullablesAttribute))
-			{
-				return xNodes.Select(xNode => new NullWrapperXmlDataRecord(xNode.ToString(), _target));
-			}
-			return xNodes.Select(xNode => new XmlDataRecord(xNode.ToString(), _target));
+			return xNodes.Select(xNode => new NullWrapperXmlDataRecord(xNode.ToString(), _target));
 		}
 
 		#region Unsupported

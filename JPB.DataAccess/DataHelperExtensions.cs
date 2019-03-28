@@ -21,5 +21,10 @@ namespace JPB.DataAccess
 				? "@" + paramName
 				: paramName;
 		}
+
+		public static string TrimAlias(this string alias)
+		{
+			return alias.Trim('[', ']');
+		}
 	}
 }

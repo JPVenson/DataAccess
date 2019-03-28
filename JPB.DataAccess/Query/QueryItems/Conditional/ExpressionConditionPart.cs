@@ -4,11 +4,8 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
 	internal class ExpressionConditionPart : IConditionPart
 	{
-		private readonly QueryIdentifier _currentAlias;
-
-		public ExpressionConditionPart(QueryIdentifier currentAlias, ColumnInfo columnName)
+		public ExpressionConditionPart(ColumnInfo columnName)
 		{
-			_currentAlias = currentAlias;
 			Column = columnName;
 		}
 

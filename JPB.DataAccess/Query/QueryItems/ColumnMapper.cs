@@ -24,25 +24,25 @@ namespace JPB.DataAccess.Query.QueryItems
 		}
 	}
 
-	internal class ColumnMapper : EntityProcessorBase
-	{
-		public ColumnMapper()
-		{
-			Mappings = new Dictionary<Type, ColumnInfo[]>();
-		}
+	//internal class ColumnMapper : EntityProcessorBase
+	//{
+	//	public ColumnMapper()
+	//	{
+	//		Mappings = new Dictionary<Type, ColumnInfo[]>();
+	//	}
 
-		public IDictionary<Type, ColumnInfo[]> Mappings { get; private set; }
+	//	public IDictionary<Type, ColumnInfo[]> Mappings { get; private set; }
 
-		public override EagarDataRecord[] Transform(EagarDataRecord[] readers, Type entityType, QueryProcessingRecordsContext context)
-		{
-			if (Mappings.TryGetValue(entityType, out var mappings))
-			{
-				return readers.Select(f =>
-						new EagarDataRecord(mappings.Select(e => e.ColumnName.Trim('[', ']')).ToArray(), f.Objects))
-					.ToArray();
-			}
+	//	public override EagarDataRecord[] Transform(EagarDataRecord[] readers, Type entityType, QueryProcessingRecordsContext context)
+	//	{
+	//		if (Mappings.TryGetValue(entityType, out var mappings))
+	//		{
+	//			return readers.Select(f =>
+	//					new EagarDataRecord(mappings.Select(e => e.ColumnName.TrimAlias()).ToArray(), f.Objects))
+	//				.ToArray();
+	//		}
 
-			return readers;
-		}
-	}
+	//		return readers;
+	//	}
+	//}
 }

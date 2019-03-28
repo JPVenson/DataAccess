@@ -396,10 +396,10 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static string ColumnIdentifier(string tableAlias, string columnName)
 		{
-			var col = $"[{columnName.Trim('[', ']')}]";
+			var col = $"[{columnName.TrimAlias()}]";
 			if (tableAlias != null)
 			{
-				return $"[{tableAlias.Trim('[', ']')}].{col}";
+				return $"[{tableAlias.TrimAlias()}].{col}";
 			}
 			return col;
 		}

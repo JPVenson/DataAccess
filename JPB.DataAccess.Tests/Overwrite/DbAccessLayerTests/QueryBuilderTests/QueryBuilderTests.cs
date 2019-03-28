@@ -34,21 +34,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 	[TestFixture(DbAccessType.SqLite, true, false, true)]
 	[TestFixture(DbAccessType.SqLite, true, false, false)]
 
-	//[TestFixture(DbAccessType.MySql, false, true, true)]
-	//[TestFixture(DbAccessType.MySql, false, true, true, EnumerationMode.OnCall)]
-	//[TestFixture(DbAccessType.MySql, false, true, false)]
-	//[TestFixture(DbAccessType.MySql, false, true, false, EnumerationMode.OnCall)]
-
-	//[TestFixture(DbAccessType.MySql, false, false, true)]
-	//[TestFixture(DbAccessType.MySql, false, false, true, EnumerationMode.OnCall)]
-	//[TestFixture(DbAccessType.MySql, false, false, false)]
-	//[TestFixture(DbAccessType.MySql, false, false, false, EnumerationMode.OnCall)]
-
-	//[TestFixture(DbAccessType.MySql, true, false, true)]
-	//[TestFixture(DbAccessType.MySql, true, false, true, EnumerationMode.OnCall)]
-	//[TestFixture(DbAccessType.MySql, true, false, false)]
-	//[TestFixture(DbAccessType.MySql, true, false, false, EnumerationMode.OnCall)]
-
 	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 	public class QueryBuilderTests : DatabaseBaseTest
 	{
@@ -65,50 +50,171 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			return DbAccess.Query();
 		}
 
-		//[Test]
-		//public void AsCte()
-		//{
-		//	var maxItems = 250;
-		//	DataMigrationHelper.AddUsers(maxItems, DbAccess);
-		//	Assert.That(() =>
-		//	{
-		//		var elementProducer = CreateQuery().Select.Table<Users>().AsCte<Users, Users>("cte");
-		//		var query = elementProducer.ContainerObject.Compile();
-		//		Assert.That(query, Is.Not.Null);
-		//	}, Throws.Nothing);
-		//}
+		[Test]
+		public void JoinChilds()
+		{
+			var addBooksWithImage = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			Assert.That(() =>
+			{
+				var books = CreateQuery()
+					.Select.Table<BookWithFkImages>()
+					.Join(nameof(BookWithFkImages.Images))
+					.ToArray();
 
-		//[Test]
+				Assert.That(books, Is.Not.Null);
 
-		//public void CheckFactory()
-		//{
-		//	var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
-		//	Assert.That(
-		//	() => CreateQuery().Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>()
-		//				  .ForResult(_asyncEnumeration).ToArray(), Is.Not.Empty);
+				for (var index = 0; index < books.Length; index++)
+				{
+					var bookWithFkImagese = books[index];
+					var addBook = addBooksWithImage[index];
+					Assert.That(bookWithFkImagese.BookId, Is.EqualTo(addBook));
+					Assert.That(bookWithFkImagese.Images, Is.Not.Null);
+					Assert.That(bookWithFkImagese.Images.Count, Is.EqualTo(10));
+					var bookOnId = DbAccess.Select<Book>(addBook);
+					Assert.That(bookWithFkImagese.BookName, Is.EqualTo(bookOnId.BookName));
 
-		//	var testInsertName = Guid.NewGuid().ToString();
-		//	Users_PK_IDFM_FUNCSELECTFACWITHPARAM testUser = null;
-		//	Assert.That(
-		//	() =>
-		//			testUser =
-		//					DbAccess.InsertWithSelect(new Users_PK_IDFM_FUNCSELECTFACWITHPARAM
-		//					{
-		//						UserName = testInsertName
-		//					}),
-		//	Is.Not.Null
-		//	  .And.Property("UserId").Not.EqualTo(0));
+					var imagesOfThatBook = DbAccess.Query().Select.Table<Image>()
+						.Where
+						.Column(f => f.IdBook).Is.EqualsTo(addBook).ToArray();
+					foreach (var imageWithFkBook in bookWithFkImagese.Images)
+					{
+						var img = imagesOfThatBook.FirstOrDefault(f => f.ImageId == imageWithFkBook.ImageId);
 
-		//	var selTestUser =
-		//			CreateQuery()
-		//					.Select.Table<Users_PK_IDFM_FUNCSELECTFACWITHPARAM>(testUser.UserId)
-		//					.ForResult(_asyncEnumeration)
-		//					.FirstOrDefault();
-		//	Assert.That(selTestUser, Is.Not.Null);
-		//	Assert.That(selTestUser.UserName, Is.EqualTo(testUser.UserName));
-		//	Assert.That(selTestUser.UserId, Is.EqualTo(testUser.UserId));
-		//}
+						Assert.That(imageWithFkBook, Is.Not.Null);
+						Assert.That(imageWithFkBook.Text, Is.EqualTo(img.Text));
+					}
+				}
+			}, Throws.Nothing);
+		}
 
+		[Test]
+		public void JoinParent()
+		{
+			var addBooksWithImage = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			Assert.That(() =>
+			{
+				var books = CreateQuery()
+					.Select.Table<ImageWithFkBooks>()
+					.Join(nameof(ImageWithFkBooks.Book))
+					.ToArray();
+
+				foreach (var imageWithFkBookse in books)
+				{
+					Assert.That(imageWithFkBookse.Book, Is.Not.Null);
+					Assert.That(imageWithFkBookse.Book.BookName, Is.Not.Null);
+					Assert.That(imageWithFkBookse.Book.BookId, Is.Not.Zero);
+				}
+
+				Assert.That(books, Is.Not.Null);
+			}, Throws.Nothing);
+		}
+
+		[Test]
+		public void SelectJoinParentCondition()
+		{
+			var book = DbAccess.InsertWithSelect(new Book()
+			{
+				BookName = "Test1"
+			});
+			book = DbAccess.InsertWithSelect(new Book()
+			{
+				BookName = "Test"
+			});
+			var image = DbAccess.InsertWithSelect(new Image()
+			{
+				IdBook = book.BookId
+			});
+
+			var books = CreateQuery()
+				.Select.Table<ImageWithFkBooks>()
+				.Join(nameof(ImageWithFkBooks.Book))
+				.Where
+				.Column(f => f.Book.BookName).Is.EqualsTo("Test")
+				.ToArray()
+				.FirstOrDefault();
+
+			Assert.That(books, Is.Not.Null);
+			Assert.That(books.Book.BookName, Is.EqualTo("Test"));
+		}
+
+		[Test]
+		public void JoinParentAndThenChild()
+		{
+			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			var images = CreateQuery()
+				.Select.Table<ImageWithFkBooks>()
+				.Join(f => f.Book.Images)
+				.ToArray();
+
+			Assert.That(images, Is.Not.Null);
+
+			var allBooks = DbAccess.Select<Book>();
+			var allImages = DbAccess.Select<Image>();
+
+			foreach (var imageWithFkBookse in images)
+			{
+				Assert.That(imageWithFkBookse.Text, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book, Is.Not.Null);
+
+				var book = allBooks.FirstOrDefault(e => e.BookId == imageWithFkBookse.IdBook);
+
+				Assert.That(imageWithFkBookse.Book.BookName, Is.EqualTo(book.BookName));
+
+				Assert.That(imageWithFkBookse.Book.Images, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.Images, Is.Not.Empty);
+
+				var imgs = allImages.Where(f => f.IdBook == imageWithFkBookse.IdBook);
+				foreach (var image in imageWithFkBookse.Book.Images)
+				{
+					var img = imgs.FirstOrDefault(e => e.ImageId == image.ImageId);
+					Assert.That(image.Book, Is.Null);
+					Assert.That(image.Text, Is.Not.Null);
+					Assert.That(image.IdBook, Is.EqualTo(imageWithFkBookse.Book.BookId));
+					Assert.That(img, Is.Not.Null);
+					Assert.That(img.Text, Is.EqualTo(image.Text));
+				}
+			}
+		}
+
+		[Test]
+		public void JoinChildAndThenParent()
+		{
+			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			var images = CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(f => f.Images.Type.Book)
+				.ToArray();
+
+			Assert.That(images, Is.Not.Null);
+
+			var allBooks = DbAccess.Select<Book>();
+			var allImages = DbAccess.Select<Image>();
+
+			//foreach (var imageWithFkBookse in images)
+			//{
+			//	Assert.That(imageWithFkBookse.Text, Is.Not.Null);
+			//	Assert.That(imageWithFkBookse.Book, Is.Not.Null);
+
+			//	var book = allBooks.FirstOrDefault(e => e.BookId == imageWithFkBookse.IdBook);
+
+			//	Assert.That(imageWithFkBookse.Book.BookName, Is.EqualTo(book.BookName));
+
+			//	Assert.That(imageWithFkBookse.Book.Images, Is.Not.Null);
+			//	Assert.That(imageWithFkBookse.Book.Images, Is.Not.Empty);
+
+			//	var imgs = allImages.Where(f => f.IdBook == imageWithFkBookse.IdBook);
+			//	foreach (var image in imageWithFkBookse.Book.Images)
+			//	{
+			//		var img = imgs.FirstOrDefault(e => e.ImageId == image.ImageId);
+			//		Assert.That(image.Book, Is.Null);
+			//		Assert.That(image.Text, Is.Not.Null);
+			//		Assert.That(image.IdBook, Is.EqualTo(imageWithFkBookse.Book.BookId));
+			//		Assert.That(img, Is.Not.Null);
+			//		Assert.That(img.Text, Is.EqualTo(image.Text));
+			//	}
+			//}
+		}
+		
 		[Test]
 		public void Count()
 		{
@@ -349,6 +455,22 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				Assert.That(userse.UserID, Is.EqualTo(userbe.UserID));
 				Assert.That(userse.UserName, Is.EqualTo(userbe.UserName));
 			}
+		}
+
+		[Test]
+		public void SelectWithCondition()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(2, DbAccess);
+			var contentConditionValue = DbAccess.Select<Users>()
+				.LastOrDefault();
+
+			var forResult = CreateQuery().Select.Table<Users>()
+				.Where.Column(f => f.UserName).Is.EqualsTo(contentConditionValue.UserName)
+				.ForResult(_asyncEnumeration)
+				.ToArray()
+				.FirstOrDefault();
+
+			Assert.That(forResult.UserName, Is.EqualTo(contentConditionValue.UserName));
 		}
 
 		[Test]

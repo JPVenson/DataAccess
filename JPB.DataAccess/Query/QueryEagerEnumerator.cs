@@ -79,7 +79,8 @@ namespace JPB.DataAccess.Query
 
 				if (dbCommand == null)
 				{
-					throw new InvalidOperationException($"The Command interceptor: '{queryCommandInterceptor}' has returned null");
+					throw new InvalidOperationException($"The Command interceptor: " +
+					                                    $"'{queryCommandInterceptor}' has returned null");
 				}
 			}
 			_queryContainer.AccessLayer.RaiseSelect(dbCommand);
@@ -88,29 +89,29 @@ namespace JPB.DataAccess.Query
 
 			if (_queryContainer.PostProcessors.Any())
 			{
-				var context = new QueryProcessingRecordsContext(_queryContainer, _queryContainer.PostProcessors);
-				var processedRecords = new List<EagarDataRecord>();
-
-				foreach (var element in dataRecords)
-				{
-					var item = element;
-					foreach (var queryContainerPostProcessor in _queryContainer.PostProcessors)
-					{
-						item = queryContainerPostProcessor.Transform(item, _type, context);
-					}
-					processedRecords.Add(item);
-				}
-
-				dataRecords = processedRecords.ToArray();
-
+				var context = new QueryProcessingRecordsContext(_queryContainer, _queryContainer.PostProcessors, columns);
 				foreach (var queryContainerPostProcessor in _queryContainer.PostProcessors)
 				{
 					dataRecords = queryContainerPostProcessor.Transform(dataRecords, _type, context);
 				}
+
+				columns = context.Columns;
 			}
 
-			dataRecords = dataRecords.Select(record =>
-				new EagarDataRecord(columns.Select(f => f.NaturalName.Trim('[', ']')).ToArray(), record.Objects))
+			foreach (var queryContainerJoin in _queryContainer.Joins)
+			{
+				var context = new QueryProcessingRecordsContext(_queryContainer,
+					_queryContainer.PostProcessors,
+					columns);
+				dataRecords = new RelationProcessor(queryContainerJoin.Value)
+					.JoinTables(dataRecords,
+					queryContainerJoin.Value.TargetTableType,
+					context);
+				columns = context.Columns;
+			}
+
+			var columnNames = columns.Select(f => f.NaturalName.TrimAlias()).ToArray();
+			dataRecords = dataRecords.Select(record => new EagarDataRecord(columnNames, record.Objects))
 				.ToArray();
 
 			var records = dataRecords.Select(dataRecord => _queryContainer.AccessLayer.SetPropertysViaReflection(_queryContainer.AccessLayer.GetClassInfo(_type),

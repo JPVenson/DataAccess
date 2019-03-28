@@ -6,6 +6,7 @@ using System.Data;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.QueryItems;
 using JPB.DataAccess.Query.QueryItems.Conditional;
@@ -69,10 +70,11 @@ namespace JPB.DataAccess.Query.Contracts
 	public class QueryProcessingRecordsContext
 	{
 		internal QueryProcessingRecordsContext(IQueryContainer queryContainer,
-			List<IEntityProcessor> queryContainerPostProcessors)
+			List<IEntityProcessor> queryContainerPostProcessors, IEnumerable<ColumnInfo> columns)
 		{
 			QueryContainer = queryContainer;
 			QueryContainerPostProcessors = queryContainerPostProcessors;
+			Columns = columns;
 			ColumnMappings = new Dictionary<string, string>();
 		}
 
@@ -92,12 +94,17 @@ namespace JPB.DataAccess.Query.Contracts
 		public List<IEntityProcessor> QueryContainerPostProcessors { get; }
 
 		/// <summary>
+		///		The column info of the result query
+		/// </summary>
+		public IEnumerable<ColumnInfo> Columns { get; set; }
+
+		/// <summary>
 		///		Can define a name remapping for columns. Key is the column name from the query where Value is the value recived from the object factory
 		/// </summary>
 		public IDictionary<string, string> ColumnRemappings { get; private set; }
 	}
 
-	internal interface IQueryContainerValues
+	internal interface IQueryContainerValues : IQueryContainer
 	{
 		/// <summary>
 		///     Gets the current number of used SQL Arguments
@@ -105,9 +112,14 @@ namespace JPB.DataAccess.Query.Contracts
 		int AutoParameterCounter { get; }
 
 		/// <summary>
+		///     Gets the current number of used SQL Columns
+		/// </summary>
+		int ColumnCounter { get; }
+
+		/// <summary>
 		///     Gets the current number of used SQL Arguments
 		/// </summary>
-		IDictionary<string, string> TableAlias { get; }
+		IDictionary<string, QueryIdentifier> TableAlias { get; }
 
 		/// <summary>
 		///     Gets the current number of used SQL Arguments
@@ -119,6 +131,10 @@ namespace JPB.DataAccess.Query.Contracts
 	/// </summary>
 	public interface IQueryContainer
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		IDictionary<string, JoinTableQueryPart> Joins { get; }
 		/// <summary>
 		///		A List of processors that will be executed after all entities are loaded.
 		///		If any Processor is present the <seealso cref="EnumerationMode"/> will be set to FullOnLoad
@@ -144,11 +160,6 @@ namespace JPB.DataAccess.Query.Contracts
 		///     Defines all elements added by the Add Method
 		/// </summary>
 		IEnumerable<IQueryPart> Parts { get; }
-
-		/// <summary>
-		///		The list of all Identifiers
-		/// </summary>
-		IList<QueryIdentifier> Identifiers { get; }
 		
 		/// <summary>
 		///     If enabled Variables that are only used for parameters will be Renamed if there Existing multiple times
@@ -176,7 +187,25 @@ namespace JPB.DataAccess.Query.Contracts
 		///     Translates an Identifier object into the corresponding Sql Identifier
 		/// </summary>
 		/// <returns></returns>
-		QueryIdentifier GetAlias(QueryIdentifier.QueryIdTypes type);
+		QueryIdentifier CreateAlias(QueryIdentifier.QueryIdTypes type);
+		
+		/// <summary>
+		///     Translates an Identifier object into the corresponding Sql Identifier
+		/// </summary>
+		/// <returns></returns>
+		QueryIdentifier CreateTableAlias(string path);
+
+		/// <summary>
+		/// </summary>
+		/// <returns></returns>
+		QueryIdentifier SearchTableAlias(string path);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <returns></returns>
+		string GetPathOf(QueryIdentifier identifier);
 
 		/// <summary>
 		///     Compiles the QueryCommand into a String|IEnumerable of Paramameter
@@ -215,5 +244,11 @@ namespace JPB.DataAccess.Query.Contracts
 		/// </summary>
 		/// <param name="queryPart"></param>
 		void Add(IQueryPart queryPart);
+
+		/// <summary>
+		///		Obtains a new Guaranteed Uniq ID for column name generation
+		/// </summary>
+		/// <returns></returns>
+		int GetNextColumnId();
 	}
 }

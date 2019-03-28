@@ -127,14 +127,14 @@ namespace JPB.DataAccess.Tests.Overwrite
 				for (var i = 0; i < number; i++)
 				{
 					var book = new Book();
-					book.BookName = Guid.NewGuid().ToString();
+					book.BookName = "BOOK_" + Guid.NewGuid().ToString();
 					books.Add(book = mgr.InsertWithSelect(book));
 
 					for (var j = 0; j < imagesPerBook; j++)
 					{
 						mgr.Insert(new Image
 						{
-							Text = Guid.NewGuid().ToString(),
+							Text = "IMG_" + Guid.NewGuid().ToString(),
 							IdBook = book.BookId
 						});
 					}

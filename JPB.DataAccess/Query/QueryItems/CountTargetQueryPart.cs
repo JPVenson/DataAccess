@@ -15,7 +15,7 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 			_queryId = queryId;
 			Columns = new ColumnInfo[]
 			{
-				new ColumnInfo("[Source]", Alias), 
+				new ColumnInfo("[Source]", Alias, null), 
 			};
 		}
 

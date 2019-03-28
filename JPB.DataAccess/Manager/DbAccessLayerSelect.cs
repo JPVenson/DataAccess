@@ -628,7 +628,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var query = CreateSelectQueryFactory(GetClassInfo(type)).CommandText
-			            + $" WHERE [{GetClassInfo(type).PrimaryKeyProperty.DbName.Trim('[', ']')}] = @pk";
+			            + $" WHERE [{GetClassInfo(type).PrimaryKeyProperty.DbName.TrimAlias()}] = @pk";
 			var cmd = Database.CreateCommand(query);
 			cmd.Parameters.AddWithValue("@pk", pk, Database);
 			return cmd;
@@ -677,10 +677,10 @@ namespace JPB.DataAccess.Manager
 
 			sb.Append(columns);
 			sb.Append(" FROM ");
-			sb.Append($"[{source.Trim('[', ']')}] ");
+			sb.Append($"[{source.TrimAlias()}] ");
 			if (alias != null)
 			{
-				sb.Append($"AS [{alias.Trim('[', ']')}] ");
+				sb.Append($"AS [{alias.TrimAlias()}] ");
 			}
 
 			return sb.ToString();
@@ -1139,7 +1139,7 @@ namespace JPB.DataAccess.Manager
 				if (propertyInfo.CheckForListInterface())
 				{
 					var pk = source.GetPK(Config);
-					var targetName = firstOrDefault.KeyName;
+					var targetName = firstOrDefault.ForeignKey;
 					targetType = propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
 
 					if (string.IsNullOrEmpty(targetName))
@@ -1155,7 +1155,7 @@ namespace JPB.DataAccess.Manager
 				}
 				else
 				{
-					var fkproperty = source.GetParameterValue(Config, firstOrDefault.KeyName);
+					var fkproperty = source.GetParameterValue(Config, firstOrDefault.ForeignKey);
 
 					if (fkproperty == null)
 					{

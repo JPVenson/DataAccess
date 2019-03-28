@@ -246,13 +246,15 @@ namespace JPB.DataAccess.DbInfoConfig
 			SetPropertyAttribute(exp, new PrimaryKeyAttribute());
 		}
 
-		/// <summary>
-		///     Set a Forgin key on a Property
-		/// </summary>
-		public void SetForginKey<TProp>(Expression<Func<T, TProp>> exp)
-		{
-			SetPropertyAttribute(exp, new ForeignKeyAttribute());
-		}
+		///// <summary>
+		/////     Set a Forgin key on a Property
+		///// </summary>
+		//public void SetForeignKey<TProp, TTargetProp>(
+		//	Expression<Func<T, TProp>> exp, 
+		//	Expression<Func<TProp, TTargetProp>> expTarget)
+		//{
+		//	SetPropertyAttribute(exp, new ForeignKeyAttribute(expTarget.GetPropertyInfoFromLamdba()));
+		//}
 
 		/// <summary>
 		///     Set a ForModelAttribute key on a Property

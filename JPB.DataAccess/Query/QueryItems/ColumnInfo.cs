@@ -1,4 +1,5 @@
-﻿using JPB.DataAccess.Query.QueryItems.Conditional;
+﻿using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
@@ -8,20 +9,21 @@ namespace JPB.DataAccess.Query.QueryItems
 	public class ColumnInfo
 	{
 		private readonly ColumnInfo _aliasOf;
+		private readonly IQueryContainer _container;
 
-		internal ColumnInfo(string columnName, ColumnInfo aliasOf,
-			QueryIdentifier alias)
+		internal ColumnInfo(string columnName,
+			ColumnInfo aliasOf,
+			QueryIdentifier alias,
+			IQueryContainer container) 
+			: this(columnName, alias, container)
 		{
 			_aliasOf = aliasOf;
-			Alias = alias;
-			ColumnName = columnName;
-			_counter = _gCounter++;
 		}
 
 		internal bool IsEquivalentTo(string columnName)
 		{
 			return
-				(ColumnName.Trim('[', ']').Equals(columnName))
+				(ColumnName.TrimAlias().Equals(columnName))
 				||
 				(_aliasOf != null && _aliasOf.IsEquivalentTo(columnName));
 		}
@@ -29,14 +31,14 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="columnName"></param>
-		/// <param name="sourceAlias"></param>
-		public ColumnInfo(string columnName, QueryIdentifier sourceAlias)
+		public ColumnInfo(string columnName,
+			QueryIdentifier sourceAlias,
+			IQueryContainer container)
 		{
-			//ColumnAlias = columnAlias;
 			Alias = sourceAlias;
+			_container = container;
 			ColumnName = columnName;
-			_counter = _gCounter++;
+			_counter = container?.GetNextColumnId() ?? -1;
 		}
 
 		internal string NaturalName
@@ -52,12 +54,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// 
 		/// </summary>
 		public QueryIdentifier Alias { get; }
-		/// <summary>
-		/// 
-		/// </summary>
-		//public QueryIdentifier ColumnAlias { get; }
 		private int _counter;
-		private static int _gCounter;
 
 		/// <summary>
 		/// 
@@ -72,7 +69,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// </summary>
 		public string ColumnSourceAlias()
 		{
-			return $"[{Alias.GetAlias()}].[{ColumnName.Trim('[', ']')}]";
+			return $"[{Alias.GetAlias()}].[{ColumnName.TrimAlias()}]";
 		}
 
 		/// <summary>

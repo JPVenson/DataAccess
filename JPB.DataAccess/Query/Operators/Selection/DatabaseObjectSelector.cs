@@ -48,7 +48,8 @@ namespace JPB.DataAccess.Query.Operators.Selection
 			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(
 				classInfo.TableName,
 				classInfo,
-				ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table))));
+				ContainerObject.CreateTableAlias(classInfo.TableName), 
+				ContainerObject)));
 		}
 
 		/// <summary>
@@ -57,9 +58,10 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		/// <returns></returns>
 		public SelectQuery<TPoco> Identifier<TPoco>(QueryIdentifier identifier)
 		{
+			var classInfo = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(ContainerObject.Search(identifier),
-				ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)),
-				ContainerObject.GetAlias(QueryIdentifier.QueryIdTypes.Table))));
+				classInfo,
+				ContainerObject.CreateTableAlias(classInfo.TableName), ContainerObject)));
 		}
 	}
 }

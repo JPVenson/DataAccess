@@ -389,7 +389,6 @@
     <Compile Include="Query\QueryItems\SelectTableQueryPart.cs" />
     <Compile Include="Query\QueryItems\SubSelectQueryPart.cs" />
     <Compile Include="Query\QueryItems\UpdateTableWithQueryPart.cs" />
-    <Compile Include="Query\QueryLazyEnumerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="JPB.DataAccess.licenseheader" />
