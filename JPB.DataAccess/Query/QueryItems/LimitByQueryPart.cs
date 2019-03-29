@@ -1,5 +1,7 @@
 ﻿using System.Data;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
@@ -12,9 +14,9 @@ namespace JPB.DataAccess.Query.QueryItems
 			_limitBy = limitBy;
 		}
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			return container.AccessLayer.Database.CreateCommand($"LIMIT {_limitBy}");
+			return new QueryFactoryResult($"LIMIT {_limitBy}");
 		}
 	}
 }

@@ -2,8 +2,10 @@
 using System.Data;
 using System.Linq;
 using System.Text;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
@@ -32,10 +34,10 @@ namespace JPB.DataAccess.Query.QueryItems
 			get { return _cteInfos; }
 		}
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var commandBuilder = new StringBuilder();
-			var commands = new List<IDbCommand>();
+			var commands = new List<IQueryFactoryResult>();
 			var first = true;
 			foreach (var cteInfo in CteInfos)
 			{
@@ -46,15 +48,14 @@ namespace JPB.DataAccess.Query.QueryItems
 
 				first = false;
 				commandBuilder.Append($"WITH {cteInfo.Name.Value} AS (");
-				var cteCommand = container.AccessLayer.Database.MergeTextToParameters(
-					cteInfo.CteContentParts.Select(e => e.Process(container)).Where(e => e != null).ToArray(), true);
-				commandBuilder.Append(cteCommand.CommandText);
+				var cteCommand = DbAccessLayerHelper.MergeQueryFactoryResult(true, 1, true, null,
+					cteInfo.CteContentParts.Select(e => e.Process(container)).Where(e => e != null).ToArray());
+				commandBuilder.Append(cteCommand.Parameters);
 				commandBuilder.Append(")");
-				commands.Add(container.AccessLayer.Database.CreateCommandWithParameterValues(commandBuilder.ToString(),
-					cteCommand.Parameters.OfType<IDataParameter>().ToArray()));
+				commands.Add(new QueryFactoryResult(commandBuilder.ToString(), cteCommand.Parameters.ToArray()));
 			}
 
-			return container.AccessLayer.Database.MergeTextToParameters(commands.ToArray(), true);
+			return DbAccessLayerHelper.MergeQueryFactoryResult(true, 1, true, null, commands.ToArray());
 		}
 
 		class CteQueryPart : ISelectableQueryPart
@@ -71,7 +72,7 @@ namespace JPB.DataAccess.Query.QueryItems
 					.Columns;
 			}
 
-			public IDbCommand Process(IQueryContainer container)
+			public IQueryFactoryResult Process(IQueryContainer container)
 			{
 				return null;
 			}

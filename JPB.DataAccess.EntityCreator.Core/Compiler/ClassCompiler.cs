@@ -8,9 +8,10 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 */
 
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.ClassBuilder;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.Helper;
@@ -26,15 +27,17 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		}
 
-		public CodeMemberProperty AddFallbackProperty()
+		public PropertyInfo AddFallbackProperty()
 		{
-			var codeMemberProperty = AddProperty("FallbackDictorary", typeof(Dictionary<string, object>));
-			var fallbackAtt = new LoadNotImplimentedDynamicAttribute();
-			codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(fallbackAtt.GetType().Name));
+			var codeMemberProperty = AddProperty("FallbackDictionary", typeof(Dictionary<string, object>));
+			codeMemberProperty.Attributes.Add(new AttributeInfo()
+			{
+				Name = nameof(LoadNotImplimentedDynamicAttribute),
+			});
 			return codeMemberProperty;
 		}
 
-		public CodeMemberProperty AddProperty(IColumInfoModel info)
+		public PropertyInfo AddProperty(IColumInfoModel info)
 		{
 			var propertyName = info.GetPropertyName();
 			var targetType = info.ColumnInfo.TargetType;
@@ -43,75 +46,42 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 				targetType = typeof(Nullable<>).MakeGenericType(targetType);
 			}
 
-			CodeMemberProperty codeMemberProperty;
-			if (info.EnumDeclaration != null)
-			{
-				codeMemberProperty = AddProperty(propertyName, new CodeTypeReference(info.EnumDeclaration.Name));
-				//var enumConverter = new ValueConverterAttribute(typeof(EnumMemberConverter));
-				codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(typeof(ValueConverterAttribute).Name, new CodeAttributeArgument(new CodeTypeOfExpression(typeof(EnumMemberConverter)))));
-			}
-			else
-			{
-				codeMemberProperty = AddProperty(propertyName, new CodeTypeReference(targetType));
+			var codeMemberProperty = AddProperty(propertyName, targetType);
 
-				if (info.IsRowVersion)
-				{
-					var forModel = new RowVersionAttribute();
-					codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name));
-				}
+			if (info.IsRowVersion)
+			{
+				codeMemberProperty.Attributes.Add(new AttributeInfo() { Name = nameof(RowVersionAttribute) });
 			}
 
 			if (!string.IsNullOrEmpty(info.NewColumnName))
 			{
-				var forModel = new ForModelAttribute(info.ColumnInfo.ColumnName);
-				codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(forModel.GetType().Name, new CodeAttributeArgument(new CodePrimitiveExpression(forModel.AlternatingName))));
+				codeMemberProperty.Attributes.Add(new AttributeInfo()
+				{
+					Name = nameof(ForModelAttribute),
+					ConstructorSetters =
+					{
+						{"alternatingName", "\"" + info.ColumnInfo.ColumnName + "\""}
+					}
+				});
 			}
 
+			codeMemberProperty.DbName = info.NewColumnName ?? info.GetPropertyName();
 
 			return codeMemberProperty;
 		}
 
-		public CodeMemberProperty AddProperty(string name, Type type)
+		public PropertyInfo AddProperty(string name, Type type)
 		{
-			return AddProperty(name, new CodeTypeReference(type));
+			return AddProperty(name, ClassType.FromCsType(type));
 		}
 
-		public CodeMemberProperty AddProperty(string name, CodeTypeReference propType)
+		public PropertyInfo AddProperty(string name, ClassType propType)
 		{
-			var property = new CodeMemberProperty();
-
-			property.Attributes = MemberAttributes.Public | MemberAttributes.Final;
-				//(MemberAttributes)24578; //Public Final
-			property.HasGet = true;
-			property.HasSet = true;
+			var property = new PropertyInfo();
 			property.Name = name;
-
 			property.Type = propType;
-
-			var memberName = char.ToLower(property.Name[0]) + property.Name.Substring(1);
-			memberName = memberName.Insert(0, "_");
-
-			var field = new CodeMemberField() {
-				Name = memberName,
-				Type = propType,
-				Attributes = MemberAttributes.Private
-			};
-
-			property.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName)));
-			property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), memberName), new CodePropertySetValueReferenceExpression()));
-
-			_base.Members.Add(field);
-			_base.Members.Add(property);
+			base.Generator.Properties.Add(property);
 			return property;
-		}
-
-		public void GenerateTypeConstructorBasedOnElements(IEnumerable<IColumInfoModel> columnInfos)
-		{
-			Add(new CodeConstructor() {
-				Attributes = MemberAttributes.Public
-			});
-
-			Add(FactoryHelper.GenerateTypeConstructor(ColumninfosToInfoCache(columnInfos), Namespace));
 		}
 
 		/// <inheritdoc />
@@ -119,7 +89,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		public override void PreCompile()
 		{
-			_base.IsClass = true;
 		}
 	}
 }
+

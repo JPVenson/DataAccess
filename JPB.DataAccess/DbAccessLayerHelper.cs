@@ -1,4 +1,4 @@
-﻿#region
+﻿#region usings
 
 using System;
 using System.Collections.Generic;
@@ -14,6 +14,7 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.QueryFactory;
 
 #endregion
 
@@ -55,6 +56,45 @@ namespace JPB.DataAccess
 			return DbAccessLayer.ReflectionPropertySet(config, source, type, reader, new DbAccessLayer.ReflectionSetCacheModel(), accessType);
 #pragma warning restore 618
 		}
+		/// <summary>
+		///     Creates a new Instance based on possible Ctor's and the given
+		///     <paramref name="reader" />
+		/// </summary>
+		/// <returns></returns>
+		public static object SetPropertysViaReflection(
+			this DbClassInfoCache type,
+			XmlDataRecord reader,
+			DbAccessType? accessType = null,
+			DbConfig config = null)
+		{
+			if (reader == null)
+			{
+				return null;
+			}
+
+			var eagerReader = new EagarDataRecord();
+
+			for (int i = 0; i < reader.FieldCount; i++)
+			{
+				eagerReader.Add(eagerReader.GetName(i), eagerReader[i]);
+			}
+
+			bool created;
+			var source = DbAccessLayer.CreateInstance(type, eagerReader, out created);
+			if (created)
+			{
+				return source;
+			}
+
+			if (config == null)
+			{
+				config = new DbConfig(true);
+			}
+
+#pragma warning disable 618
+			return DbAccessLayer.ReflectionPropertySet(config, source, type, eagerReader, new DbAccessLayer.ReflectionSetCacheModel(), accessType);
+#pragma warning restore 618
+		}
 
 		/// <summary>
 		///     Not Connection save
@@ -86,6 +126,70 @@ namespace JPB.DataAccess
 				parameter.Add(new QueryParameter(param.ParameterName + suffix, param.Value, param.DbType));
 			}
 			return db.CreateCommandWithParameterValues(commandText, parameter);
+		}
+
+		/// <summary>
+		///		Merges all Queries together
+		/// </summary>
+		/// <param name="autoRename"></param>
+		/// <param name="seed"></param>
+		/// <param name="pessimistic"></param>
+		/// <param name="insertDelimiter"></param>
+		/// <param name="others"></param>
+		/// <returns></returns>
+		public static IQueryFactoryResult MergeQueryFactoryResult(bool autoRename = false,
+			int seed = 1,
+			bool pessimistic = true,
+			string insertDelimiter = null,
+			params IQueryFactoryResult[] others)
+		{
+			var commandText = new StringBuilder();
+			var parameter = new List<IQueryParameter>();
+
+			if (pessimistic)
+			{
+				foreach (var dbCommand in others)
+				{
+					var commandTextOfChild = new StringBuilder(dbCommand.Query);
+					foreach (var item in dbCommand.Parameters)
+					{
+						if (parameter.Any(s => s.Name == item.Name))
+						{
+							//Parameter is found twice in both commands so rename it
+							if (!autoRename)
+							{
+								throw new ArgumentOutOfRangeException(nameof(others),
+									string.Format("The parameter {0} exists twice. Allow Auto renaming or change one of the commands",
+										item.Name));
+							}
+							var counter = seed;
+							var parameterName = item.Name;
+							var buffParam = parameterName;
+							while (parameter.Any(s => s.Name == buffParam))
+							{
+								buffParam = string.Format("{0}_{1}", parameterName, counter);
+								counter++;
+							}
+							commandTextOfChild = commandTextOfChild.Replace(item.Name, buffParam);
+							item.Name = buffParam;
+						}
+
+						parameter.Add(item);
+					}
+
+					commandText.Append((insertDelimiter ?? " ") + commandTextOfChild);
+				}
+			}
+			else
+			{
+				foreach (var dbCommand in others)
+				{
+					parameter.AddRange(dbCommand.Parameters);
+					commandText.Append((insertDelimiter ?? " ") + dbCommand.Query);
+				}
+			}
+
+			return new QueryFactoryResult(commandText.ToString(), parameter.ToArray());
 		}
 
 		/// <summary>

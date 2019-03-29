@@ -12,7 +12,6 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool CreateFallbackProperty { get; set; }
 		bool CreateSelectFactory { get; set; }
 		bool CreateDataRecordLoader { get; set; }
-		bool WrapNullables { get; set; }
 		string GetClassName();
 	}
 

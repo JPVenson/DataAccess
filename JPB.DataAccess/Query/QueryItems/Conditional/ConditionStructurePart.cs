@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
@@ -7,7 +8,9 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 		internal enum LogicalOperator
 		{
 			And,
-			Or
+			Or,
+			OpenBracket,
+			CloseBracket
 		}
 
 		public ConditionStructurePart(LogicalOperator logOperator)
@@ -19,7 +22,21 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 
 		public void Render(ConditionalQueryBuilder builder, Queue<IConditionPart> next)
 		{
-			builder.QueryBuilder.Append($" {LogOperator.ToString().ToUpper()} ");
+			switch (LogOperator)
+			{
+				case LogicalOperator.And:
+				case LogicalOperator.Or:
+					builder.QueryBuilder.Append($"{LogOperator.ToString().ToUpper()} ");
+					break;
+				case LogicalOperator.OpenBracket:
+					builder.QueryBuilder.Append($"(");
+					break;
+				case LogicalOperator.CloseBracket:
+					builder.QueryBuilder.Append($")");
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts.MetaApi;
 using JPB.DataAccess.MetaApi.Model;
 using JPB.DataAccess.ModelsAnotations;
@@ -45,7 +46,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// <summary>
 		///     If enumerated a method that creats an Instance and then fills all propertys
 		/// </summary>
-		public Func<IDataRecord, object> Factory { get; set; }
+		public Func<EagarDataRecord, object> Factory { get; set; }
 
 		/// <summary>
 		///     Internal Use only

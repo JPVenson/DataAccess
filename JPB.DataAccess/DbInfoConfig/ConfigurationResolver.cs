@@ -4,6 +4,7 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.MetaApi.Model;
@@ -197,7 +198,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		///     Set a Mehtod for creating an instance. When FullLoad is true the Framework assumes that the Factory has loaded all
 		///     infos from the IDataRecord into the new Object
 		/// </summary>
-		public void SetFactory(Func<IDataRecord, object> factory, bool fullLoad)
+		public void SetFactory(Func<EagarDataRecord, object> factory, bool fullLoad)
 		{
 			ClassInfoCache.Factory = factory;
 			ClassInfoCache.FullFactory = fullLoad;

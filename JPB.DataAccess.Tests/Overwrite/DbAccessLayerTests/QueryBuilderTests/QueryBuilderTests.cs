@@ -412,6 +412,20 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
+		public void SelectWithBrakets()
+		{
+			DataMigrationHelper.AddUsers(1, DbAccess);
+			var deSelect = DbAccess.Select<Users>();
+			var queryCompile = CreateQuery().Select.Table<Users>()
+				.Where
+				.InBracket(e => e.Column(f => f.UserName).Is.EqualsTo(deSelect[0].UserName))
+				.And
+				.InBracket(e => e.InBracket(f => f.Column(g => g.UserName).Is.Not.Null).And.PrimaryKey().Is.EqualsTo(1))
+				.ContainerObject
+				.Compile(out _);
+		}
+
+		[Test]
 		public void SelectWithEscapedInConfiguration()
 		{
 			DataMigrationHelper.AddUsers(250, DbAccess);

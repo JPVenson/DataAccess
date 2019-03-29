@@ -65,6 +65,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		public string TargetDir { get; set; }
 		public bool GenerateConstructor { get; set; }
+		public bool GenerateFactory { get; set; }
 		public bool GenerateForgeinKeyDeclarations { get; set; }
 		public bool GenerateCompilerHeader { get; set; }
 		public bool GenerateConfigMethod { get; set; }
@@ -147,32 +148,32 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				SharedMethods.CompileTable(tableInfoModel, this);
 			}
 
-			foreach (var proc in StoredProcs)
-			{
-				if (proc.Exclude)
-				{
-					continue;
-				}
+			//foreach (var proc in StoredProcs)
+			//{
+			//	if (proc.Exclude)
+			//	{
+			//		continue;
+			//	}
 
-				var targetCsName = proc.GetClassName();
-				var compiler = new ProcedureCompiler(TargetDir, targetCsName);
-				compiler.CompileHeader = GenerateCompilerHeader;
-				compiler.Namespace = Namespace;
-				compiler.GenerateConfigMethod = GenerateConfigMethod;
-				compiler.TableName = proc.NewTableName;
-				if (proc.Parameter.ParamaterSpParams != null)
-				{
-					foreach (var spParamter in proc.Parameter.ParamaterSpParams)
-					{
-						var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
-						var spcName = spParamter.Parameter.Replace("@", "");
-						compiler.AddProperty(spcName, targetType);
-					}
-				}
+			//	var targetCsName = proc.GetClassName();
+			//	var compiler = new ProcedureCompiler(TargetDir, targetCsName);
+			//	compiler.CompileHeader = GenerateCompilerHeader;
+			//	compiler.Namespace = Namespace;
+			//	compiler.GenerateConfigMethod = GenerateConfigMethod;
+			//	compiler.TableName = proc.NewTableName;
+			//	if (proc.Parameter.ParamaterSpParams != null)
+			//	{
+			//		foreach (var spParamter in proc.Parameter.ParamaterSpParams)
+			//		{
+			//			var targetType = DbTypeToCsType.GetClrType(spParamter.Type);
+			//			var spcName = spParamter.Parameter.Replace("@", "");
+			//			compiler.AddProperty(spcName, targetType);
+			//		}
+			//	}
 
-				WinConsole.WriteLine("Compile Procedure {0}", compiler.Name);
-				compiler.Compile(new List<ColumInfoModel>(), SplitByType);
-			}
+			//	WinConsole.WriteLine("Compile Procedure {0}", compiler.Name);
+			//	compiler.Compile(new List<ColumInfoModel>(), SplitByType);
+			//}
 
 			if (_optionsIncludeInVsProject)
 			{
@@ -323,6 +324,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					case @"\withautoctor":
 						SetRenderAutoCtor();
 						break;
+					case @"\withfactory":
+						SetRenderFactory();
+						break;
 					case @"\addconfigmethod":
 						SetConfigMethod();
 						break;
@@ -337,6 +341,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						break;
 				}
 			}
+		}
+
+		private void SetRenderFactory()
+		{
+			GenerateFactory = !GenerateFactory;
+			WinConsole.WriteLine("Auto Ctor is {0}", GenerateFactory ? "set" : "unset");
+			RenderMenuAction();
 		}
 
 		private void SetCompilerHeader()
@@ -378,6 +389,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public void AutoAlignNames()
 		{
 			SharedMethods.AutoAlignNames(Tables);
+			SharedMethods.AutoAlignNames(Views, "View");
 			RenderMenuAction();
 		}
 
@@ -574,7 +586,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 								WinConsole.WriteLine("Reading table: '{0}'", column.ForgeinKeyDeclarations.TableName);
 
 								var tableContent =
-										Manager.Select<DynamicTableContentModel>(new object[] { column.ForgeinKeyDeclarations.TableName });
+										Manager.Select<Any>(new object[] { column.ForgeinKeyDeclarations.TableName });
 
 								if (!tableContent.Any())
 								{
@@ -582,20 +594,20 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 									break;
 								}
 
-								if (tableContent.First().DataHolder.Count > 2)
+								if (tableContent.First().PropertyBag.Count > 2)
 								{
 									WinConsole.WriteLine("The Enum table '{0}' contains more then 2 columns", column.ForgeinKeyDeclarations.TableName);
 									break;
 								}
 
-								if (!tableContent.Any(s => s.DataHolder.Any(f => f.Value is int)))
+								if (!tableContent.Any(s => s.PropertyBag.Any(f => f.Value is int)))
 								{
 									WinConsole.WriteLine("The Enum table '{0}' does not contains exactly one column of type int",
 									column.ForgeinKeyDeclarations.TableName);
 									break;
 								}
 
-								if (!tableContent.Any(s => s.DataHolder.Any(f => f.Value is string)))
+								if (!tableContent.Any(s => s.PropertyBag.Any(f => f.Value is string)))
 								{
 									WinConsole.WriteLine("The Enum table '{0}' does not contains exactly one column of type int",
 									column.ForgeinKeyDeclarations.TableName);
@@ -607,8 +619,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 								foreach (var item in tableContent)
 								{
-									var pk = (int)item.DataHolder.FirstOrDefault(s => s.Value is int).Value;
-									var value = (string)item.DataHolder.FirstOrDefault(s => s.Value is string).Value;
+									var pk = (int)item.PropertyBag.FirstOrDefault(s => s.Value is int).Value;
+									var value = (string)item.PropertyBag.FirstOrDefault(s => s.Value is string).Value;
 									column.EnumDeclaration.Values.Add(pk, value);
 									WinConsole.WriteLine("Adding Enum member '{0}' = '{1}'", value, pk);
 								}

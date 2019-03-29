@@ -26,5 +26,10 @@ namespace JPB.DataAccess
 		{
 			return alias.Trim('[', ']');
 		}
+
+		public static string AsStringOfString(this string alias)
+		{
+			return $"\"{alias}\"";
+		}
 	}
 }

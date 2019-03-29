@@ -104,7 +104,10 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		public virtual void ExecuteNonQuery()
 		{
-			var dbCommand = ContainerObject.Compile(out var columns);
+			var query = ContainerObject.Compile(out var columns);
+			var dbCommand 
+				= ContainerObject.AccessLayer.Database.CreateCommandWithParameterValues(query.Query, query.Parameters);
+			
 			foreach (var queryCommandInterceptor in Interceptors)
 			{
 				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
@@ -135,7 +138,7 @@ namespace JPB.DataAccess.Query
 		/// <inheritdoc />
 		public override string ToString()
 		{
-			return ContainerObject.CompileFlat().Item1;
+			return ContainerObject.Compile(out var columns).Query;
 		}
 	}
 }

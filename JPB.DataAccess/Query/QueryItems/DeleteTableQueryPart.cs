@@ -1,24 +1,28 @@
 ﻿using System.Data;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
-	internal class DeleteTableQueryPart : IQueryPart
+	internal class DeleteTableQueryPart : IIdentifiableQueryPart
 	{
-		private readonly DbClassInfoCache _classInfo;
+		private readonly QueryIdentifier _target;
 
-		public DeleteTableQueryPart(DbClassInfoCache classInfo)
+		public DeleteTableQueryPart(QueryIdentifier target, QueryIdentifier alias)
 		{
-			_classInfo = classInfo;
+			Alias = alias;
+			_target = target;
 		}
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			return DbAccessLayer
-				.CreateDelete(container
-					.AccessLayer.Database, _classInfo);
+			return new QueryFactoryResult($"DELETE FROM {_target.GetAlias()} AS {Alias.GetAlias()}");
 		}
+
+		public QueryIdentifier Alias { get; }
 	}
 }

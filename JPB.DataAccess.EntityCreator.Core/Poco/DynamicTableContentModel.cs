@@ -20,11 +20,11 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 			}
 		}
 
-		[SelectFactoryMethod]
-		public static void SelectFromTable(RootQuery queryBuilder, string tableName)
-		{
-			queryBuilder.QueryD("SELECT * FROM " + tableName);
-		}
+		//[SelectFactoryMethod]
+		//public static void SelectFromTable(RootQuery queryBuilder, string tableName)
+		//{
+		//	queryBuilder.QueryD("SELECT * FROM " + tableName);
+		//}
 
 		[JPB.DataAccess.ModelsAnotations.LoadNotImplimentedDynamic]
 		public IDictionary<string, object> DataHolder { get; set; }

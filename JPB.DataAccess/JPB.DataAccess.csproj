@@ -180,6 +180,10 @@
     <Compile Include="DbCollection\DbCollection.cs" />
     <Compile Include="DbCollection\NonObservableDbCollection.cs" />
     <Compile Include="DbEventArgs\DatabaseActionEvent.cs" />
+    <Compile Include="DbInfoConfig\ClassBuilder\AttributeInfo.cs" />
+    <Compile Include="DbInfoConfig\ClassBuilder\ClassInfoGenerator.cs" />
+    <Compile Include="DbInfoConfig\ClassBuilder\ClassType.cs" />
+    <Compile Include="DbInfoConfig\ClassBuilder\PropertyInfo.cs" />
     <Compile Include="DbInfoConfig\CollisonDetectionMode.cs" />
     <Compile Include="DbInfoConfig\DbConfigHelper.cs" />
     <Compile Include="DbInfoConfig\ConfigurationResolver.cs" />

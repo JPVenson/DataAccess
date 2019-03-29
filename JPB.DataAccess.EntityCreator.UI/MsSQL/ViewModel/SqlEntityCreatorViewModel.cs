@@ -72,6 +72,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		public DelegateCommand LoadConfigCommand { get; private set; }
 		public DelegateCommand SaveConfigCommand { get; private set; }
 		private bool _splitByType;
+		private bool _generateFactory;
 
 		public bool SplitByType
 		{
@@ -249,6 +250,16 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				SendPropertyChanging(() => GenerateConstructor);
 				_generateConstructor = value;
 				SendPropertyChanged(() => GenerateConstructor);
+			}
+		}
+
+		public bool GenerateFactory
+		{
+			get { return _generateFactory; }
+			set
+			{
+				_generateFactory = value;
+				SendPropertyChanged();
 			}
 		}
 

@@ -11,6 +11,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		IEnumerable<IStoredPrcInfoModel> StoredProcs { get; }
 		string TargetDir { get; set; }
 		bool GenerateConstructor { get; set; }
+		bool GenerateFactory { get; set; }
 		bool GenerateForgeinKeyDeclarations { get; set; }
 		bool GenerateCompilerHeader { get; set; }
 		bool GenerateConfigMethod { get; set; }

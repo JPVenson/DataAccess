@@ -79,7 +79,11 @@ namespace JPB.DataAccess.Query
 
 		private void LoadResults()
 		{
-			var dbCommand = _queryContainer.Compile(out var columns);
+			var query = _queryContainer.Compile(out var columns);
+			var dbCommand =
+				_queryContainer.AccessLayer.Database
+					.CreateCommandWithParameterValues(query.Query, query.Parameters);
+			
 			foreach (var queryCommandInterceptor in _queryContainer.Interceptors)
 			{
 				dbCommand = queryCommandInterceptor.NonQueryExecuting(dbCommand);
@@ -90,7 +94,6 @@ namespace JPB.DataAccess.Query
 					                                    $"'{queryCommandInterceptor}' has returned null");
 				}
 			}
-			_queryContainer.AccessLayer.RaiseSelect(dbCommand);
 			var dataRecords = _queryContainer.AccessLayer.EnumerateDataRecordsAsync(dbCommand)
 				.ToArray();
 

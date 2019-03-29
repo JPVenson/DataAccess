@@ -10,6 +10,7 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
@@ -77,15 +78,8 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public IEnumerable<JoinTableQueryPart> Joins { get; private set; }
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			//ColumnMapper mappings;
-			//container.PostProcessors.Add(mappings = new ColumnMapper());
-			//foreach (var columnMapping in ColumnMappings)
-			//{
-			//	mappings.Mappings.Add(columnMapping);
-			//}
-
 			string modifier = null;
 
 			if (Limit.HasValue && container.AccessLayer.DbAccessType == DbAccessType.MsSql)
@@ -101,18 +95,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			var query = DbAccessLayer.CreateSelectByColumns(_source,
 				Columns.Select(e => e.ColumnAliasStatement()).Aggregate((e, f) => e + ", " + f), Alias.GetAlias(),
 				modifier);
-
-			return container.AccessLayer.Database.CreateCommand(query);
-
-			//var selectQuery = container.AccessLayer.CreateSelectQueryFactory(
-			//	_tableInfo,
-			//	() =>
-			//	{
-
-			//	},
-			//	_argumentsForFactory);
-
-			//return selectQuery;
+			return new QueryFactoryResult(query);
 		}
 
 		public QueryIdentifier Alias { get; }

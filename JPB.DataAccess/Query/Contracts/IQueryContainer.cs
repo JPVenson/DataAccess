@@ -21,6 +21,13 @@ namespace JPB.DataAccess.Query.Contracts
 	public interface IEntityProcessor
 	{
 		/// <summary>
+		///		Will be invoked right before execution of the command
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
+		IDbCommand BeforeExecution(IDbCommand command);
+
+		/// <summary>
 		///		Transforms an Entity
 		/// </summary>
 		/// <param name="entity"></param>
@@ -175,7 +182,7 @@ namespace JPB.DataAccess.Query.Contracts
 		///     Will concat all QueryParts into a statement and will check for Spaces
 		/// </summary>
 		/// <returns></returns>
-		IDbCommand Compile(out IEnumerable<ColumnInfo> columns);
+		IQueryFactoryResult Compile(out IEnumerable<ColumnInfo> columns);
 
 		/// <summary>
 		///     Increment the counter +1 and return the value
@@ -206,12 +213,6 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <param name="identifier"></param>
 		/// <returns></returns>
 		string GetPathOf(QueryIdentifier identifier);
-
-		/// <summary>
-		///     Compiles the QueryCommand into a String|IEnumerable of Paramameter
-		/// </summary>
-		/// <returns></returns>
-		Tuple<string, IEnumerable<IQueryParameter>> CompileFlat();
 
 		/// <summary>
 		///     Clones this Container

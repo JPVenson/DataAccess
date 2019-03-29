@@ -1,10 +1,14 @@
-﻿using System.CodeDom;
+﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbCollection;
+using JPB.DataAccess.DbInfoConfig.ClassBuilder;
 using JPB.DataAccess.EntityCreator.Core.Compiler;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
@@ -49,7 +53,10 @@ namespace JPB.DataAccess.EntityCreator.Core
 			CompileTableLike(tableInfoModel, sourceCreator, "Table", to);
 		}
 
-		private static void CompileTableLike(ITableInfoModel tableInfoModel, IMsSqlCreator sourceCreator, string typeName, Stream to = null)
+		private static void CompileTableLike(ITableInfoModel tableInfoModel,
+			IMsSqlCreator sourceCreator,
+			string typeName,
+			Stream to = null)
 		{
 			if (tableInfoModel.Exclude)
 				return;
@@ -63,19 +70,10 @@ namespace JPB.DataAccess.EntityCreator.Core
 			compiler.TableName = tableInfoModel.Info.TableName;
 			if (to != null)
 			{
-				compiler.WriteAllways = true;
+				compiler.WriteAlways = true;
 			}
+
 			compiler.GenerateConfigMethod = sourceCreator.GenerateConfigMethod;
-
-			if (tableInfoModel.WrapNullables || sourceCreator.WrapNullables)
-			{
-				compiler.AddAttribute(new CodeAttributeDeclaration(typeof(WrapDbNullablesAttribute).Name));
-			}
-
-			if (tableInfoModel.CreateSelectFactory || sourceCreator.GenerateConstructor)
-			{
-				compiler.GenerateTypeConstructorBasedOnElements(tableInfoModel.ColumnInfos.Where(s => !s.Exclude));
-			}
 
 			foreach (var columInfoModel in tableInfoModel.ColumnInfos)
 			{
@@ -86,52 +84,169 @@ namespace JPB.DataAccess.EntityCreator.Core
 
 				if (columInfoModel.PrimaryKey)
 				{
-					codeMemberProperty.CustomAttributes.Add(
-						new CodeAttributeDeclaration(typeof(PrimaryKeyAttribute).Name));
+					codeMemberProperty.Attributes.Add(new AttributeInfo() { Name = nameof(PrimaryKeyAttribute) });
 				}
+
 				if (columInfoModel.InsertIgnore)
 				{
-					codeMemberProperty.CustomAttributes.Add(
-						new CodeAttributeDeclaration(typeof(InsertIgnoreAttribute).Name));
+					codeMemberProperty.Attributes.Add(new AttributeInfo() { Name = nameof(InsertIgnoreAttribute) });
 				}
+
 				if (columInfoModel.ForgeinKeyDeclarations != null)
 				{
 					var isRefTypeKnown =
-						sourceCreator.Tables.FirstOrDefault(s => s.Info.TableName == columInfoModel.ForgeinKeyDeclarations.TableName);
+						sourceCreator.Tables
+							.FirstOrDefault(s =>
+								s.Info.TableName == columInfoModel.ForgeinKeyDeclarations.TableName);
 
 					if (isRefTypeKnown == null)
 					{
-						codeMemberProperty.CustomAttributes.Add(
-							new CodeAttributeDeclaration(typeof(ForeignKeyDeclarationAttribute).Name,
-								new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TargetColumn)),
-								new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TableName))));
+						codeMemberProperty.Attributes.Add(new AttributeInfo()
+						{
+							Name = nameof(ForeignKeyDeclarationAttribute),
+							ConstructorSetters =
+							{
+								{"foreignKey", "\"" + columInfoModel.ForgeinKeyDeclarations.TargetColumn + "\""},
+								{"foreignTable", "\"" + columInfoModel.ForgeinKeyDeclarations.TableName + "\""},
+							}
+						});
 					}
 					else
 					{
-						codeMemberProperty.CustomAttributes.Add(
-							new CodeAttributeDeclaration(typeof(ForeignKeyDeclarationAttribute).Name,
-								new CodeAttributeArgument(new CodePrimitiveExpression(columInfoModel.ForgeinKeyDeclarations.TargetColumn)),
-								new CodeAttributeArgument(new CodeTypeOfExpression(isRefTypeKnown.GetClassName()))));
+						codeMemberProperty.Attributes.Add(new AttributeInfo()
+						{
+							Name = nameof(ForeignKeyDeclarationAttribute),
+							ConstructorSetters =
+							{
+								{"foreignKey", $"\"{columInfoModel.ForgeinKeyDeclarations.TargetColumn}\""},
+								{"foreignTable", $"typeof({isRefTypeKnown.GetClassName()})"},
+							}
+						});
 					}
 				}
 
 				if (columInfoModel.ColumnInfo.SqlType == SqlDbType.Timestamp)
 				{
-					codeMemberProperty.CustomAttributes.Add(
-						new CodeAttributeDeclaration(typeof(RowVersionAttribute).Name));
+					codeMemberProperty.Attributes.Add(new AttributeInfo() { Name = nameof(RowVersionAttribute) });
+				}
+
+				if (tableInfoModel.CreateFallbackProperty)
+				{
+					compiler.AddFallbackProperty();
+				}
+			}
+			
+			foreach (var columInfoModel in tableInfoModel.ColumnInfos)
+			{
+				if (columInfoModel.Exclude)
+					continue;
+
+				if (columInfoModel.ForgeinKeyDeclarations != null)
+				{
+					var isRefTypeKnown =
+						sourceCreator.Tables
+							.FirstOrDefault(s =>
+								s.Info.TableName == columInfoModel.ForgeinKeyDeclarations.TableName);
+
+					if (isRefTypeKnown != null)
+					{
+						compiler.Generator.NamespaceImports.Add(typeof(EagarDataRecord).Namespace);
+						compiler.Generator.NamespaceImports.Add(typeof(DbAccessLayerHelper).Namespace);
+						var navPropertyName = isRefTypeKnown.GetClassName();
+						if (!navPropertyName.EndsWith("s"))
+						{
+							navPropertyName = navPropertyName.TrimEnd('s');
+						}
+
+						var tempName = navPropertyName;
+						var counter = 1;
+						while (compiler.Generator.Properties.Any(f => f.Name == tempName
+						                                              || tempName == tableInfoModel.GetClassName()))
+						{
+							tempName = navPropertyName + counter++;
+						}
+
+						navPropertyName = tempName;
+						var refProp = compiler.AddProperty(navPropertyName, new ClassType()
+						{
+							Name = isRefTypeKnown.GetClassName(),
+						});
+						refProp.ForeignKey = new PropertyInfo.ForeignKeyDeclaration(columInfoModel.ForgeinKeyDeclarations.SourceColumn,
+							columInfoModel.ForgeinKeyDeclarations.TargetColumn);
+						refProp.Attributes.Add(new AttributeInfo()
+						{
+							Name = nameof(ForeignKeyAttribute),
+							ConstructorSetters =
+							{
+								{"foreignKey", columInfoModel.ForgeinKeyDeclarations.SourceColumn.AsStringOfString()},
+								{"referenceKey", columInfoModel.ForgeinKeyDeclarations.TargetColumn.AsStringOfString()},
+							}
+						});
+					}
 				}
 			}
 
-			if (tableInfoModel.CreateFallbackProperty)
+			foreach (var infoModel in sourceCreator.Tables)
 			{
-				compiler.AddFallbackProperty();
+				foreach (var columInfoModel in infoModel
+					.ColumnInfos
+					.Where(f => f.ForgeinKeyDeclarations?.TableName == tableInfoModel.Info.TableName))
+				{
+
+					compiler.Generator.NamespaceImports.Add(typeof(EagarDataRecord).Namespace);
+					compiler.Generator.NamespaceImports.Add(typeof(DbAccessLayerHelper).Namespace);
+					var navPropertyName = infoModel.GetClassName();
+					if (!navPropertyName.EndsWith("s"))
+					{
+						navPropertyName = navPropertyName.TrimEnd('s');
+					}
+
+					var tempName = navPropertyName;
+					var counter = 1;
+					while (compiler.Generator.Properties.Any(f => f.Name == tempName 
+					                                              || tempName == tableInfoModel.GetClassName()))
+					{
+						tempName = navPropertyName + counter++;
+					}
+
+					navPropertyName = tempName;
+
+					var refProp = compiler.AddProperty(navPropertyName, new ClassType()
+					{
+						Name = $"{nameof(DbCollection<object>)}",
+						IsList = true,
+						GenericTypes =
+						{
+							new ClassType()
+							{
+								Name = infoModel.GetClassName()
+							}
+						}
+					});
+					refProp.ForeignKey = new PropertyInfo.ForeignKeyDeclaration(columInfoModel.ForgeinKeyDeclarations.SourceColumn,
+						columInfoModel.ForgeinKeyDeclarations.TargetColumn);
+					refProp.ForeignKey.DirectionFromParent = true;
+					refProp.Attributes.Add(new AttributeInfo()
+					{
+						Name = nameof(ForeignKeyAttribute),
+						ConstructorSetters =
+						{
+							{"referenceKey", columInfoModel.ForgeinKeyDeclarations.SourceColumn.AsStringOfString()},
+							{"foreignKey", columInfoModel.ForgeinKeyDeclarations.TargetColumn.AsStringOfString()},
+						}
+					});
+				}
 			}
+
+			compiler.GenerateConfigMethod = true;
+			compiler.Generator.GenerateFactory = tableInfoModel.CreateSelectFactory || sourceCreator.GenerateFactory;
+			compiler.Generator.GenerateConstructor = sourceCreator.GenerateConstructor;
 
 			Logger.WriteLine("Compile Class {0}", compiler.Name);
 			compiler.Compile(tableInfoModel.ColumnInfos, sourceCreator.SplitByType, to);
 		}
 
-		public static void AutoAlignNames(IEnumerable<ITableInfoModel> tableNames)
+		public static void AutoAlignNames(IEnumerable<ITableInfoModel> tableNames, string tableSuffix = null)
 		{
 			Logger.WriteLine("Auto rename Columns after common cs usage");
 			Logger.WriteLine();
@@ -144,7 +259,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 				}
 
 				Logger.WriteLine("Check Table: {0}", tableName);
-				var newName = CheckOrAlterName(tableName);
+				var newName = CheckOrAlterName(tableName, tableSuffix);
 				if (newName != tableName)
 				{
 					Logger.WriteLine("Alter Table'{0}' to '{1}'", tableName, newName);
@@ -176,9 +291,9 @@ namespace JPB.DataAccess.EntityCreator.Core
 
 		private static readonly char[] _invalidColumnChars = { '_', ' ', '.' };
 
-		public static string CheckOrAlterName(string name)
+		public static string CheckOrAlterName(string tableName, string suffix = null)
 		{
-			var newName = name;
+			var newName = tableName;
 
 			foreach (var unvalidPart in _invalidColumnChars)
 			{
@@ -195,6 +310,14 @@ namespace JPB.DataAccess.EntityCreator.Core
 						}
 					}
 					newName = newName.Replace(unvalidPart.ToString(CultureInfo.InvariantCulture), string.Empty);
+				}
+			}
+
+			if (!string.IsNullOrWhiteSpace(suffix))
+			{
+				if (!newName.EndsWith(suffix))
+				{
+					newName += suffix;
 				}
 			}
 

@@ -32,7 +32,10 @@ namespace JPB.DataAccess.Query.Operators
 			var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			return new UpdateColumnSetters<TPoco>(
 				this.Add(new UpdateTableWithQueryPart(
-					dbClassInfoCache, 
+					new QueryIdentifier()
+					{
+						Value = dbClassInfoCache.TableName
+					}, 
 					ContainerObject.CreateTableAlias(dbClassInfoCache.TableName))));
 		}
 	}

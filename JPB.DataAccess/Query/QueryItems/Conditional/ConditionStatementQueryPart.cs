@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
@@ -14,7 +16,7 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 
 		public List<IConditionPart> Conditions { get; private set; }
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var builder = new ConditionalQueryBuilder();
 			builder.QueryBuilder.Append("WHERE ");
@@ -24,9 +26,7 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 			{
 				conditions.Dequeue().Render(builder, conditions);
 			}
-
-			return container.AccessLayer.Database
-				.CreateCommandWithParameterValues(builder.QueryBuilder.ToString(), builder.QueryParameters);
+			return new QueryFactoryResult(builder.QueryBuilder.ToString(), builder.QueryParameters.ToArray());
 		}
 	}
 }

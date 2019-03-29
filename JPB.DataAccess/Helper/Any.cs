@@ -5,30 +5,42 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	/// Helper Class to enumerate a Table Directly
 	/// </summary>
-	internal sealed class Any : DynamicObject, ICustomTypeDescriptor
+	public sealed class Any : DynamicObject, ICustomTypeDescriptor
 	{
-		internal Any(string tableName)
+		/// <summary>
+		///		The selection Factory called by the DbAccessLayer. To Invoke this you must call
+		/// <example>dbAccessLayer.Select{Any}("NameOfTable");</example>
+		/// </summary>
+		/// <param name="tableName"></param>
+		/// <returns></returns>
+		public static IQueryFactoryResult SelectFrom(string tableName)
 		{
-			Table = tableName;
+			return new QueryFactoryResult($"SELECT * FROM [{tableName}]");
 		}
 
-		internal string Table { get; set; }
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="resolver"></param>
 		[ConfigMehtod]
 		public static void Configurate(ConfigurationResolver<Any> resolver)
 		{
 			resolver.SetPropertyAttribute(f => f.PropertyBag, new LoadNotImplimentedDynamicAttribute());
-			resolver.SetPropertyAttribute(f => f.Table, new IgnoreReflectionAttribute());
 		}
 
+		/// <summary>
+		///		The values enumerated
+		/// </summary>
 		public IDictionary<string, object> PropertyBag { get; set; }
 
 		/// <inheritdoc />
@@ -40,7 +52,7 @@ namespace JPB.DataAccess.Helper
 		/// <inheritdoc />
 		public string GetClassName()
 		{
-			return Table;
+			return "Any";
 		}
 
 		/// <inheritdoc />

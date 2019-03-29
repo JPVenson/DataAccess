@@ -184,9 +184,9 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <param name="xmlStream">The XML stream.</param>
 		/// <param name="target">The target.</param>
 		/// <param name="single">if set to <c>true</c> [single].</param>
-		/// <param name="accessLayer">The access layer.</param>
+		/// <param name="config">The access layer.</param>
 		/// <returns></returns>
-		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single, DbConfig accessLayer = null)
+		public static XmlDataRecord TryParse(string xmlStream, Type target, bool single, DbConfig config = null)
 		{
 			if (string.IsNullOrEmpty(xmlStream) || string.IsNullOrWhiteSpace(xmlStream))
 			{
@@ -195,7 +195,7 @@ namespace JPB.DataAccess.AdoWrapper
 			try
 			{
 				var xDocument = XDocument.Parse(xmlStream, LoadOptions.None);
-				var record = new XmlDataRecord(xDocument, target, accessLayer);
+				var record = new XmlDataRecord(xDocument, target, config);
 
 				if (single)
 				{

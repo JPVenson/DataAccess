@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
+
 #pragma warning disable 1591
 
 namespace JPB.DataAccess.Query.QueryItems
@@ -36,15 +39,14 @@ namespace JPB.DataAccess.Query.QueryItems
 		public QueryIdentifier SourceTable { get; private set; }
 		public IEnumerable<ColumnInfo> Columns { get; private set; }
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var joinBuilder = new StringBuilder();
 			joinBuilder.Append($"JOIN [{TargetTable.GetAlias()}] AS [{Alias.GetAlias()}]" +
 			                   $" ON [{Alias.GetAlias()}].[{TargetColumn}]" +
 			                   $" = " +
 			                   $"[{SourceTable.GetAlias()}].[{SourceColumn}]");
-
-			return container.AccessLayer.Database.CreateCommand(joinBuilder.ToString());
+			return new QueryFactoryResult(joinBuilder.ToString());
 		}
 
 		public QueryIdentifier Alias { get; }

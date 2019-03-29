@@ -107,9 +107,9 @@ namespace JPB.DataAccess.Query
 		public bool AllowParamterRenaming { get; set; }
 
 		/// <inheritdoc />
-		public IDbCommand Compile(out IEnumerable<ColumnInfo> columns)
+		public IQueryFactoryResult Compile(out IEnumerable<ColumnInfo> columns)
 		{
-			var commands = new List<IDbCommand>();
+			var commands = new List<IQueryFactoryResult>();
 			columns = new ColumnInfo[0];
 			foreach (var queryPart in Parts)
 			{
@@ -121,7 +121,8 @@ namespace JPB.DataAccess.Query
 				}
 			}
 
-			return DbAccessLayerHelper.ConcatCommands(AccessLayer.Database, true, commands.Where(e => e != null).ToArray());
+			return DbAccessLayerHelper.MergeQueryFactoryResult(true, 1, true, null, 
+				commands.Where(e => e != null).ToArray());
 		}
 
 		/// <inheritdoc />
@@ -157,41 +158,6 @@ namespace JPB.DataAccess.Query
 		{
 			return TableAlias.FirstOrDefault(e => e.Value.Equals(identifier)).Key;
 		}
-
-		/// <summary>
-		///     Compiles the QueryCommand into a String|IEnumerable of Paramameter
-		/// </summary>
-		/// <returns></returns>
-		public Tuple<string, IEnumerable<IQueryParameter>> CompileFlat()
-		{
-			var sb = new StringBuilder();
-			var queryParts = Parts.ToArray();
-			
-			var param = new List<IQueryParameter>();
-
-			foreach (var queryPart in queryParts)
-			{
-				var command = queryPart.Process(this);
-				if (command == null)
-				{
-					continue;
-				}
-
-				param.AddRange(command.Parameters.AsQueryParameter());
-				if (command.CommandText != null)
-				{
-					if (!command.CommandText.EndsWith(" ", true, CultureInfo.InvariantCulture) || !command.CommandText.StartsWith(" ", true, CultureInfo.InvariantCulture))
-					{
-						command.CommandText = " " + command.CommandText;
-					}
-				}
-
-				sb.Append(command.CommandText);
-			}
-
-			return new Tuple<string, IEnumerable<IQueryParameter>>(sb.ToString(), param);
-		}
-
 
 		/// <summary>
 		///     Increment the counter +1 and return the value
@@ -263,7 +229,8 @@ namespace JPB.DataAccess.Query
 		/// </summary>
 		public int Execute()
 		{
-			return Compile(out var columns).ExecuteGenericCommand(AccessLayer.Database);
+			var queryContainer = Compile(out var columns);
+			return this.AccessLayer.ExecuteGenericCommand(queryContainer.Query, queryContainer.Parameters);
 		}
 		
 		/// <summary>
@@ -284,52 +251,6 @@ namespace JPB.DataAccess.Query
 		{
 			AllowParamterRenaming = value;
 			return this;
-		}
-
-		/// <summary>
-		///     Renders the Current Object
-		/// </summary>
-		/// <returns></returns>
-		public string Render()
-		{
-			var sb = new ConsoleStringBuilderInterlaced();
-			Render(sb);
-			return sb.ToString();
-		}
-
-		internal void Render(ConsoleStringBuilderInterlaced sb)
-		{
-			sb.AppendInterlacedLine("new IQueryContainer {")
-				.Up()
-				.AppendInterlacedLine("AllowParamterRenaming = {0},", AllowParamterRenaming.ToString().ToLower())
-				.AppendInterlacedLine("AutoParameterCounter = {0},", AutoParameterCounter)
-				.AppendInterlacedLine("QueryDebugger = ")
-				.Insert(new QueryDebugger(Compile(out var columns), AccessLayer.Database).Render)
-				.AppendInterlacedLine("Parts[{0}] = ", Parts.Count())
-				.AppendInterlacedLine("{")
-				.Up();
-
-			//foreach (var genericQueryPart in Parts)
-			//{
-			//	genericQueryPart.Render(sb);
-			//	sb.AppendLine(",");
-			//}
-
-			sb.Down()
-				.AppendInterlacedLine("}")
-				.Down()
-				.AppendInterlaced("}");
-		}
-
-		/// <summary>
-		///     Returns a <see cref="System.String" /> that represents this instance.
-		/// </summary>
-		/// <returns>
-		///     A <see cref="System.String" /> that represents this instance.
-		/// </returns>
-		public override string ToString()
-		{
-			return Render();
 		}
 	}
 }

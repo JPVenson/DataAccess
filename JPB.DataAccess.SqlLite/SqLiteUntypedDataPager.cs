@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
@@ -21,6 +22,7 @@ using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.SqLite
 {
@@ -178,14 +180,11 @@ namespace JPB.DataAccess.SqLite
 
 	public class SqLitePagerPart : IQueryPart
 	{
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			return container.AccessLayer.Database.CreateCommandWithParameterValues("LIMIT @PageSize OFFSET @PagedRows",
-				new[]
-				{
-					new QueryParameter("@PagedRows", (Page - 1) * PageSize),
-					new QueryParameter("@PageSize", PageSize),
-				});
+			return new QueryFactoryResult("LIMIT @PageSize OFFSET @PagedRows",
+				new QueryParameter("@PagedRows", (Page - 1) * PageSize),
+				new QueryParameter("@PageSize", PageSize));
 		}
 
 		public int Page { get; set; }

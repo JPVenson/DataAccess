@@ -46,6 +46,7 @@
     <Compile Include="Compiler\ElementCompiler.cs" />
     <Compile Include="Compiler\EnumCompiler.cs" />
     <Compile Include="Compiler\ProcedureCompiler.cs" />
+    <Compile Include="Compiler\test.cs" />
     <Compile Include="Contracts\IColumInfoModel.cs" />
     <Compile Include="Contracts\IColumnInfo.cs" />
     <Compile Include="Contracts\IElementComparer.cs" />

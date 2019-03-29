@@ -40,6 +40,20 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		}
 
 		/// <summary>
+		///		Sets all Conditional expressions in ()
+		/// </summary>
+		/// <param name="operation"></param>
+		/// <returns></returns>
+		public ConditionalEvalQuery<TPoco> InBracket(Func<ConditionalQuery<TPoco>, ConditionalEvalQuery<TPoco>> operation)
+		{
+			var expression = new ConditionStructurePart(ConditionStructurePart.LogicalOperator.OpenBracket);
+			ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(expression);
+			var result = operation(this);
+			result.ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.CloseBracket));
+			return result;
+		}
+
+		/// <summary>
 		///		Selects the ForginKey to the table.
 		/// </summary>
 		/// <exception cref="InvalidOperationException">If there are 0 or more then 1 forginKeys</exception>

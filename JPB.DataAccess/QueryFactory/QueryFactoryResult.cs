@@ -16,20 +16,11 @@ namespace JPB.DataAccess.QueryFactory
 	{
 		/// <summary>
 		/// </summary>
-		/// <param name="container"></param>
-		public QueryFactoryResult(IQueryContainer container)
-		{
-			var compileFlat = container.CompileFlat();
-			Query = compileFlat.Item1;
-			Parameters = compileFlat.Item2;
-		}
-
-		/// <summary>
-		/// </summary>
 		/// <param name="query"></param>
-		public QueryFactoryResult(string query)
+		public QueryFactoryResult(string query) 
 		{
 			Query = query;
+			Parameters = new IQueryParameter[0];
 		}
 
 		/// <summary>

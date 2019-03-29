@@ -1,7 +1,9 @@
 ﻿using System.Data;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
@@ -10,15 +12,11 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		public int Page { get; set; }
 		public int PageSize { get; set; }
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			return container.AccessLayer.Database.CreateCommandWithParameterValues(
-				"OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY",
-				new[]
-				{
-					new QueryParameter("@PagedRows", (Page - 1) * PageSize),
-					new QueryParameter("@PageSize", PageSize),
-				});
+			return new QueryFactoryResult("OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY",
+				new QueryParameter("@PagedRows", (Page - 1) * PageSize),
+				new QueryParameter("@PageSize", PageSize));
 		}
 	}
 }

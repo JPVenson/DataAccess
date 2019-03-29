@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
@@ -30,22 +32,22 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public IEnumerable<IQueryPart> SubSelectionQueryParts { get; private set; }
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			//ColumnMapper mapper;
 			//container.PostProcessors.Add(mapper = new ColumnMapper());
 			//mapper.Mappings[_targetTable] = Columns.ToArray();
 
 			var subSelect =
-				container.AccessLayer.Database.MergeTextToParameters(
-					SubSelectionQueryParts.Select(e => e.Process(container)).Where(e => e != null).ToArray(), true);
+				DbAccessLayerHelper.MergeQueryFactoryResult(true, 1, true, null,
+					SubSelectionQueryParts.Select(e => e.Process(container)).Where(e => e != null).ToArray());
 			var modifer = Distinct ? "DISTINCT" : "";
 			modifer += Limit.HasValue ? " TOP" + Limit.Value : "";
 
-			var select = container.AccessLayer.Database.CreateCommand(
+			var select = new QueryFactoryResult(
 				$"SELECT {modifer} {Columns.Select(e => e.ColumnAliasStatement()).Aggregate((e, f) => e + "," + f)} " +
-				$"FROM ({subSelect.CommandText}) AS [{Alias.GetAlias()}]",
-				subSelect.Parameters.OfType<IDataParameter>().ToArray());
+				$"FROM ({subSelect.Query}) AS [{Alias.GetAlias()}]",
+				subSelect.Parameters.ToArray());
 			return select;
 		}
 

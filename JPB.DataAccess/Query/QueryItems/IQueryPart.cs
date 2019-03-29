@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.QueryItems
@@ -13,6 +14,6 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// </summary>
 		/// <param name="container"></param>
 		/// <returns></returns>
-		IDbCommand Process(IQueryContainer container);
+		IQueryFactoryResult Process(IQueryContainer container);
 	}
 }

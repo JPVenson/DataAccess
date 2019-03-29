@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Query.Contracts;
@@ -8,6 +9,11 @@ namespace JPB.DataAccess.Query.QueryItems
 {
 	internal abstract class EntityProcessorBase : IEntityProcessor
 	{
+		public virtual IDbCommand BeforeExecution(IDbCommand command)
+		{
+			return command;
+		}
+
 		public virtual object Transform(object entity, Type entityType, QueryProcessingEntitiesContext context)
 		{
 			return entity;

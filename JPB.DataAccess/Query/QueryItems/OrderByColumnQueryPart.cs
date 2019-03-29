@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
@@ -15,10 +17,10 @@ namespace JPB.DataAccess.Query.QueryItems
 		public List<ColumnInfo> Columns { get; set; }
 		public bool Descending { get; set; }
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var mode = Descending ? "DESC" : "ASC";
-			return container.AccessLayer.Database.CreateCommand(
+			return new QueryFactoryResult(
 				$"ORDER BY {Columns.Select(e => e.ColumnIdentifier()).Aggregate((e, f) => e + ", " + f)} {mode}");
 		}
 	}

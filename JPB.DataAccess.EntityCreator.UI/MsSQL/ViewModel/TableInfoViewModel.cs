@@ -138,16 +138,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		public bool WrapNullables
-		{
-			get { return SourceElement.WrapNullables; }
-			set
-			{
-				SourceElement.WrapNullables = value;
-				SendPropertyChanged();
-			}
-		}
-
 		public DelegateCommand RemoveColumnCommand { get; private set; }
 
 		public DelegateCommand AddColumnCommand { get; private set; }

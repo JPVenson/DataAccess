@@ -44,6 +44,8 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		/// <exception cref="ArgumentNullException">argumentsForFactory</exception>
 		public SelectQuery<TPoco> Table<TPoco>()
 		{
+			ContainerObject.PostProcessors
+				.Add(new EventPostProcessor(EventPostProcessor.EventType.Select, ContainerObject.AccessLayer));
 			var classInfo = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(
 				classInfo.TableName,
@@ -58,6 +60,8 @@ namespace JPB.DataAccess.Query.Operators.Selection
 		/// <returns></returns>
 		public SelectQuery<TPoco> Identifier<TPoco>(QueryIdentifier identifier)
 		{
+			ContainerObject.PostProcessors
+				.Add(new EventPostProcessor(EventPostProcessor.EventType.Select, ContainerObject.AccessLayer));
 			var classInfo = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			return new SelectQuery<TPoco>(Add(new SelectTableQueryPart(ContainerObject.Search(identifier),
 				classInfo,

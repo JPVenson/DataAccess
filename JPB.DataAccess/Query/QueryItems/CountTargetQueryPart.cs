@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
@@ -21,7 +23,7 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 
 		public bool DistinctMode { get; set; }
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var sb = new StringBuilder();
 			sb.Append("SELECT COUNT( ");
@@ -33,7 +35,7 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 			sb.Append(_queryId.Value);
 			sb.Append(" AS ");
 			sb.Append(Alias.GetAlias());
-			return container.AccessLayer.Database.CreateCommand(sb.ToString());
+			return new QueryFactoryResult(sb.ToString());
 		}
 
 		public QueryIdentifier Alias { get; }

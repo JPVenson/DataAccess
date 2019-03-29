@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Data;
 using JetBrains.Annotations;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
@@ -120,9 +121,14 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public ConditionalEvalQuery<T> UpdateEntity<T>(T obj)
 		{
-			return new ConditionalEvalQuery<T>(
-				Add(new UpdateTableWithQueryPart(ContainerObject.AccessLayer.GetClassInfo(typeof(T)),
-					ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Table), obj)));
+			ContainerObject.PostProcessors
+				.Add(new EventPostProcessor(EventPostProcessor.EventType.Update, ContainerObject.AccessLayer));
+			var cache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
+			var query = Add(new UpdateTableWithQueryPart(new QueryIdentifier()
+			{
+				Value = cache.TableName
+			}, ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Table)));
+			return new ElementProducer<T>(query).Where.PrimaryKey().Is.EqualsTo(cache.PrimaryKeyProperty.Getter.Invoke(obj));
 		}
 
 		/// <summary>
@@ -151,7 +157,12 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public DeleteQuery<T> Delete<T>()
 		{
-			return new DeleteQuery<T>(Add(new DeleteTableQueryPart(ContainerObject.AccessLayer.GetClassInfo(typeof(T)))));
+			ContainerObject.PostProcessors
+				.Add(new EventPostProcessor(EventPostProcessor.EventType.Delete, ContainerObject.AccessLayer));
+			var cache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
+			return new DeleteQuery<T>(
+				Add(new DeleteTableQueryPart(new QueryIdentifier() { Value = cache.TableName },
+					ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Table))));
 		}
 
 		/// <summary>
@@ -180,6 +191,52 @@ namespace JPB.DataAccess.Query.Operators
 			out QueryIdentifier cteName)
 		{
 			return WithCte(commandQueryProducer(new RootQuery(this)), out cteName);
+		}
+	}
+
+	internal class EventPostProcessor : EntityProcessorBase
+	{
+		private readonly EventType _handler;
+		private readonly DbAccessLayer _source;
+
+		internal enum EventType
+		{
+			Select,
+			Insert,
+			Delete,
+			Update,
+			Non
+		}
+
+		internal EventPostProcessor(EventType handler, DbAccessLayer source)
+		{
+			_handler = handler;
+			_source = source;
+		}
+
+		public override IDbCommand BeforeExecution(IDbCommand command)
+		{
+			switch (_handler)
+			{
+				case EventType.Select:
+					_source.RaiseSelect(command);
+					break;
+				case EventType.Insert:
+					_source.RaiseInsert(this, command);
+					break;
+				case EventType.Delete:
+					_source.RaiseDelete(this, command);
+					break;
+				case EventType.Update:
+					_source.RaiseUpdate(this, command);
+					break;
+				case EventType.Non:
+					_source.RaiseNoResult(this, command);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+			return base.BeforeExecution(command);
 		}
 	}
 }

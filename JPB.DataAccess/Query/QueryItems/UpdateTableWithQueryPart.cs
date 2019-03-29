@@ -8,13 +8,13 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
 	internal class UpdateTableWithQueryPart : IIdentifiableQueryPart
 	{
-		private readonly DbClassInfoCache _classInfo;
-		private readonly object _withObject;
+		private readonly QueryIdentifier _target;
 
 		public List<ColumnAssignment> ColumnAssignments { get; set; }
 
@@ -30,23 +30,16 @@ namespace JPB.DataAccess.Query.QueryItems
 			public List<IQueryParameter> QueryParameters { get; set; }
 		}
 
-		public UpdateTableWithQueryPart(DbClassInfoCache classInfo, QueryIdentifier queryIdentifier, object withObject = null)
+		public UpdateTableWithQueryPart(QueryIdentifier target, 
+			QueryIdentifier queryIdentifier)
 		{
-			_classInfo = classInfo;
+			_target = target;
 			Alias = queryIdentifier;
-			_withObject = withObject;
 			ColumnAssignments = new List<ColumnAssignment>();
 		}
 
-		public IDbCommand Process(IQueryContainer container)
+		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			if (_withObject != null)
-			{
-				return DbAccessLayer
-					.CreateUpdate(container
-						.AccessLayer.Database, _classInfo, _withObject);
-			}
-
 			var query = new StringBuilder();
 
 			switch (container.AccessLayer.DbAccessType)
@@ -59,17 +52,17 @@ namespace JPB.DataAccess.Query.QueryItems
 							ColumnAssignments
 								.Select(
 									columnAssignment =>
-										$"[{Alias.GetAlias()}].[{columnAssignment.Column}] = {columnAssignment.Value}")
+										$"{Alias.GetAlias()}.[{columnAssignment.Column}] = {columnAssignment.Value}")
 								.Aggregate((e, f) => e + ", " + f)
 						);
-					query.Append($" FROM [{_classInfo.TableName}] AS [{Alias.GetAlias()}]");
+					query.Append($" FROM {_target.GetAlias()} AS {Alias.GetAlias()}");
 					break;
 				case DbAccessType.Experimental:
 				case DbAccessType.Unknown:
 				case DbAccessType.OleDb:
 				case DbAccessType.Obdc:
 				case DbAccessType.SqLite:
-					query.Append($"UPDATE [{_classInfo.TableName}] SET ");
+					query.Append($"UPDATE {_target.GetAlias()} SET ");
 					query
 						.Append(
 							ColumnAssignments
@@ -84,10 +77,8 @@ namespace JPB.DataAccess.Query.QueryItems
 					throw new ArgumentOutOfRangeException();
 			}
 
-			
-
-			return container.AccessLayer.Database.CreateCommandWithParameterValues(query.ToString(),
-				ColumnAssignments.SelectMany(e => e.QueryParameters));
+			return new QueryFactoryResult(query.ToString(),
+				ColumnAssignments.SelectMany(f => f.QueryParameters).ToArray());
 		}
 
 		public QueryIdentifier Alias { get; }

@@ -49,13 +49,7 @@ namespace JPB.DataAccess.DebuggerHelper
 			_command = command;
 			_source = source;
 			Init();
-			//Init async because this could be time consuming
 			_loaded = false;
-			//if (UseDefaultDatabase != null && _source == null)
-			//{
-			//	_source = new DefaultDatabaseAccess();
-			//	_source.Attach(UseDefaultDatabase);
-			//}
 		}
 
 		private readonly IDbCommand _command;
