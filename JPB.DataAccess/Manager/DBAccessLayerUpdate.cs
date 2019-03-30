@@ -149,7 +149,9 @@ namespace JPB.DataAccess.Manager
 			var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +
 			                       type.PrimaryKeyProperty.DbName + " = " + entry.GetPK(Config);
 
+#pragma warning disable 618
 			var skalar = Database.GetSkalar(staticRowVersion);
+#pragma warning restore 618
 			if (skalar == null)
 			{
 				return false;

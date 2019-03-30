@@ -267,7 +267,9 @@ namespace JPB.DataAccess
 			{
 				foreach (var dbCommand in commmands)
 				{
+#pragma warning disable 618
 					parameter.AddRange(dbCommand.Parameters.AsQueryParameter());
+#pragma warning restore 618
 					commandText.Append((insertDelimiter ?? " ") + dbCommand.CommandText);
 				}
 			}
