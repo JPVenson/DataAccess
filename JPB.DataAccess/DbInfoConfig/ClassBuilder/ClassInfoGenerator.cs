@@ -207,6 +207,14 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			var codeName = target.Name.Split('.').Last();
 			gen.ClassName = codeName + "_Super";
 			gen.IsSuperClass = true;
+			gen.Attributes.Add(new AttributeInfo()
+			{
+				Name = nameof(ForModelAttribute),
+				ConstructorSetters =
+				{
+					{"alternatingName", target.TableName.AsStringOfString()}
+				}
+			});
 			gen.Inherts = target.Name;
 			gen.GenerateConstructor = true;
 

@@ -2,7 +2,9 @@
 
 using System;
 using System.Data;
+using System.Linq;
 using JetBrains.Annotations;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
@@ -113,25 +115,6 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
-		///     Adds a Update - Statement
-		///     Uses reflection or a Factory mehtod to create an update statement that will check for the id of the obj
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public ConditionalEvalQuery<T> UpdateEntity<T>(T obj)
-		{
-			ContainerObject.PostProcessors
-				.Add(new EventPostProcessor(EventPostProcessor.EventType.Update, ContainerObject.AccessLayer));
-			var cache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
-			var query = Add(new UpdateTableWithQueryPart(new QueryIdentifier()
-			{
-				Value = cache.TableName
-			}, ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Table)));
-			return new ElementProducer<T>(query).Where.PrimaryKey().Is.EqualsTo(cache.PrimaryKeyProperty.Getter.Invoke(obj));
-		}
-
-		/// <summary>
 		///     Adds a Delete - Statement
 		///     Uses reflection or a Factory mehtod to create
 		/// </summary>
@@ -159,10 +142,10 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			ContainerObject.PostProcessors
 				.Add(new EventPostProcessor(EventPostProcessor.EventType.Delete, ContainerObject.AccessLayer));
-			var cache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
+			var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
 			return new DeleteQuery<T>(
-				Add(new DeleteTableQueryPart(new QueryIdentifier() { Value = cache.TableName },
-					ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Table))));
+				Add(new DeleteTableQueryPart(new QueryIdentifier() { Value = dbClassInfoCache.TableName },
+					ContainerObject.CreateTableAlias(dbClassInfoCache.TableName))));
 		}
 
 		/// <summary>

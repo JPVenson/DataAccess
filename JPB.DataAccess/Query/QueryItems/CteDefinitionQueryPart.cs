@@ -50,7 +50,7 @@ namespace JPB.DataAccess.Query.QueryItems
 				commandBuilder.Append($"WITH {cteInfo.Name.Value} AS (");
 				var cteCommand = DbAccessLayerHelper.MergeQueryFactoryResult(true, 1, true, null,
 					cteInfo.CteContentParts.Select(e => e.Process(container)).Where(e => e != null).ToArray());
-				commandBuilder.Append(cteCommand.Parameters);
+				commandBuilder.Append(cteCommand.Query);
 				commandBuilder.Append(")");
 				commands.Add(new QueryFactoryResult(commandBuilder.ToString(), cteCommand.Parameters.ToArray()));
 			}

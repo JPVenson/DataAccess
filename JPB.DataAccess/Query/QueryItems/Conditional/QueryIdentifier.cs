@@ -34,6 +34,28 @@
 			Column
 		}
 
+		/// <inheritdoc />
+		public override int GetHashCode()
+		{
+			return Value.GetHashCode();
+		}
+
+		/// <inheritdoc />
+		public override bool Equals(object obj)
+		{
+			if (!(obj is QueryIdentifier ident))
+			{
+				return false;
+			}
+
+			if (ident.Value.Equals(Value) && ident.QueryIdType.Equals(QueryIdType))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
 		/// <summary>
 		///     The Generated Alias for SQL
 		/// </summary>

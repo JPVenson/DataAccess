@@ -506,7 +506,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var userIdPre = user.UserID;
 			var usernamePre = user.UserName;
 			user.UserName = Guid.NewGuid().ToString();
-			CreateQuery().UpdateEntity(user).ExecuteNonQuery();
+			CreateQuery().Update.Entity(user).ExecuteNonQuery();
 			user = DbAccess.Select<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));

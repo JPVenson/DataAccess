@@ -61,6 +61,10 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// </summary>
 		public string ColumnIdentifier()
 		{
+			if (_counter == -1)
+			{
+				return ColumnName;
+			}
 			return $"[C{_counter}]";
 		}
 

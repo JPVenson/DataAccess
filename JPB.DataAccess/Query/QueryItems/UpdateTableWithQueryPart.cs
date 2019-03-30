@@ -12,7 +12,7 @@ using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
-	internal class UpdateTableWithQueryPart : IIdentifiableQueryPart
+	internal class UpdateTableWithQueryPart : ISelectableQueryPart
 	{
 		private readonly QueryIdentifier _target;
 
@@ -30,9 +30,37 @@ namespace JPB.DataAccess.Query.QueryItems
 			public List<IQueryParameter> QueryParameters { get; set; }
 		}
 
-		public UpdateTableWithQueryPart(QueryIdentifier target, 
+		public static IEnumerable<ColumnInfo> ColumsOfType(DbClassInfoCache dbClassInfoCache,
+			QueryIdentifier alias,
+			QueryIdentifier sourceReference,
+			IQueryContainer container)
+		{
+			return DbAccessLayer.GetSelectableColumnsOf(dbClassInfoCache, null)
+				.Select(e =>
+				{
+					switch (container.AccessLayer.DbAccessType)
+					{
+						case DbAccessType.MsSql:
+						case DbAccessType.MySql:
+							return new ColumnInfo(e, alias, container);
+						case DbAccessType.Experimental:
+						case DbAccessType.Unknown:
+						case DbAccessType.OleDb:
+						case DbAccessType.Obdc:
+						case DbAccessType.SqLite:
+							return new ColumnInfo(e, sourceReference, null);
+						default:
+							throw new ArgumentOutOfRangeException();
+					}
+				}).ToArray();
+		}
+
+		public UpdateTableWithQueryPart(
+			QueryIdentifier target, 
+			IEnumerable<ColumnInfo> targetsColumns,
 			QueryIdentifier queryIdentifier)
 		{
+			Columns = targetsColumns;
 			_target = target;
 			Alias = queryIdentifier;
 			ColumnAssignments = new List<ColumnAssignment>();
@@ -52,23 +80,23 @@ namespace JPB.DataAccess.Query.QueryItems
 							ColumnAssignments
 								.Select(
 									columnAssignment =>
-										$"{Alias.GetAlias()}.[{columnAssignment.Column}] = {columnAssignment.Value}")
+										$"[{Alias.GetAlias().TrimAlias()}].[{columnAssignment.Column.TrimAlias()}] = {columnAssignment.Value}")
 								.Aggregate((e, f) => e + ", " + f)
 						);
-					query.Append($" FROM {_target.GetAlias()} AS {Alias.GetAlias()}");
+					query.Append($" FROM [{_target.GetAlias().TrimAlias()}] AS [{Alias.GetAlias().TrimAlias()}]");
 					break;
 				case DbAccessType.Experimental:
 				case DbAccessType.Unknown:
 				case DbAccessType.OleDb:
 				case DbAccessType.Obdc:
 				case DbAccessType.SqLite:
-					query.Append($"UPDATE {_target.GetAlias()} SET ");
+					query.Append($"UPDATE [{_target.GetAlias().TrimAlias()}] SET ");
 					query
 						.Append(
 							ColumnAssignments
 								.Select(
 									columnAssignment =>
-										$"[{columnAssignment.Column}] = {columnAssignment.Value}")
+										$"[{columnAssignment.Column.TrimAlias()}] = {columnAssignment.Value}")
 								.Aggregate((e, f) => e + ", " + f)
 						);
 					query.Append($"");
@@ -82,5 +110,8 @@ namespace JPB.DataAccess.Query.QueryItems
 		}
 
 		public QueryIdentifier Alias { get; }
+		public bool Distinct { get; set; }
+		public int? Limit { get; set; }
+		public IEnumerable<ColumnInfo> Columns { get; }
 	}
 }
