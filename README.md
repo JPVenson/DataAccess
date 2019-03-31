@@ -34,27 +34,24 @@ Create an Object that is called like your Table (Foo)
 Define properties that are named and of the same type like a Column
 Create a new Object of DbAccessLayer with a proper connection string Call
 ```C#
- Select<Foo>
-	();
-	```
+Select<Foo>();
+```
 In these 4 steps, you will execute a complete select to the database and then the result will be mapped with Reflection to the Object.
 
 ```C#
 public class FooTest
 {
-public class Foo
-{
-public long Id_Foo { get; set; }
-public string FooName { get; set; }
-}
+	public class Foo
+	{
+		public long Id_Foo { get; set; }
+		public string FooName { get; set; }
+	}
 
-public FooTest()
-{
-var accessLayer = new DbAccessLayer(DbTypes.MsSql,
-"Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
-var @select = accessLayer.Select<Foo>
-();
-}
+	public FooTest()
+	{
+	var accessLayer = new DbAccessLayer(DbTypes.MsSql, "Data Source=(localdb)\\Projects;Initial Catalog=Northwind;Integrated Security=True;");
+	var @select = accessLayer.Select<Foo>();
+	}
 }
 ```
 There are A LOT of overloads of Select, SelectNative, SelectWhere and RunPrimetivSelect. Almost all methods with a Generic Parameter have a corresponding method that accepts a Type instance.
@@ -75,9 +72,9 @@ As seen in the example, you can skip all extra configuration when you follow som
 [ForModel("Foo")]
 public class NotFooButSomeStrangeNameYouDoNotLike
 {
-public long Id_Foo { get; set; }
-[ForModel("FooName")]
-public string Metallica4tw { get; set; }
+	public long Id_Foo { get; set; }
+	[ForModel("FooName")]
+	public string Metallica4tw { get; set; }
 }
 ```
 The ForModel attribute is allowed on Class | Table and on Property | Column level. It gives the Processor the information that the name that is used in the POCO must be mapped to the Table.
@@ -87,9 +84,9 @@ The ForModel attribute is allowed on Class | Table and on Property | Column leve
 ```C#
 public class Foo
 {
-[PrimaryKey]
-public long Id_Foo { get; set; }
-public string FooName { get; set; }
+	[PrimaryKey]
+	public long Id_Foo { get; set; }
+	public string FooName { get; set; }
 }
 ```
 The PrimaryKey attribute marks a Property ... what a wonder, to be an PrimaryKey on the database. With this function, you can call:
@@ -101,56 +98,48 @@ accessLayer.Select<Foo>
 
 Marks a Property to be not Automatically included into a InsertStatement. Per default, the PrimaryKey inherits from this attribute.
 
-## ForeignKey (Work In Progress)
+## ForeignKey
 
-Well, some good long day when my work was not so hard, I’d thought that it would be fun, when it would be nice that the Automatic process could load NavigationPropertys too. The Term NavigationProperty is from EF and defined as:
-
-"Represents the navigation from one entity type to another entity type in the conceptual model."
-
-So a NavProperty is not more than an Property that is of the Type that another Object and that Relation is described with an ForeignKey.
+With Foreign keys you can load NavigationProperties from another entity where a relation exists. To Mark an property as an NavigationProperty you have to annoatate them with the `[ForeignKey(foreignKey, referenceKey)]` Attribute where the `foreignKey` is the name of the column on your current entity and the `referenceKey` is the name of the column that should be mapped to. The type of the Property will be used to Join the tables.
 
 ```C#
 public class FooTest
 {
-public class Foo
-{
-[PrimaryKey]
-public long Id_Foo { get; set; }
-public string FooName { get; set; }
+	public class Foo
+	{
+		[PrimaryKey]
+		public long Id_Foo { get; set; }
+		public string FooName { get; set; }
 
-public long Image_Id { get; set; }
+		public long Image_Id { get; set; }
 
-/// <summary>
-/// A Property that is of the type that is referred to
-/// 1 TO 1 relation
-///
-</summary>
-[ForeignKey("Image_Id")]
-public virtual Image img { get; set; }
+		/// <summary>
+		/// 	A Property that is of the type that is referred to
+		/// 	1 TO 1 relation
+		</summary>
+		[ForeignKey("Image_Id", "Image_Id")]
+		public virtual Image img { get; set; }
 
-/// <summary>
-/// A Property that is a List of the type that is referred to
-/// 1 TO Many relation
-///
-</summary>
-[ForeignKey("Image_Id")]
-public virtual IEnumerable<Image>
-imgs { get; set; }
-}
+		/// <summary>
+		/// 	A Property that is a List of the type that is referred to
+		/// 	1 TO Many relation
+		</summary>
+		[ForeignKey("Image_Id", "Image_Id")]
+		public virtual DbCollection<Image> imgs { get; set; }
+	}
 
-public class Image
-{
-[PrimaryKey]
-public long Id_Image { get; set; }
-public byte[] ImageData { get; set; }
-}
+	public class Image
+	{
+		[PrimaryKey]
+		public long Id_Image { get; set; }
+		public byte[] ImageData { get; set; }
+	}
 }
 ```
-As written, this is a feature that has its known issues / bugs / problems:
 
-The Select is one time, changes that are made to the collection are not observed by the manager.
-The Foreign POCO must have exactly one PrimaryKey property, when it finds more than one, the first will be taken.
-Only Egar loading is supported. When loading a big object tree, all objects are loaded at once.
+There are some restraints you have to take care of. The Navigation Property must be virtual and if its a 1-n relation it must be ether directly an `DbCollection` or assignable from it, that means it could be an ICollection<T>. 
+
+
 
 ## LoadNotImplimentedDynamic
 
@@ -159,8 +148,7 @@ When the Select statement returns more information than build in the POCO, this 
 
 ```C#
 [LoadNotImplimentedDynamic]
-public IDictionary<string, object>
-UnresolvedObjects { set; get; }
+public IDictionary<string, object> UnresolvedObjects { set; get; }
 ```
 (Property Name does not matter) it will be filled with the data (see FactoryMethods).
 
@@ -182,14 +170,14 @@ The manager can detect a method to pull statements from it. For example, how you
 ```C#
 public class Foo
 {
-public long Id_Foo { get; set; }
-public string FooName { get; set; }
+	public long Id_Foo { get; set; }
+	public string FooName { get; set; }
 
-[SelectFactoryMehtod]
-public static string CreateSelectStatement()
-{
-return "SELECT * FROM Foo";
-}
+	[SelectFactoryMehtod]
+	public static string CreateSelectStatement()
+	{
+		return "SELECT * FROM Foo";
+	}
 }
 ```
 When some method is defined, the manager will always use this method to create a Select statement and he will skip any other reflection based creation.
