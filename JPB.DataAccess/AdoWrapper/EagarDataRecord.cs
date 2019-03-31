@@ -13,88 +13,6 @@ using JPB.DataAccess.Query.QueryItems;
 
 namespace JPB.DataAccess.AdoWrapper
 {
-	internal class MultiValueDictionary<TKey1, TKey2, TValue> : IEnumerable<TValue>
-	{
-		public MultiValueDictionary()
-		{
-			DictA = new Dictionary<TKey1, TValue>();
-			DictB = new Dictionary<TKey2, TValue>();
-			DictC = new Dictionary<TKey2, TKey1>();
-			DictD = new Dictionary<TKey1, TKey2>();
-		}
-
-		public IDictionary<TKey1, TValue> DictA { get; private set; }
-		public IDictionary<TKey2, TValue> DictB { get; private set; }
-		public IDictionary<TKey2, TKey1> DictC { get; private set; }
-		public IDictionary<TKey1, TKey2> DictD { get; private set; }
-
-		public ICollection<TKey1> Key1s
-		{
-			get { return DictA.Keys; }
-		}
-
-		public ICollection<TKey2> Key2s
-		{
-			get { return DictB.Keys; }
-		}
-
-		public ICollection<TValue> Values
-		{
-			get { return DictA.Values; }
-		}
-
-		public int Count
-		{
-			get { return DictA.Count; }
-		}
-
-		public void Add(TKey1 key1, TKey2 key2, TValue value)
-		{
-			DictA.Add(key1, value);
-			DictB.Add(key2, value);
-			DictC.Add(key2, key1);
-			DictD.Add(key1, key2);
-		}
-		
-		public void Remove(TKey1 key, TKey2 key2)
-		{
-			DictA.Remove(key);
-			DictB.Remove(key2);
-			DictC.Remove(key2);
-			DictD.Remove(key);
-		}
-
-		public TKey1 FromKey(TKey2 key)
-		{
-			return DictC[key];
-		}
-
-		public TKey2 FromKey(TKey1 key)
-		{
-			return DictD[key];
-		}
-
-		public TValue this[TKey1 index]
-		{
-			get { return DictA[index]; }
-		}
-
-		public TValue this[TKey2 index]
-		{
-			get { return DictB[index]; }
-		}
-
-		public IEnumerator<TValue> GetEnumerator()
-		{
-			return DictA.Values.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-	}
-
 	/// <summary>
 	///     Provides an IDataRecord Access that enumerates the Source record. Not ThreadSave
 	/// </summary>
@@ -109,7 +27,12 @@ namespace JPB.DataAccess.AdoWrapper
 
 		internal void Add(string name, object value)
 		{
-			MetaHeader.Add(MetaHeader.Count, name, value);
+			MetaHeader.Add(name, value);
+		}
+
+		internal void Remove(string name)
+		{
+			MetaHeader.Remove(name);
 		}
 
 		///  <summary>
@@ -120,6 +43,11 @@ namespace JPB.DataAccess.AdoWrapper
 		///  <returns></returns>
 		public static EagarDataRecord WithExcludedFields(IDataRecord sourceRecord, params string[] fieldsExcluded)
 		{
+			//if (sourceRecord is EagarDataRecord subRecord)
+			//{
+			//	return new EagarDataRecord(subRecord.MetaHeader);
+			//}
+
 			var buildList = new ArrayList();
 			var metaBuildList = new List<string>();
 			for (var i = 0; i < sourceRecord.FieldCount; i++)
@@ -142,11 +70,11 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		internal EagarDataRecord(string[] fields, IList values)
 		{
-			MetaHeader = new MultiValueDictionary<int, string, object>();
+			MetaHeader = new MultiValueDictionary<string, object>();
 			for (var i = 0; i < fields.Length; i++)
 			{
 				var field = fields[i];
-				MetaHeader.Add(i, field, values[i]);
+				MetaHeader.Add(field, values[i]);
 			}
 		}
 
@@ -157,7 +85,12 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 		}
 
-		internal MultiValueDictionary<int, string, object> MetaHeader { get; set; }
+		private EagarDataRecord(MultiValueDictionary<string, object> subRecordMetaHeader)
+		{
+			MetaHeader = subRecordMetaHeader;
+		}
+
+		internal MultiValueDictionary<string, object> MetaHeader { get; set; }
 
 		/// <summary>
 		///     Gets the name for the field to find.
@@ -168,7 +101,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public string GetName(int i)
 		{
-			return MetaHeader.FromKey(i);
+			return MetaHeader.KeyAt(i);
 		}
 
 		/// <summary>
@@ -272,7 +205,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetOrdinal(string name)
 		{
-			return MetaHeader.FromKey(name);
+			return MetaHeader.IndexOf(name);
 		}
 
 		/// <summary>

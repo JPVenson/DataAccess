@@ -137,6 +137,7 @@
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataPager.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlPagerPart.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlUntypedDataPager.cs" />
+    <Compile Include="AdoWrapper\MultiValueDictionary.cs" />
     <Compile Include="AdoWrapper\ObjectDataRecord.cs" />
     <Compile Include="AdoWrapper\OdbcProvider\Obdc.cs" />
     <Compile Include="AdoWrapper\OleDBProvider\OleDb.cs" />

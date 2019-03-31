@@ -123,7 +123,7 @@ namespace JPB.DataAccess.Query
 		/// <inheritdoc />
 		public IEnumerator<TPoco> GetEnumerator<TPoco>()
 		{
-			return GetEnumerator<TPoco>(true);
+			return GetEnumerator<TPoco>(ContainerObject.AccessLayer.Async);
 		}
 
 		/// <inheritdoc />

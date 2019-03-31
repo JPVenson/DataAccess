@@ -65,7 +65,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 							  .Single(e =>
 								  e.ForginKeyDeclarationAttribute != null &&
 								  e.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TFkPoco));
-			return Column(tProp.DbName);
+			return Column(tProp.PropertyName);
 		}
 
 		/// <summary>
@@ -84,12 +84,14 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			});
 		}
 
-		private ConditionalColumnQuery<TPoco> ConditionalColumnQueryByPath(KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] columnPath)
+		internal static ColumnInfo TraversePropertyPathToColumn(
+			IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath,
+			IQueryContainer container)
 		{
-			var columnInfos = ContainerObject.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
+			var columnInfos = container.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Columns.ToArray();
 
-			var aliasPath = columnPath.Take(columnPath.Length - 1)
+			var aliasPath = columnPath.Take(columnPath.Count - 1)
 				.Select(e => e.Value.PropertyName)
 				.Aggregate(columnPath.First().Key.TableName, (e, f) => e + "." + f);
 			var dbName = columnPath.LastOrDefault().Value.DbName;
@@ -97,9 +99,15 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			var columnDefinitionPart = columnInfos
 				.FirstOrDefault(e =>
 					e.IsEquivalentTo(dbName) &&
-					e.Alias.Equals(ContainerObject.SearchTableAlias(aliasPath)));
+					e.Alias.Equals(container.SearchTableAlias(aliasPath)));
 
-			var expression = new ExpressionConditionPart(columnDefinitionPart);
+			return columnDefinitionPart;
+		}
+
+		private ConditionalColumnQuery<TPoco> ConditionalColumnQueryByPath(
+			IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath)
+		{
+			var expression = new ExpressionConditionPart(TraversePropertyPathToColumn(columnPath, ContainerObject));
 			ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(expression);
 
 			return new ConditionalColumnQuery<TPoco>(this, expression);

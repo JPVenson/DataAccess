@@ -40,32 +40,9 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 			Assert.That(new DbConfig().SClassInfoCaches, Is.Empty, () => "The Global Class cache is not empty");
 			var testClassName = TestContext.CurrentContext.Test.ClassName.Replace(typeof(Manager).Namespace, "").Where(e => char.IsUpper(e)).Select(e => e.ToString())
-			                               .Aggregate((e,f) => e + f) + "." +
+			                               .Aggregate((e, f) => e + f) + "." +
 			                    TestContext.CurrentContext.Test.MethodName;
 
-
-			//var arguments =
-			//		additionalArguments.Select(
-			//		                           f =>
-			//		                           {
-			//			                           if (f == null)
-			//			                           {
-			//				                           return TestContext.CurrentContext.Random.NextShort().ToString();
-			//			                           }
-
-			//			                           if (typeof(string).Assembly.GetTypes().Contains(f.GetType()))
-			//			                           {
-			//				                           return f.ToString();
-			//			                           }
-
-			//			                           return f.GetHashCode().ToString();
-			//		                           })
-			//		                   .ToArray();
-
-			//if (arguments.Any())
-			//{
-			//	testClassName =
-			//}
 			testClassName = testClassName + "_" + Guid.NewGuid().ToString("N");
 			testClassName = new Regex("[^a-zA-Z0-9]").Replace(testClassName, "_");
 			_errorData.AppendLine($"Attach to Database: {testClassName}");

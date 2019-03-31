@@ -159,11 +159,6 @@ namespace JPB.DataAccess.Query
 
 	internal class QueryEagerEnumerator<T> : QueryEagerEnumerator, IEnumerator<T>
 	{
-		internal QueryEagerEnumerator(IQueryContainer queryContainer, Type type, bool loadAsync)
-			: base(queryContainer, type, loadAsync)
-		{
-		}
-
 		internal QueryEagerEnumerator(IQueryContainer queryContainer, bool loadAsync)
 			: base(queryContainer, typeof(T), loadAsync)
 		{

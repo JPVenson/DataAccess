@@ -11,15 +11,12 @@ namespace JPB.DataAccess.Query.QueryItems
 {
 	internal class SubSelectQueryPart : ISelectableQueryPart
 	{
-		private readonly Type _targetTable;
 		private IList<ColumnInfo> _columns;
 
 		public SubSelectQueryPart(QueryIdentifier queryAlias,
 			IEnumerable<IQueryPart> subSelectionQueryParts,
-			Type targetTable, 
 			IQueryContainer queryContainer)
 		{
-			_targetTable = targetTable;
 			Alias = queryAlias;
 			SubSelectionQueryParts = subSelectionQueryParts;
 			_columns = SubSelectionQueryParts
@@ -34,10 +31,6 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			//ColumnMapper mapper;
-			//container.PostProcessors.Add(mapper = new ColumnMapper());
-			//mapper.Mappings[_targetTable] = Columns.ToArray();
-
 			var subSelect =
 				DbAccessLayerHelper.MergeQueryFactoryResult(true, 1, true, null,
 					SubSelectionQueryParts.Select(e => e.Process(container)).Where(e => e != null).ToArray());

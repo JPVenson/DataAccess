@@ -135,6 +135,33 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
+		public void SelectJoinParentOrder()
+		{
+			var book = DbAccess.InsertWithSelect(new Book()
+			{
+				BookName = "Test1"
+			});
+			book = DbAccess.InsertWithSelect(new Book()
+			{
+				BookName = "Test"
+			});
+			var image = DbAccess.InsertWithSelect(new Image()
+			{
+				IdBook = book.BookId
+			});
+
+			var books = Measure(() => CreateQuery()
+				.Select.Table<ImageWithFkBooks>()
+				.Join(nameof(ImageWithFkBooks.Book))
+				.Order.By(e => e.Book.BookName)
+				.ToArray()
+				.FirstOrDefault());
+
+			Assert.That(books, Is.Not.Null);
+			Assert.That(books.Book.BookName, Is.EqualTo("Test"));
+		}
+
+		[Test]
 		public void JoinParentAndThenChild()
 		{
 			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
@@ -194,6 +221,52 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				
 				Assert.That(book.Images, Is.Not.Null);
 				Assert.That(book.Images, Is.Not.Empty);
+
+				var imgsOfBook = allImages.Where(f => f.IdBook == book.BookId);
+				foreach (var image in imgsOfBook)
+				{
+					var imageInBook = book.Images.FirstOrDefault(f => f.ImageId == image.ImageId);
+					Assert.That(imageInBook, Is.Not.Null);
+					Assert.That(imageInBook.Text, Is.EqualTo(image.Text));
+				}
+			}
+		}
+		
+		[Test]
+		public void JoinChildAndThenParentAndThenChilds()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
+			var ids = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			for (var index = 0; index < ids.Length; index++)
+			{
+				var bookId = ids[index];
+				CreateQuery().Update.Table<Book>()
+					.Set
+					.Column(f => f.IdUser).Value(addUsers[index])
+					.Where
+					.Column(f => f.BookId).Is.EqualsTo(bookId)
+					.ExecuteNonQuery();
+			}
+
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(f => f.Images)
+				.Join(f => f.User)
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+
+			var allBooks = DbAccess.Select<Book>();
+			var allImages = DbAccess.Select<Image>();
+
+			foreach (var book in books)
+			{
+				Assert.That(book, Is.Not.Null);
+				Assert.That(book.BookName, Is.Not.Null);
+				
+				Assert.That(book.Images, Is.Not.Null);
+				Assert.That(book.Images, Is.Not.Empty);
+				Assert.That(book.IdUser, Is.EqualTo(book.User.User_ID));
 
 				var imgsOfBook = allImages.Where(f => f.IdBook == book.BookId);
 				foreach (var image in imgsOfBook)
@@ -300,6 +373,23 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			DataMigrationHelper.AddUsers(maxItems, DbAccess);
 			var basePager = CreateQuery()
 				.Select.Table<Users>()
+				.Order.By(e => e.UserID)
+				.ForPagedResult(1, 10);
+			basePager.LoadPage(DbAccess);
+
+			Assert.That(basePager.CurrentPage, Is.EqualTo(1));
+			Assert.That(basePager.MaxPage, Is.EqualTo(maxItems / basePager.PageSize));
+		}
+
+		[Test]
+		public void PagerWithOrdering()
+		{
+			var maxItems = 250;
+
+			DataMigrationHelper.AddUsers(maxItems, DbAccess);
+			var basePager = CreateQuery()
+				.Select.Table<Users>()
+				.Order.By(e => e.UserID)
 				.ForPagedResult(1, 10);
 			basePager.LoadPage(DbAccess);
 
@@ -321,6 +411,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 									 .Column(f => f.UserID).Is.BiggerThen(beginWithId)
 									 .Or
 									 .Column(f => f.UserID).Is.EqualsTo(beginWithId)
+									 .Order.By(e => e.UserID)
 									 .ForPagedResult(1, pageSize);
 			queryPager.LoadPage(DbAccess);
 
@@ -412,6 +503,26 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
+		public void SelectFkRelation()
+		{
+			var addBooks = DataMigrationHelper.AddBooksWithImage(10, 2, DbAccess);
+
+			foreach (var bookId in addBooks)
+			{
+				var images = CreateQuery().Select.Table<Image>()
+					.Where
+					.ForginKey<Book>().Is.EqualsTo(bookId)
+					.ToArray();
+				Assert.That(images, Is.Not.Null);
+				Assert.That(images.Length, Is.EqualTo(2));
+				foreach (var image in images)
+				{
+					Assert.That(image.IdBook, Is.EqualTo(bookId));
+				}
+			}
+		}
+
+		[Test]
 		public void SelectWithBrakets()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
@@ -462,7 +573,9 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				.LastOrDefault();
 
 			var forResult = CreateQuery().Select.Table<Users>()
-				.Where.Column(f => f.UserName).Is.EqualsTo(contentConditionValue.UserName)
+				.Where.Column(f => f.UserName)
+				.Is
+				.EqualsTo(contentConditionValue.UserName)
 				.ForResult(_asyncEnumeration)
 				.ToArray()
 				.FirstOrDefault();

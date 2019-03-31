@@ -654,25 +654,30 @@ namespace JPB.DataAccess.Manager
 			var propertys = info.Propertys.ToArray();
 			var instanceOfFallbackList = new Dictionary<string, object>();
 			IDictionary<int, DbPropertyInfoCache> cache = new Dictionary<int, DbPropertyInfoCache>();
-
-			var containsKey = cacheModel?.Cache.ContainsKey(info.Type);
-			if (containsKey != true)
+			for (var i = 0; i < reader.FieldCount; i++)
 			{
-				for (var i = 0; i < reader.FieldCount; i++)
-				{
-					info.Propertys.TryGetValue(info.SchemaMappingDatabaseToLocal(reader.GetName(i)), out var val);
-					cache.Add(i, val);
-				}
+				info.Propertys.TryGetValue(info.SchemaMappingDatabaseToLocal(reader.GetName(i)), out var val);
+				cache.Add(i, val);
+			}
 
-				if (containsKey == false)
-				{
-					cacheModel.Cache[info.Type] = cache;
-				}
-			}
-			if (containsKey == true)
-			{
-				cache = cacheModel.Cache[info.Type];
-			}
+			//var containsKey = cacheModel?.Cache.ContainsKey(info.Type);
+			//if (containsKey != true)
+			//{
+			//	for (var i = 0; i < reader.FieldCount; i++)
+			//	{
+			//		info.Propertys.TryGetValue(info.SchemaMappingDatabaseToLocal(reader.GetName(i)), out var val);
+			//		cache.Add(i, val);
+			//	}
+
+			//	if (containsKey == false)
+			//	{
+			//		cacheModel.Cache[info.Type] = cache;
+			//	}
+			//}
+			//if (containsKey == true)
+			//{
+			//	cache = cacheModel.Cache[info.Type];
+			//}
 
 			for (var i = 0; i < reader.FieldCount; i++)
 			{
@@ -810,15 +815,27 @@ namespace JPB.DataAccess.Manager
 					}
 					else
 					{
-						object changedType;
-						if (value.GetType() != property.PropertyInfo.PropertyType)
-						{
-							changedType = DataConverterExtensions.ChangeType(value, property.PropertyInfo.PropertyType);
-						}
-						else
+						object changedType = value;
+						if (property.PropertyType.IsInstanceOfType(value))
 						{
 							changedType = value;
 						}
+						else
+						{
+							if (!DataConverterExtensions.ChangeType(ref changedType, property.PropertyInfo.PropertyType))
+							{
+								continue;
+							}
+						}
+
+						//if (value.GetType() != property.PropertyInfo.PropertyType)
+						//{
+						//	changedType = DataConverterExtensions.ChangeType(value, property.PropertyInfo.PropertyType);
+						//}
+						//else
+						//{
+						//	changedType = value;
+						//}
 
 						property.Setter.Invoke(instance, changedType);
 					}

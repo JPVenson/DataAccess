@@ -30,11 +30,11 @@ namespace JPB.DataAccess.AdoWrapper
 				.Propertys
 				.ToArray();
 
-			MetaHeader = new MultiValueDictionary<int, string, object>();
+			MetaHeader = new MultiValueDictionary<string, object>();
 			for (var index = 0; index < props.Length; index++)
 			{
 				var name = props[index];
-				MetaHeader.Add(index, name.Value.DbName, name.Value.Getter.Invoke(sourceObject));
+				MetaHeader.Add(name.Value.DbName, name.Value.Getter.Invoke(sourceObject));
 			}
 		}
 	}

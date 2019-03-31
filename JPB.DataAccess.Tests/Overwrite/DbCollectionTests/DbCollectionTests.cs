@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace JPB.DataAccess.Tests.Overwrite.DbCollectionTests
 {
 	[TestFixture]
-	public class DbCollection
+	public class DbCollectionTests
 	{
 		[SetUp]
 		public void Init()

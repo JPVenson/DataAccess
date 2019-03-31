@@ -16,18 +16,6 @@ namespace JPB.DataAccess.Query.Operators.Selection
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IDbElementSelector" />
 	public class DatabaseObjectSelector : QueryBuilderX, IDbElementSelector
 	{
-		private string _currentIdent;
-
-		/// <summary>
-		///     Initializes a new instance of the <see cref="DatabaseObjectSelector" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		/// <param name="currentIdent">The current ident.</param>
-		public DatabaseObjectSelector(IQueryBuilder database, string currentIdent) : base(database)
-		{
-			_currentIdent = currentIdent;
-		}
-
 		/// <summary>
 		///     Initializes a new instance of the <see cref="DatabaseObjectSelector" /> class.
 		/// </summary>

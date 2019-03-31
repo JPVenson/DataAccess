@@ -135,7 +135,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 					compiler.AddFallbackProperty();
 				}
 			}
-			
+
 			foreach (var columInfoModel in tableInfoModel.ColumnInfos)
 			{
 				if (columInfoModel.Exclude)
@@ -161,13 +161,13 @@ namespace JPB.DataAccess.EntityCreator.Core
 						var tempName = navPropertyName;
 						var counter = 1;
 						while (compiler.Generator.Properties.Any(f => f.Name == tempName
-						                                              || tempName == tableInfoModel.GetClassName()))
+																	  || tempName == tableInfoModel.GetClassName()))
 						{
 							tempName = navPropertyName + counter++;
 						}
 
 						navPropertyName = tempName;
-						var refProp = compiler.AddProperty(navPropertyName, new ClassType()
+						var refProp = compiler.AddProperty(navPropertyName, null, new ClassType()
 						{
 							Name = isRefTypeKnown.GetClassName(),
 						});
@@ -203,15 +203,15 @@ namespace JPB.DataAccess.EntityCreator.Core
 
 					var tempName = navPropertyName;
 					var counter = 1;
-					while (compiler.Generator.Properties.Any(f => f.Name == tempName 
-					                                              || tempName == tableInfoModel.GetClassName()))
+					while (compiler.Generator.Properties.Any(f => f.Name == tempName
+																  || tempName == tableInfoModel.GetClassName()))
 					{
 						tempName = navPropertyName + counter++;
 					}
 
 					navPropertyName = tempName;
 
-					var refProp = compiler.AddProperty(navPropertyName, new ClassType()
+					var refProp = compiler.AddProperty(navPropertyName, null, new ClassType()
 					{
 						Name = $"{nameof(DbCollection<object>)}",
 						IsList = true,

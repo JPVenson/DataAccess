@@ -9,6 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.ClassBuilder;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
@@ -29,7 +30,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		public PropertyInfo AddFallbackProperty()
 		{
-			var codeMemberProperty = AddProperty("FallbackDictionary", typeof(Dictionary<string, object>));
+			var codeMemberProperty = AddProperty("FallbackDictionary", null, typeof(Dictionary<string, object>));
 			codeMemberProperty.Attributes.Add(new AttributeInfo()
 			{
 				Name = nameof(LoadNotImplimentedDynamicAttribute),
@@ -46,7 +47,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 				targetType = typeof(Nullable<>).MakeGenericType(targetType);
 			}
 
-			var codeMemberProperty = AddProperty(propertyName, targetType);
+			var codeMemberProperty = AddProperty(propertyName, info.ColumnInfo.ColumnName, targetType);
 
 			if (info.IsRowVersion)
 			{
@@ -64,21 +65,19 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 					}
 				});
 			}
-
-			codeMemberProperty.DbName = info.NewColumnName ?? info.GetPropertyName();
-
 			return codeMemberProperty;
 		}
 
-		public PropertyInfo AddProperty(string name, Type type)
+		public PropertyInfo AddProperty(string name, string dbName, Type type)
 		{
-			return AddProperty(name, ClassType.FromCsType(type));
+			return AddProperty(name, dbName, ClassType.FromCsType(type));
 		}
 
-		public PropertyInfo AddProperty(string name, ClassType propType)
+		public PropertyInfo AddProperty(string name, string dbName, ClassType propType)
 		{
 			var property = new PropertyInfo();
 			property.Name = name;
+			property.DbName = dbName;
 			property.Type = propType;
 			base.Generator.Properties.Add(property);
 			return property;

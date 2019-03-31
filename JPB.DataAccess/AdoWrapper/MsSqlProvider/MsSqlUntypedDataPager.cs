@@ -43,12 +43,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		///     The synchronize helper
 		/// </summary>
 		private Action<Action> _syncHelper;
-
-		/// <summary>
-		///     The pk
-		/// </summary>
-		private string pk;
-
+		
 		/// <summary>
 		///     The SQL version
 		/// </summary>
@@ -161,25 +156,19 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			}
 
 			SyncHelper(CurrentPageItems.Clear);
-			if (pk == null)
-			{
-				pk = typeof(T).GetPK(dbAccess.Config);
-			}
-
 			TotalItemCount = CommandQuery.CountInt().FirstOrDefault();
 			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 			RaiseNewPageLoading();
 			var elements = new SelectQuery<T>(dbAccess.Query()
-					.WithCte(CommandQuery, out var commandCte)
+					.WithCte(new ElementProducer<T>(CommandQuery
+						.Add(new MsSqlPagerPart
+						{
+							Page = CurrentPage,
+							PageSize = PageSize
+						})), out var commandCte)
 					.Select
-					.Identifier<T>(commandCte)
-					.Order.By(pk)
-					.Add(new MsSqlPagerPart
-					{
-						Page = CurrentPage,
-						PageSize = PageSize
-					}))
+					.Identifier<T>(commandCte))
 				.ToArray();
 
 			foreach (var item in elements)

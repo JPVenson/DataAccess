@@ -1,10 +1,14 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.QueryItems;
 
 #endregion
@@ -25,6 +29,16 @@ namespace JPB.DataAccess.Query.Operators.Orders
 			_queryBuilder = queryBuilder;
 		}
 
+		private OrderByColumn<TPoco> CreateByPath
+			(IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath)
+		{
+			var columnDefinitionPart =
+				ConditionalQuery<TPoco>.TraversePropertyPathToColumn(columnPath, _queryBuilder.ContainerObject);
+
+			_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
+			return new OrderByColumn<TPoco>(_queryBuilder);
+		}
+
 		/// <summary>
 		///     Uses
 		/// </summary>
@@ -32,16 +46,29 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> By(string columnName)
 		{
-			var columnInfos = _queryBuilder.ContainerObject.Search<ISelectableQueryPart>()
-				.Columns.ToArray();
-			var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
-			if (columnDefinitionPart == null)
+			var cache = _queryBuilder.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco));
+			return CreateByPath(new[]
 			{
-				throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
-			}
+				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
+					.Propertys[columnName.TrimAlias()]),
+			});
 
-			_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
-			return new OrderByColumn<TPoco>(_queryBuilder);
+			//return CreateByPath(new []
+			//{
+			//	new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(), 
+			//})
+
+			//var columnInfos = _queryBuilder.ContainerObject
+			//	.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
+			//	.Columns.ToArray();
+			//var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
+			//if (columnDefinitionPart == null)
+			//{
+			//	throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
+			//}
+
+			//_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
+			//return new OrderByColumn<TPoco>(_queryBuilder);
 		}
 
 		/// <summary>
@@ -53,9 +80,19 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		public OrderByColumn<TPoco> By<TA>(
 			Expression<Func<TPoco, TA>> columnName)
 		{
-			var member = columnName.GetPropertyInfoFromLamdba();
-			var propName = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
-			return By(propName.DbName);
+			return CreateByPath(PropertyPath<TPoco>
+				.Get(columnName)
+				.Select(e =>
+				{
+					var dbClassInfoCache = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
+						dbClassInfoCache.Propertys[e.Name]);
+				})
+				.ToArray());
+
+			//var member = columnName.GetPropertyInfoFromLamdba();
+			//var propName = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
+			//return By(propName.DbName);
 		}
 	}
 }

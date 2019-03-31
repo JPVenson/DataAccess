@@ -98,25 +98,19 @@ namespace JPB.DataAccess.SqLite
 		public void LoadPage(DbAccessLayer dbAccess)
 		{
 			SyncHelper(CurrentPageItems.Clear);
-			if (_pk == null)
-			{
-				_pk = typeof(T).GetPK(dbAccess.Config);
-			}
-
 			TotalItemCount = CommandQuery.CountInt().FirstOrDefault();
 			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 			RaiseNewPageLoading();
 			var elements = new SelectQuery<T>(dbAccess.Query()
-					.WithCte(CommandQuery, out var commandCte)
+					.WithCte(new ElementProducer<T>(CommandQuery
+						.Add(new SqLitePagerPart
+						{
+							Page = CurrentPage,
+							PageSize = PageSize
+						})), out var commandCte)
 					.Select
-					.Identifier<T>(commandCte)
-					.Order.By(_pk)
-					.Add(new SqLitePagerPart
-					{
-						Page = CurrentPage,
-						PageSize = PageSize
-					}))
+					.Identifier<T>(commandCte))
 				.ToArray();
 
 			foreach (var item in elements)

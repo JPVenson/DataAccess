@@ -221,7 +221,7 @@ namespace JPB.DataAccess.Query
 			{
 				throw new ArgumentNullException("No type Supplied", new Exception());
 			}
-			return new QueryEagerEnumerator(this, ForType, true);
+			return new QueryEagerEnumerator(this, ForType, AccessLayer.Async);
 		}
 
 		/// <summary>

@@ -131,10 +131,10 @@ namespace JPB.DataAccess.Helper.LocalDb
 								var value = reader.ReadElementContentAsString();
 								var dbPropertyInfoCache = table.TypeInfo.Propertys[table.TypeInfo.SchemaMappingDatabaseToLocal(propName)];
 
-								object contvertedValue = null;
+								object contvertedValue = value;
 								if (!isNumm)
 								{
-									contvertedValue = DataConverterExtensions.ChangeType(value, dbPropertyInfoCache.PropertyType);
+									DataConverterExtensions.ChangeType(ref contvertedValue, dbPropertyInfoCache.PropertyType);
 								}
 
 								dbPropertyInfoCache.Setter.Invoke(emptyElement, contvertedValue);

@@ -165,8 +165,9 @@ namespace JPB.DataAccess.AdoWrapper
 				return xElement.ToString();
 			}
 
-			var type = DataConverterExtensions.ChangeType(xElement.Value, propertyType);
-			return type;
+			object value = xElement.Value;
+			var type = DataConverterExtensions.ChangeType(ref value, propertyType);
+			return value;
 		}
 
 		/// <summary>

@@ -25,19 +25,7 @@ namespace JPB.DataAccess.Query.Operators
 		public PrepaireUpdateQuery(IQueryBuilder database) : base(database)
 		{
 		}
-
-		///// <summary>
-		/////		Sets the flag for Identity insert. When set primary keys can be inserted by using the <seealso cref="UpdateEntity{TEntity}"/> method.
-		///// </summary>
-		///// <typeparam name="TEntity"></typeparam>
-		///// <returns></returns>
-		//public PrepaireUpdateQuery WithIdentityInsertFor<TEntity>()
-		//{
-		//	var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TEntity));
-		//	DbIdentityInsertScope.Current.EnableIdentityModfiy(dbClassInfoCache.TableName, ContainerObject.AccessLayer.Database);
-		//	return this;
-		//}
-
+		
 		/// <summary>
 		///     Adds a Update - Statement
 		///     Uses reflection or a Factory mehtod to create an update statement that will check for the id of the obj
@@ -118,7 +106,8 @@ namespace JPB.DataAccess.Query.Operators
 			var targetAlias = ContainerObject.CreateTableAlias(dbClassInfoCache.TableName);
 			var queryIdentifier = new QueryIdentifier()
 			{
-				Value = dbClassInfoCache.TableName
+				Value = dbClassInfoCache.TableName,
+				QueryIdType = QueryIdentifier.QueryIdTypes.Table
 			};
 			return new UpdateColumnSetters<TPoco>(
 				Add(new UpdateTableWithQueryPart(

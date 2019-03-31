@@ -34,8 +34,6 @@ namespace JPB.DataAccess.Query.QueryItems
 			_columns = DbAccessLayer.GetSelectableColumnsOf(_tableInfo, null)
 				.Select(e => new ColumnInfo(e, Alias, queryContainer))
 				.ToList();
-			ColumnMappings = new Dictionary<Type, ColumnInfo[]>();
-			ColumnMappings[_tableInfo.Type] = _columns.ToArray();
 		}
 
 		public SelectTableQueryPart(ISelectableQueryPart source,
@@ -51,8 +49,6 @@ namespace JPB.DataAccess.Query.QueryItems
 
 			_columns = source.Columns
 				.Select(e => new ColumnInfo(e.ColumnIdentifier().TrimAlias(), e, Alias, queryContainer)).ToArray();
-			ColumnMappings = new Dictionary<Type, ColumnInfo[]>();
-			ColumnMappings[_tableInfo.Type] = _columns.ToArray();
 		}
 
 		public void AddJoin(JoinTableQueryPart join)
@@ -63,13 +59,10 @@ namespace JPB.DataAccess.Query.QueryItems
 				columns.Add(column);
 				_columns.Add(column);
 			}
-
-			ColumnMappings[join.TargetTableType] = columns.ToArray();
 		}
 
 		public bool Distinct { get; set; }
 		public int? Limit { get; set; }
-		public IDictionary<Type, ColumnInfo[]> ColumnMappings { get; private set; }
 
 		public IEnumerable<ColumnInfo> Columns
 		{

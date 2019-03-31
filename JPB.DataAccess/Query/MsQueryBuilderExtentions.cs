@@ -39,10 +39,10 @@ namespace JPB.DataAccess.Query
 		{
 			var classInfo = query.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(T));
 			var queryIdentifier = query.ContainerObject.CreateTableAlias(classInfo.TableName);
-			var part = new SubSelectQueryPart(queryIdentifier, subSelect().ContainerObject.Parts, typeof(T), query.ContainerObject);
+			var part = new SubSelectQueryPart(queryIdentifier, subSelect().ContainerObject.Parts, query.ContainerObject);
 			return new ElementProducer<T>(query.Add(part));
 		}
-		
+
 		/// <summary>
 		///     Creates an TSQL Count(1) statement
 		/// </summary>
@@ -63,20 +63,35 @@ namespace JPB.DataAccess.Query
 		/// <returns></returns>
 		public static ElementProducer<TOut> Count<TPoco, TOut>(this IElementProducer<TPoco> query)
 		{
+			IQueryBuilder newQuery = new RootQuery(query.ContainerObject.AccessLayer);
+			//in case there is a grouping in the query, we must use a SubQuery
+
+			var ordering = query.ContainerObject.Search<OrderByColumnQueryPart>();
+
 			var cteName = query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
 			var item = new CteDefinitionQueryPart.CteInfo()
 			{
 				Name = cteName
 			};
-			item.CteContentParts.AddRange(query.ContainerObject.Parts.ToArray());
+			item.CteContentParts.AddRange(query.ContainerObject.Parts.Except(new IQueryPart[] { ordering }).ToArray());
 
-			IQueryBuilder newQuery = new RootQuery(query.ContainerObject.AccessLayer);
 			var cteQueryPart = query.ContainerObject.Search<CteDefinitionQueryPart>();
 			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()))
 				.Add(cteQueryPart.AddCte(item));
 
-			return new ElementProducer<TOut>(newQuery
-				.Add(new CountTargetQueryPart(cteName, query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.SubQuery))));
+			var subQueryId = query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.SubQuery);
+			var countQueryPart = newQuery
+				.Add(new CountTargetQueryPart(cteName, subQueryId));
+			if (ordering != null)
+			{
+				var orderByColumnQueryPart = new OrderByColumnQueryPart();
+				orderByColumnQueryPart.Descending = ordering.Descending;
+				orderByColumnQueryPart.Columns = orderByColumnQueryPart.Columns
+					.Select(f => new ColumnInfo(f.ColumnName, f, subQueryId, query.ContainerObject)).ToList();
+				countQueryPart.Add(orderByColumnQueryPart);
+			}
+
+			return new ElementProducer<TOut>(countQueryPart);
 		}
 	}
 }

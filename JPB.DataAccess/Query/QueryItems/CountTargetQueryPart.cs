@@ -26,10 +26,10 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var sb = new StringBuilder();
-			sb.Append("SELECT COUNT( ");
+			sb.Append("SELECT COUNT(");
 			if (DistinctMode)
 			{
-				sb.Append("DISTINCT ");
+				sb.Append(" DISTINCT ");
 			}
 			sb.Append("1) AS [Count] FROM ");
 			sb.Append(_queryId.Value);

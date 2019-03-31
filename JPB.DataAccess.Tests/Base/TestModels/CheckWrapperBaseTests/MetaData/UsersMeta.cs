@@ -22,24 +22,24 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 		static UsersMeta()
 		{
 			var sb = new StringBuilder();
-			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
-			sb.AppendLine(string.Format(" {0} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,", PrimaryKeyName));
-			sb.AppendLine(string.Format(" {0} NVARCHAR(MAX)", ContentName));
+			sb.AppendLine($"CREATE TABLE {TableName} (");
+			sb.AppendLine($" {PrimaryKeyName} BIGINT PRIMARY KEY IDENTITY(1,1) NOT NULL,");
+			sb.AppendLine($" {ContentName} NVARCHAR(MAX)");
 			sb.AppendLine(");");
 			CreateMsSql = sb.ToString();
 
 			sb = new StringBuilder();
-			sb.AppendLine(string.Format("CREATE TABLE {0}", TableName));
-			sb.AppendLine(string.Format("({0} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ", PrimaryKeyName));
-			sb.AppendLine(string.Format("{0} TEXT", ContentName));
+			sb.AppendLine($"CREATE TABLE {TableName}");
+			sb.AppendLine($"({PrimaryKeyName} INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ");
+			sb.AppendLine($"{ContentName} TEXT");
 			sb.AppendLine(")");
 			CreateSqLite = sb.ToString();
 
 			sb = new StringBuilder();
-			sb.AppendLine(string.Format("CREATE TABLE {0} (", TableName));
-			sb.AppendLine(string.Format("{0} BIGINT NOT NULL AUTO_INCREMENT,", PrimaryKeyName));
-			sb.AppendLine(string.Format("{0} VARCHAR(350) NULL,", ContentName));
-			sb.AppendLine(string.Format("PRIMARY KEY ({0})", PrimaryKeyName));
+			sb.AppendLine($"CREATE TABLE {TableName} (");
+			sb.AppendLine($"{PrimaryKeyName} BIGINT NOT NULL AUTO_INCREMENT,");
+			sb.AppendLine($"{ContentName} VARCHAR(350) NULL,");
+			sb.AppendLine($"PRIMARY KEY ({PrimaryKeyName})");
 			sb.AppendLine(")");
 			sb.AppendLine(";");
 			CreateMySql = sb.ToString();

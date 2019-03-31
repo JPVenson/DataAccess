@@ -104,6 +104,11 @@ namespace JPB.DataAccess.Query.Operators
         /// <returns></returns>
         public IDataPager<TPoco> ForPagedResult(int page, int pageSize)
         {
+            if (ContainerObject.Search<OrderByColumnQueryPart>() == null)
+            {
+                throw new InvalidOperationException("To use the Pagination you have to define an Order.By()");
+            }
+
             var pager = ContainerObject.AccessLayer.Database.CreatePager<TPoco>();
             pager.CommandQuery = this;
             pager.PageSize = pageSize;

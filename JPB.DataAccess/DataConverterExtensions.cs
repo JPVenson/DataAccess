@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -288,14 +289,37 @@ namespace JPB.DataAccess
 			return GetNavigationProps(typeof(T), config);
 		}
 
-		internal static object ChangeType(object value, [NotNull] Type conversion)
+		private static IDictionary<string, Type[]> _conversionEquality = new Dictionary<string, Type[]>()
+		{
+			{"Number", new[]
+			{
+				typeof(int),
+				typeof(uint),
+				typeof(double),
+				typeof(decimal),
+				typeof(float),
+				typeof(short),
+				typeof(ushort),
+				typeof(byte),
+				typeof(sbyte),
+				typeof(long),
+				typeof(ulong),
+			}}
+		};
+
+		internal static bool IsNumber(Type type)
+		{
+			return _conversionEquality["Number"].Any(e => e == type);
+		}
+
+		internal static bool ChangeType(ref object value, [NotNull] Type conversion)
 		{
 			var t = conversion;
 			if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
 				if (value == null)
 				{
-					return null;
+					return false;
 				}
 
 				t = Nullable.GetUnderlyingType(t);
@@ -305,7 +329,8 @@ namespace JPB.DataAccess
 
 			if (conversion.IsAssignableFrom(valueType))
 			{
-				return value;
+				return true;
+				//return value;
 			}
 
 			if (typeof(Enum).IsAssignableFrom(t))
@@ -320,6 +345,8 @@ namespace JPB.DataAccess
 				{
 					value = Enum.Parse(t, value as string, true);
 				}
+
+				return true;
 			}
 			else if (typeof(bool).IsAssignableFrom(t))
 			{
@@ -335,6 +362,8 @@ namespace JPB.DataAccess
 				{
 					value = (bool) value;
 				}
+
+				return true;
 			}
 			else if (typeof(byte[]).IsAssignableFrom(t))
 			{
@@ -342,6 +371,8 @@ namespace JPB.DataAccess
 				{
 					value = Encoding.Default.GetBytes(value as string);
 				}
+
+				return true;
 			}
 			else if (typeof(DateTimeOffset).IsAssignableFrom(t))
 			{
@@ -350,9 +381,13 @@ namespace JPB.DataAccess
 					DateTimeOffset val;
 					if (DateTimeOffset.TryParse(value.ToString(), out val))
 					{
-						return val;
+						value = val;
+						return true;
+						//return val;
 					}
 				}
+
+				return false;
 			}
 			else if (typeof(DateTime).IsAssignableFrom(t))
 			{
@@ -361,12 +396,28 @@ namespace JPB.DataAccess
 					DateTime val;
 					if (DateTime.TryParse(value.ToString(), out val))
 					{
-						return val;
+						value = val;
+						return true;
+						//return val;
 					}
 				}
-			}
 
-			return Convert.ChangeType(value, t);
+				return false;
+				//return value;
+			}
+			else if (IsNumber(t))
+			{
+				value = Convert.ChangeType(value, t);
+				return true;
+			}
+			else if (t == typeof(string))
+			{
+				value = value.ToString();
+				return true;
+			}
+			return false;
+
+			//return Convert.ChangeType(value, t);
 		}
 
 

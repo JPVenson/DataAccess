@@ -87,7 +87,9 @@ namespace JPB.DataAccess.Query.Operators
 			KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path)
 		{
 			IQueryBuilder target = this;
-			var targetAlias = target.ContainerObject.Search<ISelectableQueryPart>().Alias;
+			var targetAlias = target.ContainerObject
+				.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
+				.Alias;
 			JoinTableQueryPart parentJoinPart = null;
 			foreach (var keyValuePair in path)
 			{
@@ -143,8 +145,8 @@ namespace JPB.DataAccess.Query.Operators
 					keyValuePair.Key.Type,
 					onSourceTableKey,
 					selfPrimaryKey,
-					forginColumns, 
-					ContainerObject);
+					forginColumns,
+					target.ContainerObject);
 
 				if (parentJoinPart != null)
 				{

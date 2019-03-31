@@ -20,9 +20,8 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public int IdBook { get; set; }
 
 		[ForeignKey(nameof(IdBook), nameof(BookWithFkImages.BookId))]
-		public virtual BookWithFkImages Book { get; private set; }
+		public virtual BookWithFkImages Book { get; set; }
 	}
-
 
 	[ForModel(BookMeta.TableName)]
 	public class BookWithFkImages
@@ -30,8 +29,12 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		[PrimaryKey]
 		public int BookId { get; set; }
 		public string BookName { get; set; }
+		public int? IdUser { get; set; }
 
 		[ForeignKey(nameof(BookId), nameof(ImageWithFkBooks.IdBook))]
 		public virtual DbCollection<ImageWithFkBooks> Images { get; set; }
+
+		[ForeignKey(nameof(IdUser), UsersMeta.PrimaryKeyName)]
+		public virtual Users User { get; set; }
 	}
 }

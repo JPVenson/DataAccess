@@ -204,6 +204,15 @@ namespace JPB.DataAccess.Query.QueryItems
 				.Except(joinTableQueryPart.Columns)
 				.ToArray();
 
+			foreach (var eagarDataRecord in readers)
+			{
+				foreach (var columnInfo in joinTableQueryPart.Columns)
+				{
+					eagarDataRecord.Remove(columnInfo.ColumnIdentifier());
+					eagarDataRecord.Remove(columnInfo.ColumnIdentifier().TrimAlias());
+				}
+			}
+
 			return parentedReaders.ToArray();
 		}
 

@@ -239,7 +239,9 @@ namespace JPB.DataAccess.Manager
 						Monitor.Exit(_lockRoot);
 					}
 				}
-				return Select(type, result);
+
+				var entity = Select(type, result);
+				return entity;
 			});
 		}
 
