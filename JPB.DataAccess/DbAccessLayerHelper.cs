@@ -515,9 +515,9 @@ namespace JPB.DataAccess
 		///     Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
 		/// </summary>
 		/// <returns></returns>
-		internal static string CreatePropertyCsv(this DbClassInfoCache type, string alias, params string[] ignore)
+		internal static string CreatePropertyCsv(this DbClassInfoCache type, params string[] ignore)
 		{
-			var properties = CreateProperties(type, alias, ignore);
+			var properties = CreateProperties(type, ignore);
 			if (properties.Any())
 			{
 				return properties.Aggregate((e, f) => e + ", " + f);
@@ -526,24 +526,15 @@ namespace JPB.DataAccess
 			return "";
 		}
 
-		internal static string[] CreateProperties(this DbClassInfoCache type, string alias, params string[] ignore)
+		internal static string[] CreateProperties(this DbClassInfoCache type, params string[] ignore)
 		{
 			var filteredList = FilterDbSchemaMapping(type, ignore).ToArray();
 
 			if (filteredList.Any())
 			{
-				return filteredList.Select(e => ColumnIdentifier(alias, e)).ToArray();
+				return filteredList.Select(e => e).ToArray();
 			}
 			return new string[0];
-		}
-
-		/// <summary>
-		///     Returns all Propertys that can be loaded due reflection and excludes all propertys in ignore
-		/// </summary>
-		/// <returns></returns>
-		internal static string CreatePropertyCsv<T>(DbConfig config, string alias, params string[] ignore)
-		{
-			return CreatePropertyCsv(config.GetOrCreateClassInfoCache(typeof(T)), alias, ignore);
 		}
 
 		/// <summary>

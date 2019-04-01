@@ -156,6 +156,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			IQueryBuilder newQuery = new RootQuery(this);
 			cteName = newQuery.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
+			(commandQuery.ContainerObject as IQueryContainerValues)?.TableAlias.Clear();
 
 			var cteQueryPart = commandQuery.ContainerObject.Search<CteDefinitionQueryPart>();
 			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()));

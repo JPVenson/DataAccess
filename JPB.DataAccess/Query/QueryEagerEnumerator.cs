@@ -71,12 +71,6 @@ namespace JPB.DataAccess.Query
 			}
 		}
 
-		public static IEnumerable<List<T>> Partition<T>(IList<T> source, int size)
-		{
-			for (var i = 0; i < Math.Ceiling(source.Count / (Double)size); i++)
-				yield return new List<T>(source.Skip(size * i).Take(size));
-		}
-
 		private void LoadResults()
 		{
 			var query = _queryContainer.Compile(out var columns);
@@ -113,16 +107,16 @@ namespace JPB.DataAccess.Query
 				var context = new QueryProcessingRecordsContext(_queryContainer,
 					_queryContainer.PostProcessors,
 					columns);
-				dataRecords = new RelationProcessor(queryContainerJoin.Value)
+				dataRecords = new RelationProcessor(queryContainerJoin)
 					.JoinTables(dataRecords,
-					queryContainerJoin.Value.TargetTableType,
+					queryContainerJoin.TargetTableType,
 					context);
 				columns = context.Columns;
 			}
 
-			var columnNames = columns.Select(f => f.NaturalName.TrimAlias()).ToArray();
+			var columnNames = columns.Select(f => f.NaturalName).ToArray();
 			dataRecords = dataRecords.Select(record =>
-					new EagarDataRecord(columnNames, record.MetaHeader.Values.ToArray()))
+					new EagarDataRecord(columnNames, record.MetaHeader.ToArray()))
 				.ToArray();
 
 			var records = Partitioner.Create(dataRecords, true)

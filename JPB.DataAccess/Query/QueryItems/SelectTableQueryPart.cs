@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using JetBrains.Annotations;
@@ -19,6 +20,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		private readonly string _source;
 		private readonly DbClassInfoCache _tableInfo;
 		private IList<ColumnInfo> _columns;
+		private readonly List<JoinParseInfo> _joins;
 
 		public SelectTableQueryPart(string source,
 			DbClassInfoCache tableInfo,
@@ -29,9 +31,9 @@ namespace JPB.DataAccess.Query.QueryItems
 			_tableInfo = tableInfo;
 			Alias = alias;
 			_columns = new List<ColumnInfo>();
-			Joins = new List<JoinTableQueryPart>();
+			_joins = new List<JoinParseInfo>();
 
-			_columns = DbAccessLayer.GetSelectableColumnsOf(_tableInfo, null)
+			_columns = DbAccessLayer.GetSelectableColumnsOf(_tableInfo)
 				.Select(e => new ColumnInfo(e, Alias, queryContainer))
 				.ToList();
 		}
@@ -41,22 +43,37 @@ namespace JPB.DataAccess.Query.QueryItems
 			QueryIdentifier alias, 
 			IQueryContainer queryContainer)
 		{
-			_source = source.Alias.Value;
+			_source = source.Alias.GetAlias();
 			_tableInfo = tableInfo;
 			Alias = alias;
 			_columns = new List<ColumnInfo>();
-			Joins = new List<JoinTableQueryPart>();
+			_joins = new List<JoinParseInfo>();
 
 			_columns = source.Columns
 				.Select(e => new ColumnInfo(e.ColumnIdentifier().TrimAlias(), e, Alias, queryContainer)).ToArray();
+			
+			if (source is CteDefinitionQueryPart.CteQueryPart cte)
+			{
+				queryContainer.Joins.Clear();
+				var joinTableQueryParts = (cte.CteInfo.CteContentParts.FirstOrDefault(f => f is SelectTableQueryPart) as SelectTableQueryPart)
+					?.Joins;
+				if (joinTableQueryParts != null)
+				{
+					foreach (var joinTableQueryPart in joinTableQueryParts)
+					{
+						var cloneForJoinTo = joinTableQueryPart.CloneForJoinTo(Alias, _columns, source.Columns);
+						_joins.Add(cloneForJoinTo);
+						queryContainer.Joins.Add(cloneForJoinTo);
+					}
+				}
+			}
 		}
 
 		public void AddJoin(JoinTableQueryPart join)
 		{
-			var columns = new List<ColumnInfo>();
+			_joins.Add(join.JoinParseInfo);
 			foreach (var column in join.Columns)
 			{
-				columns.Add(column);
 				_columns.Add(column);
 			}
 		}
@@ -69,7 +86,10 @@ namespace JPB.DataAccess.Query.QueryItems
 			get { return _columns; }
 		}
 
-		public IEnumerable<JoinTableQueryPart> Joins { get; private set; }
+		public IEnumerable<JoinParseInfo> Joins
+		{
+			get { return _joins; }
+		}
 
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
@@ -85,10 +105,25 @@ namespace JPB.DataAccess.Query.QueryItems
 				modifier += " DISTINCT";
 			}
 
-			var query = DbAccessLayer.CreateSelectByColumns(_source,
-				Columns.Select(e => e.ColumnAliasStatement()).Aggregate((e, f) => e + ", " + f), Alias.GetAlias(),
-				modifier);
-			return new QueryFactoryResult(query);
+			var sb = new StringBuilder();
+			sb.Append("SELECT ");
+			if (modifier != null)
+			{
+				sb.Append(modifier + " ");
+			}
+
+			sb.Append(Columns.Select(e => e.ColumnAliasStatement()).Aggregate((e, f) => e + ", " + f));
+			sb.Append(" FROM ");
+			sb.Append($"[{_source}] ");
+			if (Alias != null)
+			{
+				sb.Append($"AS [{Alias.GetAlias()}] ");
+			}
+
+			//var query = DbAccessLayer.CreateSelectByColumns(_source,
+			//	Columns.Select(e => e.ColumnAliasStatement()).Aggregate((e, f) => e + ", " + f), Alias.GetAlias(),
+			//	modifier);
+			return new QueryFactoryResult(sb.ToString());
 		}
 
 		public QueryIdentifier Alias { get; }

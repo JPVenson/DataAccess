@@ -49,7 +49,7 @@ namespace JPB.DataAccess.Query
 			PostProcessors = new List<IEntityProcessor>();
 			TableAlias = new Dictionary<string, QueryIdentifier>();
 			Identifiers = new List<QueryIdentifier>();
-			Joins = new Dictionary<string, JoinTableQueryPart>();
+			Joins = new List<JoinParseInfo>();
 		}
 
 		internal InternalContainerContainer(IQueryContainer pre)
@@ -59,7 +59,7 @@ namespace JPB.DataAccess.Query
 			AutoParameterCounter = (pre as IQueryContainerValues)?.AutoParameterCounter ?? 0;
 			TableAlias = (pre as IQueryContainerValues)?.TableAlias ?? new Dictionary<string, QueryIdentifier>();
 			Identifiers = (pre as IQueryContainerValues)?.Identifiers ?? new List<QueryIdentifier>();
-			Joins = (pre as IQueryContainerValues)?.Joins ?? new Dictionary<string, JoinTableQueryPart>();
+			Joins = (pre as IQueryContainerValues)?.Joins ?? new List<JoinParseInfo>();
 			ColumnCounter = (pre as IQueryContainerValues)?.ColumnCounter ?? 0;
 			_parts = pre.Parts.ToList();
 			AllowParamterRenaming = pre.AllowParamterRenaming;
@@ -86,7 +86,7 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// 
 		/// </summary>
-		public IDictionary<string, JoinTableQueryPart> Joins { get; }
+		public IList<JoinParseInfo> Joins { get; }
 
 		/// <inheritdoc />
 		public int AutoParameterCounter { get; private set; }

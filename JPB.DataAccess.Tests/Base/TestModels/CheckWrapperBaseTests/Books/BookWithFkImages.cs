@@ -36,5 +36,8 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 
 		[ForeignKey(nameof(IdUser), UsersMeta.PrimaryKeyName)]
 		public virtual Users User { get; set; }
+
+		[ForeignKey(nameof(IdUser), UsersMeta.PrimaryKeyName)]
+		public virtual Users User1 { get; set; }
 	}
 }

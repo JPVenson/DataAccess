@@ -11,9 +11,9 @@ namespace JPB.DataAccess.Query.QueryItems
 {
 	internal class RelationProcessor : EntityProcessorBase
 	{
-		private readonly JoinTableQueryPart _joinTableQueryPart;
+		private readonly JoinParseInfo _joinTableQueryPart;
 
-		public RelationProcessor(JoinTableQueryPart joinTableQueryPart)
+		public RelationProcessor(JoinParseInfo joinTableQueryPart)
 		{
 			_joinTableQueryPart = joinTableQueryPart;
 		}
@@ -45,7 +45,7 @@ namespace JPB.DataAccess.Query.QueryItems
 					.GetOrCreateClassInfoCache(_joinTableQueryPart.TargetTableType);
 
 			var primaryKeyColumn = context.Columns.FirstOrDefault(e =>
-				e.IsEquivalentTo(targetTable.PrimaryKeyProperty.DbName.TrimAlias()) &&
+				e.IsEquivalentTo(targetTable.PrimaryKeyProperty.DbName) &&
 				e.Alias == _joinTableQueryPart.SourceTable);
 
 			var columnMapping = new Dictionary<ColumnInfo, int>();
@@ -54,7 +54,7 @@ namespace JPB.DataAccess.Query.QueryItems
 				item,
 				index
 			}).ToDictionary(e => e.item, e => e.index);
-			var fieldsOfChild = context.Columns.Select(f => f.NaturalName.TrimAlias()).ToArray();
+			var fieldsOfChild = context.Columns.Select(f => f.NaturalName).ToArray();
 
 			foreach (var fieldOfChild in fieldsOfChild)
 			{
@@ -73,7 +73,7 @@ namespace JPB.DataAccess.Query.QueryItems
 					.FirstOrDefault(f => f.Key == targetColumn)
 					.Value;
 
-			var identifierNames = context.Columns.Select(e => e.ColumnIdentifier())
+			var identifierNames = context.Columns.Select(e => e.ColumnIdentifier().TrimAlias())
 				.ToArray();
 
 			var reducedRecords = readers
@@ -104,7 +104,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		}
 
 		private static EagarDataRecord[] MapJoinedTable(
-			JoinTableQueryPart joinTableQueryPart,
+			JoinParseInfo joinTableQueryPart,
 			EagarDataRecord[] readers,
 			Type entityType,
 			QueryProcessingRecordsContext context,
@@ -113,21 +113,14 @@ namespace JPB.DataAccess.Query.QueryItems
 			out string forginKey)
 		{
 			var parentedReaders = new List<EagarDataRecord>();
-
-			var classInfo = context.QueryContainer.AccessLayer.Config.GetOrCreateClassInfoCache(entityType);
-
-			DbPropertyInfoCache property;
-
-			property = classInfo.Propertys.FirstOrDefault(f =>
-					f.Value.ForginKeyAttribute?.Attribute.ForeignKey == joinTableQueryPart.SourceColumn.TrimAlias())
-				.Value;
+			var property = joinTableQueryPart.TargetProperty;
 
 			sourceColumn = context.Columns.FirstOrDefault(e =>
-				e.NaturalName.TrimAlias().Equals(joinTableQueryPart.TargetColumn.TrimAlias()) &&
+				e.NaturalName.Equals(joinTableQueryPart.TargetColumnName) &&
 				e.Alias.Equals(joinTableQueryPart.Alias));
 
 			targetColumn = context.Columns.FirstOrDefault(e =>
-				e.NaturalName.TrimAlias().Equals(joinTableQueryPart.SourceColumn.TrimAlias()) &&
+				e.NaturalName.Equals(joinTableQueryPart.SourceColumnName) &&
 				e.Alias.Equals(joinTableQueryPart.SourceTable));
 
 			if (sourceColumn == null)
@@ -154,7 +147,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			forginKey = property.PropertyName;
 			var fields = joinTableQueryPart.Columns.ToArray();
 			var fieldsOfChild = fields
-				.Select((item, index) => item.ColumnIdentifier().TrimAlias())
+				.Select((item, index) => item.ColumnIdentifier())
 				.ToArray();
 
 			var columnMapping = new Dictionary<string, int>();
@@ -169,8 +162,8 @@ namespace JPB.DataAccess.Query.QueryItems
 				var child = fieldOfChild;
 				var indexOfSource =
 					sourceColumnsIndexMapping
-						.FirstOrDefault(e => e.Key.ColumnIdentifier().TrimAlias().Equals(child));
-				columnMapping.Add(indexOfSource.Key.NaturalName.TrimAlias(), indexOfSource.Value);
+						.FirstOrDefault(e => e.Key.ColumnIdentifier().Equals(child));
+				columnMapping.Add(indexOfSource.Key.NaturalName, indexOfSource.Value);
 			}
 
 			var groupBy = columnMapping[columnMapping.FirstOrDefault().Key];
@@ -187,7 +180,7 @@ namespace JPB.DataAccess.Query.QueryItems
 					new ArrayList(columnMapping.Values.Select(f => readerGroup[f]).ToArray()));
 				if (joinedTables.Any())
 				{
-					var ordinal = naturalReader.GetOrdinal(sourceColumn.ColumnName.TrimAlias());
+					var ordinal = naturalReader.GetOrdinal(sourceColumn.ColumnName);
 					foreach (var eagarDataRecordse in joinedTables)
 					{
 						SetRelationOnRecord(eagarDataRecordse.Key, 
@@ -208,7 +201,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			{
 				foreach (var columnInfo in joinTableQueryPart.Columns)
 				{
-					eagarDataRecord.Remove(columnInfo.ColumnIdentifier());
+					//eagarDataRecord.Remove(columnInfo.ColumnIdentifier());
 					eagarDataRecord.Remove(columnInfo.ColumnIdentifier().TrimAlias());
 				}
 			}
@@ -223,8 +216,8 @@ namespace JPB.DataAccess.Query.QueryItems
 			int ordinal)
 		{
 			var joinedIndexOfSearch = relationRecordSource.FirstOrDefault()
-				.GetOrdinal(targetColumn.ColumnName.TrimAlias());
-
+				.GetOrdinal(targetColumn.NaturalName);
+			
 			naturalReader.Add(virtualColumnName, relationRecordSource.Where(join =>
 			{
 				var left = naturalReader[ordinal];

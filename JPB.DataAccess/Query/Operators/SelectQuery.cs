@@ -90,7 +90,7 @@ namespace JPB.DataAccess.Query.Operators
 			var targetAlias = target.ContainerObject
 				.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Alias;
-			JoinTableQueryPart parentJoinPart = null;
+			JoinParseInfo parentJoinPart = null;
 			foreach (var keyValuePair in path)
 			{
 				Type referenceType;
@@ -132,11 +132,13 @@ namespace JPB.DataAccess.Query.Operators
 				onSourceTableKey = referenceColumn.ReferenceKey;
 				selfPrimaryKey = referenceColumn.ForeignKey;
 
-				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache, null);
+				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache);
 				var pathOfJoin = target.ContainerObject.GetPathOf(targetAlias) + "." +
 				        keyValuePair.Value.PropertyName;
 				var parentAlias = target.ContainerObject
 					.CreateTableAlias(pathOfJoin);
+
+			
 
 				var joinTableQueryPart = new JoinTableQueryPart(
 					targetAliasOfJoin,
@@ -146,18 +148,19 @@ namespace JPB.DataAccess.Query.Operators
 					onSourceTableKey,
 					selfPrimaryKey,
 					forginColumns,
-					target.ContainerObject);
+					target.ContainerObject,
+					keyValuePair.Value);
 
 				if (parentJoinPart != null)
 				{
-					parentJoinPart.DependingJoins.Add(joinTableQueryPart);
+					parentJoinPart.DependingJoins.Add(joinTableQueryPart.JoinParseInfo);
 				}
 				else
 				{
-					target.ContainerObject.Joins.Add(pathOfJoin, joinTableQueryPart);
+					target.ContainerObject.Joins.Add(joinTableQueryPart.JoinParseInfo);
 				}
 
-				parentJoinPart = joinTableQueryPart;
+				parentJoinPart = joinTableQueryPart.JoinParseInfo;
 
 				target.ContainerObject.Search<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
 				target = target.Add(joinTableQueryPart);

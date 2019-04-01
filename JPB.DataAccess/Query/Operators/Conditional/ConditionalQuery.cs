@@ -80,7 +80,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			return ConditionalColumnQueryByPath(new[]
 			{
 				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
-					.Propertys[columnName.TrimAlias()]),
+					.Propertys[columnName]),
 			});
 		}
 

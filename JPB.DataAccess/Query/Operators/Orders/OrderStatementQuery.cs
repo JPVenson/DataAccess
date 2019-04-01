@@ -50,7 +50,7 @@ namespace JPB.DataAccess.Query.Operators.Orders
 			return CreateByPath(new[]
 			{
 				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
-					.Propertys[columnName.TrimAlias()]),
+					.Propertys[columnName]),
 			});
 
 			//return CreateByPath(new []

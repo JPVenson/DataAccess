@@ -9,14 +9,23 @@ namespace JPB.DataAccess.AdoWrapper
 	{
 		public MultiValueDictionary()
 		{
-			Collection = new SortedList<TKey, TValue>();
+			Collection = new List<KeyValuePair<TKey, TValue>>();
 		}
 
-		public SortedList<TKey, TValue> Collection { get; private set; }
+		public MultiValueDictionary(MultiValueDictionary<TKey, TValue> subRecordMetaHeader)
+		{
+			Collection = new List<KeyValuePair<TKey, TValue>>();
+			foreach (var o in subRecordMetaHeader.Collection)
+			{
+				Collection.Add(o);
+			}
+		}
+
+		public List<KeyValuePair<TKey, TValue>> Collection { get; private set; }
 
 		public IEnumerable<TValue> Values
 		{
-			get { return Collection.Values; }
+			get { return Collection.Select(e => e.Value); }
 		}
 
 		public int Count
@@ -26,22 +35,22 @@ namespace JPB.DataAccess.AdoWrapper
 
 		public void Add(TKey key2, TValue value)
 		{
-			Collection.Add(key2, value);
+			Collection.Add(new KeyValuePair<TKey, TValue>(key2, value));
 		}
 
 		public void Remove(TKey key)
 		{
-			Collection.Remove(key);
+			Collection.RemoveAll(e => e.Key.Equals(key));
 		}
 
 		public int IndexOf(TKey key)
 		{
-			return Collection.IndexOfKey(key);
+			return Collection.FindIndex(f => f.Key.Equals(key));
 		}
 
 		public TKey KeyAt(int index)
 		{
-			return Collection.Keys[index];
+			return Collection[index].Key;
 
 			//return Collection.IndexOfKey(key);
 		}
@@ -50,29 +59,30 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			get
 			{
-				return Collection[Collection.Keys[index]];
+				if (index <= Collection.Count)
+				{
+					return Collection[index].Value;
+				}
 
-				//if (DictA.ContainsKey(index))
-				//{
-				//	return DictA[index];
-				//}
-
-				//return default(TValue);
+				return default(TValue);
 			}
 		}
 
-		public TValue this[TKey index]
+		public TValue this[TKey key]
 		{
 			get
 			{
-				return Collection[index];
-				//if (DictB.ContainsKey(index))
-				//{
-				//	return DictB[index];
-				//}
-
-				//return default(TValue);
+				if (Collection.Any(e => e.Key.Equals(key)))
+				{
+					return Collection.FirstOrDefault(e => e.Key.Equals(key)).Value;
+				}
+				return default(TValue);
 			}
+		}
+
+		public IList ToArray()
+		{
+			return Collection.Select(e => e.Value).ToArray();
 		}
 	}
 }

@@ -8,8 +8,11 @@ namespace JPB.DataAccess.Query.QueryItems
 	/// </summary>
 	public class ColumnInfo
 	{
-		private readonly ColumnInfo _aliasOf;
-		private readonly IQueryContainer _container;
+		/// <summary>
+		/// 
+		/// </summary>
+		public ColumnInfo AliasOf { get; }
+		internal readonly IQueryContainer _container;
 
 		internal ColumnInfo(string columnName,
 			ColumnInfo aliasOf,
@@ -17,15 +20,15 @@ namespace JPB.DataAccess.Query.QueryItems
 			IQueryContainer container) 
 			: this(columnName, alias, container)
 		{
-			_aliasOf = aliasOf;
+			AliasOf = aliasOf;
 		}
 
 		internal bool IsEquivalentTo(string columnName)
 		{
 			return
-				(ColumnName.TrimAlias().Equals(columnName))
+				(ColumnName.Equals(columnName))
 				||
-				(_aliasOf != null && _aliasOf.IsEquivalentTo(columnName));
+				(AliasOf != null && AliasOf.IsEquivalentTo(columnName));
 		}
 
 		/// <summary>
@@ -43,7 +46,7 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		internal string NaturalName
 		{
-			get { return _aliasOf?.NaturalName ?? ColumnName; }
+			get { return AliasOf?.NaturalName ?? ColumnName; }
 		}
 
 		/// <summary>
@@ -73,7 +76,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// </summary>
 		public string ColumnSourceAlias()
 		{
-			return $"[{Alias.GetAlias()}].[{ColumnName.TrimAlias()}]";
+			return $"[{Alias.GetAlias()}].[{ColumnName}]";
 		}
 
 		/// <summary>

@@ -43,10 +43,10 @@ namespace JPB.DataAccess.AdoWrapper
 		///  <returns></returns>
 		public static EagarDataRecord WithExcludedFields(IDataRecord sourceRecord, params string[] fieldsExcluded)
 		{
-			//if (sourceRecord is EagarDataRecord subRecord)
-			//{
-			//	return new EagarDataRecord(subRecord.MetaHeader);
-			//}
+			if (sourceRecord is EagarDataRecord subRecord)
+			{
+				return new EagarDataRecord(subRecord.MetaHeader);
+			}
 
 			var buildList = new ArrayList();
 			var metaBuildList = new List<string>();
@@ -87,7 +87,7 @@ namespace JPB.DataAccess.AdoWrapper
 
 		private EagarDataRecord(MultiValueDictionary<string, object> subRecordMetaHeader)
 		{
-			MetaHeader = subRecordMetaHeader;
+			MetaHeader = new MultiValueDictionary<string, object>(subRecordMetaHeader);
 		}
 
 		internal MultiValueDictionary<string, object> MetaHeader { get; set; }

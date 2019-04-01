@@ -141,7 +141,7 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <summary>
 		/// 
 		/// </summary>
-		IDictionary<string, JoinTableQueryPart> Joins { get; }
+		IList<JoinParseInfo> Joins { get; }
 		/// <summary>
 		///		A List of processors that will be executed after all entities are loaded.
 		///		If any Processor is present the <seealso cref="EnumerationMode"/> will be set to FullOnLoad

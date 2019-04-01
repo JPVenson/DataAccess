@@ -107,6 +107,103 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
+		public void JoinMultipleParent()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
+			var ids = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			for (var index = 0; index < ids.Length; index++)
+			{
+				var bookId = ids[index];
+				CreateQuery().Update.Table<Book>()
+					.Set
+					.Column(f => f.IdUser).Value(addUsers[index])
+					.Where
+					.Column(f => f.BookId).Is.EqualsTo(bookId)
+					.ExecuteNonQuery();
+			}
+
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(nameof(BookWithFkImages.User))
+				.Join(nameof(BookWithFkImages.User1))
+				.ToArray());
+
+			foreach (var book in books)
+			{
+				Assert.That(book.User, Is.Not.Null);
+				Assert.That(book.User.UserName, Is.Not.Null);
+				Assert.That(book.User.User_ID, Is.Not.Zero);
+
+				Assert.That(book.User1, Is.Not.Null);
+				Assert.That(book.User1.UserName, Is.Not.Null);
+				Assert.That(book.User1.User_ID, Is.Not.Zero);
+			}
+
+			Assert.That(books, Is.Not.Null);
+		}	
+		
+		[Test]
+		public void JoinMultipleInCteParent()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
+			var ids = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			for (var index = 0; index < ids.Length; index++)
+			{
+				var bookId = ids[index];
+				CreateQuery().Update.Table<Book>()
+					.Set
+					.Column(f => f.IdUser).Value(addUsers[index])
+					.Where
+					.Column(f => f.BookId).Is.EqualsTo(bookId)
+					.ExecuteNonQuery();
+			}
+
+			var books = Measure(() => CreateQuery()
+				.WithCte(e => e
+					.Select.Table<BookWithFkImages>()
+					.Join(nameof(BookWithFkImages.User))
+					.Join(nameof(BookWithFkImages.User1)),
+					out var cteAlias)
+				.Select
+					.Identifier<BookWithFkImages>(cteAlias)
+				.ToArray());
+
+			foreach (var book in books)
+			{
+				Assert.That(book.User, Is.Not.Null);
+				Assert.That(book.User.UserName, Is.Not.Null);
+				Assert.That(book.User.User_ID, Is.Not.Zero);
+
+				Assert.That(book.User1, Is.Not.Null);
+				Assert.That(book.User1.UserName, Is.Not.Null);
+				Assert.That(book.User1.User_ID, Is.Not.Zero);
+			}
+
+			Assert.That(books, Is.Not.Null);
+		}
+
+		[Test]
+		public void JoinInCte()
+		{
+			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.WithCte(e => e.Select.Table<ImageWithFkBooks>()
+					.Join(nameof(ImageWithFkBooks.Book)), out var cteId)
+				.Select
+				.Identifier<ImageWithFkBooks>(cteId)
+				.ToArray());
+
+			foreach (var imageWithFkBookse in books)
+			{
+				Assert.That(imageWithFkBookse.Book, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.BookName, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.BookId, Is.Not.Zero);
+			}
+
+			Assert.That(books, Is.Not.Null);
+		}
+
+		[Test]
 		public void SelectJoinParentCondition()
 		{
 			var book = DbAccess.InsertWithSelect(new Book()

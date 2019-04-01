@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			QueryIdentifier sourceReference,
 			IQueryContainer container)
 		{
-			return DbAccessLayer.GetSelectableColumnsOf(dbClassInfoCache, null)
+			return DbAccessLayer.GetSelectableColumnsOf(dbClassInfoCache)
 				.Select(e =>
 				{
 					switch (container.AccessLayer.DbAccessType)

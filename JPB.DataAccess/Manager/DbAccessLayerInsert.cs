@@ -132,7 +132,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var propertyInfos = classInfo.FilterDbSchemaMapping(ignore).ToArray();
-			var csvprops = classInfo.CreatePropertyCsv(null, ignore);
+			var csvprops = classInfo.CreatePropertyCsv(ignore);
 			string query;
 
 			if (string.IsNullOrEmpty(csvprops))

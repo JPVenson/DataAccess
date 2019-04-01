@@ -382,7 +382,7 @@ namespace JPB.DataAccess.Manager
 		internal IDbCommand CreateSelectQueryFactory(DbClassInfoCache type,
 			params object[] parameter)
 		{
-			return CreateSelectQueryFactory(type, () => CreateSelect(type, $"[{type.TableName}]", Database), parameter);
+			return CreateSelectQueryFactory(type, () => CreateSelect(type, Database), parameter);
 		}
 
 		internal IDbCommand CreateInsertQueryFactory(DbClassInfoCache type,
@@ -639,19 +639,19 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="classType" />
 		/// </summary>
 		/// <returns></returns>
-		public static string CreateSelect(string source, DbClassInfoCache classType, string alias, string target)
+		public static string CreateSelect(string source, DbClassInfoCache classType, string target)
 		{
 			return CreateSelectByColumns(source,
-				GetSelectableColumnsOf(classType, alias).Aggregate((e, f) => e + ", " + f), alias, target);
+				GetSelectableColumnsOf(classType).Aggregate((e, f) => e + ", " + f), target);
 		}
 
 		/// <summary>
 		///     Gets a list of all columns that are selectable
 		/// </summary>
 		/// <returns></returns>
-		public static string[] GetSelectableColumnsOf(DbClassInfoCache classType, string alias)
+		public static string[] GetSelectableColumnsOf(DbClassInfoCache classType)
 		{
-			return classType.CreateProperties(alias,
+			return classType.CreateProperties(
 				classType
 					.Propertys
 					.Where(f => f.Value.ForginKeyAttribute != null ||
@@ -666,7 +666,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="source" />
 		/// </summary>
 		/// <returns></returns>
-		public static string CreateSelectByColumns(string source, string columns, string alias, string modifier)
+		public static string CreateSelectByColumns(string source, string columns, string modifier)
 		{
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
@@ -677,11 +677,11 @@ namespace JPB.DataAccess.Manager
 
 			sb.Append(columns);
 			sb.Append(" FROM ");
-			sb.Append($"[{source.TrimAlias()}] ");
-			if (alias != null)
-			{
-				sb.Append($"AS [{alias.TrimAlias()}] ");
-			}
+			sb.Append($"[{source}] ");
+			//if (alias != null)
+			//{
+			//	sb.Append($"AS [{alias}] ");
+			//}
 
 			return sb.ToString();
 		}
@@ -695,7 +695,7 @@ namespace JPB.DataAccess.Manager
 		public IDbCommand CreateSelect<T>()
 		{
 			var classInfo = Config.GetOrCreateClassInfoCache(typeof(T));
-			return CreateSelect(classInfo, $"[{classInfo.TableName}]", Database);
+			return CreateSelect(classInfo, Database);
 		}
 
 		/// <summary>
@@ -703,9 +703,9 @@ namespace JPB.DataAccess.Manager
 		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
-		private static IDbCommand CreateSelect(DbClassInfoCache type, string alias, IDatabase db)
+		private static IDbCommand CreateSelect(DbClassInfoCache type, IDatabase db)
 		{
-			return db.CreateCommand(CreateSelect(type.TableName, type, alias, null));
+			return db.CreateCommand(CreateSelect(type.TableName, type, null));
 		}
 
 		#endregion

@@ -58,17 +58,16 @@ namespace JPB.DataAccess.Query.QueryItems
 			return DbAccessLayerHelper.MergeQueryFactoryResult(true, 1, true, null, commands.ToArray());
 		}
 
-		class CteQueryPart : ISelectableQueryPart
+		public class CteQueryPart : ISelectableQueryPart
 		{
-			private readonly CteInfo _cteInfo;
-			private readonly IEnumerable<ColumnInfo> _columns;
+			public CteInfo CteInfo { get; }
 
 			public CteQueryPart(CteInfo cteInfo)
 			{
-				_cteInfo = cteInfo;
-				_columns = cteInfo.CteContentParts
+				CteInfo = cteInfo;
+				Columns = cteInfo.CteContentParts
 					.OfType<ISelectableQueryPart>()
-					.LastOrDefault()?
+					.FirstOrDefault(e => !(e is JoinTableQueryPart))?
 					.Columns;
 			}
 
@@ -79,16 +78,13 @@ namespace JPB.DataAccess.Query.QueryItems
 
 			public QueryIdentifier Alias
 			{
-				get { return _cteInfo.Name; }
+				get { return CteInfo.Name; }
 			}
 
 			public bool Distinct { get; set; }
 			public int? Limit { get; set; }
 
-			public IEnumerable<ColumnInfo> Columns
-			{
-				get { return _columns; }
-			}
+			public IEnumerable<ColumnInfo> Columns { get; }
 		}
 
 		public ISelectableQueryPart AddCte(CteInfo cteInfo)
