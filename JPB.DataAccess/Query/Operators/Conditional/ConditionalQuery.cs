@@ -88,19 +88,27 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath,
 			IQueryContainer container)
 		{
-			var columnInfos = container.SearchFirst<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
-				.Columns.ToArray();
-
 			var aliasPath = columnPath.Take(columnPath.Count - 1)
 				.Select(e => e.Value.PropertyName)
 				.Aggregate(columnPath.First().Key.TableName, (e, f) => e + "." + f);
 			var dbName = columnPath.LastOrDefault().Value.DbName;
 
-			var columnDefinitionPart = columnInfos
-				.FirstOrDefault(e =>
-					e.IsEquivalentTo(dbName) &&
-					e.Alias.Equals(container.SearchTableAlias(aliasPath)));
-
+			ColumnInfo columnDefinitionPart = null;
+			container
+				.SearchFirst<ISelectableQueryPart>(f => !(f is JoinTableQueryPart)
+				                                        && (columnDefinitionPart = f.Columns
+					                                        .FirstOrDefault(e =>
+						                                        e.IsEquivalentTo(
+							                                        dbName) &&
+						                                        e.Alias.Equals(
+							                                        container
+								                                        .SearchTableAlias(
+									                                        aliasPath)))) !=
+				                                        null);
+			if (columnDefinitionPart == null)
+			{
+				throw new InvalidOperationException();
+			}
 			return columnDefinitionPart;
 		}
 
