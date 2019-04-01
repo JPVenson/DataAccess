@@ -135,7 +135,7 @@
     <Compile Include="AdoWrapper\MsSqlProvider\MsSql.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataConverterPager.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlDataPager.cs" />
-    <Compile Include="AdoWrapper\MsSqlProvider\MsSqlPagerPart.cs" />
+    <Compile Include="AdoWrapper\MsSqlProvider\PaginationPart.cs" />
     <Compile Include="AdoWrapper\MsSqlProvider\MsSqlUntypedDataPager.cs" />
     <Compile Include="AdoWrapper\MultiValueDictionary.cs" />
     <Compile Include="AdoWrapper\ObjectDataRecord.cs" />
@@ -360,7 +360,6 @@
     <Compile Include="Query\Operators\Conditional\ConditionalEvalQuery.cs" />
     <Compile Include="Query\Operators\Conditional\ConditionalOperatorQuery.cs" />
     <Compile Include="Query\Operators\Conditional\ConditionalQuery.cs" />
-    <Compile Include="Query\Operators\Conditional\CondtionBuilderState.cs" />
     <Compile Include="Query\Operators\Conditional\Operator.cs" />
     <Compile Include="Query\Operators\CountElementsObjectSelector.cs" />
     <Compile Include="Query\Operators\DeleteQuery.cs" />

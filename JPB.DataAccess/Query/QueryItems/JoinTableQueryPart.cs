@@ -24,8 +24,8 @@ namespace JPB.DataAccess.Query.QueryItems
 		public DbPropertyInfoCache TargetProperty { get; set; }
 		public Type TargetTableType { get; set; }
 		public QueryIdentifier SourceTable { get; set; }
-		public string SourceColumnName { get; set; }
-		public string TargetColumnName { get; set; }
+		public ColumnInfo SourceColumnName { get; set; }
+		public ColumnInfo TargetColumnName { get; set; }
 		public QueryIdentifier Alias { get; set; }
 		public IList<JoinParseInfo> DependingJoins { get; set; }
 		public IEnumerable<ColumnInfo> Columns { get; set; }
@@ -40,33 +40,28 @@ namespace JPB.DataAccess.Query.QueryItems
 				DependingJoins = DependingJoins.Select(e => e.CloneTo(@alias)).ToArray(),
 				TargetTableType = TargetTableType,
 				SourceTable = SourceTable,
-				SourceColumnName = SourceColumnName,
-				TargetColumnName = TargetColumnName
+				SourceColumnName = new ColumnInfo(SourceColumnName.ColumnName, SourceColumnName, alias, SourceColumnName._container),
+				TargetColumnName = new ColumnInfo(TargetColumnName.ColumnName, TargetColumnName, alias, TargetColumnName._container)
 			};
 		}
 
-		public JoinParseInfo CloneForJoinTo(QueryIdentifier alias, 
-			IList<ColumnInfo> columnSource, 
+		public JoinParseInfo CloneForJoinTo(
+			QueryIdentifier alias,
+			IList<ColumnInfo> columnSource,
 			IEnumerable<ColumnInfo> originalColumnSource)
 		{
 			return new JoinParseInfo()
 			{
 				TargetProperty = TargetProperty,
 				Alias = @alias,
-				Columns = Columns
-					.Select(e =>
-					{
-						return columnSource.First(f => f.AliasOf.Equals(e));
-
-						//var matchingColumn = originalColumnSource.FirstOrDefault(f => f.IsEquivalentTo(e.ColumnName) && f.Alias.Equals(e.Alias));
-						//return columnSource.First(f => f.IsEquivalentTo(e.ColumnName));
-						//return new ColumnInfo(e.ColumnName, @alias, e._container);
-					}).ToArray(),
+				Columns = Columns.Select(e => columnSource.First(f => f.AliasOf.Equals(e))).ToArray(),
 				DependingJoins = DependingJoins.Select(e => e.CloneForJoinTo(@alias, columnSource, originalColumnSource)).ToArray(),
 				TargetTableType = TargetTableType,
 				SourceTable = @alias,
-				SourceColumnName = SourceColumnName,
-				TargetColumnName = TargetColumnName
+				SourceColumnName = Columns.FirstOrDefault(f => f.AliasOf?.Equals(SourceColumnName) == true) ?? SourceColumnName,
+				TargetColumnName = Columns.FirstOrDefault(f => f.AliasOf?.Equals(TargetColumnName) == true) ?? TargetColumnName
+				//SourceColumnName = SourceColumnName,
+				//TargetColumnName = TargetColumnName
 			};
 		}
 	}
@@ -75,24 +70,23 @@ namespace JPB.DataAccess.Query.QueryItems
 	{
 		public JoinParseInfo JoinParseInfo { get; private set; }
 
-		public string TargetColumn { get; }
-		public string SourceColumn { get; }
+		public ColumnInfo TargetColumn { get; }
+		public ColumnInfo SourceColumn { get; }
 
 		public JoinTableQueryPart(QueryIdentifier targetTable,
 			QueryIdentifier sourceTable,
 			QueryIdentifier joinAlias,
 			Type targetTargetTableType,
-			string targetColumn,
-			string sourceColumn,
-			IEnumerable<string> columns,
-			IQueryContainer queryContainer, 
+			ColumnInfo targetColumn,
+			ColumnInfo sourceColumn,
+			IEnumerable<ColumnInfo> columns,
 			DbPropertyInfoCache targetProperty)
 		{
 			TargetTable = targetTable;
 			SourceTable = sourceTable;
 			Alias = joinAlias;
 			TargetTableType = targetTargetTableType;
-			Columns = new List<ColumnInfo>(columns.Select(e => new ColumnInfo(e, Alias, queryContainer)));
+			Columns = columns;
 
 			TargetColumn = targetColumn;
 			SourceColumn = sourceColumn;
@@ -117,9 +111,9 @@ namespace JPB.DataAccess.Query.QueryItems
 		{
 			var joinBuilder = new StringBuilder();
 			joinBuilder.Append($"JOIN [{TargetTable.GetAlias()}] AS [{Alias.GetAlias()}]" +
-			                   $" ON [{Alias.GetAlias()}].[{TargetColumn}]" +
-			                   $" = " +
-			                   $"[{SourceTable.GetAlias()}].[{SourceColumn}]");
+							   $" ON [{Alias.GetAlias()}].[{TargetColumn.ColumnName.TrimAlias()}]" +
+							   $" = " +
+							   $"[{SourceTable.GetAlias()}].[{SourceColumn.ColumnName}]");
 			return new QueryFactoryResult(joinBuilder.ToString());
 		}
 

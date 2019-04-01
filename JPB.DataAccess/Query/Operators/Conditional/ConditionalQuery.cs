@@ -47,9 +47,9 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		public ConditionalEvalQuery<TPoco> InBracket(Func<ConditionalQuery<TPoco>, ConditionalEvalQuery<TPoco>> operation)
 		{
 			var expression = new ConditionStructurePart(ConditionStructurePart.LogicalOperator.OpenBracket);
-			ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(expression);
+			ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(expression);
 			var result = operation(this);
-			result.ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.CloseBracket));
+			result.ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.CloseBracket));
 			return result;
 		}
 
@@ -88,7 +88,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath,
 			IQueryContainer container)
 		{
-			var columnInfos = container.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
+			var columnInfos = container.SearchFirst<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Columns.ToArray();
 
 			var aliasPath = columnPath.Take(columnPath.Count - 1)
@@ -108,7 +108,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath)
 		{
 			var expression = new ExpressionConditionPart(TraversePropertyPathToColumn(columnPath, ContainerObject));
-			ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(expression);
+			ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(expression);
 
 			return new ConditionalColumnQuery<TPoco>(this, expression);
 		}

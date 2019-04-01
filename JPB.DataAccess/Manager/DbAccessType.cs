@@ -7,12 +7,12 @@
 	{
 		/// <summary>
 		///     For Developing
-		///     Not itend for your use!
+		///     Not intended for your use!
 		/// </summary>
 		Experimental = -1,
 
 		/// <summary>
-		///     default and undefined bevhaior
+		///     default and undefined behavior
 		/// </summary>
 		Unknown = 0,
 

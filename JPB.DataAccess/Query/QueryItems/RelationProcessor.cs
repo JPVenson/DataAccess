@@ -65,12 +65,25 @@ namespace JPB.DataAccess.Query.QueryItems
 				columnMapping.Add(indexOfSource.Key, indexOfSource.Value);
 			}
 
-			var primaryKeyOrdinal = sourceColumnsIndexMapping
-				.FirstOrDefault(f => f.Key == primaryKeyColumn)
+			var primaryKeyCache = sourceColumnsIndexMapping
+				.FirstOrDefault(f => f.Key.IsEqualsTo(primaryKeyColumn));
+
+			var targetColumnCache = sourceColumnsIndexMapping
+				.FirstOrDefault(f => f.Key.IsEqualsTo(targetColumn));
+
+			if (targetColumnCache.Key == null)
+			{
+				throw new InvalidOperationException();
+			}
+
+			if (primaryKeyCache.Key == null)
+			{
+				throw new InvalidOperationException();
+			}
+			var primaryKeyOrdinal = primaryKeyCache
 				.Value;
 
-			var targetColumnOrdinal = sourceColumnsIndexMapping
-					.FirstOrDefault(f => f.Key == targetColumn)
+			var targetColumnOrdinal = targetColumnCache
 					.Value;
 
 			var identifierNames = context.Columns.Select(e => e.ColumnIdentifier().TrimAlias())
@@ -115,13 +128,16 @@ namespace JPB.DataAccess.Query.QueryItems
 			var parentedReaders = new List<EagarDataRecord>();
 			var property = joinTableQueryPart.TargetProperty;
 
-			sourceColumn = context.Columns.FirstOrDefault(e =>
-				e.NaturalName.Equals(joinTableQueryPart.TargetColumnName) &&
-				e.Alias.Equals(joinTableQueryPart.Alias));
+			//sourceColumn = context.Columns.FirstOrDefault(e =>
+			//	e.NaturalName.Equals(joinTableQueryPart.TargetColumnName) &&
+			//	e.Alias.Equals(joinTableQueryPart.Alias));
 
-			targetColumn = context.Columns.FirstOrDefault(e =>
-				e.NaturalName.Equals(joinTableQueryPart.SourceColumnName) &&
-				e.Alias.Equals(joinTableQueryPart.SourceTable));
+			//targetColumn = context.Columns.FirstOrDefault(e =>
+			//	e.NaturalName.Equals(joinTableQueryPart.SourceColumnName) &&
+			//	e.Alias.Equals(joinTableQueryPart.SourceTable));
+
+			sourceColumn = joinTableQueryPart.TargetColumnName;
+			targetColumn = joinTableQueryPart.SourceColumnName;
 
 			if (sourceColumn == null)
 			{
@@ -215,8 +231,9 @@ namespace JPB.DataAccess.Query.QueryItems
 			EagarDataRecord naturalReader, 
 			int ordinal)
 		{
-			var joinedIndexOfSearch = relationRecordSource.FirstOrDefault()
-				.GetOrdinal(targetColumn.NaturalName);
+			var joinedIndexOfSearch = relationRecordSource
+				.FirstOrDefault()
+				.GetOrdinal(targetColumn.ColumnName);
 			
 			naturalReader.Add(virtualColumnName, relationRecordSource.Where(join =>
 			{

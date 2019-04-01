@@ -8,6 +8,26 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 {
 	public class ClassType
 	{
+		static ClassType()
+		{
+			_buildInTypes = new Dictionary<Type, string>();
+			_buildInTypes[typeof(bool)] = "bool";
+			_buildInTypes[typeof(byte)] = "byte";
+			_buildInTypes[typeof(sbyte)] = "sbyte";
+			_buildInTypes[typeof(char)] = "char";
+			_buildInTypes[typeof(decimal)] = "decimal";
+			_buildInTypes[typeof(double)] = "double";
+			_buildInTypes[typeof(float)] = "float";
+			_buildInTypes[typeof(int)] = "int";
+			_buildInTypes[typeof(uint)] = "uint";
+			_buildInTypes[typeof(long)] = "long";
+			_buildInTypes[typeof(ulong)] = "ulong";
+			_buildInTypes[typeof(short)] = "short";
+			_buildInTypes[typeof(ushort)] = "ushort";
+			_buildInTypes[typeof(string)] = "string";
+			_buildInTypes[typeof(object)] = "object";
+		}
+
 		public ClassType()
 		{
 			GenericTypes = new List<ClassType>();
@@ -29,8 +49,11 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			return name;
 		}
 
+		private static IDictionary<Type, string> _buildInTypes;
+
 		public static ClassType FromCsType(Type type)
 		{
+
 			var csType = new ClassType();
 			csType.IsNullable = Nullable.GetUnderlyingType(type) != null;
 			csType.GenericTypes = type.GetGenericArguments().Select(f => new ClassType
@@ -43,7 +66,14 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			}
 			else
 			{
-				csType.Name = type.Name;
+				if (_buildInTypes.ContainsKey(type))
+				{
+					csType.Name = _buildInTypes[type];
+				}
+				else
+				{
+					csType.Name = type.Name;
+				}
 			}
 
 			csType.IsList = type.CheckForListInterface();

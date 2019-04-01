@@ -38,10 +38,10 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public SelectQuery<TPoco> Distinct()
 		{
-			ContainerObject.Search<ISelectableQueryPart>().Distinct = true;
+			ContainerObject.SearchLast<ISelectableQueryPart>().Distinct = true;
 			return this;
 		}
-
+		
 		/// <summary>
 		///     Includes the forgin table
 		/// </summary>
@@ -88,7 +88,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			IQueryBuilder target = this;
 			var targetAlias = target.ContainerObject
-				.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
+				.SearchLast<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Alias;
 			JoinParseInfo parentJoinPart = null;
 			foreach (var keyValuePair in path)
@@ -115,8 +115,8 @@ namespace JPB.DataAccess.Query.Operators
 					Value = referencedTypeCache.TableName
 				};
 
-				string onSourceTableKey;
-				string selfPrimaryKey;
+				ColumnInfo onSourceTableKey;
+				ColumnInfo selfPrimaryKey;
 
 				var referenceColumn = keyValuePair.Value.ForginKeyAttribute?.Attribute;
 
@@ -129,16 +129,21 @@ namespace JPB.DataAccess.Query.Operators
 					                                    "Use a ForeignKeyDeclarationAttribute to connect both");
 				}
 
-				onSourceTableKey = referenceColumn.ReferenceKey;
-				selfPrimaryKey = referenceColumn.ForeignKey;
+				var targetTable = target.ContainerObject.Search(targetAlias);
 
-				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache);
 				var pathOfJoin = target.ContainerObject.GetPathOf(targetAlias) + "." +
-				        keyValuePair.Value.PropertyName;
+				                 keyValuePair.Value.PropertyName;
 				var parentAlias = target.ContainerObject
 					.CreateTableAlias(pathOfJoin);
 
-			
+				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache)
+					.Select(e => new ColumnInfo(e, parentAlias, ContainerObject))
+					.ToList();
+
+				selfPrimaryKey 
+					= targetTable.Columns.FirstOrDefault(e => e.IsEquivalentTo(referenceColumn.ForeignKey));
+				onSourceTableKey 
+					= forginColumns.FirstOrDefault(e => e.IsEquivalentTo(referenceColumn.ReferenceKey));
 
 				var joinTableQueryPart = new JoinTableQueryPart(
 					targetAliasOfJoin,
@@ -148,7 +153,6 @@ namespace JPB.DataAccess.Query.Operators
 					onSourceTableKey,
 					selfPrimaryKey,
 					forginColumns,
-					target.ContainerObject,
 					keyValuePair.Value);
 
 				if (parentJoinPart != null)
@@ -162,7 +166,7 @@ namespace JPB.DataAccess.Query.Operators
 
 				parentJoinPart = joinTableQueryPart.JoinParseInfo;
 
-				target.ContainerObject.Search<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
+				target.ContainerObject.SearchLast<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
 				target = target.Add(joinTableQueryPart);
 				targetAlias = parentAlias;
 			}

@@ -178,45 +178,73 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			if (_optionsIncludeInVsProject)
 			{
 				WinConsole.WriteLine("Update csproj file");
-				Console.WriteLine("Search for csproj file");
+				WinConsole.WriteLine("Search for csproj file");
 				var realPath = Path.GetFullPath(TargetDir)
 					.Split('\\');
+
 				for (var index = 0; index < realPath.Length; index++)
 				{
 					var fullPath = realPath.Take(realPath.Length - index).Aggregate((e, f) => e + "\\" + f);
-					Console.WriteLine($"Search in: '{fullPath}'");
+					WinConsole.WriteLine($"Search in: '{fullPath}'");
 					var hasCsProject = Directory.EnumerateFiles(fullPath, "*.csproj").FirstOrDefault();
 					if (!string.IsNullOrWhiteSpace(hasCsProject))
 					{
-						Console.WriteLine($"Found csproj file '{hasCsProject}'");
+						WinConsole.WriteLine($"Found csproj file '{hasCsProject}'");
 						using (var collection = new ProjectCollection())
 						{
 							var proj = collection.LoadProject(hasCsProject);
-							var csFiles = proj.Items.Where(e => e.ItemType == "Compile").ToArray();
-
 							var inProjectFolderName = TargetDir.Remove(0, fullPath.Length);
-
-							foreach (var projectItem in csFiles)
-							{
-								if (Path.GetDirectoryName(projectItem.EvaluatedInclude)
-									.Trim('\\').Equals(inProjectFolderName.Trim('\\')))
+							var modified = false;
+							var pocoFilesInProject = proj
+								.Items
+								.Where(e => e.ItemType == "Compile")
+								.Select(e =>
 								{
-									proj.RemoveItem(projectItem);
+									var path = Path.GetDirectoryName(e.EvaluatedInclude)
+										.Trim('\\');
+									return new
+									{
+										Item = e,
+										ScopeOfFolder = path.Equals(inProjectFolderName.Trim('\\')),
+										Path = e.EvaluatedInclude
+									};
+								})
+								.Where(e => e.ScopeOfFolder)
+								.ToDictionary(e => e.Path, e => e.Item);
+
+							var newElements = elements.Select(e =>
+								Path.Combine(inProjectFolderName.Trim('\\'), e.GetClassName() + ".cs"))
+								.ToArray();
+
+							foreach (var newElement in pocoFilesInProject)
+							{
+								if (newElements.Contains(newElement.Key))
+								{
+									continue;
 								}
+								proj.RemoveItem(newElement.Value);
+								modified = true;
 							}
 
 							foreach (var tableInfoModel in elements)
 							{
-								proj.AddItem("Compile",
-									Path.Combine(inProjectFolderName.Trim('\\'), tableInfoModel.GetClassName() + ".cs"));
+								var pathOfNew = Path.Combine(inProjectFolderName.Trim('\\'), tableInfoModel.GetClassName() + ".cs");
+								if (pocoFilesInProject.ContainsKey(pathOfNew))
+								{
+									continue;
+								}
+
+								proj.AddItem("Compile", pathOfNew);
+								modified = true;
 							}
 
-							proj.MarkDirty();
-
-							proj.Save(hasCsProject);
+							if (modified)
+							{
+								proj.MarkDirty();
+								proj.Save(hasCsProject);
+							}
 						}
-						
-						
+
 						break;
 					}
 				}

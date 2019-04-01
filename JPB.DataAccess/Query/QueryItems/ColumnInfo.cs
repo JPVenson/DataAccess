@@ -31,6 +31,21 @@ namespace JPB.DataAccess.Query.QueryItems
 				(AliasOf != null && AliasOf.IsEquivalentTo(columnName));
 		}
 
+		internal bool IsEqualsTo(ColumnInfo column)
+		{
+			if (column.AliasOf == column || AliasOf == column)
+			{
+				return true;
+			}
+			
+			if (column.IsEquivalentTo(ColumnName) && Alias.Equals(column.Alias))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
 		/// <summary>
 		/// 
 		/// </summary>

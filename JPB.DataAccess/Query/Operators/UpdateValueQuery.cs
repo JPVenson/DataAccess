@@ -47,7 +47,7 @@ namespace JPB.DataAccess.Query.Operators
 		{
 			_columnAssignment.Value = value;
 			_columnAssignment.QueryParameters.AddRange(arguments);
-			_queryBuilder.ContainerObject.Search<UpdateTableWithQueryPart>()
+			_queryBuilder.ContainerObject.SearchLast<UpdateTableWithQueryPart>()
 				.ColumnAssignments
 				.Add(_columnAssignment);
 			return new NextUpdateOrCondtionQuery<TPoco>(_queryBuilder);

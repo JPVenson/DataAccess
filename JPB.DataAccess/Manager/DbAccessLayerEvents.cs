@@ -16,6 +16,12 @@ namespace JPB.DataAccess.Manager
 		public bool RaiseEvents { get; set; }
 
 		/// <summary>
+		///		Can be used in conjunction with the <seealso cref="RaiseEvents"/> flag. If set to true events will be invoked async
+		///		Default is True
+		/// </summary> 
+		public bool RaiseEventsAsync { get; set; } = true;
+
+		/// <summary>
 		///     Will be triggerd when any DbAccessLayer detects an invalid Query that failed on the server
 		///     Will only be triggerd when setting RaiseEvents to true
 		/// </summary>
@@ -62,7 +68,7 @@ namespace JPB.DataAccess.Manager
 
 			if (handler != null)
 			{
-				if (Async && !ThreadSave)
+				if (Async && !ThreadSave && RaiseEventsAsync)
 				{
 					var eventListeners = handler.GetInvocationList();
 					foreach (var t in eventListeners)

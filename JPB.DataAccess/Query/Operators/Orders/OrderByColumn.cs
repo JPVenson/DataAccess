@@ -3,6 +3,9 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using JPB.DataAccess.AdoWrapper.MsSqlProvider;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems;
@@ -34,9 +37,43 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		{
 			get
 			{
-				ContainerObject.Search<OrderByColumnQueryPart>().Descending = true;
+				ContainerObject.SearchLast<OrderByColumnQueryPart>().Descending = true;
 				return new OrderByColumn<TPoco>(this);
 			}
+		}
+
+		/// <summary>
+		///     Executes the Current QueryBuilder by setting the type
+		/// </summary>
+		/// <param name="page">The page.</param>
+		/// <param name="pageSize">Size of the page.</param>
+		/// <returns></returns>
+		public IDataPager<TPoco> ForPagedResult(int page, int pageSize)
+		{
+			if (ContainerObject.SearchLast<OrderByColumnQueryPart>() == null)
+			{
+				throw new InvalidOperationException("To use the Pagination you have to define an Order.By()");
+			}
+
+			var pager = ContainerObject.AccessLayer.Database.CreatePager<TPoco>();
+			pager.CommandQuery = this;
+			pager.PageSize = pageSize;
+			pager.CurrentPage = page;
+			pager.LoadPage(ContainerObject.AccessLayer);
+			return pager;
+		}
+
+		/// <summary>
+		///		Returns a Query that is will skip N items and return M items
+		/// </summary>
+		/// <returns></returns>
+		public OrderByColumn<TPoco> AsPagedQuery(int page, int pageSize)
+		{
+			return new OrderByColumn<TPoco>(Add(new PaginationPart()
+			{
+				Page = page,
+				PageSize = pageSize
+			}));
 		}
 
 		/// <summary>
@@ -60,7 +97,7 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> ThenBy(string columnName)
 		{
-			var columnInfos = ContainerObject.Search<ISelectableQueryPart>()
+			var columnInfos = ContainerObject.SearchLast<ISelectableQueryPart>()
 				.Columns.ToArray();
 			var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
 			if (columnDefinitionPart == null)
@@ -68,7 +105,7 @@ namespace JPB.DataAccess.Query.Operators.Orders
 				throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
 			}
 
-			ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
+			ContainerObject.SearchLast<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
 			return new OrderByColumn<TPoco>(this);
 		}
 

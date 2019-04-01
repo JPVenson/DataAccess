@@ -8,6 +8,7 @@ using JPB.DataAccess.Manager;
 using System.Collections;
 using System.Data;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Orders;
 
 namespace JPB.DataAccess.Oracle
 {
@@ -27,11 +28,7 @@ namespace JPB.DataAccess.Oracle
             LastID = -1;
             SyncHelper = action => action();
         }
-
-        public List<IDbCommand> AppendedComands { get; set; }
-
-        public IDbCommand BaseQuery { get; set; }
-
+        
         public bool Cache
         {
             get { return _cache; }
@@ -61,7 +58,7 @@ namespace JPB.DataAccess.Oracle
         }
 
         public virtual ICollection<T> CurrentPageItems { get; protected set; }
-        public IElementProducer<T> CommandQuery { get; set; }
+        public OrderByColumn<T> CommandQuery { get; set; }
 
         public int MaxPage { get; private set; }
 
@@ -113,7 +110,6 @@ namespace JPB.DataAccess.Oracle
 
         public void Dispose()
         {
-            BaseQuery.Dispose();
             CurrentPageItems.Clear();
         }
 

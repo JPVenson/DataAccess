@@ -86,6 +86,7 @@
     <Compile Include="SqLiteDataConverterPager.cs" />
     <Compile Include="SqLiteDataPager.cs" />
     <Compile Include="SqLiteInteroptWrapper.cs" />
+    <Compile Include="SqLitePagerPart.cs" />
     <Compile Include="SqLiteUntypedDataPager.cs" />
     <Compile Include="SqLite.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

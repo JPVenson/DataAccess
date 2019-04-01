@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Orders;
 
 #endregion
 
@@ -51,14 +52,14 @@ namespace JPB.DataAccess.Contacts.Pager
 		///     Typed list of all Elements
 		/// </summary>
 		ICollection<T> CurrentPageItems { get; }
-		
+
 		/// <summary>
 		///     For Advanced querys including Order statements
 		/// </summary>
 		/// <value>
 		///     The command query.
 		/// </value>
-		IElementProducer<T> CommandQuery { get; set; }
+		OrderByColumn<T> CommandQuery { get; set; }
 
 		/// <summary>
 		///     Loads the PageSize into CurrentPageItems

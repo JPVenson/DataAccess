@@ -15,38 +15,9 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IConditionalEvalQuery{TPoco}" />
 	public class ConditionalEvalQuery<TPoco> : ElementResultQuery<TPoco>, IConditionalEvalQuery<TPoco>
 	{
-		/// <summary>
-		///     The current query state
-		/// </summary>
-		public CondtionBuilderState State { get; private set; }
-
-		/// <summary>
-		///     Initializes a new instance of the <see cref="ConditionalEvalQuery{TPoco}" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		public ConditionalEvalQuery(ConditionalEvalQuery<TPoco> database) : base(database)
-		{
-			State = database.State;
-		}
-
 		/// <inheritdoc />
 		public ConditionalEvalQuery(IQueryBuilder builder) : base(builder)
 		{
-			State = new CondtionBuilderState(null);
-			if (builder is IStateQuery)
-			{
-				State = ((IStateQuery)builder).State;
-			}
-		}
-
-		/// <summary>
-		///     Initializes a new instance of the <see cref="ConditionalEvalQuery{TPoco}" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		/// <param name="state">The state.</param>
-		public ConditionalEvalQuery(IQueryBuilder database, CondtionBuilderState state) : base(database)
-		{
-			State = state;
 		}
 
 		/// <summary>
@@ -57,7 +28,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			get
 			{
-				ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.And));
+				ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.And));
 				return new ConditionalQuery<TPoco>(this);
 			}
 		}
@@ -70,7 +41,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			get
 			{
-				ContainerObject.Search<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.Or));
+				ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.Or));
 				return new ConditionalQuery<TPoco>(this);
 			}
 		}

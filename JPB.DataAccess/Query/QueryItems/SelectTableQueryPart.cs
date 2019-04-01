@@ -50,7 +50,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			_joins = new List<JoinParseInfo>();
 
 			_columns = source.Columns
-				.Select(e => new ColumnInfo(e.ColumnIdentifier().TrimAlias(), e, Alias, queryContainer)).ToArray();
+				.Select(e => new ColumnInfo(e.ColumnIdentifier().TrimAlias(), e, Alias, queryContainer)).ToList();
 			
 			if (source is CteDefinitionQueryPart.CteQueryPart cte)
 			{

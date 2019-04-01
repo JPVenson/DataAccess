@@ -140,7 +140,7 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public DeleteQuery<T> Delete<T>()
 		{
-			ContainerObject.PostProcessors
+			ContainerObject.Interceptors
 				.Add(new EventPostProcessor(EventPostProcessor.EventType.Delete, ContainerObject.AccessLayer));
 			var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
 			return new DeleteQuery<T>(
@@ -158,7 +158,7 @@ namespace JPB.DataAccess.Query.Operators
 			cteName = newQuery.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
 			(commandQuery.ContainerObject as IQueryContainerValues)?.TableAlias.Clear();
 
-			var cteQueryPart = commandQuery.ContainerObject.Search<CteDefinitionQueryPart>();
+			var cteQueryPart = commandQuery.ContainerObject.SearchLast<CteDefinitionQueryPart>();
 			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()));
 
 			var cteInfo = new CteDefinitionQueryPart.CteInfo();
@@ -178,7 +178,7 @@ namespace JPB.DataAccess.Query.Operators
 		}
 	}
 
-	internal class EventPostProcessor : EntityProcessorBase
+	internal class EventPostProcessor : IQueryCommandInterceptor
 	{
 		private readonly EventType _handler;
 		private readonly DbAccessLayer _source;
@@ -198,7 +198,8 @@ namespace JPB.DataAccess.Query.Operators
 			_source = source;
 		}
 
-		public override IDbCommand BeforeExecution(IDbCommand command)
+
+		public IDbCommand QueryExecuting(IDbCommand command)
 		{
 			switch (_handler)
 			{
@@ -220,7 +221,33 @@ namespace JPB.DataAccess.Query.Operators
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-			return base.BeforeExecution(command);
+			return command;
+		}
+
+		public IDbCommand NonQueryExecuting(IDbCommand command)
+		{
+			switch (_handler)
+			{
+				case EventType.Select:
+					_source.RaiseSelect(command);
+					break;
+				case EventType.Insert:
+					_source.RaiseInsert(this, command);
+					break;
+				case EventType.Delete:
+					_source.RaiseDelete(this, command);
+					break;
+				case EventType.Update:
+					_source.RaiseUpdate(this, command);
+					break;
+				case EventType.Non:
+					_source.RaiseNoResult(this, command);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			return command;
 		}
 	}
 }

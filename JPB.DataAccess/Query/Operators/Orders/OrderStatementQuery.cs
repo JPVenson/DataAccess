@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Query.Operators.Orders
 			var columnDefinitionPart =
 				ConditionalQuery<TPoco>.TraversePropertyPathToColumn(columnPath, _queryBuilder.ContainerObject);
 
-			_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
+			_queryBuilder.ContainerObject.SearchLast<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
 			return new OrderByColumn<TPoco>(_queryBuilder);
 		}
 
@@ -52,23 +52,6 @@ namespace JPB.DataAccess.Query.Operators.Orders
 				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
 					.Propertys[columnName]),
 			});
-
-			//return CreateByPath(new []
-			//{
-			//	new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(), 
-			//})
-
-			//var columnInfos = _queryBuilder.ContainerObject
-			//	.Search<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
-			//	.Columns.ToArray();
-			//var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
-			//if (columnDefinitionPart == null)
-			//{
-			//	throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
-			//}
-
-			//_queryBuilder.ContainerObject.Search<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
-			//return new OrderByColumn<TPoco>(_queryBuilder);
 		}
 
 		/// <summary>
@@ -89,10 +72,6 @@ namespace JPB.DataAccess.Query.Operators.Orders
 						dbClassInfoCache.Propertys[e.Name]);
 				})
 				.ToArray());
-
-			//var member = columnName.GetPropertyInfoFromLamdba();
-			//var propName = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
-			//return By(propName.DbName);
 		}
 	}
 }

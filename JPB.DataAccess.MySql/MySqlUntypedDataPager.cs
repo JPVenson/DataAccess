@@ -14,6 +14,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Query.Operators.Orders;
 
 #endregion
 
@@ -79,7 +80,7 @@ namespace JPB.DataAccess.MySql
 		/// <value>
 		///     The command query.
 		/// </value>
-		public IElementProducer<T> CommandQuery { get; set; }
+		public OrderByColumn<T> CommandQuery { get; set; }
 
 		/// <summary>
 		///     Not Implimented
@@ -201,71 +202,23 @@ namespace JPB.DataAccess.MySql
 
 		public virtual void LoadPage(DbAccessLayer dbAccess)
 		{
-			T[] selectWhere = null;
-			IDbCommand finalAppendCommand;
-			if (AppendedComands.Any())
-			{
-				if (BaseQuery == null)
-				{
-					BaseQuery = dbAccess.CreateSelect<T>();
-				}
-
-				finalAppendCommand = AppendedComands.Aggregate(BaseQuery,
-					(current, comand) => dbAccess.Database.MergeTextToParameters(new[] { current, comand }));
-			}
-			else
-			{
-				if (BaseQuery == null)
-				{
-					BaseQuery = dbAccess.CreateSelect<T>();
-				}
-
-				finalAppendCommand = BaseQuery;
-			}
-
 			SyncHelper(CurrentPageItems.Clear);
-
-			var selectMaxCommand = dbAccess.Database.MergeTextToParameters(new[]
-			{
-				dbAccess.Database.CreateCommand("WITH CTE ("),
-				finalAppendCommand,
-				dbAccess.Database.CreateCommand(") SELECT COUNT(*) FROM CTE"),
-			});
-
-			var maxItems = dbAccess.RunPrimetivSelect(typeof(long), selectMaxCommand).FirstOrDefault();
-			if (maxItems != null)
-			{
-				long parsedCount;
-				long.TryParse(maxItems.ToString(), out parsedCount);
-				TotalItemCount = parsedCount;
-				MaxPage = (int)Math.Ceiling((decimal)parsedCount / PageSize);
-			}
+			TotalItemCount = CommandQuery.CountInt().FirstOrDefault();
+			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 			RaiseNewPageLoading();
-			IDbCommand command = dbAccess.Database.MergeTextToParameters(new[]
-			{
-				dbAccess.Database.CreateCommand("WITH CTE ("),
-				finalAppendCommand,
-				dbAccess.Database.CreateCommand(") SELECT COUNT(*) FROM CTE"),
-				dbAccess.Database.CreateCommandWithParameterValues("ASC LIMIT @PageSize OFFSET @PagedRows",
-					new []
-					{
-						new QueryParameter("@PagedRows", (CurrentPage - 1) * PageSize),
-						new QueryParameter("@PageSize", PageSize),
-					}),
-			});
+			var elements = new SelectQuery<T>(dbAccess.Query()
+					.WithCte(new ElementProducer<T>(CommandQuery
+							.AsPagedQuery(CurrentPage, PageSize)),
+						out var commandCte)
+					.Select
+					.Identifier<T>(commandCte))
+				.ToArray();
 
-			selectWhere = dbAccess.SelectNative(typeof(T), command, true).Cast<T>().ToArray();
-
-			foreach (T item in selectWhere)
+			foreach (var item in elements)
 			{
 				var item1 = item;
 				SyncHelper(() => CurrentPageItems.Add(item1));
-			}
-
-			if (CurrentPage > MaxPage)
-			{
-				CurrentPage = MaxPage;
 			}
 
 			RaiseNewPageLoaded();

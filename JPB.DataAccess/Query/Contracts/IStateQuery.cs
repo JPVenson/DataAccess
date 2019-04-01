@@ -7,9 +7,5 @@ namespace JPB.DataAccess.Query.Contracts
 	/// </summary>
 	public interface IStateQuery
 	{
-		/// <summary>
-		///		The current Query state
-		/// </summary>
-		CondtionBuilderState State { get; }
 	}
 }

@@ -14,15 +14,12 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
-using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
-using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
-using JPB.DataAccess.Query.QueryItems;
-using JPB.DataAccess.QueryFactory;
+using JPB.DataAccess.Query.Operators.Orders;
 
 namespace JPB.DataAccess.SqLite
 {
@@ -94,7 +91,7 @@ namespace JPB.DataAccess.SqLite
 		public long TotalItemCount { get; private set; }
 
 		public ICollection<T> CurrentPageItems { get; protected set; }
-		public IElementProducer<T> CommandQuery { get; set; }
+		public OrderByColumn<T> CommandQuery { get; set; }
 		public void LoadPage(DbAccessLayer dbAccess)
 		{
 			SyncHelper(CurrentPageItems.Clear);
@@ -104,11 +101,8 @@ namespace JPB.DataAccess.SqLite
 			RaiseNewPageLoading();
 			var elements = new SelectQuery<T>(dbAccess.Query()
 					.WithCte(new ElementProducer<T>(CommandQuery
-						.Add(new SqLitePagerPart
-						{
-							Page = CurrentPage,
-							PageSize = PageSize
-						})), out var commandCte)
+							.AsPagedQuery(CurrentPage, PageSize)),
+						out var commandCte)
 					.Select
 					.Identifier<T>(commandCte))
 				.ToArray();
@@ -170,18 +164,5 @@ namespace JPB.DataAccess.SqLite
 		{
 			CurrentPageItems.Clear();
 		}
-	}
-
-	public class SqLitePagerPart : IQueryPart
-	{
-		public IQueryFactoryResult Process(IQueryContainer container)
-		{
-			return new QueryFactoryResult("LIMIT @PageSize OFFSET @PagedRows",
-				new QueryParameter("@PagedRows", (Page - 1) * PageSize),
-				new QueryParameter("@PageSize", PageSize));
-		}
-
-		public int Page { get; set; }
-		public int PageSize { get; set; }
 	}
 }

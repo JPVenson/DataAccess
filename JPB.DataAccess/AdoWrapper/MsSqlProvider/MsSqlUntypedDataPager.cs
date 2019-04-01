@@ -13,6 +13,7 @@ using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Query.Operators.Orders;
 
 #endregion
 
@@ -66,7 +67,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// <value>
 		///     The command query.
 		/// </value>
-		public IElementProducer<T> CommandQuery { get; set; }
+		public OrderByColumn<T> CommandQuery { get; set; }
 
 		/// <summary>
 		///     Not Implimented
@@ -162,11 +163,8 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			RaiseNewPageLoading();
 			var elements = new SelectQuery<T>(dbAccess.Query()
 					.WithCte(new ElementProducer<T>(CommandQuery
-						.Add(new MsSqlPagerPart
-						{
-							Page = CurrentPage,
-							PageSize = PageSize
-						})), out var commandCte)
+							.AsPagedQuery(CurrentPage, PageSize)),
+						out var commandCte)
 					.Select
 					.Identifier<T>(commandCte))
 				.ToArray();

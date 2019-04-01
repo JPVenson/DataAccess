@@ -134,10 +134,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 								object contvertedValue = value;
 								if (!isNumm)
 								{
-									DataConverterExtensions.ChangeType(ref contvertedValue, dbPropertyInfoCache.PropertyType);
+									if (DataConverterExtensions.ChangeType(ref contvertedValue,
+										dbPropertyInfoCache.PropertyType))
+									{
+										dbPropertyInfoCache.Setter.Invoke(emptyElement, contvertedValue);
+									}
 								}
-
-								dbPropertyInfoCache.Setter.Invoke(emptyElement, contvertedValue);
 							} while (reader.Name != table.TypeInfo.TableName);
 							reader.ReadEndElement();
 

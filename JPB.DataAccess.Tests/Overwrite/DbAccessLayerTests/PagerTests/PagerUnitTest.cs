@@ -28,7 +28,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", UsersMeta.TableName))).ToString());
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
-			using (var pager = DbAccess.Query().Select.Table<Users>().ForPagedResult(1, 25))
+			using (var pager = DbAccess.Query().Select.Table<Users>().Order.By(e => e.UserID).ForPagedResult(1, 25))
 			{
 				Assert.That(pager, Is.Not.Null);
 
@@ -88,7 +88,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
 
 			using (var pager = DbAccess.Query().Select.Table<Users>().Where.Column(f => f.UserID).Is
-				.EqualsTo(testUsers[0]).ForPagedResult(1, 1))
+				.EqualsTo(testUsers[0]).Order.By(e => e.UserID).ForPagedResult(1, 1))
 			{
 				Assert.That(pager, Is.Not.Null);
 

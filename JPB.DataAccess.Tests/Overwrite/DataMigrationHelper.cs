@@ -23,8 +23,9 @@ namespace JPB.DataAccess.Tests.Overwrite
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", ImageMeta.TableName), null);
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", BookMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
-				mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", ImageMeta.TableName), null);
+				//mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", ImageMeta.TableName), null);
+				//mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
+				//mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", BookMeta.TableName), null);
 			}
 
 			if (mgr.DbAccessType == DbAccessType.SqLite)

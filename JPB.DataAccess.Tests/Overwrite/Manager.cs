@@ -16,6 +16,14 @@ namespace JPB.DataAccess.Tests.Overwrite
 {
 	public class Manager : IManager
 	{
+		private readonly IDictionary<DbAccessType, Func<IManagerImplementation>> _managers;
+
+		private readonly StringBuilder _errorData;
+
+		private readonly List<KeyValuePair<string, string>> _querys = new List<KeyValuePair<string, string>>();
+
+		private IManagerImplementation _selectedMgr;
+
 		public Manager()
 		{
 			_errorData = new StringBuilder();
@@ -26,12 +34,6 @@ namespace JPB.DataAccess.Tests.Overwrite
 			AllTestContextHelper.TestSetup(null);
 		}
 
-		private readonly IDictionary<DbAccessType, Func<IManagerImplementation>> _managers;
-
-		private StringBuilder _errorData;
-
-		private IManagerImplementation _selectedMgr;
-
 		public DbAccessLayer GetWrapper(DbAccessType type, params object[] additionalArguments)
 		{
 			DbAccessLayer expectWrapper = null;
@@ -39,9 +41,10 @@ namespace JPB.DataAccess.Tests.Overwrite
 			_errorData.AppendLine("Found " + type);
 
 			Assert.That(new DbConfig().SClassInfoCaches, Is.Empty, () => "The Global Class cache is not empty");
-			var testClassName = TestContext.CurrentContext.Test.ClassName.Replace(typeof(Manager).Namespace, "").Where(e => char.IsUpper(e)).Select(e => e.ToString())
-			                               .Aggregate((e, f) => e + f) + "." +
-			                    TestContext.CurrentContext.Test.MethodName;
+			var testClassName = TestContext.CurrentContext.Test.ClassName.Replace(typeof(Manager).Namespace, "")
+									.Where(e => char.IsUpper(e)).Select(e => e.ToString())
+									.Aggregate((e, f) => e + f) + "." +
+								TestContext.CurrentContext.Test.MethodName;
 
 			testClassName = testClassName + "_" + Guid.NewGuid().ToString("N");
 			testClassName = new Regex("[^a-zA-Z0-9]").Replace(testClassName, "_");
@@ -52,40 +55,35 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 
 			expectWrapper.RaiseEvents = true;
+			expectWrapper.RaiseEventsAsync = false;
 			expectWrapper.OnSelect += (sender, eventArg) =>
-			                          {
-				                          _errorData.AppendFormat(@"SELECT: \r\n{0}", eventArg.QueryDebugger);
-				                          _errorData.AppendLine();
-			                          };
+			{
+				_querys.Add(new KeyValuePair<string, string>("SELECT", eventArg.QueryDebugger.ToString()));
+			};
 
 			expectWrapper.OnDelete += (sender, eventArg) =>
-			                          {
-				                          _errorData.AppendFormat(@"DELETE: \r\n{0}", eventArg.QueryDebugger);
-				                          _errorData.AppendLine();
-			                          };
+			{
+				_querys.Add(new KeyValuePair<string, string>("DELETE", eventArg.QueryDebugger.ToString()));
+			};
 
 			expectWrapper.OnInsert += (sender, eventArg) =>
-			                          {
-				                          _errorData.AppendFormat(@"INSERT: \r\n{0}", eventArg.QueryDebugger);
-				                          _errorData.AppendLine();
-			                          };
+			{
+				_querys.Add(new KeyValuePair<string, string>("INSERT", eventArg.QueryDebugger.ToString()));
+			};
 
 			expectWrapper.OnUpdate += (sender, eventArg) =>
-			                          {
-				                          _errorData.AppendFormat(@"UPDATE: \r\n{0}", eventArg.QueryDebugger);
-				                          _errorData.AppendLine();
-			                          };
+			{
+				_querys.Add(new KeyValuePair<string, string>("UPDATE", eventArg.QueryDebugger.ToString()));
+			};
 
 			expectWrapper.OnNonResultQuery += (sender, eventArg) =>
-			                          {
-										  _errorData.AppendFormat(@"Query: \r\n{0}", eventArg.QueryDebugger);
-				                          _errorData.AppendLine();
-			                          };
+			{
+				_querys.Add(new KeyValuePair<string, string>("Query", eventArg.QueryDebugger.ToString()));
+			};
 
 			expectWrapper.OnFailedQuery += (sender, eventArg, exception) =>
 			{
-				_errorData.AppendFormat(@"Query Failed: \r\n{0}\r\n{1}", eventArg.QueryDebugger, exception);
-				_errorData.AppendLine();
+				_querys.Add(new KeyValuePair<string, string>("Query Failed", eventArg.QueryDebugger.ToString()));
 			};
 
 			Assert.NotNull(expectWrapper, "This test cannot run as no Database Variable is defined");
@@ -98,6 +96,14 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 		public void FlushErrorData()
 		{
+			_querys.Reverse();
+			foreach (var keyValuePair in _querys)
+			{
+				_errorData.AppendLine($"{keyValuePair.Key}");
+				_errorData.AppendLine($"{keyValuePair.Value}");
+				_errorData.AppendLine();
+			}
+
 			TestContext.Error.WriteLine(_errorData.ToString());
 			_errorData.Clear();
 

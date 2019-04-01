@@ -35,7 +35,7 @@ namespace JPB.DataAccess.Query.Operators
 		[MustUseReturnValue]
 		public ConditionalEvalQuery<TEntity> Entity<TEntity>(TEntity obj)
 		{
-			ContainerObject.PostProcessors
+			ContainerObject.Interceptors
 				.Add(new EventPostProcessor(EventPostProcessor.EventType.Update, ContainerObject.AccessLayer));
 			var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TEntity));
 			var targetAlias = ContainerObject.CreateTableAlias(dbClassInfoCache.TableName);
@@ -109,6 +109,17 @@ namespace JPB.DataAccess.Query.Operators
 				Value = dbClassInfoCache.TableName,
 				QueryIdType = QueryIdentifier.QueryIdTypes.Table
 			};
+
+			switch (ContainerObject.AccessLayer.DbAccessType)
+			{
+				case DbAccessType.Experimental:
+				case DbAccessType.Unknown:
+				case DbAccessType.OleDb:
+				case DbAccessType.Obdc:
+				case DbAccessType.SqLite:
+					targetAlias.Value = queryIdentifier.Value;
+					break;
+			}
 			return new UpdateColumnSetters<TPoco>(
 				Add(new UpdateTableWithQueryPart(
 					queryIdentifier,

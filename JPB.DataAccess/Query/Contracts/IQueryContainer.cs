@@ -225,14 +225,21 @@ namespace JPB.DataAccess.Query.Contracts
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		T Search<T>() where T : IQueryPart;
+		T SearchLast<T>() where T : IQueryPart;
 
 		/// <summary>
 		///		Searches in the Parts collection for the nearest occurence of this Query Part
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		T Search<T>(Func<T, bool> filter) where T : IQueryPart;
+		T SearchLast<T>(Func<T, bool> filter) where T : IQueryPart;
+
+		/// <summary>
+		///		Searches in the Parts collection for the nearest occurence of this Query Part
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		T SearchFirst<T>(Func<T, bool> filter) where T : IQueryPart;
 
 		/// <summary>
 		///		Searches in the Parts collection for an identifier

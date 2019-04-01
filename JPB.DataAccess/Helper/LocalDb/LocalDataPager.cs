@@ -9,6 +9,7 @@ using System.Linq;
 using JPB.DataAccess.Contacts.Pager;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Orders;
 
 #endregion
 
@@ -78,7 +79,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 		public ICollection<T> CurrentPageItems { get; private set; }
 
 		/// <inheritdoc />
-		public IElementProducer<T> CommandQuery { get; set; }
+		public OrderByColumn<T> CommandQuery { get; set; }
 
 		/// <summary>
 		///     The last possible Page

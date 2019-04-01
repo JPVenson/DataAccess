@@ -50,7 +50,7 @@ namespace JPB.DataAccess.Query.Operators
             switch (ContainerObject.AccessLayer.DbAccessType)
             {
                 case DbAccessType.MsSql:
-                    ContainerObject.Search<ISelectableQueryPart>().Limit = limit;
+                    ContainerObject.SearchLast<ISelectableQueryPart>().Limit = limit;
                     break;
 
                 case DbAccessType.SqLite:
@@ -94,27 +94,6 @@ namespace JPB.DataAccess.Query.Operators
         public IEnumerable<TPoco> ForResult(bool async = true)
         {
             return new QueryEnumeratorEx<TPoco>(this, async);
-        }
-
-        /// <summary>
-        ///     Executes the Current QueryBuilder by setting the type
-        /// </summary>
-        /// <param name="page">The page.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <returns></returns>
-        public IDataPager<TPoco> ForPagedResult(int page, int pageSize)
-        {
-            if (ContainerObject.Search<OrderByColumnQueryPart>() == null)
-            {
-                throw new InvalidOperationException("To use the Pagination you have to define an Order.By()");
-            }
-
-            var pager = ContainerObject.AccessLayer.Database.CreatePager<TPoco>();
-            pager.CommandQuery = this;
-            pager.PageSize = pageSize;
-            pager.CurrentPage = page;
-            pager.LoadPage(ContainerObject.AccessLayer);
-            return pager;
         }
 
         private class QueryBuilderContainerDebugView : ElementResultQuery<TPoco>

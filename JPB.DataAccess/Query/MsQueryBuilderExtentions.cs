@@ -66,7 +66,7 @@ namespace JPB.DataAccess.Query
 			IQueryBuilder newQuery = new RootQuery(query.ContainerObject.AccessLayer);
 			//in case there is a grouping in the query, we must use a SubQuery
 
-			var ordering = query.ContainerObject.Search<OrderByColumnQueryPart>();
+			var ordering = query.ContainerObject.SearchLast<OrderByColumnQueryPart>();
 
 			var cteName = query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
 			var item = new CteDefinitionQueryPart.CteInfo()
@@ -75,7 +75,7 @@ namespace JPB.DataAccess.Query
 			};
 			item.CteContentParts.AddRange(query.ContainerObject.Parts.Except(new IQueryPart[] { ordering }).ToArray());
 
-			var cteQueryPart = query.ContainerObject.Search<CteDefinitionQueryPart>();
+			var cteQueryPart = query.ContainerObject.SearchLast<CteDefinitionQueryPart>();
 			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()))
 				.Add(cteQueryPart.AddCte(item));
 

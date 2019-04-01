@@ -183,15 +183,21 @@ namespace JPB.DataAccess.Query
 		}
 
 		/// <inheritdoc />
-		public T Search<T>() where T : IQueryPart
+		public T SearchLast<T>() where T : IQueryPart
 		{
 			return Parts.OfType<T>().LastOrDefault();
 		}
 
 		/// <inheritdoc />
-		public T Search<T>(Func<T, bool> filter) where T : IQueryPart
+		public T SearchFirst<T>(Func<T, bool> filter) where T : IQueryPart
 		{
 			return Parts.OfType<T>().FirstOrDefault(filter);
+		}
+
+		/// <inheritdoc />
+		public T SearchLast<T>(Func<T, bool> filter) where T : IQueryPart
+		{
+			return Parts.OfType<T>().LastOrDefault(filter);
 		}
 
 		/// <inheritdoc />
