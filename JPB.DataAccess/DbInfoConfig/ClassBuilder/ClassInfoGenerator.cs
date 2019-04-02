@@ -1,19 +1,26 @@
 ﻿using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 
-#pragma warning disable 1591
-
 namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 {
+	/// <summary>
+	///		Creates POCO entities for ORM Usage
+	/// </summary>
 	public class ClassInfoGenerator
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		public ClassInfoGenerator()
 		{
 			NamespaceImports = new HashSet<string>();
@@ -22,26 +29,82 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			Attributes = new List<AttributeInfo>();
 		}
 
+		/// <summary>
+		///		Defines the list of Namespaces that must be imported
+		/// </summary>
 		public HashSet<string> NamespaceImports { get; set; }
+
+		/// <summary>
+		///		Sets or gets the Namespace this POCO is in
+		/// </summary>
 		public string Namespace { get; set; }
+
+		/// <summary>
+		///		Sets or gets the name of this class
+		/// </summary>
 		public string ClassName { get; set; }
+
+		/// <summary>
+		///		Gets or Sets the list of all properties
+		/// </summary>
 		public IList<PropertyInfo> Properties { get; set; }
+
+		/// <summary>
+		///		if set a Ado.net constructor will be created
+		/// </summary>
 		public bool GenerateConstructor { get; set; }
+
+		/// <summary>
+		///		if set a ado.net factory will be created
+		/// </summary>
 		public bool GenerateFactory { get; set; }
+
+		/// <summary>
+		///		The chain of all properties or interfaces that are inherted
+		/// </summary>
 		public string Inherts { get; set; }
+
+		/// <summary>
+		///		A list of comments added to the class
+		/// </summary>
 		public IList<string> CompilerHeader { get; }
+
+		/// <summary>
+		///		All attributes of this class
+		/// </summary>
 		public IList<AttributeInfo> Attributes { get; set; }
+
+		/// <summary>
+		///		If set a configuration method will be created and all attributes will be moved there
+		/// </summary>
 		public bool GenerateConfigMethod { get; set; }
+
+		/// <summary>
+		/// 
+		/// </summary>
 		public GeneratedCodeAttribute GeneratedCodeAttribute { get; set; }
+
+		/// <summary>
+		///		Flag for controling whenever this is a Super class factory
+		/// </summary>
 		public bool IsSuperClass { get; set; }
 
-
-		public string RenderPocoClass()
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns></returns>
+		public string RenderPocoClass(bool notifyPropertysChanged = false)
 		{
 			var sb = new ConsoleStringBuilderInterlaced();
 			if (GenerateConfigMethod)
 			{
 				NamespaceImports.Add(typeof(ConfigurationResolver<>).Namespace);
+			}
+
+			if (notifyPropertysChanged)
+			{
+				NamespaceImports.Add(typeof(INotifyPropertyChanged).Namespace);
+				NamespaceImports.Add(typeof(CallerMemberNameAttribute).Namespace);
 			}
 
 			NamespaceImports.Add(typeof(EagarDataRecord).Namespace);
@@ -89,9 +152,17 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			}
 
 			sb.AppendInterlaced("public partial class " + ClassName);
-			if (!string.IsNullOrWhiteSpace(Inherts))
+			if (!string.IsNullOrWhiteSpace(Inherts) || notifyPropertysChanged)
 			{
 				sb.Append($": {Inherts}");
+				if (notifyPropertysChanged)
+				{
+					if (!string.IsNullOrWhiteSpace(Inherts))
+					{
+						sb.Append(", ");
+					}
+					sb.Append(nameof(INotifyPropertyChanged));
+				}
 			}
 
 			sb.AppendLine();
@@ -117,7 +188,7 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			{
 				foreach (var propertyInfo in Properties)
 				{
-					propertyInfo.RenderProperty(sb, GenerateConfigMethod);
+					propertyInfo.RenderProperty(sb, GenerateConfigMethod, notifyPropertysChanged);
 				}
 			}
 
@@ -201,6 +272,20 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 				sb.AppendInterlacedLine("}");
 			}
 
+			if (notifyPropertysChanged)
+			{
+				sb.AppendInterlacedLine($"#region {nameof(INotifyPropertyChanged)}");
+				sb.AppendInterlacedLine(
+					$"public event {nameof(PropertyChangedEventHandler)} {nameof(INotifyPropertyChanged.PropertyChanged)};");
+				sb.AppendInterlacedLine("");
+				sb.AppendInterlacedLine("protected virtual void SendPropertyChanged([CallerMemberName] string propertyName = null)");
+				sb.AppendInterlacedLine("{").Up();
+				sb.AppendInterlacedLine("PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));");
+				sb.Down().AppendInterlacedLine("}");
+				sb.AppendInterlacedLine("");
+				sb.AppendInterlacedLine("#endregion");
+			}
+
 			sb.Down();
 			sb.AppendInterlacedLine("}");
 			sb.Down();
@@ -213,6 +298,11 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="target"></param>
+		/// <returns></returns>
 		public static ClassInfoGenerator SuperClass(DbClassInfoCache target)
 		{
 			var gen = new ClassInfoGenerator();

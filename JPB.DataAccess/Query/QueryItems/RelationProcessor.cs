@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Query.QueryItems
 			{
 				return readers;
 			}
-			
+
 			var restRecords = MapJoinedTable(_joinTableQueryPart,
 				readers,
 				entityType,
@@ -48,21 +48,21 @@ namespace JPB.DataAccess.Query.QueryItems
 				e.IsEquivalentTo(targetTable.PrimaryKeyProperty.DbName) &&
 				e.Alias == _joinTableQueryPart.SourceTable);
 
-			var columnMapping = new Dictionary<ColumnInfo, int>();
-			var sourceColumnsIndexMapping = context.Columns.ToArray().Select((item, index) => new
+			var sourceColumnsIndexMapping = new Dictionary<ColumnInfo, int>();
+			var columnInfos = context.Columns.ToArray();
+			for (int index = 0; index < columnInfos.Length; index++)
 			{
-				item,
-				index
-			}).ToDictionary(e => e.item, e => e.index);
-			var fieldsOfChild = context.Columns.Select(f => f.NaturalName).ToArray();
+				var columnInfo = columnInfos[index];
 
-			foreach (var fieldOfChild in fieldsOfChild)
-			{
-				var child = fieldOfChild;
-				var indexOfSource =
-					sourceColumnsIndexMapping
-						.FirstOrDefault(e => e.Key.IsEquivalentTo(child));
-				columnMapping.Add(indexOfSource.Key, indexOfSource.Value);
+				if (sourceColumnsIndexMapping.ContainsKey(columnInfo))
+				{
+					throw new InvalidOperationException($"1Error while mapping columns. Column: '{columnInfo.NaturalName}' exists")
+					{
+						Data = { { "Columns", sourceColumnsIndexMapping } }
+					};
+				}
+
+				sourceColumnsIndexMapping.Add(columnInfo, index);
 			}
 
 			var primaryKeyCache = sourceColumnsIndexMapping
@@ -95,7 +95,7 @@ namespace JPB.DataAccess.Query.QueryItems
 				.Select(record =>
 				{
 					var naturalReader = new EagarDataRecord(identifierNames,
-						new ArrayList(columnMapping
+						new ArrayList(sourceColumnsIndexMapping
 							.Select(f => record[f.Value])
 							.ToArray()));
 					SetRelationOnRecord(outerMostCreatedForginKeys,
@@ -111,8 +111,8 @@ namespace JPB.DataAccess.Query.QueryItems
 			context.Columns = context.Columns.Concat(new[]
 			{
 				new ColumnInfo(outerMostCreatedForginKeys, null, null),
-			}).ToArray(); 
-			
+			}).ToArray();
+
 			return reducedRecords;
 		}
 
@@ -158,7 +158,19 @@ namespace JPB.DataAccess.Query.QueryItems
 					out _,
 					out _,
 					out var mappedTo);
-				joinedTables.Add(mappedTo, relMapping.ToArray());
+				if (joinedTables.ContainsKey(mappedTo))
+				{
+					throw new InvalidOperationException($"Double joining to the same Property detected. This should have been resolved while building the join. " +
+														$"'{mappedTo}'")
+					{
+						Data =
+						{
+							{"Joins", joinedTables}
+						}
+					};
+				}
+
+				joinedTables.Add(mappedTo, relMapping);
 			}
 			forginKey = property.PropertyName;
 			var fields = joinTableQueryPart.Columns.ToArray();
@@ -172,19 +184,31 @@ namespace JPB.DataAccess.Query.QueryItems
 				item,
 				index
 			}).ToDictionary(e => e.item, e => e.index);
-			
+
 			foreach (var fieldOfChild in fieldsOfChild)
 			{
 				var child = fieldOfChild;
 				var indexOfSource =
 					sourceColumnsIndexMapping
 						.FirstOrDefault(e => e.Key.ColumnIdentifier().Equals(child));
+				if (columnMapping.ContainsKey(indexOfSource.Key.NaturalName))
+				{
+					throw new InvalidOperationException($"Column name collision detected. Column '{indexOfSource.Key.NaturalName}'")
+					{
+						Data =
+						{
+							{ "Columns", sourceColumnsIndexMapping },
+							{ "Field", indexOfSource },
+						}
+					};
+				}
+
 				columnMapping.Add(indexOfSource.Key.NaturalName, indexOfSource.Value);
 			}
 
 			var groupBy = columnMapping[columnMapping.FirstOrDefault().Key];
 			//TODO might not be the PrimaryKey of the foreign table
-			
+
 			var readerGroups = readers
 				.GroupBy(e => e[groupBy])
 				.Select(e => e.First())
@@ -199,10 +223,10 @@ namespace JPB.DataAccess.Query.QueryItems
 					var ordinal = naturalReader.GetOrdinal(sourceColumn.ColumnName);
 					foreach (var eagarDataRecordse in joinedTables)
 					{
-						SetRelationOnRecord(eagarDataRecordse.Key, 
-							eagarDataRecordse.Value, 
-							targetColumn, 
-							naturalReader, 
+						SetRelationOnRecord(eagarDataRecordse.Key,
+							eagarDataRecordse.Value,
+							targetColumn,
+							naturalReader,
 							ordinal);
 					}
 				}
@@ -228,13 +252,13 @@ namespace JPB.DataAccess.Query.QueryItems
 		private static void SetRelationOnRecord(string virtualColumnName,
 			EagarDataRecord[] relationRecordSource,
 			ColumnInfo targetColumn,
-			EagarDataRecord naturalReader, 
+			EagarDataRecord naturalReader,
 			int ordinal)
 		{
 			var joinedIndexOfSearch = relationRecordSource
 				.FirstOrDefault()
 				.GetOrdinal(targetColumn.ColumnName);
-			
+
 			naturalReader.Add(virtualColumnName, relationRecordSource.Where(join =>
 			{
 				var left = naturalReader[ordinal];

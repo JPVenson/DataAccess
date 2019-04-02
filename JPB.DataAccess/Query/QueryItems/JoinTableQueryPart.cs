@@ -6,6 +6,7 @@ using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Query.QueryItems.Conditional;
 using JPB.DataAccess.QueryFactory;
 
@@ -68,6 +69,7 @@ namespace JPB.DataAccess.Query.QueryItems
 
 	public class JoinTableQueryPart : ISelectableQueryPart
 	{
+		private readonly JoinMode _joinAs;
 		public JoinParseInfo JoinParseInfo { get; private set; }
 
 		public ColumnInfo TargetColumn { get; }
@@ -80,8 +82,10 @@ namespace JPB.DataAccess.Query.QueryItems
 			ColumnInfo targetColumn,
 			ColumnInfo sourceColumn,
 			IEnumerable<ColumnInfo> columns,
-			DbPropertyInfoCache targetProperty)
+			DbPropertyInfoCache targetProperty, 
+			JoinMode joinAs)
 		{
+			_joinAs = joinAs;
 			TargetTable = targetTable;
 			SourceTable = sourceTable;
 			Alias = joinAlias;
@@ -110,7 +114,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var joinBuilder = new StringBuilder();
-			joinBuilder.Append($"JOIN [{TargetTable.GetAlias()}] AS [{Alias.GetAlias()}]" +
+			joinBuilder.Append($"{_joinAs.JoinType} JOIN [{TargetTable.GetAlias()}] AS [{Alias.GetAlias()}]" +
 							   $" ON [{Alias.GetAlias()}].[{TargetColumn.ColumnName.TrimAlias()}]" +
 							   $" = " +
 							   $"[{SourceTable.GetAlias()}].[{SourceColumn.ColumnName}]");

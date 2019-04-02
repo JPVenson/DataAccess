@@ -6,11 +6,10 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {
 	public class BookMeta : IDatabaseMeta
 	{
-		public const string TableName = "Book";
-		public const string SelectStatement = "SELECT * FROM " + TableName;
-		public const string PrimaryKeyName = "BookId";
-		public const string ContentName = "BookName";
-		public const string ForgeinKeyName = "IdUser";
+		public const string TableName = nameof(Book);
+		public const string PrimaryKeyName = nameof(Book.BookId);
+		public const string ContentName = nameof(Book.Text);
+		public const string ForgeinKeyName = nameof(Book.IdUser);
 
 		public static readonly string CreateMsSql;
 		public static readonly string CreateSqLite;

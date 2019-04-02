@@ -64,6 +64,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 			var targetCsName = tableInfoModel.GetClassName();
 
 			var compiler = new ClassCompiler(sourceCreator.TargetDir, targetCsName);
+			
 			compiler.Type = typeName;
 			compiler.CompileHeader = sourceCreator.GenerateCompilerHeader;
 			compiler.Namespace = sourceCreator.Namespace;
@@ -243,7 +244,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 			compiler.Generator.GenerateConstructor = sourceCreator.GenerateConstructor;
 
 			Logger.WriteLine("Compile Class {0}", compiler.Name);
-			compiler.Compile(tableInfoModel.ColumnInfos, sourceCreator.SplitByType, to);
+			compiler.Compile(tableInfoModel.ColumnInfos, sourceCreator.SplitByType, sourceCreator.SetNotifyProperties, to);
 		}
 
 		public static void AutoAlignNames(IEnumerable<ITableInfoModel> tableNames, string tableSuffix = null)

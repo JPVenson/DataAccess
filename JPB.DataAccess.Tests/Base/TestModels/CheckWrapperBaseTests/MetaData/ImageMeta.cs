@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Text;
 using JPB.DataAccess.Manager;
 
@@ -6,11 +7,11 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {
 	public class ImageMeta : IDatabaseMeta
 	{
-		public const string TableName = "Image";
+		public const string TableName = nameof(Image);
 		public const string SelectStatement = "SELECT * FROM " + TableName;
-		public const string PrimaryKeyName = "ImageId";
-		public const string ContentName = "Text";
-		public const string ForgeinKeyName = "IdBook";
+		public const string PrimaryKeyName = nameof(Image.ImageId);
+		public const string ContentName = nameof(Image.Text);
+		public const string ForgeinKeyName = nameof(Image.IdBook);
 
 		public static readonly string CreateMsSql;
 		public static readonly string CreateSqLite;

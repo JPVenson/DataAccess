@@ -14,6 +14,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool GenerateFactory { get; set; }
 		bool GenerateForgeinKeyDeclarations { get; set; }
 		bool GenerateCompilerHeader { get; set; }
+		bool SetNotifyProperties { get; set; }
 		bool GenerateConfigMethod { get; set; }
 		bool SplitByType { get; set; }
 		string Namespace { get; set; }

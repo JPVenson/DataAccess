@@ -18,3 +18,4 @@ namespace JPB.DataAccess.EntityCreator.Core.Models
 		public string[] Actions { get; set; }
 	}
 }
+

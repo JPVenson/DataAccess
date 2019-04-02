@@ -8,7 +8,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		[PrimaryKey]
 		public int BookId { get; set; }
 
-		public string BookName { get; set; }
+		public string Text { get; set; }
 
 		[ForeignKeyDeclaration(typeof(Users))]
 		public int? IdUser { get; set; }

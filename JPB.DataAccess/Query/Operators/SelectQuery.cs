@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
@@ -45,9 +46,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <summary>
 		///     Includes the forgin table
 		/// </summary>
-		/// <param name="forginColumnName"></param>
-		/// <returns></returns>
-		public SelectQuery<TPoco> Join(string forginColumnName)
+		public SelectQuery<TPoco> Join(string forginColumnName,
+			JoinMode joinAs = null)
 		{
 			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			var forginColumn = teCache.Propertys.FirstOrDefault(e => e.Value.PropertyName.Equals(forginColumnName));
@@ -59,15 +59,14 @@ namespace JPB.DataAccess.Query.Operators
 			return JoinOn(new[]
 			{
 				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(teCache, forginColumn.Value)
-			});
+			}, joinAs);
 		}
 
 		/// <summary>
 		///     Includes the forgin table
 		/// </summary>
-		/// <param name="forginColumnName"></param>
-		/// <returns></returns>
-		public SelectQuery<TPoco> Join<TProp>(Expression<Func<TPoco, TProp>> forginColumnName)
+		public SelectQuery<TPoco> Join<TProp>(Expression<Func<TPoco, TProp>> forginColumnName,
+			JoinMode joinAs = null)
 			where TProp : class
 		{
 			var path = PropertyPath<TPoco>
@@ -80,12 +79,15 @@ namespace JPB.DataAccess.Query.Operators
 						dbClassInfoCache.Propertys[e.Name]);
 				})
 				.ToArray();
-			return JoinOn(path);
+			return JoinOn(path, joinAs);
 		}
 
 		private SelectQuery<TPoco> JoinOn(
-			KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path)
+			KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path,
+			JoinMode joinAs = null)
 		{
+			joinAs = joinAs ?? JoinMode.Default;
+
 			IQueryBuilder target = this;
 			var targetAlias = target.ContainerObject
 				.SearchLast<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
@@ -137,7 +139,7 @@ namespace JPB.DataAccess.Query.Operators
 					.CreateTableAlias(pathOfJoin);
 
 				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache)
-					.Select(e => new ColumnInfo(e, parentAlias, ContainerObject))
+					.Select(e => new ColumnInfo(e, parentAlias, target.ContainerObject))
 					.ToList();
 
 				selfPrimaryKey 
@@ -153,7 +155,8 @@ namespace JPB.DataAccess.Query.Operators
 					onSourceTableKey,
 					selfPrimaryKey,
 					forginColumns,
-					keyValuePair.Value);
+					keyValuePair.Value,
+					joinAs);
 
 				if (parentJoinPart != null)
 				{
@@ -212,6 +215,98 @@ namespace JPB.DataAccess.Query.Operators
 			}
 
 			return Where.Column(fkPropertie.DbName).Is.EqualsTo(id);
+		}
+	}
+
+	/// <summary>
+	/// </summary>
+	public class JoinMode
+	{
+		/// <summary>
+		///     Initializes a new instance of the <see cref="JoinMode" /> class.
+		/// </summary>
+		/// <param name="joinType">Type of the join.</param>
+		internal JoinMode(string joinType)
+		{
+			JoinType = joinType;
+		}
+
+		/// <summary>
+		///     QueryCommand string
+		/// </summary>
+		/// <value>
+		///     The type of the join.
+		/// </value>
+		public string JoinType { get; private set; }
+
+		/// <summary>
+		///		Defines the LEFT join mode
+		/// </summary>
+		public static readonly JoinMode Left = new JoinMode("LEFT");
+
+		/// <summary>
+		///		Defines the Default mode
+		/// </summary>
+		public static readonly JoinMode Default = new JoinMode("");
+
+		/// <summary>
+		///		Defines the FULL OUTER mode
+		/// </summary>
+		public static readonly JoinMode FullOuter = new JoinMode("FULL OUTER");
+
+		/// <summary>
+		///		Defines a SELF join mode
+		/// </summary>
+		public static readonly JoinMode Self = new JoinMode("SELF");
+
+		/// <summary>
+		///		Defines a SELF join mode
+		/// </summary>
+		public static readonly JoinMode Inner = new JoinMode("INNER");
+
+		/// <summary>
+		///		Defines a RIGHT join mode
+		/// </summary>
+		public static readonly JoinMode Right = new JoinMode("RIGHT");
+
+		/// <summary>
+		///     Jon modes for TSQL. This is an helper method that can be used to create JOINs by using the QueryCommand Builder
+		/// </summary>
+		// ReSharper disable once InconsistentNaming
+		public class TJoinMode : JoinMode
+		{
+			private static IEnumerable<TJoinMode> _joints;
+
+			private TJoinMode(string joinType)
+				: base(joinType)
+			{
+			}
+
+			/// <summary>
+			///     Returns a list of all Join values known be the system
+			/// </summary>
+			/// <returns></returns>
+			public static IEnumerable<JoinMode> GetJoins()
+			{
+				if (_joints != null)
+				{
+					return _joints;
+				}
+
+				_joints =
+					typeof(TJoinMode)
+						.GetFields(BindingFlags.Static)
+						.Select(s => s.GetValue(null))
+						.Cast<TJoinMode>();
+				return _joints;
+			}
+#pragma warning disable 1591
+			public static readonly TJoinMode LeftOuter = new TJoinMode("LEFT OUTER");
+			public static readonly TJoinMode RightOuter = new TJoinMode("RIGHT OUTER");
+			public static readonly TJoinMode Outer = new TJoinMode("OUTER");
+			public static readonly TJoinMode Cross = new TJoinMode("CROSS");
+			public static readonly TJoinMode Full = new TJoinMode("FULL");
+#pragma warning restore 1591
 		}
 	}
 }

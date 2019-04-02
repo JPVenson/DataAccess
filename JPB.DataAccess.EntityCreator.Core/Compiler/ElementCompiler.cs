@@ -61,7 +61,8 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		public abstract void PreCompile();
 
-		public virtual void Compile(IEnumerable<IColumInfoModel> columnInfos, bool splitByType, Stream to = null)
+		public virtual void Compile(IEnumerable<IColumInfoModel> columnInfos, bool splitByType,
+			bool sourceCreatorSetNotifyProperties, Stream to = null)
 		{
 			if (to != null)
 			{
@@ -122,7 +123,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 				using (var writer = new StreamWriter(memStream, Encoding.UTF8, 128, true))
 				{
 					writer.NewLine = Environment.NewLine;
-					writer.Write(Generator.RenderPocoClass());
+					writer.Write(Generator.RenderPocoClass(sourceCreatorSetNotifyProperties));
 					_logger.WriteLine("Generated class" + Generator.ClassName);
 					writer.Flush();
 				}

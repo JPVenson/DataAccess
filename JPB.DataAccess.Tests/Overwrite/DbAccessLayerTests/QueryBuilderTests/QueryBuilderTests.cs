@@ -72,7 +72,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				Assert.That(bookWithFkImagese.Images, Is.Not.Null);
 				Assert.That(bookWithFkImagese.Images.Count, Is.EqualTo(10));
 				var bookOnId = DbAccess.Select<Book>(addBook);
-				Assert.That(bookWithFkImagese.BookName, Is.EqualTo(bookOnId.BookName));
+				Assert.That(bookWithFkImagese.Text, Is.EqualTo(bookOnId.Text));
 
 				var imagesOfThatBook = DbAccess.Query().Select.Table<Image>()
 					.Where
@@ -99,7 +99,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			foreach (var imageWithFkBookse in books)
 			{
 				Assert.That(imageWithFkBookse.Book, Is.Not.Null);
-				Assert.That(imageWithFkBookse.Book.BookName, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.Text, Is.Not.Null);
 				Assert.That(imageWithFkBookse.Book.BookId, Is.Not.Zero);
 			}
 
@@ -159,7 +159,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			foreach (var imageWithFkBookse in books)
 			{
 				Assert.That(imageWithFkBookse.Book, Is.Not.Null);
-				Assert.That(imageWithFkBookse.Book.BookName, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.Text, Is.Not.Null);
 				Assert.That(imageWithFkBookse.Book.BookId, Is.EqualTo(imageWithFkBookse.IdBook));
 			}
 
@@ -254,11 +254,11 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		{
 			var book = DbAccess.InsertWithSelect(new Book()
 			{
-				BookName = "Test1"
+				Text = "Test1"
 			});
 			book = DbAccess.InsertWithSelect(new Book()
 			{
-				BookName = "Test"
+				Text = "Test"
 			});
 			var image = DbAccess.InsertWithSelect(new Image()
 			{
@@ -269,12 +269,12 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				.Select.Table<ImageWithFkBooks>()
 				.Join(nameof(ImageWithFkBooks.Book))
 				.Where
-				.Column(f => f.Book.BookName).Is.EqualsTo("Test")
+				.Column(f => f.Book.Text).Is.EqualsTo("Test")
 				.ToArray()
 				.FirstOrDefault());
 
 			Assert.That(books, Is.Not.Null);
-			Assert.That(books.Book.BookName, Is.EqualTo("Test"));
+			Assert.That(books.Book.Text, Is.EqualTo("Test"));
 		}
 
 		[Test]
@@ -282,11 +282,11 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		{
 			var book = DbAccess.InsertWithSelect(new Book()
 			{
-				BookName = "Test1"
+				Text = "Test1"
 			});
 			book = DbAccess.InsertWithSelect(new Book()
 			{
-				BookName = "Test"
+				Text = "Test"
 			});
 			var image = DbAccess.InsertWithSelect(new Image()
 			{
@@ -296,12 +296,12 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var books = Measure(() => CreateQuery()
 				.Select.Table<ImageWithFkBooks>()
 				.Join(nameof(ImageWithFkBooks.Book))
-				.Order.By(e => e.Book.BookName)
+				.Order.By(e => e.Book.Text)
 				.ToArray()
 				.FirstOrDefault());
 
 			Assert.That(books, Is.Not.Null);
-			Assert.That(books.Book.BookName, Is.EqualTo("Test"));
+			Assert.That(books.Book.Text, Is.EqualTo("Test"));
 		}
 
 		[Test]
@@ -325,7 +325,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 
 				var book = allBooks.FirstOrDefault(e => e.BookId == imageWithFkBookse.IdBook);
 
-				Assert.That(imageWithFkBookse.Book.BookName, Is.EqualTo(book.BookName));
+				Assert.That(imageWithFkBookse.Book.Text, Is.EqualTo(book.Text));
 
 				Assert.That(imageWithFkBookse.Book.Images, Is.Not.Null);
 				Assert.That(imageWithFkBookse.Book.Images, Is.Not.Empty);
@@ -360,7 +360,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			foreach (var book in books)
 			{
 				Assert.That(book, Is.Not.Null);
-				Assert.That(book.BookName, Is.Not.Null);
+				Assert.That(book.Text, Is.Not.Null);
 				
 				Assert.That(book.Images, Is.Not.Null);
 				Assert.That(book.Images, Is.Not.Empty);
@@ -393,7 +393,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 
 			var books = Measure(() => CreateQuery()
 				.Select.Table<BookWithFkImages>()
-				.Join(f => f.Images)
+				.Join(f => f.Images.Type.Book.Images)
 				.Join(f => f.User)
 				.ToArray());
 
@@ -405,7 +405,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			foreach (var book in books)
 			{
 				Assert.That(book, Is.Not.Null);
-				Assert.That(book.BookName, Is.Not.Null);
+				Assert.That(book.Text, Is.Not.Null);
 				
 				Assert.That(book.Images, Is.Not.Null);
 				Assert.That(book.Images, Is.Not.Empty);

@@ -111,7 +111,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 				for (var i = 0; i < number; i++)
 				{
 					var book = new Book();
-					book.BookName = Guid.NewGuid().ToString();
+					book.Text = Guid.NewGuid().ToString();
 					books.Add(mgr.InsertWithSelect(book));
 				}
 			});
@@ -128,7 +128,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 				for (var i = 0; i < number; i++)
 				{
 					var book = new Book();
-					book.BookName = "BOOK_" + Guid.NewGuid().ToString();
+					book.Text = "BOOK_" + Guid.NewGuid().ToString();
 					books.Add(book = mgr.InsertWithSelect(book));
 
 					for (var j = 0; j < imagesPerBook; j++)

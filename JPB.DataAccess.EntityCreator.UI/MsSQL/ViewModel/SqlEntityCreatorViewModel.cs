@@ -287,6 +287,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
+		public bool SetNotifyProperties { get; set; }
+
 		public bool GenerateConfigMethod
 		{
 			get { return _generateConfigMethod; }

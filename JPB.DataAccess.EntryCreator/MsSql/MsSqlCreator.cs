@@ -1,5 +1,6 @@
 ﻿
 
+using System.ComponentModel;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Evaluation;
@@ -292,7 +293,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			Console.WriteLine(@"\addConfigMethod");
 			Console.WriteLine("		Moves all attributes from Propertys and Methods into a single ConfigMethod");
 			Console.WriteLine(@"\withAutoCtor");
-			Console.WriteLine("		Generates Loader Constructors");
+			Console.WriteLine("		Generates Loader Constructors");	
+			Console.WriteLine(@"\withNotification");
+			Console.WriteLine($"		Adds the '{nameof(INotifyPropertyChanged)}' interface to all Pocos");
 			Console.WriteLine(@"\autoGenNames");
 			Console.WriteLine("		Defines all names after a common naming convention");
 			Console.WriteLine(@"\addCompilerHeader	");
@@ -352,6 +355,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					case @"\withautoctor":
 						SetRenderAutoCtor();
 						break;
+					case @"\withnotification":
+						SetAddNotifiy();
+						break;
 					case @"\withfactory":
 						SetRenderFactory();
 						break;
@@ -370,6 +376,15 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				}
 			}
 		}
+
+		private void SetAddNotifiy()
+		{
+			SetNotifyProperties = !SetNotifyProperties;
+			WinConsole.WriteLine("Create Notification propertys is {0}", SetNotifyProperties ? "set" : "unset");
+			RenderMenuAction();
+		}
+
+		public bool SetNotifyProperties { get; set; }
 
 		private void SetRenderFactory()
 		{

@@ -97,6 +97,7 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Books\Book.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Books\BookXml.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\Books\BookWithFkImages.cs" />
+    <Compile Include="Base\TestModels\CheckWrapperBaseTests\Images\ImageWithFkBooks.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\MetaData\BookMeta.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\User\ConfigLessUser.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\User\ConfigLessUserInplaceConfig.cs" />
