@@ -770,7 +770,7 @@ namespace JPB.DataAccess.Manager
 					}
 					else if (value is DBNull || value == null)
 					{
-						property.Setter.Invoke(instance, new object[] {null});
+						//property.Setter.Invoke(instance, new object[] {null});
 					}
 					else if (value is IEnumerable<EagarDataRecord> navigationValue)
 					{

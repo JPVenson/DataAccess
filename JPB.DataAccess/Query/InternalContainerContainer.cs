@@ -142,6 +142,11 @@ namespace JPB.DataAccess.Query
 		/// <inheritdoc />
 		public QueryIdentifier CreateTableAlias(string path)
 		{
+			if (TableAlias.ContainsKey(path))
+			{
+				return TableAlias[path];
+			}
+
 			var alias = CreateAlias(QueryIdentifier.QueryIdTypes.Table);
 			TableAlias.Add(path, alias);
 			return alias;

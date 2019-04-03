@@ -37,7 +37,7 @@ namespace JPB.DataAccess.QueryFactory
 		///     The SQL QueryCommand
 		/// </summary>
 		public string Query { get; private set; }
-
+		
 		/// <summary>
 		///     All used Parameters
 		/// </summary>

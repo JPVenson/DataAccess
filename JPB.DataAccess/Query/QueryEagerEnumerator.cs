@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -102,16 +103,39 @@ namespace JPB.DataAccess.Query
 				columns = context.Columns;
 			}
 
-			foreach (var queryContainerJoin in _queryContainer.Joins)
+			var relations = new List<Tuple<QueryIdentifier,QueryIdentifier, RelationProcessor>>();
+			if (_queryContainer.Joins.Any())
 			{
-				var context = new QueryProcessingRecordsContext(_queryContainer,
+				var queryProcessingRecordsContext = new QueryProcessingRecordsContext(_queryContainer,
 					_queryContainer.PostProcessors,
 					columns);
-				dataRecords = new RelationProcessor(queryContainerJoin)
-					.JoinTables(dataRecords,
-					queryContainerJoin.TargetTableType,
-					context);
-				columns = context.Columns;
+
+
+				foreach (var queryContainerJoin in _queryContainer.Joins)
+				{
+					var relationProcessor = new RelationProcessor(queryContainerJoin);
+					relations.Add(new Tuple<QueryIdentifier, QueryIdentifier, RelationProcessor>(
+						queryContainerJoin.Alias,
+						queryContainerJoin.SourceTable,
+						relationProcessor));
+					dataRecords = relationProcessor
+						.JoinTables(dataRecords,
+							queryContainerJoin.TargetTableType,
+							queryProcessingRecordsContext);
+				}
+
+				foreach (var queryContainerJoin in relations)
+				{
+					dataRecords = queryContainerJoin
+						.Item3
+						.DoJoinMapping(dataRecords,
+							queryContainerJoin.Item1,
+							queryProcessingRecordsContext, 
+							true,
+							true);
+				}
+
+				columns = queryProcessingRecordsContext.Columns;
 			}
 
 			var columnNames = columns.Select(f => f.NaturalName).ToArray();

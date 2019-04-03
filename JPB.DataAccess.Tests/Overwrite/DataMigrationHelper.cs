@@ -145,6 +145,38 @@ namespace JPB.DataAccess.Tests.Overwrite
 			return books.Select(f => f.BookId).ToArray();
 		}
 
+		public static int[] AddBooksWithImageAndUser(int number, int imagesPerBook, DbAccessLayer mgr)
+		{
+			mgr.RaiseEvents = false;
+			var books = new List<Book>();
+			mgr.Database.RunInTransaction(d =>
+			{
+				for (var i = 0; i < number; i++)
+				{
+					var book = new Book();
+					book.Text = "BOOK_" + Guid.NewGuid().ToString();
+					var usr = mgr.InsertWithSelect(new Users()
+					{
+						UserName = "USR_" + Guid.NewGuid().ToString()
+					});
+					book.IdUser = (int?) usr.User_ID;
+					books.Add(book = mgr.InsertWithSelect(book));
+
+
+					for (var j = 0; j < imagesPerBook; j++)
+					{
+						mgr.Insert(new Image
+						{
+							Text = "IMG_" + Guid.NewGuid().ToString(),
+							IdBook = book.BookId
+						});
+					}
+				}
+			});
+			mgr.RaiseEvents = true;
+			return books.Select(f => f.BookId).ToArray();
+		}
+
 		public static long[] AddImages(int number, DbAccessLayer mgr)
 		{
 			mgr.RaiseEvents = false;

@@ -109,18 +109,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		[Test]
 		public void JoinMultipleParent()
 		{
-			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
-			var ids = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			for (var index = 0; index < ids.Length; index++)
-			{
-				var bookId = ids[index];
-				CreateQuery().Update.Table<Book>()
-					.Set
-					.Column(f => f.IdUser).Value(addUsers[index])
-					.Where
-					.Column(f => f.BookId).Is.EqualsTo(bookId)
-					.ExecuteNonQuery();
-			}
+			DataMigrationHelper.AddBooksWithImageAndUser(250, 10, DbAccess);
 
 			var books = Measure(() => CreateQuery()
 				.Select.Table<BookWithFkImages>()
@@ -169,18 +158,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		[Test]
 		public void JoinMultipleInCteParent()
 		{
-			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
-			var ids = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			for (var index = 0; index < ids.Length; index++)
-			{
-				var bookId = ids[index];
-				CreateQuery().Update.Table<Book>()
-					.Set
-					.Column(f => f.IdUser).Value(addUsers[index])
-					.Where
-					.Column(f => f.BookId).Is.EqualsTo(bookId)
-					.ExecuteNonQuery();
-			}
+			DataMigrationHelper.AddBooksWithImageAndUser(250, 10, DbAccess);
 
 			var books = Measure(() => CreateQuery()
 				.WithCte(e => e
@@ -210,18 +188,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		[Test]
 		public void JoinMultipleOnCteParent()
 		{
-			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
-			var ids = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			for (var index = 0; index < ids.Length; index++)
-			{
-				var bookId = ids[index];
-				CreateQuery().Update.Table<Book>()
-					.Set
-					.Column(f => f.IdUser).Value(addUsers[index])
-					.Where
-					.Column(f => f.BookId).Is.EqualsTo(bookId)
-					.ExecuteNonQuery();
-			}
+			DataMigrationHelper.AddBooksWithImageAndUser(250, 10, DbAccess);
 
 			var books = Measure(() => CreateQuery()
 				.WithCte(e => e
@@ -374,26 +341,101 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				}
 			}
 		}
-		
+
+		[Test]
+		public void JoinEmptyParent()
+		{
+			DataMigrationHelper.AddBooks(250, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(f => f.User)
+				.Join(f => f.User1)
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+		}
+
+		[Test]
+		public void JoinEmptyChilds()
+		{
+			DataMigrationHelper.AddBooks(250, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(f => f.Images)
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+		}
+
+		[Test]
+		public void JoinEmptyChildsThenParent()
+		{
+			DataMigrationHelper.AddBooks(250, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(f => f.Images.Type.Book)
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+		}
+
+		[Test]
+		public void JoinEmptyParentThenChildsThenParent()
+		{
+			DataMigrationHelper.AddBooks(250, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(f => f.Images.Type.Book, JoinMode.FullOuter)
+				.Join(f => f.User)
+				.Join(f => f.User1)
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+		}
+
+		[Test]
+		public void JoinEmpty()
+		{
+			DataMigrationHelper.AddImages(250, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.Select.Table<ImageWithFkBooks>()
+				.Join(f => f.Book, JoinMode.FullOuter)
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+		}
+
+		[Test]
+		public void JoinParentsMultiple()
+		{
+			DataMigrationHelper.AddBooksWithImageAndUser(250, 10, DbAccess);
+
+			var books = Measure(() => CreateQuery()
+				.Select.Table<ImageWithFkBooks>()
+				.Join(f => f.Book.User1)
+				.Join(f => f.Book.User)
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+
+			foreach (var imageWithFkBookse in books)
+			{
+				Assert.That(imageWithFkBookse.Book, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.User, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.User1, Is.Not.Null);
+				Assert.That(imageWithFkBookse.Book.User.User_ID, Is.EqualTo(imageWithFkBookse.Book.User1.User_ID));
+			}
+		}
+
 		[Test]
 		public void JoinChildAndThenParentAndThenChilds()
 		{
-			var addUsers = DataMigrationHelper.AddUsers(250, DbAccess);
-			var ids = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
-			for (var index = 0; index < ids.Length; index++)
-			{
-				var bookId = ids[index];
-				CreateQuery().Update.Table<Book>()
-					.Set
-					.Column(f => f.IdUser).Value(addUsers[index])
-					.Where
-					.Column(f => f.BookId).Is.EqualsTo(bookId)
-					.ExecuteNonQuery();
-			}
+			DataMigrationHelper.AddBooksWithImageAndUser(250, 10, DbAccess);
 
 			var books = Measure(() => CreateQuery()
 				.Select.Table<BookWithFkImages>()
-				.Join(f => f.Images.Type.Book.Images)
+				.Join(f => f.User1)
+				.Join(f => f.Images.Type.Book.Images.Type.Book)
 				.Join(f => f.User)
 				.ToArray());
 

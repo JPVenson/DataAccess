@@ -92,9 +92,25 @@ namespace JPB.DataAccess.Query.Operators
 			var targetAlias = target.ContainerObject
 				.SearchLast<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Alias;
-			JoinParseInfo parentJoinPart = null;
+			IList<JoinParseInfo> parentJoinPart = ContainerObject.Joins;
 			foreach (var keyValuePair in path)
 			{
+				var targetTable = target.ContainerObject.Search(targetAlias);
+
+				var pathOfJoin = target.ContainerObject.GetPathOf(targetAlias) + "." +
+				                 keyValuePair.Value.PropertyName;
+				var parentAlias = target.ContainerObject
+					.CreateTableAlias(pathOfJoin);
+
+				var joinExists = parentJoinPart.FirstOrDefault(e => e.Alias.Equals(parentAlias));
+				if (joinExists != null)
+				{
+					parentJoinPart = joinExists.DependingJoins;
+					targetAlias = parentAlias;
+					continue;
+				}
+
+
 				Type referenceType;
 				if (keyValuePair.Value.CheckForListInterface())
 				{
@@ -131,13 +147,6 @@ namespace JPB.DataAccess.Query.Operators
 					                                    "Use a ForeignKeyDeclarationAttribute to connect both");
 				}
 
-				var targetTable = target.ContainerObject.Search(targetAlias);
-
-				var pathOfJoin = target.ContainerObject.GetPathOf(targetAlias) + "." +
-				                 keyValuePair.Value.PropertyName;
-				var parentAlias = target.ContainerObject
-					.CreateTableAlias(pathOfJoin);
-
 				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache)
 					.Select(e => new ColumnInfo(e, parentAlias, target.ContainerObject))
 					.ToList();
@@ -158,16 +167,8 @@ namespace JPB.DataAccess.Query.Operators
 					keyValuePair.Value,
 					joinAs);
 
-				if (parentJoinPart != null)
-				{
-					parentJoinPart.DependingJoins.Add(joinTableQueryPart.JoinParseInfo);
-				}
-				else
-				{
-					target.ContainerObject.Joins.Add(joinTableQueryPart.JoinParseInfo);
-				}
-
-				parentJoinPart = joinTableQueryPart.JoinParseInfo;
+				parentJoinPart.Add(joinTableQueryPart.JoinParseInfo);
+				parentJoinPart = joinTableQueryPart.JoinParseInfo.DependingJoins;
 
 				target.ContainerObject.SearchLast<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
 				target = target.Add(joinTableQueryPart);
