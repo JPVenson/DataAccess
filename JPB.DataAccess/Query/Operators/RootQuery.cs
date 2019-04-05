@@ -144,8 +144,13 @@ namespace JPB.DataAccess.Query.Operators
 				.Add(new EventPostProcessor(EventPostProcessor.EventType.Delete, ContainerObject.AccessLayer));
 			var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
 			return new DeleteQuery<T>(
-				Add(new DeleteTableQueryPart(new QueryIdentifier() { Value = dbClassInfoCache.TableName },
-					ContainerObject.CreateTableAlias(dbClassInfoCache.TableName))));
+				Add(new DeleteTableQueryPart(new QueryIdentifier()
+					{
+						Value = dbClassInfoCache.TableName
+					},
+					ContainerObject.CreateTableAlias(dbClassInfoCache.TableName), 
+					dbClassInfoCache,
+					ContainerObject)));
 		}
 
 		/// <summary>

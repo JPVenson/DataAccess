@@ -797,6 +797,14 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
+		public void Delete()
+		{
+			var addUsers = DataMigrationHelper.AddUsers(1, DbAccess)[0];
+			CreateQuery().Delete<Users>().Where.Column(f => f.UserID).Is.EqualsTo(addUsers).ExecuteNonQuery();
+			Assert.That(CreateQuery().Count.Table<Users>().FirstOrDefault(), Is.EqualTo(0));
+		}
+
+		[Test]
 		public void Update()
 		{
 			var addUsers = DataMigrationHelper.AddUsers(1, DbAccess)[0];
