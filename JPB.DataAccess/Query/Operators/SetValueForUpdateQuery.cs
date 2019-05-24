@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using JetBrains.Annotations;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.MetaApi;
@@ -28,6 +29,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <param name="columnName"></param>
 		/// <returns></returns>
+		[PublicAPI]
 		public UpdateValueQuery<TPoco> Column(string columnName)
 		{
 			return new UpdateValueQuery<TPoco>(_queryBuilder, new UpdateTableWithQueryPart.ColumnAssignment()
@@ -40,7 +42,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <param name="columnName"></param>
 		/// <returns></returns>
-		public UpdateValueQuery<TPoco> Column<TA>(Expression<Func<TPoco, TA>> columnName)
+		[PublicAPI]
+		public UpdateValueQuery<TPoco> Column<TA>([NoEnumeration] Expression<Func<TPoco, TA>> columnName)
 		{
 			return Column(
 				_queryBuilder.ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco))

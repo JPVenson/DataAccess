@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			Is.Not.Null
 			  .And.Property("UserId").Not.EqualTo(0));
 
-			var selTestUser = DbAccess.Select<Users_StaticQueryFactoryForSelect>(testUser.UserId);
+			var selTestUser = DbAccess.SelectSingle<Users_StaticQueryFactoryForSelect>(testUser.UserId);
 			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
 			Assert.AreEqual(selTestUser.UserId, testUser.UserId);
 		}
@@ -165,12 +165,13 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			Assert.That(() => dbCollection.SaveChanges(DbAccess), Throws.Nothing);
 			Assert.That(() => dbCollection.GetEntryState(user25), Is.EqualTo(CollectionStates.Unchanged));
 
-			Assert.That(() => DbAccess.Select<Users_Col>(user25.User_ID), Is.Not.Null.And
+			Assert.That(() => DbAccess.SelectSingle<Users_Col>(user25.User_ID), Is.Not.Null.And
 																			.Property("User_ID").EqualTo(user25.User_ID)
 																			.And
 																			.Property("UserName").EqualTo(user25.UserName));
 		}
 
+		private const string SelectCountOneFromUsers = "SELECT COUNT(1) FROM " + UsersMeta.TableName;
 
 		[Test]
 		public void TransactionTestRollback()
@@ -179,7 +180,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
 			DbAccess.Database.RunInTransaction(dd =>
 			{
@@ -188,7 +189,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			});
 
 			var countAfter =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 
@@ -199,7 +200,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
 			DbAccess.Database.RunInTransaction(dd =>
 			{
@@ -211,7 +212,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			});
 
 			var countAfter =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 
@@ -222,7 +223,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
 			Assert.That(() => DbAccess.Database.RunInTransaction(dd =>
 			{
@@ -231,7 +232,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			}), Throws.Exception);
 
 			var countAfter =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 
@@ -242,7 +243,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
 			await DbAccess.Database.RunInTransactionAsync(async dd =>
 			{
@@ -253,7 +254,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			});
 
 			var countAfter =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 
@@ -264,7 +265,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 			Assert.That(() =>
 			{
 				DbAccess.Database.RunInTransactionAsync(async dd =>
@@ -276,7 +277,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			}, Throws.Exception);
 
 			var countAfter =
-					DbAccess.SelectNative(typeof(long), "SELECT COUNT(1) FROM " + UsersMeta.TableName).FirstOrDefault();
+					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 			Assert.That(count, Is.EqualTo(countAfter));
 		}
 

@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 				}
 			});
 
-			var nineNineNineNineNineNine = DbAccess.Select<Users>(999999);
+			var nineNineNineNineNineNine = DbAccess.SelectSingle<Users>(999999);
 			Assert.That(nineNineNineNineNineNine, Is.Not.Null);
 
 			//check cleanup

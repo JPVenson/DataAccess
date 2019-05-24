@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using JetBrains.Annotations;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Manager;
@@ -24,49 +25,52 @@ namespace JPB.DataAccess.Query.Operators
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.ISelectQuery{TPoco}" />
 	public class SelectQuery<TPoco> : ElementProducer<TPoco>, ISelectQuery<TPoco>
 	{
-		/// <summary>
-		///     Initializes a new instance of the <see cref="SelectQuery{TPoco}" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
+		/// <inheritdoc />
 		public SelectQuery(IQueryBuilder database) : base(database)
 		{
-			CreateNewIdentifier();
 		}
 
 		/// <summary>
 		///     Selects items Distinct
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
+		[MustUseReturnValue]
 		public SelectQuery<TPoco> Distinct()
 		{
 			ContainerObject.SearchLast<ISelectableQueryPart>().Distinct = true;
 			return this;
 		}
-		
-		/// <summary>
-		///     Includes the forgin table
-		/// </summary>
-		public SelectQuery<TPoco> Join(string forginColumnName,
-			JoinMode joinAs = null)
-		{
-			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
-			var forginColumn = teCache.Propertys.FirstOrDefault(e => e.Value.PropertyName.Equals(forginColumnName));
-			if (forginColumn.Value == null)
-			{
-				return this;
-			}
 
-			return JoinOn(new[]
-			{
-				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(teCache, forginColumn.Value)
-			}, joinAs);
+		/// <summary>
+		///     Includes the foreign table
+		/// </summary>
+		[PublicAPI]
+		[MustUseReturnValue]
+		public SelectQuery<TPoco> Join(string forginColumnName,
+			[ValueProvider(nameof(JoinMode))] JoinMode joinAs = null)
+		{
+			var path = PropertyPath<TPoco>
+				.Get(ContainerObject.AccessLayer.Config, forginColumnName)
+				.Where(e => !typeof(IDbCollection).IsAssignableFrom(e.DeclaringType))
+				.Select(e =>
+				{
+					var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
+						dbClassInfoCache.Propertys[e.Name]);
+				})
+				.ToArray();
+
+			return JoinOn(path, joinAs);
 		}
 
 		/// <summary>
-		///     Includes the forgin table
+		///     Includes the foreign table
 		/// </summary>
-		public SelectQuery<TPoco> Join<TProp>(Expression<Func<TPoco, TProp>> forginColumnName,
-			JoinMode joinAs = null)
+		[PublicAPI]
+		[MustUseReturnValue]
+		public SelectQuery<TPoco> Join<TProp>([NoEnumeration] Expression<Func<TPoco, TProp>> forginColumnName,
+			[ValueProvider(nameof(JoinMode))] JoinMode joinAs = null)
 			where TProp : class
 		{
 			var path = PropertyPath<TPoco>
@@ -92,7 +96,7 @@ namespace JPB.DataAccess.Query.Operators
 			var targetAlias = target.ContainerObject
 				.SearchLast<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Alias;
-			IList<JoinParseInfo> parentJoinPart = ContainerObject.Joins;
+			var parentJoinPart = ContainerObject.Joins;
 			foreach (var keyValuePair in path)
 			{
 				var targetTable = target.ContainerObject.Search(targetAlias);
@@ -151,9 +155,9 @@ namespace JPB.DataAccess.Query.Operators
 					.Select(e => new ColumnInfo(e, parentAlias, target.ContainerObject))
 					.ToList();
 
-				selfPrimaryKey 
+				selfPrimaryKey
 					= targetTable.Columns.FirstOrDefault(e => e.IsEquivalentTo(referenceColumn.ForeignKey));
-				onSourceTableKey 
+				onSourceTableKey
 					= forginColumns.FirstOrDefault(e => e.IsEquivalentTo(referenceColumn.ReferenceKey));
 
 				var joinTableQueryPart = new JoinTableQueryPart(
@@ -185,6 +189,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <typeparam name="TEPoco"></typeparam>
 		/// <param name="element"></param>
 		/// <returns></returns>
+		[PublicAPI]
+		[MustUseReturnValue]
 		public ConditionalEvalQuery<TPoco> In<TEPoco>(TEPoco element)
 		{
 			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
@@ -198,6 +204,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		/// <typeparam name="TEPoco"></typeparam>
 		/// <returns></returns>
+		[PublicAPI]
+		[MustUseReturnValue]
 		public ConditionalEvalQuery<TPoco> In<TEPoco>(object id)
 		{
 			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
@@ -224,6 +232,36 @@ namespace JPB.DataAccess.Query.Operators
 	public class JoinMode
 	{
 		/// <summary>
+		///     Defines the LEFT join mode
+		/// </summary>
+		public static readonly JoinMode Left = new JoinMode("LEFT");
+
+		/// <summary>
+		///     Defines the Default mode
+		/// </summary>
+		public static readonly JoinMode Default = new JoinMode("");
+
+		/// <summary>
+		///     Defines the FULL OUTER mode
+		/// </summary>
+		public static readonly JoinMode FullOuter = new JoinMode("FULL OUTER");
+
+		/// <summary>
+		///     Defines a SELF join mode
+		/// </summary>
+		public static readonly JoinMode Self = new JoinMode("SELF");
+
+		/// <summary>
+		///     Defines a SELF join mode
+		/// </summary>
+		public static readonly JoinMode Inner = new JoinMode("INNER");
+
+		/// <summary>
+		///     Defines a RIGHT join mode
+		/// </summary>
+		public static readonly JoinMode Right = new JoinMode("RIGHT");
+
+		/// <summary>
 		///     Initializes a new instance of the <see cref="JoinMode" /> class.
 		/// </summary>
 		/// <param name="joinType">Type of the join.</param>
@@ -238,37 +276,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// <value>
 		///     The type of the join.
 		/// </value>
-		public string JoinType { get; private set; }
-
-		/// <summary>
-		///		Defines the LEFT join mode
-		/// </summary>
-		public static readonly JoinMode Left = new JoinMode("LEFT");
-
-		/// <summary>
-		///		Defines the Default mode
-		/// </summary>
-		public static readonly JoinMode Default = new JoinMode("");
-
-		/// <summary>
-		///		Defines the FULL OUTER mode
-		/// </summary>
-		public static readonly JoinMode FullOuter = new JoinMode("FULL OUTER");
-
-		/// <summary>
-		///		Defines a SELF join mode
-		/// </summary>
-		public static readonly JoinMode Self = new JoinMode("SELF");
-
-		/// <summary>
-		///		Defines a SELF join mode
-		/// </summary>
-		public static readonly JoinMode Inner = new JoinMode("INNER");
-
-		/// <summary>
-		///		Defines a RIGHT join mode
-		/// </summary>
-		public static readonly JoinMode Right = new JoinMode("RIGHT");
+		public string JoinType { get; }
 
 		/// <summary>
 		///     Jon modes for TSQL. This is an helper method that can be used to create JOINs by using the QueryCommand Builder

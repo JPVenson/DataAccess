@@ -205,6 +205,7 @@
     <Compile Include="Helper\DbPropertyDescriptor.cs" />
     <Compile Include="Helper\EnumMemberConverter.cs" />
     <Compile Include="Contacts\IStringBuilderInterlaced.cs" />
+    <Compile Include="Helper\FormattableStringCompositor.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\CheckConstraints.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\ConstraintCollection.cs" />
     <Compile Include="Helper\LocalDb\Constraints\Collections\ConstraintComparer.cs" />
@@ -327,6 +328,9 @@
     <Compile Include="Query\Contracts\IDbColumnSelector.cs" />
     <Compile Include="Query\Contracts\IDbElementSelector.cs" />
     <Compile Include="Query\Contracts\IElementProducer.cs" />
+    <Compile Include="Query\Contracts\IEntityProcessor.cs" />
+    <Compile Include="Query\Contracts\IEnumerableQuery.cs" />
+    <Compile Include="Query\Contracts\IEnumerableQueryAsync.cs" />
     <Compile Include="Query\Contracts\IIdentifyerElementQuery.cs" />
     <Compile Include="Query\Contracts\IInCteQuery.cs" />
     <Compile Include="Query\Contracts\IJoinQuery.cs" />
@@ -334,13 +338,18 @@
     <Compile Include="Query\Contracts\IOrderdColumnElementProducer.cs" />
     <Compile Include="Query\Contracts\IOrderdElementProducer.cs" />
     <Compile Include="Query\Contracts\IQueryBuilder.cs" />
+    <Compile Include="Query\Contracts\IQueryCommandInterceptor.cs" />
     <Compile Include="Query\Contracts\IQueryContainer.cs" />
+    <Compile Include="Query\Contracts\IQueryContainerValues.cs" />
     <Compile Include="Query\Contracts\IQueryElement.cs" />
     <Compile Include="Query\Contracts\IRootQuery.cs" />
     <Compile Include="Query\Contracts\ISelectQuery.cs" />
     <Compile Include="Query\Contracts\IStateQuery.cs" />
     <Compile Include="Query\Contracts\IUpdateQuery.cs" />
     <Compile Include="Query\Contracts\QueryBuilder.cs" />
+    <Compile Include="Query\Contracts\QueryProcessingEntitiesContext.cs" />
+    <Compile Include="Query\Contracts\QueryProcessingRecordsContext.cs" />
+    <Compile Include="Query\Operators\EventPostProcessor.cs" />
     <Compile Include="Query\QueryItems\ColumnInfo.cs" />
     <Compile Include="Query\QueryItems\ColumnMapper.cs" />
     <Compile Include="Query\QueryItems\Conditional\ConditionalQueryBuilder.cs" />
@@ -370,7 +379,6 @@
     <Compile Include="Query\Operators\Orders\OrderByColumn.cs" />
     <Compile Include="Query\Operators\Orders\OrderStatementQuery.cs" />
     <Compile Include="Query\Operators\PrepaireUpdateQuery.cs" />
-    <Compile Include="Query\Operators\QueryElement.cs" />
     <Compile Include="Query\Operators\RootQuery.cs" />
     <Compile Include="Query\Operators\Selection\ColumnChooser.cs" />
     <Compile Include="Query\Operators\Selection\DatabaseObjectSelector.cs" />

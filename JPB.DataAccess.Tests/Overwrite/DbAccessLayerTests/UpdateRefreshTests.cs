@@ -51,7 +51,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			singleEntity.UserName = null;
 
 			singleEntity = DbAccess.Refresh(singleEntity);
-			var refEntity = DbAccess.Select<Users>(id);
+			var refEntity = DbAccess.SelectSingle<Users>(id);
 
 			Assert.IsNotNull(refEntity);
 			Assert.AreEqual(id, refEntity.UserID);
@@ -65,9 +65,8 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			DataMigrationHelper.AddUsers(1, DbAccess);
 			var singleEntity = DbAccess
 				.Query()
-				.Select.Table<Base.TestModels.CheckWrapperBaseTests.Users>()
+				.Select.Table<Users>()
 				.LimitBy(1)
-				.ForResult<Users>()
 				.Single();
 			var id = singleEntity.UserID;
 			Assert.IsNotNull(singleEntity);
@@ -81,7 +80,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			singleEntity.UserName = null;
 
 			DbAccess.RefreshKeepObject(singleEntity);
-			var refEntity = DbAccess.Select<Users>(id);
+			var refEntity = DbAccess.SelectSingle<Users>(id);
 
 			Assert.IsNotNull(refEntity);
 			Assert.AreEqual(id, refEntity.UserID);
@@ -99,7 +98,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 				.Table<Users>()
 				.LimitBy(1);
 			var singleEntity = query
-				.ForResult<Users>()
 				.Single();
 			Assert.IsNotNull(singleEntity);
 
@@ -110,7 +108,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			singleEntity.UserName = postName;
 			DbAccess.Update(singleEntity);
 
-			var refEntity = DbAccess.Select<Users>(singleEntity.UserID);
+			var refEntity = DbAccess.SelectSingle<Users>(singleEntity.UserID);
 			Assert.IsNotNull(refEntity);
 			Assert.AreEqual(singleEntity.UserID, refEntity.UserID);
 			Assert.AreEqual(singleEntity.UserName, refEntity.UserName);

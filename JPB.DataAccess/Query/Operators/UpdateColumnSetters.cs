@@ -1,11 +1,10 @@
-using System;
-using JPB.DataAccess.Manager;
+using JetBrains.Annotations;
 using JPB.DataAccess.Query.Contracts;
 
 namespace JPB.DataAccess.Query.Operators
 {
 	/// <summary>
-	///		Defines mehtods for an UPDATE query
+	///     Defines methods for an UPDATE query
 	/// </summary>
 	/// <typeparam name="TPoco"></typeparam>
 	public class UpdateColumnSetters<TPoco>
@@ -19,14 +18,12 @@ namespace JPB.DataAccess.Query.Operators
 		}
 
 		/// <summary>
-		///		Syntax for setting the Entitys
+		///     Syntax for setting the Entitys
 		/// </summary>
+		[PublicAPI]
 		public SetValueForUpdateQuery<TPoco> Set
 		{
-			get
-			{
-				return new SetValueForUpdateQuery<TPoco>(_queryBuilder);
-			}
+			get { return new SetValueForUpdateQuery<TPoco>(_queryBuilder); }
 		}
 	}
 }

@@ -50,33 +50,6 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <param name="classInfo">The class information.</param>
-		/// <param name="primaryKey"></param>
-		/// <returns></returns>
-		/// <exception cref="NotSupportedException"></exception>
-		[Obsolete("Duplicate. Use CreateDelete.", true)]
-		public static IDbCommand CreateDeleteSimple(IDatabase db, DbClassInfoCache classInfo, object primaryKey)
-		{
-			if (primaryKey == null)
-			{
-				return db.CreateCommand("DELETE FROM " + classInfo.TableName);
-			}
-
-			if (classInfo.PrimaryKeyProperty == null)
-			{
-				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported",
-				classInfo.Name));
-			}
-			var proppk = classInfo.PrimaryKeyProperty.DbName;
-			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
-			return db.CreateCommandWithParameterValues(query,
-				new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, primaryKey));
-		}
-
-		/// <summary>
-		///     Creates a Delete statement for the given entry
-		/// </summary>
-		/// <param name="db">The database.</param>
-		/// <param name="classInfo">The class information.</param>
 		/// <param name="entry">The entry.</param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
@@ -84,16 +57,17 @@ namespace JPB.DataAccess.Manager
 		{
 			if (entry == null)
 			{
-				return db.CreateCommand("DELETE FROM " + classInfo.TableName);
+				return db.CreateCommand("DELETE FROM [" + classInfo.TableName.TrimAlias() + "]");
 			}
 
 			if (classInfo.PrimaryKeyProperty == null)
 			{
-				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplyed. Operation is not supported",
+				throw new NotSupportedException(string.Format("No Primary key on '{0}' was supplied. Operation is not supported",
 				classInfo.Name));
 			}
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
-			var query = "DELETE FROM " + classInfo.TableName + " WHERE " + proppk + " = @0";
+			var query = "DELETE FROM [" + classInfo.TableName.TrimAlias() + "] " +
+			            "WHERE [" + proppk.TrimAlias() + "] = @0";
 			return db.CreateCommandWithParameterValues(query,
 				new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
 		}

@@ -71,7 +71,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				Assert.That(bookWithFkImagese.BookId, Is.EqualTo(addBook));
 				Assert.That(bookWithFkImagese.Images, Is.Not.Null);
 				Assert.That(bookWithFkImagese.Images.Count, Is.EqualTo(10));
-				var bookOnId = DbAccess.Select<Book>(addBook);
+				var bookOnId = DbAccess.SelectSingle<Book>(addBook);
 				Assert.That(bookWithFkImagese.Text, Is.EqualTo(bookOnId.Text));
 
 				var imagesOfThatBook = DbAccess.Query().Select.Table<Image>()
@@ -242,6 +242,52 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 
 			Assert.That(books, Is.Not.Null);
 			Assert.That(books.Book.Text, Is.EqualTo("Test"));
+
+			books = Measure(() => CreateQuery()
+				.Select.Table<ImageWithFkBooks>()
+				.Join(nameof(ImageWithFkBooks.Book))
+				.Where
+				.Column($"{nameof(ImageWithFkBooks.Book)}.{nameof(ImageWithFkBooks.Book.Text)}").Is.EqualsTo("Test")
+				.ToArray()
+				.FirstOrDefault());
+
+			Assert.That(books, Is.Not.Null);
+			Assert.That(books.Book.Text, Is.EqualTo("Test"));
+		}
+
+		[Test]
+		public void SelectChildCondition()
+		{
+			var book = DbAccess.InsertWithSelect(new Book()
+			{
+				Text = "Test1"
+			});
+			book = DbAccess.InsertWithSelect(new Book()
+			{
+				Text = "Test"
+			});
+			var image = DbAccess.InsertWithSelect(new Image()
+			{
+				IdBook = book.BookId,
+				Text = "ImageOne"
+			});
+			var image2 = DbAccess.InsertWithSelect(new Image()
+			{
+				IdBook = book.BookId,
+				Text = "ImageTow"
+			});
+
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join(e => e.Images)
+				.Where
+				.Column(f => f.Images.Type.Text).Is.EqualsTo(image.Text)
+				.ToArray()
+				.FirstOrDefault());
+
+			Assert.That(books, Is.Not.Null);
+			Assert.That(books.Text, Is.EqualTo("Test"));
+			Assert.That(books.Images.Count, Is.EqualTo(1));
 		}
 
 		[Test]
@@ -341,6 +387,38 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				}
 			}
 		}
+		
+		[Test]
+		public void JoinChildAndThenParentAsString()
+		{
+			DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+			var books = Measure(() => CreateQuery()
+				.Select.Table<BookWithFkImages>()
+				.Join("Images.Type.Book")
+				.ToArray());
+
+			Assert.That(books, Is.Not.Null);
+
+			var allBooks = DbAccess.Select<Book>();
+			var allImages = DbAccess.Select<Image>();
+
+			foreach (var book in books)
+			{
+				Assert.That(book, Is.Not.Null);
+				Assert.That(book.Text, Is.Not.Null);
+				
+				Assert.That(book.Images, Is.Not.Null);
+				Assert.That(book.Images, Is.Not.Empty);
+
+				var imgsOfBook = allImages.Where(f => f.IdBook == book.BookId);
+				foreach (var image in imgsOfBook)
+				{
+					var imageInBook = book.Images.FirstOrDefault(f => f.ImageId == image.ImageId);
+					Assert.That(imageInBook, Is.Not.Null);
+					Assert.That(imageInBook.Text, Is.EqualTo(image.Text));
+				}
+			}
+		}
 
 		[Test]
 		public void JoinEmptyParent()
@@ -385,7 +463,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			DataMigrationHelper.AddBooks(250, DbAccess);
 			var books = Measure(() => CreateQuery()
 				.Select.Table<BookWithFkImages>()
-				.Join(f => f.Images.Type.Book, JoinMode.FullOuter)
+				.Join(f => f.Images.Type.Book, JoinMode.Left)
 				.Join(f => f.User)
 				.Join(f => f.User1)
 				.ToArray());
@@ -399,7 +477,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			DataMigrationHelper.AddImages(250, DbAccess);
 			var books = Measure(() => CreateQuery()
 				.Select.Table<ImageWithFkBooks>()
-				.Join(f => f.Book, JoinMode.FullOuter)
+				.Join(f => f.Book, JoinMode.Left)
 				.ToArray());
 
 			Assert.That(books, Is.Not.Null);
@@ -473,7 +551,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var forResult = -1;
 			var deSelect = DbAccess.Select<Users>();
 			forResult = CreateQuery().Count.Table<Users>()
-				.ForResult(_asyncEnumeration)
+				.ExecutionMode(_asyncEnumeration)
 				.FirstOrDefault();
 
 			Assert.That(runPrimetivSelect, Is.EqualTo(forResult));
@@ -484,7 +562,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void ForginKeyTest()
 		{
 			var addBooksWithImage = DataMigrationHelper.AddBooksWithImage(1, 20, DbAccess);
-			var array = CreateQuery().Select.Table<Image>().Where.ForginKey<Book>().Is.Not.Null.ForResult(_asyncEnumeration).ToArray();
+			var array = CreateQuery().Select.Table<Image>().Where.ForginKey<Book>().Is.Not.Null.ExecutionMode(_asyncEnumeration).ToArray();
 			Assert.That(array, Is.Not.Empty);
 			Assert.That(array[0].IdBook, Is.EqualTo(addBooksWithImage[0]));
 		}
@@ -509,12 +587,12 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 							.Select.Table<Users>()
 							.Where.Column(f => f.UserID)
 							.Is.In(elementsToRead.ToArray())
-							.ForResult(_asyncEnumeration)
+							.ExecutionMode(_asyncEnumeration)
 							.ToArray();
-			var directQuery = DbAccess.SelectNative<Users>(UsersMeta.SelectStatement
-														   + string.Format(" WHERE User_ID IN ({0})",
-														   elementsToRead.Select(f => f.ToString())
-																		 .Aggregate((e, f) => e + "," + f)));
+			var directQuery = DbAccess.RunSelect<Users>(DbAccess.Database.CreateCommand(UsersMeta.SelectStatement
+			                                                                               + string.Format(" WHERE User_ID IN ({0})",
+				                                                                               elementsToRead.Select(f => f.ToString())
+					                                                                               .Aggregate((e, f) => e + "," + f))));
 
 			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
 
@@ -535,9 +613,9 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var elementProducer =
 					CreateQuery().Select.Table<Users>().Order.By(s => s.UserName)
 							.ThenBy(f => f.UserID)
-								 .ForResult(_asyncEnumeration).ToArray();
+								 .ExecutionMode(_asyncEnumeration).ToArray();
 			var directQuery =
-					DbAccess.SelectNative<Users>(UsersMeta.SelectStatement + " ORDER BY UserName, User_ID");
+					DbAccess.RunSelect<Users>(DbAccess.Database.CreateCommand(UsersMeta.SelectStatement + " ORDER BY UserName, User_ID"));
 
 			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
 
@@ -620,30 +698,27 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				if (DbAccess.DbAccessType == DbAccessType.MsSql)
 				{
 					countOfImages =
-						DbAccess.RunPrimetivSelect<int>(
-							string.Format("SELECT COUNT(1) FROM {0} WHERE {0}.{1} = {2}",
-								ImageMeta.TableName, ImageMeta.ForgeinKeyName,
-								id))[0];
+						DbAccess.RunSelect<int>(
+							DbAccess.Database.CreateCommand(
+								$"SELECT COUNT(1) FROM {ImageMeta.TableName} WHERE {ImageMeta.TableName}.{ImageMeta.ForgeinKeyName} = {id}"))[0];
 				}
 
 				if (DbAccess.DbAccessType == DbAccessType.SqLite)
 				{
 					countOfImages =
 						(int)
-						DbAccess.RunPrimetivSelect<long>(
-							string.Format("SELECT COUNT(1) FROM {0} WHERE {0}.{1} = {2}",
-								ImageMeta.TableName, ImageMeta.ForgeinKeyName,
-								id))[0];
+						DbAccess.RunSelect<long>(
+							DbAccess.Database.CreateCommand($"SELECT COUNT(1) FROM {ImageMeta.TableName} WHERE {ImageMeta.TableName}.{ImageMeta.ForgeinKeyName} = {id}"))[0];
 				}
 
 				Assert.That(countOfImages, Is.EqualTo(2));
 				var deSelect =
-						DbAccess.SelectNative<Image>(string.Format("{2} AS b WHERE b.{0} = {1}",
-						ImageMeta.ForgeinKeyName, id, ImageMeta.SelectStatement));
+						DbAccess.RunSelect<Image>(
+							DbAccess.Database.CreateCommand($"{ImageMeta.SelectStatement} AS b WHERE b.{ImageMeta.ForgeinKeyName} = {id}"));
 				Assert.That(deSelect, Is.Not.Empty);
 				Assert.That(deSelect.Length, Is.EqualTo(countOfImages));
-				var book = DbAccess.Select<Book>(id);
-				var forResult = CreateQuery().Select.Table<Image>().In(book).ForResult(_asyncEnumeration).ToArray();
+				var book = DbAccess.SelectSingle<Book>(id);
+				var forResult = CreateQuery().Select.Table<Image>().In(book).ExecutionMode(_asyncEnumeration).ToArray();
 				Assert.That(forResult, Is.Not.Empty);
 				Assert.That(forResult.Count, Is.EqualTo(countOfImages));
 			}
@@ -651,15 +726,14 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 
 		private int CountUsersSqlStatement(int? imageId = null)
 		{
-			string query;
-			query = $"SELECT COUNT(1) FROM {UsersMeta.TableName}";
+			var query = DbAccess.Database.CreateCommand($"SELECT COUNT(1) FROM {UsersMeta.TableName}");
 			switch (DbAccess.DbAccessType)
 			{
 				case DbAccessType.MsSql:
-					return DbAccess.RunPrimetivSelect<int>(query)[0];
+					return DbAccess.RunSelect<int>(query)[0];
 				case DbAccessType.SqLite:
 				case DbAccessType.MySql:
-					return (int)DbAccess.RunPrimetivSelect<long>(query)[0];
+					return (int)DbAccess.RunSelect<long>(query)[0];
 			}
 
 			return -1;
@@ -673,7 +747,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var countOfImages = CountUsersSqlStatement();
 
 			var deSelect = DbAccess.Select<Users>();
-			var forResult = CreateQuery().Select.Table<Users>().ForResult(_asyncEnumeration).ToArray();
+			var forResult = CreateQuery().Select.Table<Users>().ExecutionMode(_asyncEnumeration).ToArray();
 
 			Assert.That(countOfImages, Is.EqualTo(forResult.Count()));
 			Assert.That(deSelect.Length, Is.EqualTo(forResult.Count()));
@@ -736,7 +810,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			var countOfUsers = CountUsersSqlStatement();
 
 			var deSelect = DbAccess.Select<Users>();
-			var forResult = CreateQuery().Select.Table<Users>().ForResult(_asyncEnumeration).ToArray();
+			var forResult = CreateQuery().Select.Table<Users>().ExecutionMode(_asyncEnumeration).ToArray();
 
 			Assert.That(countOfUsers, Is.EqualTo(forResult.Count()));
 			Assert.That(deSelect.Length, Is.EqualTo(forResult.Count()));
@@ -761,7 +835,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				.Where.Column(f => f.UserName)
 				.Is
 				.EqualsTo(contentConditionValue.UserName)
-				.ForResult(_asyncEnumeration)
+				.ExecutionMode(_asyncEnumeration)
 				.ToArray()
 				.FirstOrDefault();
 
@@ -800,7 +874,10 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void Delete()
 		{
 			var addUsers = DataMigrationHelper.AddUsers(1, DbAccess)[0];
-			CreateQuery().Delete<Users>().Where.Column(f => f.UserID).Is.EqualsTo(addUsers).ExecuteNonQuery();
+			CreateQuery().Delete<Users>()
+				.Where
+				.Column(f => f.UserID).Is.EqualsTo(addUsers)
+				.ExecuteNonQuery();
 			Assert.That(CreateQuery().Count.Table<Users>().FirstOrDefault(), Is.EqualTo(0));
 		}
 
@@ -808,12 +885,12 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void Update()
 		{
 			var addUsers = DataMigrationHelper.AddUsers(1, DbAccess)[0];
-			var user = DbAccess.Select<Users>(addUsers);
+			var user = DbAccess.SelectSingle<Users>(addUsers);
 			var userIdPre = user.UserID;
 			var usernamePre = user.UserName;
 			user.UserName = Guid.NewGuid().ToString();
 			CreateQuery().Update.Entity(user).ExecuteNonQuery();
-			user = DbAccess.Select<Users>(addUsers);
+			user = DbAccess.SelectSingle<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));
 		}
@@ -822,7 +899,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void UpdateExplicit()
 		{
 			var addUsers = DataMigrationHelper.AddUsers(1, DbAccess)[0];
-			var user = DbAccess.Select<Users>(addUsers);
+			var user = DbAccess.SelectSingle<Users>(addUsers);
 			var userIdPre = user.UserID;
 			var usernamePre = user.UserName;
 			user.UserName = Guid.NewGuid().ToString();
@@ -832,7 +909,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				.Column(f => f.UserName).Value(user.UserName)
 				.ExecuteNonQuery());
 
-			user = DbAccess.Select<Users>(addUsers);
+			user = DbAccess.SelectSingle<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Not.EqualTo(usernamePre));
 
@@ -840,7 +917,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 				.Column(f => f.UserName).Value(null)
 				.ExecuteNonQuery());
 
-			user = DbAccess.Select<Users>(addUsers);
+			user = DbAccess.SelectSingle<Users>(addUsers);
 			Assert.That(user.UserID, Is.EqualTo(userIdPre));
 			Assert.That(user.UserName, Is.Null);
 		}

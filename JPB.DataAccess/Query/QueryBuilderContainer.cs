@@ -18,18 +18,10 @@ namespace JPB.DataAccess.Query
 	/// </summary>
 	public abstract class QueryBuilderContainer : IQueryBuilder
 	{
-		internal QueryBuilderContainer(DbAccessLayer database, Type type) : this(new InternalContainerContainer(database, type))
-		{
-			if (database == null)
-			{
-				throw new ArgumentNullException(nameof(database), "Please use a valid Database");
-			}
-			if (database == null)
-			{
-				throw new ArgumentNullException(nameof(type), "Please use a valid Type");
-			}
-		}
-
+		/// <summary>
+		///		Copy Constructor
+		/// </summary>
+		/// <param name="database"></param>
 		internal QueryBuilderContainer(IQueryContainer database)
 		{
 			if (database == null)
@@ -40,26 +32,16 @@ namespace JPB.DataAccess.Query
 			ContainerObject = database.Clone();
 		}
 
+		/// <summary>
+		///		Copy Constructor
+		/// </summary>
+		/// <param name="database"></param>
 		internal QueryBuilderContainer(IQueryBuilder database) : this(database.ContainerObject)
 		{
 			if (database == null)
 			{
 				throw new ArgumentNullException(nameof(database), "Please use a valid Database");
 			}
-		}
-
-		internal QueryBuilderContainer(IQueryBuilder database, Type type) : this(database.ContainerObject)
-		{
-			if (database == null)
-			{
-				throw new ArgumentNullException(nameof(database), "Please use a valid Database");
-			}
-			if (database == null)
-			{
-				throw new ArgumentNullException(nameof(type), "Please use a valid Type");
-			}
-
-			ContainerObject.ForType = type;
 		}
 
 		/// <inheritdoc />
@@ -74,7 +56,7 @@ namespace JPB.DataAccess.Query
 		/// <inheritdoc />
 		public IQueryBuilder Add(IQueryPart queryPart)
 		{
-			var target = CloneWith(this);
+			var target = new QueryBuilderX(this);
 			target.ContainerObject.Add(queryPart);
 			return target;
 		}
@@ -92,13 +74,7 @@ namespace JPB.DataAccess.Query
 
 		/// <inheritdoc />
 		public IQueryContainer ContainerObject { get; protected set; }
-
-		/// <inheritdoc />
-		public virtual IEnumerable<E> ForResult<E>(bool async = true)
-		{
-			return new QueryEnumeratorEx<E>(this, async);
-		}
-
+		
 		/// <summary>
 		/// Runs the Query that does not expect to have an result
 		/// </summary>
@@ -106,7 +82,7 @@ namespace JPB.DataAccess.Query
 		{
 			var query = ContainerObject.Compile(out var columns);
 			var dbCommand 
-				= ContainerObject.AccessLayer.Database.CreateCommandWithParameterValues(query.Query, query.Parameters);
+				= ContainerObject.AccessLayer.Database.CreateCommandWithParameterValues(query.Query, query.Parameters.ToArray());
 			
 			foreach (var queryCommandInterceptor in Interceptors)
 			{
@@ -119,21 +95,6 @@ namespace JPB.DataAccess.Query
 			}
 			ContainerObject.AccessLayer.ExecuteGenericCommand(dbCommand);
 		}
-
-		/// <inheritdoc />
-		public IEnumerator<TPoco> GetEnumerator<TPoco>()
-		{
-			return GetEnumerator<TPoco>(ContainerObject.AccessLayer.Async);
-		}
-
-		/// <inheritdoc />
-		public virtual IEnumerator<TPoco> GetEnumerator<TPoco>(bool async)
-		{
-			return new QueryEagerEnumerator<TPoco>(ContainerObject, async);
-		}
-
-		/// <inheritdoc />
-		public abstract IQueryBuilder CloneWith<T>(T instance) where T : IQueryBuilder;
 
 		/// <inheritdoc />
 		public override string ToString()

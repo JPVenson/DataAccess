@@ -78,15 +78,15 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DataMigrationHelper.AddUsers(100, DbAccess);
 			var firstAvaibleUser =
-				DbAccess.Query().Select.Table<Base.TestModels.CheckWrapperBaseTests.Users>().LimitBy(1).ForResult<Users>().First();
+				DbAccess.Query().Select.Table<Users>().LimitBy(1).First();
 
-			var refSelect = DbAccess.Select<Users_PK>(firstAvaibleUser.UserID);
+			var refSelect = DbAccess.SelectSingle<Users_PK>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(refSelect);
 
-			var userSelectAlternatingProperty = DbAccess.Select<Users_PK_IDFM>(firstAvaibleUser.UserID);
+			var userSelectAlternatingProperty = DbAccess.SelectSingle<Users_PK_IDFM>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(userSelectAlternatingProperty);
 
-			var userSelectStaticSel = DbAccess.Select<Users_PK_IDFM_CLASSEL>(firstAvaibleUser.UserID);
+			var userSelectStaticSel = DbAccess.SelectSingle<Users_PK_IDFM_CLASSEL>(firstAvaibleUser.UserID);
 			Assert.IsNotNull(userSelectStaticSel);
 		}
 
@@ -96,22 +96,22 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
 
-			var refSelect = DbAccess.SelectNative<Users>(UsersMeta.SelectStatement);
+			var refSelect = DbAccess.RunSelect<Users>(DbAccess.Database.CreateCommand(UsersMeta.SelectStatement));
 			Assert.IsTrue(refSelect.Any());
 
 			var anyId = refSelect.FirstOrDefault().UserID;
 			Assert.AreNotEqual(anyId, 0);
 
 			refSelect =
-				DbAccess.SelectNative<Users>(
-					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-					new QueryParameter("paramA", anyId));
+				DbAccess.RunSelect<Users>(
+					DbAccess.Database.CreateCommandWithParameterValues($"{UsersMeta.SelectStatement} WHERE {UsersMeta.PrimaryKeyName} = @paramA",
+						new QueryParameter("paramA", anyId)));
 			Assert.IsTrue(refSelect.Length > 0);
 
 			refSelect =
-				DbAccess.SelectNative<Users>(
-					UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-					new { paramA = anyId });
+				DbAccess.RunSelect<Users>(
+					DbAccess.Database.CreateCommandWithParameterValues(UsersMeta.SelectStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
+						new QueryParameter("paramA", anyId)));
 			Assert.IsTrue(refSelect.Length > 0);
 		}
 
@@ -119,22 +119,23 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		public void SelectPrimitivSelect()
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
-			var refSelect = DbAccess.RunPrimetivSelect<long>(UsersMeta.SelectPrimaryKeyStatement);
+			var refSelect = DbAccess
+				.RunSelect<long>(DbAccess.Database.CreateCommand(UsersMeta.SelectPrimaryKeyStatement));
 			Assert.IsTrue(refSelect.Any());
 
 			var anyId = refSelect.FirstOrDefault();
 			Assert.AreNotEqual(anyId, 0);
 
 			refSelect =
-				DbAccess.RunPrimetivSelect<long>(
-					UsersMeta.SelectPrimaryKeyStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-					new QueryParameter("paramA", anyId));
+				DbAccess.RunSelect<long>(
+					DbAccess.Database.CreateCommandWithParameterValues($"{UsersMeta.SelectPrimaryKeyStatement} WHERE {UsersMeta.PrimaryKeyName} = @paramA",
+					new QueryParameter("paramA", anyId)));
 			Assert.IsTrue(refSelect.Length > 0);
 
 			refSelect =
-				DbAccess.RunPrimetivSelect<long>(
-					UsersMeta.SelectPrimaryKeyStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
-					new { paramA = anyId });
+				DbAccess.RunSelect<long>(
+					DbAccess.Database.CreateCommandWithParameterValues(UsersMeta.SelectPrimaryKeyStatement + " WHERE " + UsersMeta.PrimaryKeyName + " = @paramA",
+						new QueryParameter("paramA", anyId)));
 			Assert.IsTrue(refSelect.Length > 0);
 		}
 
@@ -143,23 +144,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DataMigrationHelper.AddUsers(1, DbAccess);
 			Assert.That(() => DbAccess.Select<UsersWithoutProperties>(), Is.Not.Null.And.Not.Empty);
-		}
-
-		[Test]
-		public void SelectWhereBase()
-		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
-			var refSelect = DbAccess.SelectWhere<Users>("UserName IS NOT NULL");
-			Assert.IsTrue(refSelect.Length > 0);
-
-			var testInsertName = Guid.NewGuid().ToString();
-			var testUser = DbAccess.InsertWithSelect(new Users { UserName = testInsertName });
-			Assert.IsNotNull(testUser);
-			Assert.AreNotEqual(testUser.UserID, default(long));
-
-			var selTestUser = DbAccess.SelectWhere<Users>("User_ID = @id", new { id = testUser.UserID }).FirstOrDefault();
-			Assert.AreEqual(selTestUser.UserName, testUser.UserName);
-			Assert.AreEqual(selTestUser.UserID, testUser.UserID);
 		}
 
 		[Test]

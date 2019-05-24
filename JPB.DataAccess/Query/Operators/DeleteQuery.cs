@@ -14,38 +14,9 @@ namespace JPB.DataAccess.Query.Operators
 	public class DeleteQuery<TPoco> : QueryBuilderX
 	{
 		/// <inheritdoc />
-		public DeleteQuery(DbAccessLayer database, Type type) : base(database, type)
-		{
-		}
-
-		/// <inheritdoc />
-		public DeleteQuery(IQueryContainer database) : base(database)
-		{
-		}
-
-		/// <inheritdoc />
 		public DeleteQuery(IQueryBuilder database) : base(database)
 		{
 		}
-
-		/// <inheritdoc />
-		public DeleteQuery(IQueryBuilder database, Type type) : base(database, type)
-		{
-		}
-
-		/// <inheritdoc />
-		public DeleteQuery(DbAccessLayer database) : base(database)
-		{
-		}
-
-
-		/// <summary>
-		///     Gets the current identifier.
-		/// </summary>
-		/// <value>
-		///     The current identifier.
-		/// </value>
-		public string CurrentIdentifier { get; private set; }
 
 		/// <summary>
 		///     Adds a SQL WHERE statement

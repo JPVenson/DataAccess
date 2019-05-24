@@ -19,13 +19,10 @@ namespace JPB.DataAccess.Query.Operators
     ///		Defines a Query that can return any count of <typeparamref name="TPoco"/>
     /// </summary>
     /// <typeparam name="TPoco"></typeparam>
-    public class ElementResultQuery<TPoco> : IdentifyableQuery<TPoco>, IElementProducer<TPoco>, IEnumerable<TPoco>
+    public class ElementResultQuery<TPoco> : IdentifyableQuery<TPoco>, 
+        IElementProducer<TPoco>,
+        IEnumerableQuery<TPoco>
     {
-        /// <inheritdoc />
-        public ElementResultQuery(IQueryBuilder database, string currentIdentifier) : base(database, currentIdentifier)
-        {
-        }
-
         /// <inheritdoc />
         public ElementResultQuery(IQueryBuilder database) : base(database)
         {
@@ -66,6 +63,18 @@ namespace JPB.DataAccess.Query.Operators
         }
 
         /// <summary>
+        ///		Sets the ContainerObject`s ExecuteAsync
+        /// </summary>
+        /// <param name="async"></param>
+        /// <returns></returns>
+        public ElementResultQuery<TPoco> ExecutionMode(bool async)
+        {
+            ContainerObject.ExecuteAsync = async;
+            return this;
+        }
+
+
+        /// <summary>
         ///     Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
@@ -73,7 +82,7 @@ namespace JPB.DataAccess.Query.Operators
         /// </returns>
         public IEnumerator<TPoco> GetEnumerator()
         {
-            return base.GetEnumerator<TPoco>();
+            return new QueryEagerEnumerator<TPoco>(ContainerObject, true);
         }
 
         /// <summary>
@@ -85,27 +94,6 @@ namespace JPB.DataAccess.Query.Operators
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        /// <summary>
-        ///     Executes the Current QueryBuilder by setting the type
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<TPoco> ForResult(bool async = true)
-        {
-            return new QueryEnumeratorEx<TPoco>(this, async);
-        }
-
-        private class QueryBuilderContainerDebugView : ElementResultQuery<TPoco>
-        {
-            public QueryBuilderContainerDebugView(ElementResultQuery<TPoco> container) : base(container)
-            {
-            }
-
-            public new IEnumerator<TPoco> GetEnumerator()
-            {
-                return base.GetEnumerator<TPoco>(false);
-            }
         }
     }
 }

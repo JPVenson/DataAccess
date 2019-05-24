@@ -103,13 +103,7 @@ namespace JPB.DataAccess.Manager
 					var query = CreateSelect(entry.GetType(), entry.GetPK(Config));
 					RaiseUpdate(entry, query);
 					var select = RunSelect<T>(query).FirstOrDefault();
-
-					var updated = false;
-					DataConverterExtensions.CopyPropertys(entry, select, Config);
-
-					LoadNavigationProps(select);
-
-					return updated;
+					return DataConverterExtensions.CopyPropertys(entry, select, Config);
 				}
 				return false;
 			});
@@ -222,7 +216,7 @@ namespace JPB.DataAccess.Manager
 
 			sb.Append(string.Format("WHERE {0} = @pkValue ", pk));
 
-			return database.CreateCommandWithParameterValues(sb.ToString(), para);
+			return database.CreateCommandWithParameterValues(sb.ToString(), para.ToArray());
 		}
 
 		/// <summary>
@@ -267,7 +261,7 @@ namespace JPB.DataAccess.Manager
 				}
 			}
 
-			return database.CreateCommandWithParameterValues(sb.ToString(), para);
+			return database.CreateCommandWithParameterValues(sb.ToString(), para.ToArray());
 		}
 
 		/// <summary>

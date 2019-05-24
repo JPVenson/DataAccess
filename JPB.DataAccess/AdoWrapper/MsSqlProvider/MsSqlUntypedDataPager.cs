@@ -148,14 +148,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// <param name="dbAccess"></param>
 		void IDataPager<T>.LoadPage(DbAccessLayer dbAccess)
 		{
-			if (string.IsNullOrEmpty(SqlVersion))
-			{
-#pragma warning disable 618
-				SqlVersion = dbAccess.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')")
-					.FirstOrDefault();
-#pragma warning restore 618
-			}
-
 			SyncHelper(CurrentPageItems.Clear);
 			TotalItemCount = CommandQuery.CountInt().FirstOrDefault();
 			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);

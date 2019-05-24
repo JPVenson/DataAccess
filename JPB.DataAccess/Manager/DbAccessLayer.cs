@@ -19,6 +19,7 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbCollection;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Operators;
 
@@ -27,7 +28,7 @@ using JPB.DataAccess.Query.Operators;
 namespace JPB.DataAccess.Manager
 {
 	/// <summary>
-	///     Contanins some Helper mehtods for CRUD operation
+	///     Contanins some Helper methods for CRUD operation
 	/// </summary>
 	[DebuggerDisplay(
 		"DB={" + nameof(DatabaseStrategy) +
@@ -382,6 +383,16 @@ namespace JPB.DataAccess.Manager
 
 			return ExecuteGenericCommand(query,
 				(IEnumerable<IQueryParameter>) DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter));
+		}
+
+		/// <summary>
+		///     Wraps a QueryCommand and its Paramters from Dynamic and then executes it
+		/// </summary>
+		/// <returns></returns>
+		public int ExecuteGenericCommand(FormattableString query)
+		{
+			var formatter = FormattableStringCompositor.Factory(query);
+			return ExecuteGenericCommand(formatter.Query, formatter.QueryParameters);
 		}
 
 		/// <summary>

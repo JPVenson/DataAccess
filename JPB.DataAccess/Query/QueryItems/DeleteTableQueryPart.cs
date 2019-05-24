@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.Contacts;
@@ -18,20 +19,32 @@ namespace JPB.DataAccess.Query.QueryItems
 		public DeleteTableQueryPart(QueryIdentifier target,
 			QueryIdentifier alias,
 			DbClassInfoCache tableInfo,
-			IQueryContainer queryContainer)
+			IQueryContainer queryContainer, 
+			IEnumerable<ColumnInfo> columns)
 		{
 			Alias = alias;
-			_columns = DbAccessLayer.GetSelectableColumnsOf(tableInfo)
-				.Select(e => new ColumnInfo(e, Alias, queryContainer))
-				.ToList();
+			_columns = columns;
 			_target = target;
 		}
 
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			return new QueryFactoryResult($"DELETE [{Alias.GetAlias().TrimAlias()}] " +
-			                              $"FROM [{_target.GetAlias().TrimAlias()}] " +
-			                              $"AS [{Alias.GetAlias().TrimAlias()}]");
+			switch (container.AccessLayer.DbAccessType)
+			{
+				case DbAccessType.Experimental:
+				case DbAccessType.Unknown:
+				case DbAccessType.MsSql:
+				case DbAccessType.MySql:
+				case DbAccessType.OleDb:
+				case DbAccessType.Obdc:
+					return new QueryFactoryResult($"DELETE [{Alias.GetAlias().TrimAlias()}] " +
+					                              $"FROM [{_target.GetAlias().TrimAlias()}] " +
+					                              $"AS [{Alias.GetAlias().TrimAlias()}]");
+				case DbAccessType.SqLite:
+					return new QueryFactoryResult($"DELETE FROM [{_target.GetAlias().TrimAlias()}] ");
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		public QueryIdentifier Alias { get; }

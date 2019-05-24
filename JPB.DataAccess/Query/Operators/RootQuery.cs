@@ -1,7 +1,6 @@
 ﻿#region
 
 using System;
-using System.Data;
 using System.Linq;
 using JetBrains.Annotations;
 using JPB.DataAccess.Helper;
@@ -23,67 +22,15 @@ namespace JPB.DataAccess.Query.Operators
 	/// <seealso cref="JPB.DataAccess.Query.Contracts.IRootQuery" />
 	public class RootQuery : QueryBuilderX, IRootQuery
 	{
-		/// <summary>
-		///     For Internal Usage only
-		/// </summary>
-		public RootQuery(DbAccessLayer database, Type type) : base(database, type)
-		{
-		}
-
-		/// <summary>
-		///     For Internal Usage only
-		/// </summary>
-		public RootQuery(IQueryContainer database) : base(database)
-		{
-		}
-
-		/// <summary>
-		///     For Internal Usage only
-		/// </summary>
+		/// <inheritdoc />
 		public RootQuery(IQueryBuilder database) : base(database)
 		{
 		}
 
-		/// <summary>
-		///     For Internal Usage only
-		/// </summary>
-		public RootQuery(IQueryBuilder database, Type type) : base(database, type)
-		{
-		}
-
-		/// <summary>
-		///     For Internal Usage only
-		/// </summary>
+		/// <inheritdoc />
 		public RootQuery(DbAccessLayer database) : base(database)
 		{
-		}
 
-		/// <summary>
-		/// Changes the ResultType property in a Fluid syntax
-		/// </summary>
-		/// <param name="resultType"></param>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public RootQuery ConfigType(Type resultType)
-		{
-			if (resultType == null)
-			{
-				throw new ArgumentNullException(nameof(resultType));
-			}
-			ContainerObject.ForType = resultType;
-			return this;
-		}
-
-		/// <summary>
-		/// Changes the AllowParamterRenaming flag in a Fluid syntax
-		/// </summary>
-		/// <param name="mode"></param>
-		/// <returns></returns>
-		[MustUseReturnValue]
-		public RootQuery ConfigAllowParamterRenaming(bool mode)
-		{
-			ContainerObject.AllowParamterRenaming = mode;
-			return this;
 		}
 
 		/// <summary>
@@ -143,14 +90,31 @@ namespace JPB.DataAccess.Query.Operators
 			ContainerObject.Interceptors
 				.Add(new EventPostProcessor(EventPostProcessor.EventType.Delete, ContainerObject.AccessLayer));
 			var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(T));
+			
+			var targetAlias = ContainerObject.CreateTableAlias(dbClassInfoCache.TableName);
+			var queryIdentifier = new QueryIdentifier()
+			{
+				Value = dbClassInfoCache.TableName,
+				QueryIdType = QueryIdentifier.QueryIdTypes.Table
+			};
+
+			switch (ContainerObject.AccessLayer.DbAccessType)
+			{
+				case DbAccessType.Experimental:
+				case DbAccessType.Unknown:
+				case DbAccessType.OleDb:
+				case DbAccessType.Obdc:
+				case DbAccessType.SqLite:
+					targetAlias.Value = queryIdentifier.Value;
+					break;
+			}
+
 			return new DeleteQuery<T>(
-				Add(new DeleteTableQueryPart(new QueryIdentifier()
-					{
-						Value = dbClassInfoCache.TableName
-					},
-					ContainerObject.CreateTableAlias(dbClassInfoCache.TableName), 
+				Add(new DeleteTableQueryPart(queryIdentifier,
+					targetAlias, 
 					dbClassInfoCache,
-					ContainerObject)));
+					ContainerObject,
+					UpdateTableWithQueryPart.ColumsOfType(dbClassInfoCache, targetAlias, queryIdentifier, ContainerObject))));
 		}
 
 		/// <summary>
@@ -180,79 +144,6 @@ namespace JPB.DataAccess.Query.Operators
 			out QueryIdentifier cteName)
 		{
 			return WithCte(commandQueryProducer(new RootQuery(this)), out cteName);
-		}
-	}
-
-	internal class EventPostProcessor : IQueryCommandInterceptor
-	{
-		private readonly EventType _handler;
-		private readonly DbAccessLayer _source;
-
-		internal enum EventType
-		{
-			Select,
-			Insert,
-			Delete,
-			Update,
-			Non
-		}
-
-		internal EventPostProcessor(EventType handler, DbAccessLayer source)
-		{
-			_handler = handler;
-			_source = source;
-		}
-
-
-		public IDbCommand QueryExecuting(IDbCommand command)
-		{
-			switch (_handler)
-			{
-				case EventType.Select:
-					_source.RaiseSelect(command);
-					break;
-				case EventType.Insert:
-					_source.RaiseInsert(this, command);
-					break;
-				case EventType.Delete:
-					_source.RaiseDelete(this, command);
-					break;
-				case EventType.Update:
-					_source.RaiseUpdate(this, command);
-					break;
-				case EventType.Non:
-					_source.RaiseNoResult(this, command);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-			return command;
-		}
-
-		public IDbCommand NonQueryExecuting(IDbCommand command)
-		{
-			switch (_handler)
-			{
-				case EventType.Select:
-					_source.RaiseSelect(command);
-					break;
-				case EventType.Insert:
-					_source.RaiseInsert(this, command);
-					break;
-				case EventType.Delete:
-					_source.RaiseDelete(this, command);
-					break;
-				case EventType.Update:
-					_source.RaiseUpdate(this, command);
-					break;
-				case EventType.Non:
-					_source.RaiseNoResult(this, command);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-
-			return command;
 		}
 	}
 }

@@ -119,13 +119,13 @@ namespace JPB.DataAccess
 		internal static IDbCommand AppendSuffix(this IDatabase db, IDbCommand left, string suffix)
 		{
 			var commandText = left.CommandText;
-			var parameter = new List<QueryParameter>();
+			var parameter = new List<IQueryParameter>();
 			foreach (var param in left.Parameters.Cast<IDataParameter>())
 			{
 				commandText = commandText.Replace(param.ParameterName, param.ParameterName + suffix);
 				parameter.Add(new QueryParameter(param.ParameterName + suffix, param.Value, param.DbType));
 			}
-			return db.CreateCommandWithParameterValues(commandText, parameter);
+			return db.CreateCommandWithParameterValues(commandText, parameter.ToArray());
 		}
 
 		/// <summary>
@@ -274,7 +274,7 @@ namespace JPB.DataAccess
 				}
 			}
 			
-			return db.CreateCommandWithParameterValues(commandText.ToString(), parameter);
+			return db.CreateCommandWithParameterValues(commandText.ToString(), parameter.ToArray());
 		}
 
 		/// <summary>
@@ -380,7 +380,7 @@ namespace JPB.DataAccess
 					SourceType = values[i].Item1
 				});
 			}
-			return db.CreateCommandWithParameterValues(query, listofQueryParamter);
+			return db.CreateCommandWithParameterValues(query, listofQueryParamter.ToArray());
 		}
 
 		/// <summary>
@@ -394,7 +394,7 @@ namespace JPB.DataAccess
 		/// </summary>
 		/// <returns></returns>
 		public static IDbCommand CreateCommandWithParameterValues(this IDatabase db, string query,
-			IEnumerable<IQueryParameter> values)
+			params IQueryParameter[] values)
 		{
 			var cmd = CreateCommand(db, query);
 			if (values == null)
@@ -520,7 +520,7 @@ namespace JPB.DataAccess
 			var properties = CreateProperties(type, ignore);
 			if (properties.Any())
 			{
-				return properties.Aggregate((e, f) => e + ", " + f);
+				return properties.Aggregate((e, f) => $"[{e.TrimAlias()}], [{f.TrimAlias()}]");
 			}
 
 			return "";

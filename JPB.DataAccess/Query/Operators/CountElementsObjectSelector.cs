@@ -1,6 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Text;
+using JetBrains.Annotations;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
@@ -14,27 +15,7 @@ namespace JPB.DataAccess.Query.Operators
 	/// <seealso cref="JPB.DataAccess.Query.QueryBuilderX" />
 	public class CountElementsObjectSelector : QueryBuilderX
 	{
-		/// <summary>
-		///     Initializes a new instance of the <see cref="CountElementsObjectSelector" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		/// <param name="type">The type.</param>
-		public CountElementsObjectSelector(DbAccessLayer database, Type type) : base(database, type)
-		{
-		}
-
-		/// <summary>
-		///     Initializes a new instance of the <see cref="CountElementsObjectSelector" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		public CountElementsObjectSelector(IQueryContainer database) : base(database)
-		{
-		}
-
-		/// <summary>
-		///     Initializes a new instance of the <see cref="CountElementsObjectSelector" /> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
+		/// <inheritdoc />
 		public CountElementsObjectSelector(IQueryBuilder database) : base(database)
 		{
 		}
@@ -51,6 +32,7 @@ namespace JPB.DataAccess.Query.Operators
 		///     Counts all elements from a table
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public CountElementsObjectSelector Distinct
 		{
 			get

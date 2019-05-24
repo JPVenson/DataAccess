@@ -77,7 +77,7 @@ namespace JPB.DataAccess.Query
 			var query = _queryContainer.Compile(out var columns);
 			var dbCommand =
 				_queryContainer.AccessLayer.Database
-					.CreateCommandWithParameterValues(query.Query, query.Parameters);
+					.CreateCommandWithParameterValues(query.Query, query.Parameters.ToArray());
 			
 			foreach (var queryCommandInterceptor in _queryContainer.Interceptors)
 			{

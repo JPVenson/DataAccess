@@ -1,7 +1,7 @@
 ﻿namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
-	///     Defines mehtods for Logging
+	///     Defines methods for Logging
 	/// </summary>
 	public interface ILogger
 	{

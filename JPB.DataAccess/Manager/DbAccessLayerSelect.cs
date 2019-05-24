@@ -8,10 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.DbCollection;
-using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
@@ -24,11 +23,6 @@ namespace JPB.DataAccess.Manager
 {
 	public partial class DbAccessLayer
 	{
-		/// <summary>
-		///     If enabled Related structures will be loaded into the source object
-		/// </summary>
-		public bool ProcessNavigationPropertys { get; set; }
-
 		/// <summary>
 		///     Executes a IDbCommand that will return multibe result sets that will be parsed to the marsTypes in order they are
 		///     provided
@@ -60,6 +54,7 @@ namespace JPB.DataAccess.Manager
 		///     Execute select on a database with a standard Where [Primary Key] = <paramref name="pk" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public object Select(Type type, object pk)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, pk));
@@ -69,9 +64,10 @@ namespace JPB.DataAccess.Manager
 		///     Execute select on a database with a standard Where [Primary Key] = <paramref name="pk" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<object> SelectAsync(Type type, object pk)
 		{
-			return await SelectAsync(type, pk, LoadCompleteResultBeforeMapping);
+			return await SelectSingleAsync(type, pk, LoadCompleteResultBeforeMapping);
 		}
 
 		/// <summary>
@@ -81,6 +77,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[PublicAPI]
 		public T[] Select<T>()
 		{
 			return Select(typeof(T)).Cast<T>().ToArray();
@@ -93,6 +90,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<T[]> SelectAsync<T>()
 		{
 			return (await SelectAsync(typeof(T))).Cast<T>().ToArray();
@@ -105,9 +103,10 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public T Select<T>(object pk)
+		[PublicAPI]
+		public T SelectSingle<T>(object pk)
 		{
-			return AsyncHelper.WaitSingle(SelectAsync<T>(pk));
+			return AsyncHelper.WaitSingle(SelectSingleAsync<T>(pk));
 		}
 
 		/// <summary>
@@ -117,7 +116,8 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public async Task<T> SelectAsync<T>(object pk)
+		[PublicAPI]
+		public async Task<T> SelectSingleAsync<T>(object pk)
 		{
 			return (T) await SelectAsync(typeof(T), pk);
 		}
@@ -127,9 +127,10 @@ namespace JPB.DataAccess.Manager
 		///     Needs to define a PrimaryKey attribute inside <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		protected object Select(Type type, object pk, bool egarLoading)
+		[PublicAPI]
+		protected object SelectSingle(Type type, object pk, bool egarLoading)
 		{
-			return AsyncHelper.WaitSingle(SelectAsync(type, pk, egarLoading));
+			return AsyncHelper.WaitSingle(SelectSingleAsync(type, pk, egarLoading));
 		}
 
 		/// <summary>
@@ -137,10 +138,11 @@ namespace JPB.DataAccess.Manager
 		///     Needs to define a PrimaryKey attribute inside <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		protected async Task<object> SelectAsync(Type type, object pk, bool egarLoading)
+		[PublicAPI]
+		protected async Task<object> SelectSingleAsync(Type type, object pk, bool egarLoading)
 		{
 			return await Database.RunAsync(async d =>
-				(await SelectAsync(type, CreateSelect(type, pk), egarLoading)).FirstOrDefault());
+				(await SelectNativeAsync(type, CreateSelect(type, pk), egarLoading)).FirstOrDefault());
 		}
 
 		/// <summary>
@@ -150,9 +152,10 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		protected T Select<T>(object pk, bool egarLoading)
+		[PublicAPI]
+		protected T SelectSingle<T>(object pk, bool egarLoading)
 		{
-			return AsyncHelper.WaitSingle(SelectAsync<T>(pk, egarLoading));
+			return AsyncHelper.WaitSingle(SelectSingleAsync<T>(pk, egarLoading));
 		}
 
 		/// <summary>
@@ -162,9 +165,10 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		protected async Task<T> SelectAsync<T>(object pk, bool egarLoading)
+		[PublicAPI]
+		protected async Task<T> SelectSingleAsync<T>(object pk, bool egarLoading)
 		{
-			return (T) await SelectAsync(typeof(T), pk, egarLoading);
+			return (T) await SelectSingleAsync(typeof(T), pk, egarLoading);
 		}
 
 		/// <summary>
@@ -172,6 +176,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public object[] Select(Type type, params object[] parameter)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, parameter));
@@ -182,6 +187,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<object[]> SelectAsync(Type type, params object[] parameter)
 		{
 			return await SelectAsync(type, LoadCompleteResultBeforeMapping, parameter);
@@ -193,6 +199,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[PublicAPI]
 		public T[] Select<T>(object[] parameter)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync<T>(parameter));
@@ -204,6 +211,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<T[]> SelectAsync<T>(object[] parameter)
 		{
 			var objects = await SelectAsync(typeof(T), parameter);
@@ -217,6 +225,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="parameter" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		protected object[] Select(Type type, bool egarLoading, params object[] parameter)
 		{
 			return AsyncHelper.WaitSingle(SelectAsync(type, egarLoading, parameter));
@@ -229,116 +238,16 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="parameter" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		protected async Task<object[]> SelectAsync(Type type, bool egarLoading, params object[] parameter)
 		{
 			return await Database.RunAsync(async d =>
-				await SelectAsync(type, CreateSelectQueryFactory(GetClassInfo(type), parameter), egarLoading));
-		}
-
-		/// <summary>
-		///     Creates and Executes a Select Statement for a given
-		///     <paramref name="type" />
-		///     by using
-		///     <paramref name="command" />
-		/// </summary>
-		/// <returns></returns>
-		protected object[] Select(Type type, IDbCommand command, bool egarLoading)
-		{
-			return AsyncHelper.WaitSingle(SelectAsync(type, command, egarLoading));
-		}
-
-		/// <summary>
-		///     Creates and Executes a Select Statement for a given
-		///     <paramref name="type" />
-		///     by using
-		///     <paramref name="command" />
-		/// </summary>
-		/// <returns></returns>
-		protected async Task<object[]> SelectAsync(Type type, IDbCommand command, bool egarLoading)
-		{
-			return await SelectNativeAsync(type, command, egarLoading);
-		}
-
-		/// <summary>
-		///     Creates and Executes a Select Statement for
-		///     <typeparam name="T"></typeparam>
-		///     by using
-		///     <paramref name="command" />
-		/// </summary>
-		/// <returns></returns>
-		protected T[] Select<T>(IDbCommand command, bool egarLoading)
-		{
-			return AsyncHelper.WaitSingle(SelectAsync<T>(command, egarLoading));
-		}
-
-		/// <summary>
-		///     Creates and Executes a Select Statement for
-		///     <typeparam name="T"></typeparam>
-		///     by using
-		///     <paramref name="command" />
-		/// </summary>
-		/// <returns></returns>
-		protected async Task<T[]> SelectAsync<T>(IDbCommand command, bool egarLoading)
-		{
-			return (await SelectAsync(typeof(T), command, egarLoading)).Cast<T>().ToArray();
+				await SelectNativeAsync(type, CreateSelectQueryFactory(GetClassInfo(type), parameter), egarLoading));
 		}
 
 		#endregion
 
 		#region CreateCommands
-
-		/// <summary>
-		///     Creates a Select with appended query.
-		///     Should be only executed inside an open <code>Database.Run</code>
-		/// </summary>
-		/// <returns></returns>
-		public IDbCommand CreateSelect(Type type, string query)
-		{
-			return DbAccessLayerHelper.CreateCommand(Database,
-				CreateSelectQueryFactory(GetClassInfo(type)).CommandText + " " + query);
-		}
-
-
-		/// <summary>
-		///     Creates a Select with appended query.
-		///     Should be only executed inside an open <code>Database.Run</code>
-		/// </summary>
-		/// <returns></returns>
-		public IDbCommand CreateSelect<T>(string query)
-		{
-			return CreateSelect(typeof(T), query);
-		}
-
-		/// <summary>
-		///     Creates a Select with appended query and inclueded QueryCommand Paramater.
-		///     Should be only executed inside an open <code>Database.Run</code>
-		/// </summary>
-		/// <returns></returns>
-		public IDbCommand CreateSelect(Type type, string query, IEnumerable<IQueryParameter> paramenter)
-		{
-			var plainCommand = Database.CreateCommand(
-				CreateSelectQueryFactory(GetClassInfo(type)).CommandText + " " + query);
-			if (paramenter != null)
-			{
-				foreach (var para in paramenter)
-				{
-					plainCommand.Parameters.AddWithValue(para.Name, para.Value, Database);
-				}
-			}
-
-			return plainCommand;
-		}
-
-		/// <summary>
-		///     Creates a Select with appended query and inclueded QueryCommand Paramater
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public IDbCommand CreateSelect<T>(string query,
-			IEnumerable<IQueryParameter> paramenter)
-		{
-			return CreateSelect(typeof(T), query, paramenter);
-		}
 
 		/// <summary>
 		///     Actives a check when any user arguments Provided via any overload that takes an
@@ -362,7 +271,7 @@ namespace JPB.DataAccess.Manager
 		/// <summary>
 		///     For StackOverflow detection
 		/// </summary>
-		private static readonly AsyncLocal<bool> _isIndented = new AsyncLocal<bool>();
+		private static readonly AsyncLocal<bool> IsIndented = new AsyncLocal<bool>();
 
 		internal IDbCommand CreateSelectQueryFactory(DbClassInfoCache type, Func<IDbCommand> fallback,
 			params object[] parameter)
@@ -430,7 +339,7 @@ namespace JPB.DataAccess.Manager
 
 			try
 			{
-				if (_isIndented.Value)
+				if (IsIndented.Value)
 				{
 					if (Multipath)
 					{
@@ -443,7 +352,7 @@ namespace JPB.DataAccess.Manager
 					}
 				}
 
-				_isIndented.Value = true;
+				IsIndented.Value = true;
 
 				var arguments = parameter.ToList();
 
@@ -534,7 +443,8 @@ namespace JPB.DataAccess.Manager
 					{
 						if (method.ReturnType != typeof(IQueryBuilder))
 						{
-							throw new InvalidOperationException("The feature of Query Factorys that return a IQueryBuilder has been retired. Please return an instance of IQueryFactoryResult (WITHOUT ROOTQUERY AS ARGUMENT) instead");
+							throw new InvalidOperationException(
+								"The feature of Query Factorys that return a IQueryBuilder has been retired. Please return an instance of IQueryFactoryResult (WITHOUT ROOTQUERY AS ARGUMENT) instead");
 						}
 
 						queryBuilder = Query();
@@ -560,7 +470,8 @@ namespace JPB.DataAccess.Manager
 					{
 						if (invoke is IQueryBuilder)
 						{
-							throw new NotSupportedException($"The feature of Query Factorys that return a IQueryBuilder has been retired. Please return an instance of IQueryFactoryResult instead");
+							throw new NotSupportedException(
+								"The feature of Query Factorys that return a IQueryBuilder has been retired. Please return an instance of IQueryFactoryResult instead");
 						}
 
 						if (!string.IsNullOrEmpty(invoke as string))
@@ -571,7 +482,7 @@ namespace JPB.DataAccess.Manager
 						if (invoke is IQueryFactoryResult)
 						{
 							var result = invoke as IQueryFactoryResult;
-							return Database.CreateCommandWithParameterValues(result.Query, result.Parameters);
+							return Database.CreateCommandWithParameterValues(result.Query, result.Parameters.ToArray());
 						}
 					}
 				}
@@ -585,7 +496,7 @@ namespace JPB.DataAccess.Manager
 			}
 			finally
 			{
-				_isIndented.Value = false;
+				IsIndented.Value = false;
 			}
 		}
 
@@ -616,7 +527,6 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Creates a Select for one Item with appended query and inclueded QueryCommand Paramater.
-		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		public IDbCommand CreateSelect(Type type, object pk)
@@ -678,29 +588,22 @@ namespace JPB.DataAccess.Manager
 			sb.Append(columns);
 			sb.Append(" FROM ");
 			sb.Append($"[{source}] ");
-			//if (alias != null)
-			//{
-			//	sb.Append($"AS [{alias}] ");
-			//}
 
 			return sb.ToString();
 		}
 
 		/// <summary>
 		///     Creates a Select by using a Factory mehtod or auto generated querys.
-		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		public IDbCommand CreateSelect<T>()
 		{
-			var classInfo = Config.GetOrCreateClassInfoCache(typeof(T));
-			return CreateSelect(classInfo, Database);
+			return CreateSelect(Config.GetOrCreateClassInfoCache(typeof(T)), Database);
 		}
 
 		/// <summary>
 		///     Creates a Select by using a Factory mehtod or auto generated querys.
-		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
 		private static IDbCommand CreateSelect(DbClassInfoCache type, IDatabase db)
@@ -713,22 +616,22 @@ namespace JPB.DataAccess.Manager
 		#region Runs
 
 		/// <summary>
-		///     Executes a Selectstatement and Parse the Output into
+		///     Executes a query and Parse the Output into
 		///     <paramref name="type" />.
-		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public IEnumerable RunDynamicSelect(Type type, IDbCommand query)
 		{
 			return AsyncHelper.WaitSingle(RunDynamicSelectAsync(type, query));
 		}
 
 		/// <summary>
-		///     Executes a Selectstatement and Parse the Output into
+		///     Executes a query and Parse the Output into
 		///     <paramref name="type" />.
-		///     Should be only executed inside an open <code>Database.Run</code>
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<IEnumerable> RunDynamicSelectAsync(Type type, IDbCommand query)
 		{
 			RaiseSelect(query);
@@ -738,178 +641,49 @@ namespace JPB.DataAccess.Manager
 		}
 
 		/// <summary>
-		///     Executes a Selectstatement and Parse the Output into
+		///     Executes a query and Parse the Output into
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<object[]> RunSelectAsync(Type type, IDbCommand query)
 		{
 			return (await RunDynamicSelectAsync(type, query)).Cast<object>().ToArray();
 		}
 
 		/// <summary>
-		///     Executes a Selectstatement and Parse the Output into
+		///     Executes a query and Parse the Output into
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public object[] RunSelect(Type type, IDbCommand query)
 		{
 			return AsyncHelper.WaitSingle(RunSelectAsync(type, query));
 		}
 
 		/// <summary>
-		///     Executes a Selectstatement and Parse the Output into
+		///     Executes a query and Parse the Output into
 		///     <typeparamref name="T"></typeparamref>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<T[]> RunSelectAsync<T>(IDbCommand query)
 		{
 			return (await RunSelectAsync(typeof(T), query)).Cast<T>().ToArray();
 		}
 
 		/// <summary>
-		///     Executes a Selectstatement and Parse the Output into
+		///     Executes a query and Parse the Output into
 		///     <typeparamref name="T"></typeparamref>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
+		[PublicAPI]
 		public T[] RunSelect<T>(IDbCommand query)
 		{
 			return AsyncHelper.WaitSingle(RunSelectAsync<T>(query));
-		}
-
-		/// <summary>
-		///     Executes
-		///     <paramref name="queryString" />
-		///     and Parse the Output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Will be Removed in future.")]
-		public object[] RunSelect(Type type, string queryString,
-			IEnumerable<IQueryParameter> paramenter)
-		{
-			return
-				Database.Run(
-					s =>
-					{
-						var query = DbAccessLayerHelper.CreateCommand(s, queryString);
-
-						foreach (var item in paramenter)
-						{
-							query.Parameters.AddWithValue(item.Name, item.Value, s);
-						}
-
-						Database.LastExecutedQuery?.Refresh();
-						Database.PrepaireRemoteExecution(query);
-						return RunSelect(type, query);
-					}
-				);
-		}
-
-		/// <summary>
-		///     Executes
-		///     <paramref name="query" />
-		///     and Parse the Output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Will be Removed in future.")]
-		public T[] RunSelect<T>(string query, IEnumerable<IQueryParameter> paramenter)
-		{
-			return RunSelect(typeof(T), query, paramenter).Cast<T>().ToArray();
-		}
-
-		#endregion
-
-		#region SelectWhereCommands
-
-		/// <summary>
-		///     Executes a Select Statement and adds
-		///     <paramref name="where" />
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
-		public object[] SelectWhere(Type type, string where)
-		{
-			return SelectWhere(type, where, null);
-		}
-
-		/// <summary>
-		///     Executes a Select Statement and adds
-		///     <paramref name="where" />
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
-		public T[] SelectWhere<T>(string where)
-		{
-			return SelectWhere(typeof(T), where).Cast<T>().ToArray();
-		}
-
-		/// <summary>
-		///     Executes a Select Statement and adds
-		///     <paramref name="where" />
-		///     uses
-		///     <paramref name="paramenter" />
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
-		public object[] SelectWhere(Type type, string where, IEnumerable<IQueryParameter> paramenter)
-		{
-			if (!where.StartsWith("WHERE"))
-			{
-				where = where.Insert(0, "WHERE ");
-			}
-
-			var query = CreateSelect(type, where, paramenter);
-			return RunSelect(type, query);
-		}
-
-		/// <summary>
-		///     Executes a Select Statement and adds
-		///     <paramref name="where" />
-		///     uses
-		///     <paramref name="paramenter" />
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
-		public T[] SelectWhere<T>(string where, IEnumerable<IQueryParameter> paramenter)
-		{
-			return SelectWhere(typeof(T), where, paramenter).Cast<T>().ToArray();
-		}
-
-		/// <summary>
-		///     Executes a Select Statement and adds
-		///     <paramref name="where" />
-		///     uses
-		///     <paramref name="paramenter" />
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
-		public object[] SelectWhere(Type type, string where, dynamic paramenter)
-		{
-			//Concret declaration is nessesary because we are working with dynmaics, so the compiler has ne space to guess the type wrong
-			IEnumerable<IQueryParameter> enumarateFromDynamics =
-				DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
-			return SelectWhere(type, where, enumarateFromDynamics);
-		}
-
-		/// <summary>
-		///     Executes a Select Statement and adds
-		///     <paramref name="where" />
-		///     uses<paramref name="paramenter" />
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().Where method")]
-		public T[] SelectWhere<T>(string where, dynamic paramenter)
-		{
-			object[] selectWhere = SelectWhere(typeof(T), where, paramenter);
-			return selectWhere.Cast<T>().ToArray();
 		}
 
 		#endregion
@@ -923,9 +697,10 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public object[] RunPrimetivSelect(Type type, IDbCommand command)
+		[PublicAPI]
+		public object[] ExecuteSelect(Type type, IDbCommand command)
 		{
-			return AsyncHelper.WaitSingle(RunPrimetivSelectAsync(type, command));
+			return AsyncHelper.WaitSingle(ExecuteSelectAsync(type, command));
 		}
 
 		/// <summary>
@@ -935,7 +710,8 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
-		public async Task<object[]> RunPrimetivSelectAsync(Type type, IDbCommand command)
+		[PublicAPI]
+		public async Task<object[]> ExecuteSelectAsync(Type type, IDbCommand command)
 		{
 			RaiseSelect(command);
 			return (await EnumerateDataRecordsAsync(command, LoadCompleteResultBeforeMapping, GetClassInfo(type),
@@ -944,133 +720,12 @@ namespace JPB.DataAccess.Manager
 
 		/// <summary>
 		///     Runs
-		///     <paramref name="query" />
-		///     and parses the first line of output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
-		public object[] RunPrimetivSelect(Type type, string query, IEnumerable<IQueryParameter> paramerter)
-		{
-			return RunPrimetivSelect(type, Database.CreateCommandWithParameterValues(query, paramerter));
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses the first line of output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
-		public object[] RunPrimetivSelect(Type type, string query)
-		{
-			return RunPrimetivSelect(type, query, new List<IQueryParameter>());
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses the first line of output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
-		public T[] RunPrimetivSelect<T>(string query, dynamic parameters)
-		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics =
-				DbAccessLayerHelper.EnumerateFromUnknownParameter(parameters);
-			var runPrimetivSelect = RunPrimetivSelect(typeof(T), query, enumarateFromDynamics);
-			return runPrimetivSelect.Cast<T>().ToArray();
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses the first line of output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
-		public T[] RunPrimetivSelect<T>(string query, IEnumerable<IQueryParameter> parameters)
-		{
-			return RunPrimetivSelect(typeof(T), query, parameters).Cast<T>().ToArray();
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses the first line of output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Use the Newer Query().Select.Table<>().ForResult<Type>() method")]
-		public T[] RunPrimetivSelect<T>(string query)
-		{
-			return RunPrimetivSelect<T>(query, new List<IQueryParameter>());
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public T[] SelectNative<T>(string query)
-		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync<T>(query));
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public async Task<T[]> SelectNativeAsync<T>(string query)
-		{
-			return (await SelectNativeAsync(typeof(T), query)).Cast<T>().ToArray();
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public object[] SelectNative(Type type, string query)
-		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync(type, query));
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public async Task<object[]> SelectNativeAsync(Type type, string query)
-		{
-			return await SelectNativeAsync(type, DbAccessLayerHelper.CreateCommand(Database, query));
-		}
-
-
-		/// <summary>
-		///     Runs
 		///     <paramref name="command" />
 		///     and parses output into
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public object[] SelectNative(Type type, IDbCommand command, bool multiRow)
 		{
 			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command, multiRow));
@@ -1083,6 +738,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<object[]> SelectNativeAsync(Type type, IDbCommand command, bool multiRow)
 		{
 			if (!multiRow)
@@ -1090,109 +746,8 @@ namespace JPB.DataAccess.Manager
 				return await SelectNativeAsync(type, command);
 			}
 
-			//var guessingRelations = new Dictionary<PropertyInfo, IDbCommand>();
-
-			//var propertyInfos = type.GetFKs();
-			//var primaryKeyName = type.GetPK();
-
-			//foreach (var propertyInfo in propertyInfos)
-			//{
-			//    guessingRelations.Append(propertyInfo, database.CreateCommand(string.Format("JOIN {0} ON {0} = {1}", propertyInfo.DeclaringType.GetTableName(), primaryKeyName)));
-			//}
-
-			/*
-			   * Due the fact that you are not able to anylse the QueryCommand in a way to ensure its will not effect the query self we
-			   * are loading the result an then loading based on that the items
-			   */
-
 			var sel = await RunSelectAsync(type, command);
-
-			if (ProcessNavigationPropertys && GetClassInfo(type).HasRelations)
-			{
-				return sel.AsParallel().Select(s => LoadNavigationProps(s)).ToArray();
-			}
-
 			return sel;
-		}
-
-		/// <summary>
-		///     ToBeSupported
-		/// </summary>
-		/// <returns></returns>
-		public object LoadNavigationProps(object source)
-		{
-			//Get nav Propertys
-			foreach (var propertyInfo in source.GetType().GetNavigationProps(Config))
-			{
-				//var firstOrDefault = source.GetFK<long>(propertyInfo.ClassName);
-				IDbCommand sqlCommand;
-
-				var firstOrDefault =
-					propertyInfo.GetCustomAttributes().FirstOrDefault(s => s is ForeignKeyAttribute) as
-						ForeignKeyAttribute;
-				if (firstOrDefault == null)
-				{
-					continue;
-				}
-
-				Type targetType = null;
-				if (propertyInfo.CheckForListInterface())
-				{
-					var pk = source.GetPK(Config);
-					var targetName = firstOrDefault.ForeignKey;
-					targetType = propertyInfo.PropertyType.GetGenericArguments().FirstOrDefault();
-
-					if (string.IsNullOrEmpty(targetName))
-					{
-						targetName = targetType.GetPK(Config);
-					}
-
-					sqlCommand = CreateSelect(targetType,
-						" WHERE " + targetName + " = @pk", new List<IQueryParameter>
-						{
-							new QueryParameter("@pk", pk)
-						});
-				}
-				else
-				{
-					var fkproperty = source.GetParameterValue(Config, firstOrDefault.ForeignKey);
-
-					if (fkproperty == null)
-					{
-						continue;
-					}
-
-					targetType = propertyInfo.PropertyType;
-					sqlCommand = CreateSelect(targetType, fkproperty);
-				}
-
-				var orDefault = RunSelect(targetType, sqlCommand);
-
-				//result is list and property is list
-				if (orDefault.CheckForListInterface() && propertyInfo.CheckForListInterface())
-				{
-					var constructorInfo =
-						typeof(DbCollection<>).MakeGenericType(targetType).GetConstructor(new[] {typeof(IEnumerable)});
-
-					var reproCollection = constructorInfo.Invoke(new object[] {orDefault});
-					propertyInfo.Setter.Invoke(source, reproCollection);
-					foreach (var item in orDefault)
-					{
-						LoadNavigationProps(item);
-					}
-				}
-
-				if (propertyInfo.CheckForListInterface())
-				{
-					continue;
-				}
-
-				var @default = orDefault.FirstOrDefault();
-				propertyInfo.Setter.Invoke(source, @default);
-				LoadNavigationProps(@default);
-			}
-
-			return source;
 		}
 
 		/// <summary>
@@ -1202,6 +757,7 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public object[] SelectNative(Type type, IDbCommand command)
 		{
 			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command));
@@ -1214,143 +770,10 @@ namespace JPB.DataAccess.Manager
 		///     <paramref name="type" />
 		/// </summary>
 		/// <returns></returns>
+		[PublicAPI]
 		public async Task<object[]> SelectNativeAsync(Type type, IDbCommand command)
 		{
-			var objects = await RunSelectAsync(type, command);
-
-			if (ProcessNavigationPropertys && GetClassInfo(type).HasRelations)
-			{
-				foreach (var model in objects)
-				{
-					LoadNavigationProps(model);
-				}
-			}
-
-			return objects.ToArray();
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public object[] SelectNative(Type type, string query, IEnumerable<IQueryParameter> paramenter)
-		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync(type, query, paramenter));
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public async Task<object[]> SelectNativeAsync(Type type, string query, IEnumerable<IQueryParameter> paramenter)
-		{
-			var dbCommand = Database.CreateCommandWithParameterValues(query, paramenter);
-			return await SelectNativeAsync(type, dbCommand);
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <typeparamref name="T" />
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		[Obsolete("Will be Removed in future.")]
-		public T[] SelectNative<T>(string query, IEnumerable<IQueryParameter> paramenter)
-		{
-			return RunSelect<T>(query, paramenter);
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public object[] SelectNative(Type type, string query, dynamic paramenter)
-		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync(type, query, paramenter));
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public async Task<object[]> SelectNativeAsync(Type type, string query, dynamic paramenter)
-		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics =
-				DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
-			return await SelectNativeAsync(type, query, enumarateFromDynamics);
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="command" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public object[] SelectNative(Type type, IDbCommand command, dynamic paramenter)
-		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command, paramenter));
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="command" />
-		///     and parses output into
-		///     <paramref name="type" />
-		/// </summary>
-		/// <returns></returns>
-		public async Task<object[]> SelectNativeAsync(Type type, IDbCommand command, dynamic paramenter)
-		{
-			IEnumerable<IQueryParameter> enumarateFromDynamics =
-				DbAccessLayerHelper.EnumerateFromUnknownParameter(paramenter);
-
-			foreach (var enumarateFromDynamic in enumarateFromDynamics)
-			{
-				command.Parameters.AddWithValue(enumarateFromDynamic.Name, enumarateFromDynamic.Value, Database);
-			}
-
-			return await RunSelectAsync(type, command);
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public T[] SelectNative<T>(string query, dynamic paramenter)
-		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync<T>(query, paramenter));
-		}
-
-		/// <summary>
-		///     Runs
-		///     <paramref name="query" />
-		///     and parses output into
-		///     <typeparamref name="T"></typeparamref>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public async Task<T[]> SelectNativeAsync<T>(string query, dynamic paramenter)
-		{
-			var objects = (object[]) await SelectNativeAsync(typeof(T), query, paramenter);
-			return objects.Cast<T>().ToArray();
+			return (await RunSelectAsync(type, command)).ToArray();
 		}
 
 		#endregion

@@ -17,11 +17,6 @@ namespace JPB.DataAccess.Query.Operators
 	public class PrepaireUpdateQuery : QueryBuilderX
 	{
 		/// <inheritdoc />
-		public PrepaireUpdateQuery(IQueryContainer database) : base(database)
-		{
-		}
-
-		/// <inheritdoc />
 		public PrepaireUpdateQuery(IQueryBuilder database) : base(database)
 		{
 		}
@@ -102,6 +97,8 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public UpdateColumnSetters<TPoco> Table<TPoco>()
 		{
+			ContainerObject.Interceptors
+				.Add(new EventPostProcessor(EventPostProcessor.EventType.Update, ContainerObject.AccessLayer));
 			var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			var targetAlias = ContainerObject.CreateTableAlias(dbClassInfoCache.TableName);
 			var queryIdentifier = new QueryIdentifier()

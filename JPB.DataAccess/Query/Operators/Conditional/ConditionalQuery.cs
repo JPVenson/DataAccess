@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using JPB.DataAccess.DbCollection;
+using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
@@ -77,11 +79,17 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			var cache = ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco));
 
-			return ConditionalColumnQueryByPath(new[]
-			{
-				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
-					.Propertys[columnName]),
-			});
+			var path = PropertyPath<TPoco>
+				.Get(ContainerObject.AccessLayer.Config, columnName)
+				.Where(e => !typeof(IDbCollection).IsAssignableFrom(e.DeclaringType))
+				.Select(e =>
+				{
+					var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache, dbClassInfoCache.Propertys[e.Name]);
+				})
+				.ToArray();
+
+			return ConditionalColumnQueryByPath(path);
 		}
 
 		internal static ColumnInfo TraversePropertyPathToColumn(
@@ -131,6 +139,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			var path = PropertyPath<TPoco>
 				.Get(columnName)
+				.Where(e => !typeof(IDbCollection).IsAssignableFrom(e.DeclaringType))
 				.Select(e =>
 				{
 					var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
@@ -149,6 +158,22 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			visitor.Visit(expression.Body);
 			visitor.Path.Reverse();
 			return visitor.Path;
+		}
+
+		public static IReadOnlyList<MemberInfo> Get(DbConfig cache, string expression)
+		{
+			var propQueue = new Queue<MemberInfo>();
+			var classInfoCache = cache.GetOrCreateClassInfoCache(typeof(TSource));
+
+			foreach (var pathPart in expression.Split('.'))
+			{
+				var property = classInfoCache.Propertys.FirstOrDefault(e =>
+					e.Key.Equals(pathPart, StringComparison.InvariantCultureIgnoreCase));
+				propQueue.Enqueue(property.Value.PropertyInfo);
+				classInfoCache = cache.GetOrCreateClassInfoCache(property.Value.PropertyType);
+			}
+
+			return propQueue.ToArray();
 		}
 
 		private class PropertyVisitor : ExpressionVisitor

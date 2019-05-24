@@ -31,7 +31,15 @@ namespace JPB.DataAccess.Query.QueryItems.Conditional
 			{
 				sb.Append(" DISTINCT ");
 			}
-			sb.Append("1) AS [Count] FROM ");
+			if (Limit.HasValue)
+			{
+				sb.Append(Limit);
+			}
+			else
+			{
+				sb.Append("1");
+			}
+			sb.Append(") AS [Count] FROM ");
 			sb.Append(_queryId.Value);
 			sb.Append(" AS ");
 			sb.Append(Alias.GetAlias());

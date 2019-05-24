@@ -18,12 +18,6 @@ namespace JPB.DataAccess.Query.Operators
 	public class ElementProducer<TPoco> : ElementResultQuery<TPoco>
 	{
 		/// <inheritdoc />
-		public ElementProducer(IQueryBuilder database, string currentIdentifier) : base(database, currentIdentifier)
-		{
-
-		}
-
-		/// <inheritdoc />
 		public ElementProducer(IQueryBuilder database) : base(database)
 		{
 		}

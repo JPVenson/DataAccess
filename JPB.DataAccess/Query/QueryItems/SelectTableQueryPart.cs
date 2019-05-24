@@ -95,21 +95,21 @@ namespace JPB.DataAccess.Query.QueryItems
 		{
 			string modifier = null;
 
-			if (Limit.HasValue && container.AccessLayer.DbAccessType == DbAccessType.MsSql)
-			{
-				modifier = $"TOP {Limit.Value}";
-			}
-
 			if (Distinct)
 			{
-				modifier += " DISTINCT";
+				modifier += "DISTINCT ";
+			}
+
+			if (Limit.HasValue && container.AccessLayer.DbAccessType == DbAccessType.MsSql)
+			{
+				modifier += $"TOP {Limit.Value} ";
 			}
 
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
 			if (modifier != null)
 			{
-				sb.Append(modifier + " ");
+				sb.Append(modifier);
 			}
 
 			sb.Append(Columns.Select(e => e.ColumnAliasStatement()).Aggregate((e, f) => e + ", " + f));

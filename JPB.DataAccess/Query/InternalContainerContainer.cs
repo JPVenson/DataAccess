@@ -29,15 +29,6 @@ namespace JPB.DataAccess.Query
 		private readonly List<IQueryPart> _parts;
 
 		/// <summary>
-		///     Creates a new Instance of an QueryCommand Builder that creates Database aware querys
-		/// </summary>
-		public InternalContainerContainer(DbAccessLayer database, Type forType)
-			: this(database)
-		{
-			ForType = forType;
-		}
-
-		/// <summary>
 		///     Creates a new Instance of an QueryText Builder that creates Database aware querys
 		/// </summary>
 		public InternalContainerContainer(DbAccessLayer database)
@@ -55,7 +46,6 @@ namespace JPB.DataAccess.Query
 		internal InternalContainerContainer(IQueryContainer pre)
 		{
 			AccessLayer = pre.AccessLayer;
-			ForType = pre.ForType;
 			AutoParameterCounter = (pre as IQueryContainerValues)?.AutoParameterCounter ?? 0;
 			TableAlias = (pre as IQueryContainerValues)?.TableAlias ?? new Dictionary<string, QueryIdentifier>();
 			Identifiers = (pre as IQueryContainerValues)?.Identifiers ?? new List<QueryIdentifier>();
@@ -66,6 +56,7 @@ namespace JPB.DataAccess.Query
 			QueryInfos = pre.QueryInfos.Select(f => f).ToDictionary(f => f.Key, f => f.Value);
 			Interceptors = pre.Interceptors;
 			PostProcessors = pre.PostProcessors;
+			ExecuteAsync = pre.ExecuteAsync;
 		}
 		
 		/// <inheritdoc />
@@ -81,11 +72,9 @@ namespace JPB.DataAccess.Query
 		public DbAccessLayer AccessLayer { get; private set; }
 
 		/// <inheritdoc />
-		public Type ForType { get; set; }
+		public bool ExecuteAsync { get; set; }
 
-		/// <summary>
-		/// 
-		/// </summary>
+		/// <inheritdoc />
 		public IList<JoinParseInfo> Joins { get; }
 
 		/// <inheritdoc />
@@ -173,15 +162,7 @@ namespace JPB.DataAccess.Query
 			return ++AutoParameterCounter;
 		}
 
-		//public object Clone()
-		//{
-		//	return new InternalContainerContainer(this);
-		//}
-
-		/// <summary>
-		///     Clones this Container
-		/// </summary>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public IQueryContainer Clone()
 		{
 			return new InternalContainerContainer(this);
@@ -221,47 +202,6 @@ namespace JPB.DataAccess.Query
 		public int GetNextColumnId()
 		{
 			return ++ColumnCounter;
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerator GetEnumerator()
-		{
-			if (ForType == null)
-			{
-				throw new ArgumentNullException("No type Supplied", new Exception());
-			}
-			return new QueryEagerEnumerator(this, ForType, AccessLayer.Async);
-		}
-
-		/// <summary>
-		///     Executes a query without result parsing
-		/// </summary>
-		public int Execute()
-		{
-			var queryContainer = Compile(out var columns);
-			return this.AccessLayer.ExecuteGenericCommand(queryContainer.Query, queryContainer.Parameters);
-		}
-		
-		/// <summary>
-		///     QueryCommand like setter for AllowParamterRenaming [Duplicate]
-		/// </summary>
-		/// <returns></returns>
-		public IQueryContainer WithParamterRenaming(bool mode)
-		{
-			AllowParamterRenaming = mode;
-			return this;
-		}
-
-		/// <summary>
-		///     QueryCommand like setter for AllowParamterRenaming
-		/// </summary>
-		/// <returns></returns>
-		public IQueryContainer SetAutoRenaming(bool value)
-		{
-			AllowParamterRenaming = value;
-			return this;
 		}
 	}
 }

@@ -47,7 +47,7 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		private static void SProcedureDbAccessLayer()
 		{
-			//not that cool maybe move this to another place or using the exisiting mehtods
+			//not that cool maybe move this to another place or using the exisiting methods
 			DbTypeMap = new Dictionary<Type, DbType>();
 
 			DbTypeMap[typeof(byte)] = DbType.Byte;

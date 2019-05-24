@@ -96,7 +96,7 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Returns All forgin keys of the given type
+		///     Returns All foreign keys of the given type
 		/// </summary>
 		/// <param name="type">The type.</param>
 		/// <param name="config">The configuration.</param>
@@ -132,7 +132,7 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Get the forgin key based that contains the
+		///     Get the foreign key based that contains the
 		///     <paramref name="databaseName" />
 		/// </summary>
 		/// <param name="type">The type.</param>

@@ -147,7 +147,7 @@ namespace JPB.DataAccess.Manager
 					values = values + ("@" + index) + ",";
 				}
 				values = values.Remove(values.Length - 1);
-				query = "INSERT INTO " + classInfo.TableName + " ( " + csvprops + " ) VALUES ( " + values + " )";
+				query = "INSERT INTO [" + classInfo.TableName + "] ( " + csvprops + " ) VALUES ( " + values + " )";
 			}
 
 			var orignialProps = classInfo.GetPropertysViaRefection(ignore).ToArray();
