@@ -100,15 +100,27 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			}
 			WinConsole.WriteLine("Connection OK ... Reading Server Version ...");
 
-			SqlVersion = Manager.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+			SqlVersion = Manager.RunSelect<string>(Manager.Database.CreateCommand("SELECT SERVERPROPERTY('productversion')")).FirstOrDefault();
 
 			WinConsole.WriteLine("Server version is {0}", SqlVersion);
 
 			WinConsole.WriteLine("Reading Tables from {0} ...", databaseName);
 
-			Tables = Manager.Select<TableInformations>().Select(s => new TableInfoModel(s, databaseName, Manager)).ToList();
-			Views = Manager.Select<ViewInformation>().Select(s => new TableInfoModel(s, databaseName, Manager)).ToList();
-			StoredProcs = Manager.Select<StoredProcedureInformation>().Select(s => new StoredPrcInfoModel(s)).ToList();
+			Tables = Manager.Select<TableInformations>()
+				.ToArray()
+				.AsParallel()
+				.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
+				.ToList();
+
+			Views = Manager.Select<ViewInformation>()
+				.ToArray()
+				.AsParallel()
+				.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
+				.ToList();
+
+			StoredProcs = Manager.Select<StoredProcedureInformation>()
+				.Select(s => new StoredPrcInfoModel(s))
+				.ToList();
 
 			WinConsole.WriteLine(
 			"Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action", Tables.Count(),
@@ -144,11 +156,11 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			var elements = Tables.Concat(Views).ToArray();
 
-			foreach (var tableInfoModel in elements)
+			elements.AsParallel().ForAll(tableInfoModel =>
 			{
 				SharedMethods.CompileTable(tableInfoModel, this);
-			}
-
+			});
+			
 			//foreach (var proc in StoredProcs)
 			//{
 			//	if (proc.Exclude)

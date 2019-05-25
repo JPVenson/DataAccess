@@ -6,6 +6,7 @@ using ICSharpCode.AvalonEdit.Highlighting;
 using JPB.DataAccess.EntityCreator.Core;
 using JPB.ErrorValidation;
 using JPB.ErrorValidation.ViewModelProvider;
+using JPB.ErrorValidation.ViewModelProvider.Base;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 {
@@ -30,7 +31,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			if(!CheckCanExecuteCondition())
 				return;
 
-			base.SimpleWorkWithSyncContinue(() =>
+			base.SimpleWork(() =>
 			{
 				try
 				{

@@ -263,7 +263,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 				var newName = CheckOrAlterName(tableName, tableSuffix);
 				if (newName != tableName)
 				{
-					Logger.WriteLine("Alter Table'{0}' to '{1}'", tableName, newName);
+					Logger.WriteLine("Alter Table '{0}' to '{1}'", tableName, newName);
 					tableInfoModel.NewTableName = newName;
 				}
 
@@ -277,11 +277,11 @@ namespace JPB.DataAccess.EntityCreator.Core
 						columnName = columnInfo.NewColumnName;
 					}
 
-					Logger.WriteLine("\tCheck Column: {0}", columnName);
+					Logger.WriteLine("\tCheck Column: '{0}'", columnName);
 					var newColumnName = CheckOrAlterName(columnName);
 					if (newColumnName != columnName)
 					{
-						Logger.WriteLine("\tAlter Column'{0}' to '{1}'", columnName, newColumnName);
+						Logger.WriteLine("\tAlter Column '{0}' to '{1}'", columnName, newColumnName);
 						columnInfo.NewColumnName = newColumnName;
 					}
 				}

@@ -10,6 +10,7 @@ using JPB.DataAccess.EntityCreator.UI.MsSQL.Services;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.View;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models;
 using JPB.ErrorValidation.ViewModelProvider;
+using JPB.ErrorValidation.ViewModelProvider.Base;
 using JPB.WPFBase.MVVM.DelegateCommand;
 using JPB.WPFBase.MVVM.ViewModel;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;

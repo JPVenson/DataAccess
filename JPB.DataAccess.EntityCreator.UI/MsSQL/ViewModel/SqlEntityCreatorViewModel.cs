@@ -400,7 +400,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 			Status = "Connection OK ... Reading Server Version ...";
 
-			SqlVersion = Manager.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
+			//SqlVersion = Manager.RunPrimetivSelect<string>("SELECT SERVERPROPERTY('productversion')").FirstOrDefault();
 			Status = "Reading Tables";
 
 			var counter = 2;

@@ -1,5 +1,6 @@
 ﻿using JPB.ErrorValidation;
 using JPB.ErrorValidation.ViewModelProvider;
+using JPB.ErrorValidation.ViewModelProvider.Base;
 
 namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.ChangeListener
 {

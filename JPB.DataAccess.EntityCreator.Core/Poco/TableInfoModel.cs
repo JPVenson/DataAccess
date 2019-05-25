@@ -43,18 +43,17 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 			Database = database;
 			ColumnInfos = db.Select<ColumnInfo>(new object[] { Info.TableName, database }).Select(s => new ColumInfoModel(s)).ToList();
 
-			var firstOrDefault = db.RunPrimetivSelect(typeof(string),
-				"SELECT COLUMN_NAME " +
-				"FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc " +
-				"JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu " +
-				"ON tc.CONSTRAINT_NAME = ccu.Constraint_name " +
-				"WHERE tc.CONSTRAINT_TYPE = 'Primary Key' " +
-				"AND tc.TABLE_CATALOG = @database " +
-				"AND tc.TABLE_NAME = @tableName", new List<IQueryParameter>()
-				{
+			var firstOrDefault = db.RunSelect(typeof(string),
+				db.Database.CreateCommandWithParameterValues("SELECT COLUMN_NAME " +
+				                                             "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc " +
+				                                             "JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu " +
+				                                             "ON tc.CONSTRAINT_NAME = ccu.Constraint_name " +
+				                                             "WHERE tc.CONSTRAINT_TYPE = 'Primary Key' " +
+				                                             "AND tc.TABLE_CATALOG = @database " +
+				                                             "AND tc.TABLE_NAME = @tableName",
 					new QueryParameter("tableName",info.TableName),
 					new QueryParameter("database",Database)
-				}).FirstOrDefault() as string;
+				)).FirstOrDefault() as string;
 
 			var columInfoModel = ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == firstOrDefault);
 			if (columInfoModel != null)

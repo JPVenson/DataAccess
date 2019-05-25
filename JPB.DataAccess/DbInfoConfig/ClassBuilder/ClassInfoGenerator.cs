@@ -192,7 +192,7 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 				}
 			}
 
-			if (!GenerateConstructor && GenerateFactory)
+			if (GenerateFactory)
 			{
 				var readerName = "reader";
 				sb.AppendInterlacedLine($"public static {ClassName} Factory({nameof(EagarDataRecord)} {readerName})");
