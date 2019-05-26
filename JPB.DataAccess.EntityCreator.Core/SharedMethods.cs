@@ -20,7 +20,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 	{
 		public static ILogger Logger = new DefaultLogger();
 
-		public static IEnumerable<ISharedInterface> GetSuggjestedInterfaces(IEnumerable<ITableInfoModel> tables)
+		public static IEnumerable<ISharedInterface> GetSuggestedInterfaces(IEnumerable<ITableInfoModel> tables)
 		{
 			IDictionary<string, Dictionary<ITableInfoModel, IColumInfoModel>> sharedProps = new Dictionary<string, Dictionary<ITableInfoModel, IColumInfoModel>>();
 
