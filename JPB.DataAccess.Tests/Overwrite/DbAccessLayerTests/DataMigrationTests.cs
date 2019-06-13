@@ -11,7 +11,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	[Parallelizable(ParallelScope.Self)]
 	public class DataMigrationTests : DatabaseBaseTest
 	{
 		public DataMigrationTests(DbAccessType type, bool asyncExecution,bool syncronised) : base(type, asyncExecution, syncronised)
@@ -19,7 +19,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		}
 
 		[Test]
-		[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
 		[TestCase(typeof(Users))]
 		[TestCase(typeof(Users_Col))]
 		[TestCase(typeof(UsersWithoutProperties))]

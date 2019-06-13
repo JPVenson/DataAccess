@@ -5,9 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using JPB.DataAccess.Anonymous;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
@@ -20,51 +17,6 @@ namespace JPB.DataAccess.AdoWrapper
 	/// <seealso cref="System.IDisposable" />
 	public class EagarDataRecord : IDataRecord, IDisposable
 	{
-		/// <summary>
-		///		If set to true <value>DBNull</value> values are converted to regular .net null values
-		/// </summary>
-		public bool WrapNulls { get; set; }
-
-		internal void Add(string name, object value)
-		{
-			MetaHeader.Add(name, value);
-		}
-
-		internal void Remove(string name)
-		{
-			MetaHeader.Remove(name);
-		}
-
-		///  <summary>
-		/// 		Creates a new Eager Data Record that contains all fields from the SourceRecord but not therese defined in fieldsExcluded
-		///  </summary>
-		///  <param name="sourceRecord"></param>
-		///  <param name="fieldsExcluded"></param>
-		///  <returns></returns>
-		public static EagarDataRecord WithExcludedFields(IDataRecord sourceRecord, params string[] fieldsExcluded)
-		{
-			if (sourceRecord is EagarDataRecord subRecord)
-			{
-				return new EagarDataRecord(subRecord.MetaHeader);
-			}
-
-			var buildList = new ArrayList();
-			var metaBuildList = new List<string>();
-			for (var i = 0; i < sourceRecord.FieldCount; i++)
-			{
-				var name = sourceRecord.GetName(i);
-				if (fieldsExcluded.Contains(name))
-				{
-					continue;
-				}
-
-				var obj = sourceRecord.GetValue(i);
-				buildList.Add(obj);
-				metaBuildList.Add(name);
-			}
-			return new EagarDataRecord(metaBuildList.ToArray(), buildList);
-		}
-
 		/// <summary>
 		///     Enumerates all items in the source record
 		/// </summary>
@@ -89,6 +41,13 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			MetaHeader = new MultiValueDictionary<string, object>(subRecordMetaHeader);
 		}
+
+		/// <summary>
+		///     If set to true
+		///     <value>DBNull</value>
+		///     values are converted to regular .net null values
+		/// </summary>
+		public bool WrapNulls { get; set; }
 
 		internal MultiValueDictionary<string, object> MetaHeader { get; set; }
 
@@ -143,40 +102,6 @@ namespace JPB.DataAccess.AdoWrapper
 		}
 
 		/// <summary>
-		///     Return the value of the specified field.
-		/// </summary>
-		/// <param name="name">The index of the field to find.</param>
-		/// <returns>
-		///     The <see cref="T:System.Object" /> which will contain the field value upon return.
-		/// </returns>
-		public object GetValue(string name)
-		{
-			return GetValueInternal(name);
-		}
-
-		/// <summary>
-		///		If overwritten provides the object on index <c>i</c>
-		/// </summary>
-		/// <param name="i"></param>
-		/// <returns></returns>
-		protected internal virtual object GetValueInternal(int i)
-		{
-			var val = MetaHeader[i];
-			return val == DBNull.Value && WrapNulls ? null : val;
-		}
-
-		/// <summary>
-		///		If overwritten provides the object on index <c>i</c>
-		/// </summary>
-		/// <param name="name"></param>
-		/// <returns></returns>
-		protected internal virtual object GetValueInternal(string name)
-		{
-			var val = MetaHeader[name];
-			return val == DBNull.Value && WrapNulls ? null : val;
-		}
-
-		/// <summary>
 		///     Populates an array of objects with the column values of the current record.
 		/// </summary>
 		/// <param name="values">An array of <see cref="T:System.Object" /> to copy the attribute fields into.</param>
@@ -187,12 +112,10 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			for (var i = 0; i < MetaHeader.Count; i++)
 			{
-				if (values.Length > i)
-				{
-					break;
-				}
+				if (values.Length > i) break;
 				values.SetValue(GetValueInternal(i), i);
 			}
+
 			return values.Length;
 		}
 
@@ -217,7 +140,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public bool GetBoolean(int i)
 		{
-			return (bool)GetValue(i);
+			return (bool) GetValue(i);
 		}
 
 		/// <summary>
@@ -229,7 +152,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public byte GetByte(int i)
 		{
-			return (byte)GetValue(i);
+			return (byte) GetValue(i);
 		}
 
 		/// <summary>
@@ -253,27 +176,15 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </exception>
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			var value = (byte[])GetValue(i);
-			if (fieldOffset > value.Length)
-			{
-				throw new ArgumentOutOfRangeException(nameof(fieldOffset));
-			}
+			var value = (byte[]) GetValue(i);
+			if (fieldOffset > value.Length) throw new ArgumentOutOfRangeException(nameof(fieldOffset));
 
-			if (bufferoffset > buffer.Length)
-			{
-				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
-			}
+			if (bufferoffset > buffer.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 
-			if (length > value.Length)
-			{
-				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
-			}
+			if (length > value.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 
 			long j;
-			for (j = fieldOffset; j < value.Length || j < length; j++)
-			{
-				buffer[j + bufferoffset] = value[j];
-			}
+			for (j = fieldOffset; j < value.Length || j < length; j++) buffer[j + bufferoffset] = value[j];
 			return j;
 		}
 
@@ -286,7 +197,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public char GetChar(int i)
 		{
-			return (char)GetValue(i);
+			return (char) GetValue(i);
 		}
 
 		/// <summary>
@@ -310,27 +221,15 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </exception>
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			var value = (char[])GetValue(i);
-			if (fieldoffset > value.Length)
-			{
-				throw new ArgumentOutOfRangeException(nameof(fieldoffset));
-			}
+			var value = (char[]) GetValue(i);
+			if (fieldoffset > value.Length) throw new ArgumentOutOfRangeException(nameof(fieldoffset));
 
-			if (bufferoffset > buffer.Length)
-			{
-				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
-			}
+			if (bufferoffset > buffer.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 
-			if (length > value.Length)
-			{
-				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
-			}
+			if (length > value.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
 
 			long j;
-			for (j = fieldoffset; j < value.Length || j < length; j++)
-			{
-				buffer[j + bufferoffset] = value[j];
-			}
+			for (j = fieldoffset; j < value.Length || j < length; j++) buffer[j + bufferoffset] = value[j];
 			return j;
 		}
 
@@ -343,7 +242,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public Guid GetGuid(int i)
 		{
-			return (Guid)GetValue(i);
+			return (Guid) GetValue(i);
 		}
 
 		/// <summary>
@@ -355,7 +254,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public short GetInt16(int i)
 		{
-			return (short)GetValue(i);
+			return (short) GetValue(i);
 		}
 
 		/// <summary>
@@ -367,7 +266,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetInt32(int i)
 		{
-			return (int)GetValue(i);
+			return (int) GetValue(i);
 		}
 
 		/// <summary>
@@ -379,7 +278,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public long GetInt64(int i)
 		{
-			return (long)GetValue(i);
+			return (long) GetValue(i);
 		}
 
 		/// <summary>
@@ -391,7 +290,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public float GetFloat(int i)
 		{
-			return (float)GetValue(i);
+			return (float) GetValue(i);
 		}
 
 		/// <summary>
@@ -403,7 +302,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public double GetDouble(int i)
 		{
-			return (double)GetValue(i);
+			return (double) GetValue(i);
 		}
 
 		/// <summary>
@@ -415,7 +314,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public string GetString(int i)
 		{
-			return (string)GetValue(i);
+			return (string) GetValue(i);
 		}
 
 		/// <summary>
@@ -427,7 +326,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public decimal GetDecimal(int i)
 		{
-			return (decimal)GetValue(i);
+			return (decimal) GetValue(i);
 		}
 
 		/// <summary>
@@ -439,7 +338,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public DateTime GetDateTime(int i)
 		{
-			return (DateTime)GetValue(i);
+			return (DateTime) GetValue(i);
 		}
 
 		/// <summary>
@@ -489,10 +388,7 @@ namespace JPB.DataAccess.AdoWrapper
 			get
 			{
 				var value = GetValue(i);
-				if (value is DBNull)
-				{
-					return null;
-				}
+				if (value is DBNull) return null;
 				return value;
 			}
 		}
@@ -508,10 +404,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <exception cref="IndexOutOfRangeException">Name is unkown</exception>
 		public object this[string name]
 		{
-			get
-			{
-				return GetValue(name);
-			}
+			get { return GetValue(name); }
 		}
 
 		/// <summary>
@@ -519,6 +412,76 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public void Dispose()
 		{
+		}
+
+		internal void Add(string name, object value)
+		{
+			MetaHeader.Add(name, value);
+		}
+
+		internal void Remove(string name)
+		{
+			MetaHeader.Remove(name);
+		}
+
+		/// <summary>
+		///     Creates a new Eager Data Record that contains all fields from the SourceRecord but not therese defined in
+		///     fieldsExcluded
+		/// </summary>
+		/// <param name="sourceRecord"></param>
+		/// <param name="fieldsExcluded"></param>
+		/// <returns></returns>
+		public static EagarDataRecord WithExcludedFields(IDataRecord sourceRecord, params string[] fieldsExcluded)
+		{
+			if (sourceRecord is EagarDataRecord subRecord) return new EagarDataRecord(subRecord.MetaHeader);
+
+			var buildList = new ArrayList();
+			var metaBuildList = new List<string>();
+			for (var i = 0; i < sourceRecord.FieldCount; i++)
+			{
+				var name = sourceRecord.GetName(i);
+				if (fieldsExcluded.Contains(name)) continue;
+
+				var obj = sourceRecord.GetValue(i);
+				buildList.Add(obj);
+				metaBuildList.Add(name);
+			}
+
+			return new EagarDataRecord(metaBuildList.ToArray(), buildList);
+		}
+
+		/// <summary>
+		///     Return the value of the specified field.
+		/// </summary>
+		/// <param name="name">The index of the field to find.</param>
+		/// <returns>
+		///     The <see cref="T:System.Object" /> which will contain the field value upon return.
+		/// </returns>
+		public object GetValue(string name)
+		{
+			return GetValueInternal(name);
+		}
+
+		/// <summary>
+		///     If overwritten provides the object on index <c>i</c>
+		/// </summary>
+		/// <param name="i"></param>
+		/// <returns></returns>
+		protected internal virtual object GetValueInternal(int i)
+		{
+			var val = MetaHeader[i];
+			return val == DBNull.Value && WrapNulls ? null : val;
+		}
+
+		/// <summary>
+		///     If overwritten provides the object on index <c>i</c>
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		protected internal virtual object GetValueInternal(string name)
+		{
+			var val = MetaHeader[name];
+			return val == DBNull.Value && WrapNulls ? null : val;
 		}
 	}
 }

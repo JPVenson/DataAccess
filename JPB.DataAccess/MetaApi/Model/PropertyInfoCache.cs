@@ -66,9 +66,7 @@ namespace JPB.DataAccess.MetaApi.Model
 				var isStatic = getMethod != null
 					? getMethod.Attributes.HasFlag(MethodAttributes.Static)
 					: setMethod.Attributes.HasFlag(MethodAttributes.Static);
-				var builder = typeof(Expression)
-					.GetMethods()
-					.First(s => s.Name == "Lambda" && s.ContainsGenericParameters);
+				var builder = MetaInfoStoreExtentions.GetExpressionLambda();
 
 				if (isStatic)
 				{
@@ -83,9 +81,12 @@ namespace JPB.DataAccess.MetaApi.Model
 							.Invoke(null, new object[]
 							{
 								accessField, null
-							}) as dynamic;
+							});
 
-						var getterDelegate = getExpression.Compile();
+						var getterDelegate = MetaInfoStoreExtentions
+							.GetCompileMethodFromExpression(getExpression.GetType())
+							.Invoke(getExpression, null);
+
 						Getter = new PropertyHelper<TAtt>(getMethod);
 						((PropertyHelper<TAtt>) Getter).SetGet(getterDelegate);
 					}
@@ -106,9 +107,12 @@ namespace JPB.DataAccess.MetaApi.Model
 								{
 									valueRef
 								}
-							}) as dynamic;
+							});
 
-						var setterDelegate = setExpression.Compile();
+						var setterDelegate = MetaInfoStoreExtentions
+							.GetCompileMethodFromExpression(setExpression.GetType())
+							.Invoke(setExpression, null);
+
 						Setter = new PropertyHelper<TAtt>(setMethod);
 						((PropertyHelper<TAtt>) Setter).SetSet(setterDelegate);
 					}

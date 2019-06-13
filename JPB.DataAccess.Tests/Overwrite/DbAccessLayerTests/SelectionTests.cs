@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 	[TestFixture(DbAccessType.MsSql, false, false, true)]
 	[TestFixture(DbAccessType.SqLite, false, false, true)]
 
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	[Parallelizable( ParallelScope.Self)]
 	public class SelectionTests : DatabaseBaseTest
 	{
 		[SetUp]

@@ -63,7 +63,10 @@ namespace JPB.DataAccess.Tests.Overwrite
 			{
 				_expectWrapper.Database.CloseAllConnection();
 			}
-			_expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, new DbConfig(true));
+
+			var dbConfig = new DbConfig(true);
+			dbConfig.EnableInstanceThreadSafety = true;
+			_expectWrapper = new DbAccessLayer(DbAccessType, ConnectionString, dbConfig);
 
 			var redesginDatabase = string.Format(
 				"IF EXISTS (select * from sys.databases where name=\'{0}\') DROP DATABASE {0}",
@@ -74,7 +77,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 				_expectWrapper.Database.CreateCommand(string.Format("CREATE DATABASE {0}", _dbname)));
 
 			_expectWrapper = new DbAccessLayer(DbAccessType,
-				string.Format(ConnectionString + "Initial Catalog={0};", _dbname), new DbConfig(true));
+				string.Format(ConnectionString + "Initial Catalog={0};", _dbname), dbConfig);
 
 			foreach (var databaseMeta in MetaManager.DatabaseMetas)
 			{

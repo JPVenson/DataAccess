@@ -1,6 +1,8 @@
 #region
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 #if !DEBUG
@@ -16,6 +18,31 @@ namespace JPB.DataAccess.MetaApi
 	/// </summary>
 	public static class MetaInfoStoreExtentions
 	{
+		internal static MethodInfo _expressionLambdaInfo;
+
+		internal static MethodInfo GetCompileMethodFromExpression(Type createLambda)
+		{
+			return createLambda
+				.GetMethods()
+				.Where(e => e.Name == nameof(Expression<object>.Compile))
+				.Where(e => e.DeclaringType != typeof(LambdaExpression))
+				.Single(e => e.GetParameters().Length == 0);
+		}
+
+		internal static MethodInfo GetExpressionLambda()
+		{
+			return _expressionLambdaInfo ?? (_expressionLambdaInfo = typeof(Expression)
+				       .GetMethods()
+				       .Where(e => e.Name == nameof(Expression.Lambda) && e.ContainsGenericParameters)
+				       .Single(e =>
+				       {
+					       var genericArguments = e.GetParameters();
+					       return genericArguments.Length == 2
+					              && genericArguments[0].ParameterType == typeof(Expression)
+					              && genericArguments[1].ParameterType == typeof(IEnumerable<ParameterExpression>);
+				       }));
+		}
+
 		/// <summary>
 		///     Anonymous type check by naming convention
 		/// </summary>

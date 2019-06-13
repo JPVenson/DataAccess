@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,7 +58,7 @@ namespace JPB.DataAccess.Helper
                     }
                     catch (Exception e)
                     {
-                        _currentContext.InnerException = e;
+                        _currentContext.InnerException = ExceptionDispatchInfo.Capture(e);
                     }
                     finally
                     {
@@ -202,7 +203,7 @@ namespace JPB.DataAccess.Helper
             private bool _done;
             private readonly EventQueue _items;
 
-            public Exception InnerException { get; set; }
+            public ExceptionDispatchInfo InnerException { get; set; }
 
             public ExclusiveSynchronizationContext(SynchronizationContext old)
             {
@@ -252,10 +253,8 @@ namespace JPB.DataAccess.Helper
                         task.Item1(task.Item2);
                         if (InnerException != null) // method threw an exeption
                         {
-                            throw new AggregateException(
-                                "AsyncBridge.Run method threw an exception.",
-                                InnerException);
-                        }
+							InnerException.Throw();
+						}
                     }
                     else
                     {

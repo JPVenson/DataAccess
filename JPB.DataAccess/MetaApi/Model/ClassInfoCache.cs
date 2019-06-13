@@ -170,28 +170,13 @@ namespace JPB.DataAccess.MetaApi.Model
 					defaultExpression = Expression.New(defaultConstructor.MethodInfo as ConstructorInfo);
 				}
 
-				var expressionInvoker = typeof(Expression)
-					.GetMethods()
-					.Where(e => e.Name == nameof(Expression.Lambda) && e.ContainsGenericParameters)
-					.Single(e =>
-					{
-						var genericArguments = e.GetParameters();
-						return genericArguments.Length == 2
-						       && genericArguments[0].ParameterType == typeof(Expression)
-						       && genericArguments[1].ParameterType == typeof(IEnumerable<ParameterExpression>);
-					});
+				var expressionInvoker = MetaInfoStoreExtentions.GetExpressionLambda();
 
 				var createLambda = expressionInvoker
 					.MakeGenericMethod(typeof(Func<>).MakeGenericType(type))
 					.Invoke(null, new object[] { defaultExpression, new List<ParameterExpression>() });
-
-				var expressionExecuter = createLambda.GetType()
-					.GetMethods()
-					.Where(e => e.Name == nameof(Expression<object>.Compile))
-					.Where(e => e.DeclaringType != typeof(LambdaExpression))
-					.Single(e => e.GetParameters().Length == 0);
-
-				DefaultFactory = expressionExecuter
+				
+				DefaultFactory = MetaInfoStoreExtentions.GetCompileMethodFromExpression(createLambda.GetType())
 					.Invoke(createLambda, null);
 			}
 

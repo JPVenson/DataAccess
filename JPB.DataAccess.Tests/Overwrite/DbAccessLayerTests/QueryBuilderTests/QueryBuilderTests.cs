@@ -37,7 +37,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 	[TestFixture(DbAccessType.SqLite, true, false, true)]
 	[TestFixture(DbAccessType.SqLite, true, false, false)]
 
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	[Parallelizable(ParallelScope.Self)]
 	public class QueryBuilderTests : DatabaseBaseTest
 	{
 		private readonly bool _asyncEnumeration;

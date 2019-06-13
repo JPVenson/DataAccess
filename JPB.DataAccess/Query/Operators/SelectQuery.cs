@@ -211,9 +211,15 @@ namespace JPB.DataAccess.Query.Operators
 			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
 			var fkPropertie = Cache.Propertys
 				.SingleOrDefault(s =>
-					s.Value.ForginKeyDeclarationAttribute != null &&
-					(s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TEPoco) ||
-					 s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == teCache.TableName))
+				{
+					var info = s.Value.ForginKeyDeclarationAttribute?.Attribute.CompileInfoWith(ContainerObject
+						.AccessLayer.Config);
+
+					if (info.HasValue &&
+					    (info.Value.ForeignType == typeof(TEPoco) ||
+					     info.Value.ForeignTable == teCache.TableName)) return true;
+					return false;
+				})
 				.Value;
 
 			if (fkPropertie == null)

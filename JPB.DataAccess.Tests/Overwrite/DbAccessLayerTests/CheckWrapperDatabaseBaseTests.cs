@@ -20,7 +20,7 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	[Parallelizable(ParallelScope.Self)]
 	public class CheckWrapperDatabaseBaseTests : DatabaseBaseTest
 	{
 		public CheckWrapperDatabaseBaseTests(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)

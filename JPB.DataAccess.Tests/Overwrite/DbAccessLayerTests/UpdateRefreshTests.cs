@@ -11,7 +11,7 @@ using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
-	[Parallelizable(ParallelScope.Fixtures | ParallelScope.Self | ParallelScope.Children)]
+	[Parallelizable(ParallelScope.Self)]
 	public class UpdateRefreshTests : DatabaseBaseTest
 	{
 
