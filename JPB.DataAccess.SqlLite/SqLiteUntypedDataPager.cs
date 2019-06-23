@@ -31,7 +31,6 @@ namespace JPB.DataAccess.SqLite
 		private bool _cache;
 		private int _currentPage;
 		private Action<Action> _syncHelper;
-		private string _pk;
 
 		/// <summary>
 		/// </summary>
