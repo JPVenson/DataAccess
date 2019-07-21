@@ -20,4 +20,21 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// </summary>
 		IEnumerable<ColumnInfo> Columns { get; }
 	}
+
+	/// <summary>
+	///		Internal Use Only
+	/// </summary>
+	public interface ISelectQueryPart : ISelectableQueryPart
+	{
+		/// <summary>
+		/// 
+		/// </summary>
+		IEnumerable<JoinParseInfo> Joins { get; }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="join"></param>
+		void AddJoin(JoinTableQueryPart join);
+	}
 }

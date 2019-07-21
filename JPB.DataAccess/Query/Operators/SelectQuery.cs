@@ -174,7 +174,7 @@ namespace JPB.DataAccess.Query.Operators
 				parentJoinPart.Add(joinTableQueryPart.JoinParseInfo);
 				parentJoinPart = joinTableQueryPart.JoinParseInfo.DependingJoins;
 
-				target.ContainerObject.SearchLast<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
+				target.ContainerObject.SearchLast<ISelectQueryPart>().AddJoin(joinTableQueryPart);
 				target = target.Add(joinTableQueryPart);
 				targetAlias = parentAlias;
 			}
@@ -215,10 +215,9 @@ namespace JPB.DataAccess.Query.Operators
 					var info = s.Value.ForginKeyDeclarationAttribute?.Attribute.CompileInfoWith(ContainerObject
 						.AccessLayer.Config);
 
-					if (info.HasValue &&
-					    (info.Value.ForeignType == typeof(TEPoco) ||
-					     info.Value.ForeignTable == teCache.TableName)) return true;
-					return false;
+					return info.HasValue &&
+					       (info.Value.ForeignType == typeof(TEPoco) ||
+					        info.Value.ForeignTable == teCache.TableName);
 				})
 				.Value;
 

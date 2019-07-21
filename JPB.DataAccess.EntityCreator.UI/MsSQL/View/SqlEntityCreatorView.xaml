@@ -3,13 +3,13 @@
 			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-			 xmlns:local="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.View"
 			 xmlns:viewModel="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel"
 			 xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
 			 xmlns:xcdg="http://schemas.xceed.com/wpf/xaml/datagrid"
 			 xmlns:models="clr-namespace:JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models"
 			 mc:Ignorable="d"
-			 d:DesignHeight="300" d:DesignWidth="500" d:DataContext="{d:DesignInstance viewModel:SqlEntityCreatorViewModel}">
+			 d:DesignHeight="300" d:DesignWidth="500" 
+             d:DataContext="{d:DesignInstance viewModel:SqlEntityCreatorViewModel}">
 	<DockPanel Dock="Top">
 		<xctk:BusyIndicator IsBusy="{Binding IsWorking}" BusyContent="{Binding Status}">
 			<DockPanel>
@@ -181,44 +181,3 @@
 		</xctk:BusyIndicator>
 	</DockPanel>
 </UserControl>
-<!--<Grid>
-	<Grid.ColumnDefinitions>
-		<ColumnDefinition />
-		<ColumnDefinition />
-	</Grid.ColumnDefinitions>
-	<Grid.RowDefinitions>
-		<RowDefinition />
-		<RowDefinition />
-		<RowDefinition />
-		<RowDefinition />
-		<RowDefinition />
-		<RowDefinition />
-		<RowDefinition />
-	</Grid.RowDefinitions>
-
-	<Label Grid.Row="0" Grid.Column="0" Content="Table Name"/>
-	<Label Grid.Row="1" Grid.Column="0" Content="CSharp Name"/>
-	<Label Grid.Row="2" Grid.Column="0" Content="Exclude from Build"/>
-	<Label Grid.Row="3" Grid.Column="0" Content="Fallback Property"/>
-	<Label Grid.Row="4" Grid.Column="0" Content="Select Factory"/>
-	<Label Grid.Row="5" Grid.Column="0" Content="Constructor"/>
-	<Label Grid.Row="6" Grid.Column="0" Content="Columns"/>
-	<TextBox Grid.Row="0" Grid.Column="1" IsEnabled="False" Text="{Binding Info.TableName}" />
-	<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NewTableName}"/>
-	<CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding Exclude}"/>
-	<CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding CreateFallbackProperty}"/>
-	<CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding CreateSelectFactory}"/>
-	<CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding CreateDataRecordLoader}"/>
-	<DockPanel Grid.Row="5" Grid.Column="1">
-		<ListBox DockPanel.Dock="Left" ItemsSource="{Binding ColumnInfos}" SelectedItem="{Binding SelectedColumn}">
-			<ListBox.ItemTemplate>
-				<DataTemplate DataType="{x:Type viewModel:ColumnInfoViewModel}">
-					<Label Content="{Binding ColumnInfo.ColumnName}"></Label>
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>
-		<DockPanel>
-
-		</DockPanel>
-	</DockPanel>
-</Grid>-->

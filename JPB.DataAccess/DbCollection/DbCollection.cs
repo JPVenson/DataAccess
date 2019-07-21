@@ -216,6 +216,7 @@ namespace JPB.DataAccess.DbCollection
 		public void CopyTo(T[] array, int arrayIndex)
 		{
 			_internalCollection.Select(s => s.Key).ToArray().CopyTo(array, arrayIndex);
+
 		}
 
 		public bool Remove(T item)

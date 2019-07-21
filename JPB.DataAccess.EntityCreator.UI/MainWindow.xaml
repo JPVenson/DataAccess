@@ -9,6 +9,6 @@
 		mc:Ignorable="d"
 		Title="EntityCreator" Height="350" Width="1150" d:DataContext="{d:DesignInstance local:MainWindowViewModel}">
 	<DockPanel>
-		<view:SqlEntityCreatorView DataContext="{Binding SelectedProvider}"></view:SqlEntityCreatorView>
+		<view:SqlEntityCreatorView DataContext="{Binding SelectedProvider}" />
 	</DockPanel>
 </Window>
