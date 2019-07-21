@@ -502,10 +502,10 @@ namespace JPB.DataAccess
 		/// <returns></returns>
 		internal static string ColumnIdentifier(string tableAlias, string columnName)
 		{
-			var col = $"[{columnName.TrimAlias()}]";
+			var col = $"{columnName.EnsureAlias()}";
 			if (tableAlias != null)
 			{
-				return $"[{tableAlias.TrimAlias()}].{col}";
+				return $"{tableAlias.EnsureAlias()}.{col}";
 			}
 			return col;
 		}
@@ -520,7 +520,7 @@ namespace JPB.DataAccess
 			var properties = CreateProperties(type, ignore);
 			if (properties.Any())
 			{
-				return properties.Aggregate((e, f) => $"[{e.TrimAlias()}], [{f.TrimAlias()}]");
+				return properties.Aggregate((e, f) => $"{e.EnsureAlias()}, {f.EnsureAlias()}");
 			}
 
 			return "";

@@ -114,10 +114,10 @@ namespace JPB.DataAccess.Query.QueryItems
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			var joinBuilder = new StringBuilder();
-			joinBuilder.Append($"{_joinAs.JoinType} JOIN [{TargetTable.GetAlias()}] AS [{Alias.GetAlias()}]" +
-							   $" ON [{Alias.GetAlias()}].[{TargetColumn.ColumnName.TrimAlias()}]" +
+			joinBuilder.Append($"{_joinAs.JoinType} JOIN {TargetTable.GetAlias().EnsureAlias()} AS {Alias.GetAlias().EnsureAlias()}" +
+							   $" ON {Alias.GetAlias().EnsureAlias()}.{TargetColumn.ColumnName.EnsureAlias()}" +
 							   $" = " +
-							   $"[{SourceTable.GetAlias()}].[{SourceColumn.ColumnName}]");
+							   $"{SourceTable.GetAlias().EnsureAlias()}.{SourceColumn.ColumnName.EnsureAlias()}");
 			return new QueryFactoryResult(joinBuilder.ToString());
 		}
 

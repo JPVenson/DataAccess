@@ -538,7 +538,7 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var query = CreateSelectQueryFactory(GetClassInfo(type)).CommandText
-			            + $" WHERE [{GetClassInfo(type).PrimaryKeyProperty.DbName.TrimAlias()}] = @pk";
+			            + $" WHERE {GetClassInfo(type).PrimaryKeyProperty.DbName.EnsureAlias()} = @pk";
 			var cmd = Database.CreateCommand(query);
 			cmd.Parameters.AddWithValue("@pk", pk, Database);
 			return cmd;
@@ -552,7 +552,7 @@ namespace JPB.DataAccess.Manager
 		public static string CreateSelect(string source, DbClassInfoCache classType, string target)
 		{
 			return CreateSelectByColumns(source,
-				GetSelectableColumnsOf(classType).Aggregate((e, f) => e + ", " + f), target);
+				GetSelectableColumnsOf(classType).Select(e => e.EnsureAlias()).Aggregate((e, f) => e + ", " + f), target);
 		}
 
 		/// <summary>
@@ -587,7 +587,7 @@ namespace JPB.DataAccess.Manager
 
 			sb.Append(columns);
 			sb.Append(" FROM ");
-			sb.Append($"[{source}] ");
+			sb.Append($"{source.EnsureAlias()} ");
 
 			return sb.ToString();
 		}

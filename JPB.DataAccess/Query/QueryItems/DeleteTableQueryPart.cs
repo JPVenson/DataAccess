@@ -37,11 +37,11 @@ namespace JPB.DataAccess.Query.QueryItems
 				case DbAccessType.MySql:
 				case DbAccessType.OleDb:
 				case DbAccessType.Obdc:
-					return new QueryFactoryResult($"DELETE [{Alias.GetAlias().TrimAlias()}] " +
-					                              $"FROM [{_target.GetAlias().TrimAlias()}] " +
-					                              $"AS [{Alias.GetAlias().TrimAlias()}]");
+					return new QueryFactoryResult($"DELETE {Alias.GetAlias().EnsureAlias()} " +
+					                              $"FROM {_target.GetAlias().EnsureAlias()} " +
+					                              $"AS {Alias.GetAlias().EnsureAlias()}");
 				case DbAccessType.SqLite:
-					return new QueryFactoryResult($"DELETE FROM [{_target.GetAlias().TrimAlias()}] ");
+					return new QueryFactoryResult($"DELETE FROM {_target.GetAlias().EnsureAlias()} ");
 				default:
 					throw new ArgumentOutOfRangeException();
 			}

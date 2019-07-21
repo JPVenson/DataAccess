@@ -57,7 +57,7 @@ namespace JPB.DataAccess.Manager
 		{
 			if (entry == null)
 			{
-				return db.CreateCommand("DELETE FROM [" + classInfo.TableName.TrimAlias() + "]");
+				return db.CreateCommand("DELETE FROM " + classInfo.TableName.EnsureAlias());
 			}
 
 			if (classInfo.PrimaryKeyProperty == null)
@@ -66,8 +66,8 @@ namespace JPB.DataAccess.Manager
 				classInfo.Name));
 			}
 			var proppk = classInfo.PrimaryKeyProperty.DbName;
-			var query = "DELETE FROM [" + classInfo.TableName.TrimAlias() + "] " +
-			            "WHERE [" + proppk.TrimAlias() + "] = @0";
+			var query = "DELETE FROM " + classInfo.TableName.EnsureAlias() + " " +
+			            "WHERE " + proppk.EnsureAlias() + " = @0";
 			return db.CreateCommandWithParameterValues(query,
 				new Tuple<Type, object>(classInfo.PrimaryKeyProperty.PropertyType, classInfo.PrimaryKeyProperty.Getter.Invoke(entry)));
 		}

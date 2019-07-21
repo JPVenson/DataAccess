@@ -80,23 +80,23 @@ namespace JPB.DataAccess.Query.QueryItems
 							ColumnAssignments
 								.Select(
 									columnAssignment =>
-										$"[{Alias.GetAlias().TrimAlias()}].[{columnAssignment.Column.TrimAlias()}] = {columnAssignment.Value}")
+										$"{Alias.GetAlias().EnsureAlias()}.{columnAssignment.Column.EnsureAlias()} = {columnAssignment.Value}")
 								.Aggregate((e, f) => e + ", " + f)
 						);
-					query.Append($" FROM [{_target.GetAlias().TrimAlias()}] AS [{Alias.GetAlias().TrimAlias()}]");
+					query.Append($" FROM {_target.GetAlias().EnsureAlias()} AS {Alias.GetAlias().EnsureAlias()}");
 					break;
 				case DbAccessType.Experimental:
 				case DbAccessType.Unknown:
 				case DbAccessType.OleDb:
 				case DbAccessType.Obdc:
 				case DbAccessType.SqLite:
-					query.Append($"UPDATE [{_target.GetAlias().TrimAlias()}] SET ");
+					query.Append($"UPDATE {_target.GetAlias().EnsureAlias()} SET ");
 					query
 						.Append(
 							ColumnAssignments
 								.Select(
 									columnAssignment =>
-										$"[{columnAssignment.Column.TrimAlias()}] = {columnAssignment.Value}")
+										$"{columnAssignment.Column.EnsureAlias()} = {columnAssignment.Value}")
 								.Aggregate((e, f) => e + ", " + f)
 						);
 					query.Append($"");
