@@ -174,7 +174,7 @@ namespace JPB.DataAccess.Query.Operators
 				parentJoinPart.Add(joinTableQueryPart.JoinParseInfo);
 				parentJoinPart = joinTableQueryPart.JoinParseInfo.DependingJoins;
 
-				target.ContainerObject.SearchLast<SelectTableQueryPart>().AddJoin(joinTableQueryPart);
+				target.ContainerObject.SearchLast<ISelectQueryPart>().AddJoin(joinTableQueryPart);
 				target = target.Add(joinTableQueryPart);
 				targetAlias = parentAlias;
 			}
@@ -211,9 +211,14 @@ namespace JPB.DataAccess.Query.Operators
 			var teCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TEPoco));
 			var fkPropertie = Cache.Propertys
 				.SingleOrDefault(s =>
-					s.Value.ForginKeyDeclarationAttribute != null &&
-					(s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TEPoco) ||
-					 s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable == teCache.TableName))
+				{
+					var info = s.Value.ForginKeyDeclarationAttribute?.Attribute.CompileInfoWith(ContainerObject
+						.AccessLayer.Config);
+
+					return info.HasValue &&
+					       (info.Value.ForeignType == typeof(TEPoco) ||
+					        info.Value.ForeignTable == teCache.TableName);
+				})
 				.Value;
 
 			if (fkPropertie == null)

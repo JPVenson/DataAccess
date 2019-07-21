@@ -678,11 +678,12 @@ namespace JPB.DataAccess.Helper.LocalDb
 			{
 				foreach (var dbPropertyInfoCach in _typeInfo.Propertys)
 				{
-					if (dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute != null &&
-					    dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType != null)
+					var fkInfo =
+						dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute?.Attribute.CompileInfoWith(Config);
+
+					if (fkInfo != null && fkInfo.Value.ForeignType != null)
 					{
-						_databaseDatabase.AddMapping(_typeInfo.Type,
-						dbPropertyInfoCach.Value.ForginKeyDeclarationAttribute.Attribute.ForeignType);
+						_databaseDatabase.AddMapping(_typeInfo.Type, fkInfo.Value.ForeignType);
 					}
 				}
 
@@ -768,8 +769,7 @@ namespace JPB.DataAccess.Helper.LocalDb
 				var fkPropForTypeX =
 						_typeInfo.Propertys.FirstOrDefault(
 						                                   s =>
-							                                   s.Value.ForginKeyDeclarationAttribute != null &&
-							                                   s.Value.ForginKeyDeclarationAttribute.Attribute.ForeignTable ==
+							                                   s.Value.ForginKeyDeclarationAttribute?.Attribute.CompileInfoWith(Config).ForeignTable ==
 							                                   localDbReposetory.TypeInfo.TableName)
 						         .Value;
 

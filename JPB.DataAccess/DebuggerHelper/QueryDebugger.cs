@@ -58,15 +58,7 @@ namespace JPB.DataAccess.DebuggerHelper
 		private bool _loaded;
 		private string _stackTracer;
 		private Task _wokerTask;
-
-		/// <summary>
-		///     When set to true the QueryCommand debugger creates an own instance the the Default database connection assumd by
-		///     the type
-		///     of the IDbCommand it contains
-		/// </summary>
-		[Obsolete("Do not use this Property anymore", true)]
-		public static IDatabaseStrategy UseDefaultDatabase { get; set; }
-
+		
 		/// <summary>
 		///     Stores the exact executed query
 		/// </summary>

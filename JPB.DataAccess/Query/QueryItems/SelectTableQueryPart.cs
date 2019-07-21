@@ -15,7 +15,7 @@ using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
-	internal class SelectTableQueryPart : ISelectableQueryPart
+	internal class SelectTableQueryPart : ISelectQueryPart
 	{
 		private readonly string _source;
 		private readonly DbClassInfoCache _tableInfo;

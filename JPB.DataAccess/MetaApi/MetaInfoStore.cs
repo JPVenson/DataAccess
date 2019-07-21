@@ -39,7 +39,7 @@ namespace JPB.DataAccess.MetaApi
 		/// <value>
 		///     <c>true</c> if this instance is global; otherwise, <c>false</c>.
 		/// </value>
-		public bool IsGlobal { get; private set; }
+		public bool IsGlobal { get; }
 
 		/// <summary>
 		///     Creates a new Instance for storing class informations. Allows you to define if this is ether the global config

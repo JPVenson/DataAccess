@@ -65,8 +65,7 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			var tProp = tCache.Propertys.Values
 							  .Single(e =>
-								  e.ForginKeyDeclarationAttribute != null &&
-								  e.ForginKeyDeclarationAttribute.Attribute.ForeignType == typeof(TFkPoco));
+								  e.ForginKeyDeclarationAttribute?.Attribute.CompileInfoWith(ContainerObject.AccessLayer.Config).ForeignType == typeof(TFkPoco));
 			return Column(tProp.PropertyName);
 		}
 

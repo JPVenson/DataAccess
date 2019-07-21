@@ -41,7 +41,6 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 	//[TestFixture(DbAccessType.MySql, true, false)]
 	//[TestFixture(DbAccessType.MySql, false, false)]
 	//[TestFixture(DbAccessType.MySql, false, true)]
-	[DotMemoryUnit(SavingStrategy = SavingStrategy.Never, FailIfRunWithoutSupport = false)]
 	public abstract class DatabaseBaseTest
 	{
 		//MemoryCheckPoint memoryCheckPoint;
@@ -144,7 +143,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 
 		protected DatabaseBaseTest(DbAccessType type, bool asyncExecution, bool syncronised, params object[] additionalArguments)
 		{
-			TestContext.CurrentContext.Test.Properties.Add("Type", type);
+			//TestContext.CurrentContext.Test.Properties.Add("Type", type);
 			AdditionalArguments = additionalArguments.Concat(new[] { asyncExecution ? "1" : "0", Synronised ? "1" : "0" }).ToArray();
 			Type = type;
 			AsyncExecution = asyncExecution;

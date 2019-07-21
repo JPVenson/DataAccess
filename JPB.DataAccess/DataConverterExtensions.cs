@@ -96,56 +96,6 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Returns All foreign keys of the given type
-		/// </summary>
-		/// <param name="type">The type.</param>
-		/// <param name="config">The configuration.</param>
-		/// <returns></returns>
-		public static DbPropertyInfoCache[] GetFKs(this Type type, DbConfig config)
-		{
-			return
-				config.GetOrCreateClassInfoCache(type)
-					.Propertys.Where(f => f.Value.ForginKeyAttribute != null)
-					.Select(f => f.Value)
-					.ToArray();
-		}
-
-		/// <summary>
-		///     Gets the first Forgin key that is of type <paramref name="fkType" />
-		/// </summary>
-		/// <param name="type">The type.</param>
-		/// <param name="fkType">Type of the fk.</param>
-		/// <param name="config">The configuration.</param>
-		/// <returns></returns>
-		public static string GetFK(this Type type, Type fkType, DbConfig config)
-		{
-			var hasFk = config.GetOrCreateClassInfoCache(type)
-				.Propertys
-				.Select(f => f.Value)
-				.Where(f => f.ForginKeyAttribute != null || f.ForginKeyDeclarationAttribute != null)
-				.FirstOrDefault(f => f.PropertyType == fkType || f.ForginKeyDeclarationAttribute != null && f.ForginKeyDeclarationAttribute.Attribute.ForeignType == fkType);
-			if (hasFk != null)
-			{
-				return hasFk.DbName;
-			}
-			return null;
-		}
-
-		/// <summary>
-		///     Get the foreign key based that contains the
-		///     <paramref name="databaseName" />
-		/// </summary>
-		/// <param name="type">The type.</param>
-		/// <param name="databaseName">Name of the database.</param>
-		/// <param name="config">The configuration.</param>
-		/// <returns></returns>
-		public static string GetFK(this Type type, string databaseName, DbConfig config)
-		{
-			var classInfo = config.GetOrCreateClassInfoCache(type);
-			return classInfo.GetDbToLocalSchemaMapping(databaseName);
-		}
-
-		/// <summary>
 		///     Copies the propertys.
 		/// </summary>
 		/// <param name="base">The base.</param>

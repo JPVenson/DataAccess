@@ -26,11 +26,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		where TCtor : class, IConstructorInfoCache<TAttr, TArg>, new()
 		where TArg : class, IMethodArgsInfoCache<TAttr>, new()
 	{
-		static ClassInfoCache()
-		{
-			
-		}
-
 		/// <summary>
 		/// The MsCoreLib Assembly used for checking of an Framework Type
 		/// </summary>
@@ -79,7 +74,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			}
 
 			return AppDomain.CurrentDomain.GetAssemblies().Where(f => f.FullName.StartsWith("System"))
-							.FirstOrDefault(e => e == Type.Assembly) != null;
+			                .FirstOrDefault(e => e == Type.Assembly) != null;
 		}
 
 		/// <summary>
@@ -129,17 +124,17 @@ namespace JPB.DataAccess.MetaApi.Model
 					.Select(s => new TAttr().Init(s as Attribute) as TAttr));
 			Propertys = new Dictionary<string, TProp>(type
 					.GetProperties(BindingFlags.Public | BindingFlags.Static |
-								   BindingFlags.NonPublic | BindingFlags.Instance)
+					               BindingFlags.NonPublic | BindingFlags.Instance)
 					.Where(e => !e.GetIndexParameters().Any())
 					.Select(s => new TProp().Init(s, anon) as TProp)
 					.ToDictionary(s => s.PropertyName, s => s));
 			Mehtods = new HashSet<TMeth>(type
 					.GetMethods(BindingFlags.Public | BindingFlags.Static |
-								BindingFlags.NonPublic | BindingFlags.Instance)
+					            BindingFlags.NonPublic | BindingFlags.Instance)
 					.Select(s => new TMeth().Init(s) as TMeth));
 			Constructors = new HashSet<TCtor>(type
 					.GetConstructors(BindingFlags.Public | BindingFlags.Static |
-									 BindingFlags.NonPublic | BindingFlags.Instance)
+					                 BindingFlags.NonPublic | BindingFlags.Instance)
 					.Select(s => new TCtor().Init(s) as TCtor));
 			var defaultConstructor = Constructors.FirstOrDefault(f => !f.Arguments.Any());
 
@@ -175,38 +170,13 @@ namespace JPB.DataAccess.MetaApi.Model
 					defaultExpression = Expression.New(defaultConstructor.MethodInfo as ConstructorInfo);
 				}
 
-				//var dynamicAccess = _expressionInvoker.MakeGenericMethod(
-				//		typeof(Func<>)
-				//				.MakeGenericType(type)
-				//		)
-				//		.Invoke(null, new object[]
-				//		{
-				//			defaultExpression, null
-				//		});
-				//var expressionBuilder = dynamicAccess.GetType().GetMethods().First(s => s.Name == "Compile");
-
-				var expressionInvoker = typeof(Expression)
-					.GetMethods()
-					.Where(e => e.Name == nameof(Expression.Lambda) && e.ContainsGenericParameters)
-					.Single(e =>
-					{
-						var genericArguments = e.GetParameters();
-						return genericArguments.Length == 2
-						       && genericArguments[0].ParameterType == typeof(Expression)
-						       && genericArguments[1].ParameterType == typeof(IEnumerable<ParameterExpression>);
-					});
+				var expressionInvoker = MetaInfoStoreExtentions.GetExpressionLambda();
 
 				var createLambda = expressionInvoker
 					.MakeGenericMethod(typeof(Func<>).MakeGenericType(type))
-					.Invoke(null, new object[] {defaultExpression, new List<ParameterExpression>()});
-
-				var expressionExecuter = createLambda.GetType()
-					.GetMethods()
-					.Where(e => e.Name == nameof(Expression<object>.Compile))
-					.Where(e => e.DeclaringType != typeof(LambdaExpression))
-					.Single(e => e.GetParameters().Length == 0);
-
-				DefaultFactory = expressionExecuter
+					.Invoke(null, new object[] { defaultExpression, new List<ParameterExpression>() });
+				
+				DefaultFactory = MetaInfoStoreExtentions.GetCompileMethodFromExpression(createLambda.GetType())
 					.Invoke(createLambda, null);
 			}
 
@@ -264,7 +234,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// Comparers IClassInfoCache to type and to IClassInfoCache
 		/// </summary>
 		public static readonly ClassInfoEquatableComparer Comparer = new ClassInfoEquatableComparer();
-		
+
 		/// <inheritdoc />
 		public bool Equals(IClassInfoCache other)
 		{

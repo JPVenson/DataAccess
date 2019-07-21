@@ -177,10 +177,10 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 		/// </summary>
 		public DbAttributeInfoCache<IgnoreReflectionAttribute> IgnoreAnyAttribute { get; private set; }
 
-		/// <summary>
-		///     If known the Generator that will mask this Property
-		/// </summary>
-		public DbAttributeInfoCache<AnonymousObjectGenerationAttribute> AnonymousObjectGenerationAttribute { get; set; }
+		///// <summary>
+		/////     If known the Generator that will mask this Property
+		///// </summary>
+		//public DbAttributeInfoCache<AnonymousObjectGenerationAttribute> AnonymousObjectGenerationAttribute { get; set; }
 
 		/// <summary>
 		///     For internal Usage only
@@ -219,7 +219,7 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 					ForginKeyAttribute = null;
 				}
 			}
-			AnonymousObjectGenerationAttribute = DbAttributeInfoCache<AnonymousObjectGenerationAttribute>.WrapperOrNull(Attributes);
+			//AnonymousObjectGenerationAttribute = DbAttributeInfoCache<AnonymousObjectGenerationAttribute>.WrapperOrNull(Attributes);
 			RowVersionAttribute = DbAttributeInfoCache<RowVersionAttribute>.WrapperOrNull(Attributes);
 			FromXmlAttribute = DbAttributeInfoCache<FromXmlAttribute>.WrapperOrNull(Attributes);
 			ForModelAttribute = DbAttributeInfoCache<ForModelAttribute>.WrapperOrNull(Attributes);

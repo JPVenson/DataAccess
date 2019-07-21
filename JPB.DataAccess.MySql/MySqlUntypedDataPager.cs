@@ -38,16 +38,6 @@ namespace JPB.DataAccess.MySql
 		private Action<Action> _syncHelper;
 
 		/// <summary>
-		///     The pk
-		/// </summary>
-		private string pk;
-
-		/// <summary>
-		///     The SQL version
-		/// </summary>
-		protected string SqlVersion;
-
-		/// <summary>
 		/// </summary>
 		public Action<Action> SyncHelper
 		{

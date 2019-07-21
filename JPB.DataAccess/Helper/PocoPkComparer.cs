@@ -11,7 +11,7 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 namespace JPB.DataAccess.Helper
 {
 	/// <summary>
-	///     Compares 2 Pocos based on there PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey
+	///     Compares 2 Pocos based on their PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey
 	///     attribute.
 	///     When both of the instances are of the same reference: return true.
 	///     When one of the instances is default(T): return false.
