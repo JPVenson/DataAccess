@@ -3,12 +3,12 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Data;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.ModelsAnotations;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	[GeneratedCode("JPB.DataAccess.EntityCreator.MsSql.MsSqlCreator", "1.0.0.8")]
 	public partial class GeneratedUsers

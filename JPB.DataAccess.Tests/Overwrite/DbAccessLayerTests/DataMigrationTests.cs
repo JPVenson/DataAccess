@@ -1,9 +1,10 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
@@ -22,7 +23,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[TestCase(typeof(Users))]
 		[TestCase(typeof(Users_Col))]
 		[TestCase(typeof(UsersWithoutProperties))]
-		[TestCase(typeof(Base.TestModels.CheckWrapperBaseTests.Users))]
+		[TestCase(typeof(Base.TestModels.CheckWrapperBaseTests.User.Users))]
 		[TestCase(typeof(UsersAutoGenerateConstructor))]
 		[TestCase(typeof(UsersAutoGenerateNullableConstructor))]
 		[TestCase(typeof(GeneratedUsers))]

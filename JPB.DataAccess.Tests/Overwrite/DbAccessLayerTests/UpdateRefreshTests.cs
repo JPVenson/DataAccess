@@ -2,8 +2,8 @@
 
 using System;
 using System.Linq;
-using JPB.DataAccess.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Framework.Manager;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 

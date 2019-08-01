@@ -1,12 +1,12 @@
 #region
 
 using System.Data;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	[ForModel(UsersMeta.TableName)]
 	public class Users_PK_IDFM_CTORSEL

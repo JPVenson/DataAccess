@@ -6,14 +6,14 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Manager;
-using JPB.DataAccess.SqLite;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.SqLite.NetStandard;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Overwrite
+namespace JPB.DataAccess.Tests.Overwrite.Framework.SqLite
 {
 	public class SqLiteManager : IManagerImplementation
 	{
@@ -64,7 +64,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 			//tempPath = Path.GetTempFileName() + dbname + "sqLite";
 
-			_expectWrapper = new DbAccessLayer(new SqLite.SqLite(connection), new DbConfig(true));
+			_expectWrapper = new DbAccessLayer(new DataAccess.SqLite.NetStandard.SqLiteStrategy(connection), new DbConfig(true));
 			foreach (var databaseMeta in MetaManager.DatabaseMetas)
 			{
 				_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(databaseMeta.Value.CreationCommand(DbAccessType)));
@@ -79,7 +79,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 
 		public void Clear()
 		{
-			var connectionCounter = SqLite.SqLite.ConnectionCounter.Where(f => f.Key == _expectWrapper.Database.DatabaseFile)
+			var connectionCounter = SqLiteStrategy.ConnectionCounter.Where(f => f.Key == _expectWrapper.Database.DatabaseFile)
 			                              .SelectMany(e => e.Value.Connections)
 			                              .Select(e =>
 			                              {

@@ -4,8 +4,8 @@ using System.IO;
 using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using JPB.DataAccess.AdoWrapper;
-using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Framework.AdoWrapper;
+using JPB.DataAccess.Framework.DbInfoConfig;
 using JPB.DataAccess.Tests.Base.TestModels.XmlDataRecordTest;
 using NUnit.Framework;
 

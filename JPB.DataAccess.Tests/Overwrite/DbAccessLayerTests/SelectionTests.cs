@@ -2,11 +2,13 @@
 
 using System;
 using System.Linq;
-using JPB.DataAccess.Helper;
-using JPB.DataAccess.Manager;
-using JPB.DataAccess.Query;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Framework.Helper;
+using JPB.DataAccess.Framework.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;
 using JPB.DataAccess.Tests.TestFramework;
 using NUnit.Framework;
 using Users = JPB.DataAccess.Tests.Base.Users;

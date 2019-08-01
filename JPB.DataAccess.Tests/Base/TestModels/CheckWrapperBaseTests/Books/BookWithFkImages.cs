@@ -1,13 +1,13 @@
 ﻿#region
 
-using System.Collections.Generic;
-using JPB.DataAccess.DbCollection;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.DbCollection;
+using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books
 {
 	[ForModel(BookMeta.TableName)]
 	public class BookWithFkImages
@@ -21,9 +21,9 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 		public virtual DbCollection<ImageWithFkBooks> Images { get; set; }
 
 		[ForeignKey(nameof(IdUser), UsersMeta.PrimaryKeyName)]
-		public virtual Users User { get; set; }
+		public virtual User.Users User { get; set; }
 
 		[ForeignKey(nameof(IdUser), UsersMeta.PrimaryKeyName)]
-		public virtual Users User1 { get; set; }
+		public virtual User.Users User1 { get; set; }
 	}
 }

@@ -1,7 +1,7 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Helper;
+using JPB.DataAccess.Framework.Helper;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 

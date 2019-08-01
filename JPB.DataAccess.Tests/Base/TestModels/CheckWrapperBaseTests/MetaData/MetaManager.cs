@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.Manager;
+﻿using System.Collections.Generic;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {

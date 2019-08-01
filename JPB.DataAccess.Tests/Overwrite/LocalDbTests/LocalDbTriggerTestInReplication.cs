@@ -3,12 +3,13 @@
 using System;
 using System.Linq;
 using System.Transactions;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Helper.LocalDb;
-using JPB.DataAccess.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Helper.LocalDb.Trigger;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.Helper.LocalDb;
+using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Framework.Helper.LocalDb.Trigger;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
+using TransactionScope = JPB.DataAccess.Framework.Helper.LocalDb.TransactionScope;
 
 #endregion
 

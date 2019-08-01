@@ -1,12 +1,12 @@
 #region
 
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	public class ConfigLessUserInplaceConfig
 	{

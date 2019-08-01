@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JPB.DataAccess.Query;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Framework.Query;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.Overwrite.Misc

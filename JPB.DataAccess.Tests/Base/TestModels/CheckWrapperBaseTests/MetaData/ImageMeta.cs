@@ -1,7 +1,7 @@
 using System;
-using System.Reflection;
 using System.Text;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {

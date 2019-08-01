@@ -1,6 +1,7 @@
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images
 {
 	[ForModel("Image")]
 	public class ImageNullable

@@ -1,8 +1,8 @@
 ﻿#region
 
-using JPB.DataAccess.ModelsAnotations;
-
 #endregion
+
+using JPB.DataAccess.Framework.ModelsAnotations;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 {

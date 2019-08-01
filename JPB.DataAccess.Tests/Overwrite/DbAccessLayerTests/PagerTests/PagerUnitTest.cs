@@ -1,7 +1,7 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.Manager;
 using JPB.DataAccess.Tests.Base;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;

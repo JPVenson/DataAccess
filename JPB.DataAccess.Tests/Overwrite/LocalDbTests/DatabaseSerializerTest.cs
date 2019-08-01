@@ -6,11 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Transactions;
 using System.Xml.Serialization;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Helper.LocalDb;
-using JPB.DataAccess.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.Helper.LocalDb;
+using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images;
 using NUnit.Framework;
+using TransactionScope = JPB.DataAccess.Framework.Helper.LocalDb.TransactionScope;
 using Users = JPB.DataAccess.Tests.Base.Users;
 
 #endregion

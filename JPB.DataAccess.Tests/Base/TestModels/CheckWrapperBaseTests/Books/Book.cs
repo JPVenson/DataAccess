@@ -1,7 +1,8 @@
-using System;
-using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+
+using JPB.DataAccess.Framework.ModelsAnotations;
+
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books
 {
 	public class Book
 	{
@@ -10,7 +11,7 @@ namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 
 		public string Text { get; set; }
 
-		[ForeignKeyDeclaration(typeof(Users))]
+		[ForeignKeyDeclaration(typeof(User.Users))]
 		public int? IdUser { get; set; }
 	}
 }

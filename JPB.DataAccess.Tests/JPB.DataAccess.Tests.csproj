@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JPB.DataAccess.Tests</RootNamespace>
     <AssemblyName>JPB.DataAccess.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -180,17 +180,17 @@
     <Compile Include="TestFramework\DbCategory.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj">
+      <Project>{300DA607-CBAE-4CA4-ABFC-AE250CDC7C30}</Project>
+      <Name>JPB.DataAccess.Framework</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess.MySql\JPB.DataAccess.MySql.csproj">
       <Project>{3aa3990d-ffa4-4ee5-82be-e30970ffd0fa}</Project>
       <Name>JPB.DataAccess.MySql</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JPB.DataAccess.SqlLite\JPB.DataAccess.SqLite.csproj">
-      <Project>{de42f7ed-51b5-4118-831b-05efeeecd7ac}</Project>
-      <Name>JPB.DataAccess.SqLite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
-      <Name>JPB.DataAccess</Name>
+    <ProjectReference Include="..\JPB.DataAccess.SqLite.NetStandard\JPB.DataAccess.SqLite.NetStandard.csproj">
+      <Project>{6ff8bf3a-8fec-49c7-a8b8-a8b7a31b6bff}</Project>
+      <Name>JPB.DataAccess.SqLite.NetStandard</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

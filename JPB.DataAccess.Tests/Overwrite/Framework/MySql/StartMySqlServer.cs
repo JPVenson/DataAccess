@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using JPB.DataAccess.Tests.Overwrite.Framework.MySql;
 using NUnit.Framework;
 
 

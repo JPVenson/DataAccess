@@ -1,4 +1,4 @@
-﻿using JPB.DataAccess.Manager;
+﻿using JPB.DataAccess.Framework.Manager;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {

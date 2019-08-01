@@ -3,13 +3,13 @@
 using System;
 using System.Configuration;
 using System.Text;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Overwrite
+namespace JPB.DataAccess.Tests.Overwrite.Framework.MsSql
 {
 	public class MsSqlManager : IManagerImplementation
 	{

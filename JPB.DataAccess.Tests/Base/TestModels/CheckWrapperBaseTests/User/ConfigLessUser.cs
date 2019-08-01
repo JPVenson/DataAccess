@@ -1,4 +1,4 @@
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	public class ConfigLessUser
 	{

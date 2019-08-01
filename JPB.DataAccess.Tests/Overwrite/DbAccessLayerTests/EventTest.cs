@@ -2,8 +2,9 @@
 
 using System;
 using System.Threading;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;
 using NUnit.Framework;
 
 #endregion

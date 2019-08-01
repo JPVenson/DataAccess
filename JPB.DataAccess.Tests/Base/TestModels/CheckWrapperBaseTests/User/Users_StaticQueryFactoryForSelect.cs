@@ -1,15 +1,13 @@
 #region
 
-using JPB.DataAccess.Contacts;
-using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.Query.Operators;
-using JPB.DataAccess.QueryFactory;
+using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Framework.QueryFactory;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	[ForModel(UsersMeta.TableName)]
 	public class Users_StaticQueryFactoryForSelect

@@ -1,4 +1,4 @@
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.ModelsAnotations;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
 {

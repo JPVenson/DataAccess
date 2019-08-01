@@ -1,10 +1,11 @@
 ﻿#region
 
-using JPB.DataAccess.ModelsAnotations;
-
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
+
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images
 {
 	public class Image
 	{

@@ -1,10 +1,10 @@
 #region
 
-using JPB.DataAccess.ModelsAnotations;
-
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+using JPB.DataAccess.Framework.ModelsAnotations;
+
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	[AutoGenerateCtor(CtorGeneratorMode = CtorGeneratorMode.FactoryMethod)]
 	public class Users

@@ -6,8 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Tests.Overwrite.Framework.MsSql;
+using JPB.DataAccess.Tests.Overwrite.Framework.MySql;
+using JPB.DataAccess.Tests.Overwrite.Framework.SqLite;
 using NUnit.Framework;
 
 #endregion

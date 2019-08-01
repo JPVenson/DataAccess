@@ -1,6 +1,7 @@
 using System;
 using System.Text;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData
 {

@@ -1,7 +1,7 @@
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	[AutoGenerateCtor(CtorGeneratorMode = CtorGeneratorMode.FactoryMethod)]
 	[ForModel(UsersMeta.TableName)]

@@ -3,10 +3,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Manager;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;
 
 #endregion
 

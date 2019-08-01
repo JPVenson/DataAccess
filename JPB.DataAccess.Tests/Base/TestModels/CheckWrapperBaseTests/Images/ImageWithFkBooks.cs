@@ -1,7 +1,8 @@
-﻿using JPB.DataAccess.ModelsAnotations;
+﻿using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images
 {
 	[ForModel(ImageMeta.TableName)]
 	public class ImageWithFkBooks

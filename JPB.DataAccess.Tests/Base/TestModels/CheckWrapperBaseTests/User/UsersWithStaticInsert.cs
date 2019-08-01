@@ -1,12 +1,12 @@
 #region
 
-using JPB.DataAccess.Manager;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Framework.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
 
-namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests
+namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {
 	public class UsersWithStaticInsert
 	{

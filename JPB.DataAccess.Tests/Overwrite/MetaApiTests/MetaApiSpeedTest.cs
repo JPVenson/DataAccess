@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Framework.DbInfoConfig;
 using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
 using NUnit.Framework;
 

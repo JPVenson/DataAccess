@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using JetBrains.dotMemoryUnit;
-using JPB.DataAccess.Manager;
-using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
+using JPB.DataAccess.Framework.Manager;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 

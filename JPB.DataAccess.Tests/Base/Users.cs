@@ -3,8 +3,8 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Data;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.Framework.ModelsAnotations;
 
 #endregion
 
