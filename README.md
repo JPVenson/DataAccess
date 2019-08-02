@@ -1,5 +1,9 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/vatab1g9oyo6sriq/branch/master?svg=true)](https://ci.appveyor.com/project/JPVenson/dataaccess/branch/master)
 
+##YAORM now supports folloring Frameworks: netstandard2.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;net47;net471;net472
+
+###if you got trouble with the SqLite Adapter please see the wiki "SqLite"
+
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 
 You can also contact me on gitter at https://gitter.im/JPVenson/DataAccess.
