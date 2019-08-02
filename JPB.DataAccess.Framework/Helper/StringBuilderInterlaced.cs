@@ -7,11 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	///     Allows building of strings in a interlaced and colored way

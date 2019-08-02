@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper.MsSqlProvider
+namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
 	/// </summary>

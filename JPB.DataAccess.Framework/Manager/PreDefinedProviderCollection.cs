@@ -2,12 +2,12 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.AdoWrapper.MsSqlProvider;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.AdoWrapper.MsSqlProvider;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Manager
+namespace JPB.DataAccess.Manager
 {
 	/// <summary>
 	///     A KeyValue list of providers that can be loaded with the DbAccessLayer where Key is a
@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Framework.Manager
 		private readonly Dictionary<DbAccessType, string> _preDefinedProvider = new Dictionary<DbAccessType, string>
 		{
 			{DbAccessType.MsSql, typeof(MsSql).AssemblyQualifiedName},
-			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.SqLite, JPB.DataAccess.SqLite"},
+			{DbAccessType.SqLite, "JPB.DataAccess.SqLite.NetStandard.SqLiteStrategy, JPB.DataAccess.SqLite.NetStandard"},
 			{DbAccessType.MySql, "JPB.DataAccess.MySql.MySql, JPB.DataAccess.MySql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"}
 		};
 

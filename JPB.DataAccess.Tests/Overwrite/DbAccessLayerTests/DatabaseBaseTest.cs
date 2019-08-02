@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Manager;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 

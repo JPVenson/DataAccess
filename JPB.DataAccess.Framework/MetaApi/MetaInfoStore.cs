@@ -10,11 +10,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
+using JPB.DataAccess.Contacts.MetaApi;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi
+namespace JPB.DataAccess.MetaApi
 {
 	/// <summary>
 	///     Class info Storage. When this is a Global config store you should may never call the dispose method because it

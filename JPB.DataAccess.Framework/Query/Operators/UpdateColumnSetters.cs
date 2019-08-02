@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
-using JPB.DataAccess.Framework.Query.Contracts;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Framework.Query.Operators
+namespace JPB.DataAccess.Query.Operators
 {
 	/// <summary>
 	///     Defines methods for an UPDATE query

@@ -15,15 +15,15 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using JetBrains.Annotations;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.DebuggerHelper;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.ModelsAnotations;
 
 #endregion
 
-namespace JPB.DataAccess.Framework
+namespace JPB.DataAccess
 {
 	/// <summary>
 	///     Helper Extentions for Maintaining Value

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     A rowstate that is used to Detect a newer version

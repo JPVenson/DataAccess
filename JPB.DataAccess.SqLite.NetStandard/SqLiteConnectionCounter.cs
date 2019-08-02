@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.Runtime.CompilerServices;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	public class SqLiteConnectionCounter : IDisposable
 	{

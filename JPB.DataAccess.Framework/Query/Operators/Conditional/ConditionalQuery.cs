@@ -5,16 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using JPB.DataAccess.Framework.DbCollection;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.EntityCollections;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query.Operators.Conditional
+namespace JPB.DataAccess.Query.Operators.Conditional
 {
 	/// <summary>
 	///     Creates an Conditional Query that allows you to filter the Previus query

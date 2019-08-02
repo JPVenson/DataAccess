@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using JetBrains.Annotations;
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///		Provides Methods for Building a String with partial colored parts

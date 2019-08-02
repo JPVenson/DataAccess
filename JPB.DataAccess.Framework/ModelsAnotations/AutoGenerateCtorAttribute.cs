@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Marks this class to be allowed by the Framework for the CodeDOM Ado.net ctor creation

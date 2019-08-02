@@ -5,14 +5,14 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.DebuggerHelper;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper.MsSqlProvider
+namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
 	///     Wrapps MsSQL spezifc data

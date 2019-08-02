@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Indicates this Property to be resolved by a ForeignKey column. A foreign key property must be public virtual the be detected

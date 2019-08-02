@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.Helper;
+using JPB.DataAccess.Helper;
 
 #pragma warning disable 1591
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder
+namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 {
 	public class AttributeInfo
 	{

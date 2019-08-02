@@ -9,17 +9,18 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.ModelsAnotations;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.Operators;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Manager
+namespace JPB.DataAccess.Manager
 {
 	public partial class DbAccessLayer
 	{

@@ -1,11 +1,11 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Framework.DebuggerHelper;
+using JPB.DataAccess.DebuggerHelper;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbEventArgs
+namespace JPB.DataAccess.DbEventArgs
 {
 	/// <summary>
 	///     Wraps an Event raised by the DbAccessLayer

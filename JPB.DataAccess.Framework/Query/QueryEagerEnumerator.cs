@@ -6,14 +6,15 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query
+namespace JPB.DataAccess.Query
 {
 	internal class QueryEagerEnumerator : IEnumerator, IDisposable
 	{

@@ -1,4 +1,4 @@
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User

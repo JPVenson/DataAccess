@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi
+namespace JPB.DataAccess.MetaApi
 {
 	/// <summary>
 	///     Extention methods for easy access to meta infos

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
 	///		Provides info for <see cref="IEntityProcessor"/> transformations

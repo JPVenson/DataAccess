@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
-using JPB.DataAccess.Framework.QueryFactory;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems
+namespace JPB.DataAccess.Query.QueryItems
 {
 	internal class SubSelectQueryPart : ISelectableQueryPart
 	{

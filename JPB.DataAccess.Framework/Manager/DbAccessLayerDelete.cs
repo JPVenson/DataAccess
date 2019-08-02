@@ -2,12 +2,13 @@
 
 using System;
 using System.Data;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Manager
+namespace JPB.DataAccess.Manager
 {
 	partial class DbAccessLayer
 	{

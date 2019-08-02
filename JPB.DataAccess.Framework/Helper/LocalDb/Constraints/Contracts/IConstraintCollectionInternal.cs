@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Contracts
+﻿namespace JPB.DataAccess.Helper.LocalDb.Constraints.Contracts
 {
 	/// <summary>
 	/// </summary>

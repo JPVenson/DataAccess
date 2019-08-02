@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Adds a namespace to the generated class

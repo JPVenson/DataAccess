@@ -1,11 +1,11 @@
 ﻿#region
 
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.QueryFactory
+namespace JPB.DataAccess.QueryFactory
 {
 	/// <summary>
 	///     Wraps a query and its Paramters into one single Object.

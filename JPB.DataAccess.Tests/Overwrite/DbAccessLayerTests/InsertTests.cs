@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;

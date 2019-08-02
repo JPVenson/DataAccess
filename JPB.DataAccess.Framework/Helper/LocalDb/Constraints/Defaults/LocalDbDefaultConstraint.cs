@@ -1,11 +1,11 @@
 #region
 
 using System;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Contracts;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Defaults
+namespace JPB.DataAccess.Helper.LocalDb.Constraints.Defaults
 {
 	/// <summary>
 	/// </summary>

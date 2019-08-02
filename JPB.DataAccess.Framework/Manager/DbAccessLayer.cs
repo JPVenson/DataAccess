@@ -14,18 +14,19 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbCollection;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.ModelsAnotations;
-using JPB.DataAccess.Framework.Query.Operators;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.EntityCollections;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Query.Operators;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Manager
+namespace JPB.DataAccess.Manager
 {
 	/// <summary>
 	///     Contanins some Helper methods for CRUD operation
@@ -741,7 +742,7 @@ namespace JPB.DataAccess.Framework.Manager
 							var enumerableOfItems =
 								xmlDataRecords.Select(
 									s => genericArguments
-										.SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(s),
+										.SetPropertiesViaReflection(EagarDataRecord.WithExcludedFields(s),
 											dbAccessType, config)).ToList();
 							object castedList;
 
@@ -773,7 +774,7 @@ namespace JPB.DataAccess.Framework.Manager
 								true, config);
 
 							//the t
-							var xmlSerilizedProperty = classInfo.SetPropertysViaReflection(
+							var xmlSerilizedProperty = classInfo.SetPropertiesViaReflection(
 								EagarDataRecord.WithExcludedFields(xmlDataRecord), dbAccessType,
 								config);
 							property.Setter.Invoke(instance, xmlSerilizedProperty);
@@ -1075,7 +1076,7 @@ namespace JPB.DataAccess.Framework.Manager
 		/// <returns></returns>
 		public object SetPropertysViaReflection(DbClassInfoCache type, EagarDataRecord reader, DbAccessType? accessType)
 		{
-			return type.SetPropertysViaReflection(reader, DbAccessType, Config);
+			return type.SetPropertiesViaReflection(reader, DbAccessType, Config);
 		}
 	}
 }

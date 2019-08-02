@@ -6,15 +6,15 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.DebuggerHelper;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
 	/// </summary>

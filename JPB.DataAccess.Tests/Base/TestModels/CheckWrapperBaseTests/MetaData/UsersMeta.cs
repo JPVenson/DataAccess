@@ -2,7 +2,7 @@
 
 using System;
 using System.Text;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Manager;
 
 #endregion
 

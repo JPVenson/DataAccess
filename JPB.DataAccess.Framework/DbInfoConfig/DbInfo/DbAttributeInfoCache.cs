@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using JPB.DataAccess.Framework.MetaApi.Model;
+using JPB.DataAccess.MetaApi.Model;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.DbInfo
+namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
 	/// <summary>
 	/// </summary>

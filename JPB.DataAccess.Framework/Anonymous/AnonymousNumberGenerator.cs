@@ -3,7 +3,7 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 #endregion
 

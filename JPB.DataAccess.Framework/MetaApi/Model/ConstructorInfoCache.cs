@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
-using JPB.DataAccess.Framework.MetaApi.Model.Equatable;
+using JPB.DataAccess.Contacts.MetaApi;
+using JPB.DataAccess.MetaApi.Model.Equatable;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
 	///     Infos about the Ctor

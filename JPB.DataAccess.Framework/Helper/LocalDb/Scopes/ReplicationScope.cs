@@ -1,11 +1,10 @@
 #region
 
 using System;
-using System.Transactions;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Scopes
+namespace JPB.DataAccess.Helper.LocalDb.Scopes
 {
 	/// <summary>
 	///     Defines a scope where a Replication can be done. This will disable all Trigger and Constraints and will reinvoke

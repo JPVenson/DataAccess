@@ -2,6 +2,20 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;net47;net471;net472</TargetFrameworks>
+    <RootNamespace>JPB.DataAccess.SqLite</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>JPB.DataAccess.SqLite</PackageId>
+    <Version>3.1.0</Version>
+    <Authors>Jean-Pierre Bachmann</Authors>
+    <Product>JPB.DataAccess.SqLite Adapter</Product>
+    <Description>The SqLite Adapter for the JPB.DataAccess Project</Description>
+    <Copyright>Jean-Pierre Bachmann</Copyright>
+    <PackageProjectUrl>https://github.com/JPVenson/DataAccess</PackageProjectUrl>
+    <PackageIconUrl>https://cdn0.iconfinder.com/data/icons/Hosting_Icons/128/database-px-png.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/JPVenson/DataAccess</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>DAL, ORM, DAO, YAORM, SqLite</PackageTags>
+    <NeutralLanguage>English (Germany)</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

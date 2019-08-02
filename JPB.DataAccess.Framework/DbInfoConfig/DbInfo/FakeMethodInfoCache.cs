@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.DbInfo
+namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
 	internal class FakeMethodInfoCache : DbMethodInfoCache
 	{

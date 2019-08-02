@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Marks the property that will be used to hold all non existing Columns

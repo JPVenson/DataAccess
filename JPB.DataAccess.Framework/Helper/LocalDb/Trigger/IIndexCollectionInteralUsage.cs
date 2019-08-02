@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using JPB.DataAccess.Framework.Helper.LocalDb.Index;
+using JPB.DataAccess.Helper.LocalDb.Index;
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Trigger
+namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	internal interface IIndexCollectionInteralUsage<TEntity> : IIndexCollection<TEntity>, ICollection<IDbIndex<TEntity>>
 	{

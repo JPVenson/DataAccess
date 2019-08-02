@@ -1,10 +1,10 @@
 using JetBrains.Annotations;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
-namespace JPB.DataAccess.Framework.Query.Operators
+namespace JPB.DataAccess.Query.Operators
 {
 	/// <summary>
 	///     Defines methods for setting a Column

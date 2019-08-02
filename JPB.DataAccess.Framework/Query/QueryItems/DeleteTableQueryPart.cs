@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
-using JPB.DataAccess.Framework.QueryFactory;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems.Conditional;
+using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems
+namespace JPB.DataAccess.Query.QueryItems
 {
 	internal class DeleteTableQueryPart : ISelectableQueryPart
 	{

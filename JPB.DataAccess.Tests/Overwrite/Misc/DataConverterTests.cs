@@ -1,6 +1,6 @@
 ﻿using System;
 using JPB.DataAccess.Framework;
-using JPB.DataAccess.Framework.Query;
+using JPB.DataAccess.Query;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.Overwrite.Misc

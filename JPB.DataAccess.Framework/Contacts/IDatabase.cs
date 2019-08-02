@@ -3,14 +3,14 @@
 using System;
 using System.Data;
 using System.Threading.Tasks;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.DebuggerHelper;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Database wrapper interface

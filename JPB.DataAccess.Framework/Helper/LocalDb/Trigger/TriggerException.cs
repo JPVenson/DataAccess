@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Trigger
+namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	/// <summary>
 	///     Is used to indicate the negative value of an trigger check

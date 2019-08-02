@@ -9,12 +9,12 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Helper;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DebuggerHelper
+namespace JPB.DataAccess.DebuggerHelper
 {
 	/// <summary>
 	///     Generates a easy debuggable object that contains all infos about the Generated Query.

@@ -1,12 +1,12 @@
 ﻿using System;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
-using JPB.DataAccess.Framework.QueryFactory;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.Framework.AdoWrapper.MsSqlProvider
+namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	internal class PaginationPart : IQueryPart
 	{

@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.ModelsAnotations
+﻿namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Defines how an Constructor should be created

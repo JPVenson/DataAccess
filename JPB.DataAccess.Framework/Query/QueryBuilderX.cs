@@ -1,7 +1,7 @@
-﻿using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
+﻿using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Framework.Query
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	/// </summary>

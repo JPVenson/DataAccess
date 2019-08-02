@@ -1,4 +1,4 @@
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Trigger
+namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	//public class ForActionCancelToken : EventArgs
 	//{
@@ -42,7 +42,7 @@ namespace JPB.DataAccess.Framework.Helper.LocalDb.Trigger
 		public TEntity Item { get; private set; }
 
 		/// <summary>
-		///     Gets a value indicating whether this <see cref="T:JPB.DataAccess.Framework.Helper.LocalDb.Trigger.ISequentialToken`1" /> is
+		///     Gets a value indicating whether this <see cref="T:JPB.DataAccess.Helper.LocalDb.Trigger.ISequentialToken`1" /> is
 		///     canceled.
 		/// </summary>
 		/// <value>

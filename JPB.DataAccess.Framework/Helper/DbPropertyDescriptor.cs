@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <inheritdoc />
 	internal class DbPropertyDescriptor : PropertyDescriptor

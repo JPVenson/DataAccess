@@ -3,11 +3,11 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
+using JPB.DataAccess.Contacts.MetaApi;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	[DebuggerDisplay("{" + nameof(MethodName) + "}")]
 	[Serializable]

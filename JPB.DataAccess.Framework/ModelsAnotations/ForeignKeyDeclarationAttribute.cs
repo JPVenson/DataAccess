@@ -1,7 +1,7 @@
 ﻿using System;
-using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Indicates this Property to be resolved as a ForeignKey column

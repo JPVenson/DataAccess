@@ -1,6 +1,5 @@
 ﻿#region
 
-using JPB.DataAccess.Framework.DbCollection;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;
 using NUnit.Framework;

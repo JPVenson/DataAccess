@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Operators.Orders;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Operators.Orders;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	///     Provides LINQ paged access to an LocalDbReporsetory

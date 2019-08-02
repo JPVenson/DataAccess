@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Query.Operators.Conditional
+﻿namespace JPB.DataAccess.Query.Operators.Conditional
 {
 	/// <summary>
 	/// </summary>

@@ -8,12 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.MetaApi;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.MetaApi;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig
+namespace JPB.DataAccess.DbInfoConfig
 {
 
 	/// <summary>

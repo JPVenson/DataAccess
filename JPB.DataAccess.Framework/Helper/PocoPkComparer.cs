@@ -3,12 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	///     Compares 2 Pocos based on their PrimaryKeys. Requires all Pocos to define one property with the PrimaryKey

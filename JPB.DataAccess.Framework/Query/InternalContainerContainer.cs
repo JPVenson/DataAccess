@@ -3,15 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	///     Stores the Query data produced by an QueryBuilder element

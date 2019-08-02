@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Defaults;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Index
+namespace JPB.DataAccess.Helper.LocalDb.Index
 {
 	/// <summary>
 	/// Simple Index for Indexed searches

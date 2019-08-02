@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	/// </summary>

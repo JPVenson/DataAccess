@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using JPB.DataAccess.Framework.MetaApi.Model;
+using JPB.DataAccess.MetaApi.Model;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts.MetaApi
+namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
 	/// </summary>

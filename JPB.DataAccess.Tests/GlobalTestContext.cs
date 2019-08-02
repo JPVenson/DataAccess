@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests

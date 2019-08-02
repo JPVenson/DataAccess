@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbCollection
+namespace JPB.DataAccess.EntityCollections
 {
 	internal interface IDbCollection
 	{

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Adds a Converter that is used to convert from an DB object to an C# object

@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Base type for all maker Attributes

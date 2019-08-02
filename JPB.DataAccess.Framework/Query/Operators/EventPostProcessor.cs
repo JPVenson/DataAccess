@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Framework.Query.Operators
+namespace JPB.DataAccess.Query.Operators
 {
 	internal class EventPostProcessor : IQueryCommandInterceptor
 	{

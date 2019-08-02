@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <inheritdoc />
 	public class ConsoleStringBuilderInterlaced : StringBuilderInterlaced<ConsoleColorWrapper>

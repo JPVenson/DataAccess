@@ -3,15 +3,15 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using JPB.DataAccess.Framework.AdoWrapper.MsSqlProvider;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.MetaApi;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
+using JPB.DataAccess.AdoWrapper.MsSqlProvider;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.MetaApi;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query.Operators.Orders
+namespace JPB.DataAccess.Query.Operators.Orders
 {
 	/// <summary>
 	/// </summary>

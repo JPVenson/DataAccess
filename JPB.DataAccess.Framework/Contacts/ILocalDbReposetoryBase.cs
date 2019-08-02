@@ -1,12 +1,12 @@
 ﻿#region
 
 using System.Collections;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper.LocalDb;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Helper.LocalDb;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	/// </summary>

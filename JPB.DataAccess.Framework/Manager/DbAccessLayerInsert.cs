@@ -6,14 +6,15 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Manager
+namespace JPB.DataAccess.Manager
 {
 	partial class DbAccessLayer
 	{

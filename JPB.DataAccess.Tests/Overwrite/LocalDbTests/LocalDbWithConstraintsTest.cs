@@ -2,13 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.Helper.LocalDb;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Contracts;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Defaults;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper.LocalDb;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images;
 using NUnit.Framework;

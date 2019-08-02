@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.DbCollection
+﻿namespace JPB.DataAccess.EntityCollections
 {
 	/// <summary>
 	///     All states that an item inside an DbCollection can be

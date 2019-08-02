@@ -1,10 +1,10 @@
 #region
 
-using JPB.DataAccess.Framework.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
 	///		The base interface for Executing a build Query

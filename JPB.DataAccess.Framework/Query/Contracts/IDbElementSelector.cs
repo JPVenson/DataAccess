@@ -1,4 +1,4 @@
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
 	/// </summary>

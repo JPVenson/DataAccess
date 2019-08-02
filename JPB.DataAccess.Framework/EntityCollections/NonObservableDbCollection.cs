@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using JetBrains.Annotations;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.DbInfoConfig;
+
 #if !DEBUG
 using System.Diagnostics;
 #endif
 
-namespace JPB.DataAccess.Framework.DbCollection
+namespace JPB.DataAccess.EntityCollections
 {
 	/// <summary>
 	///     For internal use only
@@ -72,7 +73,7 @@ namespace JPB.DataAccess.Framework.DbCollection
 			             .CreateListOfItems()
 			             .Select(item => typeof(T)
 			                             .GetClassInfo()
-			                             .SetPropertysViaReflection(EagarDataRecord.WithExcludedFields(item))));
+			                             .SetPropertiesViaReflection(EagarDataRecord.WithExcludedFields(item))));
 		}
 	}
 }

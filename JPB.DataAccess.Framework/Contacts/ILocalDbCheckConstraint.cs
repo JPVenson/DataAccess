@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Contacts
+﻿namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Creates a new Strong Typed Constraint

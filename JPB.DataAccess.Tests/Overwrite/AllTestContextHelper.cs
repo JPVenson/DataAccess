@@ -2,7 +2,7 @@
 
 #endregion
 
-using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig;
 
 namespace JPB.DataAccess.Tests.Overwrite
 {

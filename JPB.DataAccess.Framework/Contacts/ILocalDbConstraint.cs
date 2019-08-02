@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Contacts
+﻿namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Defines a new Constraint that can be applyed to a Database

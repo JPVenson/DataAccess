@@ -2,14 +2,14 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.Operators.Orders;
-using JPB.DataAccess.Framework.Query.QueryItems;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Orders;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query.Operators
+namespace JPB.DataAccess.Query.Operators
 {
     /// <summary>
     ///		Defines a Query that can return any count of <typeparamref name="TPoco"/>

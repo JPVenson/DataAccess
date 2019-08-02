@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Scopes
+namespace JPB.DataAccess.Helper.LocalDb.Scopes
 {
 	/// <summary>
 	///     Provides a logical scope for defining databases. All DbCollections within this scope are logicly combined.

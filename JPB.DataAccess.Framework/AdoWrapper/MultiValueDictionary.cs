@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	internal class MultiValueDictionary<TKey, TValue>
 	{

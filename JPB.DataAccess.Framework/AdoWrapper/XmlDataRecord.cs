@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Xml.Linq;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
 	///		Wrapper for the XmlDataRecord to comply with the WrapDbNullAttribute

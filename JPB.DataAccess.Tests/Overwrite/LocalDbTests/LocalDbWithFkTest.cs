@@ -1,9 +1,9 @@
 ﻿#region
 
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.Helper.LocalDb;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper.LocalDb;
+using JPB.DataAccess.Helper.LocalDb.Constraints;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images;

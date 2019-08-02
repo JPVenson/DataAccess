@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using JPB.DataAccess.Framework.Contacts.Pager;
+using JPB.DataAccess.Contacts.Pager;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	/// <summary>
 	///     Converts all items from T to TE

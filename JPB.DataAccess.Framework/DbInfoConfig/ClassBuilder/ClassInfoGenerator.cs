@@ -4,14 +4,14 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.DbCollection;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.ModelsAnotations;
-using System.Runtime.CompilerServices;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.EntityCollections;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder
+namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 {
 	/// <summary>
 	///		Creates POCO entities for ORM Usage

@@ -9,7 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 using System.Collections.Generic;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	public class SqLiteDataPager<T> : SqLiteUntypedDataPager<T>
 	{

@@ -7,18 +7,18 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbCollection;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.QueryFactory;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.EntityCollections;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.QueryFactory;
 
 #endregion
 
-namespace JPB.DataAccess.Framework
+namespace JPB.DataAccess
 {
 	/// <summary>
 	/// </summary>
@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Framework
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public static object SetPropertysViaReflection(
+		public static object SetPropertiesViaReflection(
 			this DbClassInfoCache type,
 			EagarDataRecord reader,
 			DbAccessType? accessType = null,
@@ -61,7 +61,7 @@ namespace JPB.DataAccess.Framework
 		///     <paramref name="reader" />
 		/// </summary>
 		/// <returns></returns>
-		public static object SetPropertysViaReflection(
+		public static object SetPropertiesViaReflection(
 			this DbClassInfoCache type,
 			XmlDataRecord reader,
 			DbAccessType? accessType = null,

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.ModelsAnotations;
-using JPB.DataAccess.Framework.QueryFactory;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	/// Helper Class to enumerate a Table Directly

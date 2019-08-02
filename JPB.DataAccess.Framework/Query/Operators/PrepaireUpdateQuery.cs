@@ -1,14 +1,14 @@
 using System.Linq;
 using JetBrains.Annotations;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.Operators.Conditional;
-using JPB.DataAccess.Framework.Query.QueryItems;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Conditional;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
-namespace JPB.DataAccess.Framework.Query.Operators
+namespace JPB.DataAccess.Query.Operators
 {
 	/// <summary>
 	///		Select a Target for an Update query

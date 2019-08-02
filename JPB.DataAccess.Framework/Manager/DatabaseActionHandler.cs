@@ -1,6 +1,6 @@
-﻿using JPB.DataAccess.Framework.DbEventArgs;
+﻿using JPB.DataAccess.DbEventArgs;
 
-namespace JPB.DataAccess.Framework.Manager
+namespace JPB.DataAccess.Manager
 {
 	/// <summary>
 	///     A database operation has to be done

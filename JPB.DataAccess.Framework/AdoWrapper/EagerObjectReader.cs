@@ -1,11 +1,11 @@
 ﻿#region
 
 using System.Linq;
-using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
 	///     Provides access to the Given object

@@ -3,14 +3,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Transactions;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Helper.LocalDb.PrimaryKeyProvider;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	///		Access class for DbOperations and DbSettings.

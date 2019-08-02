@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Manager
+﻿namespace JPB.DataAccess.Manager
 {
 	/// <summary>
 	///     Defines a Common set of DBTypes

@@ -7,24 +7,24 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Transactions;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.DbCollection;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Collections;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Contracts;
-using JPB.DataAccess.Framework.Helper.LocalDb.Index;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Framework.Helper.LocalDb.Trigger;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.EntityCollections;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Helper.LocalDb.Constraints;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Collections;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
+using JPB.DataAccess.Helper.LocalDb.Index;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Helper.LocalDb.Trigger;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb
 {
 	public class TransactionScope : IDisposable
 	{

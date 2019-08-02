@@ -4,13 +4,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Contracts;
-using JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Defaults;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
+using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Collections
+namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
 	/// <summary>
 	/// </summary>

@@ -5,14 +5,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
-using JPB.DataAccess.Framework.MetaApi.Model;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts.MetaApi;
+using JPB.DataAccess.MetaApi.Model;
+using JPB.DataAccess.ModelsAnotations;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.DbInfo
+namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
 	/// <summary>
 	///     for internal use only

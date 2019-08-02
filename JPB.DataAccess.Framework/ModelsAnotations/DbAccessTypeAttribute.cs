@@ -1,6 +1,6 @@
-﻿using JPB.DataAccess.Framework.Manager;
+﻿using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Defines an function or property that is specific for an single database

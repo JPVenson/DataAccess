@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
 	/// Defines how Transactions are handeld

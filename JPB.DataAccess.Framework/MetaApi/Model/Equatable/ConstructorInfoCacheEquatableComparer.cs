@@ -2,11 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
+using JPB.DataAccess.Contacts.MetaApi;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi.Model.Equatable
+namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
 	internal class ConstructorInfoCacheEquatableComparer<TAtt, TArg>
 		: IEqualityComparer<IConstructorInfoCache<TAtt, TArg>>,

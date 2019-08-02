@@ -5,7 +5,7 @@ using System.Globalization;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Converts values from DB to C# and back

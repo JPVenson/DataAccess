@@ -1,7 +1,7 @@
-﻿using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Query.Contracts;
+﻿using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems
+namespace JPB.DataAccess.Query.QueryItems
 {
 	/// <summary>
 	///		The part of the Query

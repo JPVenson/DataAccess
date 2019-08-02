@@ -1,6 +1,6 @@
-﻿using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+﻿using JPB.DataAccess.Query.QueryItems.Conditional;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems
+namespace JPB.DataAccess.Query.QueryItems
 {
 	/// <summary>
 	///		Defines a query that declares an alias

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 

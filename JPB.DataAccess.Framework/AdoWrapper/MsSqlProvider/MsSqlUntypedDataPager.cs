@@ -4,15 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query;
-using JPB.DataAccess.Framework.Query.Operators;
-using JPB.DataAccess.Framework.Query.Operators.Orders;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Query.Operators.Orders;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper.MsSqlProvider
+namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
 	/// </summary>

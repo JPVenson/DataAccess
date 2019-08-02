@@ -2,11 +2,12 @@
 
 using System;
 using System.Data;
-using JPB.DataAccess.Framework.DbEventArgs;
+using JPB.DataAccess.DbEventArgs;
+using JPB.DataAccess.Framework;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Manager
+namespace JPB.DataAccess.Manager
 {
 	partial class DbAccessLayer
 	{

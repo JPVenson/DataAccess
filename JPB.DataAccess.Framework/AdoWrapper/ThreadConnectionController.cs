@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading;
-using System.Transactions;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
 	///		Contains all Properties to control the ThreadBased connection and Transaction behavior

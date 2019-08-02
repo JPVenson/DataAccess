@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Helper.LocalDb.Trigger;
+using JPB.DataAccess.Helper.LocalDb.Trigger;
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Index
+namespace JPB.DataAccess.Helper.LocalDb.Index
 {
 	internal class IndexCollection<T> : IIndexCollectionInteralUsage<T>
 	{

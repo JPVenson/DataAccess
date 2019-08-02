@@ -1,10 +1,10 @@
 #region
 
-using JPB.DataAccess.Framework.DbCollection;
+using JPB.DataAccess.EntityCollections;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb
 {
 	internal class TransactionalItem<TEntity>
 	{

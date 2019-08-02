@@ -2,14 +2,14 @@
 
 using System;
 using System.Linq;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.Operators;
-using JPB.DataAccess.Framework.Query.QueryItems;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	///     Provides A set of extentions for Microsoft SQL Serve

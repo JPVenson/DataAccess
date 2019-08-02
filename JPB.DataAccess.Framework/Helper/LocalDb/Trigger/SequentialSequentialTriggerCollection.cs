@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Trigger
+namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	/// <summary>
 	/// </summary>

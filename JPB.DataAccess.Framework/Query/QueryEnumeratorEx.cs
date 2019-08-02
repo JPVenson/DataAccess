@@ -2,11 +2,11 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Query.Contracts;
+using JPB.DataAccess.Query.Contracts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	///     Wrapes the QueryBuilderX element for an IEnumerable that is strongly typed

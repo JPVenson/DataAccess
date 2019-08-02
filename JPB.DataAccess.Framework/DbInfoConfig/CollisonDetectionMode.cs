@@ -1,4 +1,4 @@
-namespace JPB.DataAccess.Framework.DbInfoConfig
+namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
 	///     How to handle existing created Poco.Dlls

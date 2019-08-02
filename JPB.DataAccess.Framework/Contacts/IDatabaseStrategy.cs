@@ -2,12 +2,12 @@
 
 using System;
 using System.Data;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     A Strategy for accessing a Database Provider

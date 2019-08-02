@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	public static class SqLiteInteroptWrapper
 	{

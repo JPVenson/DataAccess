@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Contacts
+﻿namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Defines methods for Logging

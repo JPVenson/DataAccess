@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Manager;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;

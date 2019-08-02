@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Collections
+namespace JPB.DataAccess.Helper.LocalDb.Constraints.Collections
 {
 	/// <summary>
 	/// </summary>

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts.MetaApi
+namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
 	/// </summary>

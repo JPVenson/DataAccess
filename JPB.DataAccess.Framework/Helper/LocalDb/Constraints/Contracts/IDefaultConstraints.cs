@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Constraints.Contracts
+namespace JPB.DataAccess.Helper.LocalDb.Constraints.Contracts
 {
 	/// <summary>
 	/// </summary>

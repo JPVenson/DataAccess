@@ -11,13 +11,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query;
-using JPB.DataAccess.Framework.Query.Operators;
-using JPB.DataAccess.Framework.Query.Operators.Orders;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Operators;
+using JPB.DataAccess.Query.Operators.Orders;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	/// <summary>
 	/// </summary>

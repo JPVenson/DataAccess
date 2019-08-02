@@ -1,10 +1,10 @@
 ﻿#region
 
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	/// </summary>

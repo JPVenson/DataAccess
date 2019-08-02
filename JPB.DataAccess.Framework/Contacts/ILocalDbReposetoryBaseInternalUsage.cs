@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Contacts
+﻿namespace JPB.DataAccess.Contacts
 {
 	internal interface ILocalDbReposetoryBaseInternalUsage : ILocalDbReposetoryBase
 	{

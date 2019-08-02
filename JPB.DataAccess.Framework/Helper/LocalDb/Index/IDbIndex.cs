@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Index
+namespace JPB.DataAccess.Helper.LocalDb.Index
 {
 	/// <summary>
 	///		Defines an Index(WIP)

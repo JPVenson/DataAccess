@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Contacts.Pager
+﻿namespace JPB.DataAccess.Contacts.Pager
 {
 	/// <summary>
 	///     Defines the Output of an Pager

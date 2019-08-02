@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Constraints
+namespace JPB.DataAccess.Helper.LocalDb.Constraints
 {
 	/// <summary>
 	/// </summary>

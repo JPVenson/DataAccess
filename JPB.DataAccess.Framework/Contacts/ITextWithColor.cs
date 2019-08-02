@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Contacts
+﻿namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///		Combines a Text(string) with the given color

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Marker interface for an QueryCommand that was created due the invoke of a Factory mehtod

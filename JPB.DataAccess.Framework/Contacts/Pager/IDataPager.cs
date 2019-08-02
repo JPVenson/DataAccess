@@ -2,12 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Operators.Orders;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Operators.Orders;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts.Pager
+namespace JPB.DataAccess.Contacts.Pager
 {
 	/// <summary>
 	///     Base pager

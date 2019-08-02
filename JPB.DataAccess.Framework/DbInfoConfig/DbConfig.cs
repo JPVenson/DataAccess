@@ -3,12 +3,12 @@
 using System;
 using System.Linq;
 using System.Threading;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.MetaApi;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.MetaApi;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig
+namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
 	/// </summary>

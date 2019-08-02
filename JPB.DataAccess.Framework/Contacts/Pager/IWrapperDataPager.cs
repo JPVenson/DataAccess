@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts.Pager
+namespace JPB.DataAccess.Contacts.Pager
 {
 	/// <summary>
 	///     A wrapper interface to convert all incomming items from Load method into new type

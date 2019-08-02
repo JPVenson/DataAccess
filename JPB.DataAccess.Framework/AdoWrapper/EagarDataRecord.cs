@@ -8,7 +8,7 @@ using System.Linq;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
 	///     Provides an IDataRecord Access that enumerates the Source record. Not ThreadSave

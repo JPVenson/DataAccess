@@ -6,7 +6,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
     using EventTask = Tuple<SendOrPostCallback, object>;
     using EventQueue = ConcurrentQueue<Tuple<SendOrPostCallback, object>>;

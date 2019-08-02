@@ -2,12 +2,12 @@
 
 using System;
 using System.Data;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Manager;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	///     Example Implimentation of IQueryParameter

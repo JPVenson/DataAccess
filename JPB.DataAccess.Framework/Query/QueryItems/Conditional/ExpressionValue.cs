@@ -1,6 +1,6 @@
-﻿using JPB.DataAccess.Framework.Contacts;
+﻿using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems.Conditional
+namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
 	internal class ExpressionValue
 	{

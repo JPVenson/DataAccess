@@ -1,9 +1,9 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;

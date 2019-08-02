@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
 	///     Provides access to the interal query storage and enumeration Function

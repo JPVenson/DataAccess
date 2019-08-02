@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Query.Contracts;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Query.Contracts;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems
+namespace JPB.DataAccess.Query.QueryItems
 {
 	internal abstract class EntityProcessorBase : IEntityProcessor
 	{

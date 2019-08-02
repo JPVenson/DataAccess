@@ -2,11 +2,11 @@
 
 using System;
 using System.Globalization;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	///		Standart number to Enum converter for Enum fields

@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
 	///		Allows for Modifications of Commands

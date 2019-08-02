@@ -1,11 +1,11 @@
 ﻿#region
 
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
+using JPB.DataAccess.Contacts.MetaApi;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi.Model.Equatable
+namespace JPB.DataAccess.MetaApi.Model.Equatable
 {
 	/// <summary>
 	///     Defines methods for compareing two Property Cache instances on its Name and location

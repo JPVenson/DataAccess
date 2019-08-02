@@ -3,8 +3,8 @@
 using System;
 using System.Configuration;
 using System.Text;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion

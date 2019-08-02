@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.Framework.Helper
+namespace JPB.DataAccess.Helper
 {
 	/// <summary>
 	///		Composes a interpolated string into an QueryString that has escaped chars

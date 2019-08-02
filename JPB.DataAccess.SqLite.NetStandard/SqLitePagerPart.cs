@@ -1,10 +1,10 @@
-﻿using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
-using JPB.DataAccess.Framework.QueryFactory;
+﻿using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	public class SqLitePagerPart : IQueryPart
 	{

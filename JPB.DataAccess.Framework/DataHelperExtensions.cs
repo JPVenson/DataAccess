@@ -1,11 +1,11 @@
 #region
 
 using System.Data;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework
+namespace JPB.DataAccess
 {
 	internal static class DataHelperExtensions
 	{

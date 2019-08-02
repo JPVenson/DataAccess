@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	public class DisposableAction : IDisposable
 	{

@@ -3,13 +3,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query
+namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	/// Base class for each QueryPart

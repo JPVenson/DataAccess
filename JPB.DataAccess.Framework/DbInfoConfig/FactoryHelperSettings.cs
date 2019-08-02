@@ -5,12 +5,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.ModelsAnotations;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig
+namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
 	/// </summary>

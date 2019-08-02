@@ -1,11 +1,11 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.AdoWrapper
+namespace JPB.DataAccess.AdoWrapper
 {
 	/// <summary>
 	///     Defines a new Transaction Scope where all changes to a local DB can be Rejected and Reverted

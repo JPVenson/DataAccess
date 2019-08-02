@@ -6,9 +6,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.SqLite.NetStandard;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Manager;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion

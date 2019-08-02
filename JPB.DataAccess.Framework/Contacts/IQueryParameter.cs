@@ -5,7 +5,7 @@ using System.Data;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Wraps Paramters for Commands

@@ -14,12 +14,12 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Contacts.Pager;
-using JPB.DataAccess.Framework.DebuggerHelper;
-using JPB.DataAccess.Framework.Manager;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DebuggerHelper;
+using JPB.DataAccess.Manager;
 
-namespace JPB.DataAccess.SqLite.NetStandard
+namespace JPB.DataAccess.SqLite
 {
 	/// <summary>
 	/// Wrapps MsSQL spezifc data

@@ -1,7 +1,7 @@
 #region
 
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion

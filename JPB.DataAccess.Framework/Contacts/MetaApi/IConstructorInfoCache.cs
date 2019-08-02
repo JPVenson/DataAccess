@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts.MetaApi
+namespace JPB.DataAccess.Contacts.MetaApi
 {
 	/// <summary>
 	///     Holts all infos about an Constructor

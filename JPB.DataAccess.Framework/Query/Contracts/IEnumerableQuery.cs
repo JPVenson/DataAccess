@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
 	///     This Part of the Query can be executed and returns a set of Pocos

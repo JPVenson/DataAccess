@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems.Conditional
+namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
 	internal class ExpressionConditionPart : IConditionPart
 	{

@@ -5,15 +5,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Transactions;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb
+namespace JPB.DataAccess.Helper.LocalDb
 {
 	/// <summary>
 	///     Provieds the IXmlSerializable interface for an entire database.

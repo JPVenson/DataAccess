@@ -1,11 +1,11 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Framework.MetaApi.Model;
+using JPB.DataAccess.MetaApi.Model;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.DbInfo
+namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
 	internal class DbAutoStaticPropertyInfoCache<TE> : DbPropertyInfoCache
 	{

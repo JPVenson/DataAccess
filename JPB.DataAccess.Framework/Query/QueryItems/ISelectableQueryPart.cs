@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems
+namespace JPB.DataAccess.Query.QueryItems
 {
 	/// <summary>
 	///		Internal Use Only

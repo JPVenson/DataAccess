@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 namespace JPB.DataAccess.Framework.Anonymous
 {

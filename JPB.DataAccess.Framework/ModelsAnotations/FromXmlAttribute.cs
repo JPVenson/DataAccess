@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
-namespace JPB.DataAccess.Framework.ModelsAnotations
+namespace JPB.DataAccess.ModelsAnotations
 {
 	/// <summary>
 	///     Marks a Property as XML Serilized

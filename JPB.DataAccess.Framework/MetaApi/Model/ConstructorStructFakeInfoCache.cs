@@ -1,12 +1,12 @@
 #region
 
 using System;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
-using JPB.DataAccess.Framework.MetaApi.Model.Equatable;
+using JPB.DataAccess.Contacts.MetaApi;
+using JPB.DataAccess.MetaApi.Model.Equatable;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
 	///     Fake Constructor for Structs

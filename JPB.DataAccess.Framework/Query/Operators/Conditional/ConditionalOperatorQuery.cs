@@ -4,14 +4,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Query.Operators.Conditional
+namespace JPB.DataAccess.Query.Operators.Conditional
 {
 	/// <summary>
 	/// </summary>

@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Query
+﻿namespace JPB.DataAccess.Query
 {
 	/// <summary>
 	///     Enum for specifying the way in enumeration that is used by enumerating a IQueryContainer

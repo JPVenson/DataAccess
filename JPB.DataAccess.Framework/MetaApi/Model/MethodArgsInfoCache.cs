@@ -6,11 +6,11 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
+using JPB.DataAccess.Contacts.MetaApi;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
 	///     Infos about Arguments delcared on a Mehtod

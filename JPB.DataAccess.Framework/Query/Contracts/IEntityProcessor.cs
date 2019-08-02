@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Data;
-using JPB.DataAccess.Framework.AdoWrapper;
+using JPB.DataAccess.AdoWrapper;
 
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	/// <summary>
 	///		Allows Modifications on Entities mapping

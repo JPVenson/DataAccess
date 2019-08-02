@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.DbInfoConfig;
+using JPB.DataAccess.DbInfoConfig;
 
 #endregion
 

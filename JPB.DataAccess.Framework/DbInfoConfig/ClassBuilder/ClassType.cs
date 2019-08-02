@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.Framework;
 
 #pragma warning disable 1591
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder
+namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 {
 	public class ClassType
 	{

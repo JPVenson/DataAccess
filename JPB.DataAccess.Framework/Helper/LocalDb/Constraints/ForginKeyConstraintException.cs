@@ -1,4 +1,4 @@
-﻿namespace JPB.DataAccess.Framework.Helper.LocalDb.Constraints
+﻿namespace JPB.DataAccess.Helper.LocalDb.Constraints
 {
 	/// <summary>
 	///     An exception that will be thrown if an Invalid data insert/update/delete is detected

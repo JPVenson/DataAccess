@@ -2,11 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Query.Contracts;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
-namespace JPB.DataAccess.Framework.Query.QueryItems
+namespace JPB.DataAccess.Query.QueryItems
 {
 	internal class RelationProcessor : EntityProcessorBase
 	{

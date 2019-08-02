@@ -8,23 +8,22 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.DbCollection;
-using JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework.Manager;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.DbInfoConfig.ClassBuilder;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.EntityCollections;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.ModelsAnotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.DbInfoConfig
+namespace JPB.DataAccess.DbInfoConfig
 {
 	/// <summary>
 	///     Only for internal use

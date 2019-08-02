@@ -2,12 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Transactions;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Scopes
+namespace JPB.DataAccess.Helper.LocalDb.Scopes
 {
 	/// <summary>
 	///     Base class for Identity Operations on ether a Database or a LocalDbRepository

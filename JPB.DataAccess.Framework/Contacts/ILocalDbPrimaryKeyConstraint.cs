@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Contacts
+namespace JPB.DataAccess.Contacts
 {
 	/// <summary>
 	///     Contains logic for generating primary key values that are used by the LocalDbRepro

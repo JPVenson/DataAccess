@@ -2,7 +2,7 @@
 
 #endregion
 
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User
 {

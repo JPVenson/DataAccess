@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using JPB.DataAccess.Framework.DbInfoConfig;
-using JPB.DataAccess.Framework.Helper.LocalDb;
-using JPB.DataAccess.Framework.Helper.LocalDb.Scopes;
+using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Helper.LocalDb;
+using JPB.DataAccess.Helper.LocalDb.Scopes;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 

@@ -1,4 +1,4 @@
-namespace JPB.DataAccess.Framework.Helper.LocalDb.Trigger
+namespace JPB.DataAccess.Helper.LocalDb.Trigger
 {
 	//public class SequentialTriggerAfterCollection<TToken, TEntity>
 	//	: ISequentialTriggerAfterCollection<,> 

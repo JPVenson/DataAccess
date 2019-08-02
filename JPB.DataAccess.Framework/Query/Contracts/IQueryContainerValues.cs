@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using JPB.DataAccess.Framework.Query.QueryItems.Conditional;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
-namespace JPB.DataAccess.Framework.Query.Contracts
+namespace JPB.DataAccess.Query.Contracts
 {
 	internal interface IQueryContainerValues : IQueryContainer
 	{

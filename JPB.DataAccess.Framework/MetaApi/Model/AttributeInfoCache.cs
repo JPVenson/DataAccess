@@ -4,12 +4,12 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using JPB.DataAccess.Framework.Contacts.MetaApi;
-using JPB.DataAccess.Framework.MetaApi.Model.Equatable;
+using JPB.DataAccess.Contacts.MetaApi;
+using JPB.DataAccess.MetaApi.Model.Equatable;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.MetaApi.Model
+namespace JPB.DataAccess.MetaApi.Model
 {
 	/// <summary>
 	/// </summary>

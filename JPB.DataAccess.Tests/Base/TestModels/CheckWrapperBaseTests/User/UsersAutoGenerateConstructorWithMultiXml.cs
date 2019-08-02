@@ -1,8 +1,8 @@
 #region
 
 using System.Collections.Generic;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.ModelsAnotations;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion

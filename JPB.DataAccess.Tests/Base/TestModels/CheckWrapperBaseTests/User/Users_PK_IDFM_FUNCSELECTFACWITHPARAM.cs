@@ -1,9 +1,9 @@
 #region
 
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.Helper;
-using JPB.DataAccess.Framework.ModelsAnotations;
-using JPB.DataAccess.Framework.QueryFactory;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.QueryFactory;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion

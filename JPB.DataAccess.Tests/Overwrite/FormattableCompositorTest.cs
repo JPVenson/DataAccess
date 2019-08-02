@@ -1,5 +1,5 @@
 ﻿using System;
-using JPB.DataAccess.Framework.Helper;
+using JPB.DataAccess.Helper;
 using NUnit.Framework;
 
 namespace JPB.DataAccess.Tests.Overwrite

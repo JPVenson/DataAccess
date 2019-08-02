@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using JPB.DataAccess.Framework.AdoWrapper;
-using JPB.DataAccess.Framework.Contacts;
-using JPB.DataAccess.Framework.DbCollection;
-using JPB.DataAccess.Framework.Helper;
+using JPB.DataAccess.AdoWrapper;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.EntityCollections;
+using JPB.DataAccess.Framework;
+using JPB.DataAccess.Helper;
 
 #pragma warning disable 1591
 
-namespace JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder
+namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 {
 	public class PropertyInfo
 	{
@@ -121,7 +122,7 @@ namespace JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder
 	            .{nameof(XmlDataRecord.CreateListOfItems)}()
 	            .Select(item => {pocoName}
 					.{nameof(DbConfigHelper.GetClassInfo)}()
-					.{nameof(DbAccessLayerHelper.SetPropertysViaReflection)}(reader: {nameof(EagarDataRecord)}.{nameof(EagarDataRecord.WithExcludedFields)}(item))))";
+					.{nameof(DbAccessLayerHelper.SetPropertiesViaReflection)}(reader: {nameof(EagarDataRecord)}.{nameof(EagarDataRecord.WithExcludedFields)}(item))))";
 				}
 				else
 				{
@@ -142,7 +143,7 @@ namespace JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder
 					var realType = Type.GenericTypes.FirstOrDefault();
 
 					readFromTarget =
-						$@"{varName} == null ? null : new {Type.GetTypeName()}({varName}.Select(item => (({realType.Name})(typeof({realType.Name}).{nameof(DbConfigHelper.GetClassInfo)}().{nameof(DbAccessLayerHelper.SetPropertysViaReflection)}(reader: item)))))";
+						$@"{varName} == null ? null : new {Type.GetTypeName()}({varName}.Select(item => (({realType.Name})(typeof({realType.Name}).{nameof(DbConfigHelper.GetClassInfo)}().{nameof(DbAccessLayerHelper.SetPropertiesViaReflection)}(reader: item)))))";
 
 				}
 				else
@@ -150,7 +151,7 @@ namespace JPB.DataAccess.Framework.DbInfoConfig.ClassBuilder
 					sb.AppendInterlacedLine(
 						$"var {varName} = (({nameof(EagarDataRecord)}[])reader[{DbName}])?.FirstOrDefault();");
 					readFromTarget =
-						$@"{varName} == null ? null : (({Type.GetTypeName()})(typeof({Type.GetTypeName()}).{nameof(DbConfigHelper.GetClassInfo)}().{nameof(DbAccessLayerHelper.SetPropertysViaReflection)}(reader: {varName})))";
+						$@"{varName} == null ? null : (({Type.GetTypeName()})(typeof({Type.GetTypeName()}).{nameof(DbConfigHelper.GetClassInfo)}().{nameof(DbAccessLayerHelper.SetPropertiesViaReflection)}(reader: {varName})))";
 				}
 			}
 			else

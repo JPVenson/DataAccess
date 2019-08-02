@@ -1,7 +1,7 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Framework.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 #endregion
 

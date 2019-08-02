@@ -1,11 +1,11 @@
 #region
 
 using System;
-using JPB.DataAccess.Framework.Contacts;
+using JPB.DataAccess.Contacts;
 
 #endregion
 
-namespace JPB.DataAccess.Framework.Helper.LocalDb.PrimaryKeyProvider
+namespace JPB.DataAccess.Helper.LocalDb.PrimaryKeyProvider
 {
 	/// <summary>
 	/// </summary>
