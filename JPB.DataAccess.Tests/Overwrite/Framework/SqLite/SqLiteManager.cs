@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.SqLite;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 
 #endregion
@@ -63,7 +64,7 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.SqLite
 
 			//tempPath = Path.GetTempFileName() + dbname + "sqLite";
 
-			_expectWrapper = new DbAccessLayer(new DataAccess.SqLite.NetStandard.SqLiteStrategy(connection), new DbConfig(true));
+			_expectWrapper = new DbAccessLayer(new DataAccess.SqLite.SqLiteStrategy(connection), new DbConfig(true));
 			foreach (var databaseMeta in MetaManager.DatabaseMetas)
 			{
 				_expectWrapper.ExecuteGenericCommand(_expectWrapper.Database.CreateCommand(databaseMeta.Value.CreationCommand(DbAccessType)));

@@ -70,8 +70,9 @@ namespace JPB.DataAccess.Query.Operators
 		/// </summary>
 		[PublicAPI]
 		[MustUseReturnValue]
-		public SelectQuery<TPoco> Join<TProp>([NoEnumeration] Expression<Func<TPoco, TProp>> forginColumnName,
-			[ValueProvider(nameof(JoinMode))] JoinMode joinAs = null)
+		public SelectQuery<TPoco> Join<TProp>(Expression<Func<TPoco, TProp>> forginColumnName,
+			[ValueProvider(nameof(JoinMode))] JoinMode joinAs = null,
+			Func<ConditionalEvalQuery<TPoco>, ConditionalEvalQuery<TPoco>> joinCondition = null)
 			where TProp : class
 		{
 			var path = PropertyPath<TPoco>
@@ -84,12 +85,12 @@ namespace JPB.DataAccess.Query.Operators
 						dbClassInfoCache.Propertys[e.Name]);
 				})
 				.ToArray();
-			return JoinOn(path, joinAs);
+			return JoinOn(path, joinAs, joinCondition);
 		}
 
-		private SelectQuery<TPoco> JoinOn(
-			KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path,
-			JoinMode joinAs = null)
+		private SelectQuery<TPoco> JoinOn(KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path,
+			JoinMode joinAs = null,
+			Func<ConditionalEvalQuery<TPoco>, ConditionalEvalQuery<TPoco>> joinCondition = null)
 		{
 			joinAs = joinAs ?? JoinMode.Default;
 
@@ -103,7 +104,7 @@ namespace JPB.DataAccess.Query.Operators
 				var targetTable = target.ContainerObject.Search(targetAlias);
 
 				var pathOfJoin = target.ContainerObject.GetPathOf(targetAlias) + "." +
-				                 keyValuePair.Value.PropertyName;
+								 keyValuePair.Value.PropertyName;
 				var parentAlias = target.ContainerObject
 					.CreateTableAlias(pathOfJoin);
 
@@ -146,10 +147,10 @@ namespace JPB.DataAccess.Query.Operators
 				if (referenceColumn == null)
 				{
 					throw new InvalidOperationException("There is no known reference from table " +
-					                                    $"'{keyValuePair.Key.Type}' " +
-					                                    "to table " +
-					                                    $"'{referenceType}'." +
-					                                    "Use a ForeignKeyDeclarationAttribute to connect both");
+														$"'{keyValuePair.Key.Type}' " +
+														"to table " +
+														$"'{referenceType}'." +
+														"Use a ForeignKeyDeclarationAttribute to connect both");
 				}
 
 				var forginColumns = DbAccessLayer.GetSelectableColumnsOf(referencedTypeCache)
@@ -178,6 +179,15 @@ namespace JPB.DataAccess.Query.Operators
 				target.ContainerObject.SearchLast<ISelectQueryPart>().AddJoin(joinTableQueryPart);
 				target = target.Add(joinTableQueryPart);
 				targetAlias = parentAlias;
+			}
+
+			if (joinCondition != null)
+			{
+				var lastJoin = target.ContainerObject.SearchLast<JoinTableQueryPart>();
+				var condition = new ConditionStatementQueryPart();
+				var tempSelect = new ConditionalEvalQuery<TPoco>(target.Add(condition));
+				joinCondition(tempSelect);
+				lastJoin.Condition = condition;
 			}
 
 			return new SelectQuery<TPoco>(target);
@@ -217,8 +227,8 @@ namespace JPB.DataAccess.Query.Operators
 						.AccessLayer.Config);
 
 					return info.HasValue &&
-					       (info.Value.ForeignType == typeof(TEPoco) ||
-					        info.Value.ForeignTable == teCache.TableName);
+						   (info.Value.ForeignType == typeof(TEPoco) ||
+							info.Value.ForeignTable == teCache.TableName);
 				})
 				.Value;
 

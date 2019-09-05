@@ -2,7 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query;
@@ -539,6 +542,29 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 					Assert.That(imageInBook.Text, Is.EqualTo(image.Text));
 				}
 			}
+		}
+
+		[Test]
+		public void JoinChildWithAdditionalCondition()
+		{
+			DataMigrationHelper.AddBooksWithImageAndUser(250, 10, DbAccess);
+
+			var books = Measure(() =>
+			{
+				var bookWithFkImageses = CreateQuery()
+					.Select.Table<BookWithFkImages>()
+					.Join(f => f.User1, null, e => e.And.Column(f => f.Text).Is.Not.Null);
+
+				var compiled = bookWithFkImageses.ContainerObject.Compile(out _);
+				var debugger =
+					new QueryDebugger(
+						DbAccess.Database.CreateCommandWithParameterValues(compiled.Query,
+							compiled.Parameters.ToArray()), DbAccess.Database);
+
+				Console.WriteLine(debugger);
+				return bookWithFkImageses
+					.ToArray();
+			});
 		}
 		
 		[Test]

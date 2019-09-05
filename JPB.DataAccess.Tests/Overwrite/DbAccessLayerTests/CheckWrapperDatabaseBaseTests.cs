@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
+using JPB.DataAccess.EntityCollections;
 using JPB.DataAccess.Framework;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;

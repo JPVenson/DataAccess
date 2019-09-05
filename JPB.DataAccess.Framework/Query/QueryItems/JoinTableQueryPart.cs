@@ -118,7 +118,22 @@ namespace JPB.DataAccess.Query.QueryItems
 							   $" ON {Alias.GetAlias().EnsureAlias()}.{TargetColumn.ColumnName.EnsureAlias()}" +
 							   $" = " +
 							   $"{SourceTable.GetAlias().EnsureAlias()}.{SourceColumn.ColumnName.EnsureAlias()}");
-			return new QueryFactoryResult(joinBuilder.ToString());
+
+			var parameters = new List<IQueryParameter>();
+			if (Condition != null)
+			{
+				var condQueryBuilder = new ConditionalQueryBuilder();
+				condQueryBuilder.QueryBuilder.Append(" ");
+				foreach (var conditionCondition in Condition.Conditions)
+				{
+					conditionCondition.Render(condQueryBuilder, null);
+				}
+
+				joinBuilder.Append(condQueryBuilder.QueryBuilder);
+				parameters.AddRange(condQueryBuilder.QueryParameters);
+			}
+
+			return new QueryFactoryResult(joinBuilder.ToString(), parameters.ToArray());
 		}
 
 		public QueryIdentifier Alias { get; }
@@ -126,5 +141,7 @@ namespace JPB.DataAccess.Query.QueryItems
 		public int? Limit { get; set; }
 		public Type TargetTableType { get; set; }
 		public List<JoinTableQueryPart> DependingJoins { get; set; }
+
+		internal ConditionStatementQueryPart Condition { get; set; }
 	}
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
+using JPB.DataAccess.Helper.LocalDb.Constraints;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 using JPB.DataAccess.Helper.LocalDb.Scopes;

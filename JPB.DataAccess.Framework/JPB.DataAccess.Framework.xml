@@ -10246,7 +10246,7 @@
                 Includes the foreign table
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.SelectQuery`1.Join``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},JPB.DataAccess.Query.Operators.JoinMode)">
+        <member name="M:JPB.DataAccess.Query.Operators.SelectQuery`1.Join``1(System.Linq.Expressions.Expression{System.Func{`0,``0}},JPB.DataAccess.Query.Operators.JoinMode,System.Func{JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery{`0},JPB.DataAccess.Query.Operators.Conditional.ConditionalEvalQuery{`0}})">
             <summary>
                 Includes the foreign table
             </summary>
