@@ -553,6 +553,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			{
 				var bookWithFkImageses = CreateQuery()
 					.Select.Table<BookWithFkImages>()
+					.Join(e => e.Images.Type.Book, JoinMode.Left)
 					.Join(f => f.User1, null, e => e.And.Column(f => f.Text).Is.Not.Null);
 
 				var compiled = bookWithFkImageses.ContainerObject.Compile(out _);
