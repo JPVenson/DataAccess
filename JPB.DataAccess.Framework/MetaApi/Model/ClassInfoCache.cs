@@ -34,15 +34,7 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// The MsCoreLib Assembly used for checking of an Framework Type
 		/// </summary>
 		public static readonly Assembly CollectionAssembly = typeof(ICollection<>).Assembly;
-
-		internal ClassInfoCache(Type type, bool anon = false)
-		{
-			//this is ok.
-			//init is used to be called from an other MetaApi part after the instanciation
-			//so as this constructor is internal we know what we do ;-)
-			Init(type, anon);
-		}
-
+		
 		/// <summary>
 		///     For internal use Only
 		/// </summary>
@@ -53,6 +45,10 @@ namespace JPB.DataAccess.MetaApi.Model
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		protected ClassInfoCache()
 		{
+			Attributes = new HashSet<TAttr>();
+			Propertys = new Dictionary<string, TProp>();
+			Mehtods = new HashSet<TMeth>();
+			Constructors = new HashSet<TCtor>();
 		}
 
 		private Type _type;
@@ -118,24 +114,38 @@ namespace JPB.DataAccess.MetaApi.Model
 				anon = true;
 			}
 
-			Attributes = new HashSet<TAttr>(type
-					.GetCustomAttributes(true)
-					.Where(s => s is Attribute)
-					.Select(s => new TAttr().Init(s as Attribute) as TAttr));
-			Propertys = new Dictionary<string, TProp>(type
-					.GetProperties(BindingFlags.Public | BindingFlags.Static |
-					               BindingFlags.NonPublic | BindingFlags.Instance)
-					.Where(e => !e.GetIndexParameters().Any())
-					.Select(s => new TProp().Init(s, anon) as TProp)
-					.ToDictionary(s => s.PropertyName, s => s));
-			Mehtods = new HashSet<TMeth>(type
-					.GetMethods(BindingFlags.Public | BindingFlags.Static |
-					            BindingFlags.NonPublic | BindingFlags.Instance)
-					.Select(s => new TMeth().Init(s) as TMeth));
-			Constructors = new HashSet<TCtor>(type
-					.GetConstructors(BindingFlags.Public | BindingFlags.Static |
-					                 BindingFlags.NonPublic | BindingFlags.Instance)
-					.Select(s => new TCtor().Init(s) as TCtor));
+			foreach (var attributeInfoCach in type
+				.GetCustomAttributes(true)
+				.Where(s => s is Attribute)
+				.Select(s => new TAttr().Init(s as Attribute) as TAttr))
+			{
+				Attributes.Add(attributeInfoCach);
+			}
+			foreach (var propertyInfoCach in type
+				.GetProperties(BindingFlags.Public | BindingFlags.Static |
+				               BindingFlags.NonPublic | BindingFlags.Instance)
+				.Where(e => !e.GetIndexParameters().Any())
+				.Select(s => new TProp().Init(s, anon) as TProp)
+				.ToDictionary(s => s.PropertyName, s => s))
+			{
+				Propertys.Add(propertyInfoCach.Key, propertyInfoCach.Value);
+			}
+
+			foreach (var methodInfoCach in type
+				.GetMethods(BindingFlags.Public | BindingFlags.Static |
+				            BindingFlags.NonPublic | BindingFlags.Instance)
+				.Select(s => new TMeth().Init(s) as TMeth))
+			{
+				Mehtods.Add(methodInfoCach);
+			}
+
+			foreach (var constructor in type
+				.GetConstructors(BindingFlags.Public | BindingFlags.Static |
+				                 BindingFlags.NonPublic | BindingFlags.Instance)
+				.Select(s => new TCtor().Init(s) as TCtor))
+			{
+				Constructors.Add(constructor);
+			}
 			var defaultConstructor = Constructors.FirstOrDefault(f => !f.Arguments.Any());
 
 			IsMsCoreFrameworkType = type.Assembly == MsCoreLibAssembly;

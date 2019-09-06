@@ -12,7 +12,6 @@ using JetBrains.Annotations;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 using JPB.DataAccess.Query.Contracts;

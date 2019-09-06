@@ -4,7 +4,6 @@ using System;
 using System.Data;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework;
 
 #endregion
 

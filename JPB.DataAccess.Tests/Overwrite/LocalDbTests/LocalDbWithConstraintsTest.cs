@@ -9,7 +9,6 @@ using JPB.DataAccess.Helper.LocalDb.Constraints;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Contracts;
 using JPB.DataAccess.Helper.LocalDb.Constraints.Defaults;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
-using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Images;
 using NUnit.Framework;
 

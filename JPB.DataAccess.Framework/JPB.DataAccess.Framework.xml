@@ -3440,17 +3440,17 @@
                 set a Attribute on a method
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.ConfigurationResolver`1.CreateMethod(System.String,System.Func{System.Object,System.Object[],System.Object},JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache[])">
+        <member name="M:JPB.DataAccess.DbInfoConfig.ConfigurationResolver`1.CreateMethod(System.String,System.Func{System.Object,System.Object[],System.Object})">
             <summary>
                 Adds a Fake Mehtod to the class
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.ConfigurationResolver`1.CreateMethod``2(System.String,System.Action{``0,``1},JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache[])">
+        <member name="M:JPB.DataAccess.DbInfoConfig.ConfigurationResolver`1.CreateMethod``2(System.String,System.Action{``0,``1})">
             <summary>
                 Adds a Fake Mehtod to the class
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.ConfigurationResolver`1.CreateMethod``2(System.String,System.Func{``0,``1},JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache[])">
+        <member name="M:JPB.DataAccess.DbInfoConfig.ConfigurationResolver`1.CreateMethod``2(System.String,System.Func{``0,``1})">
             <summary>
                 Adds a Fake Mehtod to the class
             </summary>
@@ -3754,25 +3754,6 @@
         <member name="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache">
             <summary>
                 Infos about the Method
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache.#ctor(System.Reflection.MethodInfo)">
-            <summary>
-                Initializes a new instance of the <see cref="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache" /> class.
-            </summary>
-            <param name="mehtodInfo">The mehtod information.</param>
-        </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache.#ctor(System.Func{System.Object,System.Object[],System.Object},System.Type,System.String,JPB.DataAccess.DbInfoConfig.DbInfo.DbAttributeInfoCache[])">
-            <summary>
-                Initializes a new instance of the <see cref="T:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache" /> class.
-            </summary>
-            <param name="fakeMehtod">The fake mehtod.</param>
-            <param name="declaringType">Type of the declaring.</param>
-            <param name="name">The name.</param>
-            <param name="attributes">The attributes.</param>
-        </member>
-        <member name="M:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache.#ctor">
-            <summary>
             </summary>
         </member>
         <member name="P:JPB.DataAccess.DbInfoConfig.DbInfo.DbMethodInfoCache.DeclaringClass">
@@ -8552,6 +8533,12 @@
                 the declaring class
             </summary>
         </member>
+        <member name="P:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.ReturnType">
+            <summary>
+                Contains the C# Return type of this Instance if known.
+                Can Be null
+            </summary>
+        </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Init(System.Reflection.MethodBase)">
             <summary>
                 For Internal use Only
@@ -8573,12 +8560,6 @@
         <member name="P:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Delegate">
             <summary>
                 if set this method does not exist so we fake it
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.ReturnType">
-            <summary>
-            Contains the C# Return type of this Instance if known.
-            Can Be null
             </summary>
         </member>
         <member name="P:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.MethodInfo">
@@ -8633,6 +8614,20 @@
                 occurs in the same position in the sort order as <paramref name="other" />. Greater than zero This instance follows
                 <paramref name="other" /> in the sort order.
             </returns>
+        </member>
+        <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Init(System.Func{System.Object,System.Object[],System.Object})">
+            <summary>
+                For Internal use Only
+            </summary>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Init(System.Func{System.Object,System.Object[],System.Object},System.Type,System.String)">
+            <summary>
+                For Internal use Only
+            </summary>
+            <exception cref="T:System.InvalidOperationException"></exception>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="M:JPB.DataAccess.MetaApi.Model.MethodInfoCache`2.Init(System.Reflection.MethodBase,System.Type,System.String)">
             <summary>

@@ -74,8 +74,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod(string methodName, Func<object, object[], object> methodBody,
-			params DbAttributeInfoCache[] attributes)
+		public void CreateMethod(string methodName, Func<object, object[], object> methodBody)
 		{
 			if (methodName == null)
 			{
@@ -89,7 +88,8 @@ namespace JPB.DataAccess.DbInfoConfig
 			{
 				throw new ArgumentOutOfRangeException(nameof(methodName), "Method name does exist. Cannot define a Method twice");
 			}
-			var mehtodInfo = new DbMethodInfoCache(methodBody, ClassInfoCache.Type, methodName, attributes);
+			var mehtodInfo = new DbMethodInfoCache();
+			mehtodInfo.Init(methodBody, ClassInfoCache.Type, methodName);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
@@ -97,8 +97,7 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod<Source, Input>(string methodName, Action<Source, Input> methodBody,
-			params DbAttributeInfoCache[] attributes)
+		public void CreateMethod<Source, Input>(string methodName, Action<Source, Input> methodBody)
 		{
 			if (methodName == null)
 			{
@@ -112,19 +111,19 @@ namespace JPB.DataAccess.DbInfoConfig
 			{
 				throw new ArgumentOutOfRangeException(nameof(methodName), "Method name does exist. Cannot define a Method twice");
 			}
-			var mehtodInfo = new DbMethodInfoCache((o, objects) =>
+			var mehtodInfo = new DbMethodInfoCache();
+			mehtodInfo.Init((o, objects) =>
 			{
 				methodBody((Source) o, (Input) objects[0]);
 				return null;
-			}, ClassInfoCache.Type, methodName, attributes);
+			}, ClassInfoCache.Type, methodName);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 
 		/// <summary>
 		///     Adds a Fake Mehtod to the class
 		/// </summary>
-		public void CreateMethod<Source, Output>(string methodName, Func<Source, Output> methodBody,
-			params DbAttributeInfoCache[] attributes)
+		public void CreateMethod<Source, Output>(string methodName, Func<Source, Output> methodBody)
 		{
 			if (methodName == null)
 			{
@@ -138,8 +137,9 @@ namespace JPB.DataAccess.DbInfoConfig
 			{
 				throw new ArgumentOutOfRangeException(nameof(methodName), "Method name does exist. Cannot define a Method twice");
 			}
-			var mehtodInfo = new DbMethodInfoCache((o, objects) => { return methodBody((Source) o); }, ClassInfoCache.Type,
-				methodName, attributes);
+			var mehtodInfo = new DbMethodInfoCache();
+			mehtodInfo.Init((o, objects) => { return methodBody((Source) o); }, ClassInfoCache.Type,
+				methodName);
 			ClassInfoCache.Mehtods.Add(mehtodInfo);
 		}
 

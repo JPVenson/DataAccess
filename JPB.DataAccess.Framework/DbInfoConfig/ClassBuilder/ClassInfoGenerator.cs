@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.EntityCollections;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 

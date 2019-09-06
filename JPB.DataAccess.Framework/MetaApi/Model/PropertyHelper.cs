@@ -17,8 +17,9 @@ namespace JPB.DataAccess.MetaApi.Model
 		private dynamic _getter;
 		private dynamic _setter;
 
-		public PropertyHelper(MethodBase accessorMethod) : base(accessorMethod)
+		public PropertyHelper(MethodBase accessorMethod)
 		{
+			Init(accessorMethod);
 			MethodInfo = accessorMethod;
 			MethodName = accessorMethod.Name;
 		}

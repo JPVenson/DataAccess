@@ -49,7 +49,9 @@ namespace JPB.DataAccess.DbInfoConfig
 		{
 			if (type.IsAnonymousType())
 			{
-				return new DbClassInfoCache(type, true); //Anonymous types does not have any Attributes
+				var dbClassInfoCache = new DbClassInfoCache();
+				dbClassInfoCache.Init(type, true);
+				return dbClassInfoCache; //Anonymous types does not have any Attributes
 			}
 
 			return ReflecionStore.GetOrCreateClassInfoCache(type);

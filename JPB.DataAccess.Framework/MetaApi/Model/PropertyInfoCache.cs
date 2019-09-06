@@ -181,12 +181,14 @@ namespace JPB.DataAccess.MetaApi.Model
 			{
 				if (getMethod != null)
 				{
-					Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(getMethod);
+					Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>();
+					Getter.Init(getMethod);
 				}
 
 				if (setMethod != null)
 				{
-					Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>(setMethod);
+					Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>();
+					Setter.Init(setMethod);
 				}
 			}
 
@@ -318,16 +320,18 @@ namespace JPB.DataAccess.MetaApi.Model
 
 			if (setter != null)
 			{
-				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) =>
+				Setter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>();
+				Setter.Init(new Func<object, object[], object>((o, objects) =>
 				{
 					setter((T) o, (TE) objects[0]);
 					return null;
-				});
+				}).Method);
 			}
 
 			if (getter != null)
 			{
-				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>((o, objects) => getter((T) o));
+				Getter = new MethodInfoCache<TAtt, MethodArgsInfoCache<TAtt>>();
+				Setter.Init(new Func<object, object[], object>((o, objects) => getter((T)o)).Method);
 			}
 		}
 	}

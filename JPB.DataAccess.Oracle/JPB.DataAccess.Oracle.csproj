@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JPB.DataAccess.Oracle</RootNamespace>
     <AssemblyName>JPB.DataAccess.Oracle</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -57,9 +58,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
-      <Name>JPB.DataAccess</Name>
+    <ProjectReference Include="..\JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj">
+      <Project>{300da607-cbae-4ca4-abfc-ae250cdc7c30}</Project>
+      <Name>JPB.DataAccess.Framework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -4,7 +4,6 @@ using System.Linq;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCollections;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Helper;
 
 #pragma warning disable 1591

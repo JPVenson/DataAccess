@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text;
 using JPB.DataAccess.Contacts;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.QueryItems.Conditional;
 using JPB.DataAccess.QueryFactory;

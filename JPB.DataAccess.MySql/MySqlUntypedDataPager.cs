@@ -1,18 +1,14 @@
 ﻿#region
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.Contacts.Pager;
-using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query;
-using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.Query.Operators.Orders;
 

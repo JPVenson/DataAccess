@@ -3,7 +3,6 @@
 using System;
 using System.Data;
 using JPB.DataAccess.DbEventArgs;
-using JPB.DataAccess.Framework;
 
 #endregion
 

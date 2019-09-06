@@ -10,15 +10,16 @@ using JPB.DataAccess.MetaApi.Model;
 
 namespace JPB.DataAccess.DbInfoConfig.DbInfo
 {
-	internal class FakePropertyMethodInfoCache<TAtt, TArg> : MethodInfoCache<TAtt, TArg>
+	internal sealed class FakePropertyMethodInfoCache<TAtt, TArg> : MethodInfoCache<TAtt, TArg>
 		where TAtt : class, IAttributeInfoCache, new()
 		where TArg : class, IMethodArgsInfoCache<TAtt>, new()
 	{
 		private readonly DbPropertyInfoCache _property;
 
 		public FakePropertyMethodInfoCache(DbPropertyInfoCache property, Func<object, object[], object> fakeMehtod)
-			: base(fakeMehtod)
+			: base()
 		{
+			Init(fakeMehtod.Method);
 			_property = property;
 		}
 

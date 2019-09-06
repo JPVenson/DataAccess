@@ -1,7 +1,6 @@
 ﻿#region
 
 using System.Linq;
-using System.Transactions;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;

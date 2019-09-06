@@ -1,5 +1,4 @@
 ﻿using System;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Query;
 using NUnit.Framework;
 

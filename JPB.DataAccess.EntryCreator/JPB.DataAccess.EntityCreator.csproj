@@ -136,9 +136,9 @@
       <Project>{5bc12918-3a58-4e94-8aa2-b2cf56dc9de9}</Project>
       <Name>JPB.DataAccess.EntityCreator.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46E06D7F-F55A-4B10-978D-13607BE17CB9}</Project>
-      <Name>JPB.DataAccess</Name>
+    <ProjectReference Include="..\JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj">
+      <Project>{798d7353-ff9e-4224-8ec2-395dbc0dc012}</Project>
+      <Name>JPB.DataAccess.Framework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -2,10 +2,8 @@
 
 using System;
 using System.Linq;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
-using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.User;

@@ -11,7 +11,7 @@ namespace JPB.DataAccess.MetaApi.Model
 	/// <summary>
 	///     Fake Constructor for Structs
 	/// </summary>
-	public class ConstructorStructFakeInfoCache :
+	public sealed class ConstructorStructFakeInfoCache :
 		MethodInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>,
 		IConstructorInfoCache<AttributeInfoCache, MethodArgsInfoCache<AttributeInfoCache>>
 	{
@@ -21,8 +21,8 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <param name="del"></param>
 		/// <param name="name"></param>
 		public ConstructorStructFakeInfoCache(Func<object> del, string name)
-			: base((e, f) => { return del(); }, typeof(ConstructorStructFakeInfoCache), ".ctor")
 		{
+			Init((e, f) => del(), typeof(ConstructorStructFakeInfoCache), ".ctor");
 		}
 
 #pragma warning disable CS1591

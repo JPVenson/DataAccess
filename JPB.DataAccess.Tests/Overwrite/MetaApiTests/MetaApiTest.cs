@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JPB.DataAccess.DbInfoConfig;
-using JPB.DataAccess.Tests.Base;
 using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
 using NUnit.Framework;
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework;
 
 #pragma warning disable 1591
 

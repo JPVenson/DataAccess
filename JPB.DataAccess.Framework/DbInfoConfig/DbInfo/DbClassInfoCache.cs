@@ -33,13 +33,6 @@ namespace JPB.DataAccess.DbInfoConfig.DbInfo
 			SchemaMappingValues = new Dictionary<string, string>();
 		}
 
-		internal DbClassInfoCache(Type type, bool anon = false)
-			: base(type, anon)
-		{
-			SchemaMappingValues = new Dictionary<string, string>();
-			Refresh(true);
-		}
-
 		private Dictionary<string, string> _invertedSchema;
 
 		/// <summary>

@@ -8,7 +8,6 @@ using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 
 #endregion

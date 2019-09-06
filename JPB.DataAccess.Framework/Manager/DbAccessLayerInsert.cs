@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
 

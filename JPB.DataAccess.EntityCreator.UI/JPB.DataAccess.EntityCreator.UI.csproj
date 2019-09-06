@@ -15,7 +15,7 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
-    <AssemblyVersion>2.0.0.1</AssemblyVersion>
+    <AssemblyVersion>3.0.1.0</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -221,9 +221,9 @@
       <Project>{5BC12918-3A58-4E94-8AA2-B2CF56DC9DE9}</Project>
       <Name>JPB.DataAccess.EntityCreator.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JPB.DataAccess\JPB.DataAccess.csproj">
-      <Project>{46e06d7f-f55a-4b10-978d-13607be17cb9}</Project>
-      <Name>JPB.DataAccess</Name>
+    <ProjectReference Include="..\JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj">
+      <Project>{798d7353-ff9e-4224-8ec2-395dbc0dc012}</Project>
+      <Name>JPB.DataAccess.Framework</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

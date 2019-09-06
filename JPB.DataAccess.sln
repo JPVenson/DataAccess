@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess", "JPB.DataAccess\JPB.DataAccess.csproj", "{46E06D7F-F55A-4B10-978D-13607BE17CB9}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{456F719E-2DB1-4D01-82E8-01E4175492B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Tests", "JPB.DataAccess.Tests\JPB.DataAccess.Tests.csproj", "{33ACDF31-634C-4183-BBD9-F3B25AC1F601}"
@@ -22,13 +20,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Oracle", "JP
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Framework", "Framework", "{844A6219-233F-473E-BE91-11E59E0C88C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.Framework", "JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj", "{300DA607-CBAE-4CA4-ABFC-AE250CDC7C30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JPB.DataAccess.Framework", "JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj", "{300DA607-CBAE-4CA4-ABFC-AE250CDC7C30}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Provider", "Provider", "{9315D7CF-7D3A-4FAF-9475-91BE4080DC27}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SqLite", "SqLite", "{74773330-0DBA-4667-8560-A82309B89030}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.SqLite.NetStandard", "JPB.DataAccess.SqLite.NetStandard\JPB.DataAccess.SqLite.NetStandard.csproj", "{6FF8BF3A-8FEC-49C7-A8B8-A8B7A31B6BFF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JPB.DataAccess.SqLite.NetStandard", "JPB.DataAccess.SqLite.NetStandard\JPB.DataAccess.SqLite.NetStandard.csproj", "{6FF8BF3A-8FEC-49C7-A8B8-A8B7A31B6BFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,18 +38,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|x64.ActiveCfg = Debug|x64
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|x64.Build.0 = Debug|x64
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|x86.ActiveCfg = Debug|x86
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Debug|x86.Build.0 = Debug|x86
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|x64.ActiveCfg = Release|x64
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|x64.Build.0 = Release|x64
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|x86.ActiveCfg = Release|x86
-		{46E06D7F-F55A-4B10-978D-13607BE17CB9}.Release|x86.Build.0 = Release|x86
 		{33ACDF31-634C-4183-BBD9-F3B25AC1F601}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{33ACDF31-634C-4183-BBD9-F3B25AC1F601}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33ACDF31-634C-4183-BBD9-F3B25AC1F601}.Debug|x64.ActiveCfg = Debug|x64

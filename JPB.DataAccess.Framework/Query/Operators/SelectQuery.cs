@@ -8,7 +8,6 @@ using System.Reflection;
 using JetBrains.Annotations;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.EntityCollections;
-using JPB.DataAccess.Framework;
 using JPB.DataAccess.Manager;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;

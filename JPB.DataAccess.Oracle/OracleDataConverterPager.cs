@@ -1,11 +1,8 @@
-﻿using JPB.DataAccess.Contacts.Pager;
-using JPB.DataAccess.Manager;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.Oracle
 {

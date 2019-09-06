@@ -29,6 +29,12 @@ namespace JPB.DataAccess.MetaApi.Model
 		private Lazy<Func<object, object[], object>> _createMethod;
 
 		/// <summary>
+		///     Contains the C# Return type of this Instance if known.
+		///     Can Be null
+		/// </summary>
+		public virtual Type ReturnType { get; protected internal set; }
+
+		/// <summary>
 		///     For Internal use Only
 		/// </summary>
 		/// <param name="mehtodInfo"></param>
@@ -68,12 +74,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		}
 
 		/// <summary>
-		/// Contains the C# Return type of this Instance if known.
-		/// Can Be null
-		/// </summary>
-		public virtual Type ReturnType { get; protected internal set; }
-
-		/// <summary>
 		///     Direct Reflection
 		/// </summary>
 		public virtual MethodBase MethodInfo { get; protected internal set; }
@@ -108,6 +108,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			{
 				return Delegate(target, param);
 			}
+
 			return MethodInfo.Invoke(target, param);
 		}
 
@@ -142,6 +143,26 @@ namespace JPB.DataAccess.MetaApi.Model
 		/// <summary>
 		///     For Internal use Only
 		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
+		public virtual IMethodInfoCache<TAtt, TArg> Init(Func<object, object[], object> fakeMehtod)
+		{
+			return Init(fakeMehtod.GetMethodInfo());
+		}
+
+		/// <summary>
+		///     For Internal use Only
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="ArgumentNullException"></exception>
+		public virtual IMethodInfoCache<TAtt, TArg> Init(Func<object, object[], object> fakeMehtod, Type declaringType, string name = null)
+		{
+			return Init(fakeMehtod.GetMethodInfo(), declaringType, name);
+		}
+
+		/// <summary>
+		///     For Internal use Only
+		/// </summary>
 		/// <param name="mehtodInfo"></param>
 		/// <param name="sourceType"></param>
 		/// <param name="name">User name for this Mehtod.</param>
@@ -163,6 +184,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			{
 				throw new ArgumentNullException(nameof(mehtodInfo));
 			}
+
 			MethodInfo = mehtodInfo;
 			if (mehtodInfo is MethodInfo)
 			{
@@ -177,6 +199,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			{
 				MethodName = name;
 			}
+
 			Attributes = new HashSet<TAtt>(mehtodInfo
 				.GetCustomAttributes(true)
 				.Where(s => s is Attribute)
@@ -186,7 +209,7 @@ namespace JPB.DataAccess.MetaApi.Model
 			return this;
 		}
 
-		static Func<object, object[], object> Wrap(MethodBase method, Type declaringType)
+		private static Func<object, object[], object> Wrap(MethodBase method, Type declaringType)
 		{
 			return (instance, args) => method.Invoke(instance, args);
 
@@ -238,25 +261,6 @@ namespace JPB.DataAccess.MetaApi.Model
 		public override int GetHashCode()
 		{
 			return new MethodInfoCacheEquatableComparer<TAtt, TArg>().GetHashCode(this);
-		}
-
-		internal MethodInfoCache(MethodBase mehtodInfo)
-		{
-			// ReSharper disable DoNotCallOverridableMethodsInConstructor
-			Init(mehtodInfo);
-		}
-
-		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, params TAtt[] attributes)
-			: this()
-		{
-			Init(fakeMehtod.GetMethodInfo());
-		}
-
-		internal MethodInfoCache(Func<object, object[], object> fakeMehtod, Type declaringType, string name = null,
-			params TAtt[] attributes)
-			: this()
-		{
-			Init(fakeMehtod.GetMethodInfo(), declaringType, name);
 		}
 
 		/// <summary>

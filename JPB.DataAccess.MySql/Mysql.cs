@@ -8,7 +8,6 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 */
 
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using JPB.DataAccess.Contacts;

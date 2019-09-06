@@ -1,6 +1,4 @@
-﻿using JPB.DataAccess.Framework;
-
-namespace JPB.DataAccess.Query.QueryItems.Conditional
+﻿namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
 	/// <summary>
 	///     Identifies an SQL target

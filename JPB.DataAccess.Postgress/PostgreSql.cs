@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.Contacts.Pager;
-using JPB.DataAccess.DebuggerHelper;
 using JPB.DataAccess.Manager;
 using Npgsql;
 using NpgsqlTypes;

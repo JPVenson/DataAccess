@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using JPB.DataAccess.Contacts.Pager;
-using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.MySql
 {
