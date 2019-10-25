@@ -82,5 +82,45 @@ namespace JPB.DataAccess.Query
 
 			return new ElementProducer<TOut>(countQueryPart);
 		}
+
+		/// <summary>
+		///     Creates an TSQL Count(1) statement
+		/// </summary>
+		/// <typeparam name="TPoco">The type of the poco.</typeparam>
+		/// <typeparam name="TOut">The type of the out.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
+		private static ElementProducer<TOut> Sum<TPoco, TOut>(this IElementProducer<TPoco> query)
+		{
+			IQueryBuilder newQuery = new RootQuery(query.ContainerObject.AccessLayer);
+			//in case there is a grouping in the query, we must use a SubQuery
+
+			var ordering = query.ContainerObject.SearchLast<OrderByColumnQueryPart>();
+
+			var cteName = query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
+			var item = new CteDefinitionQueryPart.CteInfo()
+			{
+				Name = cteName
+			};
+			item.CteContentParts.AddRange(query.ContainerObject.Parts.Except(new IQueryPart[] { ordering }).ToArray());
+
+			var cteQueryPart = query.ContainerObject.SearchLast<CteDefinitionQueryPart>();
+			newQuery = newQuery.Add(cteQueryPart ?? (cteQueryPart = new CteDefinitionQueryPart()))
+				.Add(cteQueryPart.AddCte(item));
+
+			var subQueryId = query.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.SubQuery);
+			var countQueryPart = newQuery
+				.Add(new CountTargetQueryPart(cteName, subQueryId));
+			if (ordering != null)
+			{
+				var orderByColumnQueryPart = new OrderByColumnQueryPart();
+				orderByColumnQueryPart.Descending = ordering.Descending;
+				orderByColumnQueryPart.Columns = orderByColumnQueryPart.Columns
+					.Select(f => new ColumnInfo(f.ColumnName, f, subQueryId, query.ContainerObject)).ToList();
+				countQueryPart.Add(orderByColumnQueryPart);
+			}
+
+			return new ElementProducer<TOut>(countQueryPart);
+		}
 	}
 }

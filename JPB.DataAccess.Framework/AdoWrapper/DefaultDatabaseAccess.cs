@@ -56,19 +56,20 @@ namespace JPB.DataAccess.AdoWrapper
 
 		private void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (ConnectionController.Connection != null)
 			{
-				if (ConnectionController.Connection != null)
+				while (ConnectionController.Transaction != null)
 				{
-					while (ConnectionController.Transaction != null)
-					{
-						ConnectionController.Transaction.Rollback();
-						ConnectionController.Transaction = null;
-					}
-					ConnectionController.Connection.Close();
-					ConnectionController.Connection.Dispose();
-					ConnectionController.Connection = null;
+					ConnectionController.Transaction.Rollback();
+					ConnectionController.Transaction = null;
 				}
+
+				if (ConnectionController.Connection.State != ConnectionState.Closed)
+				{
+					ConnectionController.Connection.Close();
+				}
+				ConnectionController.Connection.Dispose();
+				ConnectionController.Connection = null;
 			}
 		}
 

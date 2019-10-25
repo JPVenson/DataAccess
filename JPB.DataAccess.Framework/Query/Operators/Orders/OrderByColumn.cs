@@ -1,12 +1,15 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using JPB.DataAccess.AdoWrapper.MsSqlProvider;
 using JPB.DataAccess.Contacts.Pager;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.QueryItems;
 
 #endregion
@@ -89,6 +92,16 @@ namespace JPB.DataAccess.Query.Operators.Orders
 			return Descending;
 		}
 
+		private OrderByColumn<TPoco> CreateByPath
+			(IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath)
+		{
+			var columnDefinitionPart =
+				ConditionalQuery<TPoco>.TraversePropertyPathToColumn(columnPath, ContainerObject);
+
+			ContainerObject.SearchLast<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
+			return new OrderByColumn<TPoco>(this);
+		}
+
 		/// <summary>
 		///     Appents another order statement
 		/// </summary>
@@ -96,16 +109,12 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> ThenBy(string columnName)
 		{
-			var columnInfos = ContainerObject.SearchLast<ISelectableQueryPart>()
-				.Columns.ToArray();
-			var columnDefinitionPart = columnInfos.FirstOrDefault(e => e.IsEquivalentTo(columnName));
-			if (columnDefinitionPart == null)
+			var cache = ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco));
+			return CreateByPath(new[]
 			{
-				throw new InvalidOperationException($"You have tried to create an expression for the column '{columnName}' on table '{typeof(TPoco)}' that does not exist.");
-			}
-
-			ContainerObject.SearchLast<OrderByColumnQueryPart>().Columns.Add(columnDefinitionPart);
-			return new OrderByColumn<TPoco>(this);
+				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
+					.Propertys[columnName]),
+			});
 		}
 
 		/// <summary>
@@ -116,9 +125,15 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> ThenBy<TA>(Expression<Func<TPoco, TA>> columnName)
 		{
-			var member = columnName.GetPropertyInfoFromLamdba();
-			var propName = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco)).Propertys[member];
-			return ThenBy(propName.DbName);
+			return CreateByPath(PropertyPath<TPoco>
+				.Get(columnName)
+				.Select(e =>
+				{
+					var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
+						dbClassInfoCache.Propertys[e.Name]);
+				})
+				.ToArray());
 		}
 	}
 }
