@@ -150,6 +150,26 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 
 	internal static class PropertyPath<TSource>
 	{
+		public static IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> GetFromPath(DbConfig cache, string path)
+		{
+			var target = cache.GetOrCreateClassInfoCache(typeof(TSource));
+			var pathParts = path.Split('.');
+			var pathCompiled = new List<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>>();
+
+			for (var index = 0; index < pathParts.Length; index++)
+			{
+				var pathPart = pathParts[index];
+				var prop = target.Propertys.FirstOrDefault(e =>
+					e.Value.PropertyName.Equals(pathPart, StringComparison.InvariantCulture));
+				var nTarget = prop.Value?.DeclaringClass;
+
+				target = nTarget ?? throw new InvalidOperationException($"Could not find part of the path '{path}'. The {index} part could not be found on {target.Name}");
+				pathCompiled.Add(new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(nTarget, prop.Value));
+			}
+
+			return pathCompiled;
+		}
+
 		public static IReadOnlyList<MemberInfo> Get<TResult>(Expression<Func<TSource, TResult>> expression)
 		{
 			var visitor = new PropertyVisitor();

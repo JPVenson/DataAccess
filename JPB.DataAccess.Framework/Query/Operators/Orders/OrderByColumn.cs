@@ -92,8 +92,8 @@ namespace JPB.DataAccess.Query.Operators.Orders
 			return Descending;
 		}
 
-		private OrderByColumn<TPoco> CreateByPath
-			(IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath)
+		private OrderByColumn<TPoco> CreateByPath(
+			IReadOnlyCollection<KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>> columnPath)
 		{
 			var columnDefinitionPart =
 				ConditionalQuery<TPoco>.TraversePropertyPathToColumn(columnPath, ContainerObject);
@@ -109,12 +109,14 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> ThenBy(string columnName)
 		{
-			var cache = ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco));
-			return CreateByPath(new[]
-			{
-				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
-					.Propertys[columnName]),
-			});
+			return CreateByPath(PropertyPath<TPoco>
+				.Get(ContainerObject.AccessLayer.Config, columnName)
+				.Select(e =>
+				{
+					var dbClassInfoCache = ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
+						dbClassInfoCache.Propertys[e.Name]);
+				}).ToArray());
 		}
 
 		/// <summary>

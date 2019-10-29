@@ -654,6 +654,29 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		}
 
 		[Test]
+		public void OrderByWithString()
+		{
+			var maxItems = 250;
+			DataMigrationHelper.AddUsers(maxItems, DbAccess);
+			var elementProducer =
+					CreateQuery().Select.Table<Users>().Order.By("UserName")
+							.ThenBy("UserID")
+								 .ExecutionMode(_asyncEnumeration).ToArray();
+			var directQuery =
+					DbAccess.RunSelect<Users>(DbAccess.Database.CreateCommand(UsersMeta.SelectStatement + " ORDER BY UserName, User_ID"));
+
+			Assert.That(directQuery.Length, Is.EqualTo(elementProducer.Length));
+
+			for (var index = 0; index < directQuery.Length; index++)
+			{
+				var userse = directQuery[index];
+				var userbe = elementProducer[index];
+				Assert.That(userbe.UserID, Is.EqualTo(userse.UserID));
+				Assert.That(userbe.UserName, Is.EqualTo(userse.UserName));
+			}
+		}
+
+		[Test]
 		public void Pager()
 		{
 			var maxItems = 250;
