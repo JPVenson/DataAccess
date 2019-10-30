@@ -44,12 +44,14 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> By(string columnName)
 		{
-			var cache = _queryBuilder.ContainerObject.AccessLayer.Config.GetOrCreateClassInfoCache(typeof(TPoco));
-			return CreateByPath(new[]
-			{
-				new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(cache, cache
-					.Propertys[columnName]),
-			});
+			return CreateByPath(PropertyPath<TPoco>
+				.Get(_queryBuilder.ContainerObject.AccessLayer.Config, columnName)
+				.Select(e =>
+				{
+					var dbClassInfoCache = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
+					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
+						dbClassInfoCache.Propertys[e.Name]);
+				}).ToArray());
 		}
 
 		/// <summary>
