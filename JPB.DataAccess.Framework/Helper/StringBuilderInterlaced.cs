@@ -14,10 +14,20 @@ using JPB.DataAccess.Contacts;
 namespace JPB.DataAccess.Helper
 {
 	/// <summary>
+	///		A color that does represent nothing
+	/// </summary>
+	public class NoColor
+	{
+			
+	}
+
+	/// <summary>
 	///     Allows building of strings in a interlaced and colored way
 	/// </summary>
-	public class StringBuilderInterlaced<TColor> : IStringBuilderInterlaced<TColor>, ICollection where TColor : class, new()
+	public class StringBuilderInterlaced<TColor> : IStringBuilderInterlaced<TColor>, ICollection 
+		where TColor : class, new()
 	{
+
 		private readonly uint _interlacedSpace;
 
 		private readonly List<ITextWithColor<TColor>> _source;
