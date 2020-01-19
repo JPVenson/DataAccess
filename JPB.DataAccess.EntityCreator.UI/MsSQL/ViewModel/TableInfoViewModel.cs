@@ -172,7 +172,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		public void AddColumn(IColumnInfo column)
 		{
-			var columnMeta = new ColumInfoModel(column);
+			var columnMeta = new ColumnInfoModel(column);
 			var collumnVm = new ColumnInfoViewModel(columnMeta);
 			ColumnInfoModels.Add(collumnVm);
 		}

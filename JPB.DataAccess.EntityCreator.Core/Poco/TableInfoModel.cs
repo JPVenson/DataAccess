@@ -41,7 +41,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 			CreateSelectFactory = true;
 			Info = info;
 			Database = database;
-			ColumnInfos = db.Select<ColumnInfo>(new object[] { Info.TableName, database }).Select(s => new ColumInfoModel(s)).ToList();
+			ColumnInfos = db.Select<ColumnInfo>(new object[] { Info.TableName, database }).Select(s => new ColumnInfoModel(s)).ToList();
 
 			var firstOrDefault = db.RunSelect(typeof(string),
 				db.Database.CreateCommandWithParameterValues("SELECT COLUMN_NAME " +

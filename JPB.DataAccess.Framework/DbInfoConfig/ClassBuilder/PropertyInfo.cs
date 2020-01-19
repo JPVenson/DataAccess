@@ -59,6 +59,13 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 					attributeInfo.Render(sb);
 				}
 			}
+			else
+			{
+				foreach (var attributeInfo in Attributes.Where(e => e.DoesNotSupportDbConfigApi))
+				{
+					attributeInfo.Render(sb);
+				}
+			}
 
 			sb.AppendInterlaced("public ");
 			if (ForeignKey != null)

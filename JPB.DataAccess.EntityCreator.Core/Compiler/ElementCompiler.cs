@@ -23,6 +23,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 			Generator = new ClassInfoGenerator();
 			Generator.ClassName = targetCsName;
 			TargetDir = targetDir;
+			Namespaces = new HashSet<string>();
 		}
 
 		public const string GitURL = "https://github.com/JPVenson/DataAccess";
@@ -33,6 +34,8 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 		public bool WriteAlways { get; set; }
 		public string TargetDir { get; private set; }
 		public string TableName { get; set; }
+
+		public ICollection<string> Namespaces { get; set; }
 
 		public string TargetCsName
 		{
@@ -110,13 +113,17 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 					}
 				});
 			}
+			Namespaces.Add("System");
+			Namespaces.Add("System.Collections.Generic");
+			Namespaces.Add("System.CodeDom.Compiler");
+			Namespaces.Add("System.Linq");
+			Namespaces.Add("System.Data");
+			Namespaces.Add(typeof(ForModelAttribute).Namespace);
 
-			Generator.NamespaceImports.Add("System");
-			Generator.NamespaceImports.Add("System.Collections.Generic");
-			Generator.NamespaceImports.Add("System.CodeDom.Compiler");
-			Generator.NamespaceImports.Add("System.Linq");
-			Generator.NamespaceImports.Add("System.Data");
-			Generator.NamespaceImports.Add(typeof(ForModelAttribute).Namespace);
+			foreach (var ns in Namespaces.OrderBy(e => e))
+			{
+				Generator.NamespaceImports.Add(ns);
+			}
 
 			using (var memStream = new MemoryStream())
 			{

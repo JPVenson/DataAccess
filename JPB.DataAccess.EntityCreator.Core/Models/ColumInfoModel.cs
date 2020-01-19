@@ -7,14 +7,14 @@ using JPB.DataAccess.EntityCreator.Core.Poco;
 namespace JPB.DataAccess.EntityCreator.Core.Models
 {
 	[Serializable]
-	public class ColumInfoModel : IColumInfoModel
+	public class ColumnInfoModel : IColumInfoModel
 	{
-		public ColumInfoModel()
+		public ColumnInfoModel()
 		{
 
 		}
 
-		public ColumInfoModel(IColumnInfo columnInfo)
+		public ColumnInfoModel(IColumnInfo columnInfo)
 		{
 			ColumnInfo = columnInfo;
 			if (columnInfo.SqlType == SqlDbType.Timestamp)
@@ -74,7 +74,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Models
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
 			if (obj.GetType() != this.GetType()) return false;
-			return Equals((ColumInfoModel)obj);
+			return Equals((ColumnInfoModel)obj);
 		}
 
 		public override int GetHashCode()

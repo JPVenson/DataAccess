@@ -17,6 +17,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool SetNotifyProperties { get; set; }
 		bool GenerateConfigMethod { get; set; }
 		bool SplitByType { get; set; }
+		bool GenerateDbValidationAnnotations { get; set; }
 		string Namespace { get; set; }
 		string SqlVersion { get; set; }
 		bool WrapNullables { get; set; }

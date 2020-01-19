@@ -2,6 +2,7 @@
 
 using System;
 using System.Data;
+using System.Globalization;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Helper;
@@ -15,8 +16,26 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 	[Serializable]
 	public class ColumnInfo : IColumnInfo
 	{
+		[ObjectFactoryMethod]
+		public ColumnInfo(IDataRecord dataRecord)
+		{
+			ColumnName = dataRecord.GetString(dataRecord.GetOrdinal("COLUMN_NAME"));
+			PositionFromTop = dataRecord.GetInt32(dataRecord.GetOrdinal("ORDINAL_POSITION"));
+			Nullable = dataRecord.GetString(dataRecord.GetOrdinal("IS_NULLABLE")) == "1";
+			var ordinal = dataRecord.GetOrdinal("CHARACTER_MAXIMUM_LENGTH");
+			if(dataRecord.IsDBNull(ordinal))
+			{
+				MaxLength = dataRecord.GetInt32(ordinal);
+			}
+
+			var targetType = dataRecord.GetValue(dataRecord.GetOrdinal("DATA_TYPE"));
+			SqlType = (SqlDbType)new SQLDbTypeEnumMemberConverter() { Fallback = SqlDbType.Udt }
+				.Convert(targetType, typeof(SqlDbType), null, CultureInfo.CurrentCulture);
+			var targetType2 = dataRecord.GetValue(dataRecord.GetOrdinal("DATA_TYPE2"));
+			TargetType = (Type)new DbTypeToCsType().Convert(targetType2, typeof(Type), null, CultureInfo.CurrentCulture);
+		}
+
 		[ForModel("DATA_TYPE")]
-		[ValueConverter(typeof(EnumMemberConverter))]
 		public SqlDbType SqlType { get; set; }
 
 		[ForModel("COLUMN_NAME")]
@@ -30,8 +49,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		public bool Nullable { get; set; }
 
 		[ForModel("DATA_TYPE2")]
-		[ValueConverter(typeof(DbTypeToCsType))]
 		public Type TargetType { get; set; }
+
+		[ForModel("CHARACTER_MAXIMUM_LENGTH")]
+		public int? MaxLength { get; set; }
 
 		[SelectFactoryMethod]
 		public static IQueryFactoryResult SelectColumns(string tableName, string database)

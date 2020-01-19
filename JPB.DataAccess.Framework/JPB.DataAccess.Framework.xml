@@ -4286,7 +4286,7 @@
         </member>
         <member name="T:JPB.DataAccess.Helper.EnumMemberConverter">
             <summary>
-            	Standart number to Enum converter for Enum fields
+            	Standard number to Enum converter for Enum fields
             </summary>
             <seealso cref="T:JPB.DataAccess.Contacts.IValueConverter" />
         </member>
@@ -4304,6 +4304,35 @@
             <exception cref="T:System.InvalidCastException">No enum member Provided</exception>
         </member>
         <member name="M:JPB.DataAccess.Helper.EnumMemberConverter.ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+                Converts a value from a C# object to the proper DB eqivaluent
+            </summary>
+            <param name="value"></param>
+            <param name="targetType"></param>
+            <param name="parameter"></param>
+            <param name="culture"></param>
+            <returns></returns>
+        </member>
+        <member name="T:JPB.DataAccess.Helper.SQLDbTypeEnumMemberConverter">
+            <summary>
+            	Standard number to Enum converter for Enum fields
+            </summary>
+            <seealso cref="T:JPB.DataAccess.Contacts.IValueConverter" />
+        </member>
+        <member name="M:JPB.DataAccess.Helper.SQLDbTypeEnumMemberConverter.Convert(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
+            <summary>
+                Converts a value from a DB to a C# object
+            </summary>
+            <param name="value"></param>
+            <param name="targetType"></param>
+            <param name="parameter"></param>
+            <param name="culture"></param>
+            <returns>
+                C# object that is of type of property
+            </returns>
+            <exception cref="T:System.InvalidCastException">No enum member Provided</exception>
+        </member>
+        <member name="M:JPB.DataAccess.Helper.SQLDbTypeEnumMemberConverter.ConvertBack(System.Object,System.Type,System.Object,System.Globalization.CultureInfo)">
             <summary>
                 Converts a value from a C# object to the proper DB eqivaluent
             </summary>
@@ -6909,6 +6938,11 @@
         </member>
         <member name="M:JPB.DataAccess.Helper.QueryParameter.Clone">
             <inheritdoc />
+        </member>
+        <member name="T:JPB.DataAccess.Helper.NoColor">
+            <summary>
+            	A color that does represent nothing
+            </summary>
         </member>
         <member name="T:JPB.DataAccess.Helper.StringBuilderInterlaced`1">
             <summary>
@@ -9670,6 +9704,15 @@
             <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Query.MsQueryBuilderExtentions.Count``2(JPB.DataAccess.Query.Contracts.IElementProducer{``0})">
+            <summary>
+                Creates an TSQL Count(1) statement
+            </summary>
+            <typeparam name="TPoco">The type of the poco.</typeparam>
+            <typeparam name="TOut">The type of the out.</typeparam>
+            <param name="query">The query.</param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.MsQueryBuilderExtentions.Sum``2(JPB.DataAccess.Query.Contracts.IElementProducer{``0})">
             <summary>
                 Creates an TSQL Count(1) statement
             </summary>

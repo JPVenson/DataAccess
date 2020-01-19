@@ -73,6 +73,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		/// <inheritdoc />
 		public bool SplitByType { get; set; }
+
+		public bool GenerateDbValidationAnnotations { get; set; }
 		public string Namespace { get; set; }
 
 		public void CreateEntrys(string connection, string outputPath, string database)
@@ -93,6 +95,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			{
 				throw new Exception("Database not accessible. Maybe wrong Connection or no Selected Database?");
 			}
+
 			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
 			if (string.IsNullOrEmpty(databaseName))
 			{
@@ -271,49 +274,51 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private void RenderMenu()
 		{
-			Console.WriteLine("Tables:");
+			WinConsole.WriteLine("Tables:");
 			var i = 0;
 			for (; i < Tables.Count(); i++)
 			{
-				Console.WriteLine("{0} \t {1}", i, Tables.ToArray()[i].Info.TableName);
+				WinConsole.WriteLine("{0} \t {1}", i, Tables.ToArray()[i].Info.TableName);
 			}
 
-			Console.WriteLine("Views:");
+			WinConsole.WriteLine("Views:");
 			var j = i;
 			for (; j < Views.Count() + i; j++)
 			{
-				Console.WriteLine("{0} \t {1}", j, Views.ToArray()[j - i].Info.TableName);
+				WinConsole.WriteLine("{0} \t {1}", j, Views.ToArray()[j - i].Info.TableName);
 			}
 
-			Console.WriteLine("Procedures:");
+			WinConsole.WriteLine("Procedures:");
 			var k = j;
 			for (; k < StoredProcs.Count() + j; k++)
 			{
-				Console.WriteLine("{0} \t {1}", k, StoredProcs.ToArray()[k - j].Parameter.TableName);
+				WinConsole.WriteLine("{0} \t {1}", k, StoredProcs.ToArray()[k - j].Parameter.TableName);
 			}
 
-			Console.WriteLine("Actions: ");
+			WinConsole.WriteLine("Actions: ");
 
-			Console.WriteLine(@"[Name | Number]");
-			Console.WriteLine("		Edit table");
-			Console.WriteLine(@"\compile");
-			Console.WriteLine("		Starts the Compiling of all Tables");
-			Console.WriteLine(@"\ns");
-			Console.WriteLine("		Defines a default Namespace");
-			Console.WriteLine(@"\fkGen");
-			Console.WriteLine("		Generates ForgeinKeyDeclarations");
-			Console.WriteLine(@"\addConfigMethod");
-			Console.WriteLine("		Moves all attributes from Propertys and Methods into a single ConfigMethod");
-			Console.WriteLine(@"\withAutoCtor");
-			Console.WriteLine("		Generates Loader Constructors");	
-			Console.WriteLine(@"\withNotification");
-			Console.WriteLine($"		Adds the '{nameof(INotifyPropertyChanged)}' interface to all Pocos");
-			Console.WriteLine(@"\autoGenNames");
-			Console.WriteLine("		Defines all names after a common naming convention");
-			Console.WriteLine(@"\addCompilerHeader	");
-			Console.WriteLine("		Adds a Timestamp and a created user on each POCO");
-			Console.WriteLine(@"\exit");
-			Console.WriteLine("		Stops the execution of the program");
+			WinConsole.WriteLine(@"[Name | Number]");
+			WinConsole.WriteLine("		Edit table");
+			WinConsole.WriteLine(@"\compile");
+			WinConsole.WriteLine("		Starts the Compiling of all Tables");
+			WinConsole.WriteLine(@"\ns");
+			WinConsole.WriteLine("		Defines a default Namespace");
+			WinConsole.WriteLine(@"\fkGen");
+			WinConsole.WriteLine("		Generates ForgeinKeyDeclarations");
+			WinConsole.WriteLine(@"\addConfigMethod");
+			WinConsole.WriteLine("		Moves all attributes from Propertys and Methods into a single ConfigMethod");
+			WinConsole.WriteLine(@"\withAutoCtor");
+			WinConsole.WriteLine("		Generates Loader Constructors");	
+			WinConsole.WriteLine(@"\withNotification");
+			WinConsole.WriteLine($"		Adds the '{nameof(INotifyPropertyChanged)}' interface to all Pocos");
+			WinConsole.WriteLine(@"\autoGenNames");
+			WinConsole.WriteLine("		Defines all names after a common naming convention");
+			WinConsole.WriteLine(@"\addCompilerHeader	");
+			WinConsole.WriteLine("		Adds a Timestamp and a created user on each POCO");
+			WinConsole.WriteLine(@"\withValidators	");
+			WinConsole.WriteLine("		Adds Validator attributes from the System.ComponentModel.DataAnnotations");
+			WinConsole.WriteLine(@"\exit");
+			WinConsole.WriteLine("		Stops the execution of the program");
 			RenderMenuAction();
 		}
 
@@ -379,6 +384,9 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 					case @"\addcompilerheader":
 						SetCompilerHeader();
 						break;
+					case @"\withvalidators":
+						SetValidators();
+						break;
 					case @"\exit":
 						return;
 
@@ -387,6 +395,13 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 						break;
 				}
 			}
+		}
+
+		private void SetValidators()
+		{
+			GenerateDbValidationAnnotations = !GenerateDbValidationAnnotations;
+			WinConsole.WriteLine("Create Validators propertys is {0}", GenerateDbValidationAnnotations ? "set" : "unset");
+			RenderMenuAction();
 		}
 
 		private void SetAddNotifiy()

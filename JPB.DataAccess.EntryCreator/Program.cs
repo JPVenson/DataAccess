@@ -156,7 +156,8 @@ namespace JPB.DataAccess.EntityCreator
 
 			try
 			{
-				new MsSqlCreator(options.IncludeInVsProject).CreateEntrys(connectionString, outputDirectory, string.Empty);
+				new MsSqlCreator(options.IncludeInVsProject)
+					.CreateEntrys(connectionString, outputDirectory, string.Empty);
 			}
 			catch (Exception e)
 			{

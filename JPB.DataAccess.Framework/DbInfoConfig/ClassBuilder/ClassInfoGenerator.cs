@@ -252,7 +252,8 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 
 				foreach (var propertyInfo in Properties)
 				{
-					foreach (var propertyInfoAttribute in propertyInfo.Attributes)
+					foreach (var propertyInfoAttribute in propertyInfo.Attributes
+						.Where(e => !e.DoesNotSupportDbConfigApi))
 					{
 						sb.AppendInterlacedLine(
 							$"config.{nameof(ConfigurationResolver<object>.SetPropertyAttribute)}" +

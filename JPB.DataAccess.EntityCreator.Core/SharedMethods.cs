@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Globalization;
 using System.IO;
@@ -59,7 +60,9 @@ namespace JPB.DataAccess.EntityCreator.Core
 			Stream to = null)
 		{
 			if (tableInfoModel.Exclude)
+			{
 				return;
+			}
 
 			var targetCsName = tableInfoModel.GetClassName();
 
@@ -79,9 +82,64 @@ namespace JPB.DataAccess.EntityCreator.Core
 			foreach (var columInfoModel in tableInfoModel.ColumnInfos)
 			{
 				if (columInfoModel.Exclude)
+				{
 					continue;
+				}
 
 				var codeMemberProperty = compiler.AddProperty(columInfoModel);
+
+				if (sourceCreator.GenerateDbValidationAnnotations)
+				{
+					compiler.Namespaces.Add(typeof(ValidationAttribute).Namespace);
+					if (!columInfoModel.ColumnInfo.Nullable)
+					{
+						//new RequiredAttribute();
+						codeMemberProperty.Attributes.Add(new AttributeInfo()
+						{
+							Name = nameof(RequiredAttribute),
+							DoesNotSupportDbConfigApi = true
+						});
+					}
+
+					if (columInfoModel.ColumnInfo.MaxLength.HasValue 
+					    && columInfoModel.ColumnInfo.MaxLength > 0)
+					{
+						if ((
+							columInfoModel.ColumnInfo.SqlType == SqlDbType.NVarChar
+							||
+							columInfoModel.ColumnInfo.SqlType == SqlDbType.Char
+							||
+							columInfoModel.ColumnInfo.SqlType == SqlDbType.NChar
+							||
+							columInfoModel.ColumnInfo.SqlType == SqlDbType.VarChar
+						))
+						{
+							//new StringLengthAttribute();
+							codeMemberProperty.Attributes.Add(new AttributeInfo()
+							{
+								Name = nameof(StringLengthAttribute),
+								PropertySetters =
+								{
+									{ "maximumLength", columInfoModel.ColumnInfo.MaxLength.Value.ToString() }
+								},
+								DoesNotSupportDbConfigApi = true
+							});
+						}
+						else if (columInfoModel.ColumnInfo.SqlType == SqlDbType.Binary)
+						{
+							//new MaxLengthAttribute();
+							codeMemberProperty.Attributes.Add(new AttributeInfo()
+							{
+								Name = nameof(MaxLengthAttribute),
+								PropertySetters =
+								{
+									{ "length", columInfoModel.ColumnInfo.MaxLength.Value.ToString() }
+								},
+								DoesNotSupportDbConfigApi = true
+							});
+						}
+					}
+				}
 
 				if (columInfoModel.PrimaryKey)
 				{
@@ -140,7 +198,9 @@ namespace JPB.DataAccess.EntityCreator.Core
 			foreach (var columInfoModel in tableInfoModel.ColumnInfos)
 			{
 				if (columInfoModel.Exclude)
+				{
 					continue;
+				}
 
 				if (columInfoModel.ForgeinKeyDeclarations != null)
 				{

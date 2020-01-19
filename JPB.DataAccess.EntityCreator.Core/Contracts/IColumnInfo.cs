@@ -10,5 +10,6 @@ namespace JPB.DataAccess.EntityCreator.Core.Contracts
 		bool Nullable { get; set; }
 		Type TargetType { get; set; }
 		SqlDbType SqlType { get; set; }
+		int? MaxLength { get; set; }
 	}
 }

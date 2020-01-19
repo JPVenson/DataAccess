@@ -17,6 +17,7 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 		public string Name { get; set; }
 		public IDictionary<string, string> PropertySetters { get; set; }
 		public IDictionary<string, string> ConstructorSetters { get; set; }
+		public bool DoesNotSupportDbConfigApi { get; set; }
 
 		public void Render(ConsoleStringBuilderInterlaced sb)
 		{
