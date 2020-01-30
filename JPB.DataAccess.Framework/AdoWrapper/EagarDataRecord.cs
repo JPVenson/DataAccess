@@ -20,7 +20,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <summary>
 		///     Enumerates all items in the source record
 		/// </summary>
-		internal EagarDataRecord(string[] fields, IList values)
+		public EagarDataRecord(string[] fields, IList values)
 		{
 			MetaHeader = new MultiValueDictionary<string, object>();
 			for (var i = 0; i < fields.Length; i++)
@@ -33,7 +33,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <summary>
 		///     Initializes a new instance of the <see cref="EagarDataRecord" /> class.
 		/// </summary>
-		protected internal EagarDataRecord()
+		public EagarDataRecord()
 		{
 		}
 

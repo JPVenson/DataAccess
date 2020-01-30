@@ -27,12 +27,9 @@ namespace JPB.DataAccess.Manager
 		/// <typeparam name="T"></typeparam>
 		public void Update<T>(T entry, IDatabase db)
 		{
-			db.Run(f =>
-			{
-				var query = CreateUpdate(entry, f);
-				RaiseUpdate(entry, query);
-				ExecuteGenericCommand(query);
-			});
+			var query = CreateUpdate(entry, db);
+			RaiseUpdate(entry, query);
+			ExecuteGenericCommand(query);
 		}
 
 		/// <summary>

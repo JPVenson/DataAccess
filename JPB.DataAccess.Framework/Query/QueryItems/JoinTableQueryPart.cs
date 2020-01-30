@@ -29,6 +29,10 @@ namespace JPB.DataAccess.Query.QueryItems
 		public QueryIdentifier Alias { get; set; }
 		public IList<JoinParseInfo> DependingJoins { get; set; }
 		public IEnumerable<ColumnInfo> Columns { get; set; }
+		/// <summary>
+		///		If set the Join will be returned and will be transformed into the result objects
+		/// </summary>
+		public bool IsResultJoin { get; set; }
 
 		public JoinParseInfo CloneTo(QueryIdentifier @alias)
 		{

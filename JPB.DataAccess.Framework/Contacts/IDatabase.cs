@@ -121,6 +121,11 @@ namespace JPB.DataAccess.Contacts
 		void TransactionRollback();
 
 		/// <summary>
+		///     Commits the current Transaction.
+		/// </summary>
+		void TransactionCommit();
+
+		/// <summary>
 		///     Required
 		///     Closing a open Connection
 		/// </summary>

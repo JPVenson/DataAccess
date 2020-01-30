@@ -37,19 +37,14 @@ namespace JPB.DataAccess.Query.QueryItems
 			return DbAccessLayer.GetSelectableColumnsOf(dbClassInfoCache)
 				.Select(e =>
 				{
-					switch (container.AccessLayer.DbAccessType)
+					if (container.AccessLayer.DbAccessType.HasFlag(DbAccessType.MsSql) ||
+					    container.AccessLayer.DbAccessType.HasFlag(DbAccessType.MySql))
 					{
-						case DbAccessType.MsSql:
-						case DbAccessType.MySql:
-							return new ColumnInfo(e, alias, container);
-						case DbAccessType.Experimental:
-						case DbAccessType.Unknown:
-						case DbAccessType.OleDb:
-						case DbAccessType.Obdc:
-						case DbAccessType.SqLite:
-							return new ColumnInfo(e, sourceReference, null);
-						default:
-							throw new ArgumentOutOfRangeException();
+						return new ColumnInfo(e, alias, container);
+					}
+					else
+					{
+						return new ColumnInfo(e, sourceReference, null);
 					}
 				}).ToArray();
 		}
@@ -69,39 +64,32 @@ namespace JPB.DataAccess.Query.QueryItems
 		{
 			var query = new StringBuilder();
 
-			switch (container.AccessLayer.DbAccessType)
+			if (container.AccessLayer.DbAccessType.HasFlag(DbAccessType.MsSql) ||
+			    container.AccessLayer.DbAccessType.HasFlag(DbAccessType.MySql))
 			{
-				case DbAccessType.MsSql:
-				case DbAccessType.MySql:
-					query.Append($"UPDATE [{Alias.GetAlias()}] SET ");
-					query
-						.Append(
-							ColumnAssignments
-								.Select(
-									columnAssignment =>
-										$"{Alias.GetAlias().EnsureAlias()}.{columnAssignment.Column.EnsureAlias()} = {columnAssignment.Value}")
-								.Aggregate((e, f) => e + ", " + f)
-						);
-					query.Append($" FROM {_target.GetAlias().EnsureAlias()} AS {Alias.GetAlias().EnsureAlias()}");
-					break;
-				case DbAccessType.Experimental:
-				case DbAccessType.Unknown:
-				case DbAccessType.OleDb:
-				case DbAccessType.Obdc:
-				case DbAccessType.SqLite:
-					query.Append($"UPDATE {_target.GetAlias().EnsureAlias()} SET ");
-					query
-						.Append(
-							ColumnAssignments
-								.Select(
-									columnAssignment =>
-										$"{columnAssignment.Column.EnsureAlias()} = {columnAssignment.Value}")
-								.Aggregate((e, f) => e + ", " + f)
-						);
-					query.Append($"");
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				query.Append($"UPDATE [{Alias.GetAlias()}] SET ");
+				query
+					.Append(
+						ColumnAssignments
+							.Select(
+								columnAssignment =>
+									$"{Alias.GetAlias().EnsureAlias()}.{columnAssignment.Column.EnsureAlias()} = {columnAssignment.Value}")
+							.Aggregate((e, f) => e + ", " + f)
+					);
+				query.Append($" FROM {_target.GetAlias().EnsureAlias()} AS {Alias.GetAlias().EnsureAlias()}");
+			}
+			else
+			{
+				query.Append($"UPDATE {_target.GetAlias().EnsureAlias()} SET ");
+				query
+					.Append(
+						ColumnAssignments
+							.Select(
+								columnAssignment =>
+									$"{columnAssignment.Column.EnsureAlias()} = {columnAssignment.Value}")
+							.Aggregate((e, f) => e + ", " + f)
+					);
+				query.Append($"");
 			}
 
 			return new QueryFactoryResult(query.ToString(),

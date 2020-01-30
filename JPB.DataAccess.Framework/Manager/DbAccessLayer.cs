@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using JetBrains.Annotations;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Contacts;
@@ -21,6 +22,7 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.EntityCollections;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators;
 
 #endregion
@@ -55,6 +57,7 @@ namespace JPB.DataAccess.Manager
 			CheckFactoryArguments = true;
 			UpdateDbAccessLayer();
 			Async = AsyncDefault;
+			CommandProcessor = new DatabaseCommandProcessor();
 		}
 
 		/// <summary>
@@ -159,6 +162,7 @@ namespace JPB.DataAccess.Manager
 		public bool ThreadSave { get; set; }
 
 		private readonly object _lockRoot = new object();
+		private ICommandProcessor _commandProcessor;
 
 		/// <summary>
 		///     Defines a set of Providers that are inclueded in this DLL or are weak refernced.
@@ -340,7 +344,7 @@ namespace JPB.DataAccess.Manager
 				Database.Connect();
 				Database.CloseConnection();
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
 				return false;
 			}
@@ -403,25 +407,21 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.PrepaireRemoteExecution(query);
 			RaiseNoResult(this, query);
-			return Database.Run(s =>
+			try
 			{
-				try
+				if (ThreadSave)
 				{
-					if (ThreadSave)
-					{
-						Monitor.Enter(_lockRoot);
-					}
-
-					return s.ExecuteNonQuery(query);
+					Monitor.Enter(_lockRoot);
 				}
-				finally
+				return CommandProcessor.ExecuteCommand(this, query);
+			}
+			finally
+			{
+				if (ThreadSave)
 				{
-					if (ThreadSave)
-					{
-						Monitor.Exit(_lockRoot);
-					}
+					Monitor.Exit(_lockRoot);
 				}
-			});
+			}
 		}
 
 		/// <summary>
@@ -432,7 +432,7 @@ namespace JPB.DataAccess.Manager
 		{
 			Database.PrepaireRemoteExecution(query);
 			RaiseNoResult(this, query);
-			return await Database.RunAsync(async s => { return await s.ExecuteNonQueryAsync(query, Async); });
+			return await CommandProcessor.ExecuteCommandAsync(this, query);
 		}
 
 		/// <summary>
@@ -959,51 +959,7 @@ namespace JPB.DataAccess.Manager
 					Monitor.Enter(_lockRoot);
 				}
 
-				await Database.RunAsync(
-					async s =>
-					{
-						using (query)
-						{
-							query.Connection = query.Connection ?? s.GetConnection();
-							query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
-
-							IDataReader dr = null;
-							try
-							{
-								var command = query as DbCommand;
-								if (command != null && Async)
-								{
-									dr = await command.ExecuteReaderAsync(executionHint).ConfigureAwait(ConfigureAwait);
-								}
-								else
-								{
-									dr = query.ExecuteReader(executionHint);
-								}
-
-								do
-								{
-									var reader = dr as DbDataReader;
-									while (reader != null && Async
-										? await reader.ReadAsync().ConfigureAwait(ConfigureAwait)
-										: dr.Read())
-									{
-										onRecord(dr);
-									}
-								} while (dr.NextResult());
-							}
-							catch (Exception ex)
-							{
-								RaiseFailedQuery(this, query, ex);
-								throw;
-							}
-							finally
-							{
-								dr?.Dispose();
-							}
-						}
-
-						return new object();
-					});
+				await CommandProcessor.EnumerateAsync(this, query, onRecord, executionHint);
 			}
 			finally
 			{
@@ -1012,6 +968,15 @@ namespace JPB.DataAccess.Manager
 					Monitor.Exit(_lockRoot);
 				}
 			}
+		}
+
+		/// <summary>
+		///		Executes commands
+		/// </summary>
+		public ICommandProcessor CommandProcessor
+		{
+			get { return _commandProcessor; }
+			set { _commandProcessor = value ?? throw new ArgumentNullException("value", "The command processor must never be null"); }
 		}
 
 		internal List<List<EagarDataRecord>> EnumerateMarsDataRecords(
@@ -1025,39 +990,7 @@ namespace JPB.DataAccess.Manager
 					Monitor.Enter(_lockRoot);
 				}
 
-				return Database.Run(
-					s =>
-					{
-						var records = new List<List<EagarDataRecord>>();
-						using (query)
-						{
-							query.Connection = query.Connection ?? s.GetConnection();
-							query.Transaction = query.Transaction ?? s.ConnectionController.Transaction;
-							using (var dr = query.ExecuteReader())
-							{
-								try
-								{
-									do
-									{
-										var resultSet = new List<EagarDataRecord>();
-										while (dr.Read())
-										{
-											resultSet.Add(EagarDataRecord.WithExcludedFields(dr));
-										}
-
-										records.Add(resultSet);
-									} while (dr.NextResult());
-								}
-								catch (Exception ex)
-								{
-									RaiseFailedQuery(this, query, ex);
-									throw;
-								}
-							}
-						}
-
-						return records;
-					});
+				return CommandProcessor.ExecuteMARSCommand(this, query, out _);
 			}
 			finally
 			{

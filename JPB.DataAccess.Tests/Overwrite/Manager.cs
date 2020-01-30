@@ -31,6 +31,9 @@ namespace JPB.DataAccess.Tests.Overwrite
 		{
 			_errorData = new StringBuilder();
 			_managers = new ConcurrentDictionary<DbAccessType, Func<IManagerImplementation>>();
+			_managers.Add(DbAccessType.Remoting | DbAccessType.MsSql, () => new RemotingManager(new MsSqlManager()));
+			_managers.Add(DbAccessType.Remoting | DbAccessType.SqLite, () => new RemotingManager(new SqLiteManager()));
+			_managers.Add(DbAccessType.Remoting | DbAccessType.MySql, () => new RemotingManager(new MySqlManager()));
 			_managers.Add(DbAccessType.MsSql, () => new MsSqlManager());
 			_managers.Add(DbAccessType.SqLite, () => new SqLiteManager());
 			_managers.Add(DbAccessType.MySql, () => new MySqlManager());

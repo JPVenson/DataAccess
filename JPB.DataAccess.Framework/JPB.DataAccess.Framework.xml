@@ -808,7 +808,7 @@
         </member>
         <member name="T:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql">
             <summary>
-                Wrapps MsSQL spezifc data
+                Wraps MsSQL data Access
             </summary>
             <seealso cref="T:JPB.DataAccess.Contacts.IDatabaseStrategy" />
         </member>
@@ -901,7 +901,7 @@
             <param name="value">The value.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql.GetlastInsertedID_Cmd(System.Data.IDbConnection)">
+        <member name="M:JPB.DataAccess.AdoWrapper.MsSqlProvider.MsSql.GetLastInsertedID_Cmd(System.Data.IDbConnection)">
             <summary>
                 Getlasts a inserted identifier command.
             </summary>
@@ -1978,6 +1978,11 @@
                 rollback the current Transaction.
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Contacts.IDatabase.TransactionCommit">
+            <summary>
+                Commits the current Transaction.
+            </summary>
+        </member>
         <member name="M:JPB.DataAccess.Contacts.IDatabase.CloseConnection(System.Boolean)">
             <summary>
                 Required
@@ -2168,7 +2173,7 @@
             <param name="value">The value.</param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.GetlastInsertedID_Cmd(System.Data.IDbConnection)">
+        <member name="M:JPB.DataAccess.Contacts.IDatabaseStrategy.GetLastInsertedID_Cmd(System.Data.IDbConnection)">
             <summary>
                 Getlasts a inserted identifier command.
             </summary>
@@ -3258,12 +3263,6 @@
         <member name="M:JPB.DataAccess.DbAccessLayerHelper.CreateCommand(JPB.DataAccess.Contacts.IDatabase,System.String)">
             <summary>
                 Wraps a Parameterless string into a Command for the given DB
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:JPB.DataAccess.DbAccessLayerHelper.ExecuteGenericCommand(System.Data.IDbCommand,JPB.DataAccess.Contacts.IDatabase)">
-            <summary>
-                Execute a QueryCommand on a given Database
             </summary>
             <returns></returns>
         </member>
@@ -7357,6 +7356,11 @@
                 If set the System will never execute a Async method
             </summary>
         </member>
+        <member name="P:JPB.DataAccess.Manager.DbAccessLayer.CommandProcessor">
+            <summary>
+            	Executes commands
+            </summary>
+        </member>
         <member name="M:JPB.DataAccess.Manager.DbAccessLayer.SetPropertysViaReflection(JPB.DataAccess.DbInfoConfig.DbInfo.DbClassInfoCache,JPB.DataAccess.AdoWrapper.EagarDataRecord,System.Nullable{JPB.DataAccess.Manager.DbAccessType})">
             <summary>
                 Creates a new Instance based on possible Ctor's and the given
@@ -7957,15 +7961,15 @@
                 Defines a Common set of DBTypes
             </summary>
         </member>
+        <member name="F:JPB.DataAccess.Manager.DbAccessType.Unknown">
+            <summary>
+                default and undefined behavior
+            </summary>
+        </member>
         <member name="F:JPB.DataAccess.Manager.DbAccessType.Experimental">
             <summary>
                 For Developing
                 Not intended for your use!
-            </summary>
-        </member>
-        <member name="F:JPB.DataAccess.Manager.DbAccessType.Unknown">
-            <summary>
-                default and undefined behavior
             </summary>
         </member>
         <member name="F:JPB.DataAccess.Manager.DbAccessType.MsSql">
@@ -7996,6 +8000,34 @@
                 Defines the MsSQL Type as a Target database
                 Not Tested
             </summary>
+        </member>
+        <member name="F:JPB.DataAccess.Manager.DbAccessType.Remoting">
+            <summary>
+            	Defines the Remoting Target. Should be used combined with the target database on the server.
+            </summary>
+        </member>
+        <member name="T:JPB.DataAccess.Manager.ICommandProcessor">
+            <summary>
+            	Allows for Modifications of Commands
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Manager.ICommandProcessor.ExecuteMARSCommand(JPB.DataAccess.Manager.DbAccessLayer,System.Data.IDbCommand,System.Int32@)">
+            <summary>
+            	Should execute the operation and returns one or multiple resultsets
+            </summary>
+            <param name="db"></param>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Manager.ICommandProcessor.EnumerateAsync(JPB.DataAccess.Manager.DbAccessLayer,System.Data.IDbCommand,System.Action{System.Data.IDataReader},System.Data.CommandBehavior)">
+             <summary>
+            		Should execute the operation within a task and call onRecord each time a new Record is produced
+             </summary>
+             <param name="db"></param>
+             <param name="command"></param>
+             <param name="onRecord"></param>
+             <param name="executionHint"></param>
+             <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Manager.PreDefinedProviderCollection">
             <summary>
@@ -10649,6 +10681,11 @@
             
             </summary>
             <param name="join"></param>
+        </member>
+        <member name="P:JPB.DataAccess.Query.QueryItems.JoinParseInfo.IsResultJoin">
+            <summary>
+            	If set the Join will be returned and will be transformed into the result objects
+            </summary>
         </member>
     </members>
 </doc>

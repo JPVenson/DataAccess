@@ -63,7 +63,7 @@ namespace JPB.DataAccess.Contacts
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <returns></returns>
-		IDbCommand GetlastInsertedID_Cmd(IDbConnection conn);
+		IDbCommand GetLastInsertedID_Cmd(IDbConnection conn);
 
 		/// <summary>
 		///     Creates a data pager.

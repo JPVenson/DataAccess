@@ -222,15 +222,16 @@ namespace JPB.DataAccess.Manager
 			{
 				var mergeCommands = CreateInsertWithSelectCommand(type, entry);
 				RaiseInsert(entry, mergeCommands);
+				if (ThreadSave)
+				{
+					Monitor.Enter(_lockRoot);
+				}
+
 				object result;
 				try
 				{
-					if (ThreadSave)
-					{
-						Monitor.Enter(_lockRoot);
-					}
 
-					result = s.GetSkalar(mergeCommands);
+					result = CommandProcessor.GetSkalar(this, mergeCommands, null);
 				}
 				finally
 				{

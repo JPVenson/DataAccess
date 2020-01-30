@@ -362,8 +362,7 @@ namespace JPB.DataAccess.Manager
 					if (factoryAttribute == typeof(SelectFactoryMethodAttribute) && type.SelectFactory != null
 					                                                             && (!IsMultiProviderEnvironment ||
 					                                                                 type.SelectFactory.Attribute
-						                                                                 .TargetDatabase ==
-					                                                                 Database.TargetDatabase))
+						                                                                 .TargetDatabase.HasFlag(Database.TargetDatabase)))
 					{
 						return DbAccessLayerHelper.CreateCommand(Database, type.SelectFactory.Attribute.Query);
 					}
@@ -373,8 +372,7 @@ namespace JPB.DataAccess.Manager
 					type.Mehtods
 						.Where(s => s.Attributes.Any(e => e.Attribute is TE && (!IsMultiProviderEnvironment
 						                                                        ||
-						                                                        ((TE) e.Attribute).TargetDatabase ==
-						                                                        Database.TargetDatabase)))
+						                                                        ((TE) e.Attribute).TargetDatabase.HasFlag(Database.TargetDatabase))))
 						.ToArray();
 
 				if (methods.Any())

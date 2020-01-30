@@ -97,7 +97,7 @@ namespace JPB.DataAccess.Oracle
             return "";
         }
 
-        public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
+        public IDbCommand GetLastInsertedID_Cmd(IDbConnection conn)
         {
             throw new NotImplementedException("This Functionalty is not supported by the Oracle database.");
         }

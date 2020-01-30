@@ -15,7 +15,7 @@ using JPB.DataAccess.Manager;
 namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 {
 	/// <summary>
-	///     Wrapps MsSQL spezifc data
+	///     Wraps MsSQL data Access
 	/// </summary>
 	/// <seealso cref="IDatabaseStrategy" />
 	public class MsSql : IDatabaseStrategy
@@ -174,7 +174,7 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <returns></returns>
-		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
+		public IDbCommand GetLastInsertedID_Cmd(IDbConnection conn)
 		{
 			//return this.CreateCommand("SELECT SCOPE_IDENTITY() as Value", conn);
 			return CreateCommand("SELECT SCOPE_IDENTITY() as Value", conn);
@@ -239,11 +239,6 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		/// <returns></returns>
 		public static string CommandAsMsSql(IDbCommand sc)
 		{
-			if (!(sc is SqlCommand))
-			{
-				return sc.CommandText;
-			}
-
 			var sql = new StringBuilder();
 			var firstParam = true;
 

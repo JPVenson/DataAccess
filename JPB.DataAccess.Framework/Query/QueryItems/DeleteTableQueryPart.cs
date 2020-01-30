@@ -27,21 +27,15 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
-			switch (container.AccessLayer.DbAccessType)
+			if (container.AccessLayer.DbAccessType.HasFlag(DbAccessType.SqLite))
 			{
-				case DbAccessType.Experimental:
-				case DbAccessType.Unknown:
-				case DbAccessType.MsSql:
-				case DbAccessType.MySql:
-				case DbAccessType.OleDb:
-				case DbAccessType.Obdc:
-					return new QueryFactoryResult($"DELETE {Alias.GetAlias().EnsureAlias()} " +
-					                              $"FROM {_target.GetAlias().EnsureAlias()} " +
-					                              $"AS {Alias.GetAlias().EnsureAlias()}");
-				case DbAccessType.SqLite:
-					return new QueryFactoryResult($"DELETE FROM {_target.GetAlias().EnsureAlias()} ");
-				default:
-					throw new ArgumentOutOfRangeException();
+				return new QueryFactoryResult($"DELETE FROM {_target.GetAlias().EnsureAlias()} ");
+			}
+			else
+			{
+				return new QueryFactoryResult($"DELETE {Alias.GetAlias().EnsureAlias()} " +
+				                              $"FROM {_target.GetAlias().EnsureAlias()} " +
+				                              $"AS {Alias.GetAlias().EnsureAlias()}");
 			}
 		}
 

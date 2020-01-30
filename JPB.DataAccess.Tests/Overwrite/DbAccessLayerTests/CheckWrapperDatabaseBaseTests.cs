@@ -176,7 +176,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void TransactionTestRollback()
 		{
-			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -219,7 +219,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void TransactionTestExceptional()
 		{
-			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -239,7 +239,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public async Task TransactionAsyncTest()
 		{
-			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -261,7 +261,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void TransactionAsyncTestExceptional()
 		{
-			DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
+			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
 			DataMigrationHelper.AddUsers(250, DbAccess);
 			var count =
@@ -334,7 +334,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			Assert.That(rootAccess.Database, Is.Not.EqualTo(nestedAccess.Database));
 			Assert.That(rootAccess.Database.ConnectionController, Is.Not.EqualTo(nestedAccess.Database.ConnectionController));
 
-			if (Type == DbAccessType.MsSql)
+			if (Type.HasFlag(DbAccessType.MsSql))
 			{
 				DbAccess.ExecuteGenericCommand("ALTER DATABASE " + DbAccess.Database.DatabaseName +
 										   " SET ALLOW_SNAPSHOT_ISOLATION ON");

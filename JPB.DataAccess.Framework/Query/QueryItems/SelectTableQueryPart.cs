@@ -95,7 +95,7 @@ namespace JPB.DataAccess.Query.QueryItems
 				modifier += "DISTINCT ";
 			}
 
-			if (Limit.HasValue && container.AccessLayer.DbAccessType == DbAccessType.MsSql)
+			if (Limit.HasValue && container.AccessLayer.DbAccessType.HasFlag(DbAccessType.MsSql))
 			{
 				modifier += $"TOP {Limit.Value} ";
 			}

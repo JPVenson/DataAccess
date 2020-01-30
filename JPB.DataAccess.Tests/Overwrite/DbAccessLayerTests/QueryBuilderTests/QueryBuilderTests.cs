@@ -743,7 +743,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 			foreach (var id in addBooksWithImage)
 			{
 				var countOfImages = -1;
-				if (DbAccess.DbAccessType == DbAccessType.MsSql)
+				if (DbAccess.DbAccessType.HasFlag( DbAccessType.MsSql))
 				{
 					countOfImages =
 						DbAccess.RunSelect<int>(
@@ -751,7 +751,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 								$"SELECT COUNT(1) FROM {ImageMeta.TableName} WHERE {ImageMeta.TableName}.{ImageMeta.ForgeinKeyName} = {id}"))[0];
 				}
 
-				if (DbAccess.DbAccessType == DbAccessType.SqLite)
+				if (DbAccess.DbAccessType.HasFlag(DbAccessType.SqLite))
 				{
 					countOfImages =
 						(int)
@@ -775,13 +775,14 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		private int CountUsersSqlStatement(int? imageId = null)
 		{
 			var query = DbAccess.Database.CreateCommand($"SELECT COUNT(1) FROM {UsersMeta.TableName}");
-			switch (DbAccess.DbAccessType)
+			if (DbAccess.DbAccessType.HasFlag(DbAccessType.MsSql))
 			{
-				case DbAccessType.MsSql:
-					return DbAccess.RunSelect<int>(query)[0];
-				case DbAccessType.SqLite:
-				case DbAccessType.MySql:
-					return (int)DbAccess.RunSelect<long>(query)[0];
+				return DbAccess.RunSelect<int>(query)[0];
+			}
+			else if (DbAccess.DbAccessType.HasFlag(DbAccessType.SqLite )|| 
+			         DbAccess.DbAccessType.HasFlag(DbAccessType.MySql))
+			{
+				return (int) DbAccess.RunSelect<long>(query)[0];
 			}
 
 			return -1;

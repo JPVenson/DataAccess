@@ -276,21 +276,26 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		public IsolationLevel GetDefaultTransactionLevel()
 		{
-			switch (TargetDatabase)
+			var targetFlag = TargetDatabase;
+			if (targetFlag.HasFlag(DbAccessType.MsSql) || targetFlag.HasFlag(DbAccessType.MySql))
 			{
-				case DbAccessType.Experimental:
-				case DbAccessType.Unknown:
-					return IsolationLevel.Unspecified;
-				case DbAccessType.MsSql:
-				case DbAccessType.MySql:
-					return IsolationLevel.ReadUncommitted;
-				case DbAccessType.OleDb:
-				case DbAccessType.Obdc:
-					return IsolationLevel.ReadCommitted;
-				case DbAccessType.SqLite:
-					return IsolationLevel.Serializable;
-				default:
-					throw new ArgumentOutOfRangeException();
+				return IsolationLevel.ReadUncommitted;
+			}
+			else if (targetFlag.HasFlag(DbAccessType.OleDb) || targetFlag.HasFlag(DbAccessType.Obdc))
+			{
+				return IsolationLevel.ReadCommitted;
+			}
+			else if (targetFlag.HasFlag(DbAccessType.SqLite))
+			{
+				return IsolationLevel.Serializable;
+			}
+			else if (targetFlag == DbAccessType.Experimental || targetFlag == DbAccessType.Unknown)
+			{
+				return IsolationLevel.Unspecified;
+			}
+			else
+			{
+				throw new ArgumentOutOfRangeException();
 			}
 		}
 
@@ -513,7 +518,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <exception cref="Exception">DB2.ExecuteNonQuery: void connection</exception>
 		public IDbCommand GetLastInsertedIdCommand()
 		{
-			return Strategy.GetlastInsertedID_Cmd(ConnectionController.Connection);
+			return Strategy.GetLastInsertedID_Cmd(ConnectionController.Connection);
 		}
 
 		/// <summary>

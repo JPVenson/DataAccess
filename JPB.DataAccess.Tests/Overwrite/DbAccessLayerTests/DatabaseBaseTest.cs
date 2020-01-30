@@ -27,14 +27,22 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 			_then();
 		}
 	}
-
+	
 	[TestFixture(DbAccessType.MsSql, true, false)]
 	[TestFixture(DbAccessType.MsSql, false, false)]
 	[TestFixture(DbAccessType.MsSql, false, true)]
+
+	[TestFixture(DbAccessType.MsSql | DbAccessType.Remoting, true, false)]
+	[TestFixture(DbAccessType.MsSql | DbAccessType.Remoting, false, false)]
+	[TestFixture(DbAccessType.MsSql | DbAccessType.Remoting, false, true)]
 	
 	[TestFixture(DbAccessType.SqLite, true, false)]
 	[TestFixture(DbAccessType.SqLite, false, false)]
 	[TestFixture(DbAccessType.SqLite, false, true)]
+
+	[TestFixture(DbAccessType.SqLite | DbAccessType.Remoting, true, false)]
+	[TestFixture(DbAccessType.SqLite | DbAccessType.Remoting, false, false)]
+	[TestFixture(DbAccessType.SqLite | DbAccessType.Remoting, false, true)]
 	
 	//[TestFixture(DbAccessType.MySql, true, false)]
 	//[TestFixture(DbAccessType.MySql, false, false)]

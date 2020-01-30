@@ -95,7 +95,7 @@ namespace JPB.DataAccess.MySql
 			return new MySqlDataAdapter(cmd as MySqlCommand);
 		}
 
-		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
+		public IDbCommand GetLastInsertedID_Cmd(IDbConnection conn)
 		{
 			return CreateCommand("SELECT LAST_INSERT_ID();", conn);
 		}

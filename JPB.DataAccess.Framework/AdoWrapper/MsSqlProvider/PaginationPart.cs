@@ -16,17 +16,18 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 		public IQueryFactoryResult Process(IQueryContainer container)
 		{
 			string query;
-			switch (container.AccessLayer.DbAccessType)
+			if (container.AccessLayer.DbAccessType.HasFlag(DbAccessType.MsSql))
 			{
-				case DbAccessType.MsSql:
-					query = "OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY";
-					break;
-				case DbAccessType.MySql:
-				case DbAccessType.SqLite:
-					query = "LIMIT @PageSize OFFSET @PagedRows";
-					break;
-				default:
-					throw new NotSupportedException("There are no in build pageing support for these type of Database");
+				query = "OFFSET @PagedRows ROWS FETCH NEXT @PageSize ROWS ONLY";
+			}
+			else if (container.AccessLayer.DbAccessType.HasFlag(DbAccessType.MySql) ||
+			         container.AccessLayer.DbAccessType.HasFlag(DbAccessType.SqLite))
+			{
+				query = "LIMIT @PageSize OFFSET @PagedRows";
+			}
+			else
+			{
+				throw new NotSupportedException("There are no in build pageing support for these type of Database");
 			}
 
 			return new QueryFactoryResult(query,

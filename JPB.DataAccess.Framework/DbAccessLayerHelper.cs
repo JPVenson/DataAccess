@@ -588,15 +588,6 @@ namespace JPB.DataAccess
 		}
 
 		/// <summary>
-		///     Execute a QueryCommand on a given Database
-		/// </summary>
-		/// <returns></returns>
-		public static int ExecuteGenericCommand(this IDbCommand command, IDatabase db)
-		{
-			return db.Run(s => s.ExecuteNonQuery(command));
-		}
-
-		/// <summary>
 		///     Not Connection save
 		///     Must be executed inside a Valid Connection
 		///     Takes <paramref name="base" /> as base of Connection properties

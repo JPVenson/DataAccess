@@ -57,7 +57,7 @@ namespace JPB.DataAccess.PostgreSQL
 			return new NpgsqlParameter(strName, value);
 		}
 
-		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
+		public IDbCommand GetLastInsertedID_Cmd(IDbConnection conn)
 		{
 			return CreateCommand("SELECT LASTVAL();", conn);
 		}

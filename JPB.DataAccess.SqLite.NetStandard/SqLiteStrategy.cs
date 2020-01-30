@@ -145,7 +145,7 @@ namespace JPB.DataAccess.SqLite
 		/// </summary>
 		/// <param name="conn">The connection.</param>
 		/// <returns></returns>
-		public IDbCommand GetlastInsertedID_Cmd(IDbConnection conn)
+		public IDbCommand GetLastInsertedID_Cmd(IDbConnection conn)
 		{
 			//return this.CreateCommand("SELECT SCOPE_IDENTITY() as Value", conn);
 			return CreateCommand("SELECT last_insert_rowid() as Value", conn);

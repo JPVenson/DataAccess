@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Query.Operators
 		public SelectQuery(IQueryBuilder database) : base(database)
 		{
 		}
-
+		
 		/// <summary>
 		///     Selects items Distinct
 		/// </summary>

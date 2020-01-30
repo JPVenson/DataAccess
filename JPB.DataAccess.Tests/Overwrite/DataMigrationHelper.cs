@@ -20,7 +20,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 		{
 			mgr.Config.Dispose();
 			DbConfig.Clear();
-			if (mgr.DbAccessType == DbAccessType.MsSql)
+			if (mgr.DbAccessType.HasFlag(DbAccessType.MsSql))
 			{
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", ImageMeta.TableName), null);
@@ -29,8 +29,7 @@ namespace JPB.DataAccess.Tests.Overwrite
 				//mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", UsersMeta.TableName), null);
 				//mgr.ExecuteGenericCommand(string.Format("TRUNCATE TABLE {0} ", BookMeta.TableName), null);
 			}
-
-			if (mgr.DbAccessType == DbAccessType.SqLite)
+			else if (mgr.DbAccessType.HasFlag(DbAccessType.SqLite))
 			{
 				mgr.ExecuteGenericCommand(string.Format("DELETE FROM {0} ", UsersMeta.TableName), null);
 				mgr.ExecuteGenericCommand("VACUUM", null);

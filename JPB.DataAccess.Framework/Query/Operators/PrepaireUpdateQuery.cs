@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Query.Operators
 		public PrepaireUpdateQuery(IQueryBuilder database) : base(database)
 		{
 		}
-		
+
 		/// <summary>
 		///     Adds a Update - Statement
 		///     Uses reflection or a Factory mehtod to create an update statement that will check for the id of the obj
@@ -39,16 +39,15 @@ namespace JPB.DataAccess.Query.Operators
 				QueryIdType = QueryIdentifier.QueryIdTypes.Table
 			};
 
-			switch (ContainerObject.AccessLayer.DbAccessType)
+			if (ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.Experimental) ||
+				ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.Unknown) ||
+				ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.OleDb) ||
+				ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.Obdc) ||
+				ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.SqLite))
 			{
-				case DbAccessType.Experimental:
-				case DbAccessType.Unknown:
-				case DbAccessType.OleDb:
-				case DbAccessType.Obdc:
-				case DbAccessType.SqLite:
-					targetAlias.Value = queryIdentifier.Value;
-				break;
+				targetAlias.Value = queryIdentifier.Value;
 			}
+
 			var updatePart = new UpdateTableWithQueryPart(queryIdentifier,
 				UpdateTableWithQueryPart.ColumsOfType(dbClassInfoCache, targetAlias, queryIdentifier, ContainerObject),
 				targetAlias);
@@ -106,16 +105,15 @@ namespace JPB.DataAccess.Query.Operators
 				QueryIdType = QueryIdentifier.QueryIdTypes.Table
 			};
 
-			switch (ContainerObject.AccessLayer.DbAccessType)
+			if (ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.Experimental) ||
+			    ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.Unknown) ||
+			    ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.OleDb) ||
+			    ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.Obdc) ||
+			    ContainerObject.AccessLayer.DbAccessType.HasFlag(DbAccessType.SqLite))
 			{
-				case DbAccessType.Experimental:
-				case DbAccessType.Unknown:
-				case DbAccessType.OleDb:
-				case DbAccessType.Obdc:
-				case DbAccessType.SqLite:
-					targetAlias.Value = queryIdentifier.Value;
-					break;
+				targetAlias.Value = queryIdentifier.Value;
 			}
+
 			return new UpdateColumnSetters<TPoco>(
 				Add(new UpdateTableWithQueryPart(
 					queryIdentifier,
