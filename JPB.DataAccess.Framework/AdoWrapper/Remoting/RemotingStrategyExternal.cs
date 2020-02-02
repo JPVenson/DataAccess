@@ -116,8 +116,27 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		/// <param name="connectionId"></param>
 		public abstract void CloseConnection(string connectionId);
 
+		/// <summary>
+		///		Should register a new connection
+		/// </summary>
+		/// <param name="connectionId"></param>
+		/// <returns></returns>
 		public abstract string RegisterTransaction(string connectionId);
+
+		/// <summary>
+		///		Should rollback a transaction
+		/// </summary>
+		/// <param name="connectionId"></param>
+		/// <param name="transactionId"></param>
+		/// <returns></returns>
 		public abstract bool RollbackTransaction(string connectionId, string transactionId);
+
+		/// <summary>
+		///		Should commit a transaction
+		/// </summary>
+		/// <param name="connectionId"></param>
+		/// <param name="transactionId"></param>
+		/// <returns></returns>
 		public abstract bool CommitTransaction(string connectionId, string transactionId);
 
 		public abstract int ExecuteQuery(string commandGraph, string connectionId, [CanBeNull] string transactionId);

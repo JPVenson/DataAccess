@@ -60,7 +60,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		///		Creates a new Connection
 		/// </summary>
 		/// <returns></returns>
-		public string RegisterConnection()
+		public virtual string RegisterConnection()
 		{
 			var connectionId = GenerateUniqueId();
 			var connectionTuple = new ConnectionTuple()
@@ -78,7 +78,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		///		Closes a connection
 		/// </summary>
 		/// <param name="connectionId"></param>
-		public void CloseConnection(string connectionId)
+		public virtual void CloseConnection(string connectionId)
 		{
 			if (ConnectionTuples.TryGetValue(connectionId, out var connection))
 			{
@@ -98,7 +98,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		/// </summary>
 		/// <param name="connectionId"></param>
 		/// <returns></returns>
-		public string RegisterTransaction(string connectionId)
+		public virtual string RegisterTransaction(string connectionId)
 		{
 			if (!ConnectionTuples.TryGetValue(connectionId, out var connection))
 			{
@@ -123,7 +123,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		/// <param name="connectionId"></param>
 		/// <param name="transactionId"></param>
 		/// <returns></returns>
-		public bool RollbackTransaction(string connectionId, string transactionId)
+		public virtual bool RollbackTransaction(string connectionId, string transactionId)
 		{
 			if (!ConnectionTuples.TryGetValue(connectionId, out var connection))
 			{
@@ -151,7 +151,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		/// <param name="connectionId"></param>
 		/// <param name="transactionId"></param>
 		/// <returns></returns>
-		public bool CommitTransaction(string connectionId, string transactionId)
+		public virtual bool CommitTransaction(string connectionId, string transactionId)
 		{
 			if (!ConnectionTuples.TryGetValue(connectionId, out var connection))
 			{
@@ -217,7 +217,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		/// <param name="connectionId"></param>
 		/// <param name="transactionId"></param>
 		/// <returns></returns>
-		public int ExecuteQuery(string commandGraph, string connectionId, string transactionId)
+		public virtual int ExecuteQuery(string commandGraph, string connectionId, string transactionId)
 		{
 			if (!ConnectionTuples.TryGetValue(connectionId, out var connection))
 			{
@@ -244,7 +244,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		/// <param name="connectionId"></param>
 		/// <param name="transactionId"></param>
 		/// <returns></returns>
-		public object ExecuteScalar(string commandGraph, string connectionId, string transactionId)
+		public virtual object ExecuteScalar(string commandGraph, string connectionId, string transactionId)
 		{
 			if (!ConnectionTuples.TryGetValue(connectionId, out var connection))
 			{
@@ -269,7 +269,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		/// <param name="connectionId"></param>
 		/// <param name="transactionId"></param>
 		/// <returns></returns>
-		public IEnumerable<IEnumerable<IDataRecord>> EnumerateCommand(string commandGraph, string connectionId, string transactionId, out int recordsAffected)
+		public virtual IEnumerable<IEnumerable<IDataRecord>> EnumerateCommand(string commandGraph, string connectionId, string transactionId, out int recordsAffected)
 		{
 			if (!ConnectionTuples.TryGetValue(connectionId, out var connection))
 			{
@@ -291,7 +291,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		///		Creates a new ID
 		/// </summary>
 		/// <returns></returns>
-		public string GenerateUniqueId()
+		public virtual string GenerateUniqueId()
 		{
 			lock (ConnectionTuples)
 			{
@@ -303,7 +303,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 		///		Returns true if there are any open connections
 		/// </summary>
 		/// <returns></returns>
-		public bool HasOpenConnection()
+		public virtual bool HasOpenConnection()
 		{
 			return ConnectionTuples.Any();
 		}
