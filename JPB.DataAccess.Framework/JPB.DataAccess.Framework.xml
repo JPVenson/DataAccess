@@ -1408,6 +1408,471 @@
             <param name="name">The name.</param>
             <returns></returns>
         </member>
+        <member name="T:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction">
+            <summary>
+            	Defines the wrapper for an external managed Transaction
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.Strategy">
+            <summary>
+            	The Associated Strategy
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.#ctor(JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection,System.Data.IsolationLevel,JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy)">
+            <summary>
+            
+            </summary>
+            <param name="connection"></param>
+            <param name="isolationLevel"></param>
+            <param name="strategy"></param>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.Status">
+            <summary>
+            	Gets in what status this transaction is currently in
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.Commit">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.Rollback">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.Connection">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemoteDbTransaction.IsolationLevel">
+            <inheritdoc />
+        </member>
+        <member name="T:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer">
+            <summary>
+            	Can be used as an Endpoint on another system for the RemotingStrategyExternal
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.#ctor(System.Func{JPB.DataAccess.Manager.DbAccessLayer})">
+            <summary>
+            	Should create a new DbAccessLayer for each connection that is requested
+            </summary>
+            <param name="accessLayerFactory"></param>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.CancelAllOpenConnections(System.TimeSpan)">
+            <summary>
+            	Cancels all connections that did not receive instructions for the set amount of time
+            </summary>
+            <param name="age"></param>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.RegisterConnection">
+            <summary>
+            	Creates a new Connection
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.CloseConnection(System.String)">
+            <summary>
+            	Closes a connection
+            </summary>
+            <param name="connectionId"></param>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.RegisterTransaction(System.String)">
+            <summary>
+            	Registers a new Transaction for a Connection or returns the current transaction
+            </summary>
+            <param name="connectionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.RollbackTransaction(System.String,System.String)">
+            <summary>
+            	Rollbacks a Transaction
+            </summary>
+            <param name="connectionId"></param>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.CommitTransaction(System.String,System.String)">
+            <summary>
+            	Commits a Transaction
+            </summary>
+            <param name="connectionId"></param>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.Deserialize(System.String)">
+            <summary>
+            	Deserialises the Remoting Data
+            </summary>
+            <param name="commandGraph"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.ExecuteQuery(System.String,System.String,System.String)">
+            <summary>
+            	Execute the Command on the given connection
+            </summary>
+            <param name="commandGraph"></param>
+            <param name="connectionId"></param>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.ExecuteScalar(System.String,System.String,System.String)">
+            <summary>
+            	Execute the Command on the given connection
+            </summary>
+            <param name="commandGraph"></param>
+            <param name="connectionId"></param>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.EnumerateCommand(System.String,System.String,System.String,System.Int32@)">
+            <summary>
+            	Execute the Command on the given connection
+            </summary>
+            <param name="commandGraph"></param>
+            <param name="connectionId"></param>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.GenerateUniqueId">
+            <summary>
+            	Creates a new ID
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingConsumerServer.HasOpenConnection">
+            <summary>
+            	Returns true if there are any open connections
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand">
+            <summary>
+            	Wraps a command that can be executed external
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.Strategy">
+            <summary>
+            	The Associated Strategy
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.#ctor(JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy)">
+            <summary>
+            
+            </summary>
+            <param name="strategy"></param>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.Cancel">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.CreateParameter">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.ExecuteNonQuery">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.ExecuteReader">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.ExecuteReader(System.Data.CommandBehavior)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.ExecuteScalar">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.Prepare">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.CommandText">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.CommandTimeout">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.CommandType">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.Connection">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.Parameters">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.Transaction">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand.UpdatedRowSource">
+            <inheritdoc />
+        </member>
+        <member name="T:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection">
+            <summary>
+            	Wraps an External Connection
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.Strategy">
+            <summary>
+            	The Associated Strategy
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.#ctor(JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy)">
+            <summary>
+            
+            </summary>
+            <param name="strategy"></param>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.BeginTransaction">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.BeginTransaction(System.Data.IsolationLevel)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.ChangeDatabase(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.Close">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.CreateCommand">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.Open">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.ConnectionString">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.ConnectionTimeout">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.Database">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbConnection.State">
+            <inheritdoc />
+        </member>
+        <member name="T:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.Strategy">
+            <summary>
+            	The Associated Strategy
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.#ctor(JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy)">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.DbType">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.Direction">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.IsNullable">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.ParameterName">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.SourceColumn">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.SourceVersion">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.Value">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.Precision">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.Scale">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingDbParameter.Size">
+            <inheritdoc />
+        </member>
+        <member name="T:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy">
+            <summary>
+            	Allows the external execution of DbCommands
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.Config">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.#ctor(JPB.DataAccess.Manager.DbAccessType,JPB.DataAccess.DbInfoConfig.DbConfig)">
+            <summary>
+            
+            </summary>
+            <param name="emulateDbType"></param>
+            <param name="config"></param>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.Clone">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.ExecuteQuery(JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand)">
+            <summary>
+            	Should execute the Query and return an value int
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.ExecuteScalar(JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand)">
+            <summary>
+            	Should execute the query and return a single result
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.EnumerateCommand(JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand,System.Data.CommandBehavior,System.Int32@)">
+            <summary>
+            	You can overwrite this method to return multiple sets of IDataRecords.
+            	If you only got objects you can use the ObjectDataRecord to wrap them into IDataRecords
+            </summary>
+            <param name="command"></param>
+            <param name="behavior"></param>
+            <param name="recordsAffected"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.ExecuteReader(JPB.DataAccess.AdoWrapper.Remoting.RemotingDbCommand,System.Data.CommandBehavior)">
+            <summary>
+            	Should execute the query an return a IDataReader that contains the result.
+            	You can overwrite the EnumerateDataRecord method to use an inbuild IDataReader
+            </summary>
+            <param name="command"></param>
+            <param name="behavior"></param>
+            <returns></returns>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.Events">
+            <summary>
+            	Defines all events you can attach to
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.SourceDatabase">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.ConnectionString">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.DatabaseFile">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.ServerName">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.CreateConnection">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.CreateCommand(System.String,System.Data.IDbConnection,System.Data.IDataParameter[])">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.CreateParameter(System.String,System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.GetLastInsertedID_Cmd(System.Data.IDbConnection)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.CreatePager``1">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.CreateConverterPager``2">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.FormartCommandToQuery(System.Data.IDbCommand)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.ConvertParameter(System.Data.DbType)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.CloseAllConnections">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.EnableIdentityInsert(System.String,System.Data.IDbConnection)">
+            <inheritdoc />
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategy.DisableIdentityInsert(System.String,System.Data.IDbConnection)">
+            <inheritdoc />
+        </member>
+        <member name="T:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents">
+            <summary>
+            	Contains all events for the External Remote strategy
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.ParameterCreated">
+            <summary>
+            	Will be raised when a new Parameter is Created
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.CommandCancel">
+            <summary>
+            	Will be raised when a command is cancled
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.CommandPrepare">
+            <summary>
+            	Will be raised when a command should be prepared
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.TransactionCreated">
+            <summary>
+            	Will be raised when a Transaction is created
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.TransactionCommit">
+            <summary>
+            	Will be raised when a Transaction should be commited
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.TransactionRollback">
+            <summary>
+            	Will be raised when a Transaction should be rolled back
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.ConnectionCreated">
+            <summary>
+            	Will be raised when a Connection is created
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.ConnectionOpened">
+            <summary>
+            	Will be raised when a Connection should be opened
+            </summary>
+        </member>
+        <member name="E:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyEvents.ConnectionClosed">
+            <summary>
+            	Will be raised when a Connection should be closed
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.#ctor(JPB.DataAccess.Manager.DbAccessType,JPB.DataAccess.DbInfoConfig.DbConfig)">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.ConnectionIds">
+            <summary>
+            	The list of all Connections and its ids
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.TransactionIds">
+            <summary>
+            	The list of all Transactions and its ids
+            </summary>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.RegisterConnection">
+            <summary>
+            	Should call an external provider and provide a new connection id
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.CloseConnection(System.String)">
+            <summary>
+            	Should close the connection
+            </summary>
+            <param name="connectionId"></param>
+        </member>
         <member name="T:JPB.DataAccess.AdoWrapper.ThreadConnection">
             <summary>
             	Contains all Properties to control the ThreadBased connection and Transaction behavior

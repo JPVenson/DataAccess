@@ -148,7 +148,9 @@ namespace JPB.DataAccess.Tests.Overwrite.Framework.MsSql
 
 			public override IEnumerable<IEnumerable<IDataRecord>> ExecuteCommand(string commandGraph, string connectionId, string transactionId, out int recordsAffected)
 			{
-				return RemotingConsumerServer.EnumerateCommand(commandGraph, connectionId, transactionId, out recordsAffected);
+				var enumerateCommand = RemotingConsumerServer.EnumerateCommand(commandGraph, connectionId, transactionId, out recordsAffected);
+				Assert.That(enumerateCommand, Is.XmlSerializable.Or.BinarySerializable);
+				return enumerateCommand;
 			}
 		}
 

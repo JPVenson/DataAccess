@@ -29,29 +29,46 @@ namespace JPB.DataAccess.Helper.LocalDb
 	{
 		public TransactionScope()
 		{
-			Transaction.Current = Transaction.Current  ?? new Transaction();
-			Transaction.Current.Status = TransactionStatus.Aborted;
+			Transaction.Current.Value = Transaction.Current.Value ?? new Transaction();
+			Transaction.Current.Value.DisposeCounter = Transaction.Current.Value.DisposeCounter + 1;
+			if (Transaction.Current.Value.DisposeCounter == 1)
+			{
+				Transaction.Current.Value.Status = TransactionStatus.Aborted;
+			}
 		}
 
 		public void Complete()
 		{
-			Transaction.Current.Status = TransactionStatus.Success;
-
+			Transaction.Current.Value.Status = TransactionStatus.Success;
 		}
 
 		public void Dispose()
 		{
-			Transaction.Current.OnTransactionCompleted(new TransactionEventArgs()
+			if (--Transaction.Current.Value.DisposeCounter == 0)
 			{
-				Transaction = Transaction.Current
-			});
-			Transaction.Current = null;
+				Transaction.Current.Value.OnTransactionCompleted(new TransactionEventArgs()
+				{
+					Transaction = Transaction.Current.Value
+				});
+				Transaction.Current.Value = null;
+			}
+			else if (Transaction.Current.Value.DisposeCounter < 0)
+			{
+				throw new InvalidOperationException("Cannot dispose the Transaction scope more then you nested it");
+			}
 		}
 	}
 
 	public class Transaction
 	{
-		public static Transaction Current { get; internal set; }
+		static Transaction()
+		{
+			Current = new AsyncLocal<Transaction>();
+		}
+
+		internal int DisposeCounter;
+
+		public static AsyncLocal<Transaction>  Current { get; internal set; }
 		public TransactionStatus Status { get; set; }
 
 		public event EventHandler<TransactionEventArgs> TransactionCompleted;
@@ -739,9 +756,9 @@ namespace JPB.DataAccess.Helper.LocalDb
 		private object SetNextId(object item)
 		{
 			var idVal = GetId(item);
-			if (DbReposetoryIdentityInsertScope.Current != null && _currentDbReposetoryIdentityInsertScope == null)
+			if (DbReposetoryIdentityInsertScope.Current.Value != null && _currentDbReposetoryIdentityInsertScope == null)
 			{
-				_currentDbReposetoryIdentityInsertScope = DbReposetoryIdentityInsertScope.Current;
+				_currentDbReposetoryIdentityInsertScope = DbReposetoryIdentityInsertScope.Current.Value;
 				_currentDbReposetoryIdentityInsertScope.EnsureTransaction();
 			}
 
@@ -827,11 +844,11 @@ namespace JPB.DataAccess.Helper.LocalDb
 
 		private bool AttachTransactionIfSet(TEntity changedItem, CollectionStates action)
 		{
-			if (Transaction.Current != null)
+			if (Transaction.Current.Value != null)
 			{
 				if (_currentTransaction == null)
 				{
-					_currentTransaction = Transaction.Current;
+					_currentTransaction = Transaction.Current.Value;
 					_currentTransaction.TransactionCompleted += _currentTransaction_TransactionCompleted;
 				}
 

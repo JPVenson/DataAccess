@@ -10,27 +10,65 @@ using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.AdoWrapper.Remoting
 {
+	/// <summary>
+	///		Allows the external execution of DbCommands
+	/// </summary>
 	public abstract class RemotingStrategy : IDatabaseStrategy
 	{
+		/// <summary>
+		/// 
+		/// </summary>
 		public DbConfig Config { get; }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="emulateDbType"></param>
+		/// <param name="config"></param>
 		public RemotingStrategy(DbAccessType emulateDbType, DbConfig config)
 		{
 			Config = config;
 			SourceDatabase = DbAccessType.Remoting | emulateDbType;
 			Events = new RemotingStrategyEvents();
 		}
-
+		
+		/// <inheritdoc />
 		public abstract object Clone();
 
+		/// <summary>
+		///		Should execute the Query and return an value int
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
 		public abstract int ExecuteQuery(RemotingDbCommand command);
+
+		/// <summary>
+		///		Should execute the query and return a single result
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
 		public abstract object ExecuteScalar(RemotingDbCommand command);
 
+		/// <summary>
+		///		You can overwrite this method to return multiple sets of IDataRecords.
+		///		If you only got objects you can use the ObjectDataRecord to wrap them into IDataRecords
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="behavior"></param>
+		/// <param name="recordsAffected"></param>
+		/// <returns></returns>
 		public virtual IEnumerable<IEnumerable<IDataRecord>> EnumerateCommand(RemotingDbCommand command, CommandBehavior behavior, out int recordsAffected)
 		{
 			throw new NotImplementedException("Please ether overwrite the ExecuteReader function or the EnumerateCommand function.");
 		}
 
+		/// <summary>
+		///		Should execute the query an return a IDataReader that contains the result.
+		///		You can overwrite the EnumerateDataRecord method to use an inbuild IDataReader
+		/// </summary>
+		/// <param name="command"></param>
+		/// <param name="behavior"></param>
+		/// <returns></returns>
 		public virtual IDataReader ExecuteReader(RemotingDbCommand command, CommandBehavior behavior)
 		{
 			return new VirtualDataReader(EnumerateCommand(command, behavior, out var records), Config, records);
@@ -233,18 +271,28 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 			public int RecordsAffected { get; private set; }
 		}
 
+		/// <summary>
+		///		Defines all events you can attach to
+		/// </summary>
 		public RemotingStrategyEvents Events { get; set; }
-
+		
+		/// <inheritdoc />
 		public DbAccessType SourceDatabase { get; }
+		
+		/// <inheritdoc />
 		public string ConnectionString { get; set; }
+		/// <inheritdoc />
 		public string DatabaseFile { get; }
+		/// <inheritdoc />
 		public string ServerName { get; }
-
+		
+		/// <inheritdoc />
 		public IDbConnection CreateConnection()
 		{
 			return new RemotingDbConnection(this);
 		}
-
+		
+		/// <inheritdoc />
 		public IDbCommand CreateCommand(string strSql, IDbConnection conn, params IDataParameter[] fields)
 		{
 			var remotingDbCommand = new RemotingDbCommand(this)
@@ -258,7 +306,8 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 			}
 			return remotingDbCommand;
 		}
-
+		
+		/// <inheritdoc />
 		public IDataParameter CreateParameter(string strName, object value)
 		{
 			return new RemotingDbParameter(this)
@@ -267,7 +316,8 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 				Value = value
 			};
 		}
-
+		
+		/// <inheritdoc />
 		public virtual IDbCommand GetLastInsertedID_Cmd(IDbConnection conn)
 		{
 			if (SourceDatabase.HasFlagFast(DbAccessType.MsSql))
@@ -286,33 +336,40 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 			}
 			throw new NotImplementedException($"The GetLastInsertedId ist not implemented for the mixed type of '{SourceDatabase}' please overwrite this function to provide an query.");
 		}
-
+		
+		/// <inheritdoc />
 		public abstract IDataPager<T> CreatePager<T>();
-
+		
+		/// <inheritdoc />
 		public IWrapperDataPager<T, TE> CreateConverterPager<T, TE>()
 		{
 			throw new NotImplementedException();
 		}
-
+		
+		/// <inheritdoc />
 		public virtual string FormartCommandToQuery(IDbCommand command)
 		{
 			return command.CommandText;
 		}
-
+		
+		/// <inheritdoc />
 		public virtual string ConvertParameter(DbType type)
 		{
 			return type.ToString();
 		}
-
+		
+		/// <inheritdoc />
 		public void CloseAllConnections()
 		{
 		}
-
+		
+		/// <inheritdoc />
 		public virtual IDbCommand EnableIdentityInsert(string classInfoTableName, IDbConnection conn)
 		{
 			throw new NotImplementedException();
 		}
-
+		
+		/// <inheritdoc />
 		public virtual IDbCommand DisableIdentityInsert(string classInfoTableName, IDbConnection conn)
 		{
 			throw new NotImplementedException();

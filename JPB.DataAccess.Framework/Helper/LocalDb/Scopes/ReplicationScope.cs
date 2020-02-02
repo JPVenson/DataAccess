@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 			{
 				throw new InvalidOperationException("Nested Identity Scopes are not supported");
 			}
-			if (Transaction.Current == null)
+			if (Transaction.Current.Value == null)
 			{
 				throw new InvalidOperationException("Has to be executed inside a valid TransactionScope");
 			}

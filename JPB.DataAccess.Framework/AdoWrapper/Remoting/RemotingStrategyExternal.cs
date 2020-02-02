@@ -25,6 +25,7 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 			});
 		}
 
+		/// <inheritdoc />
 		public RemotingStrategyExternal(DbAccessType emulateDbType, DbConfig config) : base(emulateDbType, config)
 		{
 			ConnectionIds = new ConcurrentDictionary<RemotingDbConnection, string>();
@@ -88,8 +89,14 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 			ConnectionIds.TryRemove(connection, out _);
 			CloseConnection(id);
 		}
-
+		/// <summary>
+		///		The list of all Connections and its ids
+		/// </summary>
 		public ConcurrentDictionary<RemotingDbConnection, string> ConnectionIds { get; set; }
+
+		/// <summary>
+		///		The list of all Transactions and its ids
+		/// </summary>
 		public ConcurrentDictionary<RemoteDbTransaction, string> TransactionIds { get; set; }
 
 		private void Events_ConnectionOpened(RemotingDbConnection connection)
@@ -97,7 +104,16 @@ namespace JPB.DataAccess.AdoWrapper.Remoting
 			ConnectionIds.TryAdd(connection, RegisterConnection());
 		}
 
+		/// <summary>
+		///		Should call an external provider and provide a new connection id
+		/// </summary>
+		/// <returns></returns>
 		public abstract string RegisterConnection();
+
+		/// <summary>
+		///		Should close the connection
+		/// </summary>
+		/// <param name="connectionId"></param>
 		public abstract void CloseConnection(string connectionId);
 
 		public abstract string RegisterTransaction(string connectionId);

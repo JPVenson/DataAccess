@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using JPB.DataAccess.Contacts;
 
 #endregion
@@ -30,7 +31,7 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 				throw new InvalidOperationException("Nested Identity Scopes are not supported");
 			}
 
-			IsInValidTransaction = Transaction.Current != null;
+			IsInValidTransaction = Transaction.Current.Value != null;
 
 			if (GetStore() == null)
 			{
@@ -137,8 +138,11 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 	/// </summary>
 	public sealed class DbReposetoryIdentityInsertScope : IdentityInsertScope
 	{
-		[ThreadStatic]
-		internal static DbReposetoryIdentityInsertScope Current;
+		static DbReposetoryIdentityInsertScope()
+		{
+			Current = new AsyncLocal<DbReposetoryIdentityInsertScope>();
+		}
+		internal static AsyncLocal<DbReposetoryIdentityInsertScope> Current;
 
 		/// <summary>
 		///		Creates a New <code>DbReposetoryIdentityInsertScope</code> or obtains the current active Instance
@@ -146,9 +150,9 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 		/// <returns></returns>
 		public static DbReposetoryIdentityInsertScope CreateOrObtain(bool rewriteDefaultValues = false)
 		{
-			if (Current != null)
+			if (Current.Value != null)
 			{
-				return Current;
+				return Current.Value;
 			}
 
 			var newScope = new DbReposetoryIdentityInsertScope(rewriteDefaultValues);
@@ -179,12 +183,12 @@ namespace JPB.DataAccess.Helper.LocalDb.Scopes
 
 		internal override IdentityInsertScope GetStore()
 		{
-			return Current;
+			return Current.Value;
 		}
 
 		internal override void SetStore(IdentityInsertScope item)
 		{
-			Current = (DbReposetoryIdentityInsertScope) item;
+			Current.Value = (DbReposetoryIdentityInsertScope) item;
 		}
 	}
 
