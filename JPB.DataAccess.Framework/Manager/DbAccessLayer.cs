@@ -937,7 +937,7 @@ namespace JPB.DataAccess.Manager
 			return resultList;
 		}
 
-		internal List<EagarDataRecord> EnumerateDataRecordsAsync(IDbCommand query)
+		internal EagarDataRecord[] EnumerateDataRecordsAsync(IDbCommand query)
 		{
 			return EnumerateMarsDataRecords(query).FirstOrDefault();
 		}
@@ -979,7 +979,7 @@ namespace JPB.DataAccess.Manager
 			set { _commandProcessor = value ?? throw new ArgumentNullException("value", "The command processor must never be null"); }
 		}
 
-		internal List<List<EagarDataRecord>> EnumerateMarsDataRecords(
+		internal EagarDataRecord[][] EnumerateMarsDataRecords(
 			IDbCommand query)
 		{
 			Database.PrepaireRemoteExecution(query);

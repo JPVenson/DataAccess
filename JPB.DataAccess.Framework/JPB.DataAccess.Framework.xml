@@ -1873,6 +1873,29 @@
             </summary>
             <param name="connectionId"></param>
         </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.RegisterTransaction(System.String)">
+            <summary>
+            	Should register a new connection
+            </summary>
+            <param name="connectionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.RollbackTransaction(System.String,System.String)">
+            <summary>
+            	Should rollback a transaction
+            </summary>
+            <param name="connectionId"></param>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.AdoWrapper.Remoting.RemotingStrategyExternal.CommitTransaction(System.String,System.String)">
+            <summary>
+            	Should commit a transaction
+            </summary>
+            <param name="connectionId"></param>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
         <member name="T:JPB.DataAccess.AdoWrapper.ThreadConnection">
             <summary>
             	Contains all Properties to control the ThreadBased connection and Transaction behavior

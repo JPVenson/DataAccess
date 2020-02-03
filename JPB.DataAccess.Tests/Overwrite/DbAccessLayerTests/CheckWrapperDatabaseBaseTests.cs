@@ -20,6 +20,29 @@ using Users = JPB.DataAccess.Tests.Base.Users;
 
 namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 {
+	[Explicit]
+	public class PerformanceTests : DatabaseBaseTest
+	{
+		public PerformanceTests(DbAccessType type, bool asyncExecution, bool syncronised) : base(type, asyncExecution, syncronised)
+		{
+		}
+
+		[Test]
+		public void TestSelect()
+		{
+			Measure(() =>
+			{
+				DataMigrationHelper.AddUsersFast(40000, DbAccess);
+			}, "Insert 40k Users");
+			var startup = DbAccess.Select<UsersAutoGenerateConstructor>();
+			Measure(() =>
+			{
+				var generatedUserses = DbAccess.Select<UsersAutoGenerateConstructor>();
+				Assert.That(generatedUserses.Length, Is.EqualTo(40000));
+			}, "Select 40k Users");
+		}
+	}
+
 	[Parallelizable(ParallelScope.Self)]
 	public class CheckWrapperDatabaseBaseTests : DatabaseBaseTest
 	{
@@ -48,7 +71,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void CheckFactory()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 			Assert.That(() => DbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
@@ -68,7 +91,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void CheckFactoryWithArguments()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 			Assert.That(() => DbAccess.Select<Users_StaticQueryFactoryForSelect>(), Is.Not.Empty);
 
 			var testInsertName = Guid.NewGuid().ToString();
@@ -115,7 +138,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void MarsTest()
 		{
-			DataMigrationHelper.AddUsers(100, DbAccess);
+			DataMigrationHelper.AddUsersFast(100, DbAccess);
 
 			var queryA = DbAccess.CreateSelect<Users>();
 			var queryB = DbAccess.CreateSelect<Users>();
@@ -139,7 +162,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void SyncCollectionTest()
 		{
-			DataMigrationHelper.AddUsers(100, DbAccess);
+			DataMigrationHelper.AddUsersFast(100, DbAccess);
 
 			DbCollection<Users_Col> dbCollection = null;
 			Assert.That(() => dbCollection = DbAccess.CreateDbCollection<Users_Col>(), Throws.Nothing);
@@ -178,7 +201,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			DataMigrationHelper.AddUsersFast(250, DbAccess);
 			var count =
 					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
@@ -198,7 +221,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			//DbAccess.Database.AllowNestedTransactions = Type == DbAccessType.SqLite;
 
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			DataMigrationHelper.AddUsersFast(250, DbAccess);
 			var count =
 					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
@@ -221,7 +244,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			DataMigrationHelper.AddUsersFast(250, DbAccess);
 			var count =
 					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
@@ -241,7 +264,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			DataMigrationHelper.AddUsersFast(250, DbAccess);
 			var count =
 					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 
@@ -263,7 +286,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		{
 			DbAccess.Database.AllowNestedTransactions = Type.HasFlag(DbAccessType.SqLite);
 
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			DataMigrationHelper.AddUsersFast(250, DbAccess);
 			var count =
 					DbAccess.SelectNative(typeof(long), DbAccess.Database.CreateCommand(SelectCountOneFromUsers)).FirstOrDefault();
 			Assert.That(() =>
@@ -351,7 +374,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 				Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(nestedAccess.Database.ConnectionController.InstanceCounter));
 				Assert.That(rootAccess.Database.ConnectionController.Transaction, Is.EqualTo(nestedAccess.Database.ConnectionController.Transaction));
 				Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
-				DataMigrationHelper.AddUsers(10, rootAccess);
+				DataMigrationHelper.AddUsersFast(10, rootAccess);
 				Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(1));
 
 				//the nested database runs with the same TransactionCounter as the RootAccess so it should use
@@ -360,7 +383,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 				{
 					Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(2));
 					Assert.That(nestedAccess.Select<Users>().Length, Is.EqualTo(10));
-					DataMigrationHelper.AddUsers(10, nestedAccess);
+					DataMigrationHelper.AddUsersFast(10, nestedAccess);
 					Assert.That(rootAccess.Database.ConnectionController.InstanceCounter, Is.EqualTo(2));
 				});
 

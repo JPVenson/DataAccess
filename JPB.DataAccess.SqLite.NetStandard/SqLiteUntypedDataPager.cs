@@ -94,13 +94,16 @@ namespace JPB.DataAccess.SqLite
 			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 			RaiseNewPageLoading();
-			var elements = new SelectQuery<T>(dbAccess.Query()
-					.WithCte(new ElementProducer<T>(CommandQuery
-							.AsPagedQuery(CurrentPage, PageSize)),
-						out var commandCte)
-					.Select
-					.Identifier<T>(commandCte))
+			var elements = CommandQuery
+				.AsPagedQuery(CurrentPage, PageSize)
 				.ToArray();
+			//var elements = new SelectQuery<T>(dbAccess.Query()
+			//		.WithCte(new ElementProducer<T>(CommandQuery
+			//				.AsPagedQuery(CurrentPage, PageSize)),
+			//			out var commandCte)
+			//		.Select
+			//		.Identifier<T>(commandCte))
+			//	.ToArray();
 
 			foreach (var item in elements)
 			{

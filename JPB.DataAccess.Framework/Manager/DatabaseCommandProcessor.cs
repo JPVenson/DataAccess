@@ -10,13 +10,13 @@ namespace JPB.DataAccess.Manager
 {
 	internal class DatabaseCommandProcessor : ICommandProcessor
 	{
-		public List<List<EagarDataRecord>> ExecuteMARSCommand(DbAccessLayer db, IDbCommand query, out int recordsAffected)
+		public EagarDataRecord[][] ExecuteMARSCommand(DbAccessLayer db, IDbCommand query, out int recordsAffected)
 		{
 			var recordsAffectedA = 0;
 			var result = db.Database.Run(
 				s =>
 				{
-					var records = new List<List<EagarDataRecord>>();
+					var records = new List<EagarDataRecord[]>();
 					using (query)
 					{
 						query.Connection = query.Connection ?? s.GetConnection();
@@ -34,7 +34,7 @@ namespace JPB.DataAccess.Manager
 										resultSet.Add(EagarDataRecord.WithExcludedFields(dr));
 									}
 
-									records.Add(resultSet);
+									records.Add(resultSet.ToArray());
 								} while (dr.NextResult());
 							}
 							catch (Exception ex)
@@ -45,7 +45,7 @@ namespace JPB.DataAccess.Manager
 						}
 					}
 
-					return records;
+					return records.ToArray();
 				});
 			recordsAffected = recordsAffectedA;
 			return result;

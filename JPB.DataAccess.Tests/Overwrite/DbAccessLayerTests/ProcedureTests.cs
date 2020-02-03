@@ -19,7 +19,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[DbCategory(DbAccessType.MsSql)]
 		public void ProcedureDirectParamTest()
 		{
-			DataMigrationHelper.AddUsers(100, DbAccess);
+			DataMigrationHelper.AddUsersFast(100, DbAccess);
 
 			Assert.That(() => DbAccess.Select<TestProcBParamsDirect>(new object[] {10}),
 				Is.Not.Null.And.Property("Length").EqualTo(9));
@@ -29,7 +29,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[DbCategory(DbAccessType.MsSql)]
 		public void ProcedureParamLessTest()
 		{
-			DataMigrationHelper.AddUsers(100, DbAccess);
+			DataMigrationHelper.AddUsersFast(100, DbAccess);
 			var expectedUser = DbAccess.ExecuteProcedure<TestProcAParams, Users>(new TestProcAParams());
 
 			Assert.IsNotNull(expectedUser);
@@ -44,7 +44,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[DbCategory(DbAccessType.MsSql)]
 		public void ProcedureParamTest()
 		{
-			DataMigrationHelper.AddUsers(100, DbAccess);
+			DataMigrationHelper.AddUsersFast(100, DbAccess);
 
 			Assert.That(() => DbAccess.ExecuteProcedure<TestProcBParams, Users>(new TestProcBParams
 			{

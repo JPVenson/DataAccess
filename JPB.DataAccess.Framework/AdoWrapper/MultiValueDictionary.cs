@@ -50,8 +50,6 @@ namespace JPB.DataAccess.AdoWrapper
 		public TKey KeyAt(int index)
 		{
 			return Collection[index].Key;
-
-			//return Collection.IndexOfKey(key);
 		}
 		
 		public TValue this[int index]

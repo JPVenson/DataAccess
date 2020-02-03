@@ -57,7 +57,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void SelectBase()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 			var refSelect = DbAccess.Select<Users>();
 			Assert.IsTrue(refSelect.Length > 0);
 
@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void SelectModelsSelect()
 		{
-			DataMigrationHelper.AddUsers(100, DbAccess);
+			DataMigrationHelper.AddUsersFast(100, DbAccess);
 			var firstAvaibleUser =
 				DbAccess.Query().Select.Table<Users>().LimitBy(1).First();
 
@@ -94,7 +94,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void SelectNative()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 
 			var refSelect = DbAccess.RunSelect<Users>(DbAccess.Database.CreateCommand(UsersMeta.SelectStatement));
 			Assert.IsTrue(refSelect.Any());
@@ -118,7 +118,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void SelectPrimitivSelect()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 			var refSelect = DbAccess
 				.RunSelect<long>(DbAccess.Database.CreateCommand(UsersMeta.SelectPrimaryKeyStatement));
 			Assert.IsTrue(refSelect.Any());
@@ -142,14 +142,14 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests
 		[Test]
 		public void SelectPropertyLessPoco()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 			Assert.That(() => DbAccess.Select<UsersWithoutProperties>(), Is.Not.Null.And.Not.Empty);
 		}
 
 		[Test]
 		public void SelectWithEgarLoading()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 			var refSelect = DbAccess.Select<Users>();
 			Assert.IsTrue(refSelect.Length > 0);
 

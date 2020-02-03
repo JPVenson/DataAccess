@@ -5,6 +5,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 #endregion
 
@@ -15,14 +18,13 @@ namespace JPB.DataAccess.AdoWrapper
 	/// </summary>
 	/// <seealso cref="System.Data.IDataRecord" />
 	/// <seealso cref="System.IDisposable" />
-	public class EagarDataRecord : IDataRecord, IDisposable
+	public class EagarDataRecord : IDataRecord, IDisposable, IXmlSerializable
 	{
 		/// <summary>
 		///     Enumerates all items in the source record
 		/// </summary>
-		public EagarDataRecord(string[] fields, IList values)
+		public EagarDataRecord(string[] fields, IList values) : this()
 		{
-			MetaHeader = new MultiValueDictionary<string, object>();
 			for (var i = 0; i < fields.Length; i++)
 			{
 				var field = fields[i];
@@ -35,11 +37,64 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </summary>
 		public EagarDataRecord()
 		{
+			MetaHeader = new MultiValueDictionary<string, object>();
 		}
 
 		private EagarDataRecord(MultiValueDictionary<string, object> subRecordMetaHeader)
 		{
 			MetaHeader = new MultiValueDictionary<string, object>(subRecordMetaHeader);
+		}
+
+		public XmlSchema GetSchema()
+		{
+			return null;
+		}
+
+		public void ReadXml(XmlReader reader)
+		{
+			WrapNulls = reader.GetAttribute("wnull") != null;
+			reader.ReadStartElement();//<d>
+			while (reader.Name == "d")
+			{
+				var name = reader.GetAttribute("n");
+				object val = DBNull.Value;
+				if (!reader.IsEmptyElement)
+				{
+					reader.ReadStartElement();//<v>
+					var type = reader.GetAttribute("t");
+					val = reader.ReadElementContentAs(Type.GetType(type), null);
+					reader.ReadEndElement();//</d>
+				}
+				else
+				{
+					reader.ReadStartElement();//<d>		
+				}
+				MetaHeader.Add(name, val);
+			}
+		}
+
+		private const string XmlNamespace = "https://github.com/JPVenson/DataAccess";
+
+		public void WriteXml(XmlWriter writer)
+		{
+			if (WrapNulls)
+			{
+				writer.WriteAttributeString("wnull", "");
+			}
+
+			foreach (var header in MetaHeader.Collection)
+			{
+				writer.WriteStartElement("d");
+				writer.WriteAttributeString("n", header.Key);
+				if (header.Value != DBNull.Value)
+				{
+					writer.WriteStartElement("v");
+					writer.WriteAttributeString("t", header.Value.GetType().FullName);
+					writer.WriteValue(header.Value);
+					writer.WriteEndElement();//</v>
+				}
+				writer.WriteEndElement();//</d>
+			}
 		}
 
 		/// <summary>
@@ -112,7 +167,11 @@ namespace JPB.DataAccess.AdoWrapper
 		{
 			for (var i = 0; i < MetaHeader.Count; i++)
 			{
-				if (values.Length > i) break;
+				if (values.Length > i)
+				{
+					break;
+				}
+
 				values.SetValue(GetValueInternal(i), i);
 			}
 
@@ -140,7 +199,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public bool GetBoolean(int i)
 		{
-			return (bool) GetValue(i);
+			return (bool)GetValue(i);
 		}
 
 		/// <summary>
@@ -152,7 +211,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public byte GetByte(int i)
 		{
-			return (byte) GetValue(i);
+			return (byte)GetValue(i);
 		}
 
 		/// <summary>
@@ -176,15 +235,28 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </exception>
 		public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
 		{
-			var value = (byte[]) GetValue(i);
-			if (fieldOffset > value.Length) throw new ArgumentOutOfRangeException(nameof(fieldOffset));
+			var value = (byte[])GetValue(i);
+			if (fieldOffset > value.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(fieldOffset));
+			}
 
-			if (bufferoffset > buffer.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			if (bufferoffset > buffer.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			}
 
-			if (length > value.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			if (length > value.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			}
 
 			long j;
-			for (j = fieldOffset; j < value.Length || j < length; j++) buffer[j + bufferoffset] = value[j];
+			for (j = fieldOffset; j < value.Length || j < length; j++)
+			{
+				buffer[j + bufferoffset] = value[j];
+			}
+
 			return j;
 		}
 
@@ -197,7 +269,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public char GetChar(int i)
 		{
-			return (char) GetValue(i);
+			return (char)GetValue(i);
 		}
 
 		/// <summary>
@@ -221,15 +293,28 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </exception>
 		public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
 		{
-			var value = (char[]) GetValue(i);
-			if (fieldoffset > value.Length) throw new ArgumentOutOfRangeException(nameof(fieldoffset));
+			var value = (char[])GetValue(i);
+			if (fieldoffset > value.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(fieldoffset));
+			}
 
-			if (bufferoffset > buffer.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			if (bufferoffset > buffer.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			}
 
-			if (length > value.Length) throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			if (length > value.Length)
+			{
+				throw new ArgumentOutOfRangeException(nameof(bufferoffset));
+			}
 
 			long j;
-			for (j = fieldoffset; j < value.Length || j < length; j++) buffer[j + bufferoffset] = value[j];
+			for (j = fieldoffset; j < value.Length || j < length; j++)
+			{
+				buffer[j + bufferoffset] = value[j];
+			}
+
 			return j;
 		}
 
@@ -242,7 +327,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public Guid GetGuid(int i)
 		{
-			return (Guid) GetValue(i);
+			return (Guid)GetValue(i);
 		}
 
 		/// <summary>
@@ -254,7 +339,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public short GetInt16(int i)
 		{
-			return (short) GetValue(i);
+			return (short)GetValue(i);
 		}
 
 		/// <summary>
@@ -266,7 +351,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public int GetInt32(int i)
 		{
-			return (int) GetValue(i);
+			return (int)GetValue(i);
 		}
 
 		/// <summary>
@@ -278,7 +363,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public long GetInt64(int i)
 		{
-			return (long) GetValue(i);
+			return (long)GetValue(i);
 		}
 
 		/// <summary>
@@ -290,7 +375,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public float GetFloat(int i)
 		{
-			return (float) GetValue(i);
+			return (float)GetValue(i);
 		}
 
 		/// <summary>
@@ -302,7 +387,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public double GetDouble(int i)
 		{
-			return (double) GetValue(i);
+			return (double)GetValue(i);
 		}
 
 		/// <summary>
@@ -314,7 +399,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public string GetString(int i)
 		{
-			return (string) GetValue(i);
+			return (string)GetValue(i);
 		}
 
 		/// <summary>
@@ -326,7 +411,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public decimal GetDecimal(int i)
 		{
-			return (decimal) GetValue(i);
+			return (decimal)GetValue(i);
 		}
 
 		/// <summary>
@@ -338,7 +423,7 @@ namespace JPB.DataAccess.AdoWrapper
 		/// </returns>
 		public DateTime GetDateTime(int i)
 		{
-			return (DateTime) GetValue(i);
+			return (DateTime)GetValue(i);
 		}
 
 		/// <summary>
@@ -388,7 +473,11 @@ namespace JPB.DataAccess.AdoWrapper
 			get
 			{
 				var value = GetValue(i);
-				if (value is DBNull) return null;
+				if (value is DBNull)
+				{
+					return null;
+				}
+
 				return value;
 			}
 		}
@@ -433,21 +522,27 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public static EagarDataRecord WithExcludedFields(IDataRecord sourceRecord, params string[] fieldsExcluded)
 		{
-			if (sourceRecord is EagarDataRecord subRecord) return new EagarDataRecord(subRecord.MetaHeader);
+			if (sourceRecord is EagarDataRecord subRecord)
+			{
+				return new EagarDataRecord(subRecord.MetaHeader);
+			}
 
 			var buildList = new ArrayList();
-			var metaBuildList = new List<string>();
+			var metaBuildList = new string[sourceRecord.FieldCount];
 			for (var i = 0; i < sourceRecord.FieldCount; i++)
 			{
 				var name = sourceRecord.GetName(i);
-				if (fieldsExcluded.Contains(name)) continue;
+				if (fieldsExcluded.Contains(name))
+				{
+					continue;
+				}
 
 				var obj = sourceRecord.GetValue(i);
 				buildList.Add(obj);
-				metaBuildList.Add(name);
+				metaBuildList[i] = name;
 			}
 
-			return new EagarDataRecord(metaBuildList.ToArray(), buildList);
+			return new EagarDataRecord(metaBuildList, buildList);
 		}
 
 		/// <summary>

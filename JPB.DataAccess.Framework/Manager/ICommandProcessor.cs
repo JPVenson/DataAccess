@@ -18,7 +18,7 @@ namespace JPB.DataAccess.Manager
 		/// <param name="db"></param>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		List<List<EagarDataRecord>> ExecuteMARSCommand(DbAccessLayer db, IDbCommand command, out int recordsAffected);
+		EagarDataRecord[][] ExecuteMARSCommand(DbAccessLayer db, IDbCommand command, out int recordsAffected);
 
 		///  <summary>
 		/// 		Should execute the operation within a task and call onRecord each time a new Record is produced

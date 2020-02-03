@@ -148,13 +148,14 @@ namespace JPB.DataAccess.AdoWrapper.MsSqlProvider
 			MaxPage = (int)Math.Ceiling((decimal)TotalItemCount / PageSize);
 
 			RaiseNewPageLoading();
-			var elements = new SelectQuery<T>(dbAccess.Query()
-					.WithCte(new ElementProducer<T>(CommandQuery
-							.AsPagedQuery(CurrentPage, PageSize)),
-						out var commandCte)
-					.Select
-					.Identifier<T>(commandCte))
-				.ToArray();
+			var elements = CommandQuery.AsPagedQuery(CurrentPage, PageSize).ToArray();
+			//var elements = new SelectQuery<T>(dbAccess.Query()
+			//		.WithCte(new ElementProducer<T>(CommandQuery
+			//				.AsPagedQuery(CurrentPage, PageSize)),
+			//			out var commandCte)
+			//		.Select
+			//		.Identifier<T>(commandCte))
+			//	.ToArray();
 
 			foreach (var item in elements)
 			{

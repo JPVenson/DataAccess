@@ -634,7 +634,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void OrderBy()
 		{
 			var maxItems = 250;
-			DataMigrationHelper.AddUsers(maxItems, DbAccess);
+			DataMigrationHelper.AddUsersFast(maxItems, DbAccess);
 			var elementProducer =
 					CreateQuery().Select.Table<Users>().Order.By(s => s.UserName)
 							.ThenBy(f => f.UserID)
@@ -657,7 +657,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		public void OrderByWithString()
 		{
 			var maxItems = 250;
-			DataMigrationHelper.AddUsers(maxItems, DbAccess);
+			DataMigrationHelper.AddUsersFast(maxItems, DbAccess);
 			var elementProducer =
 					CreateQuery().Select.Table<Users>().Order.By("UserName")
 							.ThenBy("UserID")
@@ -681,7 +681,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		{
 			var maxItems = 250;
 
-			DataMigrationHelper.AddUsers(maxItems, DbAccess);
+			DataMigrationHelper.AddUsersFast(maxItems, DbAccess);
 			var basePager = CreateQuery()
 				.Select.Table<Users>()
 				.Order.By(e => e.UserID)
@@ -697,7 +697,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		{
 			var maxItems = 250;
 
-			DataMigrationHelper.AddUsers(maxItems, DbAccess);
+			DataMigrationHelper.AddUsersFast(maxItems, DbAccess);
 			var basePager = CreateQuery()
 				.Select.Table<Users>()
 				.Order.By(e => e.UserID)
@@ -791,7 +791,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		[Test]
 		public void Select()
 		{
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			DataMigrationHelper.AddUsersFast(250, DbAccess);
 
 			var countOfImages = CountUsersSqlStatement();
 
@@ -833,7 +833,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		[Test]
 		public void SelectWithBrakets()
 		{
-			DataMigrationHelper.AddUsers(1, DbAccess);
+			DataMigrationHelper.AddUsersFast(1, DbAccess);
 			var deSelect = DbAccess.Select<Users>();
 			var queryCompile = CreateQuery().Select.Table<Users>()
 				.Where
@@ -847,7 +847,7 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.QueryBuilderTests
 		[Test]
 		public void SelectWithEscapedInConfiguration()
 		{
-			DataMigrationHelper.AddUsers(250, DbAccess);
+			DataMigrationHelper.AddUsersFast(250, DbAccess);
 
 			var userConfigCache = DbAccess.Config.GetOrCreateClassInfoCache(typeof(Users));
 			var dbPropertyInfoCache = userConfigCache.Propertys[nameof(Users.UserName)];

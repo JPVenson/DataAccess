@@ -144,6 +144,7 @@
     <Compile Include="Overwrite\DbCollectionTests\DbCollectionTests.cs" />
     <Compile Include="GlobalTestContext.cs" />
     <Compile Include="Overwrite\FormattableCompositorTest.cs" />
+    <Compile Include="Overwrite\Framework\RemotingManager.cs" />
     <Compile Include="Overwrite\Framework\MySql\StartMySqlServerContext.cs" />
     <Compile Include="Overwrite\Framework\MySql\MySqlLogline.cs" />
     <Compile Include="Overwrite\IManager.cs" />

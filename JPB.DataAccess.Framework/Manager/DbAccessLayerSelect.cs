@@ -31,13 +31,13 @@ namespace JPB.DataAccess.Manager
 		public List<List<object>> ExecuteMARS(IDbCommand bulk, params Type[] marsTypes)
 		{
 			var mars = EnumerateMarsDataRecords(bulk);
-			var concatedMarsToType = new List<Tuple<DbClassInfoCache, List<EagarDataRecord>>>();
-			for (var index = 0; index < mars.Count; index++)
+			var concatedMarsToType = new List<Tuple<DbClassInfoCache, EagarDataRecord[]>>();
+			for (var index = 0; index < mars.Length; index++)
 			{
 				var dataRecord = mars[index];
 				var expectedResult = marsTypes[index];
 				concatedMarsToType.Add(
-					new Tuple<DbClassInfoCache, List<EagarDataRecord>>(GetClassInfo(expectedResult), dataRecord));
+					new Tuple<DbClassInfoCache, EagarDataRecord[]>(GetClassInfo(expectedResult), dataRecord));
 			}
 
 			var list =

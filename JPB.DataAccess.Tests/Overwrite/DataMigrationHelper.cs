@@ -103,6 +103,22 @@ namespace JPB.DataAccess.Tests.Overwrite
 			return users.Select(f => f.User_ID).ToArray();
 		}
 
+		public static void AddUsersFast(int number, DbAccessLayer mgr)
+		{
+			mgr.RaiseEvents = false;
+			var users = new List<Users>();
+			mgr.Database.RunInTransaction(d =>
+			{
+				for (var i = 0; i < number; i++)
+				{
+					var user = new Users();
+					user.UserName = Guid.NewGuid().ToString();
+					mgr.Insert(user);
+				}
+			});
+			mgr.RaiseEvents = true;
+		}
+
 		public static int[] AddBooks(int number, DbAccessLayer mgr)
 		{
 			mgr.RaiseEvents = false;
