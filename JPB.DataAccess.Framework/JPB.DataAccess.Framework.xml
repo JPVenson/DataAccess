@@ -8607,16 +8607,6 @@
             <returns></returns>
             <exception cref="T:System.ArgumentNullException">type</exception>
         </member>
-        <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.GetOrCreateClassInfoCache(System.String,System.Boolean@)">
-            <summary>
-                Gets an Cache object of exists or creats one
-                Return value can be null
-            </summary>
-            <param name="typeName">Name of the type.</param>
-            <param name="newCreated">if set to <c>true</c> [new created].</param>
-            <returns></returns>
-            <exception cref="T:System.ArgumentException">Value cannot be null or empty.;typeName</exception>
-        </member>
         <member name="M:JPB.DataAccess.MetaApi.MetaInfoStore`6.GetOrCreateMethodInfoCache(System.Reflection.MethodInfo)">
             <summary>
                 Gets an Cache object if exists or creats one

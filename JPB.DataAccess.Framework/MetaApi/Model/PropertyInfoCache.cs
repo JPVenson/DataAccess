@@ -168,8 +168,9 @@ namespace JPB.DataAccess.MetaApi.Model
 							var setterDelegate = setExpression.Compile();
 							((PropertyHelper<TAtt>) Setter).SetSet(setterDelegate);
 						}
-						catch (Exception)
+						catch (Exception ex)
 						{
+							Console.WriteLine(ex);
 							//sometimes the Compile method does throw an error. In this case fall back to reflection
 							var setDelegate = setMethod.CreateDelegate(SetterDelegate);
 							((PropertyHelper<TAtt>)Setter).SetSet(setDelegate);

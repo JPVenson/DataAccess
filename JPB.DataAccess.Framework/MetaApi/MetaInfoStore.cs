@@ -1,6 +1,7 @@
 #if !DEBUG
 using System.Diagnostics;
 #endif
+using System.Collections.Concurrent;
 
 #region
 
@@ -48,7 +49,7 @@ namespace JPB.DataAccess.MetaApi
 		public MetaInfoStore(bool local)
 		{
 			IsGlobal = !local;
-			_classInfoCaches = new HashSet<TClass>();
+			_classInfoCaches = new ConcurrentDictionary<Type, TClass>();
 		}
 
 		/// <summary>
@@ -64,7 +65,7 @@ namespace JPB.DataAccess.MetaApi
 		/// </summary>
 		static MetaInfoStore()
 		{
-			_globalClassInfoCaches = new HashSet<TClass>();
+			_globalClassInfoCaches = new ConcurrentDictionary<Type, TClass>();
 		}
 
 		/// <summary>
@@ -96,7 +97,7 @@ namespace JPB.DataAccess.MetaApi
 		/// <value>
 		///     The s class information caches.
 		/// </value>
-		protected internal virtual HashSet<TClass> SClassInfoCaches
+		protected internal virtual IDictionary<Type, TClass> SClassInfoCaches
 		{
 			get
 			{
@@ -111,12 +112,12 @@ namespace JPB.DataAccess.MetaApi
 		/// <summary>
 		///     The class information caches
 		/// </summary>
-		private static readonly HashSet<TClass> _globalClassInfoCaches;
+		private static readonly IDictionary<Type, TClass> _globalClassInfoCaches;
 
 		/// <summary>
 		///     The class information caches
 		/// </summary>
-		private readonly HashSet<TClass> _classInfoCaches;
+		private readonly IDictionary<Type, TClass> _classInfoCaches;
 
 		/// <summary>
 		///     Gets an Cache object if exists or creats one
@@ -151,14 +152,14 @@ namespace JPB.DataAccess.MetaApi
 				{
 					Monitor.Enter(SClassInfoCaches);
 				}
-
-				element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
-				if (element == null)
+				
+				if (!SClassInfoCaches.TryGetValue(type, out element))
 				{
 					element = new TClass();
+					
 					if (!type.IsAnonymousType())
 					{
-						SClassInfoCaches.Add(element);
+						SClassInfoCaches.Add(type, element);
 					}
 					element.Init(type, type.IsAnonymousType());
 					newCreated = true;
@@ -174,55 +175,55 @@ namespace JPB.DataAccess.MetaApi
 			return element;
 		}
 
-		/// <summary>
-		///     Gets an Cache object of exists or creats one
-		///     Return value can be null
-		/// </summary>
-		/// <param name="typeName">Name of the type.</param>
-		/// <param name="newCreated">if set to <c>true</c> [new created].</param>
-		/// <returns></returns>
-		/// <exception cref="ArgumentException">Value cannot be null or empty.;typeName</exception>
-		protected internal virtual TClass GetOrCreateClassInfoCache(string typeName, out bool newCreated)
-		{
-			if (string.IsNullOrEmpty(typeName))
-			{
-				throw new ArgumentException("Value cannot be null or empty.", nameof(typeName));
-			}
-			newCreated = false;
-			TClass element;
-			var isThreadSave = EnableInstanceThreadSafety || EnableGlobalThreadSafety;
-			try
-			{
-				if (isThreadSave)
-				{
-					Monitor.Enter(SClassInfoCaches);
-				}
+		///// <summary>
+		/////     Gets an Cache object of exists or creats one
+		/////     Return value can be null
+		///// </summary>
+		///// <param name="typeName">Name of the type.</param>
+		///// <param name="newCreated">if set to <c>true</c> [new created].</param>
+		///// <returns></returns>
+		///// <exception cref="ArgumentException">Value cannot be null or empty.;typeName</exception>
+		//protected internal virtual TClass GetOrCreateClassInfoCache(string typeName, out bool newCreated)
+		//{
+		//	if (string.IsNullOrEmpty(typeName))
+		//	{
+		//		throw new ArgumentException("Value cannot be null or empty.", nameof(typeName));
+		//	}
+		//	newCreated = false;
+		//	TClass element;
+		//	var isThreadSave = EnableInstanceThreadSafety || EnableGlobalThreadSafety;
+		//	try
+		//	{
+		//		if (isThreadSave)
+		//		{
+		//			Monitor.Enter(SClassInfoCaches);
+		//		}
 
-				element = SClassInfoCaches.FirstOrDefault(s => s.Name.Equals(typeName));
-				if (element == null)
-				{
-					var type = Type.GetType(typeName, true, false);
+		//		element = SClassInfoCaches.FirstOrDefault(s => s.Name.Equals(typeName));
+		//		if (element == null)
+		//		{
+		//			var type = Type.GetType(typeName, true, false);
 
-					if (type == null)
-					{
-						return null;
-					}
+		//			if (type == null)
+		//			{
+		//				return null;
+		//			}
 
-					element = new TClass();
-					SClassInfoCaches.Add(element);
-					element.Init(type);
-					newCreated = true;
-				}
-			}
-			finally
-			{
-				if (isThreadSave)
-				{
-					Monitor.Exit(SClassInfoCaches);
-				}
-			}
-			return element;
-		}
+		//			element = new TClass();
+		//			SClassInfoCaches.TryAdd(element);
+		//			element.Init(type);
+		//			newCreated = true;
+		//		}
+		//	}
+		//	finally
+		//	{
+		//		if (isThreadSave)
+		//		{
+		//			Monitor.Exit(SClassInfoCaches);
+		//		}
+		//	}
+		//	return element;
+		//}
 		
 		/// <summary>
 		///     Gets an Cache object if exists or creats one
@@ -282,13 +283,12 @@ namespace JPB.DataAccess.MetaApi
 				}
 				foreach (var type in t)
 				{
-					var element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
-					if (element == null)
+					if (!SClassInfoCaches.TryGetValue(type, out var element))
 					{
 						element = new TClass();
 						if (!type.IsAnonymousType())
 						{
-							SClassInfoCaches.Add(element);
+							SClassInfoCaches.Add(type, element);
 						}
 						element.Init(type, type.IsAnonymousType());
 					}
@@ -322,7 +322,7 @@ namespace JPB.DataAccess.MetaApi
 					Monitor.Enter(SClassInfoCaches);
 				}
 
-				SClassInfoCaches.Add(existingItem);
+				SClassInfoCaches.Add(existingItem.Type, existingItem);
 			}
 			finally
 			{
@@ -355,7 +355,6 @@ namespace JPB.DataAccess.MetaApi
 		/// </summary>
 		public virtual void Dispose()
 		{
-			SClassInfoCaches.Clear();
 		}
 	}
 }

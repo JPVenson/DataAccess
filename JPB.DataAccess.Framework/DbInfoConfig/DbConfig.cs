@@ -67,15 +67,17 @@ namespace JPB.DataAccess.DbInfoConfig
 		/// </summary>
 		/// <param name="type">The type.</param>
 		/// <returns></returns>
+		[Obsolete("Unsupported", true)]
 		public DbClassInfoCache GetOrCreateClassInfoCache(string type)
 		{
-			bool isNewCreated;
-			var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
-			if (isNewCreated)
-			{
-				val.CheckForConfig(this);
-			}
-			return val;
+			return null;
+			//bool isNewCreated;
+			//var val = base.GetOrCreateClassInfoCache(type, out isNewCreated);
+			//if (isNewCreated)
+			//{
+			//	val.CheckForConfig(this);
+			//}
+			//return val;
 		}
 
 
@@ -134,13 +136,12 @@ namespace JPB.DataAccess.DbInfoConfig
 				}
 				foreach (var type in t)
 				{
-					var element = SClassInfoCaches.FirstOrDefault(s => s.Equals(type));
-					if (element == null)
+					if (!SClassInfoCaches.TryGetValue(type, out var element))
 					{
 						element = new DbClassInfoCache();
 						if (!type.IsAnonymousType())
 						{
-							SClassInfoCaches.Add(element);
+							SClassInfoCaches.Add(type, element);
 						}
 						element.Init(type, type.IsAnonymousType());
 						element.CheckForConfig(this);
