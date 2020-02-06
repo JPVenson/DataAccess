@@ -49,8 +49,20 @@ namespace JPB.DataAccess.Query.Operators.Orders
 				.Select(e =>
 				{
 					var dbClassInfoCache = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
-					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
-						dbClassInfoCache.Propertys[e.Name]);
+					if (dbClassInfoCache.Propertys.ContainsKey(e.Name))
+					{
+						return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache, dbClassInfoCache.Propertys[e.Name]);
+					}
+					else
+					{
+						throw new InvalidOperationException($"The expected property '{e.Name}' was not found.")
+						{
+							Data =
+							{
+								{"Class", dbClassInfoCache }
+							}
+						};
+					}
 				}).ToArray());
 		}
 
@@ -68,8 +80,20 @@ namespace JPB.DataAccess.Query.Operators.Orders
 				.Select(e =>
 				{
 					var dbClassInfoCache = _queryBuilder.ContainerObject.AccessLayer.GetClassInfo(e.DeclaringType);
-					return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache,
-						dbClassInfoCache.Propertys[e.Name]);
+					if (dbClassInfoCache.Propertys.ContainsKey(e.Name))
+					{
+						return new KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>(dbClassInfoCache, dbClassInfoCache.Propertys[e.Name]);
+					}
+					else
+					{
+						throw new InvalidOperationException($"The expected property '{e.Name}' was not found.")
+						{
+							Data =
+							{
+								{"Class", dbClassInfoCache }
+							}
+						};
+					}
 				})
 				.ToArray());
 		}

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -20,6 +21,16 @@ namespace JPB.DataAccess.AdoWrapper
 	/// <seealso cref="System.IDisposable" />
 	public class EagarDataRecord : IDataRecord, IDisposable, IXmlSerializable
 	{
+		//internal EagarDataRecord(SerializationInfo info, StreamingContext context)
+		//{
+			
+		//}
+
+		//public void GetObjectData(SerializationInfo info, StreamingContext context)
+		//{
+			
+		//}
+
 		/// <summary>
 		///     Enumerates all items in the source record
 		/// </summary>
@@ -62,7 +73,16 @@ namespace JPB.DataAccess.AdoWrapper
 				{
 					reader.ReadStartElement();//<v>
 					var type = reader.GetAttribute("t");
-					val = reader.ReadElementContentAs(Type.GetType(type), null);
+					var returnType = Type.GetType(type);
+					if (returnType == typeof(Guid))
+					{
+						val = XmlConvert.ToGuid(reader.ReadElementContentAsString());
+					}
+					else
+					{
+						val = reader.ReadElementContentAs(returnType, null);
+					}
+					
 					reader.ReadEndElement();//</d>
 				}
 				else
@@ -90,7 +110,15 @@ namespace JPB.DataAccess.AdoWrapper
 				{
 					writer.WriteStartElement("v");
 					writer.WriteAttributeString("t", header.Value.GetType().FullName);
-					writer.WriteValue(header.Value);
+					if (header.Value is Guid guid)
+					{
+						writer.WriteValue(XmlConvert.ToString(guid));
+					}
+					else
+					{
+						writer.WriteValue(header.Value);	
+					}
+					
 					writer.WriteEndElement();//</v>
 				}
 				writer.WriteEndElement();//</d>

@@ -60,7 +60,7 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 		{
 			var cache = new DbConfig(true);
 			cache.Include<ClassCreating>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null.And.TypeOf<ClassCreating>());
+			Assert.That(() => cache.SClassInfoCaches.First().Value.DefaultFactory(), Is.Not.Null.And.TypeOf<ClassCreating>());
 		}
 
 		[Test]
@@ -68,7 +68,7 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 		{
 			var cache = new DbConfig(true);
 			cache.Include<ClassCreatingWithArguments>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Throws.Exception);
+			Assert.That(() => cache.SClassInfoCaches.First().Value.DefaultFactory(), Throws.Exception);
 		}
 
 		[Test]
@@ -83,7 +83,7 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 				Assert.That(cache.EnableInstanceThreadSafety, Is.True);
 				Assert.That(() => { cache.Include<ClassCreating>(); }, Throws.Nothing);
 				Assert.That(cache.SClassInfoCaches.Count, Is.EqualTo(1));
-				Assert.That(() => { Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null); },
+				Assert.That(() => { Assert.That(() => cache.SClassInfoCaches.First().Value.DefaultFactory(), Is.Not.Null); },
 					Throws.Nothing);
 			});
 			DbConfig.Clear();
@@ -101,7 +101,7 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 				Assert.That(cache.SClassInfoCaches, Is.Empty);
 				Assert.That(() => { cache.Include<ClassCreating>(); }, Throws.Nothing);
 				Assert.That(cache.SClassInfoCaches.Count, Is.EqualTo(1));
-				Assert.That(() => { Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null); },
+				Assert.That(() => { Assert.That(() => cache.SClassInfoCaches.First().Value.DefaultFactory(), Is.Not.Null); },
 					Throws.Nothing);
 			});
 		}
@@ -111,7 +111,7 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 		{
 			var cache = new DbConfig(true);
 			cache.Include<StructCreating>();
-			Assert.That(() => cache.SClassInfoCaches.First().DefaultFactory(), Is.Not.Null.And.TypeOf<StructCreating>());
+			Assert.That(() => cache.SClassInfoCaches.First().Value.DefaultFactory(), Is.Not.Null.And.TypeOf<StructCreating>());
 		}
 
 		[Test]
