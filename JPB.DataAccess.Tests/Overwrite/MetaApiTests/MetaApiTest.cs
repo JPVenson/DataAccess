@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -7,7 +8,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JPB.DataAccess.DbInfoConfig;
+using JPB.DataAccess.Tests.Base;
 using JPB.DataAccess.Tests.Base.TestModels.MetaAPI;
+using JPB.DataAccess.Tests.Base.TestModels.MetaAPI.MassIncludingInConfigStore;
 using NUnit.Framework;
 
 #endregion
@@ -18,6 +21,20 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 	[TestFixture]
 	public class MetaApiTest
 	{
+		[Test]
+		public void GetAndSet()
+		{
+			var cache = new DbConfig(true);
+			var orCreateClassInfoCache = cache.GetOrCreateClassInfoCache(typeof(Users));
+			var dbPropertyInfoCache = orCreateClassInfoCache.Propertys[nameof(Users.UserID)];
+			var user = new Users();
+			var invoke = dbPropertyInfoCache.Getter.Invoke(user);
+			Assert.That(invoke, Is.EqualTo(default(int)));
+			dbPropertyInfoCache.Setter.Invoke(user, 12333);
+			invoke = dbPropertyInfoCache.Getter.Invoke(user);
+			Assert.That(invoke, Is.EqualTo(12333));
+		}
+
 		[Test]
 		public void DictionaryClassCreating()
 		{
@@ -137,6 +154,19 @@ namespace JPB.DataAccess.Tests.Overwrite.MetaApiTests
 			Assert.That(cache.GetOrCreateClassInfoCache(typeof(XmlReadMode)).IsFrameworkType(), Is.True);
 			Assert.That(cache.GetOrCreateClassInfoCache(typeof(XmlReadMode?)).IsFrameworkType(), Is.True);
 			Assert.That(cache.GetOrCreateClassInfoCache(typeof(XmlAnyAttributeAttribute)).IsFrameworkType(), Is.True);
+		}
+		
+		//[Test]
+		//[Repeat(2)]
+		public void AddMultiple()
+		{
+			var types = typeof(MassClassItem0).Assembly.GetTypes()
+				.Where(f => f.Namespace == typeof(MassClassItem0).Namespace).ToArray();
+			var config = new DbConfig(true);
+			foreach (var type in types)
+			{
+				config.Include(type);
+			}
 		}
 	}
 }

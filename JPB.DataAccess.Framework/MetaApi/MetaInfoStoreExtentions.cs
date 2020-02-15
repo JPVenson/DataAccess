@@ -32,16 +32,16 @@ namespace JPB.DataAccess.MetaApi
 
 		internal static MethodInfo GetExpressionLambda()
 		{
-			return _expressionLambdaInfo ?? (_expressionLambdaInfo = typeof(Expression)
-				       .GetMethods()
-				       .Where(e => e.Name == nameof(Expression.Lambda) && e.ContainsGenericParameters)
-				       .Single(e =>
-				       {
-					       var genericArguments = e.GetParameters();
-					       return genericArguments.Length == 2
-					              && genericArguments[0].ParameterType == typeof(Expression)
-					              && genericArguments[1].ParameterType == typeof(IEnumerable<ParameterExpression>);
-				       }));
+			return typeof(Expression)
+				.GetMethods()
+				.Where(e => e.Name == nameof(Expression.Lambda) && e.ContainsGenericParameters)
+				.Single(e =>
+				{
+					var genericArguments = e.GetParameters();
+					return genericArguments.Length == 2
+					       && genericArguments[0].ParameterType == typeof(Expression)
+					       && genericArguments[1].ParameterType == typeof(IEnumerable<ParameterExpression>);
+				});
 		}
 
 		/// <summary>

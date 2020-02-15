@@ -78,7 +78,7 @@ namespace JPB.DataAccess.Query.Operators
 		/// </returns>
 		public IEnumerator<TPoco> GetEnumerator()
 		{
-			return new QueryEagerEnumerator<TPoco>(ContainerObject, true);
+			return new QueryEagerEnumerator<TPoco>(ContainerObject, ContainerObject.ExecuteAsync);
 		}
 
 		/// <summary>

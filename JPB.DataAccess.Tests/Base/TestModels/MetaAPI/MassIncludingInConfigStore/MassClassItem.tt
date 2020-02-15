@@ -1,0 +1,38 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+var propTypes = new List<string>();
+var propNames = new List<string>();
+
+propTypes.Add("string");
+propTypes.Add("int");
+propTypes.Add("Guid");
+propNames.Add("PropA");
+propNames.Add("PropB");
+propNames.Add("PropC");
+propNames.Add("PropD");
+var rand = new Random(158515);
+
+#>
+using System;
+namespace JPB.DataAccess.Tests.Base.TestModels.MetaAPI.MassIncludingInConfigStore
+{
+<# for(int x = 0; x < 5000; x++)
+{ 
+#>
+public class MassClassItem<#= x #> {
+<# 
+for(int f = 0; f < propNames.Count; f++){
+
+	#>
+	public <#= propTypes[rand.Next(0, propTypes.Count)] #> <#= propNames[f] #> {get;set;}
+	
+<# } #>
+}
+<# } #>
+
+}

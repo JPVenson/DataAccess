@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.DbInfo;
 using JPB.DataAccess.Query.Contracts;
@@ -78,15 +79,15 @@ namespace JPB.DataAccess.Query.QueryItems
 		public ColumnInfo TargetColumn { get; }
 		public ColumnInfo SourceColumn { get; }
 
-		public JoinTableQueryPart(QueryIdentifier targetTable,
-			QueryIdentifier sourceTable,
-			QueryIdentifier joinAlias,
-			Type targetTargetTableType,
-			ColumnInfo targetColumn,
-			ColumnInfo sourceColumn,
-			IEnumerable<ColumnInfo> columns,
-			DbPropertyInfoCache targetProperty, 
-			JoinMode joinAs)
+		public JoinTableQueryPart([NotNull]QueryIdentifier targetTable,
+			[NotNull]QueryIdentifier sourceTable,
+			[NotNull]QueryIdentifier joinAlias,
+			[NotNull]Type targetTargetTableType,
+			[NotNull]ColumnInfo targetColumn,
+			[NotNull]ColumnInfo sourceColumn,
+			[NotNull, ItemNotNull]IEnumerable<ColumnInfo> columns,
+			[NotNull]DbPropertyInfoCache targetProperty, 
+			[NotNull]JoinMode joinAs)
 		{
 			_joinAs = joinAs;
 			TargetTable = targetTable;

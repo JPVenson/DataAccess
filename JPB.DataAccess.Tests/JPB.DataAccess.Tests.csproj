@@ -130,6 +130,11 @@
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\User\Users_StaticQueryFactoryForSelect.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\User\Users_StaticQueryFactoryForSelectWithArugments.cs" />
     <Compile Include="Base\TestModels\CheckWrapperBaseTests\User\Users_UsernameAnonymous.cs" />
+    <Compile Include="Base\TestModels\MetaAPI\MassIncludingInConfigStore\MassClassItem.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MassClassItem.tt</DependentUpon>
+    </Compile>
     <Compile Include="Overwrite\AllTestContextHelper.cs" />
     <Compile Include="Overwrite\DataMigrationHelper.cs" />
     <Compile Include="Overwrite\DbAccessLayerTests\DataMigrationTests.cs" />
@@ -208,9 +213,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Base\TestModels\MetaAPI\MassIncludingInConfigStore\MassClassItem.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MassClassItem.cs</LastGenOutput>
+    </Content>
     <Content Include="Dependencies\MySql\engine\libeay32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
