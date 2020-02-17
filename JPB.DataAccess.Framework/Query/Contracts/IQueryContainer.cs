@@ -78,6 +78,12 @@ namespace JPB.DataAccess.Query.Contracts
 		/// </summary>
 		/// <returns></returns>
 		QueryIdentifier CreateTableAlias(string path);
+		
+		/// <summary>
+		///     Translates an Identifier object into the corresponding Sql Identifier
+		/// </summary>
+		/// <returns></returns>
+		QueryIdentifier CreateColumnAlias(string path);
 
 		/// <summary>
 		/// </summary>

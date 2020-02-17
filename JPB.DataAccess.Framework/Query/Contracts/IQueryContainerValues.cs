@@ -23,6 +23,11 @@ namespace JPB.DataAccess.Query.Contracts
 		/// <summary>
 		///     Gets the current number of used SQL Arguments
 		/// </summary>
+		IDictionary<string, QueryIdentifier> ColumnAlias { get; }
+
+		/// <summary>
+		///     Gets the current number of used SQL Arguments
+		/// </summary>
 		IList<QueryIdentifier> Identifiers { get; }
 	}
 }

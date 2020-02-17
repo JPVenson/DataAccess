@@ -3,13 +3,36 @@ using JPB.DataAccess.Query.QueryItems.Conditional;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
+	public class SynteticColumnInfo : ColumnInfo
+	{
+		public SynteticColumnInfo(string columnName, 
+			QueryIdentifier sourceAlias, 
+			IQueryContainer container) 
+			: base(columnName, sourceAlias, container)
+		{
+		}
+
+		public override string ColumnAliasStatement()
+		{
+			return $"{ColumnName} AS {ColumnIdentifier()}";
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public override string ColumnSourceAlias()
+		{
+			return $"[{Alias.GetAlias().TrimAlias()}].[{ColumnIdentifier().TrimAlias()}]";
+		}
+	}
+
 	/// <summary>
 	///		Internal Use ONLY
 	/// </summary>
 	public class ColumnInfo
 	{
 		/// <summary>
-		/// 
+		///		If this is an inhered column of another query the original column
 		/// </summary>
 		public ColumnInfo AliasOf { get; }
 		internal readonly IQueryContainer _container;
@@ -21,6 +44,19 @@ namespace JPB.DataAccess.Query.QueryItems
 			: this(columnName, alias, container)
 		{
 			AliasOf = aliasOf;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public ColumnInfo(string columnName,
+			QueryIdentifier sourceAlias,
+			IQueryContainer container)
+		{
+			Alias = sourceAlias;
+			_container = container;
+			ColumnName = columnName;
+			_counter = container?.GetNextColumnId() ?? -1;
 		}
 
 		internal bool IsEquivalentTo(string columnName)
@@ -47,37 +83,31 @@ namespace JPB.DataAccess.Query.QueryItems
 		}
 
 		/// <summary>
-		/// 
+		///		The Real name of this column
 		/// </summary>
-		public ColumnInfo(string columnName,
-			QueryIdentifier sourceAlias,
-			IQueryContainer container)
-		{
-			Alias = sourceAlias;
-			_container = container;
-			ColumnName = columnName;
-			_counter = container?.GetNextColumnId() ?? -1;
-		}
-
 		internal string NaturalName
 		{
 			get { return AliasOf?.NaturalName ?? ColumnName; }
 		}
 
 		/// <summary>
-		/// 
+		///		The Generated Unique Column name 
 		/// </summary>
 		public string ColumnName { get; }
+
 		/// <summary>
-		/// 
+		///		The Alias of the Table or View this column origines from
 		/// </summary>
+		/// 
 		public QueryIdentifier Alias { get; }
+		public QueryIdentifier ColumnIdentifierEntry { get; set; }
+
 		private int _counter;
 
 		/// <summary>
 		/// 
 		/// </summary>
-		public string ColumnIdentifier()
+		public virtual string ColumnIdentifier()
 		{
 			if (_counter == -1)
 			{
@@ -89,15 +119,15 @@ namespace JPB.DataAccess.Query.QueryItems
 		/// <summary>
 		/// 
 		/// </summary>
-		public string ColumnSourceAlias()
+		public virtual string ColumnSourceAlias()
 		{
-			return $"[{Alias.GetAlias()}].[{ColumnName}]";
+			return $"[{Alias.GetAlias().TrimAlias()}].[{ColumnName.TrimAlias()}]";
 		}
 
 		/// <summary>
 		/// 
 		/// </summary>
-		public string ColumnAliasStatement()
+		public virtual string ColumnAliasStatement()
 		{
 			return $"{ColumnSourceAlias()} AS {ColumnIdentifier()}";
 		}

@@ -12,10 +12,10 @@ namespace JPB.DataAccess.Query.QueryItems
 {
 	internal class SelectTableQueryPart : ISelectQueryPart
 	{
-		private readonly string _source;
-		private readonly DbClassInfoCache _tableInfo;
-		private IList<ColumnInfo> _columns;
-		private readonly List<JoinParseInfo> _joins;
+		internal readonly string _source;
+		internal readonly DbClassInfoCache _tableInfo;
+		internal IList<ColumnInfo> _columns;
+		internal readonly List<JoinParseInfo> _joins;
 
 		public SelectTableQueryPart(string source,
 			DbClassInfoCache tableInfo,
@@ -75,6 +75,7 @@ namespace JPB.DataAccess.Query.QueryItems
 
 		public bool Distinct { get; set; }
 		public int? Limit { get; set; }
+
 
 		public IEnumerable<ColumnInfo> Columns
 		{

@@ -136,7 +136,20 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 		{
 			var expression = new ExpressionConditionPart(TraversePropertyPathToColumn(columnPath, ContainerObject));
 			ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(expression);
+			return new ConditionalColumnQuery<TPoco>(this, expression);
+		}
 
+		public ConditionalColumnQuery<TPoco> Column(QueryIdentifier columnName)
+		{
+			var findColumn = ContainerObject.Parts.OfType<ISelectableQueryPart>()
+				.SelectMany(f => f.Columns)
+				.FirstOrDefault(e => e.ColumnIdentifierEntry == columnName);
+			if (findColumn == null)
+			{
+				throw new InvalidOperationException($"The requested Column '{columnName.Value}' was not found");
+			}
+			var expression = new ExpressionConditionPart(findColumn);
+			ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(expression);
 			return new ConditionalColumnQuery<TPoco>(this, expression);
 		}
 

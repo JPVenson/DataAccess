@@ -18,6 +18,15 @@ using JPB.DataAccess.Query.QueryItems.Conditional;
 
 namespace JPB.DataAccess.Query.Operators
 {
+	public class PagedSelectQuery<TPoco> : SelectQuery<TPoco>
+	{
+		public PagedSelectQuery(IQueryBuilder database) : base(database)
+		{
+		}
+
+
+	}
+
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="TPoco">The type of the poco.</typeparam>
@@ -39,6 +48,16 @@ namespace JPB.DataAccess.Query.Operators
 		public SelectQuery<TPoco> Distinct()
 		{
 			ContainerObject.SearchLast<ISelectableQueryPart>().Distinct = true;
+			return this;
+		}
+
+		public SelectQuery<TPoco> SynteticColumn(string column, out QueryIdentifier identifier)
+		{
+			var selectableQueryPart = ContainerObject.SearchLast<SelectTableQueryPart>();
+			var columnInfo = new ColumnInfo(column, selectableQueryPart.Alias, ContainerObject);
+			columnInfo.ColumnIdentifierEntry = ContainerObject.CreateColumnAlias(column);
+			identifier = columnInfo.ColumnIdentifierEntry;
+			selectableQueryPart._columns.Add(columnInfo);
 			return this;
 		}
 
@@ -73,7 +92,7 @@ namespace JPB.DataAccess.Query.Operators
 				})
 				.ToArray();
 
-			return JoinOn(path, joinAs);
+			return JoinOn(this, path, joinAs);
 		}
 
 		/// <summary>
@@ -108,20 +127,22 @@ namespace JPB.DataAccess.Query.Operators
 					}
 				})
 				.ToArray();
-			return JoinOn(path, joinAs, joinCondition);
+			return JoinOn(this, path, joinAs, joinCondition);
 		}
 
-		private SelectQuery<TPoco> JoinOn(KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path,
+		internal static SelectQuery<TPoco> JoinOn(
+			IQueryBuilder builder,
+			KeyValuePair<DbClassInfoCache, DbPropertyInfoCache>[] path,
 			JoinMode joinAs = null,
 			Func<ConditionalEvalQuery<TPoco>, ConditionalEvalQuery<TPoco>> joinCondition = null)
 		{
 			joinAs = joinAs ?? JoinMode.Default;
 
-			IQueryBuilder target = this;
+			IQueryBuilder target = builder;
 			var targetAlias = target.ContainerObject
 				.SearchLast<ISelectableQueryPart>(e => !(e is JoinTableQueryPart))
 				.Alias;
-			var parentJoinPart = ContainerObject.Joins;
+			var parentJoinPart = builder.ContainerObject.Joins;
 			foreach (var keyValuePair in path)
 			{
 				var targetTable = target.ContainerObject.Search(targetAlias);

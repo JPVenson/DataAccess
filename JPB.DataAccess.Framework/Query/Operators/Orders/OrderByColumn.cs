@@ -11,6 +11,7 @@ using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Query.Contracts;
 using JPB.DataAccess.Query.Operators.Conditional;
 using JPB.DataAccess.Query.QueryItems;
+using JPB.DataAccess.Query.QueryItems.Conditional;
 
 #endregion
 
@@ -71,6 +72,29 @@ namespace JPB.DataAccess.Query.Operators.Orders
 		/// <returns></returns>
 		public OrderByColumn<TPoco> AsPagedQuery(int page, int pageSize)
 		{
+			//var rootSelect = ContainerObject.SearchFirst<SelectTableQueryPart>(f => true);
+			//var orderPart = ContainerObject.SearchLast<OrderByColumnQueryPart>();
+
+			//QueryIdentifier rnAlias = null;
+
+			//var rootQuery = new RootQuery(ContainerObject.AccessLayer);
+			//rootQuery = rootQuery.WithCte(e =>
+			//{
+			//	return e.Select.Table<TPoco>()
+			//		.SynteticColumn(
+			//			"ROW_NUMBER() OVER (ORDER BY " + orderPart.Columns.First().ColumnSourceAlias() + ")",
+			//			out rnAlias);
+			//}, out var pagedCte);
+
+			//var q = rootQuery
+			//	.WithCte(this, out var valueCte)
+			//	.Select
+			//	.Identifier<TPoco>(valueCte)
+			//	.Join(pagedCte, JoinMode.Inner)
+			//	.Where
+			//	.Column(rnAlias).Is.Between((page - 1) * pageSize, (page) * pageSize)
+			//	.Order.By(rnAlias);
+			//return rootQuery;
 			return new OrderByColumn<TPoco>(Add(new PaginationPart()
 			{
 				Page = page,

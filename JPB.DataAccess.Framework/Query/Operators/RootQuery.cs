@@ -119,6 +119,15 @@ namespace JPB.DataAccess.Query.Operators
 		/// <returns></returns>
 		public RootQuery WithCte<T>(IElementProducer<T> commandQuery, out QueryIdentifier cteName)
 		{
+			return WithCte(commandQuery as IQueryBuilder, out cteName);
+		}
+
+		/// <summary>
+		///		Creates a CTE on the start of the Query
+		/// </summary>
+		/// <returns></returns>
+		internal RootQuery WithCte(IQueryBuilder commandQuery, out QueryIdentifier cteName)
+		{
 			IQueryBuilder newQuery = new RootQuery(this);
 			cteName = newQuery.ContainerObject.CreateAlias(QueryIdentifier.QueryIdTypes.Cte);
 			(commandQuery.ContainerObject as IQueryContainerValues)?.TableAlias.Clear();
@@ -130,6 +139,16 @@ namespace JPB.DataAccess.Query.Operators
 			cteInfo.Name = cteName;
 			cteInfo.CteContentParts.AddRange(commandQuery.ContainerObject.Parts);
 			return new RootQuery(newQuery.Add(cteQueryPart.AddCte(cteInfo)));
+		}
+
+		/// <summary>
+		///		Creates a CTE on the start of the Query
+		/// </summary>
+		/// <returns></returns>
+		internal RootQuery WithCte(Func<RootQuery, IQueryBuilder> commandQueryProducer,
+			out QueryIdentifier cteName)
+		{
+			return WithCte(commandQueryProducer(new RootQuery(this)), out cteName);
 		}
 
 		/// <summary>

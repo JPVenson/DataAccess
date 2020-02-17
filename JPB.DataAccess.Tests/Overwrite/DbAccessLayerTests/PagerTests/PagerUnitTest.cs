@@ -1,10 +1,14 @@
 ﻿#region
 
 using System;
+using System.Linq;
 using JPB.DataAccess.Manager;
+using JPB.DataAccess.Query;
 using JPB.DataAccess.Tests.Base;
+using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.Books;
 using JPB.DataAccess.Tests.Base.TestModels.CheckWrapperBaseTests.MetaData;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 
 #endregion
 
@@ -16,6 +20,34 @@ namespace JPB.DataAccess.Tests.Overwrite.DbAccessLayerTests.PagerTests
 		public PagerUnitTest(DbAccessType type, bool asyncExecution, bool syncronised) : base(type,
 			asyncExecution, syncronised)
 		{
+		}
+
+		[Test]
+		public void PagerWithReferencesCall()
+		{
+			var testUsers = DataMigrationHelper.AddBooksWithImage(250, 10, DbAccess);
+
+			var refSelect =
+				int.Parse(DbAccess.Database.Run(
+					s => s.GetSkalar(string.Format("SELECT COUNT(*) FROM {0}", BookMeta.TableName))).ToString());
+			Assert.That(testUsers.Length, Is.EqualTo(refSelect));
+
+			var pageSize = 25;
+			var currentPage = 1;
+			var countElements = DbAccess.Query().Select.Table<BookWithFkImages>().CountInt().First();
+			var maxPage = countElements / pageSize;
+
+			var bookWithFkImageses = DbAccess.Query()
+				.Select.AsPagedTable<BookWithFkImages>(currentPage, pageSize, f => f.By(e => e.BookId))
+				.Join(e => e.Images)
+				.ToArray();
+
+			Assert.That(maxPage, Is.EqualTo(Math.Ceiling((int)refSelect / 25D)));
+			Assert.That(bookWithFkImageses.Length, Is.EqualTo(pageSize));
+			foreach (var bookWithFkImagese in bookWithFkImageses)
+			{
+				Assert.That(bookWithFkImagese.Images.Count, Is.EqualTo(10));
+			}
 		}
 
 		[Test]

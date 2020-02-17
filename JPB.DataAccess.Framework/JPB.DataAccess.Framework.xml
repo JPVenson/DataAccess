@@ -9925,6 +9925,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:JPB.DataAccess.Query.Contracts.IQueryContainer.CreateColumnAlias(System.String)">
+            <summary>
+                Translates an Identifier object into the corresponding Sql Identifier
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Query.Contracts.IQueryContainer.SearchTableAlias(System.String)">
             <summary>
             </summary>
@@ -9993,6 +9999,11 @@
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainerValues.TableAlias">
+            <summary>
+                Gets the current number of used SQL Arguments
+            </summary>
+        </member>
+        <member name="P:JPB.DataAccess.Query.Contracts.IQueryContainerValues.ColumnAlias">
             <summary>
                 Gets the current number of used SQL Arguments
             </summary>
@@ -10138,6 +10149,9 @@
             <inheritdoc />
         </member>
         <member name="P:JPB.DataAccess.Query.InternalContainerContainer.TableAlias">
+            <inheritdoc />
+        </member>
+        <member name="P:JPB.DataAccess.Query.InternalContainerContainer.ColumnAlias">
             <inheritdoc />
         </member>
         <member name="P:JPB.DataAccess.Query.InternalContainerContainer.Parts">
@@ -10741,6 +10755,18 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.WithCte(JPB.DataAccess.Query.Contracts.IQueryBuilder,JPB.DataAccess.Query.QueryItems.Conditional.QueryIdentifier@)">
+            <summary>
+            	Creates a CTE on the start of the Query
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.RootQuery.WithCte(System.Func{JPB.DataAccess.Query.Operators.RootQuery,JPB.DataAccess.Query.Contracts.IQueryBuilder},JPB.DataAccess.Query.QueryItems.Conditional.QueryIdentifier@)">
+            <summary>
+            	Creates a CTE on the start of the Query
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:JPB.DataAccess.Query.Operators.RootQuery.WithCte``1(System.Func{JPB.DataAccess.Query.Operators.RootQuery,JPB.DataAccess.Query.Contracts.IElementProducer{``0}},JPB.DataAccess.Query.QueryItems.Conditional.QueryIdentifier@)">
             <summary>
             	Creates a CTE on the start of the Query
@@ -10758,6 +10784,12 @@
                 Initializes a new instance of the <see cref="T:JPB.DataAccess.Query.Operators.Selection.DatabaseObjectSelector" /> class.
             </summary>
             <param name="database">The database.</param>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.Selection.DatabaseObjectSelector.AsPagedTable``1(System.Int32,System.Int32,System.Func{JPB.DataAccess.Query.Operators.Orders.OrderStatementQuery{``0},JPB.DataAccess.Query.Operators.Orders.OrderByColumn{``0}})">
+            <summary>
+            	Returns a Query that is will skip N items and return M items
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:JPB.DataAccess.Query.Operators.Selection.DatabaseObjectSelector.Table``1">
             <summary>
@@ -11007,6 +11039,11 @@
                 Returns an enumerator that contains all elements in the given QueryBuilderX
             </summary>
         </member>
+        <member name="M:JPB.DataAccess.Query.QueryItems.SynteticColumnInfo.ColumnSourceAlias">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="T:JPB.DataAccess.Query.QueryItems.ColumnInfo">
             <summary>
             	Internal Use ONLY
@@ -11014,7 +11051,7 @@
         </member>
         <member name="P:JPB.DataAccess.Query.QueryItems.ColumnInfo.AliasOf">
             <summary>
-            
+            	If this is an inhered column of another query the original column
             </summary>
         </member>
         <member name="M:JPB.DataAccess.Query.QueryItems.ColumnInfo.#ctor(System.String,JPB.DataAccess.Query.QueryItems.Conditional.QueryIdentifier,JPB.DataAccess.Query.Contracts.IQueryContainer)">
@@ -11022,15 +11059,21 @@
             
             </summary>
         </member>
+        <member name="P:JPB.DataAccess.Query.QueryItems.ColumnInfo.NaturalName">
+            <summary>
+            	The Real name of this column
+            </summary>
+        </member>
         <member name="P:JPB.DataAccess.Query.QueryItems.ColumnInfo.ColumnName">
             <summary>
-            
+            	The Generated Unique Column name 
             </summary>
         </member>
         <member name="P:JPB.DataAccess.Query.QueryItems.ColumnInfo.Alias">
             <summary>
-            
+            	The Alias of the Table or View this column origines from
             </summary>
+            
         </member>
         <member name="M:JPB.DataAccess.Query.QueryItems.ColumnInfo.ColumnIdentifier">
             <summary>
