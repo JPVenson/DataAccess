@@ -338,13 +338,27 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 
 
 		/// <summary>
-		///     Prepaires an Conditional Query
+		///     Adds an Condition with an Operator and an value wrapped into a variable
 		/// </summary>
 		public ConditionalEvalQuery<TPoco> QueryOperatorValue(string operators, object value)
 		{
 			_expression.Operator = operators;
 			var valueParameter = new QueryParameter($"@val_{_builder.ContainerObject.GetNextParameterId()}", value);
 			_expression.Value = new ExpressionValue(valueParameter.Name, valueParameter);
+			return new ConditionalEvalQuery<TPoco>(_builder);
+		}
+
+		/// <summary>
+		///		Adds an Condition with an operator and an plain sql text.
+		///		Beware that value will not be sanitized and is prone to SQL-Injection! 
+		/// </summary>
+		/// <param name="operators"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public ConditionalEvalQuery<TPoco> QueryValue(string operators, string value)
+		{
+			_expression.Operator = operators;
+			_expression.Value = new ExpressionValue(value);
 			return new ConditionalEvalQuery<TPoco>(_builder);
 		}
 	}
