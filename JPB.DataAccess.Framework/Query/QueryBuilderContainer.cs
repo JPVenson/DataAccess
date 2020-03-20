@@ -76,7 +76,7 @@ namespace JPB.DataAccess.Query
 		/// <summary>
 		/// Runs the Query that does not expect to have an result
 		/// </summary>
-		public virtual void ExecuteNonQuery()
+		public virtual int ExecuteNonQuery()
 		{
 			var query = ContainerObject.Compile(out var columns);
 			var dbCommand 
@@ -91,7 +91,7 @@ namespace JPB.DataAccess.Query
 					throw new InvalidOperationException($"The Command interceptor: '{queryCommandInterceptor}' has returned null");
 				}
 			}
-			ContainerObject.AccessLayer.ExecuteGenericCommand(dbCommand);
+			return ContainerObject.AccessLayer.ExecuteGenericCommand(dbCommand);
 		}
 
 		/// <inheritdoc />

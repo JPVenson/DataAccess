@@ -2,7 +2,7 @@
 
 namespace JPB.DataAccess.Query.QueryItems.Conditional
 {
-	internal class ExpressionValue
+	public class ExpressionValue
 	{
 		public ExpressionValue(string queryValue, params IQueryParameter[] queryParameters)
 		{

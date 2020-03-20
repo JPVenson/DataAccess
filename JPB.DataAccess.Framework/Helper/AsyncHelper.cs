@@ -120,6 +120,11 @@ namespace JPB.DataAccess.Helper
             /// </summary>
             public void Dispose()
             {
+	            if (_taskCount == 0)
+	            {
+		            return;
+	            }
+
                 try
                 {
                     _currentContext.BeginMessageLoop();

@@ -11,13 +11,13 @@ using JPB.DataAccess.QueryFactory;
 
 namespace JPB.DataAccess.Query.QueryItems
 {
-	internal class UpdateTableWithQueryPart : ISelectableQueryPart
+	public class UpdateTableWithQueryPart : ISelectableQueryPart
 	{
 		private readonly QueryIdentifier _target;
 
 		public List<ColumnAssignment> ColumnAssignments { get; set; }
 
-		internal class ColumnAssignment
+		public class ColumnAssignment
 		{
 			public ColumnAssignment()
 			{
