@@ -28,7 +28,14 @@ namespace JPB.DataAccess.Manager
 		///  <param name="onRecord"></param>
 		///  <param name="executionHint"></param>
 		///  <returns></returns>
-		Task EnumerateAsync(DbAccessLayer db, IDbCommand command, Action<IDataReader> onRecord,
+		Task EnumerateAsync(DbAccessLayer db, 
+			IDbCommand command, 
+			Action<IDataReader> onRecord,
+			CommandBehavior executionHint = CommandBehavior.Default);
+		
+		void Enumerate(DbAccessLayer db, 
+			IDbCommand command, 
+			Action<IDataReader> onRecord,
 			CommandBehavior executionHint = CommandBehavior.Default);
 
 		Task<int> ExecuteCommandAsync(DbAccessLayer db, IDbCommand command);

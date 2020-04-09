@@ -187,7 +187,9 @@ namespace JPB.DataAccess.Manager
 		/// </summary>
 		public int Insert(Type type, object entry, IDatabase db)
 		{
-			return AsyncHelper.WaitSingle(InsertAsync(type, entry, db));
+			var query = CreateInsertQueryFactory(GetClassInfo(type), entry);
+			RaiseInsert(entry, query);
+			return ExecuteGenericCommand(query);
 		}
 
 		/// <summary>

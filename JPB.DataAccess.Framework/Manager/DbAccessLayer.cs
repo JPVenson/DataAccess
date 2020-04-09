@@ -937,6 +937,35 @@ namespace JPB.DataAccess.Manager
 			return resultList;
 		}
 
+		internal IEnumerable<object> EnumerateDataRecords(IDbCommand query,
+			bool egarLoading,
+			DbClassInfoCache type,
+			CommandBehavior executionHint = CommandBehavior.Default)
+		{
+			var resultList = new List<object>();
+
+			if (!egarLoading)
+			{
+				Enumerate(query,
+					record =>
+					{
+						resultList.Add(SetPropertysViaReflection(type, EagarDataRecord.WithExcludedFields(record)));
+					},
+					executionHint);
+			}
+			else
+			{
+				var recordCache = new List<EagarDataRecord>();
+				Enumerate(query,
+					record => { recordCache.Add(EagarDataRecord.WithExcludedFields(record)); }, executionHint);
+				resultList.AddRange(recordCache
+					.Select(f => SetPropertysViaReflection(type, f))
+					.ToArray());
+			}
+
+			return resultList;
+		}
+
 		internal EagarDataRecord[] EnumerateDataRecordsAsync(IDbCommand query)
 		{
 			return EnumerateMarsDataRecords(query).FirstOrDefault();
@@ -945,6 +974,13 @@ namespace JPB.DataAccess.Manager
 		internal async Task EnumerateAsync(IDbCommand query, Action<IDataReader> onRecord,
 			CommandBehavior executionHint = CommandBehavior.Default)
 		{
+			if (!Async)
+			{
+				await Task.CompletedTask;
+				Enumerate(query, onRecord, executionHint);
+				return;
+			}
+
 			Database.PrepaireRemoteExecution(query);
 			try
 			{
@@ -960,6 +996,28 @@ namespace JPB.DataAccess.Manager
 				}
 
 				await CommandProcessor.EnumerateAsync(this, query, onRecord, executionHint);
+			}
+			finally
+			{
+				if (ThreadSave)
+				{
+					Monitor.Exit(_lockRoot);
+				}
+			}
+		}
+
+		internal void Enumerate(IDbCommand query, Action<IDataReader> onRecord,
+			CommandBehavior executionHint = CommandBehavior.Default)
+		{
+			Database.PrepaireRemoteExecution(query);
+			try
+			{
+				if (ThreadSave)
+				{
+					Monitor.Enter(_lockRoot);
+				}
+
+				CommandProcessor.Enumerate(this, query, onRecord, executionHint);
 			}
 			finally
 			{

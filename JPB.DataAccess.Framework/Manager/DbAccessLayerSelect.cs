@@ -57,7 +57,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public object Select(Type type, object pk)
 		{
-			return AsyncHelper.WaitSingle(SelectAsync(type, pk));
+			return SelectSingle(type, pk, LoadCompleteResultBeforeMapping);
 		}
 
 		/// <summary>
@@ -106,7 +106,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public T SelectSingle<T>(object pk)
 		{
-			return AsyncHelper.WaitSingle(SelectSingleAsync<T>(pk));
+			return (T) Select(typeof(T), pk);
 		}
 
 		/// <summary>
@@ -130,7 +130,8 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		protected object SelectSingle(Type type, object pk, bool egarLoading)
 		{
-			return AsyncHelper.WaitSingle(SelectSingleAsync(type, pk, egarLoading));
+			return Database.Run(d =>
+				(SelectNative(type, CreateSelect(type, pk), egarLoading)).FirstOrDefault());
 		}
 
 		/// <summary>
@@ -155,7 +156,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		protected T SelectSingle<T>(object pk, bool egarLoading)
 		{
-			return AsyncHelper.WaitSingle(SelectSingleAsync<T>(pk, egarLoading));
+			return (T) SelectSingle(typeof(T), pk, egarLoading);
 		}
 
 		/// <summary>
@@ -179,7 +180,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public object[] Select(Type type, params object[] parameter)
 		{
-			return AsyncHelper.WaitSingle(SelectAsync(type, parameter));
+			return Select(type, LoadCompleteResultBeforeMapping, parameter);
 		}
 
 		/// <summary>
@@ -202,7 +203,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public T[] Select<T>(object[] parameter)
 		{
-			return AsyncHelper.WaitSingle(SelectAsync<T>(parameter));
+			return (Select(typeof(T), parameter)).Cast<T>().ToArray();
 		}
 
 		/// <summary>
@@ -214,8 +215,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public async Task<T[]> SelectAsync<T>(object[] parameter)
 		{
-			var objects = await SelectAsync(typeof(T), parameter);
-			return objects.Cast<T>().ToArray();
+			return (await SelectAsync(typeof(T), parameter)).Cast<T>().ToArray();
 		}
 
 		/// <summary>
@@ -228,7 +228,8 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		protected object[] Select(Type type, bool egarLoading, params object[] parameter)
 		{
-			return AsyncHelper.WaitSingle(SelectAsync(type, egarLoading, parameter));
+			return Database.Run(d =>
+				SelectNative(type, CreateSelectQueryFactory(GetClassInfo(type), parameter), egarLoading));
 		}
 
 		/// <summary>
@@ -621,7 +622,10 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public IEnumerable RunDynamicSelect(Type type, IDbCommand query)
 		{
-			return AsyncHelper.WaitSingle(RunDynamicSelectAsync(type, query));
+			RaiseSelect(query);
+			var typeInfo = GetClassInfo(type);
+			return EnumerateDataRecords(query, LoadCompleteResultBeforeMapping, typeInfo,
+				CommandBehavior.SingleResult);
 		}
 
 		/// <summary>
@@ -657,7 +661,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public object[] RunSelect(Type type, IDbCommand query)
 		{
-			return AsyncHelper.WaitSingle(RunSelectAsync(type, query));
+			return (RunDynamicSelect(type, query)).Cast<object>().ToArray();
 		}
 
 		/// <summary>
@@ -681,7 +685,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public T[] RunSelect<T>(IDbCommand query)
 		{
-			return AsyncHelper.WaitSingle(RunSelectAsync<T>(query));
+			return (RunSelect(typeof(T), query)).Cast<T>().ToArray();
 		}
 
 		#endregion
@@ -698,7 +702,9 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public object[] ExecuteSelect(Type type, IDbCommand command)
 		{
-			return AsyncHelper.WaitSingle(ExecuteSelectAsync(type, command));
+			RaiseSelect(command);
+			return (EnumerateDataRecords(command, LoadCompleteResultBeforeMapping, GetClassInfo(type),
+				CommandBehavior.SingleResult)).ToArray();
 		}
 
 		/// <summary>
@@ -725,8 +731,13 @@ namespace JPB.DataAccess.Manager
 		/// <returns></returns>
 		[PublicAPI]
 		public object[] SelectNative(Type type, IDbCommand command, bool multiRow)
-		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command, multiRow));
+		{			
+			if (!multiRow)
+			{
+				return SelectNative(type, command);
+			}
+
+			return RunSelect(type, command);
 		}
 
 		/// <summary>
@@ -744,8 +755,7 @@ namespace JPB.DataAccess.Manager
 				return await SelectNativeAsync(type, command);
 			}
 
-			var sel = await RunSelectAsync(type, command);
-			return sel;
+			return await RunSelectAsync(type, command);
 		}
 
 		/// <summary>
@@ -758,7 +768,7 @@ namespace JPB.DataAccess.Manager
 		[PublicAPI]
 		public object[] SelectNative(Type type, IDbCommand command)
 		{
-			return AsyncHelper.WaitSingle(SelectNativeAsync(type, command));
+			return (RunSelect(type, command)).ToArray();
 		}
 
 		/// <summary>

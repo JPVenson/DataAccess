@@ -4701,7 +4701,7 @@
             conjunction with the using statement, to ensure it is disposed
             </summary>
         </member>
-        <member name="M:JPB.DataAccess.Helper.AsyncHelper.WaitSingle(System.Threading.Tasks.Task)">
+        <member name="M:JPB.DataAccess.Helper.System.Threading.Tasks.Task.GetResultEx()">
             <summary>
             Awaits a single Task
             </summary>

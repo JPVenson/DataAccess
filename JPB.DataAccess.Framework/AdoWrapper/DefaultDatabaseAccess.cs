@@ -475,7 +475,17 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public int ExecuteNonQuery(IDbCommand cmd)
 		{
-			return AsyncHelper.WaitSingle(ExecuteNonQueryAsync(cmd, false));
+			return Run(d =>
+			{
+				cmd.Connection = GetConnection();
+				if (ConnectionController.Transaction != null)
+				{
+					cmd.Transaction = ConnectionController.Transaction;
+				}
+
+				AttachQueryDebugger(cmd);
+				return cmd.ExecuteNonQuery();
+			});
 		}		
 		
 		/// <summary>
@@ -654,7 +664,15 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public T Run<T>(Func<IDatabase, T> func)
 		{
-			return AsyncHelper.WaitSingle(RunAsync((dd) => Task.FromResult(func(dd))));
+			try
+			{
+				Connect();
+				return func(this);
+			}
+			finally
+			{
+				CloseConnection();
+			}
 		}
 
 		/// <summary>
@@ -791,7 +809,29 @@ namespace JPB.DataAccess.AdoWrapper
 		/// <returns></returns>
 		public T RunInTransaction<T>(Func<IDatabase, T> func, IsolationLevel transaction)
 		{
-			return AsyncHelper.WaitSingle(RunInTransactionAsync((dd) => Task.FromResult(func(dd)), transaction));
+			var preState = ConnectionController.InstanceCounter;
+			try
+			{
+				Connect(transaction);
+				return func(this);
+			}
+			catch (Exception ex)
+			{
+				TransactionRollback();
+				throw;
+			}
+			finally
+			{
+				if (ConnectionOpen())
+				{
+					CloseConnection();
+
+					if (preState != ConnectionController.InstanceCounter)
+					{
+						throw new InvalidOperationException("Invalid Counter handling detected. Connection was closed");
+					}
+				}
+			}
 		}
 
 		/// <summary>

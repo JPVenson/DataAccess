@@ -123,7 +123,7 @@ namespace JPB.DataAccess.Manager
 			var command = CreateProcedureCall(GetClassInfo(procParamType), procParam, Database);
 			var typeInfo = GetClassInfo(resultType);
 			//TODO Make Async
-			return AsyncHelper.WaitSingle(EnumerateDataRecordsAsync(command, LoadCompleteResultBeforeMapping, typeInfo));
+			return EnumerateDataRecords(command, LoadCompleteResultBeforeMapping, typeInfo);
 			//if (LoadCompleteResultBeforeMapping)
 			//{
 			//	return EnumerateDataRecords(command)

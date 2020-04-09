@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using JPB.DataAccess.AdoWrapper;
 using JPB.DataAccess.Query.Contracts;
@@ -80,6 +81,44 @@ namespace JPB.DataAccess.Manager
 								while (reader != null && db.Async
 									? await reader.ReadAsync().ConfigureAwait(DbAccessLayer.ConfigureAwait)
 									: dr.Read())
+								{
+									onRecord(dr);
+								}
+							} while (dr.NextResult());
+						}
+						catch (Exception ex)
+						{
+							db.RaiseFailedQuery(this, command, ex);
+							throw;
+						}
+						finally
+						{
+							dr?.Dispose();
+						}
+					}
+
+					return new object();
+				});
+		}
+
+		public void Enumerate(DbAccessLayer db, IDbCommand command, Action<IDataReader> onRecord,
+			CommandBehavior executionHint = CommandBehavior.Default)
+		{
+			db.Database.Run(
+				s =>
+				{
+					using (command)
+					{
+						command.Connection = command.Connection ?? s.GetConnection();
+						command.Transaction = command.Transaction ?? s.ConnectionController.Transaction;
+
+						IDataReader dr = null;
+						try
+						{
+							dr = command.ExecuteReader(executionHint);
+							do
+							{
+								while (dr.Read())
 								{
 									onRecord(dr);
 								}
