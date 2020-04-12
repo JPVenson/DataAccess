@@ -70,6 +70,7 @@
     <Compile Include="Poco\ColumnInfo.cs" />
     <Compile Include="Poco\DynamicTableContentModel.cs" />
     <Compile Include="Poco\ForgeinKeyInfoModel.cs" />
+    <Compile Include="Poco\IStructureAccess.cs" />
     <Compile Include="Poco\StoredProcedureInformation.cs" />
     <Compile Include="Poco\TableInfoModel.cs" />
     <Compile Include="Poco\TableInformations.cs" />

@@ -36,31 +36,23 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 			ColumnInfos = new List<IColumInfoModel>();
 		}
 
-		public TableInfoModel(ITableInformations info, string database, DbAccessLayer db)
+		public TableInfoModel(ITableInformations info, string database, IStructureAccess db)
 		{
 			CreateSelectFactory = true;
 			Info = info;
 			Database = database;
-			ColumnInfos = db.Select<ColumnInfo>(new object[] { Info.TableName, database }).Select(s => new ColumnInfoModel(s)).ToList();
+			ColumnInfos = db.GetColumnsOf(Info.TableName, database)
+				.Select(s => new ColumnInfoModel(s)).ToList();
 
-			var firstOrDefault = db.RunSelect(typeof(string),
-				db.Database.CreateCommandWithParameterValues("SELECT COLUMN_NAME " +
-				                                             "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc " +
-				                                             "JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu " +
-				                                             "ON tc.CONSTRAINT_NAME = ccu.Constraint_name " +
-				                                             "WHERE tc.CONSTRAINT_TYPE = 'Primary Key' " +
-				                                             "AND tc.TABLE_CATALOG = @database " +
-				                                             "AND tc.TABLE_NAME = @tableName",
-					new QueryParameter("tableName",info.TableName),
-					new QueryParameter("database",Database)
-				)).FirstOrDefault() as string;
+			var primaryKeyName = db.GetPrimaryKeyOf(info.TableName, Database);
 
-			var columInfoModel = ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == firstOrDefault);
+			var columInfoModel = ColumnInfos.FirstOrDefault(s => s.ColumnInfo.ColumnName == primaryKeyName);
 			if (columInfoModel != null)
+			{
 				columInfoModel.PrimaryKey = true;
+			}
 
-
-			var forgeinKeyDeclarations = db.Select<ForgeinKeyInfoModel>(new object[] { info.TableName, database });
+			var forgeinKeyDeclarations = db.GetForeignKeys(info.TableName, database);
 
 			foreach (var item in ColumnInfos)
 			{

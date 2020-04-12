@@ -16,6 +16,11 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 	[Serializable]
 	public class ColumnInfo : IColumnInfo
 	{
+		public ColumnInfo()
+		{
+			
+		}
+
 		[ObjectFactoryMethod]
 		public ColumnInfo(IDataRecord dataRecord)
 		{

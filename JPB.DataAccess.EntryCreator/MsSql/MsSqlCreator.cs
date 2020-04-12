@@ -28,7 +28,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 	{
 		private readonly bool _optionsIncludeInVsProject;
 
-		private readonly string[] usings =
+		private readonly string[] _usings =
 		{
 			"JPB.DataAccess.ModelsAnotations",
 			"System.Collections.Generic",
@@ -37,8 +37,6 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private bool _is2000;
 		private bool _is2014;
-		public DbAccessLayer Manager;
-
 		public MsSqlCreator(bool optionsIncludeInVsProject)
 		{
 			_optionsIncludeInVsProject = optionsIncludeInVsProject;
@@ -57,6 +55,8 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 			set { _is2014 = value; }
 		}
+
+		public IMsSqlStructure MsSqlStructure { get; set; }
 
 		public IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
 		public IEnumerable<ITableInfoModel> Tables { get; set; }
@@ -80,48 +80,57 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
 			TargetDir = outputPath;
-			Manager = new DbAccessLayer(DbAccessType.MsSql, connection);
-			bool checkDatabase;
-			try
+			bool checkDatabase = false;
+			if (connection.StartsWith("file:\\\\"))
 			{
-				checkDatabase = Manager.CheckDatabase();
+				MsSqlStructure = new DacpacMsSqlStructure(connection.Replace("file:\\\\", ""));
+				checkDatabase = true;
 			}
-			catch (Exception)
+			else
 			{
-				checkDatabase = false;
+				var dbAccessLayer = new DbAccessLayer(DbAccessType.MsSql, connection);
+				MsSqlStructure = new DatabaseMsSqlStructure(dbAccessLayer);
+				try
+				{
+					checkDatabase = dbAccessLayer.CheckDatabase();
+				}
+				catch (Exception)
+				{
+					checkDatabase = false;
+				}
+				
+				var databaseName = string.IsNullOrEmpty(dbAccessLayer.Database.DatabaseName) ? database : dbAccessLayer.Database.DatabaseName;
+				if (string.IsNullOrEmpty(databaseName))
+				{
+					throw new Exception("Database not exists. Maybe wrong Connection or no Selected Database?");
+				}
 			}
+			
 
 			if (!checkDatabase)
 			{
 				throw new Exception("Database not accessible. Maybe wrong Connection or no Selected Database?");
 			}
 
-			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
-			if (string.IsNullOrEmpty(databaseName))
-			{
-				throw new Exception("Database not exists. Maybe wrong Connection or no Selected Database?");
-			}
 			WinConsole.WriteLine("Connection OK ... Reading Server Version ...");
 
-			SqlVersion = Manager.RunSelect<string>(Manager.Database.CreateCommand("SELECT SERVERPROPERTY('productversion')")).FirstOrDefault();
+			SqlVersion = MsSqlStructure.GetVersion().ToString();
 
 			WinConsole.WriteLine("Server version is {0}", SqlVersion);
 
-			WinConsole.WriteLine("Reading Tables from {0} ...", databaseName);
+			WinConsole.WriteLine("Reading Tables from {0} ...", MsSqlStructure.GetDatabaseName());
 
-			Tables = Manager.Select<TableInformations>()
-				.ToArray()
-				.AsParallel()
-				.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
+			Tables = MsSqlStructure.GetTables()
+				//.AsParallel()
+				.Select(s => new TableInfoModel(s, MsSqlStructure.GetDatabaseName(), MsSqlStructure))
 				.ToList();
 
-			Views = Manager.Select<ViewInformation>()
-				.ToArray()
-				.AsParallel()
-				.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
+			Views = MsSqlStructure.GetViews()
+				//.AsParallel()
+				.Select(s => new TableInfoModel(s, MsSqlStructure.GetDatabaseName(), MsSqlStructure))
 				.ToList();
 
-			StoredProcs = Manager.Select<StoredProcedureInformation>()
+			StoredProcs = MsSqlStructure.GetStoredProcedures()
 				.Select(s => new StoredPrcInfoModel(s))
 				.ToList();
 
@@ -656,7 +665,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 								WinConsole.WriteLine("Reading table: '{0}'", column.ForgeinKeyDeclarations.TableName);
 
 								var tableContent =
-										Manager.Select<Any>(new object[] { column.ForgeinKeyDeclarations.TableName });
+									MsSqlStructure.GetEnumValuesOfType(column.ForgeinKeyDeclarations.TableName);
 
 								if (!tableContent.Any())
 								{

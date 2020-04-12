@@ -9,13 +9,12 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
-using AutoMapper;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.EntityCreator.Core;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
-using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
+using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.Services;
 using JPB.DataAccess.EntityCreator.UI.Shared.Model;
 using JPB.DataAccess.Manager;
@@ -39,10 +38,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		private bool _generateCompilerHeader;
 		private bool _generateConfigMethod;
 		private bool _generateConstructor;
+		private bool _generateFactory;
 		private bool _generateForgeinKeyDeclarations;
 		private bool _isEnumeratingDatabase;
 		private string _namespace;
 		private ITableInfoModel _selectedTable;
+		private bool _splitByType;
 		private string _status;
 		private ThreadSaveObservableCollection<IStoredPrcInfoModel> _storedProcs;
 		private ThreadSaveObservableCollection<TableInfoViewModel> _tables;
@@ -69,21 +70,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		}
 
 		public DelegateCommand OpenInfoWindowCommand { get; set; }
-		public DelegateCommand LoadConfigCommand { get; private set; }
-		public DelegateCommand SaveConfigCommand { get; private set; }
-		private bool _splitByType;
-		private bool _generateFactory;
-
-		public bool SplitByType
-		{
-			get { return _splitByType; }
-			set
-			{
-				SendPropertyChanging(() => SplitByType);
-				_splitByType = value;
-				SendPropertyChanged(() => SplitByType);
-			}
-		}
+		public DelegateCommand LoadConfigCommand { get; }
+		public DelegateCommand SaveConfigCommand { get; }
 
 		public ITableInfoModel SelectedTable
 		{
@@ -169,7 +157,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		public DelegateCommand ConnectToDatabaseCommand { get; private set; }
+		public DelegateCommand ConnectToDatabaseCommand { get; }
 
 		public bool IsEnumeratingDatabase
 		{
@@ -179,7 +167,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				if (value == false)
 				{
 					Status =
-							string.Format("Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action",
+						string.Format(
+							"Found {0} Tables, {1} Views, {2} Procedures ... select a Table to see Options or start an Action",
 							Tables.Count, Views.Count, StoredProcs.Count);
 				}
 
@@ -188,8 +177,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				SendPropertyChanged(() => IsEnumeratingDatabase);
 			}
 		}
-
-		public DbAccessLayer Manager { get; set; }
 
 		public string Status
 		{
@@ -202,13 +189,28 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			}
 		}
 
-		public DelegateCommand AddTableCommand { get; private set; }
+		public DelegateCommand AddTableCommand { get; }
 
-		public DelegateCommand DeleteSelectedTableCommand { get; private set; }
+		public DelegateCommand DeleteSelectedTableCommand { get; }
 
-		public DelegateCommand CompileCommand { get; private set; }
+		public DelegateCommand CompileCommand { get; }
 
-		public DelegateCommand AdjustNamesCommand { get; private set; }
+		public DelegateCommand AdjustNamesCommand { get; }
+
+		public IMsSqlStructure MsSqlStructure { get; set; }
+
+		public bool SplitByType
+		{
+			get { return _splitByType; }
+			set
+			{
+				SendPropertyChanging(() => SplitByType);
+				_splitByType = value;
+				SendPropertyChanged(() => SplitByType);
+			}
+		}
+
+		public bool GenerateDbValidationAnnotations { get; set; }
 
 		IEnumerable<ITableInfoModel> IMsSqlCreator.Tables
 		{
@@ -329,7 +331,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				var dialog = new CommonOpenFileDialog();
 				dialog.IsFolderPicker = true;
 				ThreadSaveAction(
-				() => { dirResult = dialog.ShowDialog() == CommonFileDialogResult.Ok ? DialogResult.OK : DialogResult.Abort; });
+					() =>
+					{
+						dirResult = dialog.ShowDialog() == CommonFileDialogResult.Ok
+							? DialogResult.OK
+							: DialogResult.Abort;
+					});
 				if (dirResult == DialogResult.OK)
 				{
 					path = dialog.FileName;
@@ -368,20 +375,41 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			//Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;Database=TestDB;
 			IsEnumeratingDatabase = true;
 			TargetDir = outputPath;
-			Manager = new DbAccessLayer(DbAccessType.MsSql, connection);
-			Manager.Async = false;
-			Manager.ThreadSave = true;
-			DbConfig.EnableGlobalThreadSafety = true;
-			try
+
+
+			var checkDatabase = false;
+			if (connection.StartsWith("file:\\\\"))
 			{
-				Connected = Manager.CheckDatabase();
+				MsSqlStructure = new DacpacMsSqlStructure(connection.Replace("file:\\\\", ""));
 			}
-			catch (Exception)
+			else
 			{
-				IsEnumeratingDatabase = false;
-				Connected = false;
+				var dbAccessLayer = new DbAccessLayer(DbAccessType.MsSql, connection);
+				MsSqlStructure = new DatabaseMsSqlStructure(dbAccessLayer);
+				try
+				{
+					checkDatabase = dbAccessLayer.CheckDatabase();
+				}
+				catch (Exception)
+				{
+					IsEnumeratingDatabase = false;
+					Connected = false;
+					checkDatabase = false;
+				}
+
+				var databaseName = string.IsNullOrEmpty(MsSqlStructure.GetDatabaseName())
+					? database
+					: MsSqlStructure.GetDatabaseName();
+				if (string.IsNullOrEmpty(databaseName))
+				{
+					IsEnumeratingDatabase = false;
+					Status = "Database not exists. Maybe wrong Connection or no Selected Database?";
+					Connected = false;
+					return;
+				}
 			}
 
+			DbConfig.EnableGlobalThreadSafety = true;
 			if (!Connected)
 			{
 				IsEnumeratingDatabase = false;
@@ -389,14 +417,6 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				return;
 			}
 
-			var databaseName = string.IsNullOrEmpty(Manager.Database.DatabaseName) ? database : Manager.Database.DatabaseName;
-			if (string.IsNullOrEmpty(databaseName))
-			{
-				IsEnumeratingDatabase = false;
-				Status = "Database not exists. Maybe wrong Connection or no Selected Database?";
-				Connected = false;
-				return;
-			}
 
 			Status = "Connection OK ... Reading Server Version ...";
 
@@ -406,13 +426,13 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var counter = 2;
 			var createTables = SimpleWork(() =>
 			{
-				var tables = new DbAccessLayer(DbAccessType.MsSql, connection).Select<TableInformations>()
-				                                                              .Select(
-				                                                              s =>
-						                                                              new TableInfoModel(s, databaseName,
-						                                                              new DbAccessLayer(DbAccessType.MsSql, connection)))
-				                                                              .Select(s => new TableInfoViewModel(s, this))
-				                                                              .ToList();
+				var tables = MsSqlStructure.GetTables()
+					.Select(
+						s =>
+							new TableInfoModel(s, MsSqlStructure.GetDatabaseName(),
+								MsSqlStructure))
+					.Select(s => new TableInfoViewModel(s, this))
+					.ToList();
 				foreach (var source in tables)
 				{
 					if (Tables.All(f => f.Info.TableName != source.Info.TableName))
@@ -424,11 +444,10 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var createViews = SimpleWork(() =>
 			{
 				var views =
-						new DbAccessLayer(DbAccessType.MsSql, connection)
-								.Select<ViewInformation>()
-								.Select(s => new TableInfoModel(s, databaseName, new DbAccessLayer(DbAccessType.MsSql, connection)))
-								.Select(s => new TableInfoViewModel(s, this))
-								.ToList();
+					MsSqlStructure.GetViews()
+						.Select(s => new TableInfoModel(s, MsSqlStructure.GetDatabaseName(), MsSqlStructure))
+						.Select(s => new TableInfoViewModel(s, this))
+						.ToList();
 
 				foreach (var source in views)
 				{
@@ -486,10 +505,11 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 				if (new Version(options.Version) != version)
 				{
 					var messageBoxResult = MessageBox.Show(Application.Current.MainWindow,
-					"Warning Version missmatch",
-					string.Format("The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.",
-					version, options.Version),
-					MessageBoxButton.OKCancel);
+						"Warning Version missmatch",
+						string.Format(
+							"The current Entity Creator version ({0}) is not equals the version ({1}) you have provided.",
+							version, options.Version),
+						MessageBoxButton.OKCancel);
 
 					if (messageBoxResult == MessageBoxResult.Cancel)
 					{
@@ -587,10 +607,10 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 		{
 			Tables.Add(new TableInfoViewModel(new TableInfoModel
 			{
-					Info = new TableInformations
-					{
-							TableName = "New Table"
-					}
+				Info = new TableInformations
+				{
+					TableName = "New Table"
+				}
 			}, this));
 		}
 

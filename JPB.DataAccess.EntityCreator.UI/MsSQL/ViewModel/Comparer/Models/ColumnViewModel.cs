@@ -106,6 +106,16 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel.Comparer.Models
 			}
 		}
 
+		public int? MaxLength
+		{
+			get { return ColumnInfo.MaxLength; }
+			set
+			{
+				ColumnInfo.MaxLength = value;
+				SendPropertyChanged();
+			}
+		}
+
 		//[DisplayName("Type")]
 		//[ItemsSource(typeof(SqlDataTypeItemSource))]
 		//public string TargetType2
