@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;net47;net471;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netcoreapp2.2;netcoreapp2.1;netcoreapp2.0;net48;net47;net471;net472;net461;net462</TargetFrameworks>
     <RootNamespace>JPB.DataAccess</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageId>JPB.DataAccess</PackageId>
-    <Version>3.1.7.3</Version>
+    <Version>3.1.7.4</Version>
     <Description>A Fast and rich SQL based ORM that does not uses LINQ expressions for sake of readability and performance for NetCore, NetFramework &amp; NetStandard</Description>
     <PackageLicenseExpression></PackageLicenseExpression>
     <Copyright>Jean-Pierre Bachmann</Copyright>
@@ -19,7 +19,8 @@
     <Authors>Jean-Pierre Bachmann</Authors>
     <Company />
     <Product>JPB.DataAccess</Product>
-    <PackageReleaseNotes>Fixed serveral bugs</PackageReleaseNotes>
+    <PackageReleaseNotes>Added Net 461 &amp; 462 support
+Fixed NREX bug</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
