@@ -718,7 +718,7 @@ namespace JPB.DataAccess.Manager
 					if (xmlAttributeModel != null)
 					{
 						//Get the XML text and check if its null or empty
-						var xmlStream = value.ToString();
+						var xmlStream = value?.ToString();
 						if (string.IsNullOrEmpty(xmlStream))
 						{
 							continue;

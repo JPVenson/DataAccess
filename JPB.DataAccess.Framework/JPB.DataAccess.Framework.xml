@@ -4650,69 +4650,6 @@
             A Helper class to run Asynchronous functions from synchronous ones
             </summary>
         </member>
-        <member name="T:JPB.DataAccess.Helper.AsyncHelper.AsyncBridge">
-            <summary>
-            A class to bridge synchronous asynchronous methods
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.AsyncHelper.AsyncBridge.#ctor">
-            <summary>
-            Constructs the AsyncBridge by capturing the current
-            SynchronizationContext and replacing it with a new
-            ExclusiveSynchronizationContext.
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.AsyncHelper.AsyncBridge.Run(System.Threading.Tasks.Task,System.Action{System.Threading.Tasks.Task})">
-            <summary>
-            Execute's an async task with a void return type
-            from a synchronous context
-            </summary>
-            <param name="task">Task to execute</param>
-            <param name="callback">Optional callback</param>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.AsyncHelper.AsyncBridge.Run``1(System.Threading.Tasks.Task{``0},System.Action{System.Threading.Tasks.Task{``0}})">
-            <summary>
-            Execute's an async task with a T return type
-            from a synchronous context
-            </summary>
-            <typeparam name="T">The type of the task</typeparam>
-            <param name="task">Task to execute</param>
-            <param name="callback">Optional callback</param>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.AsyncHelper.AsyncBridge.Run``1(System.Threading.Tasks.Task{``0},System.Action{``0})">
-            <summary>
-            Execute's an async task with a T return type
-            from a synchronous context
-            </summary>
-            <typeparam name="T">The type of the task</typeparam>
-            <param name="task">Task to execute</param>
-            <param name="callback">
-            The callback function that uses the result of the task
-            </param>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.AsyncHelper.AsyncBridge.Dispose">
-            <summary>
-            Disposes the object
-            </summary>
-        </member>
-        <member name="P:JPB.DataAccess.Helper.AsyncHelper.Wait">
-            <summary>
-            Creates a new AsyncBridge. This should always be used in
-            conjunction with the using statement, to ensure it is disposed
-            </summary>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.System.Threading.Tasks.Task.GetResultEx()">
-            <summary>
-            Awaits a single Task
-            </summary>
-            <param name="task">The task.</param>
-        </member>
-        <member name="M:JPB.DataAccess.Helper.AsyncHelper.WaitSingle``1(System.Threading.Tasks.Task{``0})">
-            <summary>
-            Awaits a single Task
-            </summary>
-            <param name="task">The task.</param>
-        </member>
         <member name="M:JPB.DataAccess.Helper.AsyncHelper.FireAndForget(System.Func{System.Threading.Tasks.Task},System.Action{System.Exception})">
             <summary>
             Runs a task with the "Fire and Forget" pattern using Task.Run,
@@ -10389,8 +10326,17 @@
         </member>
         <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalOperatorQuery`1.QueryOperatorValue(System.String,System.Object)">
             <summary>
-                Prepaires an Conditional Query
+                Adds an Condition with an Operator and an value wrapped into a variable
             </summary>
+        </member>
+        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalOperatorQuery`1.QueryValue(System.String,System.String)">
+            <summary>
+            	Adds an Condition with an operator and an plain sql text.
+            	Beware that value will not be sanitized and is prone to SQL-Injection! 
+            </summary>
+            <param name="operators"></param>
+            <param name="value"></param>
+            <returns></returns>
         </member>
         <member name="T:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1">
             <summary>
