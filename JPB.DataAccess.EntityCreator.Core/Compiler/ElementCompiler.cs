@@ -136,7 +136,7 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 				}
 
 				_logger.WriteLine("Compute changes");
-				//check if hascodes are diverent
+				//check if hash is different
 				var hasher = MD5.Create();
 				var neuHash = hasher.ComputeHash(memStream.ToArray());
 				var targetDirectory = TargetDir;

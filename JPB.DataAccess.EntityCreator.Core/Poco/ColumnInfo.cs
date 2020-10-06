@@ -26,7 +26,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Poco
 		{
 			ColumnName = dataRecord.GetString(dataRecord.GetOrdinal("COLUMN_NAME"));
 			PositionFromTop = dataRecord.GetInt32(dataRecord.GetOrdinal("ORDINAL_POSITION"));
-			Nullable = dataRecord.GetString(dataRecord.GetOrdinal("IS_NULLABLE")) == "1";
+			var IS_NULLABLE = dataRecord.GetString(dataRecord.GetOrdinal("IS_NULLABLE"));
+			Nullable = IS_NULLABLE == "1" 
+			           || IS_NULLABLE.Equals("yes", StringComparison.InvariantCultureIgnoreCase)
+			           || IS_NULLABLE.Equals("true", StringComparison.InvariantCultureIgnoreCase);
 			var ordinal = dataRecord.GetOrdinal("CHARACTER_MAXIMUM_LENGTH");
 			if(dataRecord.IsDBNull(ordinal))
 			{
