@@ -65,11 +65,8 @@ namespace JPB.DataAccess.EntityCollections
 #endif
 		[Browsable(false)]
 		[EditorBrowsable(EditorBrowsableState.Never)]
-		public DbCollection(IEnumerable<T> subset)
+		public DbCollection(IEnumerable<T> subset) : this()
 		{
-			_internalCollection = new Dictionary<T, CollectionStates>(new PocoPkComparer<T>());
-			_changeTracker = new Dictionary<T, List<string>>();
-
 			foreach (var item in subset)
 			{
 				Add(item, CollectionStates.Unchanged);
@@ -79,6 +76,12 @@ namespace JPB.DataAccess.EntityCollections
 					notifiableItem.PropertyChanged += item_PropertyChanged;
 				}
 			}
+		}
+
+		public DbCollection()
+		{
+			_internalCollection = new Dictionary<T, CollectionStates>(new PocoPkComparer<T>());
+			_changeTracker = new Dictionary<T, List<string>>();
 		}
 
 		/// <summary>
