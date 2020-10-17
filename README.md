@@ -6,7 +6,7 @@
 
 This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
 
-You can also contact me on gitter at https://gitter.im/JPVenson/DataAccess.
+If you have questions please feel free to just open a Issue https://github.com/JPVenson/DataAccess/issues/new.
 
 ## Introduction
 This will be a short article about my multi strategy ADO.NET wrapper that uses FactoryMethods,
