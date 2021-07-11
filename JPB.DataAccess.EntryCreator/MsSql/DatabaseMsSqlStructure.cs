@@ -1,12 +1,14 @@
 ﻿using System.Linq;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Poco;
+using JPB.DataAccess.EntityCreator.Core.Poco.MsSQL;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.EntityCreator.MsSql
 {
 	public class DatabaseMsSqlStructure :
-		IMsSqlStructure
+		IDatabaseStructure
 	{
 		private readonly DbAccessLayer _db;
 
@@ -21,17 +23,17 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				.FirstOrDefault();
 		}
 
-		public TableInformations[] GetTables()
+		public ITableInformations[] GetTables()
 		{
 			return _db.Select<TableInformations>();
 		}
 
-		public ViewInformation[] GetViews()
+		public ITableInformations[] GetViews()
 		{
 			return _db.Select<ViewInformation>();
 		}
 
-		public StoredProcedureInformation[] GetStoredProcedures()
+		public IStoredProcedureInformation[] GetStoredProcedures()
 		{
 			return _db.Select<StoredProcedureInformation>();
 		}
@@ -46,7 +48,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			return _db.Database.DatabaseName;
 		}
 
-		public ColumnInfo[] GetColumnsOf(string table, string database)
+		public IColumnInfo[] GetColumnsOf(string table, string database)
 		{
 			return _db.Select<ColumnInfo>(new object[]
 			{
@@ -69,7 +71,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 				)).FirstOrDefault() as string;
 		}
 
-		public ForgeinKeyInfoModel[] GetForeignKeys(string table, string database)
+		public IForgeinKeyInfoModel[] GetForeignKeys(string table, string database)
 		{
 			return _db.Select<ForgeinKeyInfoModel>(new object[] {table, database});
 		}

@@ -7,11 +7,11 @@ namespace JPB.DataAccess.EntityCreator.Core.Models
 	[Serializable]
 	public class StoredPrcInfoModel : IStoredPrcInfoModel
 	{
-		public StoredProcedureInformation Parameter { get; set; }
+		public IStoredProcedureInformation Parameter { get; set; }
 		public bool Exclude { get; set; }
 		public string NewTableName { get; set; }
 
-		public StoredPrcInfoModel(StoredProcedureInformation parameter)
+		public StoredPrcInfoModel(IStoredProcedureInformation parameter)
 		{
 			Parameter = parameter;
 		}

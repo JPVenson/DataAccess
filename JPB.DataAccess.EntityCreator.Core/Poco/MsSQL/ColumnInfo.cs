@@ -11,7 +11,7 @@ using JPB.DataAccess.QueryFactory;
 
 #endregion
 
-namespace JPB.DataAccess.EntityCreator.Core.Poco
+namespace JPB.DataAccess.EntityCreator.Core.Poco.MsSQL
 {
 	[Serializable]
 	public class ColumnInfo : IColumnInfo

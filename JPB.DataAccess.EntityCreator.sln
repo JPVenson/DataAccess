@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JPB.DataAccess.EntityCreato
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JPB.DataAccess.Framework", "JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj", "{798D7353-FF9E-4224-8EC2-395DBC0DC012}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JPB.DataAccess.SqLite.NetStandard", "JPB.DataAccess.SqLite.NetStandard\JPB.DataAccess.SqLite.NetStandard.csproj", "{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,24 @@ Global
 		{798D7353-FF9E-4224-8EC2-395DBC0DC012}.Release|x64.Build.0 = Release|Any CPU
 		{798D7353-FF9E-4224-8EC2-395DBC0DC012}.Release|x86.ActiveCfg = Release|Any CPU
 		{798D7353-FF9E-4224-8EC2-395DBC0DC012}.Release|x86.Build.0 = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Debug|x64.Build.0 = Debug|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Debug|x86.Build.0 = Debug|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.ExternalRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.ExternalRelease|Any CPU.Build.0 = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.ExternalRelease|x64.ActiveCfg = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.ExternalRelease|x64.Build.0 = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.ExternalRelease|x86.ActiveCfg = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.ExternalRelease|x86.Build.0 = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Release|x64.ActiveCfg = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Release|x64.Build.0 = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Release|x86.ActiveCfg = Release|Any CPU
+		{0842AE32-EF09-44BE-BAB1-40066E7E9DFD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

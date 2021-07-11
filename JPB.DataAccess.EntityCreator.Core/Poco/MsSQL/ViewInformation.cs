@@ -1,7 +1,7 @@
 using System;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.EntityCreator.Core.Poco
+namespace JPB.DataAccess.EntityCreator.Core.Poco.MsSQL
 {
 	[SelectFactory("SELECT name FROM sysobjects WHERE xtype='V'")]
 	[Serializable]

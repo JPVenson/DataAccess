@@ -11,10 +11,16 @@ using System;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.ModelsAnotations;
 
-namespace JPB.DataAccess.EntityCreator.Core.Poco
+namespace JPB.DataAccess.EntityCreator.Core.Poco.SqLite
 {
 	[Serializable]
-	[SelectFactory("SELECT name FROM sysobjects WHERE xtype='U'")]
+	[SelectFactory(@"SELECT 
+	name
+	FROM 
+	sqlite_master 
+	WHERE 
+	type ='table' AND 
+	name NOT LIKE 'sqlite_%';")]
 	public class TableInformations : ITableInformations
 	{
 		[ForModel("name")]

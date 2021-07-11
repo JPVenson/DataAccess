@@ -3,12 +3,9 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
-using JPB.DataAccess.Query;
-using JPB.DataAccess.Query.Contracts;
-using JPB.DataAccess.Query.Operators;
 using JPB.DataAccess.QueryFactory;
 
-namespace JPB.DataAccess.EntityCreator.Core.Poco
+namespace JPB.DataAccess.EntityCreator.Core.Poco.MsSQL
 {
 	[Serializable]
 	public class ForgeinKeyInfoModel : IForgeinKeyInfoModel

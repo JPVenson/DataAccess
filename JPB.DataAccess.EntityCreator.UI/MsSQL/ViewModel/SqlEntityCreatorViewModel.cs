@@ -14,6 +14,7 @@ using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.EntityCreator.Core;
 using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Poco;
+using JPB.DataAccess.EntityCreator.Core.Poco.MsSQL;
 using JPB.DataAccess.EntityCreator.MsSql;
 using JPB.DataAccess.EntityCreator.UI.MsSQL.Services;
 using JPB.DataAccess.EntityCreator.UI.Shared.Model;
@@ -197,7 +198,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 
 		public DelegateCommand AdjustNamesCommand { get; }
 
-		public IMsSqlStructure MsSqlStructure { get; set; }
+		public IDatabaseStructure DatabaseStructure { get; set; }
 
 		public bool SplitByType
 		{
@@ -380,12 +381,12 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var checkDatabase = false;
 			if (connection.StartsWith("file:\\\\"))
 			{
-				MsSqlStructure = new DacpacMsSqlStructure(connection.Replace("file:\\\\", ""));
+				DatabaseStructure = new DacpacDatabaseStructure(connection.Replace("file:\\\\", ""));
 			}
 			else
 			{
 				var dbAccessLayer = new DbAccessLayer(DbAccessType.MsSql, connection);
-				MsSqlStructure = new DatabaseMsSqlStructure(dbAccessLayer);
+				DatabaseStructure = new DatabaseMsSqlStructure(dbAccessLayer);
 				try
 				{
 					checkDatabase = dbAccessLayer.CheckDatabase();
@@ -397,9 +398,9 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 					checkDatabase = false;
 				}
 
-				var databaseName = string.IsNullOrEmpty(MsSqlStructure.GetDatabaseName())
+				var databaseName = string.IsNullOrEmpty(DatabaseStructure.GetDatabaseName())
 					? database
-					: MsSqlStructure.GetDatabaseName();
+					: DatabaseStructure.GetDatabaseName();
 				if (string.IsNullOrEmpty(databaseName))
 				{
 					IsEnumeratingDatabase = false;
@@ -426,11 +427,11 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var counter = 2;
 			var createTables = SimpleWork(() =>
 			{
-				var tables = MsSqlStructure.GetTables()
+				var tables = DatabaseStructure.GetTables()
 					.Select(
 						s =>
-							new TableInfoModel(s, MsSqlStructure.GetDatabaseName(),
-								MsSqlStructure))
+							new TableInfoModel(s, DatabaseStructure.GetDatabaseName(),
+								DatabaseStructure))
 					.Select(s => new TableInfoViewModel(s, this))
 					.ToList();
 				foreach (var source in tables)
@@ -444,8 +445,8 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var createViews = SimpleWork(() =>
 			{
 				var views =
-					MsSqlStructure.GetViews()
-						.Select(s => new TableInfoModel(s, MsSqlStructure.GetDatabaseName(), MsSqlStructure))
+					DatabaseStructure.GetViews()
+						.Select(s => new TableInfoModel(s, DatabaseStructure.GetDatabaseName(), DatabaseStructure))
 						.Select(s => new TableInfoViewModel(s, this))
 						.ToList();
 

@@ -1,30 +1,25 @@
-﻿
-
-using System.ComponentModel;
-using System.Text;
-using System.Xml;
-using Microsoft.Build.Evaluation;
-
-#region
+﻿#region
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using JPB.DataAccess.EntityCreator.Core;
-using JPB.DataAccess.EntityCreator.Core.Compiler;
-using JPB.DataAccess.EntityCreator.Core.Contracts;
-using JPB.DataAccess.EntityCreator.Core.Models;
-using JPB.DataAccess.EntityCreator.Core.Poco;
-using JPB.DataAccess.Helper;
 using JPB.DataAccess.Manager;
 
 #endregion
+
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using JPB.DataAccess.EntityCreator.Core;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Models;
+using JPB.DataAccess.EntityCreator.Core.Poco;
+using JPB.DataAccess.EntityCreator.MsSql;
+using Microsoft.Build.Evaluation;
 using WinConsole = System.Console;
 
-namespace JPB.DataAccess.EntityCreator.MsSql
+namespace JPB.DataAccess.EntityCreator
 {
-	public class MsSqlCreator : IMsSqlCreator
+	public class ConsoleEntityCreator : IMsSqlCreator
 	{
 		private readonly bool _optionsIncludeInVsProject;
 
@@ -37,9 +32,10 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 
 		private bool _is2000;
 		private bool _is2014;
-		public MsSqlCreator(bool optionsIncludeInVsProject)
+		public ConsoleEntityCreator(bool optionsIncludeInVsProject, IDatabaseStructure dbStructure)
 		{
 			_optionsIncludeInVsProject = optionsIncludeInVsProject;
+			DatabaseStructure = dbStructure;
 		}
 
 		public bool Is2000
@@ -56,7 +52,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 			set { _is2014 = value; }
 		}
 
-		public IMsSqlStructure MsSqlStructure { get; set; }
+		public IDatabaseStructure DatabaseStructure { get; set; }
 
 		public IEnumerable<ISharedInterface> SharedInterfaces { get; set; }
 		public IEnumerable<ITableInfoModel> Tables { get; set; }
@@ -80,57 +76,25 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 		public void CreateEntrys(string connection, string outputPath, string database)
 		{
 			TargetDir = outputPath;
-			bool checkDatabase = false;
-			if (connection.StartsWith("file:\\\\"))
-			{
-				MsSqlStructure = new DacpacMsSqlStructure(connection.Replace("file:\\\\", ""));
-				checkDatabase = true;
-			}
-			else
-			{
-				var dbAccessLayer = new DbAccessLayer(DbAccessType.MsSql, connection);
-				MsSqlStructure = new DatabaseMsSqlStructure(dbAccessLayer);
-				try
-				{
-					checkDatabase = dbAccessLayer.CheckDatabase();
-				}
-				catch (Exception)
-				{
-					checkDatabase = false;
-				}
-				
-				var databaseName = string.IsNullOrEmpty(dbAccessLayer.Database.DatabaseName) ? database : dbAccessLayer.Database.DatabaseName;
-				if (string.IsNullOrEmpty(databaseName))
-				{
-					throw new Exception("Database not exists. Maybe wrong Connection or no Selected Database?");
-				}
-			}
-			
-
-			if (!checkDatabase)
-			{
-				throw new Exception("Database not accessible. Maybe wrong Connection or no Selected Database?");
-			}
-
 			WinConsole.WriteLine("Connection OK ... Reading Server Version ...");
 
-			SqlVersion = MsSqlStructure.GetVersion().ToString();
+			SqlVersion = DatabaseStructure.GetVersion().ToString();
 
 			WinConsole.WriteLine("Server version is {0}", SqlVersion);
 
-			WinConsole.WriteLine("Reading Tables from {0} ...", MsSqlStructure.GetDatabaseName());
+			WinConsole.WriteLine("Reading Tables from {0} ...", DatabaseStructure.GetDatabaseName());
 
-			Tables = MsSqlStructure.GetTables()
+			Tables = DatabaseStructure.GetTables()
 				//.AsParallel()
-				.Select(s => new TableInfoModel(s, MsSqlStructure.GetDatabaseName(), MsSqlStructure))
+				.Select(s => new TableInfoModel(s, DatabaseStructure.GetDatabaseName(), DatabaseStructure))
 				.ToList();
 
-			Views = MsSqlStructure.GetViews()
+			Views = DatabaseStructure.GetViews()
 				//.AsParallel()
-				.Select(s => new TableInfoModel(s, MsSqlStructure.GetDatabaseName(), MsSqlStructure))
+				.Select(s => new TableInfoModel(s, DatabaseStructure.GetDatabaseName(), DatabaseStructure))
 				.ToList();
 
-			StoredProcs = MsSqlStructure.GetStoredProcedures()
+			StoredProcs = DatabaseStructure.GetStoredProcedures()
 				.Select(s => new StoredPrcInfoModel(s))
 				.ToList();
 
@@ -665,7 +629,7 @@ namespace JPB.DataAccess.EntityCreator.MsSql
 								WinConsole.WriteLine("Reading table: '{0}'", column.ForgeinKeyDeclarations.TableName);
 
 								var tableContent =
-									MsSqlStructure.GetEnumValuesOfType(column.ForgeinKeyDeclarations.TableName);
+									DatabaseStructure.GetEnumValuesOfType(column.ForgeinKeyDeclarations.TableName);
 
 								if (!tableContent.Any())
 								{

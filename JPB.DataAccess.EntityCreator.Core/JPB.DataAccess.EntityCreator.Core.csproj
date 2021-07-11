@@ -67,14 +67,19 @@
     <Compile Include="Models\SpParam.cs" />
     <Compile Include="Models\StoredPrcInfoModel.cs" />
     <Compile Include="NoYesConverter.cs" />
-    <Compile Include="Poco\ColumnInfo.cs" />
+    <Compile Include="Poco\MsSQL\ColumnInfo.cs" />
     <Compile Include="Poco\DynamicTableContentModel.cs" />
-    <Compile Include="Poco\ForgeinKeyInfoModel.cs" />
+    <Compile Include="Poco\MsSQL\ForgeinKeyInfoModel.cs" />
     <Compile Include="Poco\IStructureAccess.cs" />
-    <Compile Include="Poco\StoredProcedureInformation.cs" />
+    <Compile Include="Poco\MsSQL\StoredProcedureInformation.cs" />
+    <Compile Include="Poco\SqLite\ColumnInfo.cs" />
+    <Compile Include="Poco\SqLite\ForgeinKeyInfoModel.cs" />
+    <Compile Include="Poco\SqLite\StoredProcedureInformation.cs" />
+    <Compile Include="Poco\SqLite\TableInformations.cs" />
+    <Compile Include="Poco\SqLite\ViewInformation.cs" />
     <Compile Include="Poco\TableInfoModel.cs" />
-    <Compile Include="Poco\TableInformations.cs" />
-    <Compile Include="Poco\ViewInformation.cs" />
+    <Compile Include="Poco\MsSQL\TableInformations.cs" />
+    <Compile Include="Poco\MsSQL\ViewInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharedMethods.cs" />
   </ItemGroup>
@@ -83,6 +88,11 @@
       <Project>{798d7353-ff9e-4224-8ec2-395dbc0dc012}</Project>
       <Name>JPB.DataAccess.Framework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite.Core">
+      <Version>1.0.111</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

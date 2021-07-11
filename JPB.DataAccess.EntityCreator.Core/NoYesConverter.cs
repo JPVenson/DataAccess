@@ -26,4 +26,17 @@ namespace JPB.DataAccess.EntityCreator.Core
 			return (bool) value ? "yes" : "no";
 		}
 	}
+	class NumToBooleanConverter : IValueConverter
+	{
+		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			var sValue = value as string;
+			return sValue.ToLower() == "1";
+		}
+
+		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		{
+			return (bool) value ? "1" : "0";
+		}
+	}
 }

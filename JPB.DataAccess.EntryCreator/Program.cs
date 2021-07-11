@@ -17,7 +17,11 @@ using System.Reflection;
 using System.Threading;
 using System.Windows;
 using CommandLine;
+using JPB.DataAccess.Contacts;
 using JPB.DataAccess.EntityCreator.MsSql;
+using JPB.DataAccess.EntityCreator.SqLite;
+using JPB.DataAccess.Manager;
+using JPB.DataAccess.SqLite;
 using WinConsole = System.Console;
 
 namespace JPB.DataAccess.EntityCreator
@@ -77,22 +81,34 @@ namespace JPB.DataAccess.EntityCreator
 				AutoConsole = new AutoConsole(null, new string[0]);
 			}
 
-			WinConsole.WriteLine(
-				@"Enter Connection string or type \explore to search for a server [Only MSSQL supported]");
-			if (Clipboard.ContainsText() && AutoConsole.Options == null)
+			WinConsole.WriteLine("Mode: (MsSQL, SqLite)");
+
+			IDatabaseStructure structure = null;
+
+			var mode = AutoConsole.GetNextOption().ToLower();
+			if (mode == "mssql")
 			{
-				var maybeConnection = Clipboard.GetText(TextDataFormat.Text);
-				var strings = maybeConnection.Split(';');
-				var any = strings.Any(s =>
-					s.ToLower().Contains("data source=") || s.ToLower().Contains("initial catalog="));
-				if (any)
+				WinConsole.WriteLine(
+				@"Enter Connection string or type \explore to search for a server");
+				if (Clipboard.ContainsText() && AutoConsole.Options == null)
 				{
-					WinConsole.WriteLine("Use clipboard content? [(y|Enter*) | no]");
-					var WinConsoleKeyInfo = Console.ReadKey();
-					if (char.ToLower(WinConsoleKeyInfo.KeyChar) == 'y' || WinConsoleKeyInfo.Key == ConsoleKey.Enter)
+					var maybeConnection = Clipboard.GetText(TextDataFormat.Text);
+					var strings = maybeConnection.Split(';');
+					var any = strings.Any(s =>
+						s.ToLower().Contains("data source=") || s.ToLower().Contains("initial catalog="));
+					if (any)
 					{
-						connectionString = maybeConnection;
-						AutoConsole.SetNextOption(connectionString);
+						WinConsole.WriteLine("Use clipboard content? [(y|Enter*) | no]");
+						var WinConsoleKeyInfo = Console.ReadKey();
+						if (char.ToLower(WinConsoleKeyInfo.KeyChar) == 'y' || WinConsoleKeyInfo.Key == ConsoleKey.Enter)
+						{
+							connectionString = maybeConnection;
+							AutoConsole.SetNextOption(connectionString);
+						}
+						else
+						{
+							connectionString = string.Empty;
+						}
 					}
 					else
 					{
@@ -103,52 +119,71 @@ namespace JPB.DataAccess.EntityCreator
 				{
 					connectionString = string.Empty;
 				}
-			}
-			else
-			{
-				connectionString = string.Empty;
-			}
 
-			if (string.IsNullOrEmpty(connectionString))
-			{
-				do
+				if (string.IsNullOrEmpty(connectionString))
 				{
-					connectionString = AutoConsole.GetNextOption();
-					if (connectionString == @"\explore")
+					do
 					{
-						var instance = SqlDataSourceEnumerator.Instance;
-						WinConsole.WriteLine("Search for data Sources in current network");
-
-						var table = instance.GetDataSources();
-						WinConsole.WriteLine("Row count {0}", table.Rows.Count);
-
-						foreach (var column in table.Columns.Cast<DataColumn>())
+						connectionString = AutoConsole.GetNextOption();
+						if (connectionString == @"\explore")
 						{
-							WinConsole.Write(column.ColumnName + "|");
-						}
+							var instance = SqlDataSourceEnumerator.Instance;
+							WinConsole.WriteLine("Search for data Sources in current network");
 
-						for (var i = 0; i < table.Rows.Count; i++)
-						{
-							var row = table.Rows[i];
+							var table = instance.GetDataSources();
+							WinConsole.WriteLine("Row count {0}", table.Rows.Count);
 
-							WinConsole.Write("o {0} |", i);
-
-							foreach (DataColumn col in table.Columns)
+							foreach (var column in table.Columns.Cast<DataColumn>())
 							{
-								WinConsole.Write(" {0} = {1} |", col.ColumnName, row[col]);
+								WinConsole.Write(column.ColumnName + "|");
 							}
 
-							WinConsole.WriteLine("============================");
-						}
+							for (var i = 0; i < table.Rows.Count; i++)
+							{
+								var row = table.Rows[i];
 
-						WinConsole.WriteLine();
+								WinConsole.Write("o {0} |", i);
+
+								foreach (DataColumn col in table.Columns)
+								{
+									WinConsole.Write(" {0} = {1} |", col.ColumnName, row[col]);
+								}
+
+								WinConsole.WriteLine("============================");
+							}
+
+							WinConsole.WriteLine();
+						}
+					} while (string.IsNullOrEmpty(connectionString) || connectionString.ToLower().Contains(@"\explore"));
+				}
+
+				if (connectionString.StartsWith("file:\\\\"))
+				{
+					//structure = new DacpacDatabaseStructure(connectionString.Replace("file:\\\\", ""));
+				}
+				else
+				{
+					var dbAccessLayer = new DbAccessLayer(DbAccessType.MsSql, connectionString);
+					structure = new DatabaseMsSqlStructure(dbAccessLayer);
+					var databaseName = dbAccessLayer.Database.DatabaseName;
+					if (string.IsNullOrEmpty(databaseName))
+					{
+						throw new Exception("Database not exists. Maybe wrong Connection or no Selected Database?");
 					}
-				} while (string.IsNullOrEmpty(connectionString) || connectionString.ToLower().Contains(@"\explore"));
+				}
+			}
+			else if (mode == "sqlite")
+			{
+				WinConsole.WriteLine("Enter Connection string:");
+				connectionString = AutoConsole.GetNextOption();
+				SqLiteInteroptWrapper.EnsureSqLiteInteropt();
+				//Data Source=H:\Code\JPB.InhousePlayback\JPB.InhousePlayback\Server\Playback.50.db;
+				structure = new DatabaseSqLiteStructure(new DbAccessLayer(new SqLiteStrategy(connectionString)));
 			}
 
 			try
 			{
-				new MsSqlCreator(options.IncludeInVsProject)
+				new ConsoleEntityCreator(options.IncludeInVsProject, structure)
 					.CreateEntrys(connectionString, outputDirectory, string.Empty);
 			}
 			catch (Exception e)
