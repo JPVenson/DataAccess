@@ -53,13 +53,14 @@ namespace JPB.DataAccess.Query.Operators.Conditional
 			result.ContainerObject.SearchLast<ConditionStatementQueryPart>().Conditions.Add(new ConditionStructurePart(ConditionStructurePart.LogicalOperator.CloseBracket));
 			return result;
 		}
-
-		/// <summary>
-		///		Selects the ForginKey to the table.
-		/// </summary>
-		/// <exception cref="InvalidOperationException">If there are 0 or more then 1 forginKeys</exception>
-		/// <returns></returns>
+		
+		[Obsolete("Renamed to ForeignKey")]
 		public ConditionalColumnQuery<TPoco> ForginKey<TFkPoco>()
+		{
+			return ForeignKey<TFkPoco>();
+		}
+
+		public ConditionalColumnQuery<TPoco> ForeignKey<TFkPoco>()
 		{
 			var tCache = ContainerObject.AccessLayer.GetClassInfo(typeof(TPoco));
 			var tProp = tCache.Propertys.Values

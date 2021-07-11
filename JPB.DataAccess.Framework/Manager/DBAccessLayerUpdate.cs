@@ -137,8 +137,13 @@ namespace JPB.DataAccess.Manager
 			}
 
 			var rowVersionprop = type.GetLocalToDbSchemaMapping(rowVersion.PropertyName);
-			var staticRowVersion = "SELECT " + rowVersionprop + " FROM " + type.TableName + " WHERE " +
-			                       type.PrimaryKeyProperty.DbName + " = " + entry.GetPK(Config);
+			var staticRowVersion = "SELECT " + 
+			                       rowVersionprop.EnsureAlias() + 
+			                       " FROM " + 
+			                       type.TableName.EnsureAlias() + 
+			                       " WHERE " +
+			                       type.PrimaryKeyProperty.DbName.EnsureAlias() + 
+			                       " = " + entry.GetPK(Config);
 
 #pragma warning disable 618
 			var skalar = Database.GetSkalar(staticRowVersion);
@@ -190,7 +195,7 @@ namespace JPB.DataAccess.Manager
 			var sb = new StringBuilder();
 
 			sb.Append("UPDATE ");
-			sb.Append(classInfo.TableName);
+			sb.Append(classInfo.TableName.EnsureAlias());
 			sb.Append(" SET ");
 			var para = new List<IQueryParameter>();
 
@@ -202,7 +207,7 @@ namespace JPB.DataAccess.Manager
 				classInfo.Propertys.TryGetValue(schemaName, out property);
 				var dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
 				para.Add(new QueryParameter(index.ToString(), dataValue, property.PropertyType));
-				sb.Append(string.Format(" {0} = @{1} ", info, index));
+				sb.Append($" {info.EnsureAlias()} = @{index} ");
 				if (index + 1 < propertyInfos.Length)
 				{
 					sb.Append(",");
@@ -211,7 +216,7 @@ namespace JPB.DataAccess.Manager
 
 			para.Add(new QueryParameter("pkValue", pkProperty.Getter.Invoke(entry), pkProperty.PropertyType));
 
-			sb.Append(string.Format("WHERE {0} = @pkValue ", pk));
+			sb.Append($"WHERE {pk.EnsureAlias()} = @pkValue ");
 
 			return database.CreateCommandWithParameterValues(sb.ToString(), para.ToArray());
 		}
@@ -239,7 +244,7 @@ namespace JPB.DataAccess.Manager
 			var sb = new StringBuilder();
 
 			sb.Append("UPDATE ");
-			sb.Append(classInfo.TableName);
+			sb.Append(classInfo.TableName.EnsureAlias());
 			sb.Append(" SET ");
 			var para = new List<IQueryParameter>();
 
@@ -251,7 +256,7 @@ namespace JPB.DataAccess.Manager
 				classInfo.Propertys.TryGetValue(schemaName, out property);
 				var dataValue = DataConverterExtensions.GetDataValue(property.GetConvertedValue(entry));
 				para.Add(new QueryParameter(index.ToString(), dataValue, property.PropertyType));
-				sb.Append(string.Format(" {0} = @{1} ", info, index));
+				sb.Append($" {info.EnsureAlias()} = @{index} ");
 				if (index + 1 < propertyInfos.Length)
 				{
 					sb.Append(",");
