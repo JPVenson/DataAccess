@@ -34,6 +34,7 @@
 	<s:String x:Key="/Default/Environment/ContinuousTesting/SnapshotLocation/@EntryValue">C:\Users\ger-d\AppData\Local\Temp\ssm.Barabuj.tmp</s:String>
 	<s:String x:Key="/Default/Environment/ContinuousTesting/Strategy/@EntryValue">DetectTests</s:String>
 	<s:String x:Key="/Default/Environment/ContinuousTesting/TriggerMode/@EntryValue">OnSave</s:String>
+	<s:String x:Key="/Default/Environment/Highlighting/HighlightingSourceSnapshotLocation/@EntryValue">C:\Users\Jean-\AppData\Local\Temp\JetBrains\ReSharperPlatformVs16\vAny_2de5483e\CoverageData\_JPB.DataAccess.-832889955\Snapshot\snapshot.utdcvr</s:String>
 	<s:Int64 x:Key="/Default/Environment/SearchAndNavigation/DefaultOccurrencesGroupingIndex/@EntryValue">0</s:Int64>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0f04ea34_002Deccd_002D460c_002Da899_002D24eee5c208c5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;Tests&amp;gt;\&amp;lt;JPB.DataAccess.Tests&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="H:\Code\DataAccess\JPB.DataAccess.Tests" Presentation="&amp;lt;Tests&amp;gt;\&amp;lt;JPB.DataAccess.Tests&amp;gt;" /&gt;&#xD;

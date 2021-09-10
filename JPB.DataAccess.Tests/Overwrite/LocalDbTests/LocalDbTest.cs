@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.Helper.LocalDb;
 using JPB.DataAccess.Helper.LocalDb.Scopes;
+using JPB.DataAccess.MetaApi;
 using JPB.DataAccess.Tests.Base;
 using NUnit.Framework;
 
@@ -36,6 +38,14 @@ namespace JPB.DataAccess.Tests.Overwrite.LocalDbTests
 		public LocalDbTest(bool useObjectCopy)
 		{
 			_useObjectCopy = useObjectCopy;
+		}
+		
+		[Test]
+		public void TestEx()
+		{
+			Expression<Func<object, object>> lmb = (e) => e.GetHashCode();
+			Assert.That(() => MetaInfoStoreExtentions.GetPropertyInfoFromLamdba(lmb), Throws.Exception.TypeOf<ArgumentException>());
+			;
 		}
 
 		[Test]

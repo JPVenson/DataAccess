@@ -5,7 +5,7 @@
     <RootNamespace>JPB.DataAccess.SqLite</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>JPB.DataAccess.SqLite</PackageId>
-    <Version>3.1.2</Version>
+    <Version>3.1.7.5</Version>
     <Authors>Jean-Pierre Bachmann</Authors>
     <Product>JPB.DataAccess.SqLite Adapter</Product>
     <Description>The SqLite Adapter for the JPB.DataAccess Project</Description>
