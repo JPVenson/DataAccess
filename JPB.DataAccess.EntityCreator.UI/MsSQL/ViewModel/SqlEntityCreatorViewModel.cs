@@ -381,7 +381,7 @@ namespace JPB.DataAccess.EntityCreator.UI.MsSQL.ViewModel
 			var checkDatabase = false;
 			if (connection.StartsWith("file:\\\\"))
 			{
-				DatabaseStructure = new DacpacDatabaseStructure(connection.Replace("file:\\\\", ""));
+				//DatabaseStructure = new DacpacDatabaseStructure(connection.Replace("file:\\\\", ""));
 			}
 			else
 			{

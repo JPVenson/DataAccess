@@ -44,9 +44,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DefaultTemplate.mdoc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Compile Include="Compiler\ClassCompiler.cs" />
     <Compile Include="Compiler\ElementCompiler.cs" />
     <Compile Include="Compiler\EnumCompiler.cs" />
+    <Compile Include="Compiler\MorestachioClassGenerator.cs" />
     <Compile Include="Compiler\ProcedureCompiler.cs" />
     <Compile Include="Compiler\test.cs" />
     <Compile Include="Contracts\IColumInfoModel.cs" />
@@ -84,6 +88,10 @@
     <Compile Include="SharedMethods.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\morestachio\Morestachio\Morestachio.csproj">
+      <Project>{817e8ace-771a-427e-96c6-526625502612}</Project>
+      <Name>Morestachio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JPB.DataAccess.Framework\JPB.DataAccess.Framework.csproj">
       <Project>{798d7353-ff9e-4224-8ec2-395dbc0dc012}</Project>
       <Name>JPB.DataAccess.Framework</Name>

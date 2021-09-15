@@ -9,6 +9,7 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using JPB.DataAccess.DbInfoConfig;
 using JPB.DataAccess.DbInfoConfig.ClassBuilder;
@@ -22,8 +23,16 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 {
 	public class ClassCompiler : ElementCompiler
 	{
+		private static string GetDefaultTemplate()
+		{
+#if DEBUG
+			return File.ReadAllText("../../../../JPB.DataAccess.EntityCreator.Core/DefaultTemplate.mdoc");
+#endif
+			return File.ReadAllText("DefaultTemplate.mdoc");
+		}
+
 		public ClassCompiler(string targetDir, string targetCsName)
-			: base(targetDir, targetCsName, new DefaultLogger())
+			: base(targetDir, targetCsName, new DefaultLogger(), GetDefaultTemplate())
 		{
 
 		}
@@ -70,10 +79,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		public PropertyInfo AddProperty(string name, string dbName, Type type)
 		{
-			return AddProperty(name, dbName, ClassType.FromCsType(type));
+			return AddProperty(name, dbName, BuilderType.FromCsType(type));
 		}
 
-		public PropertyInfo AddProperty(string name, string dbName, ClassType propType)
+		public PropertyInfo AddProperty(string name, string dbName, IBuilderType propType)
 		{
 			var property = new PropertyInfo();
 			property.Name = name;

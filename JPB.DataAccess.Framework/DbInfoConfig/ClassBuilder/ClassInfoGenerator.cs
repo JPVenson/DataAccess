@@ -92,7 +92,7 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public string RenderPocoClass(bool notifyPropertysChanged = false)
+		public virtual string RenderPocoClass(bool notifyPropertysChanged = false)
 		{
 			var sb = new ConsoleStringBuilderInterlaced();
 			if (GenerateConfigMethod)
@@ -324,7 +324,7 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			{
 				gen.Properties.Add(new PropertyInfo
 				{
-					Type = ClassType.FromProperty(dbPropertyInfoCach.Value),
+					Type = BuilderType.FromProperty(dbPropertyInfoCach.Value),
 					Name = dbPropertyInfoCach.Value.PropertyName,
 					DbName = dbPropertyInfoCach.Value.DbName,
 					ForeignKey = dbPropertyInfoCach.Value.ForginKeyAttribute == null

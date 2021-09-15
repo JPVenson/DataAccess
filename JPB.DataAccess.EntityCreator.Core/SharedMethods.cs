@@ -213,22 +213,20 @@ namespace JPB.DataAccess.EntityCreator.Core
 					{
 						compiler.Generator.NamespaceImports.Add(typeof(EagarDataRecord).Namespace);
 						compiler.Generator.NamespaceImports.Add(typeof(DbAccessLayerHelper).Namespace);
-						var navPropertyName = isRefTypeKnown.GetClassName();
-						if (!navPropertyName.EndsWith("s"))
+						var navPropertyName = columInfoModel.GetPropertyName();
+						if (navPropertyName.StartsWith("Id"))
 						{
-							navPropertyName = navPropertyName.TrimEnd('s');
+							navPropertyName = navPropertyName.Remove(0, 2);
 						}
-
 						var tempName = navPropertyName;
 						var counter = 1;
-						while (compiler.Generator.Properties.Any(f => f.Name == tempName
-																	  || tempName == tableInfoModel.GetClassName()))
+						while (compiler.Generator.Properties.Any(f => f.Name == tempName || tempName == columInfoModel.GetPropertyName()))
 						{
 							tempName = navPropertyName + counter++;
 						}
 
 						navPropertyName = tempName;
-						var refProp = compiler.AddProperty(navPropertyName, null, new ClassType()
+						var refProp = compiler.AddProperty(navPropertyName, null, new BuilderType()
 						{
 							Name = isRefTypeKnown.GetClassName(),
 						});
@@ -257,28 +255,40 @@ namespace JPB.DataAccess.EntityCreator.Core
 					compiler.Generator.NamespaceImports.Add(typeof(EagarDataRecord).Namespace);
 					compiler.Generator.NamespaceImports.Add(typeof(DbAccessLayerHelper).Namespace);
 					var navPropertyName = infoModel.GetClassName();
-					if (!navPropertyName.EndsWith("s"))
+					if (navPropertyName.StartsWith("Id"))
 					{
-						navPropertyName = navPropertyName.TrimEnd('s');
+						navPropertyName = navPropertyName.Remove(0, 2);
+					}
+					
+					if (navPropertyName.EndsWith("s"))
+					{
+						navPropertyName = navPropertyName.TrimEnd('s') + "es";
+					}
+					else if (navPropertyName.EndsWith("y"))
+					{
+						navPropertyName = navPropertyName.TrimEnd('y') + "ies";
+					}
+					else
+					{
+						navPropertyName += "s";
 					}
 
 					var tempName = navPropertyName;
 					var counter = 1;
-					while (compiler.Generator.Properties.Any(f => f.Name == tempName
-																  || tempName == tableInfoModel.GetClassName()))
+					while (compiler.Generator.Properties.Any(f => f.Name == tempName || tempName == columInfoModel.GetPropertyName()))
 					{
 						tempName = navPropertyName + counter++;
 					}
 
 					navPropertyName = tempName;
 
-					var refProp = compiler.AddProperty(navPropertyName, null, new ClassType()
+					var refProp = compiler.AddProperty(navPropertyName, null, new BuilderType()
 					{
 						Name = $"{nameof(DbCollection<object>)}",
 						IsList = true,
 						GenericTypes =
 						{
-							new ClassType()
+							new BuilderType()
 							{
 								Name = infoModel.GetClassName()
 							}
@@ -320,7 +330,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 				}
 
 				Logger.WriteLine("Check Table: {0}", tableName);
-				var newName = CheckOrAlterName(tableName, tableSuffix);
+				var newName = CheckOrAlterColumnName(tableName, tableSuffix);
 				if (newName != tableName)
 				{
 					Logger.WriteLine("Alter Table '{0}' to '{1}'", tableName, newName);
@@ -338,7 +348,7 @@ namespace JPB.DataAccess.EntityCreator.Core
 					}
 
 					Logger.WriteLine("\tCheck Column: '{0}'", columnName);
-					var newColumnName = CheckOrAlterName(columnName);
+					var newColumnName = CheckOrAlterColumnName(columnName);
 					if (newColumnName != columnName)
 					{
 						Logger.WriteLine("\tAlter Column '{0}' to '{1}'", columnName, newColumnName);
@@ -352,7 +362,23 @@ namespace JPB.DataAccess.EntityCreator.Core
 
 		private static readonly char[] _invalidColumnChars = { '_', ' ', '.' };
 
-		public static string CheckOrAlterName(string tableName, string suffix = null)
+		public static string CheckOrAlterNavigationPropertyName(IColumInfoModel column, ITableInfoModel tableInfoModel,
+			string suffix = null)
+		{
+			var sourceColumn = column.ForgeinKeyDeclarations.SourceColumn;
+			if (sourceColumn.StartsWith("Id"))
+			{
+				sourceColumn = sourceColumn.Remove(0, 2);
+			}
+			return CheckOrAlterColumnName(sourceColumn);
+
+			if (column.ForgeinKeyDeclarations.TableName == tableInfoModel.GetClassName())
+			{
+				return CheckOrAlterColumnName(sourceColumn, "s");
+			}
+		}
+
+		public static string CheckOrAlterColumnName(string tableName, string suffix = null)
 		{
 			var newName = tableName;
 

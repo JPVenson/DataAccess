@@ -191,7 +191,8 @@ namespace JPB.DataAccess.EntityCreator
 				WinConsole.WriteLine("Error while executing the MsSQLEntity Creator:");
 				WinConsole.WriteLine(e.ToString());
 				WinConsole.WriteLine("Press any key to stop the application");
-				Thread.Sleep(5000);
+				Console.ReadLine();
+				//Thread.Sleep(5000);
 
 				return;
 			}
@@ -207,14 +208,14 @@ namespace JPB.DataAccess.EntityCreator
 			[Option('c', "commands", Required = false, HelpText = "The XML file of all commands")]
 			public string InputFile { get; set; }
 
-			[Option('v', "include-vs-project", Required = false,
-				HelpText = "Search for a single .csproj file and update its content")]
+			[Option('v', "include-vs-project", Required = false, HelpText = "Search for a single .csproj file and update its content")]
 			public bool IncludeInVsProject { get; set; }
 
-			[Option('a', "argument", Required = false,
-				HelpText =
-					"A set of Variables that are replaced within the Auto Console arguments. Syntax: Name:Value")]
+			[Option('a', "argument", Required = false, HelpText = "A set of Variables that are replaced within the Auto Console arguments. Syntax: Name:Value")]
 			public IEnumerable<string> Variables { get; set; }
+
+			[Option('t', "template", HelpText = "The Morestachio template to be used for generation")]
+			public string Template { get; set; }
 		}
 	}
 }

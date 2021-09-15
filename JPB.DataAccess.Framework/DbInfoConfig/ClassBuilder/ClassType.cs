@@ -7,9 +7,18 @@ using JPB.DataAccess.DbInfoConfig.DbInfo;
 
 namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 {
-	public class ClassType
+	public interface IBuilderType
 	{
-		static ClassType()
+		string Name { get; set; }
+		bool IsList { get; set; }
+		bool IsNullable { get; set; }
+		IList<IBuilderType> GenericTypes { get; set; }
+		string GetTypeName();
+	}
+
+	public class BuilderType : IBuilderType
+	{
+		static BuilderType()
 		{
 			_buildInTypes = new Dictionary<Type, string>();
 			_buildInTypes[typeof(bool)] = "bool";
@@ -29,17 +38,17 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 			_buildInTypes[typeof(object)] = "object";
 		}
 
-		public ClassType()
+		public BuilderType()
 		{
-			GenericTypes = new List<ClassType>();
+			GenericTypes = new List<IBuilderType>();
 		}
 
 		public string Name { get; set; }
 		public bool IsList { get; set; }
 		public bool IsNullable { get; set; }
-		public IList<ClassType> GenericTypes { get; set; }
+		public IList<IBuilderType> GenericTypes { get; set; }
 
-		public string GetTypeName()
+		public virtual string GetTypeName()
 		{
 			var name = Name;
 			if (GenericTypes.Any())
@@ -52,21 +61,22 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 
 		private static IDictionary<Type, string> _buildInTypes;
 
-		public static ClassType FromCsType(Type type)
+		public static IBuilderType FromCsType(Type type)
 		{
-
-			var csType = new ClassType();
-			csType.IsNullable = Nullable.GetUnderlyingType(type) != null;
-			csType.GenericTypes = type.GetGenericArguments().Select(f => new ClassType
+			BuilderType csType;
+			var underlyingType = Nullable.GetUnderlyingType(type);
+			if (underlyingType != null)
 			{
-				Name = f.Name
-			}).ToArray();
-			if (csType.IsNullable)
-			{
-				csType.Name = $"Nullable";
+				csType = new NullableType(underlyingType);
 			}
 			else
 			{
+				csType = new BuilderType();
+				csType.GenericTypes = type.GetGenericArguments().Select(f => new BuilderType
+				{
+					Name = f.Name
+				}).ToArray();
+				csType.IsList = type.CheckForListInterface();
 				if (_buildInTypes.ContainsKey(type))
 				{
 					csType.Name = _buildInTypes[type];
@@ -77,13 +87,28 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 				}
 			}
 
-			csType.IsList = type.CheckForListInterface();
 			return csType;
 		}
 
-		public static ClassType FromProperty(DbPropertyInfoCache dbPropertyInfoCach)
+		public static IBuilderType FromProperty(DbPropertyInfoCache dbPropertyInfoCach)
 		{
 			return FromCsType(dbPropertyInfoCach.PropertyType);
+		}
+	}
+
+	public class NullableType : BuilderType
+	{
+		public NullableType(Type innerType)
+		{
+			IsNullable = true;
+			Type = FromCsType(innerType);
+		}
+
+		public IBuilderType Type { get; set; }
+
+		public override string GetTypeName()
+		{
+			return Type.GetTypeName() + "?";
 		}
 	}
 }

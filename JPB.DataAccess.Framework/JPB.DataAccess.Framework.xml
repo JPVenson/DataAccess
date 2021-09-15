@@ -10363,13 +10363,6 @@
             <param name="operation"></param>
             <returns></returns>
         </member>
-        <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.ForginKey``1">
-            <summary>
-            	Selects the ForginKey to the table.
-            </summary>
-            <exception cref="T:System.InvalidOperationException">If there are 0 or more then 1 forginKeys</exception>
-            <returns></returns>
-        </member>
         <member name="M:JPB.DataAccess.Query.Operators.Conditional.ConditionalQuery`1.Column(System.String)">
             <summary>
                 Prepaires an Conditional Query that targets an single Column

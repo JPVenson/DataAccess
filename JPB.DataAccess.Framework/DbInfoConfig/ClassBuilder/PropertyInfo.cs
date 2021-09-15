@@ -29,7 +29,7 @@ namespace JPB.DataAccess.DbInfoConfig.ClassBuilder
 		}
 
 		public string DbName { get; set; }
-		public ClassType Type { get; set; }
+		public IBuilderType Type { get; set; }
 		public bool IsRest { get; set; }
 		public string ValueConverterType { get; set; }
 		public bool IsXml { get; set; }

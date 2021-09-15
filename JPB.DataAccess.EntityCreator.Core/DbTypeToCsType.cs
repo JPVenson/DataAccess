@@ -1,5 +1,3 @@
-#region
-
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,9 +5,7 @@ using System.Globalization;
 using System.Linq;
 using JPB.DataAccess.Contacts;
 using Microsoft.SqlServer.Server;
-using Microsoft.SqlServer.Types;
-
-#endregion
+//using Microsoft.SqlServer.Types;
 
 namespace JPB.DataAccess.EntityCreator.Core
 {
@@ -20,17 +16,17 @@ namespace JPB.DataAccess.EntityCreator.Core
 
 		static DbTypeToCsType()
 		{
-			var all = typeof(SqlGeography).Assembly.GetTypes();
+			//var all = typeof(SqlGeography).Assembly.GetTypes();
 
-			foreach (var item in all)
-			{
-				var attributes = item.GetCustomAttributes(true);
+			//foreach (var item in all)
+			//{
+			//	var attributes = item.GetCustomAttributes(true);
 
-				if (attributes.Any(f => f is SqlUserDefinedTypeAttribute))
-				{
-					UserDefinedTypes.Add(item.Name.Replace("Sql", ""), item);
-				}
-			}
+			//	if (attributes.Any(f => f is SqlUserDefinedTypeAttribute))
+			//	{
+			//		UserDefinedTypes.Add(item.Name.Replace("Sql", ""), item);
+			//	}
+			//}
 
 			SqlDefinedTypes.Add(SqlDbType.BigInt, typeof(long));
 

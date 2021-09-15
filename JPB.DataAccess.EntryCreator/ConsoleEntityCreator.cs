@@ -132,10 +132,15 @@ namespace JPB.DataAccess.EntityCreator
 
 			var elements = Tables.Concat(Views).ToArray();
 
-			elements.AsParallel().ForAll(tableInfoModel =>
+			foreach (var tableInfoModel in elements)
 			{
 				SharedMethods.CompileTable(tableInfoModel, this);
-			});
+			}
+
+			//elements.AsParallel().ForAll(tableInfoModel =>
+			//{
+			//	SharedMethods.CompileTable(tableInfoModel, this);
+			//});
 			
 			//foreach (var proc in StoredProcs)
 			//{

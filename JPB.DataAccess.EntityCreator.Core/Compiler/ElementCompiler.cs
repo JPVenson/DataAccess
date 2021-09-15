@@ -16,11 +16,13 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 	public abstract class ElementCompiler
 	{
 		private readonly ILogger _logger;
+		private readonly string _template;
 
-		protected ElementCompiler(string targetDir, string targetCsName, ILogger logger)
+		protected ElementCompiler(string targetDir, string targetCsName, ILogger logger, string template)
 		{
 			_logger = logger;
-			Generator = new ClassInfoGenerator();
+			_template = template;
+			Generator = new MorestachioClassGenerator(template);
 			Generator.ClassName = targetCsName;
 			TargetDir = targetDir;
 			Namespaces = new HashSet<string>();
@@ -64,8 +66,10 @@ namespace JPB.DataAccess.EntityCreator.Core.Compiler
 
 		public abstract void PreCompile();
 
-		public virtual void Compile(IEnumerable<IColumInfoModel> columnInfos, bool splitByType,
-			bool sourceCreatorSetNotifyProperties, Stream to = null)
+		public virtual void Compile(IEnumerable<IColumInfoModel> columnInfos,
+			bool splitByType,
+			bool sourceCreatorSetNotifyProperties,
+			Stream to = null)
 		{
 			if (to != null)
 			{
