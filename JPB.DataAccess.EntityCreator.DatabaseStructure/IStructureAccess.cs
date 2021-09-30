@@ -1,6 +1,6 @@
 using JPB.DataAccess.EntityCreator.DatabaseStructure.Contracts;
 
-namespace JPB.DataAccess.EntityCreator.Core.Poco
+namespace JPB.DataAccess.EntityCreator.DatabaseStructure
 {
 	public interface IStructureAccess
 	{

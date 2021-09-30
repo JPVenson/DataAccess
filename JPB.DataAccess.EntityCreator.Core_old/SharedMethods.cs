@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.CodeDom;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Globalization;
@@ -9,8 +11,8 @@ using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.ClassBuilder;
 using JPB.DataAccess.EntityCollections;
 using JPB.DataAccess.EntityCreator.Core.Compiler;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
-using JPB.DataAccess.EntityCreator.DatabaseStructure.Contracts;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.EntityCreator.Core

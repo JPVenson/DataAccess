@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.Data;
 using JPB.DataAccess.ModelsAnotations;
+using JPB.DataAccess.Query;
+using JPB.DataAccess.Query.Contracts;
+using JPB.DataAccess.Query.Operators;
 
 namespace JPB.DataAccess.EntityCreator.Core.Poco
 {

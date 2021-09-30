@@ -1,7 +1,6 @@
 ﻿#region
 
 using System;
-using JPB.DataAccess.Manager;
 
 #endregion
 
@@ -9,12 +8,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using JPB.DataAccess.EntityCreator.Core;
-using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
 using JPB.DataAccess.EntityCreator.Core.Poco;
-using JPB.DataAccess.EntityCreator.MsSql;
-using Microsoft.Build.Evaluation;
+using JPB.DataAccess.EntityCreator.DatabaseStructure;
+using JPB.DataAccess.EntityCreator.DatabaseStructure.Contracts;
 using WinConsole = System.Console;
 
 namespace JPB.DataAccess.EntityCreator

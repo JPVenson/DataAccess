@@ -10,8 +10,11 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JPB.DataAccess.Contacts;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 using JPB.DataAccess.EntityCreator.Core.Models;
-using JPB.DataAccess.EntityCreator.DatabaseStructure.Contracts;
+using JPB.DataAccess.Helper;
+using JPB.DataAccess.Manager;
 
 namespace JPB.DataAccess.EntityCreator.Core.Poco
 {

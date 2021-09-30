@@ -6,7 +6,9 @@ using System.Security.Cryptography;
 using System.Text;
 using JPB.DataAccess.Contacts;
 using JPB.DataAccess.DbInfoConfig.ClassBuilder;
-using JPB.DataAccess.EntityCreator.DatabaseStructure.Contracts;
+using JPB.DataAccess.DbInfoConfig.DbInfo;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
+using JPB.DataAccess.Helper;
 using JPB.DataAccess.ModelsAnotations;
 
 namespace JPB.DataAccess.EntityCreator.Core.Compiler

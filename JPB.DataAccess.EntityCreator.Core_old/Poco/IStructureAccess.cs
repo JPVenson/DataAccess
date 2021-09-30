@@ -1,4 +1,4 @@
-using JPB.DataAccess.EntityCreator.DatabaseStructure.Contracts;
+using JPB.DataAccess.EntityCreator.Core.Contracts;
 
 namespace JPB.DataAccess.EntityCreator.Core.Poco
 {

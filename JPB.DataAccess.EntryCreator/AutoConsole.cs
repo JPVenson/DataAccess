@@ -9,12 +9,8 @@ http://www.codeproject.com/Articles/818690/Yet-Another-ORM-ADO-NET-Wrapper
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JPB.DataAccess.EntityCreator.Core.Models;
-using JPB.DataAccess.EntityCreator.MsSql;
 
 namespace JPB.DataAccess.EntityCreator
 {
