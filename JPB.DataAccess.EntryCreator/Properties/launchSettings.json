@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "JPB.DataAccess.EntryCreator": {
+      "commandName": "Project",
+      "commandLineArgs": "--c \"H:\\Code\\MyDoc.Net\\MyDoc.Net\\Build\\out.xml\""
+    }
+  }
+}

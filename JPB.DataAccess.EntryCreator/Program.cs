@@ -103,18 +103,25 @@ namespace JPB.DataAccess.EntityCreator
 				//Data Source=H:\Code\JPB.InhousePlayback\JPB.InhousePlayback\Server\Playback.50.db;
 				structure = new DatabaseSqLiteStructure(new DbAccessLayer(new SqLiteStrategy(connectionString)));
 			}
+			else
+			{
+				WinConsole.WriteLine("Provided an Invalid Database Mode: " + mode);
+				WinConsole.ReadLine();
+				return;
+			}
 
 			try
 			{
 				new ConsoleEntityCreator(options.IncludeInVsProject, structure)
 					.CreateEntrys(connectionString, outputDirectory, string.Empty);
+				WinConsole.ReadLine();
 			}
 			catch (Exception e)
 			{
 				WinConsole.WriteLine("Error while executing the MsSQLEntity Creator:");
 				WinConsole.WriteLine(e.ToString());
 				WinConsole.WriteLine("Press any key to stop the application");
-				Console.ReadLine();
+				WinConsole.ReadLine();
 				//Thread.Sleep(5000);
 
 				return;

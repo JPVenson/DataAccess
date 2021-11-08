@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\JPB.DataAccess.EntityCreator.Core\JPB.DataAccess.EntityCreator.Core.csproj" />
     <ProjectReference Include="..\JPB.DataAccess.EntityCreator.DatabaseStructure\JPB.DataAccess.EntityCreator.DatabaseStructure.csproj" />
     <ProjectReference Include="..\JPB.DataAccess.SqLite.NetStandard\JPB.DataAccess.SqLite.NetStandard.csproj" />
   </ItemGroup>

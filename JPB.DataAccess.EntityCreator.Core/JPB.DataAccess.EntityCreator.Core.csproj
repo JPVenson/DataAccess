@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Morestachio" Version="5.0.0.513" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\morestachio\Morestachio\Morestachio.csproj" />
     <ProjectReference Include="..\JPB.DataAccess.EntityCreator.DatabaseStructure\JPB.DataAccess.EntityCreator.DatabaseStructure.csproj" />
   </ItemGroup>
 

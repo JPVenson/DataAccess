@@ -90,7 +90,13 @@ using {{ns}};
 {{#IF !~ClassInfo.GenerateConfigMethod}}
 {{--| #EACH prop.Attributes AS attr}}
 		[{{attr.Name}}({{#IMPORT 'RenderAttributeAssignments'}})]
-{{--| /EACH}}{{/IF |-}}
+{{/EACH}}
+{{--| #ELSE}}
+{{--| #EACH prop.Attributes.Where(e => !e.IsFrameworkAttribute()) AS attr}}
+		[{{attr.Name}}({{#IMPORT 'RenderAttributeAssignments'}})]
+{{/EACH}}
+{{--| /ELSE}}
+{{--| /IF |-}}
 		public {{#IF prop.ForeignKey}}virtual {{/IF}}{{&prop.Type.GetTypeName()}} {{prop.Name}} { get; set; }
 {{--| /DECLARE |--}}
 {{--| #DECLARE RenderAttributeAssignments}}
@@ -161,15 +167,15 @@ namespace {{ClassInfo.Namespace}}
 			{{--| #IF ClassInfo.GenerateFactory}}
 			config.SetFactory({{ClassInfo.ClassName}}.Factory, true);
 			{{--| /IF}}
-			{{--| #EACH ClassInfo.Attributes AS attr}}
+			{{--| #EACH ClassInfo.Attributes.Where(e => e.IsFrameworkAttribute()) AS attr}}
 			config.SetClassAttribute(new {{attr.Name}}({{#IMPORT 'RenderAttributeAssignments' #WITH attr}}));
 			{{--| /EACH}}
 
-			{{-| #EACH ClassInfo.Properties.Where(e => e.Attributes.Any()) AS prop}}			
-			{{--| #EACH prop.Attributes AS attr}}
+			{{--| #EACH ClassInfo.Properties.Where(e => e.Attributes.Any()) AS prop}}			
+			{{--| #EACH prop.Attributes.Where(e => e.IsFrameworkAttribute()) AS attr}}
 			config.SetPropertyAttribute(s => s.{{prop.Name}}, new {{attr.Name}}({{#IMPORT 'RenderAttributeAssignments' #WITH attr}}));
 			{{--| /EACH}}
-			{{/EACH}}
+			{{--| /EACH}}
 			AfterConfig(config);
 			AfterConfig();
 		}
